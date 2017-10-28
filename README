@@ -1,3 +1,7 @@
+28-Oct-2017. Started russification (UTF-8 codetable) by Prool, proolix@gmail.com
+
+---
+
 Warning: Always back up your EmpireMUD before updating your git checkout. Some
 patches may require playerfile conversions or may have other unexpected side-
 effects.

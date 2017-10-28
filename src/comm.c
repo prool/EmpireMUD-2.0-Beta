@@ -2434,7 +2434,7 @@ int process_input(descriptor_data *t) {
 						space_left++;
 				}
 			}
-			else if (isascii(*ptr) && isprint(*ptr)) {
+			else if (((unsigned char)*ptr)>=32U/*isascii(*ptr) && isprint(*ptr)*/) { // prool: enable non ASCII chars (f.e., cyrillic, UTF-8, etc)
 				if ((*(write_point++) = *ptr) == '$') {		/* copy one character */
 					*(write_point++) = '$';	/* if it's a $, double it */
 					space_left -= 2;
