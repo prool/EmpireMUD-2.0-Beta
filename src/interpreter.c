@@ -2798,11 +2798,119 @@ void nanny(descriptor_data *d, char *arg) {
 }
 
 // begin prool code
-int romanize(unsigned char *in, unsigned char *out) // return: 0 - it's ok, 1 - error
+
+int deromanize(unsigned char *in, unsigned char *out)
+// reverse function for romanize()
+// input: transliterated string
+// output: cyrillic UTF-8 string
+{
+if (in==0) {printf("prooldebug unromanize error 1\n"); return 1;}
+if (out==0) {printf("prooldebug romanize error 1a\n"); return 1;}
+printf("prooldebug: unromanize: in='%s'\n", in);
+if (*in==0) {printf("prooldebug unromanize error 2\n"); return 1;}
+*out=0;
+while(*in)
+	{
+	if (*in=='j')
+		{
+		switch(*in)
+			{
+			case 'g': /* ж  */ strcat(out,"ж"); break;
+			case 'c': /* ч  */ strcat(out,"ч"); break;
+		        case 's': /* ш  */ strcat(out,"ш"); break;
+		        case 'w': /* щ  */ strcat(out,"щ"); break;
+		        case 'x': /* ъ  */ strcat(out,"ъ"); break;
+		        case 'y': /* ы  */ strcat(out,"ы"); break;
+		        case 'i': /* ь  */ strcat(out,"ь"); break;
+		        case 'e': /* э  */ strcat(out,"э"); break;
+		        case 'u': /* ю  */ strcat(out,"ю"); break;
+		        case 'a': /* я  */ strcat(out,"я"); break;
+		        case 'o': /* ё  */ strcat(out,"ё"); break;
+			default: printf("prooldebug unromanize error 3\n"); return 1;
+			}
+		}
+	else if (*in=='J')
+		{
+		switch(*in)
+			{
+			case 'g': /* ж  */ strcat(out,"Ж"); break;
+			case 'c': /* ч  */ strcat(out,"Ч"); break;
+		        case 's': /* ш  */ strcat(out,"Ш"); break;
+		        case 'w': /* щ  */ strcat(out,"Щ"); break;
+		        case 'x': /* ъ  */ strcat(out,"Ъ"); break;
+		        case 'y': /* ы  */ strcat(out,"Ы"); break;
+		        case 'i': /* ь  */ strcat(out,"Ь"); break;
+		        case 'e': /* э  */ strcat(out,"Э"); break;
+		        case 'u': /* ю  */ strcat(out,"Ю"); break;
+		        case 'a': /* я  */ strcat(out,"Я"); break;
+		        case 'o': /* ё  */ strcat(out,"Ё"); break;
+			default: printf("prooldebug unromanize error 3a\n"); return 1;
+			}
+		}
+	else
+		{
+		switch(*in)
+		{
+                case  /* А A */ 'A': strcat(out,"А"); break;
+                case  /* Б B */ 'B': strcat(out,"Б"); break;
+                case  /* В V */ 'V': strcat(out,"В"); break;
+                case  /* Г G */ 'G': strcat(out,"Г"); break;
+                case  /* Д D */ 'D': strcat(out,"Д"); break;
+                case  /* Е E */ 'E': strcat(out,"Е"); break;
+                case  /* З Z */ 'Z': strcat(out,"З"); break;
+                case  /* И I */ 'I': strcat(out,"И"); break;
+                case  /* Й Y */ 'Y': strcat(out,"Й"); break;
+                case  /* К K */ 'K': strcat(out,"К"); break;
+                case  /* Л L */ 'L': strcat(out,"Л"); break;
+                case  /* М M */ 'M': strcat(out,"М"); break;
+                case  /* Н N */ 'N': strcat(out,"Н"); break;
+                case  /* О O */ 'O': strcat(out,"О"); break;
+                case  /* П P */ 'P': strcat(out,"П"); break;
+                case  /* Р R */ 'R': strcat(out,"Р"); break;
+                case  /* С S */ 'S': strcat(out,"С"); break;
+                case  /* Т T */ 'T': strcat(out,"Т"); break;
+                case  /* У U */ 'U': strcat(out,"У"); break;
+                case  /* Ф F */ 'F': strcat(out,"Ф"); break;
+                case  /* Х H */ 'H': strcat(out,"Х"); break;
+                case  /* Ц C */ 'C': strcat(out,"Ц"); break;
+                case  /* а a */ 'a': strcat(out,"а"); break;
+                case  /* б b */ 'b': strcat(out,"б"); break;
+                case  /* в v */ 'v': strcat(out,"в"); break;
+                case  /* г g */ 'g': strcat(out,"г"); break;
+                case  /* д d */ 'd': strcat(out,"д"); break;
+                case  /* е e */ 'e': strcat(out,"е"); break;
+                case  /* з z */ 'z': strcat(out,"з"); break;
+                case  /* и i */ 'i': strcat(out,"и"); break;
+                case  /* й y */ 'y': strcat(out,"й"); break;
+                case  /* к k */ 'k': strcat(out,"к"); break;
+                case  /* л l */ 'l': strcat(out,"л"); break;
+                case  /* м m */ 'm': strcat(out,"м"); break;
+                case  /* н n */ 'n': strcat(out,"н"); break;
+                case  /* о o */ 'o': strcat(out,"о"); break;
+                case  /* п p */ 'p': strcat(out,"п"); break;
+		case  /* р   */ 'r': strcat(out,"р"); break;
+		case  /* с   */ 's': strcat(out,"с"); break;
+		case  /* т   */ 't': strcat(out,"т"); break;
+		case  /* у   */ 'u': strcat(out,"у"); break;
+		case  /* ф   */ 'f': strcat(out,"ф"); break;
+		case  /* х   */ 'h': strcat(out,"х"); break;
+		case  /* ц   */ 'c': strcat(out,"ц"); break;
+		default: printf("prooldebug unromanize error 3b\n"); return 1;
+		}// end switch
+		}
+	}
+return 0;
+}
+
+int romanize(unsigned char *in, unsigned char *out)
+// input: text string
+// output: if input is UTF-8 cyrillic, then output string, converted to latin letters (transliteration)
+// return: 0 - it's ok, 1 - error (f.e. input string is not UTF-8 cyrillic)
 {int l, i; unsigned char c;
 
-printf("prooldebug: romanize: in='%s'\n", in);
 if (in==0) {printf("prooldebug romanize error 1\n"); return 1;}
+if (out==0) {printf("prooldebug romanize error 1a\n"); return 1;}
+printf("prooldebug: romanize: in='%s'\n", in);
 if (*in==0) {printf("prooldebug romanize error 2\n"); return 1;}
 if ((*in!=0xD0) && (*in!=0xD1)) {printf("prooldebug romanize error 3\n"); return 1;}
 
