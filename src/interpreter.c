@@ -50,6 +50,8 @@ void show_bonus_trait_menu(char_data *ch);
 // prool
 #define PROOL_LEN 255
 char prool_buf [PROOL_LEN];
+char *deromanize(unsigned char *in, unsigned char *out);
+int romanize(unsigned char *in, unsigned char *out);
 
  //////////////////////////////////////////////////////////////////////////////
 //// COMMAND PROTOTYPES //////////////////////////////////////////////////////
@@ -2223,7 +2225,9 @@ void nanny(descriptor_data *d, char *arg) {
 			{
 				strcpy(arg,prool_buf);
 			}
-			printf("romanize='%s'\n", prool_buf);
+			printf("romanize='%s'\n", arg);
+			deromanize(arg,prool_buf);
+			printf("***deromanize='%s'\n",prool_buf);
 			// prool end
 			if (!*arg) {
 				SET_BIT(PLR_FLAGS(d->character), PLR_KEEP_LAST_LOGIN_INFO);	// prevent login storing
@@ -2274,7 +2278,7 @@ void nanny(descriptor_data *d, char *arg) {
 					}
 					GET_PC_NAME(d->character) = str_dup(CAP(tmp_name));
 
-					sprintf(buf, "Did I get that right, %s (Y/N)? ", tmp_name);
+					sprintf(buf, "Did I get that right, %s [%s] (Y/N)? ", tmp_name, deromanize(tmp_name,prool_buf)); // prool
 					SEND_TO_Q(buf, d);
 					STATE(d) = CON_NAME_CNFRM;
 				}
@@ -2799,21 +2803,22 @@ void nanny(descriptor_data *d, char *arg) {
 
 // begin prool code
 
-int deromanize(unsigned char *in, unsigned char *out)
+char *deromanize(unsigned char *in, unsigned char *out)
 // reverse function for romanize()
 // input: transliterated string
 // output: cyrillic UTF-8 string
+// return: if ok out string, if error 0
 {
-if (in==0) {printf("prooldebug unromanize error 1\n"); return 1;}
-if (out==0) {printf("prooldebug romanize error 1a\n"); return 1;}
+if (in==0) {printf("prooldebug unromanize error 1\n"); return 0;}
+if (out==0) {printf("prooldebug romanize error 1a\n"); return 0;}
 printf("prooldebug: unromanize: in='%s'\n", in);
-if (*in==0) {printf("prooldebug unromanize error 2\n"); return 1;}
+if (*in==0) {printf("prooldebug unromanize error 2\n"); return 0;}
 *out=0;
 while(*in)
 	{
 	if (*in=='j')
 		{
-		switch(*in)
+		switch(*++in)
 			{
 			case 'g': /* ж  */ strcat(out,"ж"); break;
 			case 'c': /* ч  */ strcat(out,"ч"); break;
@@ -2826,12 +2831,12 @@ while(*in)
 		        case 'u': /* ю  */ strcat(out,"ю"); break;
 		        case 'a': /* я  */ strcat(out,"я"); break;
 		        case 'o': /* ё  */ strcat(out,"ё"); break;
-			default: printf("prooldebug unromanize error 3\n"); return 1;
+			default: printf("prooldebug unromanize error 3\n"); return 0;
 			}
 		}
 	else if (*in=='J')
 		{
-		switch(*in)
+		switch(*++in)
 			{
 			case 'g': /* ж  */ strcat(out,"Ж"); break;
 			case 'c': /* ч  */ strcat(out,"Ч"); break;
@@ -2844,7 +2849,7 @@ while(*in)
 		        case 'u': /* ю  */ strcat(out,"Ю"); break;
 		        case 'a': /* я  */ strcat(out,"Я"); break;
 		        case 'o': /* ё  */ strcat(out,"Ё"); break;
-			default: printf("prooldebug unromanize error 3a\n"); return 1;
+			default: printf("prooldebug unromanize error 3a\n"); return 0;
 			}
 		}
 	else
@@ -2895,11 +2900,12 @@ while(*in)
 		case  /* ф   */ 'f': strcat(out,"ф"); break;
 		case  /* х   */ 'h': strcat(out,"х"); break;
 		case  /* ц   */ 'c': strcat(out,"ц"); break;
-		default: printf("prooldebug unromanize error 3b\n"); return 1;
+		default: printf("prooldebug unromanize error 3b\n"); return 0;
 		}// end switch
 		}
+	in++;
 	}
-return 0;
+return out;
 }
 
 int romanize(unsigned char *in, unsigned char *out)
