@@ -47,6 +47,9 @@ void parse_archetype_menu(descriptor_data *desc, char *argument);
 void set_creation_state(descriptor_data *d, int state);
 void show_bonus_trait_menu(char_data *ch);
 
+// prool
+#define PROOL_LEN 255
+char prool_buf [PROOL_LEN];
 
  //////////////////////////////////////////////////////////////////////////////
 //// COMMAND PROTOTYPES //////////////////////////////////////////////////////
@@ -1163,6 +1166,9 @@ void command_interpreter(char_data *ch, char *argument) {
 		if (check_command_trigger(ch, arg, line, CMDTRG_ABBREV)) {
 			return;
 		}
+		// prool:russian command
+		printf("prooldebug arg='%s'\n", arg);
+		// end of prool
 		// otherwise, no match
 		send_config_msg(ch, "huh_string");
 	}
@@ -2210,7 +2216,15 @@ void nanny(descriptor_data *d, char *arg) {
 				d->character->desc = d;
 				d->character->prev_host = str_dup(d->host);	// this will be overwritten if it's not a new char
 			}
-			
+		
+			// prool begin
+			printf("prooldebug. label #0. arg='%s'\n",arg);
+			if (romanize(arg,prool_buf)==0)
+			{
+				strcpy(arg,prool_buf);
+			}
+			printf("romanize='%s'\n", prool_buf);
+			// prool end
 			if (!*arg) {
 				SET_BIT(PLR_FLAGS(d->character), PLR_KEEP_LAST_LOGIN_INFO);	// prevent login storing
 				STATE(d) = CON_CLOSE;
@@ -2222,7 +2236,18 @@ void nanny(descriptor_data *d, char *arg) {
 			}
 			else {
 				if ((_parse_name(arg, tmp_name)) || strlen(tmp_name) < 2 || strlen(tmp_name) > MAX_NAME_LENGTH || !Valid_Name(tmp_name) || fill_word(strcpy(buf, tmp_name)) || reserved_word(buf)) {
-					SEND_TO_Q("Invalid name, please try another.\r\nName: ", d);
+					//prool:
+					unsigned char *cc;
+					printf("prooldebug arg='%s' ", arg);
+					cc=arg;
+					while(*cc)
+					{
+						printf("%02X ", *cc);
+						cc++;
+					}
+					printf("\n");
+					//end of prool
+					SEND_TO_Q("Error 1. Invalid name, please try another.\r\nName: ", d);//prool
 					return;
 				}
 				if ((temp_char = load_player(tmp_name, TRUE))) {
@@ -2244,7 +2269,7 @@ void nanny(descriptor_data *d, char *arg) {
 
 					/* Check for multiple creations of a character. */
 					if (!Valid_Name(tmp_name)) {
-						SEND_TO_Q("Invalid name, please try another.\r\nName: ", d);
+						SEND_TO_Q("Error 2. Invalid name, please try another.\r\nName: ", d);//prool
 						return;
 					}
 					GET_PC_NAME(d->character) = str_dup(CAP(tmp_name));
@@ -2771,3 +2796,105 @@ void nanny(descriptor_data *d, char *arg) {
 		}
 	}
 }
+
+// begin prool code
+int romanize(unsigned char *in, unsigned char *out) // return: 0 - it's ok, 1 - error
+{int l, i; unsigned char c;
+
+printf("prooldebug: romanize: in='%s'\n", in);
+if (in==0) {printf("prooldebug romanize error 1\n"); return 1;}
+if (*in==0) {printf("prooldebug romanize error 2\n"); return 1;}
+if ((*in!=0xD0) && (*in!=0xD1)) {printf("prooldebug romanize error 3\n"); return 1;}
+
+l=strlen(in);
+if (l%2) {printf("prooldebug romanize error 4\n"); return 1;}
+
+for (i=0;i<l;i++)
+	{
+	c=*in++;
+	if (c==0xD0)
+		{
+		switch (*in++) {
+                case 0x81: /* Ё Jo */ *out++='J'; *out++='o'; break;
+                case 0x90: /* А A */ *out++='A'; break;
+                case 0x91: /* Б B */ *out++='B'; break;
+                case 0x92: /* В V */ *out++='V'; break;
+                case 0x93: /* Г G */ *out++='G'; break;
+                case 0x94: /* Д D */ *out++='D'; break;
+                case 0x95: /* Е E */ *out++='E'; break;
+                case 0x96: /* Ж Jg */ *out++='J'; *out++='g'; break;
+                case 0x97: /* З Z */ *out++='Z'; break;
+                case 0x98: /* И I */ *out++='I'; break;
+                case 0x99: /* Й Y */ *out++='Y'; break;
+                case 0x9A: /* К K */ *out++='K'; break;
+                case 0x9B: /* Л L */ *out++='L'; break;
+                case 0x9C: /* М M */ *out++='M'; break;
+                case 0x9D: /* Н N */ *out++='N'; break;
+                case 0x9E: /* О O */ *out++='O'; break;
+                case 0x9F: /* П P */ *out++='P'; break;
+                case 0xA0: /* Р R */ *out++='R'; break;
+                case 0xA1: /* С S */ *out++='S'; break;
+                case 0xA2: /* Т T */ *out++='T'; break;
+                case 0xA3: /* У U */ *out++='U'; break;
+                case 0xA4: /* Ф F */ *out++='F'; break;
+                case 0xA5: /* Х H */ *out++='H'; break;
+                case 0xA6: /* Ц C */ *out++='C'; break;
+                case 0xA7: /* Ч Jc */ *out++='J'; *out++='c'; break;
+                case 0xA8: /* Ш Js */ *out++='J'; *out++='s'; break;
+                case 0xA9: /* Щ Jw */ *out++='J'; *out++='w'; break;
+                case 0xAA: /* Ъ Jx */ *out++='J'; *out++='x'; break;
+                case 0xAB: /* Ы Jy */ *out++='J'; *out++='y'; break;
+                case 0xAC: /* Ь Ji */ *out++='J'; *out++='i'; break;
+                case 0xAD: /* Э Je */ *out++='J'; *out++='e'; break;
+                case 0xAE: /* Ю Ju */ *out++='J'; *out++='u'; break;
+                case 0xAF: /* Я Ja */ *out++='J'; *out++='a'; break;
+                case 0xB0: /* а a */ *out++='a'; break;
+                case 0xB1: /* б b */ *out++='b'; break;
+                case 0xB2: /* в v */ *out++='v'; break;
+                case 0xB3: /* г g */ *out++='g'; break;
+                case 0xB4: /* д d */ *out++='d'; break;
+                case 0xB5: /* е e */ *out++='e'; break;
+                case 0xB6: /* ж jg */ *out++='j'; *out++='g'; break;
+                case 0xB7: /* з z */ *out++='z'; break;
+                case 0xB8: /* и i */ *out++='i'; break;
+                case 0xB9: /* й y */ *out++='y'; break;
+                case 0xBA: /* к k */ *out++='k'; break;
+                case 0xBB: /* л l */ *out++='l'; break;
+                case 0xBC: /* м m */ *out++='m'; break;
+                case 0xBD: /* н n */ *out++='n'; break;
+                case 0xBE: /* о o */ *out++='o'; break;
+                case 0xBF: /* п p */ *out++='p'; break;
+		default: *out=0; printf("prolldebug romanize error 4b\n"); return 1;
+		} // end of switch
+		}
+	else if (c==0xD1)
+		{
+		switch (*in++) {
+			case 0x80: /* р  */ *out++='r'; break;
+			case 0x81: /* с  */ *out++='s'; break;
+			case 0x82: /* т  */ *out++='t'; break;
+			case 0x83: /* у  */ *out++='u'; break;
+			case 0x84: /* ф  */ *out++='f'; break;
+			case 0x85: /* х  */ *out++='h'; break;
+			case 0x86: /* ц  */ *out++='c'; break;
+			case 0x87: /* ч  */ *out++='j'; *out++='c'; break;
+			case 0x88: /* ш  */ *out++='j'; *out++='s'; break;
+			case 0x89: /* щ  */ *out++='j'; *out++='w'; break;
+			case 0x8A: /* ъ  */ *out++='j'; *out++='x'; break;
+			case 0x8B: /* ы  */ *out++='j'; *out++='y'; break;
+			case 0x8C: /* ь  */ *out++='j'; *out++='i'; break;
+			case 0x8D: /* э  */ *out++='j'; *out++='e'; break;
+			case 0x8E: /* ю  */ *out++='j'; *out++='u'; break;
+			case 0x8F: /* я  */ *out++='j'; *out++='a'; break;
+			case 0x91: /* ё  */ *out++='j'; *out++='o'; break;
+		default: *out=0; printf("prolldebug romanize error 4c\n"); return 1;
+		} // end of switch
+		}
+	else if (c==0) break;
+	else {printf("prooldebug romanize error 4 c='%c' [%02X]\n",c,c); return 1;}
+	}
+
+*out=0;
+return 0;
+}
+// end of prool code
