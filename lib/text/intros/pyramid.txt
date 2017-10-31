@@ -2,6 +2,9 @@
 http://empiremud.net
 &0
 + russificated (UTF-8 codetable) by Prool
+
+Use 'prool' command for prool info
+
 http://prool.kharkov.org
 http://mud.kharkov.org
 https://github.com/prool/EmpireMUD-2.0-Beta

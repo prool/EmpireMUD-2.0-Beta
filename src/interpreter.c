@@ -1168,8 +1168,18 @@ void command_interpreter(char_data *ch, char *argument) {
 		if (check_command_trigger(ch, arg, line, CMDTRG_ABBREV)) {
 			return;
 		}
-		// prool:russian command
+		// prool: russian and other prool command
 		printf("prooldebug arg='%s'\n", arg);
+		if (!strcmp(arg,"prool"))
+			{
+			printf("prool command - первая команда Пруля\n");
+			msg_to_char(ch,"prool command - &Yпервая команда Пруля&0\n");
+			}
+		else if (!strcmp(arg,"пруль"))
+			{
+			msg_to_char(ch,"&Yпервая кириллическая команда Пруля&0\n");
+			}
+		else
 		// end of prool
 		// otherwise, no match
 		send_config_msg(ch, "huh_string");
