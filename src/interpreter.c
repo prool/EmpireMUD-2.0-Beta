@@ -2388,8 +2388,8 @@ void nanny(descriptor_data *d, char *arg) {
 					return;
 				}
 				/* check and make sure no other copies of this player are logged in */
-				if (!check_multiplaying(d)) {
-					SEND_TO_Q("\r\n\033[31mAccess Denied: Multiplaying detected\033[0m\r\n", d);
+				if (0/*!check_multiplaying(d)*/) {// prool: multiplaying enabled!
+					SEND_TO_Q("\r\n\033[31mError 1. Access Denied: Multiplaying detected\033[0m\r\n", d);
 
 					SEND_TO_Q("There is already a character logged in from the same IP address or account as\r\n", d);
 					SEND_TO_Q("you. If you are controlling that character, you must remove it from the game\r\n", d);
@@ -2399,7 +2399,7 @@ void nanny(descriptor_data *d, char *arg) {
 					SEND_TO_Q("to play together.\r\n", d);
 					SEND_TO_Q("\r\n", d);
 					SEND_TO_Q("Press ENTER to continue:\r\n", d);
-					syslog(SYS_LOGIN, 0, TRUE, "Login denied: Multiplaying detected for %s [%s]", GET_NAME(d->character), d->host);
+					syslog(SYS_LOGIN, 0, TRUE, "Error 1. Login denied: Multiplaying detected for %s [%s]", GET_NAME(d->character), d->host);
 
 					STATE(d) = CON_GOODBYE;
 					return;
@@ -2668,8 +2668,8 @@ void nanny(descriptor_data *d, char *arg) {
 			}
 	
 			// READY TO ENTER THE GAME
-			if (!check_multiplaying(d)) {
-				SEND_TO_Q("\r\n\033[31mAccess Denied: Multiplaying detected\033[0m\r\n", d);
+			if (0/*!check_multiplaying(d)*/) {// prool: multiplaying enabled!!
+				SEND_TO_Q("\r\n\033[31mError 2. Access Denied: Multiplaying detected\033[0m\r\n", d);
 				SEND_TO_Q("There is already someone logged in from the same IP address as you. If you\r\n", d);
 				SEND_TO_Q("are controlling that character, you must remove it from the game before this\r\n", d);
 				SEND_TO_Q("character can enter. Rarely, computers may share IP addresses. If this is\r\n", d);
@@ -2678,7 +2678,7 @@ void nanny(descriptor_data *d, char *arg) {
 				SEND_TO_Q("type HELP AUTHORIZATION for the appropriate e-mail address, or contact the\r\n", d);
 				SEND_TO_Q("staff member via the game.\r\n", d);
 				SEND_TO_Q("\r\nPress ENTER to continue: ", d);
-				syslog(SYS_LOGIN, 0, TRUE, "Login denied: Multiplaying detected for %s [%s]", GET_NAME(d->character), d->host);
+				syslog(SYS_LOGIN, 0, TRUE, "Error 2. Login denied: Multiplaying detected for %s [%s]", GET_NAME(d->character), d->host);
 
 				STATE(d) = CON_GOODBYE;
 				return;
