@@ -2275,7 +2275,7 @@ void nanny(descriptor_data *d, char *arg) {
 					/* undo it just in case they are set */
 					REMOVE_BIT(PLR_FLAGS(d->character), PLR_MAILING);
 
-					SEND_TO_Q("Password: ", d);
+					SEND_TO_Q("Password. Пароль: ", d);
 					ProtocolNoEcho(d, true);
 					d->idle_tics = 0;
 					STATE(d) = CON_PASSWORD;
