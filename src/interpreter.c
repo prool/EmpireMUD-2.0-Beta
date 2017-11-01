@@ -1174,10 +1174,12 @@ void command_interpreter(char_data *ch, char *argument) {
 			{
 			printf("prool command - первая команда Пруля\n");
 			msg_to_char(ch,"prool command - &Yпервая команда Пруля&0\n");
+			return;
 			}
 		else if (!strcmp(arg,"пруль"))
 			{
 			msg_to_char(ch,"&Yпервая кириллическая команда Пруля&0\n");
+			return;
 			}
 		else
 		// end of prool
