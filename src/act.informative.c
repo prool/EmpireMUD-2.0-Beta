@@ -23,6 +23,8 @@
 #include "skills.h"
 #include "dg_scripts.h"
 
+#include "prool.h" // prool
+
 /**
 * Contents:
 *   Helpers
@@ -1866,7 +1868,9 @@ ACMD(do_affects) {
 ACMD(do_coins) {
 	if (!IS_NPC(ch)) {
 		coin_string(GET_PLAYER_COINS(ch), buf);
-		msg_to_char(ch, "You have %s.\r\n", buf);
+		//msg_to_char(ch, "You have %s.\r\n", buf);
+		msg_to_char(ch,tr("You have"));
+		msg_to_char(ch," %s.\r\n", buf);
 	}
 	else {
 		msg_to_char(ch, "NPCs don't carry coins.\r\n");
