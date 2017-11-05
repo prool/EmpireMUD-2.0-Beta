@@ -1856,10 +1856,10 @@ ACMD(do_interlink) {
 		msg_to_char(ch, "You can't interlink to places more than %d tiles away.\r\n", config_get_int("interlink_distance"));
 	}
 	else if (count_flagged_sect_between(SECTF_FRESH_WATER, IN_ROOM(ch), to_room, TRUE) > config_get_int("interlink_river_limit")) {
-		msg_to_char(ch, "You can't interlink to there; there's too much water in the way.\r\n");
+		msg_to_char(ch, "You can't interlink to there, there's too much water in the way.\r\n");
 	}
 	else if (count_flagged_sect_between(SECTF_ROUGH, IN_ROOM(ch), to_room, TRUE) > config_get_int("interlink_mountain_limit")) {
-		msg_to_char(ch, "You can't interlink to there; the terrain is too rough.\r\n");
+		msg_to_char(ch, "You can't interlink to there, the terrain is too rough.\r\n");
 	}
 	else {
 		// success!

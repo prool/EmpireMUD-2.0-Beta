@@ -4201,7 +4201,7 @@ OLC_MODULE(qedit_rewards) {
 			msg_to_char(ch, "You must specify whether you're moving it up or down in the list.\r\n");
 		}
 		else if (up && num == 1) {
-			msg_to_char(ch, "You can't move it up; it's already at the top of the list.\r\n");
+			msg_to_char(ch, "You can't move it up, it's already at the top of the list.\r\n");
 		}
 		else {
 			// find the one to move
@@ -4220,7 +4220,7 @@ OLC_MODULE(qedit_rewards) {
 				msg_to_char(ch, "Invalid reward number.\r\n");
 			}
 			else if (!up && !to_move->next) {
-				msg_to_char(ch, "You can't move it down; it's already at the bottom of the list.\r\n");
+				msg_to_char(ch, "You can't move it down, it's already at the bottom of the list.\r\n");
 			}
 			else {
 				// SUCCESS: "move" them by swapping data

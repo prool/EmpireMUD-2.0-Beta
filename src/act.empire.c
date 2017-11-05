@@ -197,7 +197,7 @@ void do_customize_island(char_data *ch, char *argument) {
 		msg_to_char(ch, "You can't do that.\r\n");
 	}
 	else if (!GET_LOYALTY(ch)) {
-		msg_to_char(ch, "You must be part of an empire to customize an island.\r\n");;
+		msg_to_char(ch, "You must be part of an empire to customize an island.\r\n");
 	}
 	else if (!has_permission(ch, PRIV_CUSTOMIZE)) {
 		msg_to_char(ch, "You don't have permission to customize anything.\r\n");

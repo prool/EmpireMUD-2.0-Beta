@@ -858,7 +858,7 @@ OLC_MODULE(advedit_endvnum) {
 		GET_ADV_END_VNUM(adv) = olc_process_number(ch, argument, "ending vnum", "endvnum", GET_ADV_START_VNUM(adv), MAX_INT, GET_ADV_END_VNUM(adv));
 		temp = get_adventure_for_vnum(GET_ADV_START_VNUM(adv));
 		if (temp && GET_ADV_VNUM(temp) != GET_ADV_VNUM(adv)) {
-			msg_to_char(ch, "New value %d is inside adventure [%d] %s; old value restored.\r\n", GET_ADV_START_VNUM(adv), GET_ADV_VNUM(temp), GET_ADV_NAME(temp));
+			msg_to_char(ch, "New value %d is inside adventure [%d] %s, old value restored.\r\n", GET_ADV_START_VNUM(adv), GET_ADV_VNUM(temp), GET_ADV_NAME(temp));
 			GET_ADV_START_VNUM(adv) = old;
 		}
 	}
@@ -1308,7 +1308,7 @@ OLC_MODULE(advedit_startvnum) {
 		GET_ADV_START_VNUM(adv) = olc_process_number(ch, argument, "starting vnum", "startvnum", 0, MAX_INT, GET_ADV_START_VNUM(adv));
 		temp = get_adventure_for_vnum(GET_ADV_START_VNUM(adv));
 		if (temp && GET_ADV_VNUM(temp) != GET_ADV_VNUM(adv)) {
-			msg_to_char(ch, "New value %d is inside adventure [%d] %s; old value restored.\r\n", GET_ADV_START_VNUM(adv), GET_ADV_VNUM(temp), GET_ADV_NAME(temp));
+			msg_to_char(ch, "New value %d is inside adventure [%d] %s, old value restored.\r\n", GET_ADV_START_VNUM(adv), GET_ADV_VNUM(temp), GET_ADV_NAME(temp));
 			GET_ADV_START_VNUM(adv) = old;
 		}
 	}

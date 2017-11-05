@@ -930,7 +930,7 @@ OLC_MODULE(rmedit_exit) {
 			msg_to_char(ch, "Invalid direction '%s'.\r\n", dir_arg);
 		}
 		else if (!isdigit(*room_arg) || (vnum = atoi(room_arg)) < 0 || get_adventure_for_vnum(vnum) != adv) {
-			msg_to_char(ch, "Invalid room template vnum '%s'; target room must be part of the same adventure zone.\r\n", room_arg);
+			msg_to_char(ch, "Invalid room template vnum '%s', target room must be part of the same adventure zone.\r\n", room_arg);
 		}
 		else {
 			CREATE(ex, struct exit_template, 1);
@@ -991,7 +991,7 @@ OLC_MODULE(rmedit_exit) {
 		}
 		else if (is_abbrev(field_arg, "room") || is_abbrev(field_arg, "template") || is_abbrev(field_arg, "vnum") || is_abbrev(field_arg, "target")) {
 			if (!isdigit(*argument) || (vnum = atoi(argument)) < 0 || get_adventure_for_vnum(vnum) != adv) {
-				msg_to_char(ch, "Invalid room template vnum '%s'; target room must be part of the same adventure zone.\r\n", argument);
+				msg_to_char(ch, "Invalid room template vnum '%s', target room must be part of the same adventure zone.\r\n", argument);
 			}
 			else {
 				change->target_room = vnum;
@@ -1218,7 +1218,7 @@ OLC_MODULE(rmedit_spawns) {
 			msg_to_char(ch, "Invalid vehicle vnum '%s'.\r\n", num_arg);
 		}
 		else if ((prc = atof(prc_arg)) < .01 || prc > 100.00) {
-			msg_to_char(ch, "Percentage must be between .01 and 100; '%s' given.\r\n", prc_arg);
+			msg_to_char(ch, "Percentage must be between .01 and 100, '%s' given.\r\n", prc_arg);
 		}
 		else if (!isdigit(*argument) || (limit = atoi(argument)) > MAX_INT || limit < -1) {
 			msg_to_char(ch, "Invalid limit '%s'.\r\n", argument);
@@ -1293,7 +1293,7 @@ OLC_MODULE(rmedit_spawns) {
 			prc = atof(argument);
 			
 			if (prc < .01 || prc > 100.00) {
-				msg_to_char(ch, "Percentage must be between .01 and 100; '%s' given.\r\n", argument);
+				msg_to_char(ch, "Percentage must be between .01 and 100, '%s' given.\r\n", argument);
 			}
 			else {
 				change->percent = prc;

@@ -1459,7 +1459,7 @@ ACMD(do_alias) {
 void send_low_pos_msg(char_data *ch) {
 	switch (GET_POS(ch)) {
 		case POS_DEAD: {
-			msg_to_char(ch, "Lie still; you are DEAD!!!\r\n");
+			msg_to_char(ch, "Lie still, you are DEAD!!!\r\n");
 			msg_to_char(ch, "(Type 'respawn' to come back at your tomb.)\r\n");
 			break;
 		}

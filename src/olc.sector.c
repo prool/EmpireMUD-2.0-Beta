@@ -723,7 +723,7 @@ OLC_MODULE(sectedit_evolution) {
 				msg_to_char(ch, "Usage: evolution add <type> [value] <percent> <sector vnum>\r\n");
 			}
 			else if ((prc = atof(arg3)) < .01 || prc > 100.00) {
-				msg_to_char(ch, "Percentage must be between .01 and 100; '%s' given.\r\n", arg3);
+				msg_to_char(ch, "Percentage must be between .01 and 100, '%s' given.\r\n", arg3);
 			}
 			else if (!(to_sect = sector_proto(atoi(sectarg)))) {
 				msg_to_char(ch, "Invalid sector type '%s'.\r\n", sectarg);
@@ -812,7 +812,7 @@ OLC_MODULE(sectedit_evolution) {
 			prc = atof(val_arg);
 			
 			if (prc < .01 || prc > 100.00) {
-				msg_to_char(ch, "Percentage must be between .01 and 100; '%s' given.\r\n", val_arg);
+				msg_to_char(ch, "Percentage must be between .01 and 100, '%s' given.\r\n", val_arg);
 			}
 			else {
 				change->percent = prc;
