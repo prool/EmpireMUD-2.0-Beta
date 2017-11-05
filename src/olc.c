@@ -4753,7 +4753,7 @@ void olc_process_requirements(char_data *ch, char *argument, struct req_data **l
 			msg_to_char(ch, "You must specify whether you're moving it up or down in the list.\r\n");
 		}
 		else if (up && num == 1) {
-			msg_to_char(ch, "You can't move it up; it's already at the top of the list.\r\n");
+			msg_to_char(ch, "You can't move it up, it's already at the top of the list.\r\n");
 		}
 		else {
 			// find the one to move
@@ -4772,7 +4772,7 @@ void olc_process_requirements(char_data *ch, char *argument, struct req_data **l
 				msg_to_char(ch, "Invalid %s number.\r\n", command);
 			}
 			else if (!up && !to_move->next) {
-				msg_to_char(ch, "You can't move it down; it's already at the bottom of the list.\r\n");
+				msg_to_char(ch, "You can't move it down, it's already at the bottom of the list.\r\n");
 			}
 			else {
 				// SUCCESS: "move" them by swapping data
@@ -5561,7 +5561,7 @@ void olc_process_interactions(char_data *ch, char *argument, struct interaction_
 			msg_to_char(ch, "You must specify whether you're moving it up or down in the list.\r\n");
 		}
 		else if (up && num == 1) {
-			msg_to_char(ch, "You can't move it up; it's already at the top of the list.\r\n");
+			msg_to_char(ch, "You can't move it up, it's already at the top of the list.\r\n");
 		}
 		else {
 			// find the one to move
@@ -5580,7 +5580,7 @@ void olc_process_interactions(char_data *ch, char *argument, struct interaction_
 				msg_to_char(ch, "Invalid interaction number.\r\n");
 			}
 			else if (!up && !to_move->next) {
-				msg_to_char(ch, "You can't move it down; it's already at the bottom of the list.\r\n");
+				msg_to_char(ch, "You can't move it down, it's already at the bottom of the list.\r\n");
 			}
 			else {
 				// SUCCESS: "move" them by swapping data
@@ -5965,7 +5965,7 @@ void olc_process_resources(char_data *ch, char *argument, struct resource_data *
 			msg_to_char(ch, "You must specify whether you're moving it up or down in the list.\r\n");
 		}
 		else if (up && num == 1) {
-			msg_to_char(ch, "You can't move it up; it's already at the top of the list.\r\n");
+			msg_to_char(ch, "You can't move it up, it's already at the top of the list.\r\n");
 		}
 		else {
 			prev_res = prev_prev = NULL;
@@ -6253,7 +6253,7 @@ void olc_process_spawns(char_data *ch, char *argument, struct spawn_info **list)
 			prc = atof(val_arg);
 			
 			if (prc < .01 || prc > 100.00) {
-				msg_to_char(ch, "Percentage must be between .01 and 100; '%s' given.\r\n", val_arg);
+				msg_to_char(ch, "Percentage must be between .01 and 100, '%s' given.\r\n", val_arg);
 			}
 			else {
 				change->percent = prc;
@@ -6313,7 +6313,7 @@ void olc_process_spawns(char_data *ch, char *argument, struct spawn_info **list)
 			msg_to_char(ch, "Invalid mob vnum '%s'.\r\n", arg);
 		}
 		else if ((prc = atof(arg3)) < .01 || prc > 100.00) {
-			msg_to_char(ch, "Percentage must be between .01 and 100; '%s' given.\r\n", arg3);
+			msg_to_char(ch, "Percentage must be between .01 and 100, '%s' given.\r\n", arg3);
 		}
 		else {
 			CREATE(spawn, struct spawn_info, 1);
