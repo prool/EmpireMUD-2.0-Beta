@@ -1168,13 +1168,25 @@ void command_interpreter(char_data *ch, char *argument) {
 		printf("prooldebug arg='%s'\n", arg);
 		if (!strcmp(arg,"prool"))
 			{
-			printf("prool command - первая команда Пруля\n");
-			msg_to_char(ch,"prool command - &Yпервая команда Пруля&0\n");
+			snprintf(prool_buf,PROOL_LEN,"\bprool info - &Yинформация от Пруля:&0\n\nprooltran=%i\nВключение и выключение экспериментального переводчика командами\nprool_on и prool_off\n",prool_tr);
+			msg_to_char(ch,prool_buf);
 			return;
 			}
 		else if (!strcmp(arg,"пруль"))
 			{
 			msg_to_char(ch,"&Yпервая кириллическая команда Пруля&0\n");
+			return;
+			}
+		else if (!strcmp(arg,"prool_on"))
+			{
+			msg_to_char(ch,"\bПрульпереводчик включен\n");
+			prool_tr=1;
+			return;
+			}
+		else if (!strcmp(arg,"prool_off"))
+			{
+			msg_to_char(ch,"\bПрульпереводчик выключен\n");
+			prool_tr=0;
 			return;
 			}
 		else

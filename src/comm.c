@@ -25,6 +25,8 @@
 #include "dg_scripts.h"
 #include "dg_event.h"
 
+#include "prool.h" // prool
+
 /**
 * Contents:
 *   Data
@@ -1175,6 +1177,8 @@ void msg_to_desc(descriptor_data *d, const char *messg, ...) {
 	if (!messg || !d) {
 		return;
 	}
+
+	printf("prooldebug msg_to_desc()\n"); // prool
 	
 	va_start(tArgList, messg);
 	vsprintf(output, messg, tArgList);
@@ -1195,14 +1199,25 @@ void msg_to_desc(descriptor_data *d, const char *messg, ...) {
 void msg_to_char(char_data *ch, const char *messg, ...) {
 	char output[MAX_STRING_LENGTH];
 	va_list tArgList;
+	char prool_buf[PROOL_LEN]; // prool
 	
 	if (!messg || !ch->desc)
 		return;
+
+//	printf("prooldebug msg_to_char '%s'\n", messg); // prool
 	
 	va_start(tArgList, messg);
 	vsprintf(output, messg, tArgList);
 
+//	printf("prooldebug msg_to_char output '%s'\n", output); // prool
+
+if(prool_tr) {
+	prool_translator_2 (output, prool_buf);
+	SEND_TO_Q(prool_buf, ch->desc);
+}
+else	{
 	SEND_TO_Q(output, ch->desc);
+}
 
 	va_end(tArgList);
 }
@@ -1224,6 +1239,8 @@ void msg_to_vehicle(vehicle_data *veh, bool awake_only, const char *messg, ...) 
 	if (!messg || !veh) {
 		return;
 	}
+
+	printf("prooldebug msg_to_vehicle()\n"); // prool
 	
 	va_start(tArgList, messg);
 	vsprintf(output, messg, tArgList);
@@ -1276,6 +1293,8 @@ void send_to_all(const char *messg, ...) {
 
 	if (!messg)
 		return;
+
+	printf("prooldebug send_to_all()\n"); // prool
 
 	va_start(tArgList, messg);
 	vsprintf(output, messg, tArgList);
@@ -1492,7 +1511,14 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 			free(to->desc->last_act_message);
 		}
 		to->desc->last_act_message = strdup(lbuf);
+		//printf("prooldebug: label L3\n"); // prool
+if (prool_tr) {
+		prool_translator_2 (lbuf, prool_buf);
+		SEND_TO_Q(prool_buf, to->desc);
+}
+else {
 		SEND_TO_Q(lbuf, to->desc);
+}
 	}
 
 	if ((IS_NPC(to) && dg_act_check) && (to != ch)) {
@@ -1502,8 +1528,16 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 
 // this is the pre-circle3.1 send_to_char that doesn't have va_args
 void send_to_char(const char *messg, char_data *ch) {
-	if (ch->desc && messg)
+	if (ch->desc && messg) {
+		//printf("prooldebug send_to_char()\n"); // prool
+if (prool_tr) {
+		prool_translator_2 (messg, prool_buf);
+		SEND_TO_Q(prool_buf, ch->desc);
+}
+else {
 		SEND_TO_Q(messg, ch->desc);
+}
+	}
 }
 
 
@@ -1568,11 +1602,15 @@ void send_to_outdoor(bool weather, const char *messg, ...) {
 		if (weather && ROOM_AFF_FLAGGED(IN_ROOM(i->character), ROOM_AFF_NO_WEATHER)) {
 			continue;
 		}
+if (prool_tr) {
+		SEND_TO_Q(prool_buf, i);
+}
+else {
 		SEND_TO_Q(output, i);
+}
 	}
 	va_end(tArgList);
 }
-
 
 void send_to_room(const char *messg, room_data *room) {
 	char_data *i;
@@ -1580,9 +1618,21 @@ void send_to_room(const char *messg, room_data *room) {
 	if (messg == NULL)
 		return;
 
+	printf("prooldebug send_to_room\n"); // prool
+
 	for (i = ROOM_PEOPLE(room); i; i = i->next_in_room)
 		if (i->desc)
+		{
+if (prool_tr) {
+			printf("prool L1\n");
+			prool_translator_2 (messg, prool_buf);
+			SEND_TO_Q(prool_buf, i->desc);
+}
+else {
+			printf("prool L2\n");
 			SEND_TO_Q(messg, i->desc);
+}
+		}
 }
 
 
@@ -3669,6 +3719,8 @@ int main(int argc, char **argv) {
 
 	int pos = 1;
 	const char *dir;
+
+	prool_init(); // prool
 
 	/* Initialize these to check for overruns later. */
 	plant_magic(buf);

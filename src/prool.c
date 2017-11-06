@@ -15,6 +15,8 @@ Prool functions
 char prool_buf [PROOL_LEN];
 char prool_buf_tr [PROOL_LEN];
 
+int prool_tr; // 1 - prool translator enable. 0 - disable
+
 char *deromanize(unsigned char *in, unsigned char *out)
 // reverse function for romanize()
 // input: transliterated string
@@ -262,4 +264,111 @@ printf("tr() Can't translate '%s'\n", str);
 return str;
 
 } // end tr()
-// end of prool code
+
+/****************************************************/
+char *prool_translator_2 (char *input, char *out)
+{
+char buffer [PROOL_LEN];
+char perevod [PROOL_LEN];
+char *cc, *cc2, *cc3;
+
+//return "[prool fool!]";
+
+if (input==0) return "[prool: null string]";
+if (*input==0) return "[prool: empty string]";
+
+//printf("prool tr2 in='%s'\n", input);
+
+out[0]=0;
+
+if (input[0]=='\b') { // строки с таким символом в начале не переводятся!
+	strcpy(out,input+1);
+	return out;
+}
+
+// деление строки на слова 
+cc=input;
+while (1) {
+cc2=strchr(cc,' ');
+if (cc2==0) {// последнее слово
+	//printf("prool w last='%s'\n", cc);
+	perevod[0]=0;
+	poisk(cc,perevod);
+	strcat(out,perevod);
+	break;
+}
+strcpy(buffer,cc);
+cc3=strchr(buffer,' ');
+if (cc3) *cc3=0;
+//printf("prool w='%s'\n", buffer);
+perevod[0]=0;
+poisk(buffer,perevod);
+strcat(out,perevod);
+strcat(out," ");
+cc=cc2+1;
+if (*cc==0) break;
+}
+
+//printf("prool tr2 out='%s'\n", out);
+return out;
+} // end prool_translator_2
+
+void poisk (char *in, char *out)
+{
+FILE *fp;
+char buf[PROOL_LEN];
+char buf2[PROOL_LEN];
+char *cc;
+int i,l,count;
+
+// слова, которые в принципе не переводятся
+l=strlen(in);
+
+if (in[0]==0) goto l1;
+if (in[0]=='|') goto l1;
+if (in[0]=='-') goto l1;
+if (in[0]=='+') goto l1;
+if ((in[0]=='&')&&(l==2)) goto l1;
+if (strchr(in,'|')) goto l1;
+if (strchr(in,'/')) goto l1;
+if (strchr(in,'~')) goto l1;
+if (strchr(in,'^')) goto l1;
+if (strchr(in,'\\')) goto l1;
+
+count=0; 
+for (i=0;i<l;i++) if (in[i]=='.') count++;
+if (count>1) goto l1;
+
+fp=fopen("slovar2.txt","r");
+if (fp==NULL) {printf("Can't open slovar2.txt\n"); return;}
+
+while(1)
+	{
+	buf[0]=0;
+	fgets(buf,PROOL_LEN,fp);
+	if (buf[0]==0) break;
+	cc=strchr(buf,0x0A);
+	if (cc) *cc=0;
+	cc=strchr(buf,'#');
+	if (cc==0) continue;
+	strcpy(buf2,cc+1);
+	*cc=0;
+	if (!strcmp(in,buf))
+		{
+		strcpy(out,buf2);
+		printf("'%s'->'%s'\n", in, out);
+		return;
+		}
+	}
+
+fclose(fp);
+printf("'%s'-> ????!!!!\n", in);
+l1:;
+strcpy(out,in);
+
+} // end poisk
+
+void prool_init(void)
+{
+prool_tr=0;
+} // end of prool_init()
