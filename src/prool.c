@@ -339,6 +339,18 @@ count=0;
 for (i=0;i<l;i++) if (in[i]=='.') count++;
 if (count>1) goto l1;
 
+count=0; 
+for (i=0;i<l;i++) if (in[i]=='i') count++;
+if (count>2) goto l1;
+
+count=0; 
+for (i=0;i<l;i++) if (in[i]=='o') count++;
+if (count>2) goto l1;
+
+count=0; 
+for (i=0;i<l;i++) if (in[i]==':') count++;
+if (count>2) goto l1;
+
 fp=fopen("slovar2.txt","r");
 if (fp==NULL) {printf("Can't open slovar2.txt\n"); return;}
 
