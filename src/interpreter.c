@@ -1165,7 +1165,7 @@ void command_interpreter(char_data *ch, char *argument) {
 			return;
 		}
 		// prool: russian and other prool command
-		printf("prooldebug arg='%s'\n", arg);
+		//printf("prooldebug arg='%s'\n", arg);
 		if (!strcmp(arg,"prool"))
 			{
 			snprintf(prool_buf,PROOL_LEN,"\bprool info - &Yинформация от Пруля:&0\n\nprooltran=%i\nВключение и выключение экспериментального переводчика командами\nprool_on и prool_off\n",prool_tr);
@@ -2240,14 +2240,14 @@ void nanny(descriptor_data *d, char *arg) {
 			}
 		
 			// prool begin
-			printf("prooldebug. label #0. arg='%s'\n",arg);
+			//printf("prooldebug. label #0. arg='%s'\n",arg);
 			if (romanize(arg,prool_buf)==0)
 			{
 				strcpy(arg,prool_buf);
 			}
-			printf("romanize='%s'\n", arg);
+			//printf("romanize='%s'\n", arg);
 			deromanize(arg,prool_buf);
-			printf("***deromanize='%s'\n",prool_buf);
+			//printf("***deromanize='%s'\n",prool_buf);
 			// prool end
 			if (!*arg) {
 				SET_BIT(PLR_FLAGS(d->character), PLR_KEEP_LAST_LOGIN_INFO);	// prevent login storing
@@ -2260,9 +2260,10 @@ void nanny(descriptor_data *d, char *arg) {
 			}
 			else {
 				if ((_parse_name(arg, tmp_name)) || strlen(tmp_name) < 2 || strlen(tmp_name) > MAX_NAME_LENGTH || !Valid_Name(tmp_name) || fill_word(strcpy(buf, tmp_name)) || reserved_word(buf)) {
+#if 0 // prooldebug
 					//prool:
 					unsigned char *cc;
-					printf("prooldebug arg='%s' ", arg);
+					//printf("prooldebug arg='%s' ", arg);
 					cc=arg;
 					while(*cc)
 					{
@@ -2271,6 +2272,7 @@ void nanny(descriptor_data *d, char *arg) {
 					}
 					printf("\n");
 					//end of prool
+#endif
 					SEND_TO_Q("Error 1. Invalid name, please try another.\r\nName: ", d);//prool
 					return;
 				}

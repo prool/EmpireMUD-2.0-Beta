@@ -23,10 +23,10 @@ char *deromanize(unsigned char *in, unsigned char *out)
 // output: cyrillic UTF-8 string
 // return: if ok out string, if error 0
 {
-if (in==0) {printf("prooldebug unromanize error 1\n"); return 0;}
-if (out==0) {printf("prooldebug romanize error 1a\n"); return 0;}
-printf("prooldebug: unromanize: in='%s'\n", in);
-if (*in==0) {printf("prooldebug unromanize error 2\n"); return 0;}
+if (in==0) {/*printf("prooldebug unromanize error 1\n");*/ return 0;}
+if (out==0) {/*printf("prooldebug romanize error 1a\n"); */return 0;}
+//printf("prooldebug: unromanize: in='%s'\n", in);
+if (*in==0) {/*printf("prooldebug unromanize error 2\n"); */return 0;}
 *out=0;
 while(*in)
 	{
@@ -45,7 +45,7 @@ while(*in)
 		        case 'u': /* ю  */ strcat(out,"ю"); break;
 		        case 'a': /* я  */ strcat(out,"я"); break;
 		        case 'o': /* ё  */ strcat(out,"ё"); break;
-			default: printf("prooldebug unromanize error 3\n"); return 0;
+			default: /*printf("prooldebug unromanize error 3\n"); */return 0;
 			}
 		}
 	else if (*in=='J')
@@ -63,7 +63,7 @@ while(*in)
 		        case 'u': /* ю  */ strcat(out,"Ю"); break;
 		        case 'a': /* я  */ strcat(out,"Я"); break;
 		        case 'o': /* ё  */ strcat(out,"Ё"); break;
-			default: printf("prooldebug unromanize error 3a\n"); return 0;
+			default: /*printf("prooldebug unromanize error 3a\n"); */return 0;
 			}
 		}
 	else
@@ -114,7 +114,7 @@ while(*in)
 		case  /* ф   */ 'f': strcat(out,"ф"); break;
 		case  /* х   */ 'h': strcat(out,"х"); break;
 		case  /* ц   */ 'c': strcat(out,"ц"); break;
-		default: printf("prooldebug unromanize error 3b\n"); return 0;
+		default: /*printf("prooldebug unromanize error 3b\n"); */return 0;
 		}// end switch
 		}
 	in++;
@@ -128,14 +128,14 @@ int romanize(unsigned char *in, unsigned char *out)
 // return: 0 - it's ok, 1 - error (f.e. input string is not UTF-8 cyrillic)
 {int l, i; unsigned char c;
 
-if (in==0) {printf("prooldebug romanize error 1\n"); return 1;}
-if (out==0) {printf("prooldebug romanize error 1a\n"); return 1;}
-printf("prooldebug: romanize: in='%s'\n", in);
-if (*in==0) {printf("prooldebug romanize error 2\n"); return 1;}
-if ((*in!=0xD0) && (*in!=0xD1)) {printf("prooldebug romanize error 3\n"); return 1;}
+if (in==0) {/*printf("prooldebug romanize error 1\n"); */return 1;}
+if (out==0) {/*printf("prooldebug romanize error 1a\n"); */return 1;}
+//printf("prooldebug: romanize: in='%s'\n", in);
+if (*in==0) {/*printf("prooldebug romanize error 2\n"); */return 1;}
+if ((*in!=0xD0) && (*in!=0xD1)) {/*printf("prooldebug romanize error 3\n"); */return 1;}
 
 l=strlen(in);
-if (l%2) {printf("prooldebug romanize error 4\n"); return 1;}
+if (l%2) {/*printf("prooldebug romanize error 4\n"); */return 1;}
 
 for (i=0;i<l;i++)
 	{
@@ -192,7 +192,7 @@ for (i=0;i<l;i++)
                 case 0xBD: /* н n */ *out++='n'; break;
                 case 0xBE: /* о o */ *out++='o'; break;
                 case 0xBF: /* п p */ *out++='p'; break;
-		default: *out=0; printf("prolldebug romanize error 4b\n"); return 1;
+		default: *out=0; /*printf("prolldebug romanize error 4b\n"); */return 1;
 		} // end of switch
 		}
 	else if (c==0xD1)
@@ -215,11 +215,11 @@ for (i=0;i<l;i++)
 			case 0x8E: /* ю  */ *out++='j'; *out++='u'; break;
 			case 0x8F: /* я  */ *out++='j'; *out++='a'; break;
 			case 0x91: /* ё  */ *out++='j'; *out++='o'; break;
-		default: *out=0; printf("prolldebug romanize error 4c\n"); return 1;
+		default: *out=0; /*printf("prolldebug romanize error 4c\n"); */return 1;
 		} // end of switch
 		}
 	else if (c==0) break;
-	else {printf("prooldebug romanize error 4 c='%c' [%02X]\n",c,c); return 1;}
+	else {/*printf("prooldebug romanize error 4 c='%c' [%02X]\n",c,c); */return 1;}
 	}
 
 *out=0;
@@ -237,7 +237,7 @@ char *cc;
 
 /*
 cc=getcwd(prool_buf, PROOL_LEN);
-printf("prool tr() pwd='%s'\n", cc);
+//printf("prool tr() pwd='%s'\n", cc);
 */
 
 ff=fopen("slovar.csv","r"); // open dictionary file
@@ -250,9 +250,9 @@ while(fgets(prool_buf_tr,PROOL_LEN,ff)) {
 cc=strchr(prool_buf_tr,0x0A);
 if (cc) *cc=0;
 if (prool_buf_tr[0]==0) continue;
-printf("fgets='%s'\n", prool_buf_tr);
+//printf("fgets='%s'\n", prool_buf_tr);
 if (!memcmp(str,prool_buf_tr,strlen(str))) {
-	printf("str '%s' ok\n", str);
+	//printf("str '%s' ok\n", str);
 	cc=strchr(prool_buf_tr,',');
 	if (cc) if (*++cc) return cc;
 }
@@ -260,7 +260,7 @@ if (!memcmp(str,prool_buf_tr,strlen(str))) {
 } // end while
 
 fclose(ff);
-printf("tr() Can't translate '%s'\n", str);
+//printf("tr() Can't translate '%s'\n", str);
 return str;
 
 } // end tr()
@@ -368,13 +368,13 @@ while(1)
 	if (!strcmp(in,buf))
 		{
 		strcpy(out,buf2);
-		printf("'%s'->'%s'\n", in, out);
+		//printf("'%s'->'%s'\n", in, out);
 		return;
 		}
 	}
 
 fclose(fp);
-printf("'%s'-> ????!!!!\n", in);
+//printf("'%s'-> ????!!!!\n", in);
 l1:;
 strcpy(out,in);
 
