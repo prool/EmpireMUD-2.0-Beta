@@ -11,6 +11,8 @@ Function prototypes
 extern char prool_buf[];
 extern char prool_buf_tr[];
 extern int prool_tr; // 1 - prool translator enable. 0 - disable
+extern int prool_tr_w; // 1 - prool translator enable. 0 - disable
+extern int prool_tr_s; // 1 - prool translator enable. 0 - disable
 
 char *deromanize(unsigned char *in, unsigned char *out);
 int romanize(unsigned char *in, unsigned char *out);

@@ -16,6 +16,8 @@ char prool_buf [PROOL_LEN];
 char prool_buf_tr [PROOL_LEN];
 
 int prool_tr; // 1 - prool translator enable. 0 - disable
+int prool_tr_w; // 1 - prool translator enable. 0 - disable
+int prool_tr_s; // 1 - prool translator enable. 0 - disable
 
 char *deromanize(unsigned char *in, unsigned char *out)
 // reverse function for romanize()
@@ -226,6 +228,7 @@ for (i=0;i<l;i++)
 return 0;
 }
 
+#if 1
 char *tr(char *str) // foolish translator (interpreter)
 // input: str - english string
 // output: return value - link to russian string, or original string, if not found in dictionary
@@ -240,10 +243,16 @@ cc=getcwd(prool_buf, PROOL_LEN);
 //printf("prool tr() pwd='%s'\n", cc);
 */
 
+if (prool_tr_s==0)
+	return str;
+
 ff=fopen("slovar.csv","r"); // open dictionary file
 if (ff==0) {
 	printf("slovar not opened\n");
 	return str;
+}
+else {
+printf("slovar open!\n");
 }
 
 while(fgets(prool_buf_tr,PROOL_LEN,ff)) {
@@ -264,6 +273,7 @@ fclose(ff);
 return str;
 
 } // end tr()
+#endif
 
 /****************************************************/
 char *prool_translator_2 (char *input, char *out)
@@ -277,9 +287,20 @@ char *cc, *cc2, *cc3;
 if (input==0) return "[prool: null string]";
 if (*input==0) return "[prool: empty string]";
 
-//printf("prool tr2 in='%s'\n", input);
+printf("prool tr2 in='%s' [", input);
+
+#if 0 // debug print
+cc=input;
+while (*cc) printf ("%02X ",*cc++);
+printf(" ] \n");
+#endif
 
 out[0]=0;
+
+if (prool_tr_w==0) {
+	strcpy(out,input);
+	return out;
+}
 
 if (input[0]=='\b') { // строки с таким символом в начале не переводятся!
 	strcpy(out,input+1);
@@ -383,4 +404,6 @@ strcpy(out,in);
 void prool_init(void)
 {
 prool_tr=0;
+prool_tr_w=0;
+prool_tr_s=0;
 } // end of prool_init()
