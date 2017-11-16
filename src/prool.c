@@ -228,52 +228,66 @@ for (i=0;i<l;i++)
 return 0;
 }
 
-#if 1
-char *tr(char *str) // foolish translator (interpreter)
-// input: str - english string
-// output: return value - link to russian string, or original string, if not found in dictionary
+int tran_s(char *input, char *output) // foolish translator (interpreter)
+// input: input - english string
+// output - translated string, or original, if can't translate (not found in dictionary)
+// return value - 0 if ok, 1 if no translate
 {
 FILE *ff;
 char *cc;
+char osnova [PROOL_LEN];
+int l,crlf;
 
-//printf("prool tr() str='%s'\n", str);
+//printf("prool tr() input='%s'\n", input);
 
 /*
 cc=getcwd(prool_buf, PROOL_LEN);
 //printf("prool tr() pwd='%s'\n", cc);
 */
 
-if (prool_tr_s==0)
-	return str;
+if (prool_tr_s==0) {
+	strcpy(output, input);
+	return 1;
+}
 
 ff=fopen("slovar.csv","r"); // open dictionary file
 if (ff==0) {
 	printf("slovar not opened\n");
-	return str;
+	strcpy(output, input);
+	return 1;
 }
 else {
-printf("slovar open!\n");
+//printf("slovar open!\n");
 }
+
+crlf=0;
+strcpy(osnova,input);
+l=strlen(osnova);
+if (osnova[l-1]=='\n') {osnova[l-1]=0; crlf=1;}
+l=strlen(osnova);
+if (osnova[l-1]=='\r') {osnova[l-1]=0; crlf=1;}
+l=strlen(osnova);
 
 while(fgets(prool_buf_tr,PROOL_LEN,ff)) {
 cc=strchr(prool_buf_tr,0x0A);
 if (cc) *cc=0;
 if (prool_buf_tr[0]==0) continue;
 //printf("fgets='%s'\n", prool_buf_tr);
-if (!memcmp(str,prool_buf_tr,strlen(str))) {
-	//printf("str '%s' ok\n", str);
+if (!memcmp(osnova,prool_buf_tr,l)) {
 	cc=strchr(prool_buf_tr,',');
-	if (cc) if (*++cc) return cc;
+	if (cc) if (*++cc) {
+	strcpy(output, cc);
+	if (crlf) strcat(output,"\r\n");
+	return 0;
+	}
 }
-
 } // end while
 
 fclose(ff);
-//printf("tr() Can't translate '%s'\n", str);
-return str;
-
+printf("prool tr_s() can't translate '%s'\n", osnova);
+strcpy(output, input);
+return 1;
 } // end tr()
-#endif
 
 /****************************************************/
 char *prool_translator_2 (char *input, char *out)
@@ -287,7 +301,7 @@ char *cc, *cc2, *cc3;
 if (input==0) return "[prool: null string]";
 if (*input==0) return "[prool: empty string]";
 
-printf("prool tr2 in='%s' [", input);
+//printf("prool tr2 in='%s' [", input);
 
 #if 0 // debug print
 cc=input;
@@ -295,7 +309,15 @@ while (*cc) printf ("%02X ",*cc++);
 printf(" ] \n");
 #endif
 
+buffer[0]=0;
 out[0]=0;
+
+if (tran_s(input,buffer)==0)
+	{// translation ok
+	strcpy(out,buffer);
+	return out;
+	}
+
 
 if (prool_tr_w==0) {
 	strcpy(out,input);
