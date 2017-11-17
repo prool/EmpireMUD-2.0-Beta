@@ -352,7 +352,7 @@ cc=cc2+1;
 if (*cc==0) break;
 }
 
-//printf("prool tr2 out='%s'\n", out);
+printf("prool tr2 out='%s'\n", out);
 return out;
 } // end prool_translator_2
 
@@ -411,13 +411,13 @@ while(1)
 	if (!strcmp(in,buf))
 		{
 		strcpy(out,buf2);
-		//printf("'%s'->'%s'\n", in, out);
+		printf("'%s'->'%s'\n", in, out);
 		return;
 		}
 	}
 
 fclose(fp);
-//printf("'%s'-> ????!!!!\n", in);
+printf("'%s'-> ????\n", in);
 l1:;
 strcpy(out,in);
 
