@@ -312,6 +312,11 @@ printf(" ] \n");
 buffer[0]=0;
 out[0]=0;
 
+if (input[0]=='\b') { // строки с таким символом в начале не переводятся!
+	strcpy(out,input+1);
+	return out;
+}
+
 if (tran_s(input,buffer)==0)
 	{// translation ok
 	strcpy(out,buffer);
@@ -321,11 +326,6 @@ if (tran_s(input,buffer)==0)
 
 if (prool_tr_w==0) {
 	strcpy(out,input);
-	return out;
-}
-
-if (input[0]=='\b') { // строки с таким символом в начале не переводятся!
-	strcpy(out,input+1);
 	return out;
 }
 
@@ -356,13 +356,16 @@ printf("prool tr2 out='%s'\n", out);
 return out;
 } // end prool_translator_2
 
-void poisk (char *in, char *out)
+void poisk (char *in, char *out) // поиск слова в словаре Мюллера
 {
 FILE *fp;
 char buf[PROOL_LEN];
 char buf2[PROOL_LEN];
+char prefix[PROOL_LEN];
+char suffix[PROOL_LEN];
+char slovo[PROOL_LEN];
 char *cc;
-int i,l,count;
+int i,l,count,index,busstop;
 
 // слова, которые в принципе не переводятся
 l=strlen(in);
@@ -394,6 +397,68 @@ count=0;
 for (i=0;i<l;i++) if (in[i]==':') count++;
 if (count>2) goto l1;
 
+// выделение префикса (предшествующей слову небуквенной строки, например кода смены цвета или кавычек
+l=strlen(in);
+index=0;
+prefix[0]=0;
+suffix[0]=0;
+slovo[0]=0;
+
+for (i=0;i<l;i++)
+	{
+	if (((in[i]>='a')&&(in[i]<='z')) || ((in[i]>='A')&&(in[i]<='Z')))
+		{// єто буква
+		prefix[index]=0;
+		break;
+		}
+	else
+		{// это не буква: значит это часть префикса
+		prefix[index++]=in[i];
+		}
+	}
+
+prefix[index]=0;
+busstop=i;
+
+// выделение слова
+index=0;
+for (i=busstop; i<l; i++)
+	{
+	if (((in[i]>='a')&&(in[i]<='z')) || ((in[i]>='A')&&(in[i]<='Z')))
+		{// єто буква
+		slovo[index++]=in[i];
+		}
+	else
+		{// это не буква
+		slovo[index]=0;
+		break;
+		}
+	}
+
+slovo[index]=0;
+busstop=i;
+
+//выделение суффикса (следующей за словом небуквенной строки, например, точки, или кода смены цвета или точки и кода смены цвета
+
+index=0;
+for (i=busstop; i<l; i++)
+	{
+	if (((in[i]>='a')&&(in[i]<='z')) || ((in[i]>='A')&&(in[i]<='Z')))
+		{// єто буква
+		suffix[index]=0;
+		break;
+		}
+	else
+		{// это не буква
+		suffix[index++]=in[i];
+		}
+	}
+suffix[index]=0;
+
+//printf("Деление слова '%s' == '%s' '%s' '%s'\n", in, prefix, slovo, suffix);
+
+if (slovo[0]==0) goto l1; // слова нет, это небуквенное "псевдослово", не переводим
+
 fp=fopen("slovar2.txt","r");
 if (fp==NULL) {printf("Can't open slovar2.txt\n"); return;}
 
@@ -408,9 +473,13 @@ while(1)
 	if (cc==0) continue;
 	strcpy(buf2,cc+1);
 	*cc=0;
-	if (!strcmp(in,buf))
+	if (!strcmp(slovo/*in*/,buf))
 		{
-		strcpy(out,buf2);
+		//strcpy(out,buf2);
+		out[0]=0;
+		if (prefix[0]) strcpy(out,prefix);
+		if (buf2[0]) strcat(out,buf2);
+		if (suffix[0]) strcat(out,suffix);
 		printf("'%s'->'%s'\n", in, out);
 		return;
 		}

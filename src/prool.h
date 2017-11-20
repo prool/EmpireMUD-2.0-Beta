@@ -6,7 +6,7 @@ http://prool.kharkov.org http://mud.kharkov.org https://github.com/prool/EmpireM
 Function prototypes
 */
 
-#define PROOL_LEN 2048 /*255*/
+#define PROOL_LEN 1024 /*2048 */ /*255*/
 
 extern char prool_buf[];
 extern char prool_buf_tr[];

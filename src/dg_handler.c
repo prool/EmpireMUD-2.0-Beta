@@ -93,6 +93,11 @@ void free_varlist(struct trig_var_data *vd) {
 	for (i = vd; i;) {
 		j = i;
 		i = i->next;
+		if (j==0) // prool
+			{
+			printf("prool: memory error 0 :(\n");
+			return;
+			}
 		if (j->name)
 			free(j->name);
 		if (j->value)
