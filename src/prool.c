@@ -284,7 +284,7 @@ if (!memcmp(osnova,prool_buf_tr,l)) {
 } // end while
 
 fclose(ff);
-printf("prool tr_s() can't translate '%s'\n", osnova);
+//printf("prool tr_s() can't translate '%s'\n", osnova);
 strcpy(output, input);
 return 1;
 } // end tr()
@@ -352,7 +352,7 @@ cc=cc2+1;
 if (*cc==0) break;
 }
 
-printf("prool tr2 out='%s'\n", out);
+//printf("prool tr2 out='%s'\n", out);
 return out;
 } // end prool_translator_2
 
@@ -365,7 +365,7 @@ char prefix[PROOL_LEN];
 char suffix[PROOL_LEN];
 char slovo[PROOL_LEN];
 char *cc;
-int i,l,count,index,busstop;
+int i, l, count, index, busstop, ampersend, first_upper, all_upper;
 
 // слова, которые в принципе не переводятся
 l=strlen(in);
@@ -403,10 +403,16 @@ index=0;
 prefix[0]=0;
 suffix[0]=0;
 slovo[0]=0;
+ampersend=0;
 
 for (i=0;i<l;i++)
 	{
-	if (((in[i]>='a')&&(in[i]<='z')) || ((in[i]>='A')&&(in[i]<='Z')))
+	if (ampersend)
+		{// после амперсенда идет цифра или буква, но это код цвета, то это часть префикса! хоть и буква!!
+		prefix[index++]=in[i];
+		ampersend=0;
+		}
+	else if (((in[i]>='a')&&(in[i]<='z')) || ((in[i]>='A')&&(in[i]<='Z')))
 		{// єто буква
 		prefix[index]=0;
 		break;
@@ -414,6 +420,7 @@ for (i=0;i<l;i++)
 	else
 		{// это не буква: значит это часть префикса
 		prefix[index++]=in[i];
+		if (in[i]=='&') ampersend=1;
 		}
 	}
 
@@ -436,6 +443,7 @@ for (i=busstop; i<l; i++)
 	}
 
 slovo[index]=0;
+
 busstop=i;
 
 //выделение суффикса (следующей за словом небуквенной строки, например, точки, или кода смены цвета или точки и кода смены цвета
@@ -458,6 +466,20 @@ suffix[index]=0;
 //printf("Деление слова '%s' == '%s' '%s' '%s'\n", in, prefix, slovo, suffix);
 
 if (slovo[0]==0) goto l1; // слова нет, это небуквенное "псевдослово", не переводим
+
+// анализ первой буквы слова, большая ли она
+first_upper=0;
+if (isupper(slovo[0])) first_upper=1;
+
+// а может всё слово большими (заглавными) буквами?
+
+l=strlen(slovo);
+all_upper=1;
+for (i=0;i<l;i++) if (islower(slovo[i])==0) all_upper=0;
+
+// приводим всё слово к нижнему регистру
+for (i=0;i<l;i++) slovo[i]=tolower(slovo[i]);
+
 
 fp=fopen("slovar2.txt","r");
 if (fp==NULL) {printf("Can't open slovar2.txt\n"); return;}
