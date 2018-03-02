@@ -57,7 +57,7 @@ CXREF_FILES = abilities.c act.action.c act.battle.c act.comm.c act.empire.c \
 
 default: all
 
-all: .accepted
+all:
 	$(MAKE) $(BINDIR)/empire
 	$(MAKE) utils
 

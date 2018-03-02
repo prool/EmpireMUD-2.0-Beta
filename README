@@ -10,6 +10,8 @@ cp configure.android configure
 cd src
 
 add flag '-DANDROID' to Makefile to end of line 'MYFLAGS=...'
+in Makefile: replace 'all: .accepted' to 'all:'
+in Makefile: replace 'utils: .accepted' to 'utils:'
 
 make
 
