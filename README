@@ -1,6 +1,25 @@
-28-Oct-2017. Started russification (UTF-8 codetable) by Prool, proolix@gmail.com
+Russification (UTF-8 codetable) by Prool, proolix@gmail.com
+
+Compile under Android 6.0 (dirty instruction)
+---------------------------------------------
+
+cp configure.android configure
+
+./configure
+
+cd src
+
+add flag '-DANDROID' to Makefile to end of line 'MYFLAGS=...'
+
+make
+
+cd ..
+
+bin/empire
 
 ---
+Prool, proolix@gmailcom, mud.kharkov.org
+=========================================================================
 
 Warning: Always back up your EmpireMUD before updating your git checkout. Some
 patches may require playerfile conversions or may have other unexpected side-

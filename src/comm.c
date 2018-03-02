@@ -108,7 +108,7 @@ void setup_log(const char *filename, int fd);
 void signal_setup(void);
 void timeadd(struct timeval *sum, struct timeval *a, struct timeval *b);
 void timediff(struct timeval *diff, struct timeval *a, struct timeval *b);
-#if defined(POSIX)
+#if defined(POSIX) || ANDROID
 sigfunc *my_signal(int signo, sigfunc * func);
 #endif
 
@@ -3368,7 +3368,7 @@ RETSIGTYPE hupsig(int sig) {
  * SunOS Release 4.0.2 (sun386) needs this too, according to Tim Aldric.
  */
 
-#ifndef POSIX
+#if !defined(POSIX) && !defined(ANDROID)
 #define my_signal(signo, func) signal(signo, func)
 #else
 sigfunc *my_signal(int signo, sigfunc * func) {
