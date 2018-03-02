@@ -6,15 +6,17 @@ http://prool.kharkov.org http://mud.kharkov.org https://github.com/prool/EmpireM
 Function prototypes
 */
 
-#define PROOL_LEN 2048 /*255*/
+#define PROOL_LEN 2048
 
 extern char prool_buf[];
 extern char prool_buf_tr[];
-extern int prool_tr; // 1 - prool translator enable. 0 - disable
+extern int prool_tr; // 1 - translator enable. 0 - disable
+extern int prool_tr_w; // 1 - word translator enable. 0 - disable
+extern int prool_tr_s; // 1 - string translator enable. 0 - disable
 
 char *deromanize(unsigned char *in, unsigned char *out);
 int romanize(unsigned char *in, unsigned char *out);
-char *tr(char *str);
+int tran_s(char *input, char *output);
 char *prool_translator_2 (char *input, char *out);
 void poisk (char *in, char *out);
 void prool_init(void);

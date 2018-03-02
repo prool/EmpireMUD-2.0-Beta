@@ -16,6 +16,8 @@ char prool_buf [PROOL_LEN];
 char prool_buf_tr [PROOL_LEN];
 
 int prool_tr; // 1 - prool translator enable. 0 - disable
+int prool_tr_w; // 1 - prool translator enable. 0 - disable
+int prool_tr_s; // 1 - prool translator enable. 0 - disable
 
 char *deromanize(unsigned char *in, unsigned char *out)
 // reverse function for romanize()
@@ -23,10 +25,10 @@ char *deromanize(unsigned char *in, unsigned char *out)
 // output: cyrillic UTF-8 string
 // return: if ok out string, if error 0
 {
-if (in==0) {printf("prooldebug unromanize error 1\n"); return 0;}
-if (out==0) {printf("prooldebug romanize error 1a\n"); return 0;}
-printf("prooldebug: unromanize: in='%s'\n", in);
-if (*in==0) {printf("prooldebug unromanize error 2\n"); return 0;}
+if (in==0) {/*printf("prooldebug unromanize error 1\n");*/ return 0;}
+if (out==0) {/*printf("prooldebug romanize error 1a\n"); */return 0;}
+//printf("prooldebug: unromanize: in='%s'\n", in);
+if (*in==0) {/*printf("prooldebug unromanize error 2\n"); */return 0;}
 *out=0;
 while(*in)
 	{
@@ -45,7 +47,7 @@ while(*in)
 		        case 'u': /* ю  */ strcat(out,"ю"); break;
 		        case 'a': /* я  */ strcat(out,"я"); break;
 		        case 'o': /* ё  */ strcat(out,"ё"); break;
-			default: printf("prooldebug unromanize error 3\n"); return 0;
+			default: /*printf("prooldebug unromanize error 3\n"); */return 0;
 			}
 		}
 	else if (*in=='J')
@@ -63,7 +65,7 @@ while(*in)
 		        case 'u': /* ю  */ strcat(out,"Ю"); break;
 		        case 'a': /* я  */ strcat(out,"Я"); break;
 		        case 'o': /* ё  */ strcat(out,"Ё"); break;
-			default: printf("prooldebug unromanize error 3a\n"); return 0;
+			default: /*printf("prooldebug unromanize error 3a\n"); */return 0;
 			}
 		}
 	else
@@ -114,7 +116,7 @@ while(*in)
 		case  /* ф   */ 'f': strcat(out,"ф"); break;
 		case  /* х   */ 'h': strcat(out,"х"); break;
 		case  /* ц   */ 'c': strcat(out,"ц"); break;
-		default: printf("prooldebug unromanize error 3b\n"); return 0;
+		default: /*printf("prooldebug unromanize error 3b\n"); */return 0;
 		}// end switch
 		}
 	in++;
@@ -128,14 +130,14 @@ int romanize(unsigned char *in, unsigned char *out)
 // return: 0 - it's ok, 1 - error (f.e. input string is not UTF-8 cyrillic)
 {int l, i; unsigned char c;
 
-if (in==0) {printf("prooldebug romanize error 1\n"); return 1;}
-if (out==0) {printf("prooldebug romanize error 1a\n"); return 1;}
-printf("prooldebug: romanize: in='%s'\n", in);
-if (*in==0) {printf("prooldebug romanize error 2\n"); return 1;}
-if ((*in!=0xD0) && (*in!=0xD1)) {printf("prooldebug romanize error 3\n"); return 1;}
+if (in==0) {/*printf("prooldebug romanize error 1\n"); */return 1;}
+if (out==0) {/*printf("prooldebug romanize error 1a\n"); */return 1;}
+//printf("prooldebug: romanize: in='%s'\n", in);
+if (*in==0) {/*printf("prooldebug romanize error 2\n"); */return 1;}
+if ((*in!=0xD0) && (*in!=0xD1)) {/*printf("prooldebug romanize error 3\n"); */return 1;}
 
 l=strlen(in);
-if (l%2) {printf("prooldebug romanize error 4\n"); return 1;}
+if (l%2) {/*printf("prooldebug romanize error 4\n"); */return 1;}
 
 for (i=0;i<l;i++)
 	{
@@ -192,7 +194,7 @@ for (i=0;i<l;i++)
                 case 0xBD: /* н n */ *out++='n'; break;
                 case 0xBE: /* о o */ *out++='o'; break;
                 case 0xBF: /* п p */ *out++='p'; break;
-		default: *out=0; printf("prolldebug romanize error 4b\n"); return 1;
+		default: *out=0; /*printf("prolldebug romanize error 4b\n"); */return 1;
 		} // end of switch
 		}
 	else if (c==0xD1)
@@ -215,54 +217,76 @@ for (i=0;i<l;i++)
 			case 0x8E: /* ю  */ *out++='j'; *out++='u'; break;
 			case 0x8F: /* я  */ *out++='j'; *out++='a'; break;
 			case 0x91: /* ё  */ *out++='j'; *out++='o'; break;
-		default: *out=0; printf("prolldebug romanize error 4c\n"); return 1;
+		default: *out=0; /*printf("prolldebug romanize error 4c\n"); */return 1;
 		} // end of switch
 		}
 	else if (c==0) break;
-	else {printf("prooldebug romanize error 4 c='%c' [%02X]\n",c,c); return 1;}
+	else {/*printf("prooldebug romanize error 4 c='%c' [%02X]\n",c,c); */return 1;}
 	}
 
 *out=0;
 return 0;
 }
 
-char *tr(char *str) // foolish translator (interpreter)
-// input: str - english string
-// output: return value - link to russian string, or original string, if not found in dictionary
+int tran_s(char *input, char *output) // foolish translator (interpreter)
+// input: input - english string
+// output - translated string, or original, if can't translate (not found in dictionary)
+// return value - 0 if ok, 1 if no translate
 {
 FILE *ff;
 char *cc;
+char osnova [PROOL_LEN];
+int l,crlf;
 
-//printf("prool tr() str='%s'\n", str);
+//printf("prool tr() input='%s'\n", input);
 
 /*
 cc=getcwd(prool_buf, PROOL_LEN);
-printf("prool tr() pwd='%s'\n", cc);
+//printf("prool tr() pwd='%s'\n", cc);
 */
+
+if (prool_tr_s==0) {
+	strcpy(output, input);
+	return 1;
+}
 
 ff=fopen("slovar.csv","r"); // open dictionary file
 if (ff==0) {
 	printf("slovar not opened\n");
-	return str;
+	strcpy(output, input);
+	return 1;
 }
+else {
+//printf("slovar open!\n");
+}
+
+crlf=0;
+strcpy(osnova,input);
+l=strlen(osnova);
+if (osnova[l-1]=='\n') {osnova[l-1]=0; crlf=1;}
+l=strlen(osnova);
+if (osnova[l-1]=='\r') {osnova[l-1]=0; crlf=1;}
+l=strlen(osnova);
 
 while(fgets(prool_buf_tr,PROOL_LEN,ff)) {
 cc=strchr(prool_buf_tr,0x0A);
 if (cc) *cc=0;
 if (prool_buf_tr[0]==0) continue;
-printf("fgets='%s'\n", prool_buf_tr);
-if (!memcmp(str,prool_buf_tr,strlen(str))) {
-	printf("str '%s' ok\n", str);
+//printf("fgets='%s'\n", prool_buf_tr);
+if (!memcmp(osnova,prool_buf_tr,l)) {
 	cc=strchr(prool_buf_tr,',');
-	if (cc) if (*++cc) return cc;
+	if (cc) if (*++cc) {
+	strcpy(output, cc);
+	if (crlf) strcat(output,"\r\n");
+	return 0;
+	}
 }
-
 } // end while
 
 fclose(ff);
-printf("tr() Can't translate '%s'\n", str);
-return str;
-
+//printf("prool tr_s() can't translate '%s'\n", osnova);
+strcpy(output, input);
+return 1;
 } // end tr()
 
 /****************************************************/
@@ -277,12 +301,31 @@ char *cc, *cc2, *cc3;
 if (input==0) return "[prool: null string]";
 if (*input==0) return "[prool: empty string]";
 
-//printf("prool tr2 in='%s'\n", input);
+//printf("prool tr2 in='%s' [", input);
 
+#if 0 // debug print
+cc=input;
+while (*cc) printf ("%02X ",*cc++);
+printf(" ] \n");
+#endif
+
+buffer[0]=0;
 out[0]=0;
 
 if (input[0]=='\b') { // строки с таким символом в начале не переводятся!
 	strcpy(out,input+1);
+	return out;
+}
+
+if (tran_s(input,buffer)==0)
+	{// translation ok
+	strcpy(out,buffer);
+	return out;
+	}
+
+
+if (prool_tr_w==0) {
+	strcpy(out,input);
 	return out;
 }
 
@@ -313,13 +356,16 @@ if (*cc==0) break;
 return out;
 } // end prool_translator_2
 
-void poisk (char *in, char *out)
+void poisk (char *in, char *out) // поиск слова в словаре Мюллера
 {
 FILE *fp;
 char buf[PROOL_LEN];
 char buf2[PROOL_LEN];
+char prefix[PROOL_LEN];
+char suffix[PROOL_LEN];
+char slovo[PROOL_LEN];
 char *cc;
-int i,l,count;
+int i, l, count, index, busstop, ampersend, first_upper, all_upper;
 
 // слова, которые в принципе не переводятся
 l=strlen(in);
@@ -351,6 +397,90 @@ count=0;
 for (i=0;i<l;i++) if (in[i]==':') count++;
 if (count>2) goto l1;
 
+// выделение префикса (предшествующей слову небуквенной строки, например кода смены цвета или кавычек
+l=strlen(in);
+index=0;
+prefix[0]=0;
+suffix[0]=0;
+slovo[0]=0;
+ampersend=0;
+
+for (i=0;i<l;i++)
+	{
+	if (ampersend)
+		{// после амперсенда идет цифра или буква, но это код цвета, то это часть префикса! хоть и буква!!
+		prefix[index++]=in[i];
+		ampersend=0;
+		}
+	else if (((in[i]>='a')&&(in[i]<='z')) || ((in[i]>='A')&&(in[i]<='Z')))
+		{// єто буква
+		prefix[index]=0;
+		break;
+		}
+	else
+		{// это не буква: значит это часть префикса
+		prefix[index++]=in[i];
+		if (in[i]=='&') ampersend=1;
+		}
+	}
+
+prefix[index]=0;
+busstop=i;
+
+// выделение слова
+index=0;
+for (i=busstop; i<l; i++)
+	{
+	if (((in[i]>='a')&&(in[i]<='z')) || ((in[i]>='A')&&(in[i]<='Z')))
+		{// єто буква
+		slovo[index++]=in[i];
+		}
+	else
+		{// это не буква
+		slovo[index]=0;
+		break;
+		}
+	}
+
+slovo[index]=0;
+
+busstop=i;
+
+//выделение суффикса (следующей за словом небуквенной строки, например, точки, или кода смены цвета или точки и кода смены цвета
+
+index=0;
+for (i=busstop; i<l; i++)
+	{
+	if (((in[i]>='a')&&(in[i]<='z')) || ((in[i]>='A')&&(in[i]<='Z')))
+		{// єто буква
+		suffix[index]=0;
+		break;
+		}
+	else
+		{// это не буква
+		suffix[index++]=in[i];
+		}
+	}
+suffix[index]=0;
+
+//printf("Деление слова '%s' == '%s' '%s' '%s'\n", in, prefix, slovo, suffix);
+
+if (slovo[0]==0) goto l1; // слова нет, это небуквенное "псевдослово", не переводим
+
+// анализ первой буквы слова, большая ли она
+first_upper=0;
+if (isupper(slovo[0])) first_upper=1;
+
+// а может всё слово большими (заглавными) буквами?
+
+l=strlen(slovo);
+all_upper=1;
+for (i=0;i<l;i++) if (islower(slovo[i])==0) all_upper=0;
+
+// приводим всё слово к нижнему регистру
+for (i=0;i<l;i++) slovo[i]=tolower(slovo[i]);
+
+
 fp=fopen("slovar2.txt","r");
 if (fp==NULL) {printf("Can't open slovar2.txt\n"); return;}
 
@@ -365,16 +495,20 @@ while(1)
 	if (cc==0) continue;
 	strcpy(buf2,cc+1);
 	*cc=0;
-	if (!strcmp(in,buf))
+	if (!strcmp(slovo/*in*/,buf))
 		{
-		strcpy(out,buf2);
+		//strcpy(out,buf2);
+		out[0]=0;
+		if (prefix[0]) strcpy(out,prefix);
+		if (buf2[0]) strcat(out,buf2);
+		if (suffix[0]) strcat(out,suffix);
 		printf("'%s'->'%s'\n", in, out);
 		return;
 		}
 	}
 
 fclose(fp);
-printf("'%s'-> ????!!!!\n", in);
+printf("'%s'-> ????\n", in);
 l1:;
 strcpy(out,in);
 
@@ -383,4 +517,6 @@ strcpy(out,in);
 void prool_init(void)
 {
 prool_tr=0;
+prool_tr_w=0;
+prool_tr_s=0;
 } // end of prool_init()
