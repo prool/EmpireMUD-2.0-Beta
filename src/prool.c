@@ -515,7 +515,25 @@ strcpy(out,in);
 } // end poisk
 
 void prool_init(void)
-{
+{FILE *f;
+
+//printf("prool: cwd=%s\n", get_current_dir_name());
+#define ACC_NAME "lib/players/accounts/index"
+
+f=fopen(ACC_NAME,"r");
+
+if (!f)
+	{// file not found. create
+	//printf("prool: acc file not found\n");
+	f=fopen(ACC_NAME,"w");
+	if (f)	{
+		fputs("$",f);
+		fclose(f);
+		}
+	}
+
+//printf("press any key\n");getchar();
+
 prool_tr=0;
 prool_tr_w=0;
 prool_tr_s=0;
