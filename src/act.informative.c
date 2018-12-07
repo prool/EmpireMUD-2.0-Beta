@@ -2828,7 +2828,11 @@ ACMD(do_time) {
 	const char *suf;
 	int weekday, day;
 
+#if 0 // 0 - prool's, 1 - orig
 	sprintf(buf, "It is %d o'clock %s, on ", ((time_info.hours % 12 == 0) ? 12 : ((time_info.hours) % 12)), ((time_info.hours >= 12) ? "pm" : "am"));
+#else
+	sprintf(buf, "It is %d o'clock, on ", time_info.hours);
+#endif
 
 	/* 30 days in a month */
 	weekday = ((30 * time_info.month) + time_info.day + 1) % 7;
@@ -2839,6 +2843,7 @@ ACMD(do_time) {
 
 	day = time_info.day + 1;	/* day in [1..30] */
 
+#if 0 // 0 - prool, 1 - orig
 	/* 11, 12, and 13 are the infernal exceptions to the rule */
 	if ((day % 10) == 1 && day != 11)
 		suf = "st";
@@ -2848,6 +2853,9 @@ ACMD(do_time) {
 		suf = "rd";
 	else
 		suf = "th";
+#else
+		suf=" ";
+#endif
 
 	msg_to_char(ch, "The %d%s day of the month of %s, year %d.\r\n", day, suf, month_name[(int) time_info.month], time_info.year);
 	

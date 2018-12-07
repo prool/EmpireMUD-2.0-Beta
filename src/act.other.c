@@ -27,6 +27,8 @@
 #include "vnums.h"
 #include "dg_scripts.h"
 
+#include "prool.h" // prool
+
 /**
 * Contents:
 *   Helpers
@@ -2294,6 +2296,9 @@ ACMD(do_quit) {
 			act("$n has left the game.", TRUE, ch, 0, 0, TO_ROOM);
 		}
 		syslog(SYS_LOGIN, GET_INVIS_LEV(ch), TRUE, "%s has quit the game.", GET_NAME(ch));
+			char proolbuf[PROOL_LEN];
+			sprintf(proolbuf,"%s quit", GET_NAME(ch));
+			prool_log(proolbuf);
 		if (GET_INVIS_LEV(ch) == 0) {
 			if (config_get_bool("public_logins")) {
 				mortlog("%s has left the game", PERS(ch, ch, 1));

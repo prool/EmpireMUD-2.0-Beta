@@ -2057,6 +2057,7 @@ int perform_dupe_check(descriptor_data *d) {
 	descriptor_data *k, *next_k;
 	char_data *target = NULL, *ch, *next_ch;
 	int mode = 0;
+	char proolbuf [PROOL_LEN]; // prool
 
 	#define RECON		1
 	#define USURP		2
@@ -2162,16 +2163,22 @@ int perform_dupe_check(descriptor_data *d) {
 			SEND_TO_Q("Reconnecting.\r\n", d);
 			act("$n has reconnected.", TRUE, d->character, 0, 0, TO_ROOM);
 			syslog(SYS_LOGIN, GET_INVIS_LEV(d->character), TRUE, "%s [%s] has reconnected.", GET_NAME(d->character), d->host);
+			sprintf(proolbuf,"%s %s reconnected", GET_NAME(d->character),d->host);
+			prool_log(proolbuf);
 			break;
 		case USURP:
 			SEND_TO_Q("You take over your own body, already in use!\r\n", d);
 			act("$n suddenly keels over in pain, surrounded by a white aura...\r\n"
 				"$n's body has been taken over by a new spirit!", TRUE, d->character, 0, 0, TO_ROOM);
 			syslog(SYS_LOGIN, GET_INVIS_LEV(d->character), TRUE, "%s has re-logged in ... disconnecting old socket.", GET_NAME(d->character));
+			sprintf(proolbuf,"%s %s relogged in old socket", GET_NAME(d->character),d->host);
+			prool_log(proolbuf);
 			break;
 		case UNSWITCH:
 			SEND_TO_Q("Reconnecting to unswitched char.", d);
 			syslog(SYS_LOGIN, GET_INVIS_LEV(d->character), TRUE, "%s [%s] has reconnected.", GET_NAME(d->character), d->host);
+			sprintf(proolbuf,"%s %s reconnected-2", GET_NAME(d->character),d->host);
+			prool_log(proolbuf);
 			break;
 	}
 	
@@ -2241,6 +2248,8 @@ void nanny(descriptor_data *d, char *arg) {
 	int load_result, i, iter;
 	bool show_start = FALSE;
 	char_data *temp_char;
+
+	char proolbuf [PROOL_LEN]; // prool
 	
 	// this avoids treating telnet negotiation as menu input
 	if (d->no_nanny) {
@@ -2443,6 +2452,8 @@ void nanny(descriptor_data *d, char *arg) {
 				
 				if (!PLR_FLAGGED(d->character, PLR_INVSTART)) {
 					syslog(SYS_LOGIN, GET_INVIS_LEV(d->character), TRUE, "%s [%s] has connected.", GET_NAME(d->character), PLR_FLAGGED(d->character, PLR_IPMASK) ? "masked" : d->host);
+			sprintf(proolbuf,"%s %s connected", GET_NAME(d->character),d->host);
+			prool_log(proolbuf);
 				}
 
 				// check here if they need more traits than they have (IF they are an existing char?)

@@ -1179,7 +1179,7 @@ int perform_move(char_data *ch, int dir, int need_specials_check, byte mode) {
 
 	if ((PLR_FLAGGED(ch, PLR_UNRESTRICT) && !IS_ADVENTURE_ROOM(IN_ROOM(ch)) && !IS_INSIDE(IN_ROOM(ch))) || !ROOM_IS_CLOSED(IN_ROOM(ch))) {
 		if (dir >= NUM_2D_DIRS || dir < 0) {
-			send_to_char("Alas, you cannot go that way...\r\n", ch);
+			send_to_char("Alas, you cannot go that way.\r\n", ch);
 			return FALSE;
 		}
 		// may produce a NULL
@@ -1187,7 +1187,7 @@ int perform_move(char_data *ch, int dir, int need_specials_check, byte mode) {
 	}
 	else {
 		if (!(ex = find_exit(IN_ROOM(ch), dir)) || !ex->room_ptr) {
-			msg_to_char(ch, "Alas, you cannot go that way...\r\n");
+			msg_to_char(ch, "Alas, you cannot go that way.\r\n");
 			return FALSE;
 		}
 		if (EXIT_FLAGGED(ex, EX_CLOSED) && ex->keyword) {
@@ -1199,7 +1199,7 @@ int perform_move(char_data *ch, int dir, int need_specials_check, byte mode) {
 	
 	// safety (and map bounds)
 	if (!to_room) {
-		msg_to_char(ch, "Alas, you cannot go that way...\r\n");
+		msg_to_char(ch, "Alas, you cannot go that way.\r\n");
 		return FALSE;
 	}
 
@@ -2048,7 +2048,7 @@ ACMD(do_wake) {
 			return;
 	}
 	if (GET_POS(ch) > POS_SLEEPING)
-		send_to_char("You are already awake...\r\n", ch);
+		send_to_char("You are already awake.\r\n", ch);
 	else {
 		send_to_char("You awaken, and sit up.\r\n", ch);
 		act("$n awakens.", TRUE, ch, 0, 0, TO_ROOM);

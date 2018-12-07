@@ -20,3 +20,5 @@ int tran_s(char *input, char *output);
 char *prool_translator_2 (char *input, char *out);
 void poisk (char *in, char *out);
 void prool_init(void);
+char *ptime(void);
+void prool_log(char *str);

@@ -1697,6 +1697,9 @@ void close_socket(descriptor_data *d) {
 			if (!IS_NPC(d->character)) {
 				SAVE_CHAR(d->character);
 				syslog(SYS_LOGIN, GET_INVIS_LEV(d->character), TRUE, "Closing link to: %s.", GET_NAME(d->character));
+			char proolbuf[PROOL_LEN];
+			sprintf(proolbuf,"%s closing link", GET_NAME(d->character));
+			prool_log(proolbuf);
 			}
 			d->character->desc = NULL;
 		}
@@ -3264,6 +3267,7 @@ char *replace_prompt_codes(char_data *ch, char *str) {
 					else
 						strcpy(spare, "am");
 
+#if 0 // 0 - prool, 1 - orig
 					if (time_info.hours == 6)
 						sprintf(i, "\tC%d%s\t0", time_info.hours > 12 ? time_info.hours - 12 : time_info.hours, spare);
 					else if (time_info.hours < 19 && time_info.hours > 6)
@@ -3274,6 +3278,19 @@ char *replace_prompt_codes(char_data *ch, char *str) {
 						sprintf(i, "\tB12am\t0");
 					else
 						sprintf(i, "\tB%d%s\t0", time_info.hours > 12 ? time_info.hours - 12 : time_info.hours, spare);
+#else
+					strcpy(spare, " ");
+					if (time_info.hours == 6)
+						sprintf(i, "\tC%d%s\t0", time_info.hours > 12 ? time_info.hours  : time_info.hours, spare);
+					else if (time_info.hours < 19 && time_info.hours > 6)
+						sprintf(i, "\tY%d%s\t0", time_info.hours > 12 ? time_info.hours  : time_info.hours, spare);
+					else if (time_info.hours == 19)
+						sprintf(i, "\tR%d%s\t0", time_info.hours > 12 ? time_info.hours  : time_info.hours, spare);
+					else if (time_info.hours == 0)
+						sprintf(i, "\tB0 \t0");
+					else
+						sprintf(i, "\tB%d%s\t0", time_info.hours > 12 ? time_info.hours  : time_info.hours, spare);
+#endif
 					tmp = i;
 					break;
 				case 'a': {	// action
@@ -3745,6 +3762,8 @@ int main(int argc, char **argv) {
 	const char *dir;
 
 	prool_init(); // prool
+
+	prool_log("Empire MUD+prool starts");
 
 	/* Initialize these to check for overruns later. */
 	plant_magic(buf);

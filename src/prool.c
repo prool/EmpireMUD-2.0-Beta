@@ -9,6 +9,8 @@ Prool functions
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
+#include <ctype.h>
 
 #include "prool.h"
 
@@ -538,3 +540,25 @@ prool_tr=0;
 prool_tr_w=0;
 prool_tr_s=0;
 } // end of prool_init()
+
+char *ptime(void) // Возвращаемое значение: ссылка на текстовую строку с текущим временем // from Virtustan MUD
+	{
+	char *tmstr;
+	time_t mytime;
+
+	mytime = time(0);
+
+	tmstr = (char *) asctime(localtime(&mytime));
+	*(tmstr + strlen(tmstr) - 1) = '\0';
+
+	return tmstr;
+
+	}
+
+void prool_log(char *str) // from Virtustan MUD
+{
+FILE *fp;
+fp=fopen("empire-prool.log", "a");
+fprintf(fp,"%s %s\n",ptime(),str);
+fclose(fp);
+}
