@@ -1173,24 +1173,29 @@ void act(const char *str, int hide_invisible, char_data *ch, const void *obj, co
 void msg_to_desc(descriptor_data *d, const char *messg, ...) {
 	char output[MAX_STRING_LENGTH];
 	va_list tArgList;
+
+	char_data *ch; // prool
 	
 	if (!messg || !d) {
 		return;
 	}
 
-	//printf("prooldebug msg_to_desc()\n"); // prool
+//	printf("prooldebug msg_to_desc()\n");
 	
 	va_start(tArgList, messg);
 	vsprintf(output, messg, tArgList);
 
-if(prool_tr) {
-	prool_translator_2 (output, prool_buf);
-	SEND_TO_Q(prool_buf, d);
-}
-else	{
-	SEND_TO_Q(output, d);
-}
+	ch=d->character;
 
+	if (ch)
+		if(ch->player_specials->prooltran[0]) {
+			prool_translator_2 (output, prool_buf,ch);
+			SEND_TO_Q(prool_buf, ch->desc);
+			}
+		else
+			SEND_TO_Q(output, d);
+	else
+		SEND_TO_Q(output, d);
 
 	va_end(tArgList);
 }
@@ -1206,7 +1211,6 @@ else	{
 void msg_to_char(char_data *ch, const char *messg, ...) {
 	char output[MAX_STRING_LENGTH];
 	va_list tArgList;
-	char prool_buf[PROOL_LEN]; // prool
 	
 	if (!messg || !ch->desc)
 		return;
@@ -1218,8 +1222,8 @@ void msg_to_char(char_data *ch, const char *messg, ...) {
 
 //	printf("prooldebug msg_to_char output '%s'\n", output); // prool
 
-if(prool_tr) {
-	prool_translator_2 (output, prool_buf);
+if(ch->player_specials->prooltran[0]) {
+	prool_translator_2 (output, prool_buf,ch);
 	SEND_TO_Q(prool_buf, ch->desc);
 }
 else	{
@@ -1264,8 +1268,8 @@ void msg_to_vehicle(vehicle_data *veh, bool awake_only, const char *messg, ...) 
 		}
 		
 		// looks valid
-if(prool_tr) {
-	prool_translator_2 (output, prool_buf);
+if(ch->player_specials->prooltran[0]) {
+	prool_translator_2 (output, prool_buf,ch);
 	SEND_TO_Q(prool_buf, desc);
 }
 else	{
@@ -1304,6 +1308,7 @@ void send_to_all(const char *messg, ...) {
 	descriptor_data *i;
 	char output[MAX_STRING_LENGTH];
 	va_list tArgList;
+	char_data *ch; // prool
 
 	if (!messg)
 		return;
@@ -1315,15 +1320,16 @@ void send_to_all(const char *messg, ...) {
 
 	for (i = descriptor_list; i; i = i->next)
 		if (STATE(i) == CON_PLAYING) {
-			SEND_TO_Q(output, i);
-if(prool_tr) {
-	prool_translator_2 (output, prool_buf);
-	SEND_TO_Q(prool_buf, i);
-}
-else	{
-	SEND_TO_Q(output, i);
-}
-
+			ch = i->character;
+			if (ch)
+				if(ch->player_specials->prooltran[0]) {
+					prool_translator_2 (output, prool_buf,ch);
+					SEND_TO_Q(prool_buf, i);
+					}
+				else
+					SEND_TO_Q(output, i);
+			else
+				SEND_TO_Q(output, i);
 			}
 	va_end(tArgList);
 }
@@ -1534,11 +1540,13 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 			free(to->desc->last_act_message);
 		}
 		to->desc->last_act_message = strdup(lbuf);
-		//printf("prooldebug: label L3\n"); // prool
-if (prool_tr) {
-		prool_translator_2 (lbuf, prool_buf);
-		SEND_TO_Q(prool_buf, to->desc);
-}
+
+//		printf("prooldebug: label L3\n"); // prool
+
+		if (to->player_specials->prooltran[0]) {
+			prool_translator_2 (lbuf, prool_buf,to);
+			SEND_TO_Q(prool_buf, to->desc);
+			}
 else {
 		SEND_TO_Q(lbuf, to->desc);
 }
@@ -1552,9 +1560,9 @@ else {
 // this is the pre-circle3.1 send_to_char that doesn't have va_args
 void send_to_char(const char *messg, char_data *ch) {
 	if (ch->desc && messg) {
-		//printf("prooldebug send_to_char()\n"); // prool
-if (prool_tr) {
-		prool_translator_2 (messg, prool_buf);
+//		printf("prooldebug send_to_char()\n"); // prool
+if (ch->player_specials->prooltran[0]) {
+		prool_translator_2 (messg, prool_buf,ch);
 		SEND_TO_Q(prool_buf, ch->desc);
 }
 else {
@@ -1625,13 +1633,12 @@ void send_to_outdoor(bool weather, const char *messg, ...) {
 		if (weather && ROOM_AFF_FLAGGED(IN_ROOM(i->character), ROOM_AFF_NO_WEATHER)) {
 			continue;
 		}
-if (prool_tr) {
-		prool_translator_2 (output, prool_buf);
-		SEND_TO_Q(prool_buf, i);
-}
-else {
-		SEND_TO_Q(output, i);
-}
+		if (i->character->player_specials->prooltran[0]) {
+			prool_translator_2 (output, prool_buf,i->character);
+			SEND_TO_Q(prool_buf, i);
+			}
+		else
+			SEND_TO_Q(output, i);
 	}
 	va_end(tArgList);
 }
@@ -1647,15 +1654,12 @@ void send_to_room(const char *messg, room_data *room) {
 	for (i = ROOM_PEOPLE(room); i; i = i->next_in_room)
 		if (i->desc)
 		{
-if (prool_tr) {
-			//printf("prool L1\n");
-			prool_translator_2 (messg, prool_buf);
+		if (i->player_specials->prooltran[0]) {
+			prool_translator_2 (messg, prool_buf,i);
 			SEND_TO_Q(prool_buf, i->desc);
-}
-else {
-			//printf("prool L2\n");
-			SEND_TO_Q(messg, i->desc);
-}
+			}
+			else
+				SEND_TO_Q(messg, i->desc);
 		}
 }
 

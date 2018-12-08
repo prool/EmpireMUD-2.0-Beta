@@ -1169,7 +1169,7 @@ void command_interpreter(char_data *ch, char *argument) {
 		//printf("prooldebug argument='%s'\n", argument);
 		if (!strcmp(arg,"prool"))
 			{
-			snprintf(prool_buf,PROOL_LEN,"\bprool info - &Yинформация от Пруля:&0\n\nprooltran=%i\nВключение и выключение экспериментального переводчика командами\nprool_on и prool_off\nprooltran - управление транслятором, например prooltran 101\n",prool_tr);
+			snprintf(prool_buf,PROOL_LEN,"\bprool info - &Yинформация от Пруля:&0\n\nprooltran=%i\nВключение и выключение экспериментального переводчика командами\nprool_on и prool_off\nprooltran - управление переводчиком, например prooltran 110\n",ch->player_specials->prooltran[0]);
 			msg_to_char(ch,prool_buf);
 			return;
 			}
@@ -1181,13 +1181,14 @@ void command_interpreter(char_data *ch, char *argument) {
 		else if (!strcmp(arg,"prool_on"))
 			{
 			msg_to_char(ch,"\bПрульпереводчик включен\n");
-			prool_tr=1;
+			ch->player_specials->prooltran[0]=1;
+			ch->player_specials->prooltran[1]=1;
 			return;
 			}
 		else if (!strcmp(arg,"prool_off"))
 			{
 			msg_to_char(ch,"\bПрульпереводчик выключен\n");
-			prool_tr=0;
+			ch->player_specials->prooltran[0]=0;
 			return;
 			}
 		else if (!strcmp(arg,"prooltran"))
@@ -1199,15 +1200,24 @@ void command_interpreter(char_data *ch, char *argument) {
 			else
 				{
 				cc++;
-				if (*cc) {if (*cc=='1') prool_tr=1; else if (*cc=='0') prool_tr=0;}
+				if (*cc){if (*cc=='1') {ch->player_specials->prooltran[0]=1;}
+					else if (*cc=='0') {ch->player_specials->prooltran[0]=0;}
+					}
 				cc++;
-				if (*cc) {if (*cc=='1') prool_tr_w=1; else if (*cc=='0') prool_tr_w=0;}
+				if (*cc){if (*cc=='1') {ch->player_specials->prooltran[1]=1;}
+					else if (*cc=='0') {ch->player_specials->prooltran[1]=0;}
+					}
 				cc++;
-				if (*cc) {if (*cc=='1') prool_tr_s=1; else if (*cc=='0') prool_tr_s=0;}
+				if (*cc){if (*cc=='1') {ch->player_specials->prooltran[2]=1;}
+					else if (*cc=='0') {ch->player_specials->prooltran[2]=0;}
+					}
 				}
-			snprintf(prool_buf,PROOL_LEN,"\bprool translator=%i word=%i string=%i\n",
-				prool_tr, prool_tr_w, prool_tr_s);
+			snprintf(prool_buf,PROOL_LEN,"\bprool translator=%i word tran.=%i string tran.=%i\n", 
+			ch->player_specials->prooltran[0],
+			ch->player_specials->prooltran[1],
+			ch->player_specials->prooltran[2]);
 			msg_to_char(ch, prool_buf);
+
 			return;
 			}
 		else

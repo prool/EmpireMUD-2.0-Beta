@@ -1,7 +1,7 @@
 /* Code by Prool
 http://prool.kharkov.org http://mud.kharkov.org https://github.com/prool/EmpireMUD-2.0-Beta
 <proolix@gmail.com>
-(C) 2017
+(CC) 2017-2018
 
 Prool functions
 */
@@ -12,14 +12,12 @@ Prool functions
 #include <time.h>
 #include <ctype.h>
 
+#include "sysdep.h"
+#include "structs.h"
 #include "prool.h"
 
 char prool_buf [PROOL_LEN];
 char prool_buf_tr [PROOL_LEN];
-
-int prool_tr; // 1 - prool translator enable. 0 - disable
-int prool_tr_w; // 1 - prool translator enable. 0 - disable
-int prool_tr_s; // 1 - prool translator enable. 0 - disable
 
 char *deromanize(unsigned char *in, unsigned char *out)
 // reverse function for romanize()
@@ -230,7 +228,7 @@ for (i=0;i<l;i++)
 return 0;
 }
 
-int tran_s(char *input, char *output) // foolish translator (interpreter)
+int tran_s(char *input, char *output, char_data *ch) // foolish translator (interpreter)
 // input: input - english string
 // output - translated string, or original, if can't translate (not found in dictionary)
 // return value - 0 if ok, 1 if no translate
@@ -247,7 +245,7 @@ cc=getcwd(prool_buf, PROOL_LEN);
 //printf("prool tr() pwd='%s'\n", cc);
 */
 
-if (prool_tr_s==0) {
+if (ch->player_specials->prooltran[2]==0) {
 	strcpy(output, input);
 	return 1;
 }
@@ -292,7 +290,7 @@ return 1;
 } // end tr()
 
 /****************************************************/
-char *prool_translator_2 (char *input, char *out)
+char *prool_translator_2 (char *input, char *out, char_data *ch)
 {
 char buffer [PROOL_LEN];
 char perevod [PROOL_LEN];
@@ -319,14 +317,15 @@ if (input[0]=='\b') { // строки с таким символом в нача
 	return out;
 }
 
-if (tran_s(input,buffer)==0)
+#if 0 // prool: временно уберем
+if (tran_s(input,buffer,ch)==0)
 	{// translation ok
 	strcpy(out,buffer);
 	return out;
 	}
+#endif
 
-
-if (prool_tr_w==0) {
+if (ch->player_specials->prooltran[1]==0) {
 	strcpy(out,input);
 	return out;
 }
@@ -536,9 +535,6 @@ if (!f)
 
 //printf("press any key\n");getchar();
 
-prool_tr=0;
-prool_tr_w=0;
-prool_tr_s=0;
 } // end of prool_init()
 
 char *ptime(void) // Возвращаемое значение: ссылка на текстовую строку с текущим временем // from Virtustan MUD

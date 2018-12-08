@@ -3233,6 +3233,9 @@ struct player_special_data {
 	bool needs_delayed_load;	// whether or not the player still needs delayed data
 	bool restore_on_login;	// mark the player to trigger a free reset when they enter the game
 	bool reread_empire_tech_on_login;	// mark the player to trigger empire tech re-read on entering the game
+
+	// prool's parameters
+	int prooltran[3]; // translator parameters
 };
 
 
