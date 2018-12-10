@@ -1220,6 +1220,34 @@ void command_interpreter(char_data *ch, char *argument) {
 
 			return;
 			}
+		else if (!strcmp(arg,"duhmada"))
+			{int number;
+			obj_data *obj;
+
+			msg_to_char(ch, "Дух мада выдал вам припасы\n");
+
+			number=2112; // bottle of water
+			obj = read_object(number, TRUE);
+			if (CAN_WEAR(obj, ITEM_WEAR_TAKE))
+			obj_to_char(obj, ch);
+			else
+			obj_to_room(obj, IN_ROOM(ch));
+			act("$n makes a strange magical gesture.", TRUE, ch, 0, 0, TO_ROOM);
+			act("$n has created $p!", FALSE, ch, obj, 0, TO_ROOM);
+			act("You create $p.", FALSE, ch, obj, 0, TO_CHAR);
+
+			number=3313; // bread
+			obj = read_object(number, TRUE);
+			if (CAN_WEAR(obj, ITEM_WEAR_TAKE))
+			obj_to_char(obj, ch);
+			else
+			obj_to_room(obj, IN_ROOM(ch));
+			act("$n makes a strange magical gesture.", TRUE, ch, 0, 0, TO_ROOM);
+			act("$n has created $p!", FALSE, ch, obj, 0, TO_ROOM);
+			act("You create $p.", FALSE, ch, obj, 0, TO_CHAR);
+
+			return;
+			}
 		else
 		// end of prool
 		// otherwise, no match
