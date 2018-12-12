@@ -816,15 +816,18 @@ void perform_reboot(void) {
 			case SHUTDOWN_DIE: {
 				touch(KILLSCRIPT_FILE);
 				log("Shutdown die: mud will not reboot");
+				prool_log("Shutdown die: mud will not reboot");
 				break;
 			}
 			case SHUTDOWN_PAUSE: {
 				touch(PAUSE_FILE);
 				log("Shutdown pause: mud will not reboot until '%s' is removed", PAUSE_FILE);
+				prool_log("Shutdown pause: mud will not reboot until pause file is removed");
 				break;
 			}
 			default: {
 				log("Shutting down: the mud will reboot shortly");
+				prool_log("Shutting down: the mud will reboot shortly");
 				break;
 			}
 		}
@@ -1708,7 +1711,10 @@ void close_socket(descriptor_data *d) {
 			d->character->desc = NULL;
 		}
 		else {
-			syslog(SYS_LOGIN, 0, TRUE, "Losing player: %s.", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>");
+			if (GET_NAME(d->character))
+				syslog(SYS_LOGIN, 0, TRUE, "Losing player: %s.", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>");
+				snprintf(prool_buf,PROOL_LEN,"Losing player %s", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>");
+				prool_log(prool_buf);
 			free_char(d->character);
 		}
 	}
@@ -2208,7 +2214,8 @@ int new_descriptor(int s) {
 		if (!slow_ip) {
 			char buf[MAX_STRING_LENGTH];
 			snprintf(buf, sizeof(buf), "SYSERR: gethostbyaddr [%s]", inet_ntoa(peer.sin_addr));
-			perror(buf);
+			//perror(buf); // prool
+			prool_log(buf);
 		}
 
 		/* find the numeric site address */
@@ -2287,7 +2294,8 @@ ssize_t perform_socket_read(socket_t desc, char *read_point, size_t space_left) 
 
 	/* read() returned 0, meaning we got an EOF. */
 	if (ret == 0) {
-		log("WARNING: EOF on socket read (connection broken by peer)");
+		//log("WARNING: EOF on socket read (connection broken by peer)");
+		prool_log("WARNING: EOF on socket read (connection broken by peer)");
 		return (-1);
 	}
 
@@ -3394,6 +3402,7 @@ RETSIGTYPE checkpointing(int sig) {
 
 RETSIGTYPE hupsig(int sig) {
 	log("SYSERR: Received SIGHUP, SIGINT, or SIGTERM. Shutting down...");
+	prool_log("SYSERR: Received SIGHUP, SIGINT, or SIGTERM. Shutting down...");
 	reboot_control.type = SCMD_SHUTDOWN;
 	perform_reboot();
 	// exit(1);
@@ -3744,7 +3753,7 @@ void init_game(ush_int port) {
 		reboot_recover();
 
 	log("Entering game loop.");
-	log("MUD запустился"); // prool
+	log("Empire MUD запустился"); // prool
 	game_loop(mother_desc);
 
 	save_all_players();
@@ -3864,6 +3873,7 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 	log("Using %s as data directory.", dir);
+	prool_log("Using . as data directory ;-)");
 
 	if (scheck) {
 		boot_world();

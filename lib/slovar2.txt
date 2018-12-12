@@ -1,4 +1,5 @@
 and#и
+is#есть
 low#нижний
 southeast#юго-восток
 southwest#юго-запад
@@ -51,6 +52,7 @@ eyes#глаза
 looking#смотрящий
 crouched#притаился
 sidewinder#гремучая змея
+festering#гноящийся
 proolcomment#конец моих добавлений ====================================================================
 A-bomb#атомная
 a-going#в
@@ -24359,10 +24361,6 @@ lyricism#лиризм
 lyrics#лирические
 lyristn#играющий
 lysis#лизис
-M#Ms
-ma#от
-ma'am#от
-mac#от
 macabre#мрачный
 macaco#лемур
 macadam#щебень
