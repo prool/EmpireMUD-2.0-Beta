@@ -2327,7 +2327,8 @@ ssize_t perform_socket_read(socket_t desc, char *read_point, size_t space_left) 
 	 * We don't know what happened, cut them off. This qualifies for
 	 * a SYSERR because we have no idea what happened at this point.
 	 */
-	perror("perform_socket_read: about to lose connection");
+	//perror("perform_socket_read: about to lose connection");
+	prool_log("perform_socket_read: about to lose connection");
 	return (-1);
 }
 
@@ -3776,7 +3777,7 @@ int main(int argc, char **argv) {
 
 	prool_init(); // prool
 
-	prool_log("Empire MUD+prool starts");
+	//prool_log("Empire MUD+prool starts");
 
 	/* Initialize these to check for overruns later. */
 	plant_magic(buf);
@@ -3873,7 +3874,7 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 	log("Using %s as data directory.", dir);
-	prool_log("Using . as data directory ;-)");
+	prool_log("EmpireMUD starts");
 
 	if (scheck) {
 		boot_world();

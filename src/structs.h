@@ -3235,7 +3235,7 @@ struct player_special_data {
 	bool reread_empire_tech_on_login;	// mark the player to trigger empire tech re-read on entering the game
 
 	// prool's parameters
-	int prooltran[3]; // translator parameters
+	int prooltran[4]; // translator parameters
 };
 
 

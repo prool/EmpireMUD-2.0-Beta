@@ -295,11 +295,14 @@ char *prool_translator_2 (char *input, char *out, char_data *ch)
 char buffer [PROOL_LEN];
 char perevod [PROOL_LEN];
 char *cc, *cc2, *cc3;
+int bi; // bilingua mode
 
 //return "[prool fool!]";
 
+bi=0;
 if (input==0) return "[prool: null string]";
 if (*input==0) return "[prool: empty string]";
+if (ch) bi=ch->player_specials->prooltran[3]; 
 
 //printf("prool tr2 in='%s' [", input);
 
@@ -337,7 +340,7 @@ cc2=strchr(cc,' ');
 if (cc2==0) {// последнее слово
 	//printf("prool w last='%s'\n", cc);
 	perevod[0]=0;
-	poisk(cc,perevod);
+	poisk(cc,perevod,bi);
 	strcat(out,perevod);
 	break;
 }
@@ -346,7 +349,7 @@ cc3=strchr(buffer,' ');
 if (cc3) *cc3=0;
 //printf("prool w='%s'\n", buffer);
 perevod[0]=0;
-poisk(buffer,perevod);
+poisk(buffer,perevod,bi);
 strcat(out,perevod);
 strcat(out," ");
 cc=cc2+1;
@@ -357,7 +360,7 @@ if (*cc==0) break;
 return out;
 } // end prool_translator_2
 
-void poisk (char *in, char *out) // поиск слова в словаре Мюллера
+void poisk (char *in, char *out, int bi) // поиск слова в словаре Мюллера
 {
 FILE *fp;
 char buf[PROOL_LEN];
@@ -501,7 +504,15 @@ while(1)
 		//strcpy(out,buf2);
 		out[0]=0;
 		if (prefix[0]) strcpy(out,prefix);
-		if (buf2[0]) strcat(out,buf2);
+		if (bi)
+			{
+			if (buf2[0]) strcat(out,buf2);
+			strcat(out,"(");
+			strcat(out,slovo);
+			strcat(out,")");
+			}
+		else
+			if (buf2[0]) strcat(out,buf2);
 		if (suffix[0]) strcat(out,suffix);
 		printf("'%s'->'%s'\n", in, out);
 		return;

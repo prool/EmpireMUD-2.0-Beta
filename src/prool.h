@@ -20,7 +20,7 @@ char *deromanize(unsigned char *in, unsigned char *out);
 int romanize(unsigned char *in, unsigned char *out);
 int tran_s(char *input, char *output, char_data *ch);
 char *prool_translator_2 (char *input, char *out, char_data *ch);
-void poisk (char *in, char *out);
+void poisk (char *in, char *out, int bi);
 void prool_init(void);
 char *ptime(void);
 void prool_log(char *str);

@@ -1211,11 +1211,17 @@ void command_interpreter(char_data *ch, char *argument) {
 				if (*cc){if (*cc=='1') {ch->player_specials->prooltran[2]=1;}
 					else if (*cc=='0') {ch->player_specials->prooltran[2]=0;}
 					}
+				cc++;
+				if (*cc){if (*cc=='1') {ch->player_specials->prooltran[3]=1;}
+					else if (*cc=='0') {ch->player_specials->prooltran[3]=0;}
+					}
 				}
-			snprintf(prool_buf,PROOL_LEN,"\bprool translator=%i word tran.=%i string tran.=%i\n", 
+			snprintf(prool_buf,PROOL_LEN,"\bprool translator=%i word tran.=%i string tran.=%i bilingua=%i\n", 
 			ch->player_specials->prooltran[0],
 			ch->player_specials->prooltran[1],
-			ch->player_specials->prooltran[2]);
+			ch->player_specials->prooltran[2],
+			ch->player_specials->prooltran[3]
+			);
 			msg_to_char(ch, prool_buf);
 
 			return;
