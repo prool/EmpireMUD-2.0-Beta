@@ -544,7 +544,18 @@ if (!f)
 		}
 	}
 
-//printf("press any key\n");getchar();
+#define EMPIRE_NAME "lib/empires/index"
+
+f=fopen(EMPIRE_NAME,"r");
+
+if (!f)
+	{// file not found. create
+	f=fopen(EMPIRE_NAME,"w");
+	if (f)	{
+		fputs("$",f);
+		fclose(f);
+		}
+	}
 
 } // end of prool_init()
 
