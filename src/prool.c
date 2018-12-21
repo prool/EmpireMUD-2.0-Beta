@@ -486,7 +486,7 @@ for (i=0;i<l;i++) slovo[i]=tolower(slovo[i]);
 
 
 fp=fopen("slovar2.txt","r");
-if (fp==NULL) {printf("Can't open slovar2.txt\n"); return;}
+if (fp==NULL) {/*printf("Can't open slovar2.txt\n");*/ goto l1;}
 
 while(1)
 	{
