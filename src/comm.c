@@ -773,6 +773,7 @@ void perform_reboot(void) {
 	// If this is a reboot, restart the mud!
 	if (reboot_control.type == SCMD_REBOOT) {
 		log("Reboot: performing live reboot");
+		prool_log("Reboot: performing live reboot");
 		
 		chdir("..");
 				
@@ -3986,6 +3987,7 @@ void reboot_recover(void) {
 		}
 
 		sprintf(buf, "\r\nRestoring %s...\r\n", name);
+		prool_log(buf);
 		if (write_to_descriptor(desc, buf) < 0) {
 			close(desc);
 			continue;
