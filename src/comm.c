@@ -3709,7 +3709,7 @@ void game_loop(socket_t mother_desc) {
 
 		/* If we missed more than 30 seconds worth of pulses, just do 30 secs */
 		if (missed_pulses > (30 * PASSES_PER_SEC)) {
-			log("SYSERR: Missed %d seconds worth of pulses.", missed_pulses / PASSES_PER_SEC);
+			log("EmpireMUD SYSERR: Missed %d seconds worth of pulses.", missed_pulses / PASSES_PER_SEC);
 			missed_pulses = 30 * PASSES_PER_SEC;
 		}
 
