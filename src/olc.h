@@ -51,7 +51,8 @@
 #define OLC_FACTION  BIT(21)
 #define OLC_GENERIC  BIT(22)
 #define OLC_SHOP  BIT(23)
-#define NUM_OLC_TYPES  24
+#define OLC_PROGRESS  BIT(24)
+#define NUM_OLC_TYPES  25
 
 
 // olc command flags
@@ -81,11 +82,12 @@
 #define OLC_FLAG_NO_SKILLS  BIT(17)	// CAN edit skills
 #define OLC_FLAG_NO_VEHICLES  BIT(18)	// cannot edit vehicles
 #define OLC_FLAG_NO_MORPHS  BIT(19)	// cannot edit morphs
-#define OLC_FLAG_NO_QUESTS  BIT(19)	// cannot edit quests
-#define OLC_FLAG_NO_SOCIALS  BIT(20)	// cannot edit socials
-#define OLC_FLAG_NO_FACTIONS  BIT(21)	// cannot edit factions
-#define OLC_FLAG_NO_GENERICS  BIT(21)	// cannot edit generics
-#define OLC_FLAG_NO_SHOPS  BIT(22)	// cannot edit shops
+#define OLC_FLAG_NO_QUESTS  BIT(20)	// cannot edit quests
+#define OLC_FLAG_NO_SOCIALS  BIT(21)	// cannot edit socials
+#define OLC_FLAG_NO_FACTIONS  BIT(22)	// cannot edit factions
+#define OLC_FLAG_NO_GENERICS  BIT(23)	// cannot edit generics
+#define OLC_FLAG_NO_SHOPS  BIT(24)	// cannot edit shops
+#define OLC_FLAG_NO_PROGRESS  BIT(25)	// cannot edit progress
 
 
 // for trigger editing

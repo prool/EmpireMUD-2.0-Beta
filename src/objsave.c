@@ -603,6 +603,11 @@ void Crash_save_one_obj_to_file(FILE *fl, obj_data *obj, int location) {
 void extract_all_items(char_data *ch) {
 	int iter;
 	
+	// it's no longer safe to save the delay file -- saving it after extracting items results in losing all items
+	if (!IS_NPC(ch)) {
+		DONT_SAVE_DELAY(ch) = TRUE;
+	}
+	
 	for (iter = 0; iter < NUM_WEARS; ++iter) {
 		if (GET_EQ(ch, iter)) {
 			Crash_extract_objs(GET_EQ(ch, iter));
@@ -824,6 +829,7 @@ bool objpack_save_room(room_data *room) {
 * @param room_data *room The room.
 */
 void objpack_load_room(room_data *room) {
+	void adjust_vehicle_tech(vehicle_data *veh, bool add);
 	extern vehicle_data *unstore_vehicle_from_file(FILE *fl, any_vnum vnum);
 
 	obj_data *obj, *obj2, *cont_row[MAX_BAG_ROWS];
@@ -945,6 +951,7 @@ void objpack_load_room(room_data *room) {
 			
 			if ((veh = unstore_vehicle_from_file(fl, vnum))) {
 				vehicle_to_room(veh, room);
+				adjust_vehicle_tech(veh, TRUE);
 			}
 		}
 		else if (!strn_cmp(line, "Rent-time:", 10)) {
@@ -993,7 +1000,7 @@ void Crash_listrent(char_data *ch, char *name) {
 	msg_to_char(ch, "%s is using:\r\n", GET_NAME(victim));
 	for (iter = 0; iter < NUM_WEARS; ++iter) {
 		if (GET_EQ(victim, iter)) {
-			msg_to_char(ch, wear_data[iter].eq_prompt);
+			send_to_char(wear_data[iter].eq_prompt, ch);
 			show_obj_to_char(GET_EQ(victim, iter), ch, OBJ_DESC_EQUIPMENT);
 		}
 	}

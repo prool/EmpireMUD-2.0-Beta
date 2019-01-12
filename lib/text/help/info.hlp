@@ -6,11 +6,13 @@ These are the common map icons:
  <&u44&0>  ship or boat
 
  &g....&0  Plains              &g^^^^&0  Forest              &y/\/\&0  Mountain
- ....  Plains              YYYY  Forest              &y^^&r^&R^&0  Forest
+ ....  Plains              &W^^^^&0  Forest              &y^^&r^&R^&0  Forest
+ &g.w..&0  Copse               &g.ww.&0  Copse               &g..&t.&g.&0  Stump
  &Y....&0  Desert              &Y.&G^^&Y.&0  Desert Grove        &Y.&C~~&Y.&0  Oasis
  &y....&0  Desert              &y.&g^^&y.&0  Desert Grove        &y.&c~~&y.&0  Oasis
- &c~~~~&0  River               &b~~~~&0  Ocean               &c~~&g^&c~&0  Swamp
- &G^^^^&0  Jungle              &W,,,,&0  Arctic Tundra
+ &c~~~~&0  River               &b~~~~&0  Ocean               &a~~~~&0  Estuary/Shallows
+ &c~&t..&c~&0  Riverbank           &c~&g^&t.&c~&0  Riverbank           &c~~&g^&c~&0  Swamp/Marsh
+ &G^^^^&0  Jungle              &W,,,,&0  Arctic Tundra       &0
 
  --+-  Road                [--]  Building            \__/  Trench
  vvvv  Fence               vxxv  Gate                VVVV  Wall
@@ -36,6 +38,14 @@ Full multiplaying rules are found by typing POLICY.
 
 See also: ALTERNATE
 #
+ACHIEVEMENT ACHIEVEMENTS ACHIEVE ACHIEVED
+
+When your empire receives a notification that it has "Achieved" something, it
+means the empire has completed a progress goal. You can see completed goals
+on your elog, and can see current goals with the progress command.
+
+See also: ELOG, PROGRESS
+#
 ACTION ACTIONS "TIMED ACTIONS"
 
 EmpireMUD uses timed actions for most chores. These are things that happen
@@ -51,18 +61,37 @@ The following things will speed up various chores:
 - Faster chores (bonus): dig, gather, chop, build, dismantle, harvest, plant,
    mine, mint, repair, chip, excavate, pick, scrape, fillin, saw, quarry, tan,
    cook, smelt
+- Faster walking: run
 - Finder: dig, gather, pan, pick
 - Haste: dig, gather, chop, build, dismantle, harvest, plant, mine, repair,
    play (music), excavate, pick, scrape, fillin, saw, quarry
 - Shovel: dig
-- Weapon damage: chop, pick
+- Weapon damage: chop, mine
+- Superior tool: craft, forge
+- Progression goals: excavate, prospect
+- Certain buildings: sew (tailor), weaving (tailor), craft (clay at potter)
 
 See also: BONUS TRAITS, FINDER, SHOVEL, TOGGLE
 #
-APPROVAL AUTHORIZATION AUTHORIZED APPROVED
+AGGRO AGGR AGGRESSIVE
 
-If this MUD is configured to require player approval, you need to contact the
-game's staff to find out how to become approved. Or, check the MOTD or website.
+Some mobs are aggressive and will attack players on sight. The Majesty ability
+can reduce the chances of being attacked by aggro mobs.
+
+See also: MAJESTY
+#
+APPROVE UNAPPROVE AUTHORIZED AUTHORIZATION APPROVAL APPROVED "ANONYMOUS HOST" "PUBLIC HOST" "ANONYMOUS PUBLIC HOST" MORTAPPROVE
+
+Some MUDs require that characters are 'approved' before they are allowed to
+play the full game. Different EmpireMUDs configure this differently. In
+general, approval is required 
+
+By default, EmpireMUDs auto-approve all characters except ones that log in from
+anonymous public hosts. These are hosts that don't provide the game with your
+actual IP address. Characters that are created from anonymous hosts will not
+auto-approve, and approved characters cannot play from those hosts.
+
+If you require approval, contact any member of the immortal staff.
 
 Implementors: update this help file in: lib/text/help/info.hlp
 #
@@ -114,7 +143,7 @@ See also: DODGE, DPS, EMPIRE GREATNESS, SPEED, TO-HIT
 #
 AUTORECALL "AUTO-RECALL" "AUTO RECALL" "TOGGLE AUTORECALL"
 
-Usage:  toggle autorecall
+Usage:  toggle autorecall [on/off]
 
 If you turn on the autorecall toggle, your character will be sent home (or to
 a tower of souls, if you have no home) when you're logged off over an hour.
@@ -222,7 +251,7 @@ BOARDS READ WRITE RESPOND
 
 Usage:  look board
         write <headline>
-        read <number>
+        read <number | book>
         respond <number> <headline>
         remove <number>
 
@@ -230,6 +259,8 @@ Bulletin boards are the forum of inter-player communication on the MUD. There
 are different bulletin boards for different purposes -- for example, a
 standard mortal board and a board for immortals. Naturally, not all players
 may be allowed to read all types of boards.
+
+The 'read' command is also used to read books.
 
 Example:
 
@@ -239,7 +270,7 @@ Example:
   > read 6
   > remove 6
 
-See also: MAIL
+See also: BOOKS, MAIL
 #
 "BONUS TRAITS" BONUSES
 
@@ -256,8 +287,6 @@ Available traits:
  Extra daily bonus experience - 5 extra daily bonus experience points
  Larger inventory - Carry 5 more small items (or 2 more large items)
  Faster walking - Half the lag from normal walking
-
-See also: CHORES
 #
 BONUS-HEALING "BONUS HEALING" "HEALING ATTRIBUTE" "HEALING TRAIT"
 
@@ -295,7 +324,7 @@ See also: SCORE
 #
 "CAMPING FIRE" "COOKING FIRE" "CAMP FIRE"
 
-You can create a cooking fire by lighting a tree or log, using a flint set.
+You can create a cooking fire by lighting a tree or log, using fire sticks.
 This will let you cook food, brew potions, or craft pottery.
 
 You can also cook in a Kitchen, Alchemist, Potter, or Laboratory. If you have
@@ -309,9 +338,11 @@ The "chameleon" trait is the property of some buildings to be invisible at a
 distance. Instead of seeing the building and its owner's banner, you see only
 normal terrain.
 #
-CHANNEL CHANNELS SHOUT /OOC /NEWBIE /RECRUIT /TRADE
+CHANNEL CHANNELS SHOUT /OOC /NEWBIE /RECRUIT /TRADE /DEATH /GRATS /PROGRESS
 
-Usage:  shout <message>
+Usage:  say <message>
+        shout <message>
+        /ooc <message>
 
 See also HELP SLASH-CHANNELS for global channels like /ooc and /newbie.
 
@@ -326,6 +357,9 @@ Global channels:
 &j/newbie&0 - Newbie channel
 &R/recruit&0 - Empire recruitment channel
 &o/trade&0 - Global trade channel
+&V/grats&0 - Player accomplishments
+&T/death&0 - Player death announcements
+&g/progress&0 - Empire progress announcements
 &yshout&0 - an in-character channel limited to 50 map tiles distance
 &rtell&0 - this is a private channel that is generally considered OOC
 
@@ -348,6 +382,18 @@ Charisma is used for:
  - Many Stealth abilities.
 
 See also: ATTRIBUTES
+#
+CITIZEN CITIZENS
+
+Citizens will move into homes in your empire once you have unlocked the
+Thriving Community goal. Adding a bedroom to any building will also allow a
+citizen to move in. It takes up to an hour (real time) for a new citizen to
+move in.
+
+Eventually your empire can learn to put citizens to work. Citizens work chores
+within 20 tiles of their homes.
+
+See also: DESIGNATE, MARK, WORKFORCE
 #
 COIN COINS COINAGE CURRENCY GOLD
 
@@ -441,6 +487,41 @@ This command lists abilities and actions that you currently have cooling down.
 That is, things you can't use yet because the timer hasn't expired. Some
 abilities can only be used every so often, usually for reasons relating to
 game balance.
+#
+DAMAGE "DAMAGE TEXT" "DAMAGE MESSAGES" MAUL MASSACRE DECIMATE OBLITERATE ANNIHILATE MUTILATE SLAUGHTER ERADICATE **ERADICATE** LIQUIDATE **LIQUIDATE**
+
+Use the 'hit' command (or any attack ability) to initiate combat and deal
+damage to other creatures. Getting better gear will increase the a mount of
+damage you can deal. If you want to see more information about your hit rate
+and your total damage, check the 'meters'.
+
+When you deal damage with a weapon, you will see generated text based on the
+type of weapon and the amount of damage you dealt.
+
+Damage text:
+      0 damage: miss
+      1 damage: tickle
+    2-3 damage: barely
+   4-10 damage: [normal]
+  11-14 damage: hard
+  15-16 damage: very hard
+  17-20 damage: extremely hard
+  21-24 damage: maul
+  25-28 damage: massacre
+  29-32 damage: decimate
+  33-45 damage: OBLITERATE
+  46-60 damage: ANNIHILATE
+  61-75 damage: MUTILATE
+ 76-100 damage: SLAUGHTER
+101-125 damage: **ERADICATE**
+   126+ damage: **LIQUIDATE**
+
+Examples:
+  You slash the ship very hard!
+  You SLAUGHTER the pig with your chop!
+  You **LIQUIDATE** the ice sculpture with your fire!
+
+See also: CASTER DPS, DOT, HIT, MELEE DPS, METERS
 #
 DEATH DYING
 
@@ -581,7 +662,7 @@ Temperate crops (plains):
  &gxgxx&0  Grapes              &g::::&0  Hops                 &Tiiii&0  Oats
  &Y^o^^&0  Peaches             &G....&0  Peas                 &g^^&vo&g^&0  Plums
  &gnnnn&0  Potatoes            &gn&Rv&gnn&0  Strawberries         &Ro&g88&Ro&0  Tomatoes
- &Y;;;;&0  Wheat               &G@@@@&0  Lettuce
+ &Y;;;;&0  Wheat
 
 Arid crops (desert):
  &y.&g/&to&y.&0  Coconuts            &0::::&0  Cotton               &Y.&G^o&G.&0  Olives
@@ -592,11 +673,21 @@ Tropical crops (partially cleared jungle):
  &Gwwow&0  Watermelons
 
 River crops (plains near river):
- &yoooo&0  Gourds              &g,,,,&0  Rice
+ &yoooo&0  Squash              &g,,,,&0  Rice
+
+Newbie island crops:
+ &G@@@@&0  Lettuce             &goooo&0  Calabash gourds
 
 Most crops are used to make food and drink. Some, like cotton, have other uses.
 
 See also: CHOP, COOK, HARVEST, MILL, PICK, PLANT, TAVERN, WEAVE
+#
+"FLAT TERRAIN" FLAT-TERRAIN
+
+When a building says it must be built facing "flat-terrain", this refers to
+most regular land tiles, including plains, forest, desert, crops, and roads.
+
+Mountains, rivers, lakes, oceans, jungles, and swamps are not valid.
 #
 GREATNESS GRT
 
@@ -609,7 +700,7 @@ others perceive you.
 Greatness is used for:
  - Increasing the amount of territory your empire can control.
  - Increasing your empire's score and ranking.
- - Certain class abilities such as Noble Bearing.
+ - Certain synergy abilities such as Noble Bearing.
 
 Empires also have a Greatness rating, equal to the total Greatness of their
 members. However, if you have multiple alts (your other characters) in the same
@@ -629,27 +720,29 @@ See also: BASIC CRAFTS, FORGE
 HEALTH "HIT POINTS" HITPOINTS HP "HEALTH POINTS" "HEALTH POOL"
 
 The health pool is the amount of damage you can take before being knocked out.
-All players begin with 50 health points and starts to rise around level 80.
-Your base health at level 100 is based on your class.
+All players begin with 50 health points. Some abilities and items give you more
+health, and you can enchant your gear to get even more.
 
 If you're knocked out with 0 health, you will die without assistance.
 
-See also: CLASS, DEATH, ENDURANCE
+See also: DEATH, ENDURANCE
 #
 HISTORY "CHANNEL HISTORY" "CHAT HISTORY"
 
-You can see chat history for various channels with the following commands:
-  SAYHISTORY - say, oocsay, gsay, emote, socials
-  TELLHISTORY - tells and replies
-  EHISTORY - etalk
-  /HISTORY <channel> - slash-channels
+Usage:  history <say | tell | /<channel> | empire | rolls>
+        history immortal
 
-Immortals also have:
-  GHISTORY - godnet, wiznet
+This command will show any of the various channel histories. Each channel also
+has a separate command, such as tellhistory for tells, which is identical to
+typing 'history tells'.
+
+Group-says, emotes, and socials also appear on 'say' history.
 
 Your chat history only contains messages that you were connected and in-game
 for. History messages last for up to 24 hours, but only the last 20 messages
 are stored.
+
+See also: SAYHISTORY, TELLHISTORY, EHISTORY, GHISTORY, /HISTORY
 #
 HOSTILE ROGUE THIEF
 
@@ -728,7 +821,7 @@ Intelligence is used for:
 
 See also: ATTRIBUTES, CASTER, HEALER
 #
-LEVEL LEVELS "GEAR LEVELS" "SKILL LEVEL"
+LEVEL LEVELS "GEAR LEVELS" "SKILL LEVEL" "COMPOSITE LEVEL" "TOTAL LEVEL"
 
 Unlike many games, where your skills and equipment are based on your level,
 EmpireMUD does it backwards. Your level is based on your skills and gear.
@@ -746,12 +839,12 @@ Gear level: Your gear level raises your total level to 50 more than the average
    which make the item more powerful, such as superior and drop flags, raise
    the effective levels of items for this purpose.
 
-Composite level: This is the sum of your skill and gear levels. It is the
+Composite/total level: This is the sum of your skill and gear levels. It is the
    number used for scaling mobs to fight you. This is the level shown on your
    "score".
 
 Note: Until level 100, you must be in the same level range as an item
-   (1-50, 50-75, 75-100, or 101+) or higher to equip it. After level 100, you
+   (1-50, 50-75, 75-100, or 100+) or higher to equip it. After level 100, you
    can't use gear that's more than 25 levels above you (50 for BoP items). Your
    highest recent level is used, so you should still be able to remove all your
    gear and re-equip it.
@@ -771,10 +864,28 @@ Do not try to get out of a fight by breaking link. You will likely still die.
 MANA "MANA POINTS" "MANA POOL" "MAGIC POINTS"
 
 The mana pool is the amount of magical energy you can channel before you must
-stop to recover some. All players begin with 50 mana points and start to gain
-more around level 75. Your base mana at level 100 is based on your class.
+stop to recover some. All players begin with 50 mana points. Some abilities and
+gear give you a larger mana pool, and you can enchant gear to get even more.
 
-See also: ARCANE POWER, CLASS, GIFT OF NATURE, SOLAR POWER
+See also: ARCANE POWER, GIFT OF NATURE, SOLAR POWER
+#
+MAPSCAN "MAP SCAN"
+
+Usage:  mapscan <direction>
+
+This command allows you to find out which oceans and islands lie in a given
+direction from your current location. Use this ability if you are lost at sea
+(or on land).
+
+When used on land, mapscan will also show you the first vision-blocking terrain
+in that direction. Usually this is a mountain range.
+
+Mapscan only checks every 5 tiles up to 70, then every 10 tiles up to its
+maximum distance, which is based on the size of the world map.
+
+You must have Navigation to do this.
+
+See also: SCAN, LOOK
 #
 MOVE MOVES "MOVE POINTS" "MOVEMENT POINTS"
 
@@ -782,10 +893,10 @@ Move points are the basic energy pool for physical effort. It takes move points
 to walk around, and it takes move points to use many physical abilities like
 Kick or Shadowstep.
 
-All players begin with 100 move points and start to gain more around level 75.
-Your base move points at level 100 is based on your class. The easiest ways to
-get more move points at any level are to make a walking stick or a good pair of
-shoes.
+All players begin with 100 move points. The easiest ways to get more move
+points at any level are to make a walking stick or a good pair of shoes. You
+can also find certain abilities and gear that give more moves, and you can
+enchant gear to get even more.
 
 See also: FLY, RIDE, STAMINA, VIGOR
 #
@@ -802,7 +913,8 @@ EmpireMUD supports the following MSDP variables:
  CHARACTER_NAME - The character's full name
  SERVER_ID - The name of the MUD
  SNIPPET_VERSION - Version of KaVir's protocol snippet used for MSDP
-
+ 
+ GENDER - Current gender
  HEALTH - Current health
  HEALTH_MAX - Maximum health
  HEALTH_REGEN - Health regained per 5 seconds
@@ -850,8 +962,10 @@ EmpireMUD supports the following MSDP variables:
  EMPIRE_RANK - Character's rank in the empire
  EMPIRE_TERRITORY - Empire's current territory level
  EMPIRE_TERRITORY_MAX - Empire's maximum territory
- EMPIRE_TERRITORY_OUTSIDE - Empire's current out-of-city territory
- EMPIRE_TERRITORY_OUTSIDE_MAX - Empire's maximum out-of-city territory
+ EMPIRE_TERRITORY_OUTSIDE - Empire's current outskirts territory
+ EMPIRE_TERRITORY_OUTSIDE_MAX - Empire's maximum outskirts territory
+ EMPIRE_TERRITORY_FRONTIER - Empire's current frontier territory
+ EMPIRE_TERRITORY_FRONTIER_MAX - Empire's maximum frontier territory
  EMPIRE_WEALTH - Empire's total wealth
  EMPIRE_SCORE - Empire's total score
 
@@ -932,6 +1046,7 @@ player.
 You may attack:
 - Members of another empire if your empire is at war with theirs
 - People who are not members of your empire, but are in your territory
+- People who are stealing from your empire
 
 You may NOT attack:
 - Players with less than 1 day of play time, nor can they
@@ -1015,6 +1130,18 @@ versions of EmpireMUD.
 
 See also: RESIST-MAGICAL, SCORE
 #
+"ROUGH TERRAIN" "ROUGH TILE" ROUGH
+
+Areas of the map that are particularly hard to cross are referred to as 'rough
+terrain'. This includes mountains and the arctic tundra. Because of this
+difficulty, the game requires you to type 'climb <direction>' to move onto the
+first rough tile.
+
+Moving from one tile with rough terrain to another requires the Mountain
+Climbing ability, or flight.
+
+See also: CLIMB, MOUNTAIN CLIMBING
+#
 SCALING "MOB SCALING" "SCALING MOBS"
 
 EmpireMUD uses a system of mob-scaling where mobs are procedurally adjusted
@@ -1036,19 +1163,26 @@ SCAN
 
 Usage:  scan <direction>
         scan <tile/vehicle name>
+        scan <claimed/unclaimed/foreign>
 
 This command shows you the same information as the screen-reader map display,
 but in only one direction. The distance you see on a scan is based on your
 mapsize.
 
 You can also scan for nearby tiles matching a given keyword, such as a crop,
-building, or vehicle name. It will scan a distance up to your mapsize.
+building, or vehicle name. It will scan a distance up to your mapsize. Vehicles
+can only be seen with this command if they are large enough to show up on the
+map.
+
+You can get extra information if you have the 'political' or 'informative'
+toggles turned on. Scanning for 'foreign' tiles will show ones owned by empires
+other than your own.
 
 Example:
  > scan southwest
  southwest: 3x River, Swamp, Overgrown Forest, Road, Overgrown Forest, 2x Jungle
 
-See also: MAPSIZE, SCREEN-READERS
+See also: MAPSCAN, MAPSIZE, SCREEN-READERS, INFORMATIVE, POLITICAL
 #
 "SHIP ROOMS" "SHIP DESIGNATE" "DESIGNATE ON SHIPS"
 
@@ -1116,12 +1250,15 @@ Example:
   > /kickflip Hey guys!
   > /hist kickflip
 
+Immortals may also:  /recase <channel> <new capitalization>
+                     /echo <channel> <text>  (this requires the GECHO grant)
+
 See also: CHANNELS
 #
 SPEAR
 
 A spear is the basic tool for fishing. You can make a spear by crafting a
-handle, chipping a rock until it is a handaxe, then again until it is a spear-
+handle, chipping a flint until it is a handaxe, then again until it is a spear-
 head, and then crafting the spear from the spearhead and the handle.
 
 See also: CRAFT, CHIP, FISH
@@ -1142,6 +1279,17 @@ Strength is used for:
  - Wearing heavy armor (tank armor sometimes has -STRENGTH).
 
 See also: ATTRIBUTES, MELEE DPS, CHOP, MINE
+#
+STUMPS COPSE COPPICE COPPICING
+
+When you chop down a forest, you are usually left with a field of stumps. If
+left alone, they will regrow into a copse, and can be chopped down for
+saplings. Given time, they will regrow into full-size trees again.
+
+You can build without removing stumps, but most other uses will require that
+you burn them. Try 'burn stumps' to remove them.
+
+See also: BURN, LIGHTER
 #
 STUN STUNNED "STUN IMMUNITY"
 
@@ -1211,6 +1359,12 @@ lead them, but can store far more than you can carry alone.
 
 See also: WOODWORKING, RIDE, HARNESS, PUT, GET
 #
+UNSTUCK
+
+You gain the 'unstuck' effect if you're inside a building and try to leave it,
+but the entrance is water and you have no ability to swim or fly. This short
+effect will get you past the water.
+#
 VEHICLE VEH
 
 A vehicle (sometimes abbreviated "veh", especially in the code) is a type of
@@ -1232,6 +1386,14 @@ available when you type "look", but this version shows only the room name and
 coordinates (if applicable).
 
 See also: LOOK
+#
+WHOAMI "WHO AM I"
+
+Usage:  whoami
+
+This simple command tells you which character you're playing.
+
+See also: ALTERNATE
 #
 WITS WIT
 

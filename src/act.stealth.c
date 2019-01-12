@@ -41,8 +41,8 @@ extern bool is_fight_ally(char_data *ch, char_data *frenemy);	// fight.c
 void scale_item_to_level(obj_data *obj, int level);
 
 // locals
-int apply_poison(char_data *ch, char_data *vict, int type);
-obj_data *find_poison_by_type(obj_data *list, int type);
+int apply_poison(char_data *ch, char_data *vict);
+obj_data *find_poison_by_vnum(obj_data *list, any_vnum vnum);
 void trigger_distrust_from_stealth(char_data *ch, empire_data *emp);
 
 
@@ -97,7 +97,7 @@ bool can_infiltrate(char_data *ch, empire_data *emp) {
 		return FALSE;
 	}
 	
-	if (GET_RANK(ch) < EMPIRE_PRIV(chemp, PRIV_STEALTH) && (!pol || !IS_SET(pol->type, DIPL_WAR))) {
+	if (GET_RANK(ch) < EMPIRE_PRIV(chemp, PRIV_STEALTH) && (!pol || !IS_SET(pol->type, DIPL_WAR | DIPL_THIEVERY))) {
 		msg_to_char(ch, "You don't have permission from your empire to infiltrate others. Are you trying to start a war?\r\n");
 		return FALSE;
 	}
@@ -145,6 +145,11 @@ bool can_steal(char_data *ch, empire_data *emp) {
 		return FALSE;
 	}
 	
+	if (!chemp || !has_relationship(chemp, emp, DIPL_WAR | DIPL_THIEVERY)) {
+		msg_to_char(ch, "You need a thievery permit (using the diplomacy command) to steal from that empire.\r\n");
+		return FALSE;
+	}
+	
 	if (EMPIRE_IMM_ONLY(emp)) {
 		msg_to_char(ch, "You can't steal from immortal empires.\r\n");
 		return FALSE;
@@ -161,7 +166,7 @@ bool can_steal(char_data *ch, empire_data *emp) {
 		return FALSE;
 	}
 	
-	if (count_members_online(emp) == 0) {
+	if (count_members_online(emp) == 0 && !has_relationship(chemp, emp, DIPL_WAR | DIPL_THIEVERY)) {
 		msg_to_char(ch, "There are no members of %s online.\r\n", EMPIRE_NAME(emp));
 		return FALSE;
 	}
@@ -178,7 +183,7 @@ bool can_steal(char_data *ch, empire_data *emp) {
 		return FALSE;
 	}
 	
-	if (GET_RANK(ch) < EMPIRE_PRIV(chemp, PRIV_STEALTH) && (!pol || !IS_SET(pol->type, DIPL_WAR))) {
+	if (GET_RANK(ch) < EMPIRE_PRIV(chemp, PRIV_STEALTH) && (!pol || !IS_SET(pol->type, DIPL_WAR | DIPL_THIEVERY))) {
 		msg_to_char(ch, "You don't have permission from your empire to steal from others. Are you trying to start a war?\r\n");
 		return FALSE;
 	}
@@ -196,7 +201,7 @@ INTERACTION_FUNC(pickpocket_interact) {
 		obj = read_object(interaction->vnum, TRUE);
 		scale_item_to_level(obj, get_approximate_level(inter_mob));
 		obj_to_char(obj, ch);
-		act("You find $p!", FALSE, ch, obj, NULL, TO_CHAR);
+		act("You find $p!", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
 		load_otrigger(obj);
 	}
 		
@@ -244,6 +249,7 @@ void perform_escape(char_data *ch) {
 		greet_mtrigger(ch, NO_DIR);
 		greet_memory_mtrigger(ch);
 		greet_vtrigger(ch, NO_DIR);
+		msdp_update_room(ch);
 		
 		act("$n dives out a window and lands before you!", TRUE, ch, NULL, NULL, TO_ROOM);
 	}
@@ -344,125 +350,22 @@ bool valid_unseen_passing(room_data *room) {
  //////////////////////////////////////////////////////////////////////////////
 //// POISONS /////////////////////////////////////////////////////////////////
 
-#define POISONS_LINE_BREAK  { "*", NO_ABIL,  0, 0, 0, 0, 0, 0, 0, 0,	0, FALSE }
-
-// master potion data
-const struct poison_data_type poison_data[] = {
-
-	// WARNING: DO NOT CHANGE THE ORDER, ONLY ADD TO THE END
-	// The position in this array corresponds to obj val 0
-
-	{	// 0
-		"other", PTECH_POISON,
-		0, 0, 0, 0,	// no affect
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	},
-
-	{	// 1
-		"weakness", PTECH_POISON,
-		ATYPE_POISON, APPLY_HEALTH, -25, 0,
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	},
-
-	{	// 2
-		"exhaustion", PTECH_POISON,
-		ATYPE_POISON, APPLY_MOVE, -25, 0,
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	},
-
-	{	// 3
-		"braindrain", PTECH_POISON,
-		ATYPE_POISON, APPLY_MANA, -25, 0,
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	},
-	
-	POISONS_LINE_BREAK,	// 4
-	
-	{	// 5
-		"strength", PTECH_POISON,
-		ATYPE_POISON, APPLY_STRENGTH, -1, 0,
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	},
-	
-	{	// 6
-		"dexterity", PTECH_POISON,
-		ATYPE_POISON, APPLY_DEXTERITY, -1, 0,
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	},
-	
-	{	// 7
-		"charisma", PTECH_POISON,
-		ATYPE_POISON, APPLY_CHARISMA, -1, 0,
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	},
-	
-	{	// 8
-		"intelligence", PTECH_POISON,
-		ATYPE_POISON, APPLY_INTELLIGENCE, -1, 0,
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	},
-	
-	{	// 9
-		"wits", PTECH_POISON,
-		ATYPE_POISON, APPLY_WITS, -2, 0,
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	},
-	
-	POISONS_LINE_BREAK,	// 10
-	
-	{	// 11
-		"pain", PTECH_POISON_UPGRADE,
-		0, 0, 0, 0,
-		ATYPE_POISON, 5, DAM_POISON, 2, 5,	// no dot
-		TRUE	// likely doubled due to deadly poisons
-	},
-	
-	{	// 12
-		"slow", PTECH_POISON_UPGRADE,
-		ATYPE_POISON, APPLY_NONE, 0, AFF_SLOW,
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	},
-	
-	{	// 13
-		"heartstop", PTECH_POISON_UPGRADE,
-		ATYPE_POISON, APPLY_NONE, 0, AFF_CANT_SPEND_BLOOD,
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	},
-
-	// END
-	{
-		"\n", NO_ABIL,
-		0, 0, 0, 0,
-		0, 0, 0, 0, 0,	// no dot
-		FALSE
-	}
-};
-
-
 /**
-* finds a matching poison object in an object list
+* finds a matching poison object in an object list, preferring the one with the
+* fewest charges.
 *
 * @param obj_data *list ch->carrying, e.g.
-* @param int type any poison_data pos
+* @param any_vnum vnum The poison vnum to look for.
 * @return obj_data *the poison, if found
 */
-obj_data *find_poison_by_type(obj_data *list, int type) {
+obj_data *find_poison_by_vnum(obj_data *list, any_vnum vnum) {
 	obj_data *obj, *found = NULL;
 	
-	for (obj = list; obj && !found; obj = obj->next_content) {
-		if (GET_POISON_TYPE(obj) == type) {
-			found = obj;
+	LL_FOREACH2(list, obj, next_content) {
+		if (IS_POISON(obj) && GET_OBJ_VNUM(obj) == vnum) {
+			if (!found || GET_POISON_CHARGES(obj) < GET_POISON_CHARGES(found)) {
+				found = obj;
+			}
 		}
 	}
 	
@@ -474,41 +377,35 @@ obj_data *find_poison_by_type(obj_data *list, int type) {
 * Apply the actual effects of a poison. This also makes sure there's some
 * available, and manages the object.
 *
-* @param char_data *ch the person being poisoned
-* @param int type poison_data[] pos
+* @param char_data *ch the person doing the poisoning
+* @param char_data *vict the person being poisoned
 * @return -1 if poison killed the person, 0 if no hit at all, >0 if hit
 */
-int apply_poison(char_data *ch, char_data *vict, int type) {
-	obj_data *obj;
+int apply_poison(char_data *ch, char_data *vict) {
+	int aff_type = ATYPE_POISON, result = 0;
 	struct affected_type *af;
+	struct obj_apply *apply;
 	bool messaged = FALSE;
-	int result = 0;
+	obj_data *obj;
+	double mod;
 	
-	if (IS_NPC(ch) || type < 0) {
-		return 0;
-	}
-	
-	// has poison?
-	if (!(obj = find_poison_by_type(ch->carrying, type))) {
-		return 0;
-	}
-	
-	// ability check
-	if (poison_data[type].tech != NOTHING && !has_player_tech(ch, poison_data[type].tech)) {
-		return 0;
-	}
-
-	// stack check?
-	if (poison_data[type].atype > 0 && !poison_data[type].allow_stack && affected_by_spell_and_apply(vict, poison_data[type].atype, poison_data[type].apply)) {
+	if (IS_NPC(ch) || IS_GOD(vict) || IS_IMMORTAL(vict)) {
 		return 0;
 	}
 	
 	if (AFF_FLAGGED(vict, AFF_IMMUNE_STEALTH)) {
-		return 0;
+		return 0;	// immune to stealth debuffs
 	}
 	
-	if (IS_GOD(vict) || IS_IMMORTAL(vict)) {
-		return 0;
+	if (!(obj = find_poison_by_vnum(ch->carrying, USING_POISON(ch)))) {
+		return 0;	// out of poison
+	}
+	
+	// update aff type
+	aff_type = GET_POISON_AFFECT(obj) != NOTHING ? GET_POISON_AFFECT(obj) : ATYPE_POTION;
+
+	if (affected_by_spell_from_caster(vict, aff_type, ch)) {
+		return 0;	// stack check: don't waste charges
 	}
 	
 	// GAIN SKILL NOW -- it at least attempts an application
@@ -522,8 +419,9 @@ int apply_poison(char_data *ch, char_data *vict, int type) {
 		return 0;
 	}
 	
-	// applied -- charge a charge
+	// applied -- charge a charge (can no longer be stored)
 	GET_OBJ_VAL(obj, VAL_POISON_CHARGES) -= 1;
+	SET_BIT(GET_OBJ_EXTRA(obj), OBJ_NO_STORE);
 	
 	// attempt immunity/resist
 	if (has_player_tech(vict, PTECH_NO_POISON)) {
@@ -547,33 +445,43 @@ int apply_poison(char_data *ch, char_data *vict, int type) {
 			return 0;
 		}
 	}
-
-	// atype
-	if (poison_data[type].atype > 0) {
-		
-		af = create_aff(poison_data[type].atype, 2 MUD_HOURS, poison_data[type].apply, poison_data[type].mod * (has_player_tech(ch, PTECH_POISON_UPGRADE) ? 2 : 1), poison_data[type].aff, ch);
-		affect_join(vict, af, poison_data[type].allow_stack ? (AVG_DURATION|ADD_MODIFIER) : 0);
-		
-		if (!messaged) {
-			act("You feel ill as you are poisoned!", FALSE, vict, NULL, NULL, TO_CHAR);
-			act("$n looks ill as $e is poisoned!", FALSE, vict, NULL, NULL, TO_ROOM);
-			messaged = TRUE;
-		}
-		
-		result = 1;
+	
+	// OK GO:
+	
+	mod = has_player_tech(ch, PTECH_POISON_UPGRADE) ? 1.5 : 1.0;
+	
+	// ensure scaled
+	if (OBJ_FLAGGED(obj, OBJ_SCALABLE)) {
+		scale_item_to_level(obj, 1);	// minimum level
 	}
 	
-	// dot
-	if (poison_data[type].dot_type > 0) {
-		apply_dot_effect(vict, poison_data[type].dot_type, poison_data[type].dot_duration, poison_data[type].dot_damage_type, poison_data[type].dot_damage * (has_player_tech(ch, PTECH_POISON_UPGRADE) ? 2 : 1), poison_data[type].dot_max_stacks, ch);
+	// remove any old buffs (if adding a new one)
+	if (GET_OBJ_AFF_FLAGS(obj) || GET_OBJ_APPLIES(obj)) {
+		affect_from_char_by_caster(vict, aff_type, ch, FALSE);
+	}
+	
+	if (GET_OBJ_AFF_FLAGS(obj)) {
+		af = create_flag_aff(aff_type, 1 MUD_HOURS, GET_OBJ_AFF_FLAGS(obj), ch);
+		affect_to_char(vict, af);
+		free(af);
 		
 		if (!messaged) {
 			act("You feel ill as you are poisoned!", FALSE, vict, NULL, NULL, TO_CHAR);
 			act("$n looks ill as $e is poisoned!", FALSE, vict, NULL, NULL, TO_ROOM);
 			messaged = TRUE;
 		}
+	}
+	
+	LL_FOREACH(GET_OBJ_APPLIES(obj), apply) {
+		af = create_mod_aff(aff_type, 1 MUD_HOURS, apply->location, round(apply->modifier * mod), ch);
+		affect_to_char(vict, af);
+		free(af);
 		
-		result = 1;
+		if (!messaged) {
+			act("You feel ill as you are poisoned!", FALSE, vict, NULL, NULL, TO_CHAR);
+			act("$n looks ill as $e is poisoned!", FALSE, vict, NULL, NULL, TO_ROOM);
+			messaged = TRUE;
+		}
 	}
 	
 	// mark result if there's a consume trigger
@@ -592,6 +500,7 @@ int apply_poison(char_data *ch, char_data *vict, int type) {
 		}
 	}
 	
+	// either way
 	return result;
 }
 
@@ -603,21 +512,17 @@ int apply_poison(char_data *ch, char_data *vict, int type) {
 * @param obj_data *obj the poison
 */
 void use_poison(char_data *ch, obj_data *obj) {
-	int type = GET_POISON_TYPE(obj);
-	
-	if (!IS_POISON(obj)) {
+	if (!has_player_tech(ch, PTECH_POISON)) {
+		msg_to_char(ch, "You don't have the correct ability to use poisons.\r\n");
+	}
+	else if (!IS_POISON(obj)) {
 		// ??? shouldn't ever get here
 		act("$p isn't even a poison.", FALSE, ch, obj, NULL, TO_CHAR);
-		return;
 	}
-	
-	if (poison_data[type].tech != NOTHING && !has_player_tech(ch, poison_data[type].tech)) {
-		msg_to_char(ch, "You don't have the correct ability to use that poison.\r\n");
-		return;
+	else {
+		USING_POISON(ch) = GET_OBJ_VNUM(obj);
+		act("You are now using $p as your poison.", FALSE, ch, obj, NULL, TO_CHAR);
 	}
-	
-	USING_POISON(ch) = type;
-	act("You are now using $p as your poison.", FALSE, ch, obj, NULL, TO_CHAR);
 }
 
 
@@ -689,7 +594,7 @@ ACMD(do_backstab) {
 
 			if (damage(ch, vict, dam, ATTACK_BACKSTAB, DAM_PHYSICAL) > 0) {
 				if (has_player_tech(ch, PTECH_POISON)) {
-					if (!number(0, 1) && apply_poison(ch, vict, USING_POISON(ch)) < 0) {
+					if (!number(0, 1) && apply_poison(ch, vict) < 0) {
 						// dedz
 					}
 				}
@@ -942,7 +847,7 @@ ACMD(do_hide) {
 	command_lag(ch, WAIT_ABILITY);
 
 	for (c = ROOM_PEOPLE(IN_ROOM(ch)); c; c = c->next_in_room) {
-		if (c != ch && CAN_SEE(c, ch) && (!IS_NPC(c) || !MOB_FLAGGED(c, MOB_ANIMAL)) && !skill_check(ch, ABIL_HIDE, DIFF_HARD) && !player_tech_skill_check(ch, PTECH_HIDE_UPGRADE, DIFF_MEDIUM)) {
+		if (c != ch && (c->master != ch || !AFF_FLAGGED(c, AFF_CHARM)) && CAN_SEE(c, ch) && (!IS_NPC(c) || !MOB_FLAGGED(c, MOB_ANIMAL)) && !skill_check(ch, ABIL_HIDE, DIFF_HARD) && !player_tech_skill_check(ch, PTECH_HIDE_UPGRADE, DIFF_MEDIUM)) {
 			msg_to_char(ch, "You can't hide with somebody watching!\r\n");
 			return;
 		}
@@ -1053,9 +958,6 @@ ACMD(do_infiltrate) {
 		gain_player_tech_exp(ch, PTECH_INFILTRATE_UPGRADE, 50);
 		
 		if (!has_player_tech(ch, PTECH_INFILTRATE_UPGRADE) && !player_tech_skill_check(ch, PTECH_INFILTRATE, (emp && EMPIRE_HAS_TECH(emp, TECH_LOCKS)) ? DIFF_RARELY : DIFF_HARD)) {
-			if (emp && EMPIRE_HAS_TECH(emp, TECH_LOCKS)) {
-				empire_skillup(emp, ABIL_LOCKS, 10);
-			}
 			msg_to_char(ch, "You fail.\r\n");
 		}
 		else {
@@ -1072,6 +974,7 @@ ACMD(do_infiltrate) {
 			greet_mtrigger(ch, NO_DIR);
 			greet_memory_mtrigger(ch);
 			greet_vtrigger(ch, NO_DIR);
+			msdp_update_room(ch);	// once we're sure we're staying
 		}
 
 		// chance to log
@@ -1138,7 +1041,7 @@ ACMD(do_jab) {
 			act("$n moves in close to jab $N with $p...", FALSE, ch, GET_EQ(ch, WEAR_WIELD), vict, TO_NOTVICT);
 		}
 		
-		if (hit(ch, vict, GET_EQ(ch, WEAR_WIELD), FALSE) > 0) {
+		if (hit(ch, vict, GET_EQ(ch, WEAR_WIELD), FALSE) > 0 && !IS_DEAD(vict)) {
 			apply_dot_effect(vict, ATYPE_JABBED, 3, DAM_PHYSICAL, get_ability_level(ch, ABIL_JAB) / 24, 2, ch);
 			
 			if (has_ability(ch, ABIL_STAGGER_JAB) && !AFF_FLAGGED(vict, AFF_IMMUNE_STEALTH) && check_solo_role(ch)) {
@@ -1196,15 +1099,15 @@ ACMD(do_pickpocket) {
 		send_to_char("Come on now, that's rather stupid!\r\n", ch);
 	}
 	else if (!IS_NPC(vict)) {
-		msg_to_char(ch, "You may only pickpocket npcs.\r\n");
+		msg_to_char(ch, "You may only pickpocket NPCs.\r\n");
 	}
 	else if ((ch_emp = GET_LOYALTY(ch)) && (vict_emp = GET_LOYALTY(vict)) && has_relationship(ch_emp, vict_emp, DIPL_ALLIED | DIPL_NONAGGR)) {
 		msg_to_char(ch, "You can't pickpocket mobs you are allied or have a non-aggression pact with.\r\n");
 	}
-	else if (ch_emp && vict_emp && GET_RANK(ch) < EMPIRE_PRIV(ch_emp, PRIV_STEALTH) && !has_relationship(ch_emp, vict_emp, DIPL_WAR)) {
+	else if (ch_emp && vict_emp && GET_RANK(ch) < EMPIRE_PRIV(ch_emp, PRIV_STEALTH) && !has_relationship(ch_emp, vict_emp, DIPL_WAR | DIPL_THIEVERY)) {
 		msg_to_char(ch, "You don't have permission to steal that -- you could start a war!\r\n");
 	}
-	else if (ch_emp && vict_emp && !PRF_FLAGGED(ch, PRF_STEALTHABLE) && !has_relationship(ch_emp, vict_emp, DIPL_WAR)) {
+	else if (ch_emp && vict_emp && !PRF_FLAGGED(ch, PRF_STEALTHABLE) && !has_relationship(ch_emp, vict_emp, DIPL_WAR | DIPL_THIEVERY)) {
 		msg_to_char(ch, "You cannot pickpocket that target because your 'stealthable' toggle is off.\r\n");
 	}
 	else if (FIGHTING(vict)) {
@@ -1213,14 +1116,14 @@ ACMD(do_pickpocket) {
 	else if (run_ability_triggers_by_player_tech(ch, PTECH_PICKPOCKET, vict, NULL)) {
 		return;
 	}
-	else if (MOB_FLAGGED(vict, MOB_PICKPOCKETED | MOB_NO_LOOT) || (AFF_FLAGGED(vict, AFF_NO_ATTACK) && !!has_interaction(vict->interactions, INTERACT_PICKPOCKET))) {
+	else if (MOB_FLAGGED(vict, MOB_PICKPOCKETED | MOB_NO_LOOT) || (AFF_FLAGGED(vict, AFF_NO_ATTACK) && !has_interaction(vict->interactions, INTERACT_PICKPOCKET))) {
 		act("$E doesn't appear to be carrying anything in $S pockets.", FALSE, ch, NULL, vict, TO_CHAR);
 	}
 	else {
 		check_scaling(vict, ch);
 
 		// some random coins (negative coins are not given)
-		if (MOB_FLAGGED(vict, MOB_HUMAN) && (!GET_LOYALTY(vict) || GET_LOYALTY(vict) == GET_LOYALTY(ch) || char_has_relationship(ch, vict, DIPL_WAR))) {
+		if (MOB_FLAGGED(vict, MOB_HUMAN) && (!GET_LOYALTY(vict) || GET_LOYALTY(vict) == GET_LOYALTY(ch) || char_has_relationship(ch, vict, DIPL_WAR | DIPL_THIEVERY))) {
 			coins = mob_coins(vict);
 		}
 		else {
@@ -1245,16 +1148,20 @@ ACMD(do_pickpocket) {
 			
 			// messaging
 			if (coins > 0) {
-				msg_to_char(ch, "You find %s!\r\n", money_amount(vict_emp, coins));
+				if (ch->desc) {
+					stack_msg_to_desc(ch->desc, "You find %s!\r\n", money_amount(vict_emp, coins));
+				}
 			}
 			else if (!any) {
-				msg_to_char(ch, "You find nothing of any use.\r\n");
+				if (ch->desc) {
+					stack_msg_to_desc(ch->desc, "You find nothing of any use.\r\n");
+				}
 			}
 		}
 		else {
 			// oops... put these back
 			if (coins > 0 && GET_LOYALTY(vict)) {
-				EMPIRE_COINS(GET_LOYALTY(vict)) += coins;
+				increase_empire_coins(GET_LOYALTY(vict), GET_LOYALTY(vict), coins);
 			}
 			
 			if (!AWAKE(vict)) {
@@ -1286,7 +1193,6 @@ ACMD(do_pickpocket) {
 ACMD(do_prick) {
 	char_data *vict = FIGHTING(ch);
 	int cost = 10;
-	int type = IS_NPC(ch) ? NOTHING : USING_POISON(ch);
 	
 	one_argument(argument, arg);
 
@@ -1305,7 +1211,7 @@ ACMD(do_prick) {
 	else if (!can_fight(ch, vict)) {
 		act("You can't attack $N!", FALSE, ch, 0, vict, TO_CHAR);
 	}
-	else if (!find_poison_by_type(ch->carrying, type)) {
+	else if (!find_poison_by_vnum(ch->carrying, USING_POISON(ch))) {
 		msg_to_char(ch, "You seem to be out of poison.\r\n");
 	}
 	else if (GET_MOVE(ch) < cost) {
@@ -1329,7 +1235,7 @@ ACMD(do_prick) {
 		act("$n pricks $N with poison!", TRUE, ch, NULL, vict, TO_NOTVICT);
 
 		// possibly fatal
-		if (apply_poison(ch, vict, type) == 0) {
+		if (apply_poison(ch, vict) == 0) {
 			msg_to_char(ch, "It seems to have no effect.\r\n");
 		}
 		
@@ -1573,7 +1479,7 @@ ACMD(do_shadowstep) {
 		was_in = IN_ROOM(ch);
 		infil = !can_use_room(ch, IN_ROOM(vict), GUESTS_ALLOWED);
 		
-		if (infil && emp && GET_LOYALTY(ch) && !has_relationship(GET_LOYALTY(ch), emp, DIPL_WAR)) {
+		if (infil && emp && GET_LOYALTY(ch) && !has_relationship(GET_LOYALTY(ch), emp, DIPL_WAR | DIPL_THIEVERY)) {
 			if (!PRF_FLAGGED(ch, PRF_STEALTHABLE)) {
 				msg_to_char(ch, "You cannot shadowstep there while your 'stealthable' toggle is off.\r\n");
 				return;
@@ -1605,6 +1511,7 @@ ACMD(do_shadowstep) {
 			greet_mtrigger(ch, NO_DIR);
 			greet_memory_mtrigger(ch);
 			greet_vtrigger(ch, NO_DIR);
+			msdp_update_room(ch);	// once we're sure we're staying
 		}
 
 		// chance to log
@@ -1630,7 +1537,7 @@ ACMD(do_shadowstep) {
 
 /* Sneak is now sneak <direction>.  Note that entire parties may not sneak together. */
 ACMD(do_sneak) {
-	extern int perform_move(char_data *ch, int dir, int need_specials_check, byte mode);
+	extern int perform_move(char_data *ch, int dir, bitvector_t flags);
 	
 	int dir;
 	bool sneaking = FALSE;
@@ -1675,7 +1582,7 @@ ACMD(do_sneak) {
 		REMOVE_BIT(AFF_FLAGS(ch), AFF_HIDE);
 	}
 
-	if (perform_move(ch, dir, FALSE, 0)) {	// should be MOVE_NORMAL
+	if (perform_move(ch, dir, NOBITS)) {
 		gain_ability_exp(ch, ABIL_SNEAK, 5);
 	}
 	
@@ -1694,6 +1601,7 @@ ACMD(do_steal) {
 	
 	struct empire_storage_data *store, *next_store;
 	empire_data *emp = ROOM_OWNER(HOME_ROOM(IN_ROOM(ch)));
+	struct empire_island *isle;
 	obj_data *proto;
 	bool found = FALSE;
 	
@@ -1714,6 +1622,9 @@ ACMD(do_steal) {
 	else if (!emp) {
 		msg_to_char(ch, "Nothing is stored here that you can steal.\r\n");
 	}
+	else if (GET_ISLAND_ID(IN_ROOM(ch)) == NO_ISLAND || !(isle = get_empire_island(emp, GET_ISLAND_ID(IN_ROOM(ch))))) {
+		msg_to_char(ch, "You can't steal anything here.\r\n");
+	}
 	else if (get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_CEDED)) {
 		msg_to_char(ch, "You can't steal from a building which was ceded to an empire but never used by that empire.\r\n");
 	}
@@ -1723,17 +1634,14 @@ ACMD(do_steal) {
 		}
 	}
 	else {
-		for (store = EMPIRE_STORAGE(emp); store && !found; store = next_store) {
-			next_store = store->next;
-			
-			// island check
-			if (store->island != GET_ISLAND_ID(IN_ROOM(ch))) {
-				continue;
+		HASH_ITER(hh, isle->store, store, next_store) {
+			if (found) {
+				break;
 			}
 			
-			proto = obj_proto(store->vnum);
+			proto = store->proto;
 			
-			if (proto && obj_can_be_stored(proto, IN_ROOM(ch)) && isname(arg, GET_OBJ_KEYWORDS(proto))) {
+			if (proto && obj_can_be_retrieved(proto, IN_ROOM(ch)) && isname(arg, GET_OBJ_KEYWORDS(proto))) {
 				found = TRUE;
 				
 				if (stored_item_requires_withdraw(proto) && !has_player_tech(ch, PTECH_STEAL_UPGRADE)) {
@@ -1756,8 +1664,6 @@ ACMD(do_steal) {
 						gain_player_tech_exp(ch, PTECH_STEAL_UPGRADE, 50);
 					}
 
-					// save the empire
-					EMPIRE_NEEDS_SAVE(emp) = TRUE;
 					read_vault(emp);
 				
 					GET_WAIT_STATE(ch) = 4 RL_SEC;	// long wait

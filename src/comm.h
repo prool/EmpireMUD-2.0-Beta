@@ -17,6 +17,7 @@
 /* comm.c */
 void send_to_all(const char *messg, ...) __attribute__((format(printf, 1, 2)));
 void send_to_char(const char *messg, char_data *ch);
+void msdp_update_room(char_data *ch);
 void msg_to_char(char_data *ch, const char *messg, ...) __attribute__((format(printf, 2, 3)));
 void msg_to_desc(descriptor_data *d, const char *messg, ...) __attribute__((format(printf, 2, 3)));
 void msg_to_vehicle(vehicle_data *veh, bool awake_only, const char *messg, ...) __attribute__((format(printf, 3, 4)));
@@ -24,6 +25,9 @@ void olc_audit_msg(char_data *ch, any_vnum vnum, const char *messg, ...);
 void send_to_group(char_data *ch, struct group_data *group, const char * msg, ...) __attribute__ ((format (printf, 3, 4)));
 void send_to_room(const char *messg, room_data *room);
 void send_to_outdoor(bool weather, const char *messg, ...) __attribute__((format(printf, 2, 3)));
+void send_stacked_msgs(descriptor_data *desc);
+void stack_msg_to_desc(descriptor_data *desc, const char *messg, ...);
+void stack_simple_msg_to_desc(descriptor_data *desc, const char *messg);
 void perform_to_all(const char *messg, char_data *ch);
 void close_socket(descriptor_data *d);
 void act(const char *str, int hide_invisible, char_data *ch, const void *obj, const void *vict_obj, bitvector_t act_flags);
@@ -53,6 +57,7 @@ void act(const char *str, int hide_invisible, char_data *ch, const void *obj, co
 #define ACT_VEHICLE_OBJ  BIT(14)  // the middle/obj param is a vehicle
 #define TO_COMBAT_HIT  BIT(15)	// is a hit (fightmessages) -- REQUIRES vict_obj is a char
 #define TO_COMBAT_MISS  BIT(16)	// is a miss (fightmessages) -- REQUIRES vict_obj is a char
+#define TO_QUEUE  BIT(17)	// message goes into the stackable queue
 
 /* I/O functions */
 int write_to_descriptor(socket_t desc, const char *txt);

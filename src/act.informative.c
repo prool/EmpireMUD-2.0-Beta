@@ -27,6 +27,7 @@
 /**
 * Contents:
 *   Helpers
+*   Chart Functions
 *   Look Assist Functions
 *   Character Display Functions
 *   Object Display Functions
@@ -48,7 +49,7 @@ extern const char *wear_bits[];
 extern const struct wear_data_type wear_data[NUM_WEARS];
 
 // external functions
-extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom);
+extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom, bool allow_fake_loc);
 extern char *get_room_name(room_data *room, bool color);
 extern char *list_harnessed_mobs(vehicle_data *veh);
 void look_at_vehicle(vehicle_data *veh, char_data *ch);
@@ -160,25 +161,25 @@ char *instance_level_string(struct instance_data *inst) {
 		return output;
 	}
 	
-	if (inst->level) {
-		snprintf(output, sizeof(output), "level %d", inst->level);
+	if (INST_LEVEL(inst)) {
+		snprintf(output, sizeof(output), "level %d", INST_LEVEL(inst));
 	}
-	else if (GET_ADV_MIN_LEVEL(inst->adventure) > 0 && GET_ADV_MAX_LEVEL(inst->adventure) == 0) {
-		snprintf(output, sizeof(output), "levels %d+", GET_ADV_MIN_LEVEL(inst->adventure));
+	else if (GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst)) > 0 && GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) == 0) {
+		snprintf(output, sizeof(output), "levels %d+", GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst)));
 	}
-	else if (GET_ADV_MIN_LEVEL(inst->adventure) == 0 && GET_ADV_MAX_LEVEL(inst->adventure) > 0) {
-		snprintf(output, sizeof(output), "levels 1-%d", GET_ADV_MAX_LEVEL(inst->adventure));
+	else if (GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst)) == 0 && GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) > 0) {
+		snprintf(output, sizeof(output), "levels 1-%d", GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)));
 	}
-	else if (GET_ADV_MIN_LEVEL(inst->adventure) == GET_ADV_MAX_LEVEL(inst->adventure)) {
-		if (GET_ADV_MIN_LEVEL(inst->adventure) == 0) {
+	else if (GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst)) == GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst))) {
+		if (GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst)) == 0) {
 			snprintf(output, sizeof(output), "any level");
 		}
 		else {
-			snprintf(output, sizeof(output), "level %d", GET_ADV_MAX_LEVEL(inst->adventure));
+			snprintf(output, sizeof(output), "level %d", GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)));
 		}
 	}
 	else {
-		snprintf(output, sizeof(output), "levels %d-%d", GET_ADV_MIN_LEVEL(inst->adventure), GET_ADV_MAX_LEVEL(inst->adventure));
+		snprintf(output, sizeof(output), "levels %d-%d", GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst)), GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)));
 	}
 	
 	return output;
@@ -223,6 +224,92 @@ struct custom_message *pick_custom_longdesc(char_data *ch) {
 
 
  //////////////////////////////////////////////////////////////////////////////
+//// CHART FUNCTIONS /////////////////////////////////////////////////////////
+
+// temporary helper type for do_chart
+struct chart_territory {
+	any_vnum empire_id;	// for quick hashing
+	empire_data *emp;	// which empire
+	int tiles;	// count of territory
+	struct empire_city_data *largest_city;	// only realy need 1 per empire
+	
+	UT_hash_handle hh;	// hashed by id
+};
+
+
+/**
+* Marks a city for the empire (only the largest).
+*
+* @param struct chart_territory **hash Pointer to the hash to add to.
+* @param empire_data *emp The empire with territory.
+* @param struct empire_city_data *city The city to add (if largest).
+*/
+void chart_add_city(struct chart_territory **hash, empire_data *emp, struct empire_city_data *city) {
+	any_vnum eid = EMPIRE_VNUM(emp);
+	struct chart_territory *ct;
+	
+	HASH_FIND_INT(*hash, &eid, ct);
+	if (!ct) {
+		CREATE(ct, struct chart_territory, 1);
+		ct->empire_id = eid;
+		ct->emp = emp;
+		
+		HASH_ADD_INT(*hash, empire_id, ct);
+	}
+	
+	// is it the largest city?
+	if (!ct->largest_city || city_type[ct->largest_city->type].radius < city_type[city->type].radius) {
+		ct->largest_city = city;
+	}
+}
+
+
+/**
+* Marks territory for the empire.
+*
+* @param struct chart_territory **hash Pointer to the hash to add to.
+* @param empire_data *emp The empire with territory.
+* @param int amount How much territory.
+*/
+void chart_add_territory(struct chart_territory **hash, empire_data *emp, int amount) {
+	any_vnum eid = EMPIRE_VNUM(emp);
+	struct chart_territory *ct;
+	
+	HASH_FIND_INT(*hash, &eid, ct);
+	if (!ct) {
+		CREATE(ct, struct chart_territory, 1);
+		ct->empire_id = eid;
+		ct->emp = emp;
+		
+		HASH_ADD_INT(*hash, empire_id, ct);
+	}
+	
+	ct->tiles = MAX(ct->tiles, amount);
+}
+
+
+/**
+* Free up the memory of the temporary chart data.
+*
+* @param struct chart_territory *hash The data to free.
+*/
+void free_chart_hash(struct chart_territory *hash) {
+	struct chart_territory *ct, *next_ct;
+	
+	HASH_ITER(hh, hash, ct, next_ct) {
+		HASH_DEL(hash, ct);
+		free(ct);
+	}
+}
+
+
+// Simple vnum sorter for do_chart
+int sort_chart_hash(struct chart_territory *a, struct chart_territory *b) {
+	return b->tiles - a->tiles;
+}
+
+
+ //////////////////////////////////////////////////////////////////////////////
 //// LOOK ASSIST FUNCTIONS ///////////////////////////////////////////////////
 
 /*
@@ -240,7 +327,7 @@ void look_at_target(char_data *ch, char *arg) {
 	int bits, found = FALSE, j, fnum, i = 0;
 	char_data *found_char = NULL;
 	obj_data *obj, *found_obj = NULL;
-	vehicle_data *found_veh = NULL;
+	vehicle_data *veh, *found_veh = NULL;
 	char *desc;
 
 	if (!ch->desc)
@@ -306,6 +393,18 @@ void look_at_target(char_data *ch, char *arg) {
 				found = TRUE;
 			}
 
+	// does it match an extra desc of a vehicle here?
+	if (!found && ROOM_VEHICLES(IN_ROOM(ch))) {
+		LL_FOREACH2(ROOM_VEHICLES(IN_ROOM(ch)), veh, next_in_room) {
+			if (CAN_SEE_VEHICLE(ch, veh) && (desc = find_exdesc(arg, VEH_EX_DESCS(veh))) != NULL && ++i == fnum) {
+				send_to_char(desc, ch);
+				act("$n looks at $V.", TRUE, ch, NULL, veh, TO_ROOM);
+				found = TRUE;
+				break;	// only 1
+			}
+		}
+	}
+
 	// does it match an extra desc of the room template?
 	if (!found && GET_ROOM_TEMPLATE(IN_ROOM(ch))) {
 		if ((desc = find_exdesc(arg, GET_RMT_EX_DESCS(GET_ROOM_TEMPLATE(IN_ROOM(ch))))) != NULL && ++i == fnum) {
@@ -360,7 +459,8 @@ void look_in_obj(char_data *ch, char *arg) {
 			act("$V isn't a container.", FALSE, ch, NULL, veh, TO_CHAR);
 		}
 		else {
-			act("$V (here):", FALSE, ch, NULL, veh, TO_CHAR);
+			sprintf(buf, "$V (%d/%d):", VEH_CARRYING_N(veh), VEH_CAPACITY(veh));
+			act(buf, FALSE, ch, NULL, veh, TO_CHAR);
 			list_obj_to_char(VEH_CONTAINS(veh), ch, OBJ_DESC_CONTENTS, TRUE);
 		}
 	}
@@ -480,6 +580,7 @@ void display_score_to_char(char_data *ch, char_data *to) {
 	extern int move_gain(char_data *ch, bool info_only);
 	extern int mana_gain(char_data *ch, bool info_only);
 	extern int get_ability_points_available_for_char(char_data *ch, any_vnum skill);
+	extern const char *bonus_bit_descriptions[];
 	extern const struct material_data materials[NUM_MATERIALS];
 	extern const int base_hit_chance;
 	extern const double hit_per_dex;
@@ -504,7 +605,7 @@ void display_score_to_char(char_data *ch, char_data *to) {
 	// row 1 col 3: levels
 
 	// row 2 col 1
-	if (IS_VAMPIRE(ch) && GET_REAL_AGE(ch) > GET_AGE(ch)) {
+	if (GET_AGE_MODIFIER(ch) || (IS_VAMPIRE(ch) && GET_REAL_AGE(ch) != GET_AGE(ch))) {
 		sprintf(buf, "%d/%d years", GET_AGE(ch), GET_REAL_AGE(ch));
 	}
 	else {
@@ -520,6 +621,11 @@ void display_score_to_char(char_data *ch, char_data *to) {
 	}
 	else {
 		msg_to_char(to, "\r\n");
+	}
+	
+	if (GET_BONUS_TRAITS(ch)) {
+		prettier_sprintbit(GET_BONUS_TRAITS(ch), bonus_bit_descriptions, lbuf);
+		msg_to_char(to, "  Bonus traits: %s\r\n", lbuf);
 	}
 
 	msg_to_char(to, " +-------------------------------- Condition --------------------------------+\r\n");
@@ -811,7 +917,7 @@ void list_one_char(char_data *i, char_data *ch, int num) {
 		if (AFF_FLAGGED(i, AFF_INVISIBLE)) {
 			msg_to_char(ch, "*");
 		}
-		msg_to_char(ch, GET_LONG_DESC(i));
+		send_to_char(GET_LONG_DESC(i), ch);
 	}
 	else {
 		*buf = '\0';
@@ -1016,6 +1122,8 @@ void list_vehicles_to_char(vehicle_data *list, char_data *ch) {
 * @param bool show_eq If TRUE, can also show inventory (if skilled).
 */
 void look_at_char(char_data *i, char_data *ch, bool show_eq) {
+	extern struct character_size_data size_data[];
+	
 	char buf[MAX_STRING_LENGTH];
 	bool disguise;
 	int j, found;
@@ -1031,9 +1139,24 @@ void look_at_char(char_data *i, char_data *ch, bool show_eq) {
 	}
 
 	if (ch != i) {
-		act("You look at $N.", FALSE, ch, FALSE, i, TO_CHAR);
+		act("You look at $N:", FALSE, ch, FALSE, i, TO_CHAR);
+	}
+	else {
+		msg_to_char(ch, "You take a look at yourself:\r\n");
 	}
 	
+	// look decs
+	if (IS_MORPHED(i)) {
+		msg_to_char(ch, "%s&0", NULLSAFE(MORPH_LOOK_DESC(GET_MORPH(i))));
+	}
+	else if (GET_LOOK_DESC(i)) {
+		msg_to_char(ch, "%s&0", GET_LOOK_DESC(i));
+	}
+	
+	// diagnose at the end
+	diag_char_to_char(i, ch);
+	
+	// membership info
 	if (GET_LOYALTY(i) && !disguise) {
 		sprintf(buf, "$E is a member of %s%s\t0.", EMPIRE_BANNER(GET_LOYALTY(i)), EMPIRE_NAME(GET_LOYALTY(i)));
 		act(buf, FALSE, ch, NULL, i, TO_CHAR);
@@ -1049,30 +1172,30 @@ void look_at_char(char_data *i, char_data *ch, bool show_eq) {
 		act(buf, FALSE, ch, NULL, i, TO_CHAR);
 	}
 	
+	if (size_data[GET_SIZE(i)].show_on_look) {
+		act(size_data[GET_SIZE(i)].show_on_look, FALSE, ch, NULL, i, TO_CHAR);
+	}
+	
+	// non-npc, non-disguised info (disguise 'counts' as NPC)
 	if (!IS_NPC(i) && !disguise) {
-		// basic description -- don't show if morphed
-		if (GET_LONG_DESC(i) && !IS_MORPHED(i)) {
-			msg_to_char(ch, "%s&0", GET_LONG_DESC(i));
-		}
-
 		if (HAS_INFRA(i)) {
-			act("   You notice a distinct, red glint in $S eyes.", FALSE, ch, NULL, i, TO_CHAR);
+			act("You notice a distinct, red glint in $S eyes.", FALSE, ch, NULL, i, TO_CHAR);
 		}
 		if (AFF_FLAGGED(i, AFF_CLAWS)) {
-			act("   $N's hands are huge, distorted, and very sharp!", FALSE, ch, NULL, i, TO_CHAR);
+			act("$N's hands are huge, distorted, and very sharp!", FALSE, ch, NULL, i, TO_CHAR);
 		}
 		if (AFF_FLAGGED(i, AFF_MAJESTY)) {
-			act("   $N has an aura of majesty about $M.", FALSE, ch, NULL, i, TO_CHAR);
+			act("$N has an aura of majesty about $M.", FALSE, ch, NULL, i, TO_CHAR);
 		}
 		if (AFF_FLAGGED(i, AFF_MUMMIFY)) {
-			act("   $E is mummified in a hard, dark substance!", FALSE, ch, NULL, i, TO_CHAR);
+			act("$E is mummified in a hard, dark substance!", FALSE, ch, NULL, i, TO_CHAR);
 		}
-		diag_char_to_char(i, ch);
 	}
-	else {	// npc or disguised
-		diag_char_to_char(i, ch);
+	
+	if (IS_NPC(i) && !disguise && MOB_FLAGGED(i, MOB_MOUNTABLE) && has_player_tech(ch, PTECH_RIDING) && (!AFF_FLAGGED(i, AFF_FLY) || CAN_RIDE_FLYING_MOUNT(ch))) {
+		act("You can ride on $M.", FALSE, ch, NULL, i, TO_CHAR);
 	}
-
+	
 	if (show_eq && !disguise) {
 		// check if there's eq to see
 		found = FALSE;
@@ -1088,7 +1211,7 @@ void look_at_char(char_data *i, char_data *ch, bool show_eq) {
 			act("$n is using:", FALSE, i, 0, ch, TO_VICT);
 			for (j = 0; j < NUM_WEARS; j++) {
 				if (GET_EQ(i, j) && CAN_SEE_OBJ(ch, GET_EQ(i, j))) {
-					msg_to_char(ch, wear_data[j].eq_prompt);
+					send_to_char(wear_data[j].eq_prompt, ch);
 					show_obj_to_char(GET_EQ(i, j), ch, OBJ_DESC_EQUIPMENT);
 				}
 			}
@@ -1247,7 +1370,8 @@ char *get_obj_desc(obj_data *obj, char_data *ch, int mode) {
 */
 bool inventory_store_building(char_data *ch, room_data *room, empire_data *emp) {
 	bool found = FALSE;
-	struct empire_storage_data *store;
+	struct empire_storage_data *store, *next_store;
+	struct empire_island *eisle;
 	obj_data *proto;
 
 	/* Must be in an empire */
@@ -1255,18 +1379,15 @@ bool inventory_store_building(char_data *ch, room_data *room, empire_data *emp) 
 		return found;
 	}
 	
+	eisle = get_empire_island(emp, GET_ISLAND_ID(IN_ROOM(ch)));
+	
 	if (room_has_function_and_city_ok(IN_ROOM(ch), FNC_VAULT)) {
 		msg_to_char(ch, "\r\nVault: %.1f coin%s, %d treasure (%d total)\r\n", EMPIRE_COINS(emp), (EMPIRE_COINS(emp) != 1.0 ? "s" : ""), EMPIRE_WEALTH(emp), (int) GET_TOTAL_WEALTH(emp));
 	}
-
-	for (store = EMPIRE_STORAGE(emp); store; store = store->next) {
-		// things not stored here
-		if (store->island != GET_ISLAND_ID(room)) {
-			continue;
-		}
-		
-		if ((proto = obj_proto(store->vnum))) {
-			if (obj_can_be_stored(proto, room)) {
+	
+	HASH_ITER(hh, eisle->store, store, next_store) {
+		if ((proto = store->proto)) {
+			if (obj_can_be_retrieved(proto, room)) {
 				if (!found) {
 					msg_to_char(ch, "\r\n%s inventory available here:\r\n", EMPIRE_ADJECTIVE(emp));
 				}
@@ -1462,7 +1583,7 @@ void show_obj_to_char(obj_data *obj, char_data *ch, int mode) {
 */
 void show_one_stored_item_to_char(char_data *ch, empire_data *emp, struct empire_storage_data *store, bool show_zero) {
 	int total = get_total_stored_count(emp, store->vnum, TRUE);
-	char lbuf[MAX_INPUT_LENGTH];
+	char lbuf[MAX_INPUT_LENGTH], keepstr[256];
 	
 	if (total > store->amount || show_zero) {
 		sprintf(lbuf, " (%d total)", total);
@@ -1471,7 +1592,17 @@ void show_one_stored_item_to_char(char_data *ch, empire_data *emp, struct empire
 		*lbuf = '\0';
 	}
 	
-	msg_to_char(ch, "(%4d) %s%s\r\n", (show_zero ? 0 : store->amount), get_obj_name_by_proto(store->vnum), lbuf);
+	if (store->keep == UNLIMITED) {
+		strcpy(keepstr, " (keep)");
+	}
+	else if (store->keep > 0) {
+		snprintf(keepstr, sizeof(keepstr), " (keep %d)", store->keep);
+	}
+	else {
+		*keepstr = '\0';
+	}
+	
+	msg_to_char(ch, "(%4d) %s%s%s\r\n", (show_zero ? 0 : store->amount), get_obj_name_by_proto(store->vnum), keepstr, lbuf);
 }
 
 
@@ -1498,6 +1629,14 @@ struct who_entry {
 WHO_SORTER(sort_who_access_level) {
 	if (a->access_level != b->access_level) {
 		return a->access_level - b->access_level;
+	}
+	return 0;
+}
+
+
+WHO_SORTER(sort_who_level) {
+	if (a->computed_level != b->computed_level) {
+		return a->computed_level - b->computed_level;
 	}
 	return 0;
 }
@@ -1694,7 +1833,20 @@ char *partial_who(char_data *ch, char *name_search, int low, int high, empire_da
 	
 	// WHO_x
 	const char *who_titles[] = { "Mortals", "Gods", "Immortals" };
-	WHO_SORTER(*who_sorters[]) = { sort_who_role_level, sort_who_role_level, sort_who_access_level };
+	WHO_SORTER(*who_sorters[3]) = { NULL, sort_who_level, sort_who_access_level };
+	
+	// set sorters
+	switch (config_get_int("who_list_sort")) {
+		case WHO_LIST_SORT_LEVEL: {
+			who_sorters[WHO_MORTALS] = sort_who_level;
+			break;
+		}
+		case WHO_LIST_SORT_ROLE_LEVEL:
+		default: {
+			who_sorters[WHO_MORTALS] = sort_who_role_level;
+			break;
+		}
+	}
 
 	*whobuf = '\0';	// lines of chars
 	size = 0;	// whobuf size
@@ -1819,19 +1971,19 @@ ACMD(do_adventure) {
 		// otherwise fall through to the rest of the command
 	}
 	
-	if (!(inst = find_instance_by_room(IN_ROOM(ch), FALSE))) {
+	if (!(inst = find_instance_by_room(IN_ROOM(ch), FALSE, TRUE))) {
 		msg_to_char(ch, "You are not in or near an adventure zone.\r\n");
 		return;
 	}
 
-	msg_to_char(ch, "%s (%s)\r\n", NULLSAFE(GET_ADV_NAME(inst->adventure)), instance_level_string(inst));
+	msg_to_char(ch, "%s (%s)\r\n", NULLSAFE(GET_ADV_NAME(INST_ADVENTURE(inst))), instance_level_string(inst));
 	
-	if (GET_ADV_AUTHOR(inst->adventure) && *(GET_ADV_AUTHOR(inst->adventure))) {
-		msg_to_char(ch, "by %s\r\n", GET_ADV_AUTHOR(inst->adventure));
+	if (GET_ADV_AUTHOR(INST_ADVENTURE(inst)) && *(GET_ADV_AUTHOR(INST_ADVENTURE(inst)))) {
+		msg_to_char(ch, "by %s\r\n", GET_ADV_AUTHOR(INST_ADVENTURE(inst)));
 	}
-	msg_to_char(ch, "%s", NULLSAFE(GET_ADV_DESCRIPTION(inst->adventure)));
-	if (GET_ADV_PLAYER_LIMIT(inst->adventure) > 0) {
-		msg_to_char(ch, "Player limit: %d\r\n", GET_ADV_PLAYER_LIMIT(inst->adventure));
+	msg_to_char(ch, "%s", NULLSAFE(GET_ADV_DESCRIPTION(INST_ADVENTURE(inst))));
+	if (GET_ADV_PLAYER_LIMIT(INST_ADVENTURE(inst)) > 0) {
+		msg_to_char(ch, "Player limit: %d\r\n", GET_ADV_PLAYER_LIMIT(INST_ADVENTURE(inst)));
 	}
 }
 
@@ -1891,9 +2043,104 @@ ACMD(do_affects) {
 }
 
 
+ACMD(do_chart) {
+	struct chart_territory *citer, *next_citer, *hash = NULL;
+	struct empire_city_data *city;
+	struct empire_island *e_isle;
+	empire_data *emp, *next_emp;
+	int iter, total_claims, num;
+	struct island_info *isle;
+	bool any, city_prompt;
+	
+	skip_spaces(&argument);
+	
+	if (!*argument) {
+		msg_to_char(ch, "Get chart information on which island?\r\n");
+	}
+	else if (!(isle = get_island_by_name(ch, argument)) || isle->id == NO_ISLAND) {
+		msg_to_char(ch, "Unknown island.\r\n");
+	}
+	else {
+		msg_to_char(ch, "Chart information for %s:\r\n", isle->name);
+		if (isle->desc) {
+			send_to_char(isle->desc, ch);
+		}
+		
+		if (HAS_NAVIGATION(ch) && isle->center != NOWHERE) {
+			msg_to_char(ch, "Approximate center: (%d, %d)\r\n", MAP_X_COORD(isle->center), MAP_Y_COORD(isle->center));
+			msg_to_char(ch, "Edges: ");
+			any = FALSE;
+			for (iter = 0; iter < NUM_SIMPLE_DIRS; ++iter) {
+				if (isle->edge[iter] != NOWHERE) {
+					msg_to_char(ch, "%s(%d, %d)", (any ? ", " : ""), MAP_X_COORD(isle->edge[iter]), MAP_Y_COORD(isle->edge[iter]));
+					any = TRUE;
+				}
+			}
+			msg_to_char(ch, "%s\r\n", any ? "" : "unknown");
+		}
+		
+		// collect empire data on the island
+		total_claims = 0;
+		HASH_ITER(hh, empire_table, emp, next_emp) {
+			if (!(e_isle = get_empire_island(emp, isle->id))) {
+				continue;
+			}
+			
+			if (e_isle->territory[TER_TOTAL] > 0) {
+				chart_add_territory(&hash, emp, e_isle->territory[TER_TOTAL]);
+				total_claims += e_isle->territory[TER_TOTAL];
+			}
+			
+			LL_FOREACH(EMPIRE_CITY_LIST(emp), city) {
+				if (GET_ISLAND(city->location) != isle) {
+					continue;
+				}
+				
+				chart_add_city(&hash, emp, city);
+			}
+		}
+		
+		HASH_SORT(hash, sort_chart_hash);
+		
+		// claim info
+		if (total_claims > 0 && isle->tile_size > 0) {
+			msg_to_char(ch, "Percent claimed: %d%%, Largest empires: ", (total_claims * 100 / isle->tile_size));
+			
+			// only show some (largest, per sort_chart_hash)
+			num = 0;
+			HASH_ITER(hh, hash, citer, next_citer) {
+				msg_to_char(ch, "%s%s%s\t0", (num > 0 ? ", " : ""), EMPIRE_BANNER(citer->emp), EMPIRE_NAME(citer->emp));
+				if (++num >= 3) {
+					break;
+				}
+			}
+			msg_to_char(ch, "\r\n");
+		}
+		
+		// cities
+		city_prompt = FALSE;
+		
+		HASH_ITER(hh, hash, citer, next_citer) {
+			if (!citer->largest_city || !city_type[citer->largest_city->type].show_to_others) {
+				continue;
+			}
+			
+			if (!city_prompt) {
+				msg_to_char(ch, "Notable cities:\r\n");
+				city_prompt = TRUE;
+			}
+			
+			msg_to_char(ch, " The %s%s\t0 %s of %s%s\r\n", EMPIRE_BANNER(citer->emp), EMPIRE_ADJECTIVE(citer->emp), city_type[citer->largest_city->type].name, citer->largest_city->name, coord_display_room(ch, citer->largest_city->location, FALSE));
+		}
+		
+		free_chart_hash(hash);
+	}
+}
+
+
 // will show all currencies if the subcmd == TRUE
 ACMD(do_coins) {
-	char buf[MAX_STRING_LENGTH], line[MAX_STRING_LENGTH];
+	char buf[MAX_STRING_LENGTH], line[MAX_STRING_LENGTH], vstr[64];
 	struct player_currency *cur, *next_cur;
 	size_t size;
 	
@@ -1909,7 +2156,14 @@ ACMD(do_coins) {
 		size += snprintf(buf + size, sizeof(buf) - size, "You also have:\r\n");
 		
 		HASH_ITER(hh, GET_CURRENCIES(ch), cur, next_cur) {
-			snprintf(line, sizeof(line), "%3d %s\r\n", cur->amount, get_generic_string_by_vnum(cur->vnum, GENERIC_CURRENCY, WHICH_CURRENCY(cur->amount)));
+			if (PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
+				sprintf(vstr, "[%5d] ", cur->vnum);
+			}
+			else {
+				*vstr = '\0';
+			}
+			
+			snprintf(line, sizeof(line), "%s%3d %s\r\n", vstr, cur->amount, get_generic_string_by_vnum(cur->vnum, GENERIC_CURRENCY, WHICH_CURRENCY(cur->amount)));
 			
 			if (size + strlen(line) < sizeof(buf)) {
 				strcat(buf, line);
@@ -2491,10 +2745,14 @@ ACMD(do_look) {
 		send_to_char("You can't see anything but stars!\r\n", ch);
 	else if (AFF_FLAGGED(ch, AFF_BLIND))
 		send_to_char("You can't see a damned thing, you're blind!\r\n", ch);
+	
+	/* prior to b5.31, this block gave an abbreviated version of look_at_room, which isn't necessary
 	else if (!CAN_SEE_IN_DARK_ROOM(ch, IN_ROOM(ch)) && ROOM_IS_CLOSED(IN_ROOM(ch))) {
 		send_to_char("It is pitch black...\r\n", ch);
-		list_char_to_char(ROOM_PEOPLE(IN_ROOM(ch)), ch);	/* glowing red eyes */
+		list_char_to_char(ROOM_PEOPLE(IN_ROOM(ch)), ch);	// glowing red eyes
 	}
+	*/
+	
 	else {
 		half_chop(argument, arg, arg2);
 
@@ -2705,7 +2963,7 @@ ACMD(do_mudstats) {
 
 ACMD(do_nearby) {
 	extern const char *alt_dirs[];
-	extern int num_of_start_locs;
+	extern int highest_start_loc_index;
 	extern int *start_locs;
 	
 	int max_dist = room_has_function_and_city_ok(IN_ROOM(ch), FNC_LARGER_NEARBY) ? 150 : 50;
@@ -2753,7 +3011,7 @@ ACMD(do_nearby) {
 
 	// check starting locations
 	if (starts) {
-		for (iter = 0; iter <= num_of_start_locs; ++iter) {
+		for (iter = 0; iter <= highest_start_loc_index; ++iter) {
 			loc = real_room(start_locs[iter]);
 			dist = compute_distance(IN_ROOM(ch), loc);
 		
@@ -2761,13 +3019,7 @@ ACMD(do_nearby) {
 				found = TRUE;
 
 				dir = get_direction_for_char(ch, get_direction_to(IN_ROOM(ch), loc));
-			
-				if (HAS_NAVIGATION(ch)) {
-					snprintf(line, sizeof(line), " %d %s: %s (%d, %d)\r\n", dist, NEARBY_DIR, get_room_name(loc, FALSE), X_COORD(loc), Y_COORD(loc));
-				}
-				else {
-					snprintf(line, sizeof(line), " %d %s: %s\r\n", dist, NEARBY_DIR, get_room_name(loc, FALSE));
-				}
+				snprintf(line, sizeof(line), " %2d %s: %s%s\r\n", dist, NEARBY_DIR, get_room_name(loc, FALSE), coord_display_room(ch, loc, FALSE));
 				
 				if (size + strlen(line) < sizeof(buf)) {
 					strcat(buf, line);
@@ -2788,13 +3040,7 @@ ACMD(do_nearby) {
 					found = TRUE;
 				
 					dir = get_direction_for_char(ch, get_direction_to(IN_ROOM(ch), loc));
-
-					if (HAS_NAVIGATION(ch)) {
-						snprintf(line, sizeof(line), " %d %s: the %s of %s (%d, %d) / %s%s&0\r\n", dist, NEARBY_DIR, city_type[city->type].name, city->name, X_COORD(loc), Y_COORD(loc), EMPIRE_BANNER(emp), EMPIRE_NAME(emp));
-					}
-					else {
-						snprintf(line, sizeof(line), " %d %s: the %s of %s / %s%s&0\r\n", dist, NEARBY_DIR, city_type[city->type].name, city->name, EMPIRE_BANNER(emp), EMPIRE_NAME(emp));
-					}
+					snprintf(line, sizeof(line), " %d %s: the %s of %s%s / %s%s&0\r\n", dist, NEARBY_DIR, city_type[city->type].name, city->name, coord_display_room(ch, loc, FALSE), EMPIRE_BANNER(emp), EMPIRE_NAME(emp));
 					
 					if (size + strlen(line) < sizeof(buf)) {
 						strcat(buf, line);
@@ -2807,16 +3053,16 @@ ACMD(do_nearby) {
 	
 	// check instances
 	if (adventures) {
-		for (inst = instance_list; inst; inst = inst->next) {
-			if (!inst->location || INSTANCE_FLAGGED(inst, INST_COMPLETED)) {
+		LL_FOREACH(instance_list, inst) {
+			if (!INST_FAKE_LOC(inst) || INSTANCE_FLAGGED(inst, INST_COMPLETED)) {
 				continue;
 			}
 		
-			if (ADVENTURE_FLAGGED(inst->adventure, ADV_NO_NEARBY)) {
+			if (ADVENTURE_FLAGGED(INST_ADVENTURE(inst), ADV_NO_NEARBY)) {
 				continue;
 			}
 		
-			loc = inst->location;
+			loc = INST_FAKE_LOC(inst);
 			if (!loc || (dist = compute_distance(IN_ROOM(ch), loc)) > max_dist) {
 				continue;
 			}
@@ -2831,13 +3077,8 @@ ACMD(do_nearby) {
 		
 			// show instance
 			found = TRUE;
-			dir = get_direction_for_char(ch, get_direction_to(IN_ROOM(ch), inst->location));
-			if (HAS_NAVIGATION(ch)) {
-				snprintf(line, sizeof(line), " %d %s: %s (%d, %d) / %s%s\r\n", dist, NEARBY_DIR, GET_ADV_NAME(inst->adventure), X_COORD(loc), Y_COORD(loc), instance_level_string(inst), part);
-			}
-			else {
-				snprintf(line, sizeof(line), " %d %s: %s / %s%s\r\n", dist, NEARBY_DIR, GET_ADV_NAME(inst->adventure), instance_level_string(inst), part);
-			}
+			dir = get_direction_for_char(ch, get_direction_to(IN_ROOM(ch), loc));
+			snprintf(line, sizeof(line), " %d %s: %s%s / %s%s\r\n", dist, NEARBY_DIR, GET_ADV_NAME(INST_ADVENTURE(inst)), coord_display_room(ch, loc, FALSE), instance_level_string(inst), part);
 			
 			if (size + strlen(line) < sizeof(buf)) {
 				strcat(buf, line);
@@ -2851,6 +3092,52 @@ ACMD(do_nearby) {
 	}
 	
 	page_string(ch->desc, buf, TRUE);
+}
+
+
+ACMD(do_no_cmd) {
+	switch (subcmd) {
+		case NOCMD_CAST: {
+			msg_to_char(ch, "EmpireMUD doesn't use the 'cast' command. You use most abilities by typing their name.\r\n");
+			break;
+		}
+		case NOCMD_GOSSIP: {
+			msg_to_char(ch, "EmpireMUD doesn't have a gossip channel. Try the /ooc channel, or type /list to see which global channels you're on.\r\n");
+			break;
+		}
+		case NOCMD_LEVELS: {
+			msg_to_char(ch, "EmpireMUD uses skills and gear to determine your level, not experience points. See HELP LEVELS for more info.\r\n");
+			break;
+		}
+		case NOCMD_PRACTICE: {
+			msg_to_char(ch, "EmpireMUD doesn't use 'practices' for skill gain. Type 'skills' or check out HELP SKILLS for more info.\r\n");
+			break;
+		}
+		case NOCMD_RENT: {
+			msg_to_char(ch, "EmpireMUD doesn't require you to rent or save your character anywhere. You usually log back in right where you quit.\r\n");
+			break;
+		}
+		case NOCMD_REPORT: {
+			msg_to_char(ch, "EmpireMUD doesn't have a 'report' command.\r\n");
+			break;
+		}
+		case NOCMD_UNGROUP: {
+			msg_to_char(ch, "EmpireMUD doesn't have an 'ungroup' command. Use 'group leave' or 'group kick'.\r\n");
+			break;
+		}
+		case NOCMD_WIMPY: {
+			msg_to_char(ch, "EmpireMUD doesn't have a 'wimpy' command.\r\n");
+			break;
+		}
+		case NOCMD_TOGGLE: {
+			msg_to_char(ch, "EmpireMUD doesn't have that command by itself. Use 'toggle' instead.\r\n");
+			break;
+		}
+		default: {
+			send_config_msg(ch, "huh_string");
+			break;
+		}
+	}
 }
 
 
@@ -2882,27 +3169,36 @@ ACMD(do_survey) {
 	struct empire_city_data *city;
 	struct empire_island *eisle;
 	struct island_info *island;
+	int ter_type;
+	bool junk;
 	
 	msg_to_char(ch, "You survey the area:\r\n");
 	
 	if ((island = GET_ISLAND(IN_ROOM(ch)))) {
 		// find out if it has a local name
 		if (GET_LOYALTY(ch) && (eisle = get_empire_island(GET_LOYALTY(ch), island->id)) && eisle->name && str_cmp(eisle->name, island->name)) {
-			msg_to_char(ch, "Location: %s (%s)%s\r\n", get_island_name_for(island->id, ch), island->name, IS_SET(island->flags, ISLE_NEWBIE) ? " (newbie island)" : "");
+			msg_to_char(ch, "Location: %s (%s)%s%s\r\n", get_island_name_for(island->id, ch), island->name, IS_SET(island->flags, ISLE_NEWBIE) ? " (newbie island)" : "", IS_SET(island->flags, ISLE_CONTINENT) ? " (continent)" : "");
 		}
 		else {
-			msg_to_char(ch, "Location: %s%s\r\n", get_island_name_for(island->id, ch), IS_SET(island->flags, ISLE_NEWBIE) ? " (newbie island)" : "");
+			msg_to_char(ch, "Location: %s%s%s\r\n", get_island_name_for(island->id, ch), IS_SET(island->flags, ISLE_NEWBIE) ? " (newbie island)" : "", IS_SET(island->flags, ISLE_CONTINENT) ? " (continent)" : "");
 		}
 	}
 	
 	// empire
 	if (ROOM_OWNER(IN_ROOM(ch))) {
-		if ((city = find_city(ROOM_OWNER(IN_ROOM(ch)), IN_ROOM(ch)))) {
+		if ((ter_type = get_territory_type_for_empire(IN_ROOM(ch), ROOM_OWNER(IN_ROOM(ch)), FALSE, &junk)) == TER_CITY && (city = find_closest_city(ROOM_OWNER(IN_ROOM(ch)), IN_ROOM(ch)))) {
 			msg_to_char(ch, "This is the %s%s&0 %s of %s.\r\n", EMPIRE_BANNER(ROOM_OWNER(IN_ROOM(ch))), EMPIRE_ADJECTIVE(ROOM_OWNER(IN_ROOM(ch))), city_type[city->type].name, city->name);
-		}	
+		}
+		else if (ter_type == TER_OUTSKIRTS) {
+			msg_to_char(ch, "This is the outskirts of %s%s&0.\r\n", EMPIRE_BANNER(ROOM_OWNER(IN_ROOM(ch))), EMPIRE_NAME(ROOM_OWNER(IN_ROOM(ch))));
+		}
 		else {
 			msg_to_char(ch, "This area is claimed by %s%s&0.\r\n", EMPIRE_BANNER(ROOM_OWNER(IN_ROOM(ch))), EMPIRE_NAME(ROOM_OWNER(IN_ROOM(ch))));
 		}
+	}
+	else if (GET_LOYALTY(ch)) {
+		ter_type = get_territory_type_for_empire(IN_ROOM(ch), GET_LOYALTY(ch), FALSE, &junk);
+		msg_to_char(ch, "This location would be %s for your empire.\r\n", (ter_type == TER_CITY ? "in a city" : (ter_type == TER_OUTSKIRTS ? "on the outskirts of a city" : "on the frontier")));
 	}
 	
 	// building info
@@ -2916,7 +3212,7 @@ ACMD(do_survey) {
 	}
 	
 	// adventure info
-	if (find_instance_by_room(IN_ROOM(ch), FALSE)) {
+	if (find_instance_by_room(IN_ROOM(ch), FALSE, TRUE)) {
 		do_adventure(ch, "", 0, 0);
 	}
 }
@@ -2992,13 +3288,8 @@ ACMD(do_weather) {
 }
 
 
-ACMD(do_whereami) {	
-	if (HAS_NAVIGATION(ch) && !RMT_FLAGGED(IN_ROOM(ch), RMT_NO_LOCATION)) {
-		msg_to_char(ch, "You are at: %s (%d, %d)\r\n", get_room_name(IN_ROOM(ch), FALSE), X_COORD(IN_ROOM(ch)), Y_COORD(IN_ROOM(ch)));
-	}
-	else {
-		msg_to_char(ch, "You are at: %s\r\n", get_room_name(IN_ROOM(ch), FALSE));
-	}
+ACMD(do_whereami) {
+	msg_to_char(ch, "You are at: %s%s\r\n", get_room_name(IN_ROOM(ch), FALSE), coord_display_room(ch, IN_ROOM(ch), FALSE));
 }
 
 
@@ -3102,6 +3393,21 @@ ACMD(do_who) {
 }
 
 
+ACMD(do_whoami) {
+	char real[256], curr[256];
+	
+	strcpy(curr, PERS(ch, ch, FALSE));
+	strcpy(real, PERS(ch, ch, TRUE));
+	
+	if (strcmp(curr, real)) {	// different
+		msg_to_char(ch, "%s (%s)\r\n", curr, real);
+	}
+	else {
+		msg_to_char(ch, "%s\r\n", real);
+	}
+}
+
+
 ACMD(do_whois) {
 	void check_delayed_load(char_data *ch);
 	extern const char *level_names[][2];
@@ -3140,7 +3446,7 @@ ACMD(do_whois) {
 
 	if (GET_LOYALTY(victim)) {
 		msg_to_char(ch, "%s&0 of %s%s&0\r\n", EMPIRE_RANK(GET_LOYALTY(victim), GET_RANK(victim)-1), EMPIRE_BANNER(GET_LOYALTY(victim)), EMPIRE_NAME(GET_LOYALTY(victim)));
-		msg_to_char(ch, "Territory: %d, Members: %d, Greatness: %d\r\n", EMPIRE_CITY_TERRITORY(GET_LOYALTY(victim)) + EMPIRE_OUTSIDE_TERRITORY(GET_LOYALTY(victim)), EMPIRE_MEMBERS(GET_LOYALTY(victim)), EMPIRE_GREATNESS(GET_LOYALTY(victim)));
+		msg_to_char(ch, "Territory: %d, Members: %d, Greatness: %d\r\n", EMPIRE_TERRITORY(GET_LOYALTY(victim), TER_TOTAL), EMPIRE_MEMBERS(GET_LOYALTY(victim)), EMPIRE_GREATNESS(GET_LOYALTY(victim)));
 	}
 
 	if (GET_LORE(victim)) {

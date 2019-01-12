@@ -17,6 +17,13 @@ which will cause you to use that type of arrow first.
 
 See also: USE
 #
+BEEHIVE "BEE HIVE" HIVE
+
+Beehives are used to build the Apiary building, and can also be stored there.
+You require Advanced Woodworking to craft a beehive.
+
+See also: ADVANCED WOODWORKING, APIARY
+#
 BONES "BONE COMPONENT"
 
 Bone (component)
@@ -73,22 +80,28 @@ If you become hungry, you'll lose your well-fed effect early.
 
 See also: EAT, FAMILY RECIPES
 #
-CANOE
+CANOE RAFT
 
 Canoe (vehicle)
+Raft (vehicle)
 
 Required ability:  Basic Crafts
 
-A good canoe will allow you to cross rivers as well as oceans. And unlike
-swimming, you won't be bothered by sharks. To use a canoe, drag it to the shore
-and then sit in it. After that, use "sail" to move it.
+A good canoe or raft will allow you to cross rivers as well as oceans. And
+unlike swimming, you won't be bothered by sharks. To use a one of these
+vehicles, drag it to the shore and then sit in/on it. After that, use "sail"
+to move it.
+
+The difference between the canoe and raft is the material used to make it.
+Rafts are made from rough desert wood, while canoes are hollowed out of
+temperate trees.
 
 See also: SAIL, SWIMMING, SHIPBUILDING
 #
 CLAY "CLAY COMPONENT"
 
 Clay (component)
-Pile of clay (resource)
+Lump of clay (resource)
 
 Clay is a component used in pottery and brickmaking. Clay is found by digging
 in plains, forests, and well-irrigated areas. You can also build a clay pit to
@@ -155,12 +168,28 @@ the components from other players.
 
 The first tier of crafter items comes at level 100:
   Head: clockwork goggles (requires a clockwork lens array from an Artificer)
-  Clothes: guildmaster tunic (requires guild-patterned cloth from a Guildsman)
+  Clothes: guildmaster tunic (requires guild-patterned cloth from an
+           Antiquarian)
   Waist: utility belt (requires some clips and buckles from a Tinker)
   Off-hand: steel multitool (needs a set of delicate tools from a Steelsmith)
 
-See also: ARTIFICER, CRAFT, ENCHANT, FORGE, GUILDSMAN, SCORE, SEW, STEELSMITH,
-   TINKER
+See also: CRAFT, ENCHANT, FORGE, SCORE, SEW
+#
+"DISTILLED HERBS" "ADVANCED HERBS" "HERB JARS" "JAR HERBS"
+
+Distilled herbs are herbs that have been processed to make them more potent, so
+that you can make more powerful potions. You must have the 'Healing Elixirs'
+ability to 'brew' these from herbs.
+
+The distilled herbs are:
+ distilled whitegrass
+ fiveleaf resin
+ redthorn extract
+ magewhisper essence
+ concentrated daggerbite
+ bileberry juice
+
+See also: FIND HERBS, HEALING ELIXIRS
 #
 "DROP FLAGS" "LOOT QUALITY FLAGS" "HARD DROP" "GROUP DROP" "GENERIC DROP" HARD-DROP GROUP-DROP GENERIC-DROP 
 
@@ -178,13 +207,11 @@ DYES "DYE COMPONENT"
 
 Dye (component)
 
-Used for:  sewing, vehicles
+Used for:  none
 
-Dyes are a component type used primarily for clothing. Some recipes require a
-specific color of dye while others will accept any dye. The Glassblowing
-technology is required to make the vials used to store dyes.
+Dyes are not currently used.
 
-See also: BASIC CRAFTS, COMPONENT
+See also: COMPONENT
 #
 FEATHERS "FEATHERS COMPONENT" "FEATHER COMPONENT"
 
@@ -196,16 +223,23 @@ Feathers are a component type.
 
 See also: COMPONENT
 #
-FIBERS "FIBERS COMPONENT" "FIBER COMPONENT"
+FIBERS "FIBERS COMPONENT" "FIBER COMPONENT" "PLANT FIBER"
 
 Fibers (component)
 
-Used for:  weaving, adventure crafts
+Used for:  building, crafting
 
-Fibers are a component type usually used to make cloth. Typical examples are
-cotton and wool.
+Fibers are a component type usually used to make various crafts. Common types
+of fibers are:
 
-See also: COMPONENT
+ sticks and leaves (hard, plant, temperate, basic)
+ thorny branches (desert, hard, plant, basic)
+ tangle of vines (plant, soft, tropical, basic)
+ basket of cotton (plant, soft)
+ bag of wool (animal, soft)
+ bale of straw (hard, plant, basic)
+
+See also: COMPONENT, GATHER
 #
 FLOUR "FLOUR COMPONENT"
 
@@ -255,8 +289,8 @@ Used for:  sewing
 
 Fur is a component type primarily used for clothing and mage armor.
 
-small:  fox fur
-large:  big cat pelt
+small:  fox fur, wolverine fur
+large:  big cat pelt, polar bear fur
 
 See also: COMPONENT, SEW, SKIN COMMAND
 #
@@ -306,7 +340,7 @@ Stored in:  Utility Shed, Storage room
 Create a handle using the craft command.
 
 Handles are used in forging and crafting to provide a grasping surface to a
-tool or weapon. The most basic handles are made from sticks.
+tool or weapon. The most basic handles are made from saplings.
 
 The more advanced elegant handle can be made from magic wood.
 
@@ -319,9 +353,16 @@ Herb (component)
 Used for:  potions, poisons, crafting
 
 The herb component type covers all the herbs which can be found using the Find
-Herbs ability. Most recipes call for a specific herb, though.
+Herbs ability. Most recipes call for a specific herb, though. The basic herbs
+are:
+ whitegrass
+ fiveleaf
+ redthorn
+ magewhisper
+ daggerbite
+ bileberries
 
-See also: COMPONENT, FIND HERBS, MIX, BREW
+See also: COMPONENT, DISTILLED HERBS, FIND HERBS, MIX, BREW
 #
 "IRIDESCENT BLUE IRIS" "IRIDESCENT IRIS" "BLUE IRIS" IRIS
 
@@ -370,7 +411,15 @@ LEATHER "LEATHER COMPONENT"
 
 Leather (component)
 
-Leather is a component type used in many sewing recipes.
+Leather is a component type used in many sewing recipes. You can make leather
+by tanning skins.
+
+Common types of leather are:
+ small leather (small, basic)
+ large leather (large, basic)
+ shimmering leather (large)
+ briar hide (magic)
+ absinthian leather (magic)
 
 See also: COMPONENT, TAN, SKIN, VERDANT LEATHERS
 #
@@ -431,11 +480,14 @@ Metal is a category of component that covers all refined metal ores. It is used
 for a huge variety of crafts, most of which call for either a specific metal or
 one of the following metal categories:
 
-common:         copper and iron ingots
+poor:           copper and tin ingots
+common:         bronze and iron ingots
+basic:          copper, tin, bronze, and iron ingots
 rare:           silver, gold, imperium and nocturnium ingots
 rare, fine:     silver and gold ingots
 refined:        copper, silver and gold bars
 refined, fine:  silver and gold bars
+hard, rare:     argentine and eventide ingots
 
 See also: COMPONENT, SMELT, SEPARATE, IRON, COPPER, MINE
 #
@@ -490,7 +542,7 @@ Pillar (component)
 Used for:  building
 
 The most commonly used pillars are simple wooden logs. You can also craft bound
-wooden columns from sticks and lumber if you have Basic Crafts. This may be
+wooden columns from saplings and rope if you have Basic Crafts. This may be
 useful if you're unable to get logs (for example, rough wood cannot be scraped).
 
 See also: BASIC CRAFTS, COMPONENT, LOGS
@@ -531,6 +583,12 @@ SEEDS "SEED COMPONENT" "SEEDS COMPONENT"
 Seeds (component)
 
 Used for:  nothing
+
+While there are not currently any generic uses for the 'seeds' component type,
+some crops use seeds for planting. However, most crops are planted using the
+harvested item (e.g. a bunch of apples).
+
+See also: PLANT
 #
 SKIN SKINS "SKIN COMPONENT"
 
@@ -562,18 +620,16 @@ Example:
 
 See also: COINS
 #
-STICKS "STICK COMPONENT"
-
-Stick (component)
+"STICKS AND LEAVES" "THORNY BRANCHES" "TANGLED VINES" VINES
 
 Stored at:  Lumber Yard
 Used for:  crafting, basic buildings
 
-Sticks are gathered in the forest, or scraped off some types of tree. They can
-be used for weapons, torches, and some buildings. Most recipes that need sticks
-will accept any kind of stick.
+You can gather these items in a forest, grove, or jungle. They can be used for
+torches, crafts, and some buildings. These are all types of plant fiber, and
+can be used in any recipe that says (fiber) or (plant fiber).
 
-See also: COMPONENT, GATHER, BUILD, CRAFT, SCRAPE
+See also: FIBER COMPONENT, GATHER, BUILD, CRAFT, SCRAPE
 #
 ROPE ROPES "ROPE COMPONENT"
 
@@ -586,9 +642,32 @@ Ropes are used to tie mounts to land vehicles to pull them, and to control the
 sails of ships. They will be consumed when you manufacture the vehicles - no
 more ropes are needed afterwards.
 
-You can craft basic ropes from small pieces of leather.
+You can craft basic ropes from plant fiber or small pieces of leather.
 
 See also: COMPONENT, CRAFT, MANUFACTURE
+#
+SAPLING SAPLINGS "SAPLING COMPONENT"
+
+Sapling (component)
+
+Used for:  building, crafting
+
+Saplings are young, straight trees with very few branches. This makes them
+perfect for making handles, shafts, and arrows. They are also used to make
+many simple buildings.
+
+The best ways to get saplings are:
+ chopping a copse
+ scraping or sawing trees (rare result)
+ gathering in a forest (rare result)
+
+Common types of sapling are:
+ large shoot (basic)
+ green sapling (temperate, basic)
+ thorny sapling (desert, basic)
+ reaching sapling (tropical, basic)
+
+See also: COMPONENT, GATHER, SCRAPE, SAW, COPSE
 #
 STORE STORAGE
 
@@ -630,7 +709,6 @@ Masterwork abilities:
   Forge - Master Blacksmith
   Pottery - Master Craftsman
   Woodworking - Master Craftsman
-  Healing Elixirs and Wrath of Nature Potions are masterworks if you have both
 
 See also: SCALABLE CRAFTS
 #
@@ -808,7 +886,7 @@ See also: COMPONENT, COOK, FRUIT
 #
 WAREHOUSE
 
-Building:  {WW}  Warehouse  (Artisans skill)
+Building:  {WW}  Warehouse  (Foundations goal)
 
 Command:  warehouse inventory [item keywords]
           warehouse identify <item keywords>
@@ -838,6 +916,6 @@ You retrieve a short sword (x4).
 Note: Immortals can see the warehouse lists for other empires using the syntax
 "warehouse inv <empire> [keywords]".
 
-See also: ARTISANS, KEEP, RETRIEVE, STORE, VAULT
+See also: KEEP, RETRIEVE, STORE, VAULT
 #
 $

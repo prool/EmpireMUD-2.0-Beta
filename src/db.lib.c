@@ -46,6 +46,7 @@
 *   Room Template Lib
 *   Sector Lib
 *   Stored Event Lib
+*   Theft Lib
 *   Trigger Lib
 *   Core Lib Functions
 *   Index Saving
@@ -59,6 +60,7 @@
 extern struct automessage *automessages;
 extern struct db_boot_info_type db_boot_info[NUM_DB_BOOT_TYPES];
 extern struct player_special_data dummy_mob;
+extern struct empire_territory_data *global_next_territory_entry;
 extern int max_automessage_id;
 extern struct offense_info_type offense_info[NUM_OFFENSES];
 extern bool world_is_sorted;
@@ -75,7 +77,9 @@ void sort_world_table();
 // locals
 int check_object(obj_data *obj);
 int count_hash_records(FILE *fl);
+void delete_territory_npc(struct empire_territory_data *ter, struct empire_npc_data *npc);
 empire_vnum find_free_empire_vnum(void);
+void free_theft_logs(struct theft_log *list);
 void parse_custom_message(FILE *fl, struct custom_message **list, char *error);
 void parse_extra_desc(FILE *fl, struct extra_descr_data **list, char *error_part);
 void parse_generic_name_file(FILE *fl, char *err_str);
@@ -83,6 +87,8 @@ void parse_icon(char *line, FILE *fl, struct icon_data **list, char *error_part)
 void parse_interaction(char *line, struct interaction_item **list, char *error_part);
 void parse_link_rule(FILE *fl, struct adventure_link_rule **list, char *error_part);
 void parse_resource(FILE *fl, struct resource_data **list, char *error_str);
+struct theft_log *reduce_theft_logs_and_get_recent(empire_data *emp);
+PLAYER_UPDATE_FUNC(send_all_players_to_nowhere);
 int sort_empires(empire_data *a, empire_data *b);
 int sort_room_templates(room_template *a, room_template *b);
 void write_custom_messages_to_file(FILE *fl, char letter, struct custom_message *list);
@@ -584,8 +590,11 @@ void remove_building_from_table(bld_data *bld) {
 * @param bld_data *building The building to free.
 */
 void free_building(bld_data *bdg) {
+	void free_bld_relations(struct bld_relation *list);
+	
 	bld_data *proto = building_proto(GET_BLD_VNUM(bdg));
 	struct interaction_item *interact;
+	struct spawn_info *spawn;
 	
 	if (GET_BLD_NAME(bdg) && (!proto || GET_BLD_NAME(bdg) != GET_BLD_NAME(proto))) {
 		free(GET_BLD_NAME(bdg));
@@ -613,6 +622,12 @@ void free_building(bld_data *bdg) {
 			free(interact);
 		}
 	}
+	if (GET_BLD_SPAWNS(bdg) && (!proto || GET_BLD_SPAWNS(bdg) != GET_BLD_SPAWNS(proto))) {
+		while ((spawn = GET_BLD_SPAWNS(bdg))) {
+			GET_BLD_SPAWNS(bdg) = spawn->next;
+			free(spawn);
+		}
+	}
 	
 	if (GET_BLD_SCRIPTS(bdg) && (!proto || GET_BLD_SCRIPTS(bdg) != GET_BLD_SCRIPTS(proto))) {
 		free_proto_scripts(&GET_BLD_SCRIPTS(bdg));
@@ -620,6 +635,10 @@ void free_building(bld_data *bdg) {
 	
 	if (GET_BLD_YEARLY_MAINTENANCE(bdg) && (!proto || GET_BLD_YEARLY_MAINTENANCE(bdg) != GET_BLD_YEARLY_MAINTENANCE(proto))) {
 		free_resource_list(GET_BLD_YEARLY_MAINTENANCE(bdg));
+	}
+	
+	if (GET_BLD_RELATIONS(bdg) && (!proto || GET_BLD_RELATIONS(bdg) != GET_BLD_RELATIONS(proto))) {
+		free_bld_relations(GET_BLD_RELATIONS(bdg));
 	}
 	
 	free(bdg);
@@ -648,6 +667,7 @@ void init_building(bld_data *building) {
 void parse_building(FILE *fl, bld_vnum vnum) {
 	char line[256], str_in[256], str_in2[256];
 	struct spawn_info *spawn, *stemp;
+	struct bld_relation *relat;
 	bld_data *bld, *find;
 	int int_in[4];
 	double dbl_in;
@@ -780,14 +800,27 @@ void parse_building(FILE *fl, bld_vnum vnum) {
 				break;
 			}
 			
-			// upgrades to
-			case 'U': {
-				if (!get_line(fl, line) || sscanf(line, "%d", &int_in[0]) != 1) {
-					log("SYSERR: Format error in U line of %s", buf2);
+			case 'U': {	// relation (formerly 'upgrades to')
+				if (!get_line(fl, line)) {
+					log("SYSERR: Missing U line of %s", buf2);
 					exit(1);
 				}
+				if (sscanf(line, "%d %d", &int_in[0], &int_in[1]) != 2) {
+					if (sscanf(line, "%d", &int_in[1]) == 1) {
+						// backwards-compatible to when U was only upgrades-to
+						int_in[0] = BLD_REL_UPGRADES_TO;
+					}
+					else {	// error
+						log("SYSERR: Format error in U line of %s", buf2);
+						exit(1);
+					}
+				}
 				
-				GET_BLD_UPGRADES_TO(bld) = int_in[0];
+				CREATE(relat, struct bld_relation, 1);
+				relat->type = int_in[0];
+				relat->vnum = int_in[1];
+				
+				LL_APPEND(GET_BLD_RELATIONS(bld), relat);
 				break;
 			}
 
@@ -814,6 +847,7 @@ void parse_building(FILE *fl, bld_vnum vnum) {
 */
 void write_building_to_file(FILE *fl, bld_data *bld) {
 	char temp[MAX_STRING_LENGTH], temp2[MAX_STRING_LENGTH];
+	struct bld_relation *relat;
 	struct spawn_info *spawn;
 	
 	if (!fl || !bld) {
@@ -876,10 +910,9 @@ void write_building_to_file(FILE *fl, bld_data *bld) {
 	// T: triggers
 	write_trig_protos_to_file(fl, 'T', GET_BLD_SCRIPTS(bld));
 	
-	// U: upgrades_to
-	if (GET_BLD_UPGRADES_TO(bld) != NOTHING && building_proto(GET_BLD_UPGRADES_TO(bld))) {
-		fprintf(fl, "U\n");
-		fprintf(fl, "%d\n", GET_BLD_UPGRADES_TO(bld));
+	// U: relations (formerly upgrades_to)
+	LL_FOREACH(GET_BLD_RELATIONS(bld), relat) {
+		fprintf(fl, "U\n%d %d\n", relat->type, relat->vnum);
 	}
 	
 	// end
@@ -1384,6 +1417,197 @@ void remove_empire_from_table(empire_data *emp) {
 
 
 /**
+* This function detects when the mud boots up on a new map, and moves all
+* empire territory to "no island" (to be moved back later). It also cleans up
+* empire data and ensures players don't log in mid-ocean.
+*/
+void check_for_new_map(void) {
+	void delete_instance(struct instance_data *inst, bool run_cleanup);	// instance.c
+	void update_all_players(char_data *to_message, PLAYER_UPDATE_FUNC(*func));
+	
+	struct empire_storage_data *store, *next_store;
+	struct empire_territory_data *ter, *next_ter;
+	struct empire_trade_data *trade, *next_trade;
+	struct empire_city_data *city, *next_city;
+	struct shipping_data *shipd, *next_shipd;
+	struct empire_island *isle, *next_isle;
+	struct instance_data *inst, *next_inst;
+	struct empire_unique_storage *eus;
+	empire_data *emp, *next_emp;
+	room_data *room;
+	FILE *fl;
+	
+	if (!(fl = fopen(NEW_WORLD_HINT_FILE, "r"))) {
+		return;	// no new world
+	}
+	fclose(fl);
+	
+	log("DETECT NEW WORLD MAP -- Clearing empire islands and player locations...");
+	
+	// ensure no instances in the instance list-- their locations SHOULD be all gone anyway
+	LL_FOREACH_SAFE(instance_list, inst, next_inst) {
+		if (inst->room) {
+			free(inst->room);
+		}
+		if (INST_MOB_COUNTS(inst)) {
+			free(INST_MOB_COUNTS(inst));
+		}
+		LL_DELETE(instance_list, inst);
+		free(inst);
+	}
+	
+	// update all empires
+	HASH_ITER(hh, empire_table, emp, next_emp) {
+		// move unique storage
+		LL_FOREACH(EMPIRE_UNIQUE_STORAGE(emp), eus) {
+			eus->island = NO_ISLAND;	// simple move, for now
+		}
+		
+		// free shipping (and put the items back)
+		LL_FOREACH_SAFE(EMPIRE_SHIPPING_LIST(emp), shipd, next_shipd) {
+			add_to_empire_storage(emp, NO_ISLAND, shipd->vnum, shipd->amount);
+			free(shipd);	// no need to remove from list
+		}
+		EMPIRE_SHIPPING_LIST(emp) = NULL;	// all entries freed
+		
+		// free trade (no longer relevant)
+		LL_FOREACH_SAFE(EMPIRE_TRADE(emp), trade, next_trade) {
+			free(trade);
+		}
+		EMPIRE_TRADE(emp) = NULL;
+		
+		// free cities
+		LL_FOREACH_SAFE(EMPIRE_CITY_LIST(emp), city, next_city) {
+			if (city->name) {
+				free(city->name);
+			}
+			room = city->location;
+			if (room) {
+				if (IS_CITY_CENTER(room)) {
+					disassociate_building(room);
+				}
+				if (ROOM_OWNER(room)) {
+					abandon_room(room);
+				}
+			}
+			free(city);	// no need to remove from list
+		}
+		EMPIRE_CITY_LIST(emp) = NULL;	// all entries freed
+		
+		// free territory lists and clear numbers
+		HASH_ITER(hh, EMPIRE_TERRITORY_LIST(emp), ter, next_ter) {
+			if (ter == global_next_territory_entry) {
+				global_next_territory_entry = ter->hh.next;
+			}
+			
+			// free npcs
+			while (ter->npcs) {
+				delete_territory_npc(ter, ter->npcs);
+			}
+			
+			HASH_DEL(EMPIRE_TERRITORY_LIST(emp), ter);
+			free(ter);
+		}
+		EMPIRE_TERRITORY_LIST(emp) = NULL;	// all entires freed
+		
+		HASH_ITER(hh, EMPIRE_ISLANDS(emp), isle, next_isle) {
+			if (isle->island == NO_ISLAND) {
+				continue;	// we ONLY keep no-island data
+			}
+			
+			// move all inventories to nowhere
+			HASH_ITER(hh, isle->store, store, next_store) {
+				add_to_empire_storage(emp, NO_ISLAND, store->vnum, store->amount);
+				HASH_DEL(isle->store, store);
+				free(store);
+			}
+			
+			// remove island data
+			if (isle->name) {
+				free(isle->name);
+			}
+			HASH_DEL(EMPIRE_ISLANDS(emp), isle);
+			free(isle);
+		}
+		
+		EMPIRE_NEEDS_SAVE(emp) = TRUE;
+		EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
+	}
+	
+	// do this last in case of error
+	save_all_empires();
+	unlink(NEW_WORLD_HINT_FILE);
+	
+	// now move all player login locations to NOWHERE
+	update_all_players(NULL, send_all_players_to_nowhere);
+	
+	// rescan all empires
+	reread_empire_tech(NULL);
+}
+
+
+/**
+* This function looks for any empire inventory that's in a "no island" location
+* and moves it to the specified island. This includes unique storage.
+*
+* @param empire_data *emp The empire to move.
+* @param int new_island The ID of the island to move to.
+*/
+void check_nowhere_einv(empire_data *emp, int new_island) {
+	struct empire_storage_data *store, *next_store;
+	struct empire_unique_storage *eus;
+	struct empire_island *no_isle;
+	bool any = FALSE;
+	
+	if (!emp || new_island == NO_ISLAND) {
+		return;	// can't do
+	}
+	
+	// move basic storage
+	if ((no_isle = get_empire_island(emp, NO_ISLAND))) {
+		HASH_ITER(hh, no_isle->store, store, next_store) {
+			add_to_empire_storage(emp, new_island, store->vnum, store->amount);
+			HASH_DEL(no_isle->store, store);
+			free(store);
+			any = TRUE;
+		}
+		no_isle->store = NULL;
+	}
+	
+	// move unique storage
+	LL_FOREACH(EMPIRE_UNIQUE_STORAGE(emp), eus) {
+		if (eus->island == NO_ISLAND) {
+			eus->island = new_island;	// simple move, for now
+			any = TRUE;
+		}
+	}
+	
+	if (any) {	// reporting
+		EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
+		log_to_empire(emp, ELOG_TERRITORY, "Empire inventory delivered to the new island");
+	}
+}
+
+
+/**
+* Checks all empires to ensure they have no "missing" einv in the no-island
+* state. This is meant to be run at startup but can be re-run as needed.
+*/
+void check_nowhere_einv_all(void) {
+	extern int get_main_island(empire_data *emp);
+	
+	empire_data *emp, *next_emp;
+	int island;
+	
+	HASH_ITER(hh, empire_table, emp, next_emp) {
+		if ((island = get_main_island(emp)) != NO_ISLAND) {
+			check_nowhere_einv(emp, island);
+		}
+	}
+}
+
+
+/**
 * Creates a new empire with default ranks and ch as leader. The default empire
 * name is the player's name so that new players will see "This area is claimed
 * by <your name>", which fits the concept that small empires are just land
@@ -1395,6 +1619,7 @@ void remove_empire_from_table(empire_data *emp) {
 empire_data *create_empire(char_data *ch) {
 	void add_empire_to_table(empire_data *emp);
 	extern bool check_unique_empire_name(empire_data *for_emp, char *name);
+	void refresh_empire_goals(empire_data *emp, any_vnum only_vnum);
 	void resort_empires(bool force);
 
 	archetype_data *arch;
@@ -1461,8 +1686,9 @@ empire_data *create_empire(char_data *ch) {
 		EMPIRE_PRIV(emp, iter) = 2;
 	}
 	
-	// this is necessary to save einv at all
+	// this is necessary to save some parts at all
 	emp->storage_loaded = TRUE;
+	emp->logs_loaded = TRUE;
 
 	// set the player up
 	remove_lore(ch, LORE_PROMOTED);
@@ -1471,11 +1697,12 @@ empire_data *create_empire(char_data *ch) {
 	GET_RANK(ch) = 2;
 	SAVE_CHAR(ch);
 
-	save_empire(emp);
+	save_empire(emp, TRUE);
 	save_index(DB_BOOT_EMP);
 	
 	// this will set up all the data
 	reread_empire_tech(emp);
+	refresh_empire_goals(emp, NOTHING);
 
 	// this is a good time to sort and rank
 	resort_empires(FALSE);
@@ -1502,7 +1729,7 @@ void delete_empire(empire_data *emp) {
 	char buf[MAX_STRING_LENGTH];
 	obj_data *obj, *next_obj;
 	char_data *ch, *next_ch;
-	bool file = FALSE, save;
+	bool file = FALSE;
 	empire_vnum vnum;
 
 	if (!emp) {
@@ -1520,20 +1747,15 @@ void delete_empire(empire_data *emp) {
 
 	// things to unset on other empires
 	HASH_ITER(hh, empire_table, emp_iter, next_emp) {
-		save = FALSE;
-		
 		for (emp_pol = EMPIRE_DIPLOMACY(emp_iter); emp_pol; emp_pol = next_pol) {
 			next_pol = emp_pol->next;
 			if (emp_pol->id == vnum) {
 				REMOVE_FROM_LIST(emp_pol, EMPIRE_DIPLOMACY(emp_iter), next);
 				free(emp_pol);
-				save = TRUE;
+				
+				et_change_diplomacy(emp_iter);
+				EMPIRE_NEEDS_SAVE(emp_iter) = TRUE;
 			}
-		}
-		
-		// save at the end in case more than 1 thing changed
-		if (save) {
-			save_empire(emp_iter);
 		}
 	}
 	
@@ -1688,33 +1910,40 @@ void ewt_free_tracker(struct empire_workforce_tracker **tracker) {
 * @param empire_data *emp The empire to free
 */
 void free_empire(empire_data *emp) {
-	extern struct empire_territory_data *global_next_territory_entry;
+	void free_empire_goals(struct empire_goal *hash);
+	void free_empire_completed_goals(struct empire_completed_goal *hash);
 	
+	struct workforce_delay_chore *wdc, *next_wdc;
+	struct workforce_delay *delay, *next_delay;
 	struct empire_island *isle, *next_isle;
-	struct empire_storage_data *store;
+	struct empire_storage_data *store, *next_store;
 	struct empire_unique_storage *eus;
 	struct empire_territory_data *ter, *next_ter;
+	struct player_craft_data *pcd, *next_pcd;
+	struct empire_needs *needs, *next_needs;
 	struct empire_city_data *city;
 	struct empire_political_data *pol;
 	struct empire_trade_data *trade;
 	struct empire_log_data *elog;
+	struct workforce_log *wf_log;
 	struct shipping_data *shipd;
 	room_data *room;
 	int iter;
 	
-	// free island techs
+	// free islands
 	HASH_ITER(hh, EMPIRE_ISLANDS(emp), isle, next_isle) {
+		HASH_ITER(hh, isle->needs, needs, next_needs) {
+			HASH_DEL(isle->needs, needs);
+			free(needs);
+		}
+		HASH_ITER(hh, isle->store, store, next_store) {
+			HASH_DEL(isle->store, store);
+			free(store);
+		}
+		HASH_DEL(EMPIRE_ISLANDS(emp), isle);
 		free(isle);
 	}
 	EMPIRE_ISLANDS(emp) = NULL;
-			
-	// free storage
-	while ((store = emp->store)) {
-		emp->store = store->next;
-		store->next = NULL;
-		free(store);
-	}
-	emp->store = NULL;
 	
 	// free unique storage
 	while ((eus = EMPIRE_UNIQUE_STORAGE(emp))) {
@@ -1746,6 +1975,12 @@ void free_empire(empire_data *emp) {
 		free(city);
 	}
 	
+	// free learned crafts
+	HASH_ITER(hh, EMPIRE_LEARNED_CRAFTS(emp), pcd, next_pcd) {
+		HASH_DEL(EMPIRE_LEARNED_CRAFTS(emp), pcd);
+		free(pcd);
+	}
+	
 	// free trades
 	while ((trade = emp->trade)) {
 		emp->trade = trade->next;
@@ -1772,6 +2007,7 @@ void free_empire(empire_data *emp) {
 			delete_territory_npc(ter, ter->npcs);
 		}
 		
+		HASH_DEL(EMPIRE_TERRITORY_LIST(emp), ter);
 		free(ter);
 	}
 	
@@ -1785,6 +2021,27 @@ void free_empire(empire_data *emp) {
 	while (EMPIRE_OFFENSES(emp)) {
 		remove_offense(emp, EMPIRE_OFFENSES(emp));
 	}
+	
+	// free delays
+	HASH_ITER(hh, EMPIRE_DELAYS(emp), delay, next_delay) {
+		LL_FOREACH_SAFE(delay->chores, wdc, next_wdc) {
+			free(wdc);
+		}
+		HASH_DEL(EMPIRE_DELAYS(emp), delay);
+		free(delay);
+	}
+	
+	// free workforce log
+	while ((wf_log = EMPIRE_WORKFORCE_LOG(emp))) {
+		EMPIRE_WORKFORCE_LOG(emp) = wf_log->next;
+		free(wf_log);
+	}
+	
+	free_theft_logs(EMPIRE_THEFT_LOGS(emp));
+	
+	// free goals
+	free_empire_goals(EMPIRE_GOALS(emp));
+	free_empire_completed_goals(EMPIRE_COMPLETED_GOALS(emp));
 	
 	// free strings
 	if (emp->name) {
@@ -1811,6 +2068,91 @@ void free_empire(empire_data *emp) {
 
 
 /**
+* Delayed-load of logs for an empire.
+*
+* @param FILE *fl The open read file.
+* @param empire_data *emp The empire to assign the logs to.
+*/
+void load_empire_logs_one(FILE *fl, empire_data *emp) {	
+	char line[1024], str_in[256], buf[MAX_STRING_LENGTH];
+	struct empire_log_data *elog, *last_log = NULL;
+	struct offense_data *off, *last_off = NULL;
+	long long_in;
+	int t[10];
+	
+	if (!fl || !emp) {
+		return;
+	}
+	
+	// error for later
+	sprintf(buf,"SYSERR: Format error in empire logs for #%d (expecting letter, got %s)", EMPIRE_VNUM(emp), line);
+
+	for (;;) {
+		if (!get_line(fl, line)) {
+			log("%s", buf);
+			exit(1);
+		}
+		switch (*line) {
+			case 'L': {	// logs
+				if (!get_line(fl, line) || sscanf(line, "%d %d", &t[0], &t[1]) != 2) {
+					log("SYSERR: Format error in L line of log file for empire %d", EMPIRE_VNUM(emp));
+					exit(1);
+				}
+				
+				CREATE(elog, struct empire_log_data, 1);
+				elog->type = t[0];
+				elog->timestamp = (time_t) t[1];
+				elog->string = fread_string(fl, buf2);
+				elog->next = NULL;
+				
+				// append to end to preserve original order
+				if (last_log) {
+					last_log->next = elog;
+				}
+				else {
+					emp->logs = elog;
+				}
+				last_log = elog;
+				break;
+			}
+			case 'W': {	// offenses
+				if (sscanf(line, "W %d %d %d %ld %d %d %s", &t[0], &t[1], &t[2], &long_in, &t[4], &t[5], str_in) != 7) {
+					log("SYSERR: W line of empire %d does not scan (ignoring).\r\n", emp->vnum);
+				}
+				
+				CREATE(off, struct offense_data, 1);
+				off->type = t[0];
+				off->empire = t[1];
+				off->player_id = t[2];
+				off->timestamp = long_in;
+				off->x = t[4];
+				off->y = t[5];
+				off->flags = asciiflag_conv(str_in);
+				
+				if (last_off) {
+					last_off->next = off;
+				}
+				else {
+					EMPIRE_OFFENSES(emp) = off;
+				}
+				
+				last_off = off;
+				break;
+			}
+
+			case 'S': {	// fin
+				return;
+			}
+			default: {
+				log("%s", buf);
+				exit(1);
+			}
+		}
+	}
+}
+
+
+/**
 * Delayed-load of storage for an empire.
 *
 * @param FILE *fl The open read file.
@@ -1820,9 +2162,10 @@ void load_empire_storage_one(FILE *fl, empire_data *emp) {
 	int t[10], junk;
 	long l_in;
 	char line[1024], str_in[256], buf[MAX_STRING_LENGTH];
-	struct empire_storage_data *store, *last_store = NULL;
 	struct empire_unique_storage *eus, *last_eus = NULL;
 	struct shipping_data *shipd, *last_shipd = NULL;
+	struct empire_storage_data *store;
+	struct theft_log *tft;
 	obj_data *obj, *proto;
 	
 	if (!fl || !emp) {
@@ -1834,32 +2177,32 @@ void load_empire_storage_one(FILE *fl, empire_data *emp) {
 
 	for (;;) {
 		if (!get_line(fl, line)) {
-			log(buf);
+			log("%s", buf);
 			exit(1);
 		}
 		switch (*line) {
 			case 'O': {	// storage
-				if (!get_line(fl, line) || sscanf(line, "%d %d %d", &t[0], &t[1], &t[2]) != 3) {
+				if (!get_line(fl, line)) {
 					log("SYSERR: Storage data for empire %d was incomplete", EMPIRE_VNUM(emp));
 					exit(1);
+				}
+				if (sscanf(line, "%d %d %d %d", &t[0], &t[1], &t[2], &t[3]) != 4) {
+					t[3] = 0;	// !keep
+					if (sscanf(line, "%d %d %d", &t[0], &t[1], &t[2]) != 3) {
+						log("SYSERR: Bad storage data for empire %d", EMPIRE_VNUM(emp));
+						exit(1);
+					}
 				}
 				
 				// validate vnum
 				proto = obj_proto(t[0]);
 				if (proto && proto->storage) {
-					CREATE(store, struct empire_storage_data, 1);
-					store->vnum = t[0];
-					store->amount = t[1];
-					store->island = t[2];
-
-					// at end
-					if (last_store) {
-						last_store->next = store;
+					add_to_empire_storage(emp, t[2], t[0], t[1]);
+					
+					// check keep
+					if (t[3] && (store = find_stored_resource(emp, t[2], t[0]))) {
+						store->keep = t[3];
 					}
-					else {
-						emp->store = store;
-					}
-					last_store = store;
 				}
 				else if (proto && !proto->storage) {
 					log("- removing %dx #%d from empire storage for %s: not storable", t[1], t[0], EMPIRE_NAME(emp));
@@ -1867,6 +2210,19 @@ void load_empire_storage_one(FILE *fl, empire_data *emp) {
 				else {
 					log("- removing %dx #%d from empire storage for %s: no such object", t[1], t[0], EMPIRE_NAME(emp));
 				}
+				break;
+			}
+			case 'T': {	// theft logs
+				if (sscanf(line, "T %d %d %ld", &t[0], &t[1], &l_in) != 3) {
+					log("SYSERR: Invalid T line of empire %d: %s", EMPIRE_VNUM(emp), line);
+					exit(0);
+				}
+				
+				CREATE(tft, struct theft_log, 1);
+				tft->vnum = t[0];
+				tft->amount = t[1];
+				tft->time_minutes = l_in;
+				LL_APPEND(EMPIRE_THEFT_LOGS(emp), tft);
 				break;
 			}
 			case 'U': {	// unique storage
@@ -1909,27 +2265,30 @@ void load_empire_storage_one(FILE *fl, empire_data *emp) {
 					exit(0);
 				}
 				
-				CREATE(shipd, struct shipping_data, 1);
-				shipd->vnum = t[0];
-				shipd->amount = t[1];
-				shipd->from_island = t[2];
-				shipd->to_island = t[3];
-				shipd->status = t[4];
-				shipd->status_time = l_in;
-				shipd->shipping_id = t[5];
-				shipd->ship_origin = t[6];
-				shipd->next = NULL;
+				if (obj_proto(t[0])) {
+					CREATE(shipd, struct shipping_data, 1);
+					shipd->vnum = t[0];
+					shipd->amount = t[1];
+					shipd->from_island = t[2];
+					shipd->to_island = t[3];
+					shipd->status = t[4];
+					shipd->status_time = l_in;
+					shipd->shipping_id = t[5];
+					shipd->ship_origin = t[6];
+					shipd->next = NULL;
 				
-				EMPIRE_TOP_SHIPPING_ID(emp) = MAX(shipd->shipping_id, EMPIRE_TOP_SHIPPING_ID(emp));
+					EMPIRE_TOP_SHIPPING_ID(emp) = MAX(shipd->shipping_id, EMPIRE_TOP_SHIPPING_ID(emp));
 
-				// append to end
-				if (last_shipd) {
-					last_shipd->next = shipd;
+					// append to end
+					if (last_shipd) {
+						last_shipd->next = shipd;
+					}
+					else {
+						EMPIRE_SHIPPING_LIST(emp) = shipd;
+					}
+					last_shipd = shipd;
 				}
-				else {
-					EMPIRE_SHIPPING_LIST(emp) = shipd;
-				}
-				last_shipd = shipd;
+				// else: don't bother warning, just drop it if the obj doesn't exist
 				break;
 			}
 
@@ -1937,7 +2296,7 @@ void load_empire_storage_one(FILE *fl, empire_data *emp) {
 				return;
 			}
 			default: {
-				log(buf);
+				log("%s", buf);
 				exit(1);
 			}
 		}
@@ -1946,7 +2305,7 @@ void load_empire_storage_one(FILE *fl, empire_data *emp) {
 
 
 /**
-* Load the storage files for all empires (called at startup).
+* Load the storage and log files for all empires (called at startup).
 */
 void load_empire_storage(void) {
 	char fname[MAX_STRING_LENGTH];
@@ -1955,18 +2314,25 @@ void load_empire_storage(void) {
 	
 	HASH_ITER(hh, empire_table, emp, next_emp) {
 		emp->storage_loaded = TRUE;	// safe to save now (whether or not it loads one)
+		emp->logs_loaded = TRUE;
 		
-		// open file
+		// storage file
 		sprintf(fname, "%s%d%s", STORAGE_PREFIX, EMPIRE_VNUM(emp), EMPIRE_SUFFIX);
 		if (!(fl = fopen(fname, "r"))) {
 			// it's not considered critical to lack this file
 			log("Unable to open einv file for empire %d %s", EMPIRE_VNUM(emp), EMPIRE_NAME(emp));
 			continue;
 		}
-		
 		load_empire_storage_one(fl, emp);
-		
 		fclose(fl);
+		
+		// logs file
+		sprintf(fname, "%s%d%s", ELOG_PREFIX, EMPIRE_VNUM(emp), EMPIRE_SUFFIX);
+		if ((fl = fopen(fname, "r"))) {
+			// it's not considered critical to lack this file
+			load_empire_logs_one(fl, emp);
+			fclose(fl);
+		}
 	}
 }
 
@@ -1989,16 +2355,24 @@ void parse_empire(FILE *fl, empire_vnum vnum) {
 	struct empire_political_data *emp_pol;
 	struct empire_territory_data *ter;
 	struct empire_trade_data *trade, *last_trade = NULL;
-	struct empire_log_data *elog, *last_log = NULL;
-	struct offense_data *off, *last_off = NULL;
+	struct empire_goal *egoal, *last_egoal = NULL;
+	struct empire_completed_goal *ecg;
+	struct player_craft_data *pcd;
+	struct empire_log_data *elog;
+	struct empire_needs *need;
+	struct offense_data *off;
 	struct empire_city_data *city;
 	struct empire_island *isle;
+	struct req_data *task;
+	bitvector_t bit_in;
 	room_data *room;
 	double dbl_in;
 	long long_in;
+	char *tmp, c_in;
 	
 	sprintf(buf2, "empire #%d", vnum);
 	
+	// init
 	CREATE(emp, empire_data, 1);
 	emp->vnum = vnum;
 
@@ -2009,7 +2383,8 @@ void parse_empire(FILE *fl, empire_vnum vnum) {
 	}
 	add_empire_to_table(emp);
 	
-	emp->storage_loaded = FALSE;	// block accidental storage saves
+	emp->storage_loaded = FALSE;	// block accidental saves
+	emp->logs_loaded = FALSE;
 	
 	emp->name = fread_string(fl, buf2);
 	emp->adjective = fread_string(fl, buf2);
@@ -2021,17 +2396,20 @@ void parse_empire(FILE *fl, empire_vnum vnum) {
 		exit(1);
 	}
 
-	if (sscanf(line, "%d %ld %d", &t[0], &long_in, &t[1]) != 3) {
-		log("SYSERR: Format error in numeric line of empire #%d", vnum);
-		exit(1);
+	if (sscanf(line, "%d %ld %d %s", &t[0], &long_in, &t[1], str_in) != 4) {
+		// backwards-compatibility if no flags
+		strcpy(str_in, "0");
+		if (sscanf(line, "%d %ld %d", &t[0], &long_in, &t[1]) != 3) {
+			log("SYSERR: Format error in data line of empire #%d", vnum);
+			exit(1);
+		}
 	}
 
 	emp->leader = t[0];
 	emp->create_time = long_in;
 	emp->num_ranks = t[1];
+	emp->admin_flags = asciiflag_conv(str_in);
 	
-	emp->city_terr = 0;
-	emp->outside_terr = 0;
 	emp->members = 0;
 	emp->greatness = 0;
 	for (iter = 0; iter < NUM_TECHS; ++iter) {
@@ -2052,13 +2430,32 @@ void parse_empire(FILE *fl, empire_vnum vnum) {
 
 	for (;;) {
 		if (!get_line(fl, line)) {
-			log(buf);
+			log("%s", buf);
 			exit(1);
 		}
 
 		switch (*line) {
 			case 'A': {	// description
 				EMPIRE_DESCRIPTION(emp) = fread_string(fl, buf2);
+				break;
+			}
+			case 'B': {	// misc data
+				if (sscanf(line, "B %d %ld", &t[0], &long_in) != 2) {
+					log("SYSERR: Bad format in B tag of empire %d!", vnum);
+					exit(1);
+				}
+				
+				switch (t[0]) {
+					case 1: {
+						EMPIRE_CITY_OVERAGE_WARNING_TIME(emp) = long_in;
+						break;
+					}
+					default: {
+						log("SYSERR: Bad data type %d in B tag of empire %d!", t[0], vnum);
+						exit(1);
+					}
+				}
+				
 				break;
 			}
 			case 'C': { // chore
@@ -2088,8 +2485,7 @@ void parse_empire(FILE *fl, empire_vnum vnum) {
 				emp_pol->type = t[1];
 				emp_pol->offer = t[2];
 				emp_pol->start_time = t[3];
-				emp_pol->next = emp->diplomacy;
-				emp->diplomacy = emp_pol;
+				LL_APPEND(emp->diplomacy, emp_pol);
 				break;
 			}
 			case 'E': {	// extra data
@@ -2107,13 +2503,143 @@ void parse_empire(FILE *fl, empire_vnum vnum) {
 				emp->coins = dbl_in;
 				break;
 			}
+			case 'F': {	// base tech
+				if (sscanf(line, "F %d %d", &t[0], &t[1]) != 2) {
+					log("SYSERR: Bad format in F tag of empire %d!", vnum);
+					exit(1);
+				}
+				
+				if (t[0] >= 0 && t[0] < NUM_TECHS) {
+					EMPIRE_BASE_TECH(emp, t[0]) = t[1];
+				}
+				break;
+			}
+			case 'G': {	// goals (sub-divided by a 2nd letter)
+				switch (*(line + 1)) {
+					case 'C': {	// GC: completed
+						if (sscanf(line, "GC %d %ld", &t[0], &long_in) != 2) {
+							log("SYSERR: Format error in GC line of empire %d", vnum);
+							// non-fatal
+							break;
+						}
+						
+						HASH_FIND_INT(EMPIRE_COMPLETED_GOALS(emp), &t[0], ecg);
+						if (!ecg) {
+							CREATE(ecg, struct empire_completed_goal, 1);
+							ecg->vnum = t[0];
+							HASH_ADD_INT(EMPIRE_COMPLETED_GOALS(emp), vnum, ecg);
+						}
+						ecg->when = long_in;
+						break;
+					}
+					case 'G': {	// GG: goal in progress
+						if (sscanf(line, "GG %d %d %ld", &t[0], &t[1], &long_in) != 3) {
+							long_in = time(0);	// backwards-compatible
+							if (sscanf(line, "GG %d %d", &t[0], &t[1]) != 2) {
+								log("SYSERR: Format error in GG line of empire %d", vnum);
+								// fatal because it could mess up trackers
+								exit(1);
+							}
+						}
+						
+						HASH_FIND_INT(EMPIRE_GOALS(emp), &t[0], egoal);
+						if (!egoal) {
+							CREATE(egoal, struct empire_goal, 1);
+							egoal->vnum = t[0];
+							HASH_ADD_INT(EMPIRE_GOALS(emp), vnum, egoal);
+						}
+						egoal->version = t[1];
+						egoal->timestamp = long_in;
+						
+						last_egoal = egoal;
+						break;
+					}
+					case 'L': {	// GL: learned crafts
+						if (sscanf(line, "GL %d %d", &t[0], &t[1]) != 2) {
+							log("SYSERR: Format error in GL line of empire %d", vnum);
+							// not fatal
+							break;
+						}
+						
+						if (t[1] > 0) {
+							HASH_FIND_INT(EMPIRE_LEARNED_CRAFTS(emp), &t[0], pcd);
+							if (!pcd) {
+								CREATE(pcd, struct player_craft_data, 1);
+								pcd->vnum = t[0];
+								pcd->count = t[1];
+								HASH_ADD_INT(EMPIRE_LEARNED_CRAFTS(emp), vnum, pcd);
+							}
+						}
+						break;
+					}
+					case 'P': {	// GP: goal points (progress points)
+						if (sscanf(line, "GP %d %d", &t[0], &t[1]) != 2) {
+							log("SYSERR: Format error in GP line of empire %d", vnum);
+							// non-fatal
+							break;
+						}
+						
+						if (t[0] >= 0 && t[0] < NUM_PROGRESS_TYPES) {
+							EMPIRE_PROGRESS_POINTS(emp, t[0]) = t[1];
+						}
+						break;
+					}
+					case 'T': {	// GT: tracker for last goal
+						if (last_egoal && sscanf(line, "GT %d %d %lld %d %d %c", &t[0], &t[1], &bit_in, &t[2], &t[3], &c_in) == 6) {
+							// found group
+						}
+						else if (last_egoal && sscanf(line, "GT %d %d %lld %d %d", &t[0], &t[1], &bit_in, &t[2], &t[3]) == 5) {
+							c_in = 0;	// no group given
+						}
+						else {
+							log("SYSERR: Format error in GT line of empire %d", vnum);
+							// bad format but not fatal
+							if (last_egoal) {
+								--last_egoal->version;	// forces a refresh by putting the version out of date
+							}
+							break;
+						}
+					
+						CREATE(task, struct req_data, 1);
+						task->type = t[0];
+						task->vnum = t[1];
+						task->misc = bit_in;
+						task->needed = t[2];
+						task->current = t[3];
+						task->group = c_in;
+					
+						LL_APPEND(last_egoal->tracker, task);
+						break;
+					}
+					default: {
+						log("SYSERR: Unknown G line in empire %d: %s", vnum, line);
+						// safe to continue though
+						break;
+					}
+				}
+				break;
+			}
 			case 'I': {	// island name
 				if ((isle = get_empire_island(emp, atoi(line+1)))) {
 					isle->name = fread_string(fl, buf2);
 				}
 				break;
 			}
-			case 'L': {	// logs
+			case 'J': {	// island data
+				if (sscanf(line, "J %d %d %d %s", &t[0], &t[1], &t[2], str_in) != 4) {
+					log("SYSERR: Expected 4 args in J line of empire %d", vnum);
+					exit(0);
+				}
+				
+				// find or add
+				need = get_empire_needs(emp, t[0], t[1]);
+				
+				need->needed = t[2];
+				need->status = asciiflag_conv(str_in);
+				
+				break;
+			}
+			case 'L': {	// NOTE: logs are here for backwards-compatibility -- they are now loaded by load_empire_logs_one
 				if (!get_line(fl, line) || sscanf(line, "%d %d", &t[0], &t[1]) != 2) {
 					log("SYSERR: Format error in L line of empire %d", vnum);
 					exit(1);
@@ -2123,16 +2649,7 @@ void parse_empire(FILE *fl, empire_vnum vnum) {
 				elog->type = t[0];
 				elog->timestamp = (time_t) t[1];
 				elog->string = fread_string(fl, buf2);
-				elog->next = NULL;
-				
-				// append to end to preserve original order
-				if (last_log) {
-					last_log->next = elog;
-				}
-				else {
-					emp->logs = elog;
-				}
-				last_log = elog;
+				LL_APPEND(emp->logs, elog);
 				break;
 			}
 			case 'M': {	// motd
@@ -2189,7 +2706,7 @@ void parse_empire(FILE *fl, empire_vnum vnum) {
 				}
 				break;
 			}
-			case 'W': {	// offenses
+			case 'W': {	// NOTE: offenses are here for backwards-compatibility -- they are now loaded by load_empire_logs_one
 				if (sscanf(line, "W %d %d %d %ld %d %d %s", &t[0], &t[1], &t[2], &long_in, &t[4], &t[5], str_in) != 7) {
 					log("SYSERR: W line of empire %d does not scan (ignoring).\r\n", emp->vnum);
 				}
@@ -2202,15 +2719,7 @@ void parse_empire(FILE *fl, empire_vnum vnum) {
 				off->x = t[4];
 				off->y = t[5];
 				off->flags = asciiflag_conv(str_in);
-				
-				if (last_off) {
-					last_off->next = off;
-				}
-				else {
-					EMPIRE_OFFENSES(emp) = off;
-				}
-				
-				last_off = off;
+				LL_APPEND(EMPIRE_OFFENSES(emp), off);
 				break;
 			}
 			case 'X': { // trade
@@ -2238,8 +2747,18 @@ void parse_empire(FILE *fl, empire_vnum vnum) {
 			}
 			case 'Y': { // city				
 				if (sscanf(line, "Y %d %d %s", &t[0], &t[1], str_in) == 3) {
-					city = create_city_entry(emp, fread_string(fl, buf2), real_room(t[0]), t[1]);
-					city->traits = asciiflag_conv(str_in);
+					tmp = fread_string(fl, buf2);
+					
+					if ((room = real_room(t[0])) && IS_CITY_CENTER(room)) {
+						city = create_city_entry(emp, tmp, room, t[1]);
+						city->traits = asciiflag_conv(str_in);
+					}
+					else if (room) {
+						// no city center -- just lose the city
+						log_to_empire(emp, ELOG_TERRITORY, "%s was lost", tmp);
+					}
+					
+					free(tmp);	// was duplicated
 				}
 				else {
 					log("SYSERR: Format error in city line of empire %d", emp->vnum);
@@ -2247,15 +2766,43 @@ void parse_empire(FILE *fl, empire_vnum vnum) {
 				
 				break;
 			}
+			case 'Z': { // attribute
+				if (sscanf(line, "Z%d %d", &t[0], &t[1]) != 2) {
+					log("SYSERR: Format error in Z line of empire %d.\r\n", emp->vnum);
+					exit(1);
+				}
+				
+				if (t[0] >= 0 && t[0] < NUM_EMPIRE_ATTRIBUTES) {
+					EMPIRE_ATTRIBUTE(emp, t[0]) = t[1];
+				}
+				break;
+			}
 
 			case 'S':			/* end of empire */
 				return;
 			default: {
-				log(buf);
+				log("%s", buf);
 				exit(1);
 			}
 		}
 	}
+}
+
+
+// for check_for_new_map
+PLAYER_UPDATE_FUNC(send_all_players_to_nowhere) {
+	// clear these rooms
+	GET_LAST_ROOM(ch) = NOWHERE;
+	GET_LOADROOM(ch) = NOWHERE;
+	GET_LOAD_ROOM_CHECK(ch) = NOWHERE;
+	GET_MARK_LOCATION(ch) = NOWHERE;
+	GET_TOMB_ROOM(ch) = NOWHERE;
+	GET_ADVENTURE_SUMMON_RETURN_LOCATION(ch) = NOWHERE;
+	GET_ADVENTURE_SUMMON_RETURN_MAP(ch) = NOWHERE;
+	GET_ADVENTURE_SUMMON_INSTANCE_ID(ch) = NOTHING;
+	
+	// remove loadroom flag (their loadroom is gone)
+	REMOVE_BIT(PLR_FLAGS(ch), PLR_LOADROOM);
 }
 
 
@@ -2269,11 +2816,14 @@ void write_empire_to_file(FILE *fl, empire_data *emp) {
 	struct empire_island *isle, *next_isle;
 	struct empire_political_data *emp_pol;
 	struct empire_territory_data *ter, *next_ter;
+	struct empire_completed_goal *ecg, *next_ecg;
+	struct player_craft_data *pcd, *next_pcd;
+	struct empire_goal *egoal, *next_egoal;
+	struct empire_needs *need, *next_need;
 	struct empire_trade_data *trade;
 	struct empire_city_data *city;
-	struct empire_log_data *elog;
 	struct empire_npc_data *npc;
-	struct offense_data *off;
+	struct req_data *task;
 	int iter;
 
 	if (!emp) {
@@ -2284,7 +2834,7 @@ void write_empire_to_file(FILE *fl, empire_data *emp) {
 	fprintf(fl, "%s~\n", NULLSAFE(EMPIRE_NAME(emp)));
 	fprintf(fl, "%s~\n", NULLSAFE(EMPIRE_ADJECTIVE(emp)));
 	fprintf(fl, "%s~\n", NULLSAFE(EMPIRE_BANNER(emp)));
-	fprintf(fl, "%d %ld %d\n", EMPIRE_LEADER(emp), EMPIRE_CREATE_TIME(emp), EMPIRE_NUM_RANKS(emp));
+	fprintf(fl, "%d %ld %d %s\n", EMPIRE_LEADER(emp), EMPIRE_CREATE_TIME(emp), EMPIRE_NUM_RANKS(emp), bitv_to_alpha(EMPIRE_ADMIN_FLAGS(emp)));
 	
 	// A: description
 	if (EMPIRE_DESCRIPTION(emp) && *EMPIRE_DESCRIPTION(emp)) {
@@ -2293,6 +2843,11 @@ void write_empire_to_file(FILE *fl, empire_data *emp) {
 		strcpy(temp, EMPIRE_DESCRIPTION(emp));
 		strip_crlf(temp);
 		fprintf(fl, "A\n%s~\n", temp);
+	}
+	
+	// B: misc data
+	if (EMPIRE_CITY_OVERAGE_WARNING_TIME(emp)) {
+		fprintf(fl, "B 1 %ld\n", EMPIRE_CITY_OVERAGE_WARNING_TIME(emp));
 	}
 
 	// C: chores
@@ -2312,10 +2867,47 @@ void write_empire_to_file(FILE *fl, empire_data *emp) {
 	// E: extra data
 	fprintf(fl, "E\n%s %.1f\n", bitv_to_alpha(EMPIRE_FRONTIER_TRAITS(emp)), EMPIRE_COINS(emp));
 	
-	// I: island names
+	// F: base techs
+	for (iter = 0; iter < NUM_TECHS; ++iter) {
+		if (EMPIRE_BASE_TECH(emp, iter) > 0) {
+			fprintf(fl, "F %d %d\n", iter, EMPIRE_BASE_TECH(emp, iter));
+		}
+	}
+	
+	// G: progression goals, tasks, and completed
+	HASH_ITER(hh, EMPIRE_GOALS(emp), egoal, next_egoal) {
+		// GG goal in progress
+		fprintf(fl, "GG %d %d %ld\n", egoal->vnum, egoal->version, egoal->timestamp);
+		
+		// GT goal tracker
+		LL_FOREACH(egoal->tracker, task) {
+			fprintf(fl, "GT %d %d %lld %d %d %c\n", task->type, task->vnum, task->misc, task->needed, task->current, task->group);
+		}
+	}
+	HASH_ITER(hh, EMPIRE_COMPLETED_GOALS(emp), ecg, next_ecg) {
+		// GC completed goal
+		fprintf(fl, "GC %d %ld\n", ecg->vnum, ecg->when);
+	}
+	HASH_ITER(hh, EMPIRE_LEARNED_CRAFTS(emp), pcd, next_pcd) {
+		// GL learned crafts
+		fprintf(fl, "GL %d %d\n", pcd->vnum, pcd->count);
+	}
+	for (iter = 0; iter < NUM_PROGRESS_TYPES; ++iter) {
+		// GP goal points (progress points)
+		if (EMPIRE_PROGRESS_POINTS(emp, iter)) {
+			fprintf(fl, "GP %d %d\n", iter, EMPIRE_PROGRESS_POINTS(emp, iter));
+		}
+	}
+	
 	HASH_ITER(hh, EMPIRE_ISLANDS(emp), isle, next_isle) {
+		// I: island names
 		if (isle->name) {
 			fprintf(fl, "I%d\n%s~\n", isle->island, isle->name);
+		}
+		
+		// J: island data
+		HASH_ITER(hh, isle->needs, need, next_need) {
+			fprintf(fl, "J %d %d %d %s\n", isle->island, need->type, need->needed, bitv_to_alpha(need->status));
 		}
 	}
 	
@@ -2328,23 +2920,17 @@ void write_empire_to_file(FILE *fl, empire_data *emp) {
 		fprintf(fl, "M\n%s~\n", temp);
 	}
 	
-	// L: logs
-	for (elog = EMPIRE_LOGS(emp); elog; elog = elog->next) {
-		fprintf(fl, "L\n");
-		fprintf(fl, "%d %d\n", elog->type, (int) elog->timestamp);
-		fprintf(fl, "%s~\n", elog->string);
-	}
-
+	// avoid L (used by empire logs)
 	// avoid O (used by empire storage)
 
 	// P: privs
 	for (iter = 0; iter < NUM_PRIVILEGES; ++iter)
 		fprintf(fl, "P%d\n%d\n", iter, EMPIRE_PRIV(emp, iter));
-
+	
 	// R: ranks
 	for (iter = 0; iter < emp->num_ranks; ++iter)
 		fprintf(fl, "R%d\n%s~\n", iter, EMPIRE_RANK(emp, iter));
-
+	
 	// T: territory buildings
 	HASH_ITER(hh, EMPIRE_TERRITORY_LIST(emp), ter, next_ter) {
 		fprintf(fl, "T %d %d\n", ter->vnum, ter->population_timer);
@@ -2357,11 +2943,7 @@ void write_empire_to_file(FILE *fl, empire_data *emp) {
 	
 	// avoid U (used by empire storage)
 	// avoid V (used by empire storage)
-	
-	// W: offenses
-	LL_FOREACH(EMPIRE_OFFENSES(emp), off) {
-		fprintf(fl, "W %d %d %d %ld %d %d %s\n", off->type, off->empire, off->player_id, off->timestamp, off->x, off->y, bitv_to_alpha(off->flags));
-	}
+	// avoid W (used by empire logs)
 	
 	// X: trade
 	for (trade = EMPIRE_TRADE(emp); trade; trade = trade->next) {
@@ -2372,7 +2954,45 @@ void write_empire_to_file(FILE *fl, empire_data *emp) {
 	for (city = EMPIRE_CITY_LIST(emp); city; city = city->next) {
 		fprintf(fl, "Y %d %d %s\n%s~\n", GET_ROOM_VNUM(city->location), city->type, bitv_to_alpha(city->traits), city->name);
 	}
+	
+	// Z: attributes
+	for (iter = 0; iter < NUM_EMPIRE_ATTRIBUTES; ++iter) {
+		fprintf(fl, "Z%d %d\n", iter, EMPIRE_ATTRIBUTE(emp, iter));
+	}
 
+	fprintf(fl, "S\n");
+}
+
+
+/**
+* Writes one empire's log info to file. This is separate to speed up saving.
+* This file includes:
+* - elogs
+* - offenses
+*
+* @param FILE *fl The open write file.
+* @param empire_data *emp The empire whose logs to save.
+*/
+void write_empire_logs_to_file(FILE *fl, empire_data *emp) {
+	struct empire_log_data *elog;
+	struct offense_data *off;
+	
+	if (!emp) {
+		return;
+	}
+	
+	// L: logs
+	for (elog = EMPIRE_LOGS(emp); elog; elog = elog->next) {
+		fprintf(fl, "L\n");
+		fprintf(fl, "%d %d\n", elog->type, (int) elog->timestamp);
+		fprintf(fl, "%s~\n", elog->string);
+	}
+	
+	// W: offenses
+	LL_FOREACH(EMPIRE_OFFENSES(emp), off) {
+		fprintf(fl, "W %d %d %d %ld %d %d %s\n", off->type, off->empire, off->player_id, off->timestamp, off->x, off->y, bitv_to_alpha(off->flags));
+	}
+	
 	fprintf(fl, "S\n");
 }
 
@@ -2385,17 +3005,27 @@ void write_empire_to_file(FILE *fl, empire_data *emp) {
 * @param empire_data *emp The empire whose storage to save.
 */
 void write_empire_storage_to_file(FILE *fl, empire_data *emp) {	
-	struct empire_storage_data *store;
+	struct empire_storage_data *store, *next_store;
+	struct empire_island *isle, *next_isle;
 	struct empire_unique_storage *eus;
 	struct shipping_data *shipd;
+	struct theft_log *tft;
 
 	if (!emp) {
 		return;
 	}
-
-	// O: storage
-	for (store = EMPIRE_STORAGE(emp); store; store = store->next) {
-		fprintf(fl, "O\n%d %d %d\n", store->vnum, store->amount, store->island);
+	
+	// islands
+	HASH_ITER(hh, EMPIRE_ISLANDS(emp), isle, next_isle) {
+		// O: storage
+		HASH_ITER(hh, isle->store, store, next_store) {
+			fprintf(fl, "O\n%d %d %d %d\n", store->vnum, store->amount, isle->island, store->keep);
+		}
+	}
+	
+	// T: theft logs
+	LL_FOREACH(EMPIRE_THEFT_LOGS(emp), tft) {
+		fprintf(fl, "T %d %d %ld\n", tft->vnum, tft->amount, tft->time_minutes);
 	}
 
 	// U: unique storage
@@ -2418,11 +3048,72 @@ void write_empire_storage_to_file(FILE *fl, empire_data *emp) {
 
 
 /**
-* Saves an empire to files: main empire file, empire storage file.
+* Writes the logs file for the empire.
 *
 * @param empire_data *emp The empire to save.
 */
-void save_empire(empire_data *emp) {
+void save_empire_logs(empire_data *emp) {
+	char fname[30], tempname[64];
+	FILE *fl;
+
+	// empire logs: only if it's already been loaded (saves may trigger sooner)
+	if (!emp || !emp->logs_loaded) {
+		return;
+	}
+	
+	sprintf(fname, "%s%d%s", ELOG_PREFIX, EMPIRE_VNUM(emp), EMPIRE_SUFFIX);
+	strcpy(tempname, fname);
+	strcat(tempname, TEMP_SUFFIX);
+	if (!(fl = fopen(tempname, "w"))) {
+		log("SYSERR: Unable to write %s", tempname);
+		return;
+	}
+	write_empire_logs_to_file(fl, emp);
+	fprintf(fl, "$~\n");
+	fclose(fl);
+	rename(tempname, fname);
+	
+	EMPIRE_NEEDS_LOGS_SAVE(emp) = FALSE;
+}
+
+
+/**
+* Writes the storage file for the empire.
+*
+* @param empire_data *emp The empire to save.
+*/
+void save_empire_storage(empire_data *emp) {
+	FILE *fl;
+	char fname[30], tempname[64];
+
+	// empire storage: only if it's already been loaded (saves may trigger sooner)
+	if (!emp || !emp->storage_loaded) {
+		return;
+	}
+	
+	sprintf(fname, "%s%d%s", STORAGE_PREFIX, EMPIRE_VNUM(emp), EMPIRE_SUFFIX);
+	strcpy(tempname, fname);
+	strcat(tempname, TEMP_SUFFIX);
+	if (!(fl = fopen(tempname, "w"))) {
+		log("SYSERR: Unable to write %s", tempname);
+		return;
+	}
+	write_empire_storage_to_file(fl, emp);
+	fprintf(fl, "$~\n");
+	fclose(fl);
+	rename(tempname, fname);
+	
+	EMPIRE_NEEDS_STORAGE_SAVE(emp) = FALSE;
+}
+
+
+/**
+* Saves an empire to file.
+*
+* @param empire_data *emp The empire to save.
+* @param bool save_all_parts If TRUE, also saves storage file, etc.
+*/
+void save_empire(empire_data *emp, bool save_all_parts) {
 	FILE *fl;
 	char fname[30], tempname[64];
 
@@ -2442,23 +3133,13 @@ void save_empire(empire_data *emp) {
 	fprintf(fl, "$~\n");
 	fclose(fl);
 	rename(tempname, fname);
-
-	// empire storage: only if it's already been loaded (saves may trigger sooner)
-	if (emp->storage_loaded) {
-		sprintf(fname, "%s%d%s", STORAGE_PREFIX, EMPIRE_VNUM(emp), EMPIRE_SUFFIX);
-		strcpy(tempname, fname);
-		strcat(tempname, TEMP_SUFFIX);
-		if (!(fl = fopen(tempname, "w"))) {
-			log("SYSERR: Unable to write %s", tempname);
-			return;
-		}
-		write_empire_storage_to_file(fl, emp);
-		fprintf(fl, "$~\n");
-		fclose(fl);
-		rename(tempname, fname);
-	}
 	
 	EMPIRE_NEEDS_SAVE(emp) = FALSE;	// done
+	
+	if (save_all_parts) {
+		save_empire_storage(emp);
+		save_empire_logs(emp);
+	}
 }
 
 
@@ -2469,20 +3150,26 @@ void save_all_empires(void) {
 	empire_data *iter, *next_iter;
 
 	HASH_ITER(hh, empire_table, iter, next_iter) {
-		save_empire(iter);
+		save_empire(iter, TRUE);
 	}
 }
 
 
 /**
-* Delayed empire saves -- things marked EMPIRE_NEEDS_SAVE.
+* Delayed empire saves -- things marked as needing saves.
 */
 void save_marked_empires(void) {
 	empire_data *emp, *next_emp;
 	
 	HASH_ITER(hh, empire_table, emp, next_emp) {
 		if (EMPIRE_NEEDS_SAVE(emp)) {
-			save_empire(emp);
+			save_empire(emp, FALSE);
+		}
+		if (EMPIRE_NEEDS_STORAGE_SAVE(emp)) {
+			save_empire_storage(emp);
+		}
+		if (EMPIRE_NEEDS_LOGS_SAVE(emp)) {
+			save_empire_logs(emp);
 		}
 	}
 }
@@ -2573,7 +3260,7 @@ void populate_npc(room_data *room, struct empire_territory_data *ter) {
 	char_data *proto;
 	mob_vnum artisan;
 	
-	if (!room || !(emp = ROOM_OWNER(room)) || (!ter && !(ter = find_territory_entry(emp, room)))) {
+	if (!room || !(emp = ROOM_OWNER(room)) || !EMPIRE_HAS_TECH(emp, TECH_CITIZENS) || (!ter && !(ter = find_territory_entry(emp, room)))) {
 		return;	// no work
 	}
 	if (!IS_COMPLETE(room) || ROOM_PRIVATE_OWNER(HOME_ROOM(room)) != NOBODY) {
@@ -2784,7 +3471,7 @@ void add_offense(empire_data *emp, int type, char_data *offender, room_data *loc
 	}
 	
 	LL_PREPEND(EMPIRE_OFFENSES(emp), off);
-	EMPIRE_NEEDS_SAVE(emp) = TRUE;
+	EMPIRE_NEEDS_LOGS_SAVE(emp) = TRUE;
 	
 	log_offense_to_empire(emp, off, offender);
 }
@@ -2813,7 +3500,7 @@ int avenge_offenses_from_empire(empire_data *emp, empire_data *foe) {
 	}
 	
 	if (count) {
-		EMPIRE_NEEDS_SAVE(emp) = TRUE;
+		EMPIRE_NEEDS_LOGS_SAVE(emp) = TRUE;
 	}
 	
 	return count;
@@ -2844,7 +3531,7 @@ int avenge_solo_offenses_from_player(empire_data *emp, char_data *foe) {
 	}
 	
 	if (count) {
-		EMPIRE_NEEDS_SAVE(emp) = TRUE;
+		EMPIRE_NEEDS_LOGS_SAVE(emp) = TRUE;
 	}
 	
 	return count;
@@ -2954,7 +3641,7 @@ void log_offense_to_empire(empire_data *emp, struct offense_data *off, char_data
 	}
 	
 	if (*buf) {
-		log_to_empire(emp, ELOG_HOSTILITY, buf);
+		log_to_empire(emp, ELOG_HOSTILITY, "%s", buf);
 	}
 }
 
@@ -3626,7 +4313,14 @@ struct island_info *get_island(int island_id, bool create_if_missing) {
 		CREATE(isle, struct island_info, 1);
 		// ensure good data
 		isle->id = island_id;
-		sprintf(buf, "Unexplored Island %d", island_id);
+		
+		if (island_id != NO_ISLAND) {
+			sprintf(buf, "Unexplored Island %d", island_id);
+		}
+		else {
+			strcpy(buf, "The Ocean");
+		}
+		
 		isle->name = str_dup(buf);
 		isle->flags = NOBITS;
 		isle->tile_size = 0;
@@ -3695,7 +4389,7 @@ struct island_info *get_island_by_name(char_data *ch, char *name) {
 			if (eisle->name && !str_cmp(name, eisle->name)) {
 				return get_island(eisle->island, TRUE);
 			}
-			else if (eisle->name && !e_abbrev && is_abbrev(name, eisle->name)) {
+			else if (eisle->name && !e_abbrev && is_multiword_abbrev(name, eisle->name)) {
 				e_abbrev = eisle;
 			}
 		}
@@ -3710,7 +4404,7 @@ struct island_info *get_island_by_name(char_data *ch, char *name) {
 		if (!str_cmp(name, isle->name)) {
 			return isle;
 		}
-		else if (!abbrev && is_abbrev(name, isle->name)) {
+		else if (!abbrev && is_multiword_abbrev(name, isle->name)) {
 			abbrev = isle;
 		}
 	}
@@ -3795,6 +4489,10 @@ static struct island_info *load_one_island(FILE *fl, int id) {
 			exit(1);
 		}
 		switch (*line) {
+			case 'D': {	// description
+				isle->desc = fread_string(fl, errstr);
+				break;
+			}
 			case 'S': {
 				// done
 				return isle;
@@ -3841,6 +4539,7 @@ void load_islands(void) {
 */
 void save_island_table(void) {
 	struct island_info *isle, *next_isle;
+	char temp[MAX_STRING_LENGTH];
 	FILE *fl;
 	
 	if (!(fl = fopen(ISLAND_FILE TEMP_SUFFIX, "w"))) {
@@ -3851,7 +4550,14 @@ void save_island_table(void) {
 	HASH_ITER(hh, island_table, isle, next_isle) {
 		fprintf(fl, "#%d\n", isle->id);
 		fprintf(fl, "%s~\n", NULLSAFE(isle->name));
-		fprintf(fl, "%s\n", bitv_to_alpha(isle->flags));		
+		fprintf(fl, "%s\n", bitv_to_alpha(isle->flags));
+		
+		if (isle->desc && *isle->desc) {
+			strcpy(temp, isle->desc);
+			strip_crlf(temp);
+			fprintf(fl, "D\n%s~\n", temp);
+		}
+		
 		fprintf(fl, "S\n");
 	}
 
@@ -3948,16 +4654,21 @@ void parse_mobile(FILE *mob_f, int nr) {
 			*tmpptr = LOWER(*tmpptr);
 	mob->player.long_descr = fread_string(mob_f, buf2);
 	
-	// 1. min_scale_level max_scale_level mobflags affs
-	if (!get_line(mob_f, line) || sscanf(line, "%d %d %s %s", &t[0], &t[1], f1, f2) != 4) {
-		log("SYSERR: Format error in first numeric section of mob #%d\n...expecting line of form '# # # #'", nr);
-		exit(1);
+	// 1. min_scale_level max_scale_level mobflags affs [size]
+	if (!get_line(mob_f, line) || sscanf(line, "%d %d %s %s %d", &t[0], &t[1], f1, f2, &t[2]) != 5) {
+		t[2] = SIZE_NORMAL;	// backwards-compatible
+		
+		if (sscanf(line, "%d %d %s %s", &t[0], &t[1], f1, f2) != 4) {
+			log("SYSERR: Format error in first numeric section of mob #%d\n...expecting line of form '# # # # #'", nr);
+			exit(1);
+		}
 	}
 	
 	GET_MIN_SCALE_LEVEL(mob) = t[0];
 	GET_MAX_SCALE_LEVEL(mob) = t[1];
 	MOB_FLAGS(mob) = asciiflag_conv(f1);
 	AFF_FLAGS(mob) = asciiflag_conv(f2);
+	SET_SIZE(mob) = t[2];
 
 	SET_BIT(MOB_FLAGS(mob), MOB_ISNPC);	// sanity
 	REMOVE_BIT(MOB_FLAGS(mob), MOB_EXTRACTED);	// sanity
@@ -3997,6 +4708,10 @@ void parse_mobile(FILE *mob_f, int nr) {
 			exit(1);
 		}
 		switch (*line) {
+			case 'D': { // look desc
+				mob->player.look_descr = fread_string(mob_f, buf2);
+				break;
+			}
 			case 'F': {	// faction
 				if (strlen(line) > 2) {
 					MOB_FACTION(mob) = find_faction_by_vnum(atoi(line + 2));
@@ -4053,15 +4768,22 @@ void write_mob_to_file(FILE *fl, char_data *mob) {
 	strip_crlf(temp);
 	fprintf(fl, "%s~\n", temp);
 
-	// min_scale_level max_scale_level mobflags affs
+	// min_scale_level max_scale_level mobflags affs size
 	strcpy(temp, bitv_to_alpha(MOB_FLAGS(mob)));
 	strcpy(temp2, bitv_to_alpha(AFF_FLAGS(mob)));
-	fprintf(fl, "%d %d %s %s\n", GET_MIN_SCALE_LEVEL(mob), GET_MAX_SCALE_LEVEL(mob), temp, temp2);
+	fprintf(fl, "%d %d %s %s %d\n", GET_MIN_SCALE_LEVEL(mob), GET_MAX_SCALE_LEVEL(mob), temp, temp2, SET_SIZE(mob));
 	
 	// sex name-list move-type attack-type
 	fprintf(fl, "%d %d %d %d\n", GET_SEX(mob), MOB_NAME_SET(mob), MOB_MOVE_TYPE(mob), MOB_ATTACK_TYPE(mob));
 
 	// optionals:
+	
+	// D: look desc
+	if (GET_LOOK_DESC(mob) && *GET_LOOK_DESC(mob)) {
+		strcpy(temp, GET_LOOK_DESC(mob));
+		strip_crlf(temp);
+		fprintf(fl, "D\n%s~\n", temp);
+	}
 	
 	// F: faction
 	if (MOB_FACTION(mob)) {
@@ -4737,7 +5459,7 @@ void parse_room(FILE *fl, room_vnum vnum) {
 
 	for (;;) {
 		if (!get_line(fl, line)) {
-			log(error_log);
+			log("%s", error_log);
 			exit(1);
 		}
 		switch (*line) {
@@ -4987,7 +5709,7 @@ void parse_room(FILE *fl, room_vnum vnum) {
 				return;
 			}
 			default: {
-				log(error_log);
+				log("%s", error_log);
 				exit(1);
 			}
 		}
@@ -5059,8 +5781,8 @@ void write_room_to_file(FILE *fl, room_data *room) {
 		if (ROOM_PEOPLE(room)) {
 			for (mob = ROOM_PEOPLE(room); mob; mob = mob->next_in_room) {
 				if (mob && IS_NPC(mob) && !MOB_FLAGGED(mob, MOB_EMPIRE | MOB_FAMILIAR)) {
-					// C M vnum flags (pulling unused)
-					fprintf(fl, "C M %d %s %d\n", GET_MOB_VNUM(mob), bitv_to_alpha(MOB_FLAGS(mob)), NOTHING);
+					// C M vnum flags rope-vnum
+					fprintf(fl, "C M %d %s %d\n", GET_MOB_VNUM(mob), bitv_to_alpha(MOB_FLAGS(mob)), GET_ROPE_VNUM(mob));
 					
 					// C I instance_id
 					if (MOB_INSTANCE_ID(mob) != NOTHING) {
@@ -5513,13 +6235,6 @@ void add_sector_to_table(sector_data *sect) {
 * @param sector_data *sect The sect to remove from the table.
 */
 void remove_sector_from_table(sector_data *sect) {
-	extern sector_data *last_evo_sect;
-	
-	// if we left off on this sect, remove it entirely
-	if (last_evo_sect == sect) {
-		last_evo_sect = NULL;
-	}
-	
 	HASH_DEL(sector_table, sect);
 }
 
@@ -5890,6 +6605,144 @@ EVENT_CANCEL_FUNC(cancel_room_event) {
 
 
  //////////////////////////////////////////////////////////////////////////////
+//// THEFT LIB ///////////////////////////////////////////////////////////////
+
+/**
+* Frees up a list of theft logs.
+*
+* struct theft_log *list The list to free.
+*/
+void free_theft_logs(struct theft_log *list) {
+	struct theft_log *iter;
+	
+	while ((iter = list)) {
+		list = list->next;
+		free(iter);
+	}
+}
+
+
+/**
+* Turns theft logs into consolidated empire theft reports.
+*/
+void process_theft_logs(void) {
+	char buf[MAX_STRING_LENGTH], temp[MAX_STRING_LENGTH];
+	struct theft_log *list, *iter;
+	empire_data *emp, *next_emp;
+	
+	HASH_ITER(hh, empire_table, emp, next_emp) {
+		if (!EMPIRE_THEFT_LOGS(emp)) {
+			continue;	// short-circuit
+		}
+		
+		list = reduce_theft_logs_and_get_recent(emp);
+		*buf = '\0';
+		LL_FOREACH(list, iter) {	// build the buffer to report
+			if (iter->vnum == NOTHING) {
+				sprintf(temp, "coin%s x%d", PLURAL(iter->amount), iter->amount);
+			}
+			else {
+				sprintf(temp, "%s x%d", skip_filler(get_obj_name_by_proto(iter->vnum)), iter->amount);
+			}
+			
+			if (!*buf || strlen(buf) + strlen(temp) + 2 < 150) {
+				// just add to buffer
+				sprintf(buf + strlen(buf), "%s%s", (*buf ? ", " : "Recently stolen: "), temp);
+			}
+			else {
+				// overflow: report current then start new buffer
+				log_to_empire(emp, ELOG_HOSTILITY, "%s", buf);
+				sprintf(buf, "Recently stolen: %s", temp);
+			}
+		}
+		
+		// anything left to report?
+		if (*buf) {
+			log_to_empire(emp, ELOG_HOSTILITY, "%s", buf);
+		}
+		
+		free_theft_logs(list);
+	}
+}
+
+
+/**
+* Records a theft to an empire for delayed logging.
+*
+* @param empire_data *emp Which empire.
+* @param obj_vnum vnum What item was stolen (use NOTHING for coins).
+* @param int amount How much/many was/were taken.
+*/
+void record_theft_log(empire_data *emp, obj_vnum vnum, int amount) {
+	long time_minutes = time(0) / 60;
+	struct theft_log *tft, *iter;
+	bool found = FALSE;
+	
+	if (!emp || amount < 1) {
+		return;	// wut?
+	}
+	
+	LL_FOREACH(EMPIRE_THEFT_LOGS(emp), iter) {
+		if (iter->time_minutes < time_minutes) {
+			// always stored in descending order of time for fast adds
+			break;
+		}
+		if (iter->vnum == vnum) {
+			iter->amount += amount;
+			EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
+			found = TRUE;
+			break;
+		}
+	}
+	
+	if (!found) {
+		CREATE(tft, struct theft_log, 1);
+		tft->vnum = vnum;
+		tft->amount = amount;
+		tft->time_minutes = time_minutes;
+		LL_PREPEND(EMPIRE_THEFT_LOGS(emp), tft);
+		EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
+	}
+}
+
+
+/**
+* Filters recent thefts from an empire's theft log, EXCLUDING the last ~5
+* minutes, which are not reported to give some anonymity. This generates a NEW
+* list (which must be freed with free_theft_logs) that is consolidated so that
+* each vnum only appears once, with the total stolen.
+*
+* @param empire_data *emp Which empire to get theft logs for.
+* @return struct theft_log* The new list of recent thefts to report.
+*/
+struct theft_log *reduce_theft_logs_and_get_recent(empire_data *emp) {
+	struct theft_log *iter, *next_iter, *tft, *recent = NULL;
+	long threshold = (time(0) / 60) - 4;	// more than 4 minutes ago
+	
+	LL_FOREACH_SAFE(EMPIRE_THEFT_LOGS(emp), iter, next_iter) {
+		if (iter->time_minutes > threshold) {
+			continue;	// skip recent
+		}
+		
+		// ok, found, so we're gonna use this one
+		LL_DELETE(EMPIRE_THEFT_LOGS(emp), iter);
+		LL_SEARCH_SCALAR(EMPIRE_THEFT_LOGS(emp), tft, vnum, iter->vnum);
+		if (!tft) {
+			CREATE(tft, struct theft_log, 1);
+			tft->vnum = iter->vnum;
+			// prepend will essentially flip the order so older thefts are earlier
+			LL_PREPEND(recent, tft);
+		}
+		tft->amount += iter->amount;
+		free(iter);
+	}
+	
+	EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
+	return recent;
+}
+
+
+ //////////////////////////////////////////////////////////////////////////////
 //// TRIGGER LIB /////////////////////////////////////////////////////////////
 
 /**
@@ -5997,6 +6850,7 @@ void discrete_load(FILE *fl, int mode, char *filename) {
 	void parse_book(FILE *fl, int book_id);
 	void parse_class(FILE *fl, any_vnum vnum);
 	void parse_morph(FILE *fl, any_vnum vnum);
+	void parse_progress(FILE *fl, any_vnum vnum);
 	void parse_quest(FILE *fl, any_vnum vnum);
 	void parse_skill(FILE *fl, any_vnum vnum);
 	void parse_social(FILE *fl, any_vnum vnum);
@@ -6006,7 +6860,7 @@ void discrete_load(FILE *fl, int mode, char *filename) {
 	char line[256];
 
 	/* modes positions correspond to DB_BOOT_x in db.h */
-	const char *modes[] = {"world", "mob", "obj", "zone", "empire", "book", "craft", "trg", "crop", "sector", "adventure", "room template", "global", "account", "augment", "archetype", "ability", "class", "skill", "vehicle", "morph", "quest", "social", "faction", "generic", "shop" };
+	const char *modes[] = {"world", "mob", "obj", "zone", "empire", "book", "craft", "trg", "crop", "sector", "adventure", "room template", "global", "account", "augment", "archetype", "ability", "class", "skill", "vehicle", "morph", "quest", "social", "faction", "generic", "shop", "progress" };
 
 	for (;;) {
 		if (!get_line(fl, line)) {
@@ -6087,6 +6941,10 @@ void discrete_load(FILE *fl, int mode, char *filename) {
 					break;
 				case DB_BOOT_MORPH: {
 					parse_morph(fl, nr);
+					break;
+				}
+				case DB_BOOT_PRG: {
+					parse_progress(fl, nr);
 					break;
 				}
 				case DB_BOOT_EMP:
@@ -6290,6 +7148,11 @@ void index_boot(int mode) {
 			log("   %d name lists.", rec_count);
 			break;
 		}
+		case DB_BOOT_PRG: {
+   			size[0] = sizeof(progress_data) * rec_count;
+			log("   %d progression goals, %d bytes in prototypes.", rec_count, size[0]);
+			break;
+		}
 		case DB_BOOT_OBJ:
 			size[0] = sizeof(obj_data) * rec_count;
 			log("   %d objs, %d bytes in prototypes.", rec_count, size[0]);
@@ -6365,6 +7228,7 @@ void index_boot(int mode) {
 			case DB_BOOT_OBJ:
 			case DB_BOOT_MOB:
 			case DB_BOOT_MORPH:
+			case DB_BOOT_PRG:
 			case DB_BOOT_EMP:
 			case DB_BOOT_BOOKS:
 			case DB_BOOT_QST:
@@ -6568,6 +7432,16 @@ void save_library_file_for_vnum(int type, any_vnum vnum) {
 			HASH_ITER(hh, object_table, obj, next_obj) {
 				if (GET_OBJ_VNUM(obj) >= (zone * 100) && GET_OBJ_VNUM(obj) <= (zone * 100 + 99)) {
 					write_obj_to_file(fl, obj);
+				}
+			}
+			break;
+		}
+		case DB_BOOT_PRG: {
+			void write_progress_to_file(FILE *fl, progress_data *prg);
+			progress_data *prg, *next_prg;
+			HASH_ITER(hh, progress_table, prg, next_prg) {
+				if (PRG_VNUM(prg) >= (zone * 100) && PRG_VNUM(prg) <= (zone * 100 + 99)) {
+					write_progress_to_file(fl, prg);
 				}
 			}
 			break;
@@ -6947,6 +7821,11 @@ void save_index(int type) {
 			write_object_index(fl);
 			break;
 		}
+		case DB_BOOT_PRG: {
+			void write_progress_index(FILE *fl);
+			write_progress_index(fl);
+			break;
+		}
 		case DB_BOOT_QST: {
 			void write_quest_index(FILE *fl);
 			write_quest_index(fl);
@@ -7281,12 +8160,10 @@ void clean_empire_logs(void) {
 	struct empire_log_data *elog, *next_elog, *temp;
 	empire_data *iter, *next_iter;
 	time_t now = time(0);
-	bool save;
 	
 	log("Cleaning stale empire logs...");
 
 	HASH_ITER(hh, empire_table, iter, next_iter) {
-		save = FALSE;
 		for (elog = EMPIRE_LOGS(iter); elog; elog = next_elog) {
 			next_elog = elog->next;
 			
@@ -7297,12 +8174,8 @@ void clean_empire_logs(void) {
 					free(elog->string);
 				}
 				free(elog);
-				save = TRUE;
+				EMPIRE_NEEDS_LOGS_SAVE(iter) = TRUE;
 			}
-		}
-		
-		if (save) {
-			EMPIRE_NEEDS_SAVE(iter) = TRUE;
 		}
 	}
 }
@@ -7759,85 +8632,6 @@ int sort_sectors(void *a, void *b) {
 }
 
 
-// for sort_storage: quick-switch of linked list positions
-static struct empire_storage_data *switch_storage_pos(struct empire_storage_data *l1, struct empire_storage_data *l2) {
-    l1->next = l2->next;
-    l2->next = l1;
-    return l2;
-}
-
-
-/**
-* This alpha-sorts an empire's storage.
-*
-* @param empire_data *emp The empire to sort.
-*/
-void sort_storage(empire_data *emp) {
-	struct empire_storage_data *start, *p, *q, *top;
-	char *a_name = NULL, *b_name = NULL;
-	obj_data *obj_a, *obj_b;
-	int a_store, b_store;
-    bool changed = TRUE;
-    
-    // [hopefully] quick macro to skip past a/an/the before comparing names
-    #define FIND_NAME_START(str)  (!strn_cmp((str), "the ", 4) ? ((str)+4) : (!strn_cmp((str), "an ", 3) ? ((str) + 3) : (!strn_cmp((str), "a ", 2) ? ((str) + 2) : (str))))
-    
-    // safety first
-    if (!emp) {
-    	return;
-    }
-    
-    start = EMPIRE_STORAGE(emp);
-
-	CREATE(top, struct empire_storage_data, 1);
-
-    top->next = start;
-    if (start && start->next) {
-    	// q is always one item behind p
-
-        while (changed) {
-            changed = FALSE;
-            q = top;
-            p = top->next;
-            while (p->next != NULL) {
-            	// determine items
-            	obj_a = obj_proto(p->vnum);
-            	obj_b = obj_proto(p->next->vnum);
-            	
-            	// only bother if the item is real (this accommodates deleted items)
-            	if (obj_a && obj_b) {
-					a_store = find_lowest_storage_loc(obj_a);
-					b_store = find_lowest_storage_loc(obj_b);
-				
-					// prepare for alpha-sorting ...
-					if (a_store == b_store) {
-						a_name = GET_OBJ_SHORT_DESC(obj_a);
-						b_name = GET_OBJ_SHORT_DESC(obj_b);
-				
-						// skip a/an/the
-						a_name = FIND_NAME_START(a_name);
-						b_name = FIND_NAME_START(b_name);
-					}
-				
-					if (a_store > b_store || (a_store == b_store && str_cmp(a_name, b_name) > 0)) {
-						q->next = switch_storage_pos(p, p->next);
-						changed = TRUE;
-					}
-				}
-				
-                q = p;
-                if (p->next) {
-                    p = p->next;
-                }
-            }
-        }
-    }
-    
-    EMPIRE_STORAGE(emp) = top->next;
-    free(top);
-}
-
-
 /**
 * This sorts trade data by type and cost, for easier visual analysis in both
 * the editor and the db file. It should not change the relative order of any
@@ -8080,6 +8874,7 @@ void free_shared_room_data(struct shared_room_data *data) {
 		free(dep);
 	}
 	HASH_ITER(hh, data->extra_data, room_ex, next_room_ex) {
+		HASH_DEL(data->extra_data, room_ex);
 		free(room_ex);
 	}
 	while ((track = data->tracks)) {
@@ -8381,7 +9176,8 @@ void write_shared_room_data(FILE *fl, struct shared_room_data *dat) {
 	struct room_extra_data *red, *next_red;
 	char temp[MAX_STRING_LENGTH];
 	struct depletion_data *dep;
-	struct track_data *track;
+	struct track_data *track, *next_track;
+	time_t now = time(0);
 	
 	// E affects
 	if (dat->base_affects) {
@@ -8411,8 +9207,14 @@ void write_shared_room_data(FILE *fl, struct shared_room_data *dat) {
 	}
 	
 	// Y tracks
-	LL_FOREACH(dat->tracks, track) {
-		fprintf(fl, "Y\n%d %d %ld %d\n", track->player_id, track->mob_num, track->timestamp, track->dir);
+	LL_FOREACH_SAFE(dat->tracks, track, next_track) {
+		if (now - track->timestamp > SECS_PER_REAL_HOUR) {
+			LL_DELETE(dat->tracks, track);
+			free(track);
+		}
+		else {
+			fprintf(fl, "Y\n%d %d %ld %d\n", track->player_id, track->mob_num, track->timestamp, track->dir);
+		}
 	}
 
 	// Z: extra data

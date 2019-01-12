@@ -7,13 +7,14 @@ Vampirism is not a curse, per se, but its powers do come at a price: vampires
 must drink blood. Vampires are not harmed by the sun, but their powers do not
 function in broad daylight.
 
-Vampires at low skill levels are constantly hungry, losing a blood point ever
+Vampires at low skill levels are constantly hungry, losing a blood point every
 hour even if they have no blood powers active. At such low levels, the easiest
 way to gain Vampire skill is to use the Bite ability to drink the blood of
 others. Higher level vampires have an hourly upkeep based only on which powers
 are active. See the help file on BITE for more information on drinking blood.
 
-To become a vampire, seek out another of their kind -- if you dare.
+To become a vampire, seek out another of their kind -- if you dare. If you no
+longer want to be a vampire, find a player who can Purify you.
 
 Check out &yHELP VAMPIRE GUIDE&0 for a getting-started.
 
@@ -21,7 +22,7 @@ You can get additional Vampire abilities when you reach level 100, depending on
 which other skills you have at high levels. Use the 'role' command to choose
 which set of skills to use.
 
-See also: BITE, SIRE, FEED, ROLE, SKILL, SKILL SYNERGY
+See also: BITE, SIRE, FEED, ROLE, SKILL, SKILL SYNERGY, PURIFY
 #
 ALACRITY
 
@@ -242,6 +243,33 @@ is particularly effective in melee combat.
 
 See also: MORPH
 #
+INSPIRE
+
+Inspire (Vampire ability)
+
+Usage:  inspire <target | all> <type>
+Cost:  30 move points per person or 60 for 'all'
+Duration:  30 minutes (in same empire) or 5 minutes (if not)
+
+A powerful leader can inspire his friends and allies with a rousing speech.
+It will only be half as effective when used on himself. The 'all' option
+targets all players in the room except himself.
+
+This ability scales with the user's Greatness. If Greatness is too low, people
+may not feel inspired at all.
+
+Gain experience when you inspire someone, including yourself.
+
+Here are the ways you can inspire:
+  Accuracy: to-hit
+  Evasion: dodge
+  Mana: max mana and mana regeneration
+  Might: strength and bonus physical damage
+  Prowess: dexterity and wits
+  Sorcery: intelligence and bonus magical damage
+  Stamina: max moves and move regeneration
+  Toughness: max health
+#
 MAJESTY
 
 Majesty (Vampire ability)
@@ -265,12 +293,12 @@ Gains experience when activated, and passively while active.
 Mist Form (Vampire ability)
 
 Usage:  morph mist
-Cost: 20 blood (60 in combat)
+Cost: 20 blood
 Upkeep:  1 blood/hr
 
 The vampire dissolves into mist, unable to be harmed. Many spells and abilities
-cannot be used while in this state, but you can use it in combat, and you can
-move around while transformed.
+cannot be used while in this state, and you cannot use it in combat. However,
+you can move around while transformed.
 
 Gains experience when you finish transforming into mist.
 
@@ -452,7 +480,7 @@ Morph types:  wolf, coyote, ocelot
 With Wolf Form, the vampire taps into its primal nature to become a wolf. In
 this form, he is nearly indistinguishable from a wild animal.
 
-This also allows him to turn into coyotes and ocelots, which are useful more
+This also allows him to turn into coyotes and ocelots, which are more useful
 disguises in certain terrains.
 
 Gains experience when you transform into a wolf.

@@ -40,7 +40,7 @@ a distance.
 You don't need to found a city yet, but you will be limited on how much land
 you can claim that isn't in a city. To find out what your claim limits are,
 type "empire <name>" (using the name of your character or empire). There is a
-line on that display that says "Territory: XXX in cities, YYY/ZZZ outside".
+line on that display that says "Territory: XXX/YYY" (with breakdowns by type).
 If you reach your claim limit, you won't be able to claim more land. The
 TERRITORY help file has more information on gaining territory. It can also be
 used to find places you claimed that you might not want any more.
@@ -97,13 +97,13 @@ entrance to face. If you want to place your building in the woods, you can
 clear out the necessary space during the next phase.
 
 Once you've picked a nice spot, you will need your building materials. Typing
-HELP CABIN reveals that you will need a total of 6 logs for construction. That
-means you will need to find some trees, which are hopefully not too far away.
-You will want to make sure to WIELD your trusty axe and proceed to CHOP while
-in a forest tile. A fully grown forest tile will provide 4 trees, so you will
-have to clear out 2 map tiles of dense forest for all of the material. If you
-are building your CABIN in the woods, these two tiles can be for placement of
-the building.
+BUILD INFO CABIN reveals that you will need a total of 6 logs for construction.
+That means you will need to find some trees, which are hopefully not too far
+away. You will want to make sure to WIELD your trusty axe and proceed to CHOP
+while in a forest tile. A fully grown forest tile will provide 4 trees, so you
+will have to clear out 2 map tiles of dense forest for all of the material. If
+you are building your CABIN in the woods, these two tiles can be for placement
+of the building.
 
 After chopping down 6 trees, you will want to SCRAPE TREE to convert the trees
 into logs and sticks. After all the scraping, you will end up with six logs
@@ -160,8 +160,8 @@ need iron to make a pick, and you can't get the iron without the pick!
 
 That stone axe of ours was made by the CRAFT command, with a handaxe and a
 handle. Instead of turning it into an axe, we can also WIELD a handaxe and use
-it for mining. If you need to, craft another handaxe by chipping one rock 
-against another. WIELD HANDAXE, then MINE until there's no ore left. Sometimes,
+it for mining. If you need to, craft another handaxe by chipping a flint with 
+a rock. WIELD HANDAXE, then MINE until there's no ore left. Sometimes,
 you come across gold dust while mining ore, or perhaps the entire mine is full
 of silver instead of iron. Silver nuggets and gold dust can be stored in your
 empire's vault, which will increase its wealth rating. They can also be used in
@@ -200,7 +200,7 @@ If you aren't interested in tutorials, you can turn them off by typing
 
 You can also find tutorial zones at the following locations:
  - The Soulstream (general) at any Tower of Souls.
- - The Royal Planning Office (Empire skill) on the newbie island.
+ - The Royal Planning Office (empire progress) -- currently disabled.
  - The Museum of Early Man (Trade skill) on the newbie island.
 
 See also: NEARBY, QUEST, TOGGLE

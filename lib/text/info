@@ -16,7 +16,7 @@ the help files for MAP and CROPS.
 You can type SCORE to see a sheet of information about your character, with
 your name, play time, and skills. It also shows your health, moves, and mana in
 the form of &gcurrent&0/&gmax&0/+&gregen&0/5s (amount per 5 seconds). You can
-also see get this information in your PROMPT or over MDSP.
+also get this information in your PROMPT or over MDSP.
 
 Here are some starting commands you will want to know from the get go:
    EQUIPMENT (eq)   INVENTORY (i)   SKILLS         QUEST (q)
@@ -28,6 +28,9 @@ Here are some starting commands you will want to know from the get go:
 You can find tutorials around the starting area that will teach you to gather
 resources, build a house, and craft clothing. You may also find areas such as
 the Goblin Mines, where you can learn how to go on adventures.
+
+Your empire has goals that you can complete to unlock more buildings, larger
+cities, and other perks. Use the PROGRESS command to see your current goals.
 
 Before it gets dark, you should learn to make a torch. GATHER a stick in the
 forest, and DIG up a flint and a rock. CRAFT a 'flint set' from the rocks, and

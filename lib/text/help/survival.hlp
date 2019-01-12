@@ -16,14 +16,15 @@ See also: SCAVENGING, ROLE, SKILL, SKILL SYNERGY
 #
 BUTCHER
 
-Butcher (Survival ability)
-
 Usage:  butcher <corpse>
 
 With a little practice, you can butcher a corpse into smaller cuts of meat.
-This ability can fail at low skill levels, giving you less meat (or none).
+This command succeeds about 60% of the time unskilled, and 100% of the time
+with the Huntsman ability.
 
 Gains experience when you butcher something.
+
+See also: HUNTSMAN, SKIN COMMAND
 #
 "BY MOONLIGHT"
 
@@ -40,7 +41,7 @@ Gains experience passively when you're standing in a dark room.
 
 See also: NIGHTSIGHT
 #
-"FIND HERBS"
+"FIND HERBS" WHITEGRASS FIVELEAF REDTHORN MAGEWHISPER DAGGERBITE BILEBERRIES BILEBERRY "WHITE GRASS" "FIVE LEAF" "RED THORN" "MAGE WHISPER" "DAGGER BITE" "BILE BERRIES"
 
 Find Herbs (Survival ability)
 
@@ -52,14 +53,14 @@ of flowers.
 Find Herbs gains experience when you pick herbs.
 
 Herbs you can find:
- whitegrass - near oceans
+ whitegrass - beach, shore
  fiveleaf - plains, forests
  redthorn - mountains
  magewhisper - oases
  daggerbite - deserts
- bileberries - near rivers
+ bileberries - floodplains, riverbanks
 
-See also: HERBS, HERB GARDENS, PICK
+See also: HERBS, DISTILLED HERBS, PICK
 #
 "FIND SHELTER" SHELTERS
 
@@ -103,7 +104,7 @@ Learn to live at the water's edge through spear-fishing. As your skill
 improves, you will find yourself catching fish faster. You can fish the map
 location you're standing in, or any adjacent tile.
 
-To make a spear, craft a handle and chip a rock until it is a spearhead, then
+To make a spear, craft a handle and chip a flint until it is a spearhead, then
 craft the spear from the handle and spearhead.
 
 You can find all kinds of useful things while fishing, but not everything you
@@ -129,35 +130,19 @@ Gains experience when you find things by foraging.
 
 See also: DEPLETION
 #
-"HERB GARDENS" GARDENS
+HUNTSMAN HUNT HUNTING "HUNTSMAN ABILITY"
 
-Herb Gardens (Survival ability)
+Huntsman (Survival ability)
 
-Command:  build <garden> [direction]
+Those with the Huntsman ability deal twice as much damage to animals. This
+ability has a chance to not activate at low levels.
 
-The various herb gardens allow you to farm more herbs than can normally be
-picked in one spot, and if your empire has Skilled Labor, your workforce can
-use the gardens as well.
+Huntsmen (and women) also get a 100% chance to skin or butcher corpses.
 
-&y/&r##&y\&0 terracedgarden (mountain)
-&c~&b##&c~&0 raftgarden (river)
-&G^&C##&G^&0 oasisgarden (oasis)
-&b~&0##&b~&0 estuarygarden (river facing ocean)
-&g|&y##&g|&0 shadygarden (plains or forest)
+Gains experience when you hit an animal, or skin or butcher a corpse.
 
-Only the estuarygarden requires a direction. Gain skill by building any of the
-gardens.
-
-See also: BUILD, FIND HERBS, WORKFORCE, SKILLED LABOR
-#
-HUNT HUNTING
-
-Hunt (Survival ability)
-
-Those with the Hunt ability deal twice as much damage to animals. This ability
-has a chance to not activate at low levels.
-
-Gains experience when you hit an animal.
+See also: SKIN, BUTCHER
+Immortals see also: MHUNT
 #
 "MASTER SURVIVALIST" SURVIVALIST
 
@@ -194,7 +179,7 @@ If you have a saddle in your inventory, you will automatically equip it when
 you mount up. The saddle will be removed automatically when you dismount. You
 can make a simple saddle with Basic Crafts.
 
-Flying mounts require All-Terrain Riding, Windstride, or Fly + Ride.
+Flying mounts require All-Terrain Riding, or Fly + Ride.
 
 Ride gains experience just from moving around while mounted, but All-Terrain
 Riding only gains experience when you cross water or mountains while mounted.
@@ -214,7 +199,15 @@ In order to cross large mountain ranges, you must learn Mountain climbing.
 It still takes a lot of energy to cross, but it's not possible at all
 otherwise.
 
+Without this ability, you can only enter the first mountain tile, but cannot
+move from mountain to mountain.
+
+To enter a mountain tile, you must type 'climb'. This prevents players from
+wasting move points by accidentally walking onto a mountain.
+
 Gains experience when you cross mountains while not riding.
+
+See also: CLIMB, AUTOCLIMB
 #
 NAVIGATION COORDINATES
 
@@ -225,12 +218,15 @@ logged out of the game for over an hour you will see a random direction as
 North.
 
 Once you learn Navigation, you'll also be able to see coordinates for map
-locations. This game uses Cartesian coordinates (x, y).
+locations. This game uses Cartesian coordinates (x, y). This ability also
+allows you to use the mapscan command.
 
 When you first buy this ability, your map may change orientations to the
 correct "North".
 
 Gains experience when you move around while not mounted.
+
+See also: MAPSCAN
 #
 NIGHTSIGHT "NIGHT SIGHT"
 
@@ -254,6 +250,8 @@ No trace (Survival ability)
 A person who has learned to leave no trace can not be found using the "track"
 or "where" commands, but this ability only functions outdoor in the wilderness.
 It also won't work in adventures at all.
+
+Gain skill by walking around in the wilderness without leaving tracks.
 
 See also: TRACK, WHERE, UNSEEN PASSING
 #
@@ -308,6 +306,9 @@ Scavenging commands:
   dig
   gather
   pick
+  chop
+  harvest
+  quarrying
 
 See also: DIG, GATHER, PICK
 #
@@ -337,7 +338,7 @@ Gains experience when you recover movement.
 
 See also: SLEEP
 #
-SWIM SWIMMING
+SWIMMING
 
 Swimming (Survival ability)
 
@@ -345,9 +346,12 @@ Swimming allows you to move through river and ocean squares without a canoe
 or ship. However, sharks are attracted to the splashing of swimmers and will
 attack you if you are in the ocean.
 
+You must type 'swim' to enter a water tile from land. This keeps players from
+wasting movement points or wandering into the mouth of a shark.
+
 Gains experience when you swim around.
 
-See also: CANOE, SHIPBUILDING
+See also: CANOE, SHIPBUILDING, SWIM, AUTOSWIM
 #
 THIRST "SATED THIRST"
 

@@ -9,6 +9,8 @@ ride on the cart and drive it around.
 bfhio 22 5 200 1
 R
 19 1 1 0
+P
+0
 S
 #901
 carriage wooden~
@@ -27,6 +29,8 @@ R
 19 1 1 0
 R
 20 1 1 0
+P
+1
 S
 #902
 wagon covered~
@@ -41,6 +45,8 @@ R
 19 1 1 0
 R
 20 1 1 0
+P
+2
 S
 #903
 catapult~
@@ -59,6 +65,8 @@ R
 16 1 1 1048576
 R
 20 1 1 0
+P
+0
 S
 #904
 chair wooden~
@@ -67,7 +75,9 @@ There is a wooden chair here.~
 You can sit on the chair.
 ~
 ~
-fghln 19 1 0 0
+fghlnv 19 1 0 0
+P
+2
 S
 #905
 bench wooden~
@@ -76,7 +86,9 @@ There is a wooden bench here.~
 You can sit on the bench.
 ~
 ~
-fhln 19 1 0 0
+fhlnv 19 1 0 0
+P
+2
 S
 #906
 table long~
@@ -85,7 +97,9 @@ There is a long table here.~
 Tables are merely for decoration.
 ~
 ~
-hln 19 1 0 0
+hlnv 19 1 0 0
+P
+2
 S
 #907
 stool wooden~
@@ -94,7 +108,9 @@ There is a wooden stool here.~
 You can sit on the stool.
 ~
 ~
-fhln 19 1 0 0
+fhlnv 19 1 0 0
+P
+2
 S
 #917
 throne~
@@ -103,7 +119,9 @@ There is a throne at the head of the room.~
 You can sit on the throne.
 ~
 ~
-fhln 19 1 0 0
+fhlnv 19 1 0 0
+P
+2
 S
 #920
 canoe wooden~
@@ -116,6 +134,8 @@ to the edge of the water, 'sit' in it, and then type 'sail <direction>'.
 cfghlnu 3 3 0 0
 R
 1003 1 5 0
+P
+0
 S
 #921
 caravan brightly-painted painted wooden~
@@ -136,6 +156,8 @@ R
 R
 20 1 1 0
 T 921
+P
+2
 S
 #922
 raft wooden~
@@ -149,6 +171,8 @@ You can 'drag' the raft to the edge of the water, 'sit' on it, then type 'sail
 cfhlnu 3 3 0 0
 R
 1003 1 5 0
+P
+0
 S
 #952
 caravel lateen-rigged~
@@ -168,6 +192,8 @@ R
 R
 26 1 1 0
 T 952
+P
+1
 S
 #953
 cog~
@@ -188,11 +214,13 @@ R
 R
 26 1 1 0
 T 953
+P
+1
 S
 #954
 longship fearsome~
 the longship~
-A fearsome longship floats ominiously on the water.~
+A fearsome longship floats ominously on the water.~
    The longship has a single tall mast, its single sail embroidered with the
 fierce emblem of its master. This longship is armed with cannon, and used to
 raid up and down the coast. You can "board" it from here.
@@ -210,6 +238,8 @@ R
 R
 26 1 1 0
 T 954
+P
+0
 S
 #955
 brigantine massive~
@@ -232,6 +262,8 @@ R
 R
 26 2 1 0
 T 955
+P
+1
 S
 #956
 carrack four-masted~
@@ -251,6 +283,8 @@ R
 R
 26 2 1 0
 T 956
+P
+2
 S
 #957
 hulk cargo huge~
@@ -270,5 +304,7 @@ R
 R
 26 1 1 0
 T 957
+P
+1
 S
 $

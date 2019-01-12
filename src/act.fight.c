@@ -38,6 +38,7 @@ extern obj_data *die(char_data *ch, char_data *killer);
 extern int determine_best_scale_level(char_data *ch, bool check_group);	// mobact.c
 extern bool is_fight_ally(char_data *ch, char_data *frenemy);	// fight.c
 extern bool is_fight_enemy(char_data *ch, char_data *frenemy);	// fight.c
+void scale_item_to_level(obj_data *obj, int level);
 void trigger_distrust_from_hostile(char_data *ch, empire_data *emp);	// fight.c
 
 
@@ -152,6 +153,7 @@ ACMD(do_consider) {
 	bitvector_t bits;
 	int diff, pos, hitch;
 	char_data *vict;
+	bool any = FALSE;
 	
 	one_argument(argument, arg);
 	
@@ -178,34 +180,46 @@ ACMD(do_consider) {
 		if (diff != 0) {
 			snprintf(buf, sizeof(buf), "$E is %d level%s %s you.", ABSOLUTE(diff), PLURAL(ABSOLUTE(diff)), diff > 0 ? "below" : "above");
 			act(buf, FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 		
 		// difficulty
 		if (MOB_FLAGGED(vict, MOB_HARD) && MOB_FLAGGED(vict, MOB_GROUP)) {
 			act("$E is a boss fight (requires 4 players of proper level).", FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 		else if (MOB_FLAGGED(vict, MOB_GROUP)) {
 			act("$E is a group fight (requires 3 players of proper level).", FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 		else if (MOB_FLAGGED(vict, MOB_HARD)) {
 			act("$E is a hard fight (may require 2 players of proper level).", FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 
 		// hit/dodge
 		hitch = get_to_hit(ch, vict, FALSE, FALSE) - get_dodge_modifier(vict, ch, FALSE);
 		if (hitch < 50) {
 			act("You would have trouble hitting $M.", FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 		hitch = get_to_hit(vict, ch, FALSE, FALSE) - get_dodge_modifier(ch, vict, FALSE);
 		if (hitch > 50) {
 			act("You would have trouble dodging $S attacks.", FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 
 		// flags (with overflow protection on affected_bits_consider[])
 		for (bits = AFF_FLAGS(vict), pos = 0; bits && *affected_bits_consider[pos] != '\n'; bits >>= 1, ++pos) {
 			if (IS_SET(bits, BIT(0)) && *affected_bits_consider[pos]) {
 				act(affected_bits_consider[pos], FALSE, ch, NULL, vict, TO_CHAR);
+				any = TRUE;
 			}
+		}
+		
+		// no message sent?
+		if (!any) {
+			msg_to_char(ch, "You seem to be an even match.\r\n");
 		}
 	}
 }
@@ -239,7 +253,7 @@ ACMD(do_execute) {
 
 
 ACMD(do_flee) {
-	extern int perform_move(char_data *ch, int dir, int need_specials_check, byte mode);
+	extern int perform_move(char_data *ch, int dir, bitvector_t flags);
 	extern const bool can_flee_dir[NUM_OF_DIRS];
 	
 	int i, attempt, try;
@@ -288,7 +302,7 @@ ACMD(do_flee) {
 		if ((inside && (ex = find_exit(IN_ROOM(ch), attempt)) && CAN_GO(ch, ex)) || (!inside && to_room && (!ROOM_SECT_FLAGGED(to_room, SECTF_ROUGH | SECTF_FRESH_WATER | SECTF_OCEAN) || IS_RIDING(ch)) && !ROOM_IS_CLOSED(to_room))) {
 			act("$n panics, and attempts to flee!", TRUE, ch, 0, 0, TO_ROOM);
 			was_fighting = FIGHTING(ch);
-			if (perform_move(ch, attempt, TRUE, 0)) {
+			if (perform_move(ch, attempt, NOBITS)) {
 				send_to_char("You flee head over heels.\r\n", ch);
 				if (was_fighting && can_gain_exp_from(ch, was_fighting)) {
 					gain_ability_exp(ch, ABIL_FLEET, 5);
@@ -466,6 +480,7 @@ ACMD(do_respawn) {
 		greet_mtrigger(ch, NO_DIR);
 		greet_memory_mtrigger(ch);
 		greet_vtrigger(ch, NO_DIR);
+		msdp_update_room(ch);
 	}
 }
 
@@ -529,8 +544,6 @@ ACMD(do_shoot) {
 
 
 ACMD(do_stake) {
-	void scale_item_to_level(obj_data *obj, int level);
-	
 	char_data *victim;
 	obj_data *stake;
 
@@ -682,7 +695,8 @@ ACMD(do_summary) {
 // do_untie -- search hint
 ACMD(do_tie) {
 	void perform_npc_tie(char_data *ch, char_data *victim, int subcmd);
-
+	
+	bool kept = FALSE;
 	char_data *victim;
 	obj_data *rope;
 
@@ -712,13 +726,20 @@ ACMD(do_tie) {
 		GET_HEALTH(victim) = MAX(1, GET_HEALTH(victim));
 		GET_POS(victim) = POS_RESTING;
 		REMOVE_BIT(INJURY_FLAGS(victim), INJ_TIED);
-		obj_to_char((rope = read_object(o_ROPE, TRUE)), ch);
-		load_otrigger(rope);
+		
+		if (GET_ROPE_VNUM(victim) != NOTHING && (rope = read_object(GET_ROPE_VNUM(victim), TRUE))) {
+			obj_to_char(rope, ch);
+			scale_item_to_level(rope, 1);	// minimum
+			load_otrigger(rope);
+			act("You receive $p.", FALSE, ch, rope, NULL, TO_CHAR);
+		}
+		GET_ROPE_VNUM(victim) = NOTHING;
 	}
 	else if (GET_POS(victim) >= POS_SLEEPING)
 		act("You need to knock $M out first.", FALSE, ch, 0, victim, TO_CHAR);
-	else if (!(rope = get_obj_in_list_num(o_ROPE, ch->carrying)))
-		msg_to_char(ch, "You don't have any rope.\r\n");
+	else if (!(rope = get_component_in_list(CMP_ROPE, NOBITS, ch->carrying, &kept))) {
+		msg_to_char(ch, "You don't seem to have any rope%s.\r\n", kept ? " that isn't marked 'keep'" : "");
+	}
 	else {
 		act("You bind and gag $N!", FALSE, ch, 0, victim, TO_CHAR);
 		act("$n binds and gags you!", FALSE, ch, 0, victim, TO_VICT | TO_SLEEP);
@@ -728,6 +749,7 @@ ACMD(do_tie) {
 			GET_HEALTH(victim) = 1;
 			GET_POS(victim) = POS_RESTING;
 		}
+		GET_ROPE_VNUM(victim) = GET_OBJ_VNUM(rope);
 		extract_obj(rope);
 	}
 }

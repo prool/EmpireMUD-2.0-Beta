@@ -156,6 +156,7 @@
 #define OCMD_SHOOT  7
 #define OCMD_POISON  8
 #define OCMD_PAINT  9
+#define OCMD_LIGHT  10
 
 #define TRIG_NEW                0	     /* trigger starts from top  */
 #define TRIG_RESTART            1	     /* trigger restarting       */
@@ -167,6 +168,13 @@
 // used for command triggers
 #define CMDTRG_EXACT  0
 #define CMDTRG_ABBREV  1
+
+
+// for drop triggers: which command dropped it
+#define DROP_TRIG_DROP  0
+#define DROP_TRIG_JUNK  1
+#define DROP_TRIG_SACRIFICE  2
+#define DROP_TRIG_PUT  3
 
 
 /* one line of the trigger */
@@ -254,10 +262,10 @@ int greet_mtrigger(char_data *actor, int dir);
 int entry_mtrigger(char_data *ch);
 void entry_memory_mtrigger(char_data *ch);
 int enter_wtrigger(room_data *room, char_data *actor, int dir);
-int drop_otrigger(obj_data *obj, char_data *actor);
+int drop_otrigger(obj_data *obj, char_data *actor, int mode);
 int timer_otrigger(obj_data *obj);
 int get_otrigger(obj_data *obj, char_data *actor);
-int drop_wtrigger(obj_data *obj, char_data *actor);
+int drop_wtrigger(obj_data *obj, char_data *actor, int mode);
 int give_otrigger(obj_data *obj, char_data *actor, char_data *victim);
 int receive_mtrigger(char_data *ch, char_data *actor, obj_data *obj);
 int wear_otrigger(obj_data *obj, char_data *actor, int where);
@@ -346,6 +354,7 @@ void do_dg_affect_room(void *go, struct script_data *sc, trig_data *trig, int ty
 void dg_purge_instance(void *owner, struct instance_data *inst, char *argument);
 void script_damage(char_data *vict, char_data *killer, int level, int dam_type, double modifier);
 void script_damage_over_time(char_data *vict, any_vnum atype, int level, int dam_type, double modifier, int dur_seconds, int max_stacks, char_data *cast_by);
+void script_heal(void *thing, int type, char *argument);
 
 void extract_value(struct script_data *sc, trig_data *trig, char *cmd);
 

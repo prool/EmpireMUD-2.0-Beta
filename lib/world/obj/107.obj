@@ -119,10 +119,9 @@ A holiday bell is lying here.~
 This bell can summon a cheerful elf (a noncombat pet)!
 Type 'use bell' to summon him.
 ~
-3 p a 4
+19 p a 5
 10709 0 0
 2 0
-T 9900
 S
 #10710
 snowglobe globe~
@@ -191,16 +190,6 @@ A
 25 25 0
 C
 100 100
-S
-#10715
-sleigh broken~
-a broken sleigh~
-A broken sleigh is parked here.~
-This item is deprecated.
-~
-16 0 0 3
-300 1 0
-0 1
 S
 #10716
 cookies plate christmas~
@@ -319,10 +308,9 @@ Someone has left their Christmas tree whistle here.~
 This whistle can summon a noncombat pet!
 Type 'use whistle' to summon it.
 ~
-3 p a 2
+19 p a 3
 10723 0 0
 2 0
-T 9900
 S
 #10724
 whistle reindeer fawn~
@@ -331,10 +319,9 @@ Someone has left their reindeer fawn whistle here.~
 This whistle can summon a noncombat pet!
 Type 'use whistle' to summon it.
 ~
-3 p a 3
+19 p a 4
 10724 0 0
 2 0
-T 9900
 S
 #10725
 whistle snowman small animated~
@@ -343,10 +330,9 @@ Someone has left their animated snowman whistle here.~
 This whistle can summon a noncombat pet!
 Type 'use whistle' to summon it.
 ~
-3 p a 4
+19 p a 5
 10725 0 0
 2 0
-T 9900
 S
 #10726
 whistle toy soldier~
@@ -355,10 +341,9 @@ Someone has left their toy soldier whistle here.~
 This whistle can summon a noncombat pet!
 Type 'use whistle' to summon it.
 ~
-3 p a 5
+19 p a 6
 10726 0 0
 2 0
-T 9900
 S
 #10727
 whistle mini-pet pet random~
@@ -390,8 +375,10 @@ A fiddle is lying here.~
    This fiddle, though a fine musical instrument, belongs to someone else. If
 you can find the cat who has lost the fiddle, surely he will reward you. You
 can also play it as an instrument.
+   You can 'use' this item to teleport back to the nearest Mother Goose
+adventure. From there, try 'where musical' to find the cat.
 ~
-22 p ao 6
+22 p ao 7
 0 0 0
 0 0
 M
@@ -430,8 +417,10 @@ a pail~
 A pail is lying on the ground.~
    This pail is inscribed with the names 'Jack' and 'Jill', and surely they
 would reward you if you gave it back to them.
+   You can 'use' this item to teleport back to the nearest Mother Goose
+adventure. From there, try 'where jack' or 'where jill' to find them.
 ~
-5 p a 2
+5 p a 3
 32 32 0
 0 0
 T 10738
@@ -458,8 +447,10 @@ A candlestick is lying here, unlit.~
    This candlestick is made from fine copper, and is surely someone's family
 heirloom. Indeed, the base is etched with the name 'Nimble'. Perhaps if you
 could find its owner, he'd reward you.
+   You can 'use' this item to teleport back to the nearest Mother Goose
+adventure. From there, try 'where nimble' to find the right Jack.
 ~
-3 p ao 3
+3 p ao 4
 0 0 0
 13 0
 I 11 10735 100.00 1  # LIGHT: a lit candlestick
@@ -472,8 +463,10 @@ A lit candlestick is sitting on the ground.~
    This candlestick is made from fine copper, and is surely someone's family
 heirloom. Indeed, the base is etched with the name 'Nimble'. Perhaps if you
 could find its owner, he'd reward you.
+   You can 'use' this item to teleport back to the nearest Mother Goose
+adventure. From there, try 'where nimble' to find the right Jack.
 ~
-3 cp ao 4
+3 cp ao 5
 0 0 0
 13 168
 T 10738
@@ -500,8 +493,10 @@ A large ham is lying in the dirt.~
    The ham is mouth-watering. Nevertheless, the plate indicates it belongs to
 Jack Sprat and he must be going hungry without it. Perhaps he would reward you
 if you returned it.
+   You can 'use' this item to teleport back to the nearest Mother Goose
+adventure. From there, try 'where sprat' to find the right Jack.
 ~
-6 p a 6
+6 p a 7
 72 0 0
 7 336
 A
@@ -536,8 +531,10 @@ A Christmas pie is sitting on the ground.~
    This is a Christmas pie, although they're good all year long. From the
 markings on the pie plate, this seems to belong to Jack Horner. Perhaps he
 would reward you if you returned it to him.
+   You can 'use' this item to teleport back to the nearest Mother Goose
+adventure. From there, try 'where horner' to find the right Jack.
 ~
-6 p a 6
+6 p a 7
 72 0 0
 7 336
 M
@@ -581,8 +578,10 @@ curds and whey~
 Someone has left a dish of curds and whey on the ground.~
    These curds and whey could only belong to little Miss Muffet. If you could
 find her, she might reward you for their safe return.
+   You can 'use' this item to teleport back to the nearest Mother Goose
+adventure. From there, try 'where muffet' to find her.
 ~
-6 p a 6
+6 p a 7
 72 0 0
 7 336
 M
@@ -617,7 +616,7 @@ Some warm fleece is lying here.~
    This warm fleece is white as snow. It looks like it would protect you, a
 little bit.
 ~
-2 mp ad 8
+2 mp ad 9
 0 0 0
 11 0
 A
@@ -629,20 +628,22 @@ C
 M
 12
 $n is standing here; $s fleece is white as snow.~
-T 10738
 S
 #10744
 bell ribbon blue~
 a bell on a blue ribbon~
 A bell on a blue ribbon is lying here.~
    This little bell on a blue ribbon belongs to Mary's lost lamb. Surely she
-would reward you if you gave the bell back to her. You can also summon a little
-lamb by typing 'use bell'.
+would reward you if you gave the bell back to her. If you 'ring' the bell, you
+will gain a little lamb mini-pet.
+   You can 'use' this item to teleport back to the nearest Mother Goose
+adventure. From there, try 'where mary' to find her.
 ~
-3 p a 6
+3 p a 9
 10744 0 0
 2 0
-T 9900
+T 10744
+T 10738
 S
 #10745
 skirt fetching~
@@ -665,8 +666,10 @@ a leathery broth~
 A bowl of leathery broth is sitting here.~
    This broth is hearty enough to chew! Surely it belongs to the woman who
 lives in the shoe. If you returned it, she might reward you.
+   You can 'use' this item to teleport back to the nearest Mother Goose
+adventure, where you can turn in this quest.
 ~
-6 p a 8
+6 p a 9
 72 0 0
 7 336
 A
@@ -739,10 +742,9 @@ a spider egg~
 A spider egg is lying here.~
 This egg will summon a spiderling minipet if you use it.
 ~
-3 p a 5
+19 p a 6
 10753 0 0
 7 0
-T 9900
 S
 #10754
 potion bug~
@@ -750,9 +752,15 @@ a bug potion~
 A bug potion is sitting here.~
 This potion smells foul, but it will help you in combat.
 ~
-25 0 a 2
-8 25 0
+25 0 a 5
+-1 0 3030
 8 0
+A
+2 1 0
+C
+50 50
+R
+5130 0
 S
 #10755
 bread goblin crusty~
@@ -939,9 +947,9 @@ coffin goblin decaying~
 a goblin coffin~
 A decaying coffin is sticking up from the gravesite.~
    The coffin looks small and cramped, but you might be able to fit a human in
-it. It's in poor condition and doesn't look like it will last very long
+it. It's in poor condition and doesn't look like it will last very long.
 ~
-3 0 0 6
+3 0 0 7
 0 0 0
 0 288
 T 10771
@@ -956,5 +964,54 @@ This is supposed to purge itself and spawn a goblin raft. Evidently it didn't.
 0 0 0
 0 1
 T 10773
+S
+#10777
+fruit knowledge~
+the fruit of knowledge~
+The fruit of knowledge is lying on the ground.~
+   The fruit of knowledge resembles an apple on the outside, with the thick
+peel of an orange, and the arils of a pomegranate. Eat it to unlock its power.
+~
+6 p a 3
+24 0 0
+0 0
+A
+8 2 0
+C
+1 1
+T 10777
+S
+#10780
+knowledge seed~
+the seed of knowledge~
+The seed of knowledge has been planted here.~
+This tiny seed grants great knowledge to those who know where to look.
+~
+3 k a 2
+0 0 0
+0 2
+T 10780
+S
+#10781
+leash buffalo~
+a buffalo leash~
+A buffalo leash is lying here.~
+This leash will summon a noncombat pet!
+Type 'use leash' to summon it.
+~
+19 o a 6
+10781 0 0
+2 0
+S
+#10782
+leash zebra~
+a zebra leash~
+A zebra leash is lying here.~
+This leash will summon a noncombat pet!
+Type 'use leash' to summon it.
+~
+19 o a 7
+10782 0 0
+2 0
 S
 $

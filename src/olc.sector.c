@@ -54,6 +54,85 @@ const char default_roadside_icon = '.';
 //// HELPERS /////////////////////////////////////////////////////////////////
 
 /**
+* Checks for common sector problems and reports them to ch.
+*
+* @param sector_data *sect The item to audit.
+* @param char_data *ch The person to report to.
+* @return bool TRUE if any problems were reported; FALSE if all good.
+*/
+bool audit_sector(sector_data *sect, char_data *ch) {
+	extern bool audit_interactions(any_vnum vnum, struct interaction_item *list, int attach_type, char_data *ch);
+	extern bool audit_spawns(any_vnum vnum, struct spawn_info *list, char_data *ch);
+	extern struct icon_data *get_icon_from_set(struct icon_data *set, int type);
+	extern const char *icon_types[];
+	
+	char temp[MAX_STRING_LENGTH];
+	bool problem = FALSE;
+	int iter;
+	
+	// flags to audit for
+	const bitvector_t odd_flags = SECTF_ADVENTURE | SECTF_NON_ISLAND | SECTF_START_LOCATION | SECTF_MAP_BUILDING | SECTF_INSIDE;
+	
+	if (!GET_SECT_NAME(sect) || !*GET_SECT_NAME(sect) || !str_cmp(GET_SECT_NAME(sect), default_sect_name)) {
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "No name set");
+		problem = TRUE;
+	}
+	if (GET_SECT_NAME(sect) && islower(*GET_SECT_NAME(sect))) {
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "Missing capital in sector name");
+		problem = TRUE;
+	}
+	
+	if (!GET_SECT_TITLE(sect) || !*GET_SECT_TITLE(sect) || !str_cmp(GET_SECT_TITLE(sect), default_sect_title)) {
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "No title set");
+		problem = TRUE;
+	}
+	
+	for (iter = 0; iter < NUM_TILESETS; ++iter) {
+		if (!get_icon_from_set(GET_SECT_ICONS(sect), iter)) {
+			olc_audit_msg(ch, GET_SECT_VNUM(sect), "No icon for '%s' tileset", icon_types[iter]);
+			problem = TRUE;
+		}
+	}
+	if (GET_SECT_CLIMATE(sect) == CLIMATE_NONE) {
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "Climate not set");
+		problem = TRUE;
+	}
+	if (!GET_SECT_SPAWNS(sect)) {
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "No spawns set");
+		problem = TRUE;
+	}
+	if (GET_SECT_MAPOUT(sect) == 0) {
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "Mapout color not set (or set to starting location)");
+		problem = TRUE;
+	}
+	if (!GET_SECT_MOVE_LOSS(sect)) {
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "No movement cost");
+		problem = TRUE;
+	}
+	
+	if (SECT_FLAGGED(sect, odd_flags)) {
+		sprintbit(GET_SECT_FLAGS(sect) & odd_flags, sector_flags, temp, TRUE);
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "Unusual flag(s): %s", temp);
+		problem = TRUE;
+	}
+	if (SECT_FLAGGED(sect, SECTF_OCEAN | SECTF_FRESH_WATER) && !has_interaction(GET_SECT_INTERACTIONS(sect), INTERACT_FISH)) {
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "Water sect with no fish interaction");
+		problem = TRUE;
+	}
+	
+	if (has_evolution_type(sect, EVO_CHOPPED_DOWN) && !has_interaction(GET_SECT_INTERACTIONS(sect), INTERACT_CHOP)) {
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "Choppable sect with no chop interaction");
+		problem = TRUE;
+	}
+	
+	problem |= audit_interactions(GET_SECT_VNUM(sect), GET_SECT_INTERACTIONS(sect), TYPE_ROOM, ch);
+	problem |= audit_spawns(GET_SECT_VNUM(sect), GET_SECT_SPAWNS(sect), ch);
+	
+	return problem;
+}
+
+
+/**
 * Creates a new sector entry.
 * 
 * @param sector_vnum vnum The number to create.
@@ -144,6 +223,7 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 	
 	sector_data *sect, *sect_iter, *next_sect, *replace_sect;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
 	descriptor_data *desc;
 	adv_data *adv, *next_adv;
@@ -227,10 +307,24 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 		}
 	}
 	
+	// update progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_VISIT_SECTOR, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_OWN_SECTOR, vnum);
+		
+		if (found) {
+			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+			need_progress_refresh = TRUE;
+		}
+	}
+	
 	// update quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
 		found = delete_requirement_from_list(&QUEST_TASKS(quest), REQ_VISIT_SECTOR, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_VISIT_SECTOR, vnum);
+		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_OWN_SECTOR, vnum);
+		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_OWN_SECTOR, vnum);
 		
 		if (found) {
 			SET_BIT(QUEST_FLAGS(quest), QST_IN_DEVELOPMENT);
@@ -241,6 +335,7 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 	// update socials
 	HASH_ITER(hh, social_table, soc, next_soc) {
 		found = delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_VISIT_SECTOR, vnum);
+		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_OWN_SECTOR, vnum);
 		
 		if (found) {
 			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
@@ -264,9 +359,20 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 				msg_to_desc(desc, "One or more linking rules have been removed from the adventure you are editing.\r\n");
 			}
 		}
+		if (GET_OLC_PROGRESS(desc)) {
+			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_VISIT_SECTOR, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_OWN_SECTOR, vnum);
+		
+			if (found) {
+				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
+				msg_to_desc(desc, "A sector used by the progression goal you're editing has been deleted.\r\n");
+			}
+		}
 		if (GET_OLC_QUEST(desc)) {
 			found = delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_VISIT_SECTOR, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_VISIT_SECTOR, vnum);
+			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_OWN_SECTOR, vnum);
+			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_OWN_SECTOR, vnum);
 		
 			if (found) {
 				SET_BIT(QUEST_FLAGS(GET_OLC_QUEST(desc)), QST_IN_DEVELOPMENT);
@@ -275,6 +381,7 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 		}
 		if (GET_OLC_SOCIAL(desc)) {
 			found = delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_VISIT_SECTOR, vnum);
+			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_OWN_SECTOR, vnum);
 		
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
@@ -309,6 +416,7 @@ void olc_search_sector(char_data *ch, sector_vnum vnum) {
 	struct evolution_data *evo;
 	sector_data *real, *sect, *next_sect;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
 	adv_data *adv, *next_adv;
 	int size, found;
@@ -340,6 +448,21 @@ void olc_search_sector(char_data *ch, sector_vnum vnum) {
 		}
 	}
 	
+	// progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		if (size >= sizeof(buf)) {
+			break;
+		}
+		// REQ_x: requirement search
+		any = find_requirement_in_list(PRG_TASKS(prg), REQ_VISIT_SECTOR, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_OWN_SECTOR, vnum);
+		
+		if (any) {
+			++found;
+			size += snprintf(buf + size, sizeof(buf) - size, "PRG [%5d] %s\r\n", PRG_VNUM(prg), PRG_NAME(prg));
+		}
+	}
+	
 	// quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
 		if (size >= sizeof(buf)) {
@@ -347,6 +470,8 @@ void olc_search_sector(char_data *ch, sector_vnum vnum) {
 		}
 		any = find_requirement_in_list(QUEST_TASKS(quest), REQ_VISIT_SECTOR, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_VISIT_SECTOR, vnum);
+		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_OWN_SECTOR, vnum);
+		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_OWN_SECTOR, vnum);
 		
 		if (any) {
 			++found;
@@ -375,6 +500,7 @@ void olc_search_sector(char_data *ch, sector_vnum vnum) {
 			break;
 		}
 		any = find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_VISIT_SECTOR, vnum);
+		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_OWN_SECTOR, vnum);
 		
 		if (any) {
 			++found;

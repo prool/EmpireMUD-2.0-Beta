@@ -47,7 +47,7 @@ extern const struct wear_data_type wear_data[NUM_WEARS];
 // external funcs
 extern obj_data *die(char_data *ch, char_data *killer);
 void death_log(char_data *ch, char_data *killer, int type);
-extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom);
+extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom, bool allow_fake_loc);
 extern struct instance_data *get_instance_by_id(any_vnum instance_id);
 extern room_data *obj_room(obj_data *obj);
 void out_of_blood(char_data *ch);
@@ -292,7 +292,7 @@ void check_should_dismount(char_data *ch) {
 	else if (IS_MORPHED(ch)) {
 		ok = FALSE;
 	}
-	else if (IS_COMPLETE(IN_ROOM(ch)) && !BLD_ALLOWS_MOUNTS(IN_ROOM(ch))) {
+	else if ((IS_COMPLETE(IN_ROOM(ch)) || ROOM_BLD_FLAGGED(IN_ROOM(ch), BLD_CLOSED)) && !BLD_ALLOWS_MOUNTS(IN_ROOM(ch))) {
 		ok = FALSE;
 	}
 	else if (GET_SITTING_ON(ch)) {
@@ -360,7 +360,6 @@ void point_update_char(char_data *ch) {
 	struct instance_data *inst;
 	obj_data *obj, *next_obj;
 	char_data *c, *chiter;
-	empire_data *emp;
 	bool found;
 	int count;
 	
@@ -369,7 +368,7 @@ void point_update_char(char_data *ch) {
 	}
 	
 	// check mob crowding (for npcs in stables)
-	if (IS_NPC(ch) && !ch->desc && HAS_FUNCTION(IN_ROOM(ch), FNC_STABLE)) {
+	if (IS_NPC(ch) && !ch->desc && room_has_function_and_city_ok(IN_ROOM(ch), FNC_STABLE)) {
 		count = 1;	// me
 		LL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), chiter, next_in_room) {
 			if (ch != chiter && !EXTRACTED(chiter) && IS_NPC(chiter) && GET_MOB_VNUM(chiter) == GET_MOB_VNUM(ch)) {
@@ -385,8 +384,6 @@ void point_update_char(char_data *ch) {
 	}
 	
 	if (!IS_NPC(ch)) {
-		emp = GET_LOYALTY(ch);
-		
 		// check bad quest items
 		remove_quest_items(ch);
 		
@@ -409,21 +406,11 @@ void point_update_char(char_data *ch) {
 		if (IS_BLOOD_STARVED(ch)) {
 			msg_to_char(ch, "You are starving!\r\n");
 		}
-	
-		// in an empire with Prominence?
-		if (emp) {
-			gain_ability_exp(ch, ABIL_PROMINENCE, 2);
-			gain_ability_exp(ch, ABIL_LOCKS, 1);
-		}
-		// city lights after dark
-		if (weather_info.sunlight == SUN_DARK) {
-			gain_ability_exp(ch, ABIL_CITY_LIGHTS, 2);
-		}
-		else if (weather_info.sunlight == SUN_LIGHT && IS_OUTDOORS(ch)) {
+		
+		// light-based gains
+		if (weather_info.sunlight == SUN_LIGHT && IS_OUTDOORS(ch)) {
 			gain_ability_exp(ch, ABIL_DAYWALKING, 2);
 		}
-		
-		gain_ability_exp(ch, ABIL_COMMERCE, 2);
 		
 		if (GET_MOUNT_LIST(ch)) {
 			gain_ability_exp(ch, ABIL_STABLEMASTER, 2);
@@ -490,10 +477,10 @@ void point_update_char(char_data *ch) {
 				if (!MOB_FLAGGED(ch, MOB_NO_RESCALE)) {
 					inst = get_instance_by_id(MOB_INSTANCE_ID(ch));
 					if (!inst && IS_ADVENTURE_ROOM(IN_ROOM(ch))) {
-						inst = find_instance_by_room(IN_ROOM(ch), FALSE);
+						inst = find_instance_by_room(IN_ROOM(ch), FALSE, TRUE);
 					}
 					// if no instance or not level-locked
-					if (!inst || inst->level <= 0) {
+					if (!inst || INST_LEVEL(inst) <= 0) {
 						GET_CURRENT_SCALE_LEVEL(ch) = 0;
 					}
 				}
@@ -566,7 +553,7 @@ void real_update_char(char_data *ch) {
 	struct instance_data *inst;
 	int result, iter, type;
 	int fol_count, gain;
-	bool found, took_dot;
+	bool found, took_dot, msg;
 	
 	// check for end of meters (in case it was missed in the fight code)
 	if (!FIGHTING(ch)) {
@@ -574,7 +561,7 @@ void real_update_char(char_data *ch) {
 	}
 	
 	// first check location: this may move the player
-	if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_ADVENTURE_SUMMONED) && (!(inst = find_instance_by_room(IN_ROOM(ch), FALSE)) || inst->id != GET_ADVENTURE_SUMMON_INSTANCE_ID(ch))) {
+	if (!IS_NPC(ch) && PLR_FLAGGED(ch, PLR_ADVENTURE_SUMMONED) && (!(inst = find_instance_by_room(IN_ROOM(ch), FALSE, FALSE)) || INST_ID(inst) != GET_ADVENTURE_SUMMON_INSTANCE_ID(ch))) {
 		adventure_unsummon(ch);
 	}
 	
@@ -693,7 +680,12 @@ void real_update_char(char_data *ch) {
 	}
 	
 	// update recent level data if level has gone up or it's been too long since we've seen a higher level
-	if (GET_COMPUTED_LEVEL(ch) > GET_HIGHEST_KNOWN_LEVEL(ch)) {
+	if (!IS_IMMORTAL(ch) && GET_COMPUTED_LEVEL(ch) > GET_HIGHEST_KNOWN_LEVEL(ch)) {
+		if ((int) (GET_COMPUTED_LEVEL(ch) / 100) > (int) (GET_HIGHEST_KNOWN_LEVEL(ch) / 100)) {
+			// first time over a new 100?
+			log_to_slash_channel_by_name(PLAYER_LOG_CHANNEL, ch, "%s has reached level %d!", PERS(ch, ch, TRUE), (int)(GET_COMPUTED_LEVEL(ch) / 100) * 100);
+		}
+		
 		GET_HIGHEST_KNOWN_LEVEL(ch) = GET_COMPUTED_LEVEL(ch);
 	}
 	// update the last-known-level
@@ -720,9 +712,6 @@ void real_update_char(char_data *ch) {
 			GET_DAILY_BONUS_EXPERIENCE(ch) = gain;
 		}
 		GET_DAILY_QUESTS(ch) = 0;
-		for (iter = 0; iter < MAX_REWARDS_PER_DAY; ++iter) {
-			GET_REWARDED_TODAY(ch, iter) = -1;
-		}
 		
 		msg_to_char(ch, "&yYour daily quests and bonus experience have reset!&0\r\n");
 		
@@ -821,10 +810,13 @@ void real_update_char(char_data *ch) {
 
 	if (!AWAKE(ch) && IS_MORPHED(ch) && CHAR_MORPH_FLAGGED(ch, MORPHF_NO_SLEEP)) {
 		sprintf(buf, "%s has become $n!", PERS(ch, ch, 0));
+		msg = !CHAR_MORPH_FLAGGED(ch, MORPHF_NO_MORPH_MESSAGE);
 
 		perform_morph(ch, NULL);
-
-		act(buf, TRUE, ch, 0, 0, TO_ROOM);
+		
+		if (msg) {
+			act(buf, TRUE, ch, 0, 0, TO_ROOM);
+		}
 		msg_to_char(ch, "You revert to normal!\r\n");
 	}
 
@@ -923,14 +915,19 @@ static bool check_one_city_for_ruin(empire_data *emp, struct empire_city_data *c
 void check_ruined_cities(void) {
 	struct empire_city_data *city, *next_city;
 	empire_data *emp, *next_emp;
+	bool any = FALSE;
 	
 	HASH_ITER(hh, empire_table, emp, next_emp) {
 		if (!EMPIRE_IMM_ONLY(emp)) {
 			for (city = EMPIRE_CITY_LIST(emp); city; city = next_city) {
 				next_city = city->next;
-				check_one_city_for_ruin(emp, city);
+				any |= check_one_city_for_ruin(emp, city);
 			}
 		}
+	}
+	
+	if (any) {
+		read_empire_territory(NULL, FALSE);
 	}
 }
 
@@ -966,6 +963,17 @@ void check_wars(void) {
 					log_to_empire(emp, ELOG_DIPLOMACY, "The war with %s is over", EMPIRE_NAME(enemy));
 					log_to_empire(enemy, ELOG_DIPLOMACY, "The war with %s is over", EMPIRE_NAME(emp));
 				}
+			}
+			// check for a theivery permit that's over a day
+			if (IS_SET(pol->type, DIPL_THIEVERY) && pol->start_time < (time(0) - SECS_PER_REAL_DAY)) {
+				enemy = real_empire(pol->id);
+				
+				// remove war, set distrust
+				REMOVE_BIT(pol->type, DIPL_THIEVERY);
+				pol->start_time = time(0);
+								
+				syslog(SYS_INFO, 0, TRUE, "DIPL: %s's thievery permit against %s has timed out", EMPIRE_NAME(emp), EMPIRE_NAME(enemy));
+				log_to_empire(emp, ELOG_DIPLOMACY, "The thievery permit against %s has timed out", EMPIRE_NAME(enemy));
 			}
 		}
 	}
@@ -1008,7 +1016,7 @@ static void reduce_city_overage_one(empire_data *emp) {
 		perform_abandon_city(emp, city, FALSE);
 	}
 	
-	save_empire(emp);
+	EMPIRE_NEEDS_SAVE(emp) = TRUE;
 }
 
 
@@ -1024,17 +1032,33 @@ void reduce_city_overages(void) {
 	extern int count_city_points_used(empire_data *emp);
 	
 	empire_data *iter, *next_iter;
-	int used, points;
+	int points;
+	
+	time_t overage_timeout = time(0) - (config_get_int("city_overage_timeout") * SECS_PER_REAL_HOUR);
 	
 	HASH_ITER(hh, empire_table, iter, next_iter) {
 		// only bother on !imm empires that have MORE than one city (they can always keep the last one)
 		if (!EMPIRE_IMM_ONLY(iter) && count_cities(iter) > 1) {
-			used = count_city_points_used(iter);
 			points = city_points_available(iter);
 			
-			// cutoff for keeping cities is being at 2x currently-earned points
-			if (used > (2 * (points + used))) {
-				reduce_city_overage_one(iter);
+			if (points >= 0) {	// no overage
+				// remove warning time, if any
+				EMPIRE_CITY_OVERAGE_WARNING_TIME(iter) = 0;
+			}
+			else {	// over on points
+				
+				if (EMPIRE_CITY_OVERAGE_WARNING_TIME(iter) == 0) {
+					EMPIRE_CITY_OVERAGE_WARNING_TIME(iter) = time(0);
+					log_to_empire(iter, ELOG_TERRITORY, "Your empire is using more city points than it has available and will abandon one soon");
+				}
+				else if (EMPIRE_CITY_OVERAGE_WARNING_TIME(iter) <= overage_timeout) {
+					// time's up
+					reduce_city_overage_one(iter);
+				}
+				else {
+					// still over -- log again
+					log_to_empire(iter, ELOG_TERRITORY, "Your empire is using more city points than it has available and will abandon one soon");
+				}
 			}
 		}
 	}
@@ -1051,16 +1075,25 @@ static void reduce_outside_territory_one(empire_data *emp) {
 	
 	struct empire_city_data *city;
 	room_data *iter, *next_iter, *loc, *farthest;
-	int dist, this_far, far_dist;
-	bool junk;
+	int dist, this_far, far_dist, far_type, ter_type;
+	bool junk, outskirts_over, frontier_over, total_over;
 	
 	// sanity
-	if (!emp || EMPIRE_IMM_ONLY(emp) || EMPIRE_OUTSIDE_TERRITORY(emp) <= land_can_claim(emp, TRUE)) {
+	if (!emp || EMPIRE_IMM_ONLY(emp)) {
 		return;
+	}
+	
+	// see which is over
+	outskirts_over = EMPIRE_TERRITORY(emp, TER_OUTSKIRTS) > OUTSKIRTS_CLAIMS_AVAILABLE(emp);
+	frontier_over = EMPIRE_TERRITORY(emp, TER_FRONTIER) > land_can_claim(emp, TER_FRONTIER);
+	total_over = EMPIRE_TERRITORY(emp, TER_TOTAL) > land_can_claim(emp, TER_TOTAL);
+	if (!outskirts_over && !frontier_over && !total_over) {
+		return;	// no work
 	}
 	
 	farthest = NULL;
 	far_dist = -1;	// always less
+	far_type = TER_FRONTIER;
 	
 	// check the whole map to determine the farthest outside claim
 	HASH_ITER(hh, world_table, iter, next_iter) {
@@ -1071,7 +1104,17 @@ static void reduce_outside_territory_one(empire_data *emp) {
 		loc = HOME_ROOM(iter);
 		
 		// if owner matches AND it's not in a city
-		if (ROOM_OWNER(loc) == emp && !is_in_city_for_empire(loc, emp, FALSE, &junk)) {
+		if (ROOM_OWNER(loc) == emp && (ter_type = get_territory_type_for_empire(loc, emp, FALSE, &junk)) != TER_CITY) {
+			if (ter_type == TER_CITY) {
+				continue;	// NEVER do a city, even if total is over
+			}
+			if (ter_type == TER_FRONTIER && !frontier_over && !total_over) {
+				continue;
+			}
+			else if (ter_type == TER_OUTSKIRTS && !outskirts_over && !total_over) {
+				continue;
+			}
+			
 			// check its distance from each city, find the city it's closest to
 			this_far = MAP_SIZE;
 			for (city = EMPIRE_CITY_LIST(emp); city; city = city->next) {
@@ -1085,12 +1128,13 @@ static void reduce_outside_territory_one(empire_data *emp) {
 			if (this_far > far_dist) {
 				far_dist = this_far;
 				farthest = loc;
+				far_type = ter_type;
 			}
 		}
 	}
 	
 	if (farthest) {
-		log_to_empire(emp, ELOG_TERRITORY, "Abandoning %s (%d, %d) because too much outside territory has been claimed", get_room_name(farthest, FALSE), X_COORD(farthest), Y_COORD(farthest));
+		log_to_empire(emp, ELOG_TERRITORY, "Abandoning %s (%d, %d) because too much %s territory has been claimed", get_room_name(farthest, FALSE), X_COORD(farthest), Y_COORD(farthest), (far_type == TER_FRONTIER) ? "frontier" : "outskirts");
 		abandon_room(farthest);
 	}
 }
@@ -1108,7 +1152,11 @@ void reduce_outside_territory(void) {
 	empire_data *iter, *next_iter;
 	
 	HASH_ITER(hh, empire_table, iter, next_iter) {
-		if (!EMPIRE_IMM_ONLY(iter) && EMPIRE_OUTSIDE_TERRITORY(iter) > land_can_claim(iter, TRUE)) {
+		if (EMPIRE_IMM_ONLY(iter)) {
+			continue;	// ignore imms
+		}
+		
+		if (EMPIRE_TERRITORY(iter, TER_OUTSKIRTS) > OUTSKIRTS_CLAIMS_AVAILABLE(iter) || EMPIRE_TERRITORY(iter, TER_FRONTIER) > land_can_claim(iter, TER_FRONTIER)) {
 			reduce_outside_territory_one(iter);
 		}
 	}
@@ -1123,7 +1171,7 @@ void reduce_outside_territory(void) {
 * @param empire_data *emp The empire to reduce.
 */
 static void reduce_stale_empires_one(empire_data *emp) {
-	bool outside_only = (EMPIRE_OUTSIDE_TERRITORY(emp) > 0);
+	bool outside_only = (EMPIRE_TERRITORY(emp, TER_OUTSKIRTS) > 0 || EMPIRE_TERRITORY(emp, TER_FRONTIER) > 0);
 	room_data *iter, *next_iter, *found_room = NULL;
 	bool junk;
 	
@@ -1188,8 +1236,17 @@ static void reduce_stale_empires_one(empire_data *emp) {
 void reduce_stale_empires(void) {
 	empire_data *iter, *next_iter;
 	
+	// syslog(SYS_INFO, 0, TRUE, "Debug: Starting reduce_stale_empires");
+	
 	HASH_ITER(hh, empire_table, iter, next_iter) {
-		if (!EMPIRE_IMM_ONLY(iter) && EMPIRE_MEMBERS(iter) == 0 && (EMPIRE_OUTSIDE_TERRITORY(iter) > 0 || EMPIRE_CITY_TERRITORY(iter) > 0)) {
+		// check if we need to rescan
+		if (EMPIRE_MEMBERS(iter) > 0 && EMPIRE_NEXT_TIMEOUT(iter) != 0 && EMPIRE_NEXT_TIMEOUT(iter) <= time(0)) {
+			// syslog(SYS_INFO, 0, TRUE, "Debug: Rescanning empire %s based on timeout", EMPIRE_NAME(iter));
+			reread_empire_tech(iter);
+		}
+		
+		// check overages
+		if (!EMPIRE_IMM_ONLY(iter) && EMPIRE_MEMBERS(iter) == 0 && EMPIRE_TERRITORY(iter, TER_TOTAL) > 0) {
 			// when members hit 0, we consider the empire timed out
 			reduce_stale_empires_one(iter);
 		}
@@ -1214,6 +1271,98 @@ bool should_delete_empire(empire_data *emp) {
 	}
 	
 	return FALSE;
+}
+
+
+/**
+* Processes needs for a given empire/island/need. This generally involves
+* taking resources, and will set the UNSUPPLIED flag if there aren't enough.
+*
+* @param empire_data *emp Which empire.
+* @param struct empire_island *eisle The island being processed for needs.
+* @param struct empire_needs *needs The current 'needs' to process.
+*/
+void update_empire_needs(empire_data *emp, struct empire_island *eisle, struct empire_needs *needs) {
+	void deactivate_workforce_island(empire_data *emp, int island_id);
+	void read_vault(empire_data *emp);
+	
+	struct empire_storage_data *store, *next_store;
+	struct island_info *island = get_island(eisle->island, TRUE);
+	bool any = TRUE, vault = FALSE;
+	int amount, max, can_take;
+	obj_data *obj;
+	
+	while (needs->needed > 0 && any) {
+		any = FALSE;	// ensure we charged any item this cycle
+		HASH_ITER(hh, eisle->store, store, next_store) {
+			if (needs->needed < 1) {
+				break;	// done early
+			}
+			if (store->keep == UNLIMITED || store->amount <= store->keep || store->amount < 1 || !(obj = store->proto)) {
+				continue;
+			}
+			
+			can_take = store->amount - store->keep;	// already checked for keep=UNLIMITED
+			amount = 0;
+			
+			// ENEED_x: processing the item
+			switch (needs->type) {
+				case ENEED_WORKFORCE: {
+					if (IS_FOOD(obj)) {
+						if (GET_FOOD_HOURS_OF_FULLNESS(obj) > needs->needed) {
+							amount = 1;
+							needs->needed = 0;
+						}
+						else {	// need more than 1
+							amount = ceil((double) needs->needed / GET_FOOD_HOURS_OF_FULLNESS(obj));
+							max = MAX(100, can_take / 4);
+							amount = MIN(amount, can_take);
+							amount = MIN(amount, max);	// don't take more than this of any 1 thing per cycle
+							SAFE_ADD(needs->needed, -(amount * GET_FOOD_HOURS_OF_FULLNESS(obj)), 0, INT_MAX, FALSE);
+						}
+					}
+					break;
+				}
+				default: {
+					// type not implemented
+					
+					// Note for implementation:
+					// if (IS_WEALTH(obj)) { vault = TRUE; }
+					break;
+				}
+			}
+			
+			// amount we could take
+			if (amount > 0) {
+				any = TRUE;
+				add_to_empire_storage(emp, eisle->island, store->vnum, -amount);
+				log_to_empire(emp, ELOG_WORKFORCE, "Consumed %s (x%d) on %s", GET_OBJ_SHORT_DESC(obj), amount, eisle->name ? eisle->name : island->name);
+			}
+		}
+	}
+	
+	if (needs->needed > 0) {
+		if (!IS_SET(needs->status, ENEED_STATUS_UNSUPPLIED)) {
+			// ENEED_x: logging the problem
+			switch (needs->type) {
+				case ENEED_WORKFORCE: {
+					// this logs to TRADE because otherwise members won't see it
+					log_to_empire(emp, ELOG_TRADE, "Your workforce on %s is starving!", eisle->name ? eisle->name : island->name);
+					deactivate_workforce_island(emp, eisle->island);
+					break;
+				}
+			}
+			
+			SET_BIT(needs->status, ENEED_STATUS_UNSUPPLIED);
+		}
+	}
+	else {
+		REMOVE_BIT(needs->status, ENEED_STATUS_UNSUPPLIED);
+	}
+	
+	if (vault) {
+		read_vault(emp);
+	}
 }
 
 
@@ -1333,7 +1482,9 @@ bool check_autostore(obj_data *obj, bool force) {
 				islid = get_main_island(emp);
 			}
 			
-			add_to_empire_storage(emp, islid, GET_OBJ_VNUM(obj), 1);
+			if (islid != NO_ISLAND) {	// MUST be not-nowhere to autostore
+				add_to_empire_storage(emp, islid, GET_OBJ_VNUM(obj), 1);
+			}
 		}
 	}
 	
@@ -1689,9 +1840,9 @@ bool can_teleport_to(char_data *ch, room_data *loc, bool check_owner) {
 	}
 	
 	// player limit, maybe
-	if (IS_ADVENTURE_ROOM(loc) && (inst = find_instance_by_room(loc, FALSE))) {
+	if (IS_ADVENTURE_ROOM(loc) && (inst = find_instance_by_room(loc, FALSE, FALSE))) {
 		// only if not already in there
-		if (!IS_ADVENTURE_ROOM(IN_ROOM(ch)) || find_instance_by_room(IN_ROOM(ch), FALSE) != inst) {
+		if (!IS_ADVENTURE_ROOM(IN_ROOM(ch)) || find_instance_by_room(IN_ROOM(ch), FALSE, FALSE) != inst) {
 			if (!can_enter_instance(ch, inst)) {
 				return FALSE;
 			}
@@ -1800,7 +1951,7 @@ void update_trading_post(void) {
 * @param int value The amount to gain or lose
 */
 void gain_condition(char_data *ch, int condition, int value) {
-	extern bool gain_cond_messsage;
+	extern bool gain_cond_message;
 	bool intoxicated;
 
 	// no change?
@@ -1830,7 +1981,7 @@ void gain_condition(char_data *ch, int condition, int value) {
 		affect_from_char(ch, ATYPE_WELL_FED, TRUE);
 	}
 
-	if (!gain_cond_messsage) {
+	if (!gain_cond_message) {
 		return;
 	}
 

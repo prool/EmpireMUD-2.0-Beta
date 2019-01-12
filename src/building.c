@@ -72,11 +72,11 @@ const char *interlink_codes[11] = { "AX", "RB",	"UN", "DD", "WZ", "FG", "VI", "Q
 * @param room_data *room The location to set up.
 */
 void special_building_setup(char_data *ch, room_data *room) {
-	void init_mine(room_data *room, char_data *ch);
+	void init_mine(room_data *room, char_data *ch, empire_data *emp);
 		
 	// mine data
-	if (HAS_FUNCTION(room, FNC_MINE)) {
-		init_mine(room, ch);
+	if (room_has_function_and_city_ok(room, FNC_MINE)) {
+		init_mine(room, ch, ROOM_OWNER(room) ? ROOM_OWNER(room) : (ch ? GET_LOYALTY(ch) : NULL));
 	}
 }
 
@@ -86,7 +86,7 @@ void special_building_setup(char_data *ch, room_data *room) {
 
 /**
 * @param room_data *room The map location to check
-* @param bitvector_t flags BLD_ON_x
+* @param bitvector_t flags BLD_ON_
 * @return TRUE if valid, FALSE if not
 */
 bool can_build_on(room_data *room, bitvector_t flags) {
@@ -176,6 +176,7 @@ void complete_building(room_data *room) {
 		
 		if (GET_BUILDING(room)) {
 			qt_empire_players(emp, qt_gain_building, GET_BLD_VNUM(GET_BUILDING(room)));
+			et_gain_building(emp, GET_BLD_VNUM(GET_BUILDING(room)));
 		}
 	}
 }
@@ -188,7 +189,8 @@ void complete_building(room_data *room) {
 * @param bld_vnum type The building vnum to set up.
 */
 void construct_building(room_data *room, bld_vnum type) {
-	bool was_large, was_in_city, junk;
+	bool was_large, junk;
+	int was_ter, is_ter;
 	sector_data *sect;
 	
 	if (GET_ROOM_VNUM(room) >= MAP_SIZE) {
@@ -200,7 +202,7 @@ void construct_building(room_data *room, bld_vnum type) {
 	
 	// for updating territory counts
 	was_large = ROOM_BLD_FLAGGED(room, BLD_LARGE_CITY_RADIUS);
-	was_in_city = ROOM_OWNER(room) ? is_in_city_for_empire(room, ROOM_OWNER(room), FALSE, &junk) : FALSE;
+	was_ter = ROOM_OWNER(room) ? get_territory_type_for_empire(room, ROOM_OWNER(room), FALSE, &junk) : TER_FRONTIER;
 	
 	sect = SECT(room);
 	change_terrain(room, config_get_int("default_building_sect"));
@@ -215,22 +217,16 @@ void construct_building(room_data *room, bld_vnum type) {
 	// check for territory updates
 	if (ROOM_OWNER(room) && was_large != ROOM_BLD_FLAGGED(room, BLD_LARGE_CITY_RADIUS)) {
 		struct empire_island *eisle = get_empire_island(ROOM_OWNER(room), GET_ISLAND_ID(room));
-		if (was_large && was_in_city && !is_in_city_for_empire(room, ROOM_OWNER(room), FALSE, &junk)) {
-			// changing from in-city to not
-			EMPIRE_CITY_TERRITORY(ROOM_OWNER(room)) -= 1;
-			eisle->city_terr -= 1;
-			EMPIRE_OUTSIDE_TERRITORY(ROOM_OWNER(room)) += 1;
-			eisle->outside_terr += 1;
-		}
-		else if (ROOM_BLD_FLAGGED(room, BLD_LARGE_CITY_RADIUS) && !was_in_city && is_in_city_for_empire(room, ROOM_OWNER(room), FALSE, &junk)) {
-			// changing from outside-territory to in-city
-			EMPIRE_CITY_TERRITORY(ROOM_OWNER(room)) += 1;
-			eisle->city_terr += 1;
-			EMPIRE_OUTSIDE_TERRITORY(ROOM_OWNER(room)) -= 1;
-			eisle->outside_terr -= 1;
-		}
-		else {
-			// no relevant change
+		is_ter = get_territory_type_for_empire(room, ROOM_OWNER(room), FALSE, &junk);
+		
+		if (was_ter != is_ter) {	// did territory type change?
+			SAFE_ADD(EMPIRE_TERRITORY(ROOM_OWNER(room), was_ter), -1, 0, UINT_MAX, FALSE);
+			SAFE_ADD(eisle->territory[was_ter], -1, 0, UINT_MAX, FALSE);
+			
+			SAFE_ADD(EMPIRE_TERRITORY(ROOM_OWNER(room), is_ter), 1, 0, UINT_MAX, FALSE);
+			SAFE_ADD(eisle->territory[is_ter], 1, 0, UINT_MAX, FALSE);
+			
+			// (total territory does not change)
 		}
 	}
 	
@@ -315,21 +311,26 @@ void construct_tunnel(char_data *ch, int dir, room_data *entrance, room_data *ex
 */
 void disassociate_building(room_data *room) {
 	void decustomize_room(room_data *room);
-	void delete_instance(struct instance_data *inst);
-	extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom);
+	void delete_instance(struct instance_data *inst, bool run_cleanup);
+	extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom, bool allow_fake_loc);
+	extern crop_data *get_potential_crop_for_location(room_data *location);
 	void remove_designate_objects(room_data *room);
 	
-	bool was_large, was_in_city, junk;
+	sector_data *old_sect = SECT(room);
+	bool was_large, junk;
 	room_data *iter, *next_iter;
 	struct instance_data *inst;
 	bool deleted = FALSE;
+	int was_ter, is_ter;
+	char_data *temp_ch;
 	
 	// for updating territory counts
 	was_large = ROOM_BLD_FLAGGED(room, BLD_LARGE_CITY_RADIUS);
-	was_in_city = ROOM_OWNER(room) ? is_in_city_for_empire(room, ROOM_OWNER(room), FALSE, &junk) : FALSE;
+	was_ter = ROOM_OWNER(room) ? get_territory_type_for_empire(room, ROOM_OWNER(room), FALSE, &junk) : TER_FRONTIER;
 	
 	if (ROOM_OWNER(room) && GET_BUILDING(room) && IS_COMPLETE(room)) {
 		qt_empire_players(ROOM_OWNER(room), qt_lose_building, GET_BLD_VNUM(GET_BUILDING(room)));
+		et_lose_building(ROOM_OWNER(room), GET_BLD_VNUM(GET_BUILDING(room)));
 	}
 	
 	if (ROOM_OWNER(room)) {
@@ -337,8 +338,8 @@ void disassociate_building(room_data *room) {
 	}
 	
 	// delete any open instance here
-	if (ROOM_AFF_FLAGGED(room, ROOM_AFF_HAS_INSTANCE) && (inst = find_instance_by_room(room, FALSE))) {
-		delete_instance(inst);
+	if (ROOM_AFF_FLAGGED(room, ROOM_AFF_HAS_INSTANCE) && (inst = find_instance_by_room(room, FALSE, FALSE))) {
+		delete_instance(inst, TRUE);
 	}
 	
 	dismantle_wtrigger(room, NULL, FALSE);
@@ -369,6 +370,23 @@ void disassociate_building(room_data *room) {
 
 	// restore sect: this does not use change_terrain()
 	perform_change_sect(room, NULL, BASE_SECT(room));
+
+	// update requirement trackers
+	if (ROOM_OWNER(room)) {
+		qt_empire_players(ROOM_OWNER(room), qt_lose_tile_sector, GET_SECT_VNUM(old_sect));
+		et_lose_tile_sector(ROOM_OWNER(room), GET_SECT_VNUM(old_sect));
+		
+		qt_empire_players(ROOM_OWNER(room), qt_gain_tile_sector, GET_SECT_VNUM(SECT(room)));
+		et_gain_tile_sector(ROOM_OWNER(room), GET_SECT_VNUM(SECT(room)));
+	}
+		
+	// also check for missing crop data
+	if (SECT_FLAGGED(SECT(room), SECTF_HAS_CROP_DATA | SECTF_CROP) && !ROOM_CROP(room)) {
+		crop_data *new_crop = get_potential_crop_for_location(room);
+		if (new_crop) {
+			set_crop_type(room, new_crop);
+		}
+	}
 	
 	if (COMPLEX_DATA(room)) {
 		COMPLEX_DATA(room)->home_room = NULL;
@@ -400,11 +418,12 @@ void disassociate_building(room_data *room) {
 			remove_designate_objects(iter);
 			
 			// move people and contents
-			while (ROOM_PEOPLE(iter)) {
-				if (!IS_NPC(ROOM_PEOPLE(iter))) {
-					GET_LAST_DIR(ROOM_PEOPLE(iter)) = NO_DIR;
+			while ((temp_ch = ROOM_PEOPLE(iter))) {
+				if (!IS_NPC(temp_ch)) {
+					GET_LAST_DIR(temp_ch) = NO_DIR;
 				}
-				char_to_room(ROOM_PEOPLE(iter), room);
+				char_to_room(temp_ch, room);
+				msdp_update_room(temp_ch);
 			}
 			while (ROOM_CONTENTS(iter)) {
 				obj_to_room(ROOM_CONTENTS(iter), room);
@@ -429,22 +448,16 @@ void disassociate_building(room_data *room) {
 	// check for territory updates
 	if (ROOM_OWNER(room) && was_large != ROOM_BLD_FLAGGED(room, BLD_LARGE_CITY_RADIUS)) {
 		struct empire_island *eisle = get_empire_island(ROOM_OWNER(room), GET_ISLAND_ID(room));
-		if (was_large && was_in_city && !is_in_city_for_empire(room, ROOM_OWNER(room), FALSE, &junk)) {
-			// changing from in-city to not
-			EMPIRE_CITY_TERRITORY(ROOM_OWNER(room)) -= 1;
-			eisle->city_terr -= 1;
-			EMPIRE_OUTSIDE_TERRITORY(ROOM_OWNER(room)) += 1;
-			eisle->outside_terr += 1;
-		}
-		else if (ROOM_BLD_FLAGGED(room, BLD_LARGE_CITY_RADIUS) && !was_in_city && is_in_city_for_empire(room, ROOM_OWNER(room), FALSE, &junk)) {
-			// changing from outside-territory to in-city
-			EMPIRE_CITY_TERRITORY(ROOM_OWNER(room)) += 1;
-			eisle->city_terr += 1;
-			EMPIRE_OUTSIDE_TERRITORY(ROOM_OWNER(room)) -= 1;
-			eisle->outside_terr -= 1;
-		}
-		else {
-			// no relevant change
+		is_ter = get_territory_type_for_empire(room, ROOM_OWNER(room), FALSE, &junk);
+		
+		if (was_ter != is_ter) {
+			SAFE_ADD(EMPIRE_TERRITORY(ROOM_OWNER(room), was_ter), -1, 0, UINT_MAX, FALSE);
+			SAFE_ADD(eisle->territory[was_ter], -1, 0, UINT_MAX, FALSE);
+			
+			SAFE_ADD(EMPIRE_TERRITORY(ROOM_OWNER(room), is_ter), 1, 0, UINT_MAX, FALSE);
+			SAFE_ADD(eisle->territory[is_ter], 1, 0, UINT_MAX, FALSE);
+			
+			// (totals do not change)
 		}
 	}
 }
@@ -548,7 +561,7 @@ bld_data *find_upgraded_from(bld_data *bb) {
 	}
 	
 	HASH_ITER(hh, building_table, iter, next_iter) {
-		if (GET_BLD_UPGRADES_TO(iter) == GET_BLD_VNUM(bb)) {
+		if (bld_has_relation(iter, BLD_REL_UPGRADES_TO, GET_BLD_VNUM(bb))) {
 			return iter;
 		}
 	}
@@ -661,7 +674,7 @@ void finish_maintenance(char_data *ch, room_data *room) {
 * @param room_data *location The building's tile.
 */
 void herd_animals_out(room_data *location) {
-	extern int perform_move(char_data *ch, int dir, int need_specials_check, byte mode);
+	extern int perform_move(char_data *ch, int dir, bitvector_t flags);
 	
 	char_data *ch_iter, *next_ch;
 	bool found_any, herd_msg = FALSE;
@@ -690,12 +703,12 @@ void herd_animals_out(room_data *location) {
 			
 				// move the mob
 				if ((!to_room || WATER_SECT(to_room)) && to_reverse && ROOM_BLD_FLAGGED(location, BLD_TWO_ENTRANCES)) {
-					if (perform_move(ch_iter, BUILDING_ENTRANCE(location), TRUE, 0)) {
+					if (perform_move(ch_iter, BUILDING_ENTRANCE(location), MOVE_HERD)) {
 						found_any = TRUE;
 					}
 				}
 				else if (to_room) {
-					if (perform_move(ch_iter, rev_dir[BUILDING_ENTRANCE(location)], TRUE, 0)) {
+					if (perform_move(ch_iter, rev_dir[BUILDING_ENTRANCE(location)], MOVE_HERD)) {
 						found_any = TRUE;
 					}
 				}
@@ -959,6 +972,7 @@ void setup_tunnel_entrance(char_data *ch, room_data *room, int dir) {
 	bitvector_t tunnel_flags = 0;	// formerly ROOM_AFF_CHAMELEON;
 	
 	empire_data *emp = get_or_create_empire(ch);
+	int ter_type;
 	bool junk;
 	
 	construct_building(room, BUILDING_TUNNEL);
@@ -967,7 +981,8 @@ void setup_tunnel_entrance(char_data *ch, room_data *room, int dir) {
 	SET_BIT(ROOM_AFF_FLAGS(room), tunnel_flags);
 	COMPLEX_DATA(room)->entrance = dir;
 	if (emp && can_claim(ch) && !ROOM_AFF_FLAGGED(room, ROOM_AFF_UNCLAIMABLE)) {
-		if (EMPIRE_OUTSIDE_TERRITORY(emp) < land_can_claim(emp, TRUE) || is_in_city_for_empire(room, emp, FALSE, &junk)) {
+		ter_type = get_territory_type_for_empire(room, emp, FALSE, &junk);
+		if (EMPIRE_TERRITORY(emp, ter_type) < land_can_claim(emp, ter_type)) {
 			claim_room(room, emp);
 		}
 	}
@@ -1019,13 +1034,14 @@ void start_dismantle_building(room_data *loc) {
 				next_obj = obj->next_content;
 				obj_to_room(obj, loc);
 			}
-			for (targ = ROOM_PEOPLE(loc); targ; targ = next_targ) {
+			for (targ = ROOM_PEOPLE(room); targ; targ = next_targ) {
 				next_targ = targ->next_in_room;
 				if (!IS_NPC(targ)) {
 					GET_LAST_DIR(targ) = NO_DIR;
 				}
 				char_from_room(targ);
 				char_to_room(targ, loc);
+				msdp_update_room(targ);
 			}
 		
 			delete_room(room, FALSE);	// must check_all_exits
@@ -1100,6 +1116,7 @@ void start_dismantle_building(room_data *loc) {
 	
 	if (loc && ROOM_OWNER(loc) && GET_BUILDING(loc) && complete) {
 		qt_empire_players(ROOM_OWNER(loc), qt_lose_building, GET_BLD_VNUM(GET_BUILDING(loc)));
+		et_lose_building(ROOM_OWNER(loc), GET_BLD_VNUM(GET_BUILDING(loc)));
 	}
 	
 	stop_room_action(loc, ACT_DIGGING, CHORE_DIGGING);
@@ -1161,7 +1178,7 @@ ACMD(do_build) {
 	room_data *to_room = NULL, *to_rev = NULL;
 	obj_data *found_obj = NULL;
 	empire_data *e = NULL;
-	int dir = NORTH;
+	int dir = NORTH, ter_type;
 	craft_data *iter, *next_iter, *type = NULL, *abbrev_match = NULL;
 	bool found = FALSE, found_any, this_line, is_closed, needs_facing, needs_reverse;
 	bool junk, wait;
@@ -1294,14 +1311,20 @@ ACMD(do_build) {
 	else if (IS_SET(GET_CRAFT_FLAGS(type), CRAFT_IN_CITY_ONLY) && !is_in_city_for_empire(IN_ROOM(ch), GET_LOYALTY(ch), TRUE, &wait)) {
 		msg_to_char(ch, "You can only build that in a city%s.\r\n", wait ? " (this city was founded too recently)" : "");
 	}
+	else if (CRAFT_FLAGGED(type, CRAFT_BY_RIVER) && !find_flagged_sect_within_distance_from_char(ch, SECTF_FRESH_WATER, NOBITS, 1)) {
+		msg_to_char(ch, "You must build that next to a river.\r\n");
+	}
 	else if (GET_CRAFT_ABILITY(type) != NO_ABIL && !has_ability(ch, GET_CRAFT_ABILITY(type))) {
 		msg_to_char(ch, "You don't have the skill to erect that structure.\r\n");
 	}
 	else if (GET_CRAFT_MIN_LEVEL(type) > get_crafting_level(ch)) {
 		msg_to_char(ch, "You need to have a crafting level of %d to build that.\r\n", GET_CRAFT_MIN_LEVEL(type));
 	}
-	else if (ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_UNCLAIMABLE | ROOM_AFF_HAS_INSTANCE)) {
-		msg_to_char(ch, "You can't build here.\r\n");
+	else if (ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_UNCLAIMABLE)) {
+		msg_to_char(ch, "You can't build on unclaimable land.\r\n");
+	}
+	else if (ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_HAS_INSTANCE)) {
+		msg_to_char(ch, "You can't build here until the adventure is gone.\r\n");
 	}
 	else if (!can_build_or_claim_at_war(ch, IN_ROOM(ch))) {
 		msg_to_char(ch, "You can't build here while at war with the empire that controls this area.\r\n");
@@ -1312,7 +1335,7 @@ ACMD(do_build) {
 	else if (!(e = get_or_create_empire(ch)) && FALSE) {
 		msg_to_char(ch, "You will never see this line, it's only here to set up an empire!\r\n");
 	}
-	else if (!has_permission(ch, PRIV_BUILD)) {
+	else if (!has_permission(ch, PRIV_BUILD, IN_ROOM(ch))) {
 		msg_to_char(ch, "You don't have permission to build anything.\r\n");
 	}
 	else if (!can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY) || ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_UNCLAIMABLE)) {
@@ -1386,15 +1409,16 @@ ACMD(do_build) {
 	construct_building(IN_ROOM(ch), GET_CRAFT_BUILD_TYPE(type));
 	set_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_BUILD_RECIPE, GET_CRAFT_VNUM(type));
 	
+	special_building_setup(ch, IN_ROOM(ch));
 	SET_BIT(ROOM_BASE_FLAGS(IN_ROOM(ch)), ROOM_AFF_INCOMPLETE);
 	SET_BIT(ROOM_AFF_FLAGS(IN_ROOM(ch)), ROOM_AFF_INCOMPLETE);
 	GET_BUILDING_RESOURCES(IN_ROOM(ch)) = copy_resource_list(GET_CRAFT_RESOURCES(type));
-	special_building_setup(ch, IN_ROOM(ch));
 	
 	// can_claim checks total available land, but the outside is check done within this block
 	if (!ROOM_OWNER(IN_ROOM(ch)) && can_claim(ch) && !ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_UNCLAIMABLE)) {
 		if (e || (e = get_or_create_empire(ch))) {
-			if (EMPIRE_OUTSIDE_TERRITORY(e) < land_can_claim(e, TRUE) || is_in_city_for_empire(IN_ROOM(ch), e, FALSE, &junk)) {
+			ter_type = get_territory_type_for_empire(IN_ROOM(ch), e, FALSE, &junk);
+			if (EMPIRE_TERRITORY(e, ter_type) < land_can_claim(e, ter_type)) {
 				claim_room(IN_ROOM(ch), e);
 			}
 		}
@@ -1503,7 +1527,7 @@ ACMD(do_dismantle) {
 		return;
 	}
 
-	if (!has_permission(ch, PRIV_BUILD) || !can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
+	if (!has_permission(ch, PRIV_BUILD, IN_ROOM(ch)) || !can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
 		msg_to_char(ch, "You don't have permission to dismantle this building.\r\n");
 		return;
 	}
@@ -1558,7 +1582,7 @@ void do_customize_room(char_data *ch, char *argument) {
 	else if (!IS_ANY_BUILDING(IN_ROOM(ch))) {
 		msg_to_char(ch, "You can't customize here.\r\n");
 	}
-	else if (!has_permission(ch, PRIV_CUSTOMIZE)) {
+	else if (!has_permission(ch, PRIV_CUSTOMIZE, IN_ROOM(ch))) {
 		msg_to_char(ch, "You are not allowed to customize.\r\n");
 	}
 	else if (is_abbrev(arg, "name")) {
@@ -1642,7 +1666,7 @@ ACMD(do_dedicate) {
 	else if (GET_LOYALTY(ch) != ROOM_OWNER(HOME_ROOM(IN_ROOM(ch)))) {
 		msg_to_char(ch, "You can only dedicate it if you own it.\r\n");
 	}
-	else if (!has_permission(ch, PRIV_BUILD) || !can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
+	else if (!has_permission(ch, PRIV_BUILD, IN_ROOM(ch)) || !can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
 		msg_to_char(ch, "You don't have permission to dedicate buildings.\r\n");
 	}
 	else if (!*arg) {
@@ -1734,7 +1758,7 @@ ACMD(do_designate) {
 		msg_to_char(ch, "Invalid direction.\r\n");
 		msg_to_char(ch, "Usage: %s <room>\r\n", subcmd == SCMD_REDESIGNATE ? "redesignate" : "designate <direction>");
 	}
-	else if (!has_permission(ch, PRIV_BUILD) || !can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
+	else if (!has_permission(ch, PRIV_BUILD, IN_ROOM(ch)) || !can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
 		msg_to_char(ch, "You don't have permission to designate rooms here.\r\n");
 	}
 	else if (subcmd == SCMD_DESIGNATE && IS_MAP_BUILDING(IN_ROOM(ch)) && dir != BUILDING_ENTRANCE(IN_ROOM(ch))) {
@@ -1870,7 +1894,7 @@ ACMD(do_interlink) {
 	else if (!IS_COMPLETE(IN_ROOM(ch))) {
 		msg_to_char(ch, "You must finish building the room before you can interlink it.\r\n");
 	}
-	else if (!has_permission(ch, PRIV_BUILD) || !can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
+	else if (!has_permission(ch, PRIV_BUILD, IN_ROOM(ch)) || !can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
 		msg_to_char(ch, "You don't have permission to interlink rooms here.\r\n");
 	}
 	else if ((dir = parse_direction(ch, arg)) == NO_DIR || !can_designate_dir[dir]) {
@@ -1913,13 +1937,7 @@ ACMD(do_interlink) {
 		// success!
 		create_exit(IN_ROOM(ch), to_room, dir, TRUE);
 		
-		if (HAS_NAVIGATION(ch)) {
-			msg_to_char(ch, "You interlink %s to %s (%d, %d).\r\n", dirs[get_direction_for_char(ch, dir)], get_room_name(to_room, FALSE), X_COORD(to_room), Y_COORD(to_room));
-		}
-		else {
-			msg_to_char(ch, "You interlink %s to %s.\r\n", dirs[get_direction_for_char(ch, dir)], get_room_name(to_room, FALSE));
-		}
-		
+		msg_to_char(ch, "You interlink %s to %s%s.\r\n", dirs[get_direction_for_char(ch, dir)], get_room_name(to_room, FALSE), coord_display_room(ch, to_room, FALSE));
 		act("$n interlinks the room with another building.", FALSE, ch, NULL, NULL, TO_ROOM);
 		
 		if (ROOM_PEOPLE(to_room)) {
@@ -1955,13 +1973,9 @@ ACMD(do_lay) {
 		msg_to_char(ch, "You can't do that here.\r\n");
 	}
 	else if (!can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY))
-		msg_to_char(ch, "You can't lay road here!\r\n");
-	else if (!has_permission(ch, PRIV_BUILD))
+		msg_to_char(ch, "You can't lay road in someone else's territory!\r\n");
+	else if (!has_permission(ch, PRIV_BUILD, IN_ROOM(ch)))
 		msg_to_char(ch, "You don't have permission to lay road.\r\n");
-	else if (SECT_FLAGGED(check_sect, SECTF_LAY_ROAD) && !SECT_FLAGGED(check_sect, SECTF_ROUGH) && !has_ability(ch, ABIL_ROADS)) {
-		// not rough requires Roads
-		msg_to_char(ch, "You don't have the skill to properly do that.\r\n");
-	}
 	else if (SECT_FLAGGED(check_sect, SECTF_LAY_ROAD) && SECT_FLAGGED(check_sect, SECTF_ROUGH) && !has_ability(ch, ABIL_PATHFINDING)) {
 		// rough requires Pathfinding
 		msg_to_char(ch, "You don't have the skill to properly do that.\r\n");
@@ -1983,7 +1997,7 @@ ACMD(do_lay) {
 		msg_to_char(ch, "Road data has not been set up for this game.\r\n");
 	}
 	else if (!ROOM_SECT_FLAGGED(IN_ROOM(ch), SECTF_LAY_ROAD))
-		msg_to_char(ch, "You can't lay road here!\r\n");
+		msg_to_char(ch, "You can't lay a road here!\r\n");
 	else if (!has_resources(ch, cost, TRUE, TRUE)) {
 		// sends own messages
 	}
@@ -1996,9 +2010,6 @@ ACMD(do_lay) {
 		// skillup before sect change
 		if (SECT_FLAGGED(check_sect, SECTF_ROUGH)) {
 			gain_ability_exp(ch, ABIL_PATHFINDING, 15);
-		}
-		else {
-			gain_ability_exp(ch, ABIL_ROADS, 15);
 		}
 				
 		// change it over
@@ -2069,7 +2080,7 @@ ACMD(do_nodismantle) {
 	else if (!IS_ANY_BUILDING(IN_ROOM(ch))) {
 		msg_to_char(ch, "You can only toggle nodismantle in buildings.\r\n");
 	}
-	else if (!has_permission(ch, PRIV_BUILD)) {
+	else if (!has_permission(ch, PRIV_BUILD, IN_ROOM(ch))) {
 		msg_to_char(ch, "You don't have permission to do that.\r\n");
 	}
 	else if (ROOM_AFF_FLAGGED(HOME_ROOM(IN_ROOM(ch)), ROOM_AFF_NO_DISMANTLE)) {
@@ -2096,7 +2107,7 @@ ACMD(do_paint) {
 	else if (!can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY) || ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_UNCLAIMABLE)) {
 		msg_to_char(ch, "You don't have permission to paint here.\r\n");
 	}
-	else if (!has_permission(ch, PRIV_CUSTOMIZE)) {
+	else if (!has_permission(ch, PRIV_CUSTOMIZE, IN_ROOM(ch))) {
 		msg_to_char(ch, "You don't have permission to paint anything (customize).\r\n");
 	}
 	else if (!COMPLEX_DATA(IN_ROOM(ch)) || !IS_ANY_BUILDING(IN_ROOM(ch))) {
@@ -2121,7 +2132,7 @@ ACMD(do_paint) {
 		msg_to_char(ch, "Paint the building with what?\r\n");
 	}
 	else if (!(paint = get_obj_in_list_vis(ch, arg, ch->carrying))) {
-		msg_to_char(ch, "You don't seem to have that paint.\r\n");
+		msg_to_char(ch, "You don't seem to have that paint with.\r\n");
 	}
 	else if (!IS_PAINT(paint)) {
 		act("$p isn't paint!", FALSE, ch, paint, NULL, TO_CHAR);
@@ -2167,8 +2178,11 @@ ACMD(do_tunnel) {
 	
 	one_argument(argument, arg);
 	
-	if (!has_permission(ch, PRIV_BUILD)) {
+	if (!has_permission(ch, PRIV_BUILD, IN_ROOM(ch))) {
 		msg_to_char(ch, "You do not have permission to build anything.\r\n");
+	}
+	else if (!GET_LOYALTY(ch) || !EMPIRE_HAS_TECH(GET_LOYALTY(ch), TECH_TUNNELS)) {
+		msg_to_char(ch, "You must be in an empire with the technology to make tunnels to do that.\r\n");
 	}
 	else if (!can_build_on(IN_ROOM(ch), exit_bld_flags)) {
 		prettier_sprintbit(exit_bld_flags, bld_on_flags, buf);
@@ -2256,7 +2270,7 @@ ACMD(do_unpaint) {
 	if (!can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
 		msg_to_char(ch, "You don't have permission to remove the paint here.\r\n");
 	}
-	else if (!has_permission(ch, PRIV_CUSTOMIZE)) {
+	else if (!has_permission(ch, PRIV_CUSTOMIZE, IN_ROOM(ch))) {
 		msg_to_char(ch, "You don't have permission to unpaint anything (customize).\r\n");
 	}
 	else if (HOME_ROOM(IN_ROOM(ch)) != IN_ROOM(ch)) {
@@ -2281,8 +2295,18 @@ ACMD(do_unpaint) {
 
 ACMD(do_upgrade) {
 	craft_data *iter, *next_iter, *type;
-	bld_vnum upgrade = GET_BLD_UPGRADES_TO(building_proto(BUILDING_VNUM(IN_ROOM(ch))));
+	char valid_list[MAX_STRING_LENGTH];
+	struct bld_relation *relat;
+	bld_data *proto, *found_bld;
+	int upgrade_count = 0;
 	bool wait, room_wait;
+	
+	// determine what kind of upgrades are available here
+	if (GET_BUILDING(IN_ROOM(ch))) {
+		upgrade_count = count_bld_relations(GET_BUILDING(IN_ROOM(ch)), BLD_REL_UPGRADES_TO);
+	}
+	
+	skip_spaces(&argument);
 	
 	if (IS_NPC(ch)) {
 		msg_to_char(ch, "NPCs cannot use the upgrade command.\r\n");
@@ -2290,13 +2314,13 @@ ACMD(do_upgrade) {
 	else if (!IS_APPROVED(ch) && config_get_bool("build_approval")) {
 		send_config_msg(ch, "need_approval_string");
 	}
-	else if (!GET_BUILDING(IN_ROOM(ch)) || (upgrade = GET_BLD_UPGRADES_TO(GET_BUILDING(IN_ROOM(ch)))) == NOTHING || !building_proto(upgrade)) {
+	else if (!GET_BUILDING(IN_ROOM(ch)) || upgrade_count == 0) {
 		msg_to_char(ch, "You can't upgrade this.\r\n");
 	}
 	else if (!can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
 		msg_to_char(ch, "You don't have permission to upgrade this building.\r\n");
 	}
-	else if (!has_permission(ch, PRIV_BUILD)) {
+	else if (!has_permission(ch, PRIV_BUILD, IN_ROOM(ch))) {
 		msg_to_char(ch, "You do not have permission to upgrade buildings.\r\n");
 	}
 	else if (GET_ACTION(ch) != ACT_NONE) {
@@ -2308,11 +2332,47 @@ ACMD(do_upgrade) {
 	else if (BUILDING_RESOURCES(IN_ROOM(ch))) {
 		msg_to_char(ch, "The building needs some work before it can be upgraded.\r\n");
 	}
-	else {
+	else {	// tentative success
+		*valid_list = '\0';	// initialize
+		found_bld = NULL;
+		
+		// attempt to figure out what we're upgrading to
+		LL_FOREACH(GET_BLD_RELATIONS(GET_BUILDING(IN_ROOM(ch))), relat) {
+			if (relat->type != BLD_REL_UPGRADES_TO || !(proto = building_proto(relat->vnum))) {
+				continue;
+			}
+			
+			// did we find a match?
+			if (*argument && multi_isname(argument, GET_BLD_NAME(proto))) {
+				found_bld = proto;
+				break;
+			}
+			else if (upgrade_count == 1) {
+				found_bld = proto;
+				break;
+			}
+			
+			// append to the valid list
+			sprintf(valid_list + strlen(valid_list), "%s%s", (*valid_list ? ", " : ""), GET_BLD_NAME(proto));
+		}
+		
+		if (!*argument && upgrade_count > 1) {
+			msg_to_char(ch, "Upgrade it to what: %s\r\n", valid_list);
+			return;
+		}
+		else if (!found_bld && !*valid_list) {
+			msg_to_char(ch, "You can't seem to upgrade anything there.\r\n");
+			return;
+		}
+		else if (!found_bld) {
+			msg_to_char(ch, "You can't upgrade it to that. Valid options are: %s\r\n", valid_list);
+			return;
+		}
+		
 		// ok, we know it's upgradeable and they have permission... now locate the upgrade craft...
 		type = NULL;
 		HASH_ITER(hh, craft_table, iter, next_iter) {
-			if (GET_CRAFT_TYPE(iter) == CRAFT_TYPE_BUILD && IS_SET(GET_CRAFT_FLAGS(iter), CRAFT_UPGRADE) && upgrade == GET_CRAFT_BUILD_TYPE(iter)) {
+			if (GET_CRAFT_TYPE(iter) == CRAFT_TYPE_BUILD && IS_SET(GET_CRAFT_FLAGS(iter), CRAFT_UPGRADE) && GET_CRAFT_BUILD_TYPE(iter) == GET_BLD_VNUM(found_bld)) {
 				if (IS_IMMORTAL(ch) || !IS_SET(GET_CRAFT_FLAGS(iter), CRAFT_IN_DEVELOPMENT)) {
 					type = iter;
 					break;
@@ -2325,6 +2385,9 @@ ACMD(do_upgrade) {
 		}
 		else if (GET_CRAFT_ABILITY(type) != NO_ABIL && !has_ability(ch, GET_CRAFT_ABILITY(type))) {
 			msg_to_char(ch, "You don't have the required ability to upgrade this building.\r\n");
+		}
+		else if (CRAFT_FLAGGED(type, CRAFT_LEARNED) && !has_learned_craft(ch, GET_CRAFT_VNUM(type))) {
+			msg_to_char(ch, "You have not learned the correct recipe to upgrade this building.\r\n");
 		}
 		else if (IS_SET(GET_CRAFT_FLAGS(type), CRAFT_IN_CITY_ONLY) && !is_in_city_for_empire(IN_ROOM(ch), GET_LOYALTY(ch), TRUE, &wait) && !is_in_city_for_empire(IN_ROOM(ch), ROOM_OWNER(IN_ROOM(ch)), TRUE, &room_wait)) {
 			msg_to_char(ch, "You can only upgrade this building in a city%s.\r\n", (wait || room_wait) ? " (this city was founded too recently)" : "");

@@ -11,10 +11,11 @@ You can see a list of what's changed recently at http://empiremud.net/patch-note
 * General tips
 You can always ask for help on the /newbie channel.
 You can type 'messages' to see any recent announcements.
+Type 'progress' to see your empire's progression goals.
 Items you leave on your claimed land will automatically be stored in your empire.
 Items that are left on the ground will disappear over time.
 If an item gets auto-stored, you'll have to build the right building to retrieve it.
-You can check what's stored in your empire from anywhere using 'einventory'.
+You can check what's stored in your empire from anywhere using 'EInventory'.
 You find a list of territory outside your cities by typing 'territory'.
 You can use the 'territory' command to search for any type of building or crop you own.
 You can find out if cities, adventures or starting locations are near you with 'nearby'.
@@ -28,7 +29,7 @@ Lots of useful preferences are found on the 'toggle' command.
 You can knock enemies out instead of killing them using 'toggle autokill'.
 You can reduce the spam from chores like chopping by typing 'toggle action-spam'.
 If you're not riding or on a road, there's a small delay each time you move.
-You can only get two skills all the way to 100; these determine your class.
+You can only get two skills all the way to 100.
 It's possible to gain skill levels even when you're out of daily skill points. The rate is just lower.
 With the Workforce ability, you can give your citizens chores.
 Your Workforce will only work a chore if you don't already have too much of the resource it produces.
@@ -88,7 +89,6 @@ Type 'elog' to see a list of recent empire events.
 You can use the 'eedit' command to configure your empire.
 Type 'cooldowns' to see how long until your abilities are available.
 Players with less than 24 hours of playtime can't be attacked by other players, unless they are hostile.
-You get a class when two skills hit level 76, but won't get class abilities until you hit skill level 100.
 You can identify items to see how good they are, or which is better.
 To identify an item in your inventory when you're wearing something with the same name, try 'id 1.item'.
 You can create new slash-channels with /join.
@@ -114,6 +114,7 @@ The 'meters' command will show you how much damage you're dealing/taking.
 You can find out where to store an item by identifying it. Items without regular storage may go in the warehouse.
 Some recipes use generic components, which look like (lumber). Many different types of lumber can be used for this.
 You can morph faster, at an additional cost, by typing 'fastmorph'.
+The 'distance' command tells you the distance to any coordinates.
 Forests will regrow faster if they have more forest tiles around them.
 Type 'estats' to get quick info about your empire, or another.
 If you don't maintain your buildings, they will fall into ruin.
@@ -122,7 +123,7 @@ You can use 'fmessages' to turn off spammy combat text.
 You can use 'fprompt' to set a different prompt for combat.
 You can write your own books at the library.
 You can have more than one mount, but you have to switch them at a stable.
-You can abbreviate most things include commands and names.
+You can abbreviate most things including commands and names.
 If you've typed too many commands and are waiting for them to happen, you can use + to insert a command at the front of the list.
 If you've typed too many commands and are waiting for them to happen, you can type -- to clear them all out of the queue.
 The only way to remove seeded fields is with Devastation Ritual.
@@ -141,6 +142,11 @@ If you 'toggle autorecall', you'll appear at your home (or tomb) if you're logge
 Sick of being told you can't go there while mounted? Try 'toggle autodismount'.
 You can irrigate the desert by digging trenches next to your rivers.
 Being hungry or thirsty will slow down activities like chopping and sailing.
-You can learn new craft recipes with the 'learn' command, and list then with 'learned'.
+You can learn new craft recipes with the 'learn' command, and list them with 'learned'.
 You can use 'city list <empire>' to find the locations of other empires.
+Type 'climb' to move onto mountains, or 'toggle autoclimb' to remove the need to do this.
+Type 'swim' to move into water, or 'toggle autoswim' to remove the need to do this.
+Use 'mapscan' to locate islands across the sea.
+Use 'run' to set a path and move quickly. You can 'toggle travel-look' to stop seeing rooms while running.
+Try the 'directions' command to figure out how to get to a set of coordinates.
 $~

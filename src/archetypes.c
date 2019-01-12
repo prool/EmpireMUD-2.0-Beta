@@ -98,9 +98,7 @@ void add_archetype_lore(char_data *ch) {
 			free(str);
 		}
 		
-		CAP(temp);
-		
-		add_lore(ch, LORE_CREATED, temp);
+		add_lore(ch, LORE_CREATED, "%s", CAP(temp));
 	}
 }
 
@@ -1178,7 +1176,7 @@ void display_archetype_list(descriptor_data *desc, int type, char *argument) {
 	archetype_data *arch, *next_arch;
 	bool basic = FALSE, all = FALSE;
 	struct archetype_skill *sk;
-	bool skill_match;
+	bool skill_match, any;
 	size_t size;
 	
 	if (!*argument) {
@@ -1194,8 +1192,12 @@ void display_archetype_list(descriptor_data *desc, int type, char *argument) {
 	
 	size = 0;
 	*buf = '\0';
+	any = FALSE;
 	
 	HASH_ITER(sorted_hh, sorted_archetypes, arch, next_arch) {
+		if (ARCHETYPE_FLAGGED(arch, ARCH_IN_DEVELOPMENT)) {
+			continue;	// don't show in-dev
+		}
 		if (GET_ARCH_TYPE(arch) != type) {
 			continue;
 		}
@@ -1214,6 +1216,7 @@ void display_archetype_list(descriptor_data *desc, int type, char *argument) {
 		// match strings
 		if (all || basic || skill_match || multi_isname(argument, GET_ARCH_NAME(arch)) || multi_isname(argument, GET_ARCH_DESC(arch))) {
 			snprintf(line, sizeof(line), " %s%s\t0 - %s", ARCHETYPE_FLAGGED(arch, ARCH_BASIC) ? "\tc" : "\ty", GET_ARCH_NAME(arch), GET_ARCH_DESC(arch));
+			any = TRUE;
 			
 			if (size + strlen(line) + 40 < sizeof(buf)) {
 				size += snprintf(buf + size, sizeof(buf) - size, "%s\r\n", line);
@@ -1223,6 +1226,10 @@ void display_archetype_list(descriptor_data *desc, int type, char *argument) {
 				break;
 			}
 		}
+	}
+	
+	if (!any) {
+		size += snprintf(buf + size, sizeof(buf) - size, " There are no archetypes %s.\r\n", (all || basic) ? "available to list" : "with those keywords");
 	}
 	
 	if (*buf) {

@@ -30,6 +30,7 @@
 */
 
 // externs
+extern const char *action_bits[];
 extern const char *affected_bits[];
 extern const char *apply_type_names[];
 extern const char *apply_types[];
@@ -45,8 +46,6 @@ extern const char *obj_custom_types[];
 extern const char *offon_types[];
 extern const char *paint_colors[];
 extern const char *paint_names[];
-extern const struct poison_data_type poison_data[];
-extern const struct potion_data_type potion_data[];
 extern const char *storage_bits[];
 extern const char *wear_bits[];
 
@@ -76,6 +75,7 @@ char **olc_material_list = NULL;	// used for olc
 * @return bool TRUE if any problems were reported; FALSE if all good.
 */
 bool audit_object(obj_data *obj, char_data *ch) {
+	extern bool audit_interactions(any_vnum vnum, struct interaction_item *list, int attach_type, char_data *ch);
 	extern adv_data *get_adventure_for_vnum(rmt_vnum vnum);
 	
 	bool is_adventure = (get_adventure_for_vnum(GET_OBJ_VNUM(obj)) != NULL);
@@ -172,7 +172,7 @@ bool audit_object(obj_data *obj, char_data *ch) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "No maximum scale level on non-adventure obj");
 		problem = TRUE;
 	}
-	if (OBJ_FLAGGED(obj, OBJ_SCALABLE) && obj->storage) {
+	if (OBJ_FLAGGED(obj, OBJ_SCALABLE) && obj->storage && GET_OBJ_MAX_SCALE_LEVEL(obj) != GET_OBJ_MIN_SCALE_LEVEL(obj)) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Scalable object has storage locations");
 		problem = TRUE;
 	}
@@ -180,6 +180,12 @@ bool audit_object(obj_data *obj, char_data *ch) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Scalable object has no bind flags");
 		problem = TRUE;
 	}
+	if (OBJ_FLAGGED(obj, OBJ_NO_STORE)) {
+		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Object has !STORE - this flag is meaningless on a prototype");
+		problem = TRUE;
+	}
+	
+	problem |= audit_interactions(GET_OBJ_VNUM(obj), obj->interactions, TYPE_OBJ, ch);
 	
 	// ITEM_X: auditors
 	switch (GET_OBJ_TYPE(obj)) {
@@ -290,6 +296,20 @@ bool audit_object(obj_data *obj, char_data *ch) {
 		case ITEM_WEALTH: {
 			if (GET_WEALTH_VALUE(obj) == 0) {
 				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Wealth value not set");
+				problem = TRUE;
+			}
+			break;
+		}
+		case ITEM_LIGHTER: {
+			if (GET_LIGHTER_USES(obj) == 0) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Number of uses not set");
+				problem = TRUE;
+			}
+			break;
+		}
+		case ITEM_MINIPET: {
+			if (GET_MINIPET_VNUM(obj) == NOTHING || !mob_proto(GET_MINIPET_VNUM(obj))) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Mini-pet not set");
 				problem = TRUE;
 			}
 			break;
@@ -418,6 +438,7 @@ char *list_one_object(obj_data *obj, bool detail) {
 * @param obj_vnum vnum The vnum to delete.
 */
 void olc_delete_object(char_data *ch, obj_vnum vnum) {
+	void adjust_vehicle_tech(vehicle_data *veh, bool add);
 	void complete_building(room_data *room);
 	extern bool delete_from_interaction_list(struct interaction_item **list, int vnum_type, any_vnum vnum);
 	extern bool delete_from_spawn_template_list(struct adventure_spawn **list, int spawn_type, mob_vnum vnum);
@@ -442,6 +463,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	craft_data *craft, *next_craft;
 	morph_data *morph, *next_morph;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	augment_data *aug, *next_aug;
 	vehicle_data *veh, *next_veh;
 	crop_data *crop, *next_crop;
@@ -453,7 +475,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	adv_data *adv, *next_adv;
 	bld_data *bld, *next_bld;
 	descriptor_data *desc;
-	bool save, found, any_trades = FALSE;
+	bool found, any_trades = FALSE;
 	
 	if (!(proto = obj_proto(vnum))) {
 		msg_to_char(ch, "There is no such object %d.\r\n", vnum);
@@ -519,6 +541,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 				// removing the resource finished the vehicle
 				if (VEH_FLAGGED(veh, VEH_INCOMPLETE)) {
 					REMOVE_BIT(VEH_FLAGS(veh), VEH_INCOMPLETE);
+					adjust_vehicle_tech(veh, TRUE);
 					load_vtrigger(veh);
 				}
 			}
@@ -527,14 +550,12 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	
 	// remove from empire inventories and trade -- DO THIS BEFORE REMOVING FROM OBJ TABLE
 	HASH_ITER(hh, empire_table, emp, next_emp) {
-		save = FALSE;
-		
 		if (delete_stored_resource(emp, vnum)) {
-			save = TRUE;
+			EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
 		}
 		
 		if (delete_unique_storage_by_vnum(emp, vnum)) {
-			save = TRUE;
+			EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
 		}
 		
 		for (trade = EMPIRE_TRADE(emp); trade; trade = next_trade) {
@@ -543,12 +564,8 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 				struct empire_trade_data *temp;
 				REMOVE_FROM_LIST(trade, EMPIRE_TRADE(emp), next);
 				free(trade);	// certified
-				save = TRUE;
+				EMPIRE_NEEDS_SAVE(emp) = TRUE;
 			}
-		}
-		
-		if (save) {
-			save_empire(emp);
 		}
 	}
 	
@@ -693,6 +710,19 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 		found = delete_from_interaction_list(&obj_iter->interactions, TYPE_OBJ, vnum);
 		if (found) {
 			save_library_file_for_vnum(DB_BOOT_OBJ, GET_OBJ_VNUM(obj_iter));
+		}
+	}
+	
+	// update progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_GET_OBJECT, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_WEARING, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_WEARING_OR_HAS, vnum);
+		
+		if (found) {
+			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+			need_progress_refresh = TRUE;
 		}
 	}
 	
@@ -869,6 +899,16 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 				msg_to_char(desc->character, "One of the objects in an interaction for the item you're editing was deleted.\r\n");
 			}
 		}
+		if (GET_OLC_PROGRESS(desc)) {
+			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_GET_OBJECT, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_WEARING, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_WEARING_OR_HAS, vnum);
+		
+			if (found) {
+				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
+				msg_to_desc(desc, "An object used by the progression goal you're editing has been deleted.\r\n");
+			}
+		}
 		if (GET_OLC_QUEST(desc)) {
 			found = delete_quest_giver_from_list(&QUEST_STARTS_AT(GET_OLC_QUEST(desc)), QG_OBJECT, vnum);
 			found |= delete_quest_giver_from_list(&QUEST_ENDS_AT(GET_OLC_QUEST(desc)), QG_OBJECT, vnum);
@@ -961,7 +1001,10 @@ void olc_fullsearch_obj(char_data *ch, char *argument) {
 		// figure out a type
 		argument = any_one_arg(argument, type_arg);
 		
-		if (is_abbrev(type_arg, "-affects")) {
+		if (!strcmp(type_arg, "-")) {
+			continue;	// just skip stray dashes
+		}
+		else if (is_abbrev(type_arg, "-affects")) {
 			argument = any_one_word(argument, val_arg);
 			if ((lookup = search_block(val_arg, affected_bits, FALSE)) != NOTHING) {
 				only_affs |= BIT(lookup);
@@ -1206,6 +1249,7 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 	craft_data *craft, *next_craft;
 	morph_data *morph, *next_morph;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	room_template *rmt, *next_rmt;
 	sector_data *sect, *next_sect;
 	augment_data *aug, *next_aug;
@@ -1333,6 +1377,13 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 				size += snprintf(buf + size, sizeof(buf) - size, "GLB [%5d] %s\r\n", GET_GLOBAL_VNUM(glb), GET_GLOBAL_NAME(glb));
 			}
 		}
+		for (gear = GET_GLOBAL_GEAR(glb); gear && !any; gear = gear->next) {
+			if (gear->vnum == vnum) {
+				any = TRUE;
+				++found;
+				size += snprintf(buf + size, sizeof(buf) - size, "GLB [%5d] %s\r\n", GET_GLOBAL_VNUM(glb), GET_GLOBAL_NAME(glb));
+			}
+		}
 	}
 	
 	// mob interactions
@@ -1364,6 +1415,22 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 				++found;
 				size += snprintf(buf + size, sizeof(buf) - size, "OBJ [%5d] %s\r\n", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
 			}
+		}
+	}
+	
+	// progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		if (size >= sizeof(buf)) {
+			break;
+		}
+		// REQ_x: requirement search
+		any = find_requirement_in_list(PRG_TASKS(prg), REQ_GET_OBJECT, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_WEARING, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_WEARING_OR_HAS, vnum);
+		
+		if (any) {
+			++found;
+			size += snprintf(buf + size, sizeof(buf) - size, "PRG [%5d] %s\r\n", PRG_VNUM(prg), PRG_NAME(prg));
 		}
 	}
 	
@@ -1839,7 +1906,6 @@ void olc_get_values_display(char_data *ch, char *storage) {
 			sprintf(storage + strlen(storage), "<%squantity\t0> %d\r\n", OLC_LABEL_VAL(GET_AMMO_QUANTITY(obj), 0), GET_AMMO_QUANTITY(obj));
 			sprintf(storage + strlen(storage), "<%sdamage\t0> %+d%s\r\n", OLC_LABEL_VAL(GET_AMMO_DAMAGE_BONUS(obj), 0), GET_AMMO_DAMAGE_BONUS(obj), OBJ_FLAGGED(obj, OBJ_SCALABLE) ? " (scalable)" : "");
 			sprintf(storage + strlen(storage), "<%sammotype\t0> %c\r\n", OLC_LABEL_VAL(GET_AMMO_TYPE(obj), 0), 'A' + GET_AMMO_TYPE(obj));
-			sprintf(storage + strlen(storage), "NOTE: Positive applies become negative debuffs (see HELP AMMO ITEM)\r\n");
 			break;
 		}
 		case ITEM_PACK: {
@@ -1851,12 +1917,12 @@ void olc_get_values_display(char_data *ch, char *storage) {
 			break;
 		}
 		case ITEM_POTION: {
-			sprintf(storage + strlen(storage), "<%spotion\t0> %s\r\n", OLC_LABEL_VAL(GET_POTION_TYPE(obj), 0), potion_data[GET_POTION_TYPE(obj)].name);
-			sprintf(storage + strlen(storage), "<%spotionscale\t0> %d%s\r\n", OLC_LABEL_VAL(GET_POTION_SCALE(obj), 0), GET_POTION_SCALE(obj), OBJ_FLAGGED(obj, OBJ_SCALABLE) ? " (scalable)" : "");
+			sprintf(storage + strlen(storage), "<%saffecttype\t0> [%d] %s\r\n", OLC_LABEL_VAL(GET_POTION_AFFECT(obj), NOTHING), GET_POTION_AFFECT(obj), GET_POTION_AFFECT(obj) != NOTHING ? get_generic_name_by_vnum(GET_POTION_AFFECT(obj)) : "not custom");
+			sprintf(storage + strlen(storage), "<%scooldown\t0> [%d] %s, <%scdtime\t0> %d second%s\r\n", OLC_LABEL_VAL(GET_POTION_COOLDOWN_TYPE(obj), NOTHING), GET_POTION_COOLDOWN_TYPE(obj), GET_POTION_COOLDOWN_TYPE(obj) != NOTHING ? get_generic_name_by_vnum(GET_POTION_COOLDOWN_TYPE(obj)) : "no cooldown", OLC_LABEL_VAL(GET_POTION_COOLDOWN_TIME(obj), 0), GET_POTION_COOLDOWN_TIME(obj), PLURAL(GET_POTION_COOLDOWN_TIME(obj)));
 			break;
 		}
 		case ITEM_POISON: {
-			sprintf(storage + strlen(storage), "<%spoison\t0> %s\r\n", OLC_LABEL_VAL(GET_POISON_TYPE(obj), 0), poison_data[GET_POISON_TYPE(obj)].name);
+			sprintf(storage + strlen(storage), "<%saffecttype\t0> [%d] %s\r\n", OLC_LABEL_VAL(GET_POISON_AFFECT(obj), NOTHING), GET_POISON_AFFECT(obj), GET_POISON_AFFECT(obj) != NOTHING ? get_generic_name_by_vnum(GET_POISON_AFFECT(obj)) : "not custom");
 			sprintf(storage + strlen(storage), "<%scharges\t0> %d\r\n", OLC_LABEL_VAL(GET_POISON_CHARGES(obj), 0), GET_POISON_CHARGES(obj));
 			break;
 		}
@@ -1877,6 +1943,19 @@ void olc_get_values_display(char_data *ch, char *storage) {
 		case ITEM_WEALTH: {
 			sprintf(storage + strlen(storage), "<%swealth\t0> %d\r\n", OLC_LABEL_VAL(GET_WEALTH_VALUE(obj), 0), GET_WEALTH_VALUE(obj));
 			sprintf(storage + strlen(storage), "<%sautomint\t0> %s\r\n", OLC_LABEL_VAL(GET_WEALTH_AUTOMINT(obj), 0), offon_types[GET_WEALTH_AUTOMINT(obj)]);
+			break;
+		}
+		case ITEM_LIGHTER: {
+			if (GET_LIGHTER_USES(obj) == UNLIMITED) {
+				sprintf(storage + strlen(storage), "<%suses\t0> unlimited\r\n", OLC_LABEL_VAL(GET_LIGHTER_USES(obj), 0));
+			}
+			else {
+				sprintf(storage + strlen(storage), "<%suses\t0> %d\r\n", OLC_LABEL_VAL(GET_LIGHTER_USES(obj), 0), GET_LIGHTER_USES(obj));
+			}
+			break;
+		}
+		case ITEM_MINIPET: {
+			sprintf(storage + strlen(storage), "<%sminipet\t0> %d %s\r\n", OLC_LABEL_VAL(GET_MINIPET_VNUM(obj), NOTHING), GET_MINIPET_VNUM(obj), get_mob_name_by_proto(GET_MINIPET_VNUM(obj)));
 			break;
 		}
 		
@@ -2057,6 +2136,45 @@ OLC_MODULE(oedit_affects) {
 }
 
 
+OLC_MODULE(oedit_affecttype) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	any_vnum old;
+	int pos;
+	
+	switch (GET_OBJ_TYPE(obj)) {
+		case ITEM_POTION: {
+			pos = VAL_POTION_AFFECT;
+			break;
+		}
+		case ITEM_POISON: {
+			pos = VAL_POISON_AFFECT;
+			break;
+		}
+		default: {
+			msg_to_char(ch, "You can't set an affecttype on this type of item.\r\n");
+			return;
+		}
+	}
+	
+	if (!str_cmp(argument, "none")) {
+		GET_OBJ_VAL(obj, pos) = NOTHING;
+		msg_to_char(ch, "It now has no custom affect type.\r\n");
+	}
+	else {
+		old = GET_OBJ_VAL(obj, pos);
+		GET_OBJ_VAL(obj, pos) = olc_process_number(ch, argument, "affect vnum", "affecttype", 0, MAX_VNUM, GET_OBJ_VAL(obj, pos));
+
+		if (!find_generic(GET_OBJ_VAL(obj, pos), GENERIC_AFFECT)) {
+			msg_to_char(ch, "Invalid affect generic vnum %d. Old value restored.\r\n", GET_OBJ_VAL(obj, pos));
+			GET_OBJ_VAL(obj, pos) = old;
+		}
+		else {
+			msg_to_char(ch, "Affect type set to [%d] %s.\r\n", GET_OBJ_VAL(obj, pos), get_generic_name_by_vnum(GET_OBJ_VAL(obj, pos)));
+		}
+	}
+}
+
+
 OLC_MODULE(oedit_apply) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH], arg4[MAX_INPUT_LENGTH];
@@ -2158,7 +2276,7 @@ OLC_MODULE(oedit_apply) {
 		if (!change) {
 			msg_to_char(ch, "Invalid apply number.\r\n");
 		}
-		else if (is_abbrev(type_arg, "value")) {
+		else if (is_abbrev(type_arg, "value") || is_abbrev(type_arg, "amount")) {
 			num = atoi(val_arg);
 			if ((!isdigit(*val_arg) && *val_arg != '-') || num == 0) {
 				msg_to_char(ch, "Invalid value '%s'.\r\n", val_arg);
@@ -2275,7 +2393,7 @@ OLC_MODULE(oedit_text) {
 	book_data *book;
 	
 	if (!IS_BOOK(obj)) {
-		msg_to_char(ch, "You can only set etxt id on a book.\r\n");
+		msg_to_char(ch, "You can only set text id on a book.\r\n");
 	}
 	else {
 		GET_OBJ_VAL(obj, VAL_BOOK_ID) = olc_process_number(ch, argument, "text id", "text", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_BOOK_ID));
@@ -2315,6 +2433,13 @@ OLC_MODULE(oedit_capacity) {
 	else {
 		GET_OBJ_VAL(obj, slot) = olc_process_number(ch, argument, "capacity", "capacity", 0, MAX_INT, GET_OBJ_VAL(obj, slot));
 	}
+}
+
+
+OLC_MODULE(oedit_cdtime) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	
+	GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TIME) = olc_process_number(ch, argument, "cooldown time", "cdtime", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TIME));
 }
 
 
@@ -2402,6 +2527,32 @@ OLC_MODULE(oedit_contents) {
 }
 
 
+OLC_MODULE(oedit_cooldown) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	any_vnum old;
+	
+	if (!IS_POTION(obj)) {
+		msg_to_char(ch, "You can only set cooldown type on a potion.\r\n");
+	}
+	else if (!str_cmp(argument, "none")) {
+		GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE) = NOTHING;
+		msg_to_char(ch, "It now has no cooldown type.\r\n");
+	}
+	else {
+		old = GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE);
+		GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE) = olc_process_number(ch, argument, "cooldown vnum", "cooldown", 0, MAX_VNUM, GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE));
+
+		if (!find_generic(GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE), GENERIC_COOLDOWN)) {
+			msg_to_char(ch, "Invalid cooldown generic vnum %d. Old value restored.\r\n", GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE));
+			GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE) = old;
+		}
+		else {
+			msg_to_char(ch, "Cooldown type set to [%d] %s.\r\n", GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE), get_generic_name_by_vnum(GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE)));
+		}
+	}
+}
+
+
 OLC_MODULE(oedit_corpseof) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	mob_vnum old = GET_CORPSE_NPC_VNUM(obj);
@@ -2417,6 +2568,9 @@ OLC_MODULE(oedit_corpseof) {
 		}
 		else if (!PRF_FLAGGED(ch, PRF_NOREPEAT)) {
 			msg_to_char(ch, "It is now the corpse of: %s\r\n", get_mob_name_by_proto(GET_CORPSE_NPC_VNUM(obj)));
+		}
+		else {
+			send_config_msg(ch, "ok_string");
 		}
 	}
 }
@@ -2559,6 +2713,43 @@ OLC_MODULE(oedit_maxlevel) {
 }
 
 
+OLC_MODULE(oedit_minipet) {
+	extern bitvector_t default_minipet_flags, default_minipet_affs;
+	
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	mob_vnum old = GET_MINIPET_VNUM(obj);
+	char buf[MAX_STRING_LENGTH];
+	char_data *mob;
+	
+	if (!IS_MINIPET(obj)) {
+		msg_to_char(ch, "You can only set this on a MINIPET item.\r\n");
+	}
+	else {
+		GET_OBJ_VAL(obj, VAL_MINIPET_VNUM) = olc_process_number(ch, argument, "mini-pet", "minipet", 0, MAX_VNUM, GET_OBJ_VAL(obj, VAL_MINIPET_VNUM));
+		if (!(mob = mob_proto(GET_MINIPET_VNUM(obj)))) {
+			GET_OBJ_VAL(obj, VAL_MINIPET_VNUM) = old;
+			msg_to_char(ch, "There is no mobile with that vnum. Old value restored.\r\n");
+			return;
+		}
+		else if (!PRF_FLAGGED(ch, PRF_NOREPEAT)) {
+			msg_to_char(ch, "It now gives the mini-pet: %s\r\n", get_mob_name_by_proto(GET_MINIPET_VNUM(obj)));
+		}
+		else {
+			send_config_msg(ch, "ok_string");
+		}
+		
+		if (!MOB_FLAGGED(mob, default_minipet_flags)) {
+			sprintbit(default_minipet_flags, action_bits, buf, TRUE);
+			msg_to_char(ch, "Warning: mob should have these flags: buf\r\n");
+		}
+		if (!AFF_FLAGGED(mob, default_minipet_affs)) {
+			sprintbit(default_minipet_affs, affected_bits, buf, TRUE);
+			msg_to_char(ch, "Warning: mob should have these affects: buf\r\n");
+		}
+	}
+}
+
+
 OLC_MODULE(oedit_minlevel) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	
@@ -2595,82 +2786,6 @@ OLC_MODULE(oedit_plants) {
 			msg_to_char(ch, "No such crop vnum. Old value restored.\r\n");
 			GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE) = old;
 		}
-	}
-}
-
-
-OLC_MODULE(oedit_poison) {
-	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	static char **poison_types = NULL;
-	int iter, count;
-	
-	// this does not have a const char** list .. build one the first time
-	if (!poison_types) {
-		// count types
-		count = 0;
-		for (iter = 0; *poison_data[iter].name != '\n'; ++iter) {
-			++count;
-		}
-	
-		CREATE(poison_types, char*, count+1);
-		
-		for (iter = 0; iter < count; ++iter) {
-			poison_types[iter] = str_dup(poison_data[iter].name);
-		}
-		
-		// must terminate
-		poison_types[count] = str_dup("\n");
-	}
-	
-	if (!IS_POISON(obj)) {
-		msg_to_char(ch, "You can only set poison type on a poison object.\r\n");
-	}
-	else {
-		GET_OBJ_VAL(obj, VAL_POISON_TYPE) = olc_process_type(ch, argument, "poison", "poison", (const char**)poison_types, GET_OBJ_VAL(obj, VAL_POISON_TYPE));
-	}
-}
-
-
-OLC_MODULE(oedit_potion) {
-	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	static char **potion_types = NULL;
-	int iter, count;
-	
-	// this does not have a const char** list .. build one the first time
-	if (!potion_types) {
-		// count types
-		count = 0;
-		for (iter = 0; *potion_data[iter].name != '\n'; ++iter) {
-			++count;
-		}
-	
-		CREATE(potion_types, char*, count+1);
-		
-		for (iter = 0; iter < count; ++iter) {
-			potion_types[iter] = str_dup(potion_data[iter].name);
-		}
-		
-		// must terminate
-		potion_types[count] = str_dup("\n");
-	}
-
-	if (!IS_POTION(obj)) {
-		msg_to_char(ch, "You can only set potion type on a potion object.\r\n");
-	}
-	else {
-		GET_OBJ_VAL(obj, VAL_POTION_TYPE) = olc_process_type(ch, argument, "potion", "potion", (const char**)potion_types, GET_OBJ_VAL(obj, VAL_POTION_TYPE));
-	}
-}
-
-
-OLC_MODULE(oedit_potionscale) {
-	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	
-	if (!IS_POTION(obj)) {
-		msg_to_char(ch, "You can't set potionscale on this type of item.\r\n");
-	}
-	else {
-		GET_OBJ_VAL(obj, VAL_POTION_SCALE) = olc_process_number(ch, argument, "potion scale", "potionscale", 0, 1000, GET_OBJ_VAL(obj, VAL_POTION_SCALE));
 	}
 }
 
@@ -3023,10 +3138,45 @@ OLC_MODULE(oedit_type) {
 				GET_OBJ_VAL(obj, VAL_WEAPON_TYPE) = TYPE_SLASH;
 				break;
 			}
+			case ITEM_POTION: {
+				GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE) = NOTHING;
+				GET_OBJ_VAL(obj, VAL_POTION_AFFECT) = NOTHING;
+				break;
+			}
+			case ITEM_POISON: {
+				GET_OBJ_VAL(obj, VAL_POISON_AFFECT) = NOTHING;
+				break;
+			}
+			case ITEM_MINIPET: {
+				GET_OBJ_VAL(obj, VAL_MINIPET_VNUM) = NOTHING;
+				break;
+			}
 			default: {
 				break;
 			}
 		}
+	}
+}
+
+
+OLC_MODULE(oedit_uses) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	
+	if (GET_OBJ_TYPE(obj) != ITEM_LIGHTER) {
+		msg_to_char(ch, "You can only set uses on a LIGHTER object.\r\n");
+	}
+	else if (is_abbrev(argument, "unlimited")) {
+		GET_OBJ_VAL(obj, VAL_LIGHTER_USES) = UNLIMITED;
+		
+		if (PRF_FLAGGED(ch, PRF_NOREPEAT)) {
+			send_config_msg(ch, "ok_string");
+		}
+		else {
+			msg_to_char(ch, "It now has unlimited uses.\r\n");
+		}
+	}
+	else {
+		GET_OBJ_VAL(obj, VAL_LIGHTER_USES) = olc_process_number(ch, argument, "lighter uses", "uses", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_LIGHTER_USES));
 	}
 }
 

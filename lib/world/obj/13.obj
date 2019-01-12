@@ -4,15 +4,13 @@ a glowing green seashell~
 A glowing green seashell is sitting on the ground.~
 The seashell can be used in certain crafts and enchantments.
 ~
-3 l a 3
+3 l a 4
 0 0 0
 1 0
 O
 11 gu
 R
 5164 0
-R
-5511 0
 S
 #1301
 barbfish striped remains fish~
@@ -386,11 +384,11 @@ a bag of wool~
 Some wool is scattered on the ground.~
 You can weave the wool into cloth.
 ~
-3 l a 4
+3 l a 5
 0 0 0
 7 0
 O
-7 a
+7 ap
 R
 5137 0
 S
@@ -445,11 +443,11 @@ Some soft llama wool is scattered on the ground.~
    Llama wool is softer than sheep wool, and comes in a variety of colors. It
 can be woven into llama fiber cloth.
 ~
-3 l a 2
+3 l a 3
 0 0 0
 7 0
 O
-7 a
+7 ap
 R
 5137 0
 S

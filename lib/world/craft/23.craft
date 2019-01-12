@@ -205,7 +205,7 @@ clay shield~
 R
 4 6 1 0
 R
-25 6 1 0
+7 6 1 272
 R
 15 1 1 16384
 S
@@ -249,38 +249,38 @@ R
 176 6 0 0
 S
 #2324
-copper breastplate~
+bronze breastplate~
 2324 1
 1 53 0 24 -1
 R
-178 10 0 0
+168 10 0 0
 R
 15 2 1 16384
 S
 #2325
-copper mask~
+bronze mask~
 2325 1
 1 53 0 24 -1
 R
 26 1 1 0
 R
-178 4 0 0
+168 4 0 0
 S
 #2326
-copper vambraces~
+bronze vambraces~
 2326 1
 1 53 0 24 -1
 R
-178 8 0 0
+168 8 0 0
 R
 15 2 1 16384
 S
 #2327
-copper buckler~
+bronze buckler~
 2327 1
 1 53 0 24 -1
 R
-178 6 0 0
+168 6 0 0
 R
 15 1 1 16384
 R
@@ -442,7 +442,7 @@ S
 #2344
 guild patterned cloth~
 2344 1
-9 242 g 12 -1
+9 247 g 12 -1
 R
 26 4 1 0
 R
@@ -614,7 +614,7 @@ S
 #2366
 guild-forged hammer head~
 2366 1
-1 242 q 12 -1
+1 243 q 12 -1
 L
 300
 R

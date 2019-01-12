@@ -149,7 +149,7 @@ bool audit_generic(generic_data *gen, char_data *ch) {
 				olc_audit_msg(ch, GEN_VNUM(gen), "Liquid not set");
 				problem = TRUE;
 			}
-			if (GET_LIQUID_COLOR(gen)) {
+			if (!GET_LIQUID_COLOR(gen)) {
 				olc_audit_msg(ch, GEN_VNUM(gen), "Color not set");
 				problem = TRUE;
 			}
@@ -246,8 +246,10 @@ void olc_search_generic(char_data *ch, any_vnum vnum) {
 	ability_data *abil, *next_abil;
 	craft_data *craft, *next_craft;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	augment_data *aug, *next_aug;
 	vehicle_data *veh, *next_veh;
+	social_data *soc, *next_soc;
 	shop_data *shop, *next_shop;
 	struct resource_data *res;
 	bld_data *bld, *next_bld;
@@ -329,7 +331,21 @@ void olc_search_generic(char_data *ch, any_vnum vnum) {
 			++found;
 			size += snprintf(buf + size, sizeof(buf) - size, "OBJ [%5d] %s\r\n", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
 		}
-	}
+	
+	
+	// progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		if (size >= sizeof(buf)) {
+			break;
+		}
+		// REQ_x: requirement search
+		any = find_requirement_in_list(PRG_TASKS(prg), REQ_GET_CURRENCY, vnum);
+		
+		if (any) {
+			++found;
+			size += snprintf(buf + size, sizeof(buf) - size, "PRG [%5d] %s\r\n", PRG_VNUM(prg), PRG_NAME(prg));
+		}
+	}}
 	
 	// check quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
@@ -354,6 +370,19 @@ void olc_search_generic(char_data *ch, any_vnum vnum) {
 		if (any) {
 			++found;
 			size += snprintf(buf + size, sizeof(buf) - size, "SHOP [%5d] %s\r\n", SHOP_VNUM(shop), SHOP_NAME(shop));
+		}
+	}
+	
+	// socials
+	HASH_ITER(hh, social_table, soc, next_soc) {
+		if (size >= sizeof(buf)) {
+			break;
+		}
+		any = find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_GET_CURRENCY, vnum);
+		
+		if (any) {
+			++found;
+			size += snprintf(buf + size, sizeof(buf) - size, "SOC [%5d] %s\r\n", SOC_VNUM(soc), SOC_NAME(soc));
 		}
 	}
 	
@@ -476,8 +505,6 @@ void free_generic(generic_data *gen) {
 * @param any_vnum vnum The generic vnum
 */
 void parse_generic(FILE *fl, any_vnum vnum) {
-	void parse_requirement(FILE *fl, struct req_data **list, char *error_str);
-	
 	char line[256], error[256], str_in[256], *ptr;
 	generic_data *gen, *find;
 	int int_in[4];
@@ -711,6 +738,7 @@ generic_data *create_generic_table_entry(any_vnum vnum) {
 * @param any_vnum vnum The vnum to delete.
 */
 void olc_delete_generic(char_data *ch, any_vnum vnum) {
+	void adjust_vehicle_tech(vehicle_data *veh, bool add);
 	void complete_building(room_data *room);
 	
 	struct trading_post_data *tpd, *next_tpd;
@@ -719,17 +747,19 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 	ability_data *abil, *next_abil;
 	craft_data *craft, *next_craft;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	augment_data *aug, *next_aug;
 	vehicle_data *veh, *next_veh;
 	room_data *room, *next_room;
 	empire_data *emp, *next_emp;
+	social_data *soc, *next_soc;
 	shop_data *shop, *next_shop;
 	bld_data *bld, *next_bld;
 	obj_data *obj, *next_obj;
 	descriptor_data *desc;
 	generic_data *gen;
 	char_data *chiter;
-	bool found, save;
+	bool found;
 	int res_type;
 	
 	if (!(gen = real_generic(vnum))) {
@@ -787,18 +817,14 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 	
 	// remove from live lists: unique storage of drink containers
 	HASH_ITER(hh, empire_table, emp, next_emp) {
-		save = FALSE;
 		LL_FOREACH(EMPIRE_UNIQUE_STORAGE(emp), eus) {
 			if (!eus->obj) {
 				continue;
 			}
 			if (GEN_TYPE(gen) == GENERIC_LIQUID && IS_DRINK_CONTAINER(eus->obj) && GET_DRINK_CONTAINER_TYPE(eus->obj) == vnum) {
 				GET_OBJ_VAL(eus->obj, VAL_DRINK_CONTAINER_TYPE) = LIQ_WATER;
+				EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
 			}
-		}
-		
-		if (save) {
-			save_empire(emp);
 		}
 	}
 	
@@ -835,6 +861,7 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 				// removing the resource finished the vehicle
 				if (VEH_FLAGGED(veh, VEH_INCOMPLETE)) {
 					REMOVE_BIT(VEH_FLAGS(veh), VEH_INCOMPLETE);
+					adjust_vehicle_tech(veh, TRUE);
 					load_vtrigger(veh);
 				}
 			}
@@ -912,6 +939,17 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 		}
 	}
 	
+	// update progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_GET_CURRENCY, vnum);
+		
+		if (found) {
+			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+			need_progress_refresh = TRUE;
+		}
+	}
+	
 	// remove from quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
 		// REQ_x, QR_x: quest types
@@ -930,6 +968,16 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 		if (find_currency_in_shop_item_list(SHOP_ITEMS(shop), vnum)) {
 			SET_BIT(SHOP_FLAGS(shop), SHOP_IN_DEVELOPMENT);
 			save_library_file_for_vnum(DB_BOOT_SHOP, SHOP_VNUM(shop));
+		}
+	}
+	
+	// update socials
+	HASH_ITER(hh, social_table, soc, next_soc) {
+		found = delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_GET_CURRENCY, vnum);
+		
+		if (found) {
+			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
+			save_library_file_for_vnum(DB_BOOT_SOC, SOC_VNUM(soc));
 		}
 	}
 	
@@ -998,6 +1046,14 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 				msg_to_char(desc->character, "The liquid used by the object you're editing was deleted.\r\n");
 			}
 		}
+		if (GET_OLC_PROGRESS(desc)) {
+			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_GET_CURRENCY, vnum);
+		
+			if (found) {
+				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
+				msg_to_desc(desc, "A generic currency used by the progression goal you're editing has been deleted.\r\n");
+			}
+		}
 		if (GET_OLC_QUEST(desc)) {
 			// REQ_x, QR_x: quest types
 			found = delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_GET_CURRENCY, vnum);
@@ -1012,6 +1068,14 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 		if (GET_OLC_SHOP(desc)) {
 			if (find_currency_in_shop_item_list(SHOP_ITEMS(GET_OLC_SHOP(desc)), vnum)) {
 				msg_to_char(desc->character, "One of the currencies used for the shop you're editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_SOCIAL(desc)) {
+			found = delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_GET_CURRENCY, vnum);
+		
+			if (found) {
+				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
+				msg_to_desc(desc, "A currency required by the social you are editing was deleted.\r\n");
 			}
 		}
 		if (GET_OLC_VEHICLE(desc)) {
@@ -1163,6 +1227,8 @@ void do_stat_generic(char_data *ch, generic_data *gen) {
 			break;
 		}
 		case GENERIC_AFFECT: {
+			size += snprintf(buf + size, sizeof(buf) - size, "Apply to-char: %s\r\n", GET_AFFECT_APPLY_TO_CHAR(gen) ? GET_AFFECT_APPLY_TO_CHAR(gen) : "(none)");
+			size += snprintf(buf + size, sizeof(buf) - size, "Apply to-room: %s\r\n", GET_AFFECT_APPLY_TO_ROOM(gen) ? GET_AFFECT_APPLY_TO_ROOM(gen) : "(none)");
 			size += snprintf(buf + size, sizeof(buf) - size, "Wear-off: %s\r\n", GET_AFFECT_WEAR_OFF_TO_CHAR(gen) ? GET_AFFECT_WEAR_OFF_TO_CHAR(gen) : "(none)");
 			size += snprintf(buf + size, sizeof(buf) - size, "Wear-off to room: %s\r\n", GET_AFFECT_WEAR_OFF_TO_ROOM(gen) ? GET_AFFECT_WEAR_OFF_TO_ROOM(gen) : "(none)");
 			break;
@@ -1315,7 +1381,7 @@ OLC_MODULE(genedit_build2char) {
 			free(GEN_STRING(gen, GSTR_ACTION_BUILD_TO_CHAR));
 		}
 		GEN_STRING(gen, GSTR_ACTION_BUILD_TO_CHAR) = NULL;
-		msg_to_char(ch, "Build2char messsage removed.\r\n");
+		msg_to_char(ch, "Build2char message removed.\r\n");
 	}
 	else {
 		olc_process_string(ch, argument, "build2char", &GEN_STRING(gen, GSTR_ACTION_BUILD_TO_CHAR));
@@ -1334,7 +1400,7 @@ OLC_MODULE(genedit_build2room) {
 			free(GEN_STRING(gen, GSTR_ACTION_BUILD_TO_ROOM));
 		}
 		GEN_STRING(gen, GSTR_ACTION_BUILD_TO_ROOM) = NULL;
-		msg_to_char(ch, "Build2room messsage removed.\r\n");
+		msg_to_char(ch, "Build2room message removed.\r\n");
 	}
 	else {
 		olc_process_string(ch, argument, "build2room", &GEN_STRING(gen, GSTR_ACTION_BUILD_TO_ROOM));
@@ -1353,7 +1419,7 @@ OLC_MODULE(genedit_craft2char) {
 			free(GEN_STRING(gen, GSTR_ACTION_CRAFT_TO_CHAR));
 		}
 		GEN_STRING(gen, GSTR_ACTION_CRAFT_TO_CHAR) = NULL;
-		msg_to_char(ch, "Craft2char messsage removed.\r\n");
+		msg_to_char(ch, "Craft2char message removed.\r\n");
 	}
 	else {
 		olc_process_string(ch, argument, "craft2char", &GEN_STRING(gen, GSTR_ACTION_CRAFT_TO_CHAR));
@@ -1372,7 +1438,7 @@ OLC_MODULE(genedit_craft2room) {
 			free(GEN_STRING(gen, GSTR_ACTION_CRAFT_TO_ROOM));
 		}
 		GEN_STRING(gen, GSTR_ACTION_CRAFT_TO_ROOM) = NULL;
-		msg_to_char(ch, "Craft2room messsage removed.\r\n");
+		msg_to_char(ch, "Craft2room message removed.\r\n");
 	}
 	else {
 		olc_process_string(ch, argument, "craft2room", &GEN_STRING(gen, GSTR_ACTION_CRAFT_TO_ROOM));
@@ -1391,7 +1457,7 @@ OLC_MODULE(genedit_repair2char) {
 			free(GEN_STRING(gen, GSTR_ACTION_REPAIR_TO_CHAR));
 		}
 		GEN_STRING(gen, GSTR_ACTION_REPAIR_TO_CHAR) = NULL;
-		msg_to_char(ch, "Repair2char messsage removed.\r\n");
+		msg_to_char(ch, "Repair2char message removed.\r\n");
 	}
 	else {
 		olc_process_string(ch, argument, "repair2char", &GEN_STRING(gen, GSTR_ACTION_REPAIR_TO_CHAR));
@@ -1410,7 +1476,7 @@ OLC_MODULE(genedit_repair2room) {
 			free(GEN_STRING(gen, GSTR_ACTION_REPAIR_TO_ROOM));
 		}
 		GEN_STRING(gen, GSTR_ACTION_REPAIR_TO_ROOM) = NULL;
-		msg_to_char(ch, "Repair2room messsage removed.\r\n");
+		msg_to_char(ch, "Repair2room message removed.\r\n");
 	}
 	else {
 		olc_process_string(ch, argument, "repair2room", &GEN_STRING(gen, GSTR_ACTION_REPAIR_TO_ROOM));
@@ -1468,7 +1534,7 @@ OLC_MODULE(genedit_apply2char) {
 			free(GEN_STRING(gen, pos));
 		}
 		GEN_STRING(gen, pos) = NULL;
-		msg_to_char(ch, "Apply-to-char messsage removed.\r\n");
+		msg_to_char(ch, "Apply-to-char message removed.\r\n");
 	}
 	else {
 		olc_process_string(ch, argument, "apply2char", &GEN_STRING(gen, pos));
@@ -1496,7 +1562,7 @@ OLC_MODULE(genedit_apply2room) {
 			free(GEN_STRING(gen, pos));
 		}
 		GEN_STRING(gen, pos) = NULL;
-		msg_to_char(ch, "Apply-to-room messsage removed.\r\n");
+		msg_to_char(ch, "Apply-to-room message removed.\r\n");
 	}
 	else {
 		olc_process_string(ch, argument, "apply2room", &GEN_STRING(gen, pos));
@@ -1719,7 +1785,7 @@ OLC_MODULE(genedit_standardwearoff) {
 		send_config_msg(ch, "ok_string");
 	}
 	else {
-		msg_to_char(ch, "Wear-off messsage changed to: %s\r\n", buf);
+		msg_to_char(ch, "Wear-off message changed to: %s\r\n", buf);
 	}
 }
 
@@ -1748,7 +1814,7 @@ OLC_MODULE(genedit_wearoff) {
 			free(GEN_STRING(gen, pos));
 		}
 		GEN_STRING(gen, pos) = NULL;
-		msg_to_char(ch, "Wear-off messsage removed.\r\n");
+		msg_to_char(ch, "Wear-off message removed.\r\n");
 	}
 	else {
 		olc_process_string(ch, argument, "wearoff", &GEN_STRING(gen, pos));
@@ -1776,7 +1842,7 @@ OLC_MODULE(genedit_wearoff2room) {
 			free(GEN_STRING(gen, pos));
 		}
 		GEN_STRING(gen, pos) = NULL;
-		msg_to_char(ch, "Wear-off-to-room messsage removed.\r\n");
+		msg_to_char(ch, "Wear-off-to-room message removed.\r\n");
 	}
 	else {
 		olc_process_string(ch, argument, "wearoff2room", &GEN_STRING(gen, pos));

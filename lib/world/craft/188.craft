@@ -40,7 +40,7 @@ R
 R
 2 50 4 0
 R
-25 1 1 0
+7 1 1 0
 S
 #18816
 skeleton costume~
@@ -51,7 +51,7 @@ R
 R
 2 50 4 0
 R
-25 10 1 0
+25 3 1 0
 S
 #18817
 wizard costume~
@@ -73,7 +73,7 @@ R
 R
 26 20 1 0
 R
-25 10 1 0
+7 10 1 0
 R
 18 2 1 262144
 R
@@ -84,7 +84,7 @@ unearthlymanor~
 -1 1
 8 -1 m 1 18828
 B
-18828 bce bcdeklmno
+18828 bce cop
 R
 16 48 1 0
 R
@@ -97,9 +97,9 @@ S
 #18844
 mausoleum~
 -1 1
-8 48 0 1 18844
+8 300 0 1 18844
 B
-18844 bce bcdeklmno
+18844 bce cop
 R
 16 48 1 0
 R

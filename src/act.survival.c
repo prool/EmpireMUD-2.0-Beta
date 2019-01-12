@@ -47,8 +47,8 @@ INTERACTION_FUNC(butcher_interact) {
 	obj_data *fillet = NULL;
 	int num;
 	
-	if (!player_tech_skill_check(ch, PTECH_BUTCHER, DIFF_EASY)) {
-		return FALSE;
+	if (!has_player_tech(ch, PTECH_BUTCHER_UPGRADE) && number(1, 100) > 60) {
+		return FALSE;	// 60% chance of failure without the ability
 	}
 	
 	for (num = 0; num < interaction->quantity; ++num) {
@@ -400,6 +400,8 @@ void do_mount_release(char_data *ch, char *argument) {
 		mob = read_mobile(GET_MOUNT_VNUM(ch), TRUE);
 		char_to_room(mob, IN_ROOM(ch));
 		setup_generic_npc(mob, GET_LOYALTY(ch), NOTHING, NOTHING);
+		SET_BIT(AFF_FLAGS(mob), AFF_NO_DRINK_BLOOD);
+		SET_BIT(MOB_FLAGS(mob), MOB_NO_EXPERIENCE);
 		
 		act("You drop $N's lead and release $M.", FALSE, ch, NULL, mob, TO_CHAR);
 		act("$n drops $N's lead and releases $M.", TRUE, ch, NULL, mob, TO_NOTVICT);
@@ -428,8 +430,16 @@ void do_mount_swap(char_data *ch, char *argument) {
 	char_data *proto;
 	int number;
 	
-	if (!has_ability(ch, ABIL_STABLEMASTER) && (!HAS_FUNCTION(IN_ROOM(ch), FNC_STABLE) || !IS_COMPLETE(IN_ROOM(ch)))) {
+	if (!has_ability(ch, ABIL_STABLEMASTER) && !room_has_function_and_city_ok(IN_ROOM(ch), FNC_STABLE)) {
 		msg_to_char(ch, "You can only swap mounts in a stable unless you have the Stablemaster ability.\r\n");
+		return;
+	}
+	if (!has_ability(ch, ABIL_STABLEMASTER) && !check_in_city_requirement(IN_ROOM(ch), TRUE)) {
+		msg_to_char(ch, "This stable must be in a city for you to swap mounts without the Stablemaster ability.\r\n");
+		return;
+	}
+	if (!has_ability(ch, ABIL_STABLEMASTER) && !IS_COMPLETE(IN_ROOM(ch))) {
+		msg_to_char(ch, "You must complete the stable first.\r\n");
 		return;
 	}
 	if (!has_ability(ch, ABIL_STABLEMASTER) && !check_in_city_requirement(IN_ROOM(ch), TRUE)) {
@@ -505,14 +515,6 @@ ACMD(do_butcher) {
 	
 	one_argument(argument, arg);
 	
-	if (!has_player_tech(ch, PTECH_BUTCHER)) {
-		msg_to_char(ch, "You don't have the correct ability to butcher anything.\r\n");
-		return;
-	}
-	if (!can_use_ability(ch, NOTHING, NOTHING, 0, NOTHING)) {
-		return;
-	}
-	
 	if (!*arg) {
 		msg_to_char(ch, "What would you like to butcher?\r\n");
 		return;
@@ -541,12 +543,13 @@ ACMD(do_butcher) {
 	else if (!has_sharp_tool(ch)) {
 		msg_to_char(ch, "You need a sharp tool to butcher with.\r\n");
 	}
-	else if (run_ability_triggers_by_player_tech(ch, PTECH_BUTCHER, NULL, corpse)) {
+	else if (run_ability_triggers_by_player_tech(ch, PTECH_BUTCHER_UPGRADE, NULL, corpse)) {
 		return;
 	}
 	else {
 		if (run_interactions(ch, proto->interactions, INTERACT_BUTCHER, IN_ROOM(ch), NULL, corpse, butcher_interact)) {
 			// success
+			gain_player_tech_exp(ch, PTECH_BUTCHER_UPGRADE, 15);
 		}
 		else {
 			act("You butcher $p but get no useful meat.", FALSE, ch, corpse, NULL, TO_CHAR);
@@ -555,8 +558,7 @@ ACMD(do_butcher) {
 		
 		empty_obj_before_extract(corpse);
 		extract_obj(corpse);
-		charge_ability_cost(ch, NOTHING, 0, NOTHING, 0, WAIT_ABILITY);
-		gain_player_tech_exp(ch, PTECH_BUTCHER, 15);
+		command_lag(ch, WAIT_OTHER);
 	}
 }
 
@@ -623,7 +625,7 @@ ACMD(do_fish) {
 	else if (dir != NO_DIR && !(room = dir_to_room(IN_ROOM(ch), dir, FALSE))) {
 		msg_to_char(ch, "You can't fish in that direction.\r\n");
 	}
-	else if (!CAN_INTERACT_ROOM(room, INTERACT_FISH)) {
+	else if (!can_interact_room(room, INTERACT_FISH)) {
 		msg_to_char(ch, "You can't fish for anything %s!\r\n", (room == IN_ROOM(ch)) ? "here" : "there");
 	}
 	else if (!can_use_room(ch, room, MEMBERS_ONLY)) {
@@ -676,7 +678,7 @@ ACMD(do_forage) {
 		return;
 	}
 	
-	if (!CAN_INTERACT_ROOM(IN_ROOM(ch), INTERACT_FORAGE)) {
+	if (!can_interact_room(IN_ROOM(ch), INTERACT_FORAGE)) {
 		msg_to_char(ch, "There's nothing you can forage for here.\r\n");
 		return;
 	}

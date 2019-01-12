@@ -19,7 +19,7 @@ P
 P
 17 18200 0 5 a
 R
-7 18200 20
+7 18200 200
 T 18217
 W
 17 18200 0 5 a
@@ -45,7 +45,7 @@ P
 P
 17 18200 0 5 a
 R
-7 18200 20
+7 18200 200
 W
 17 18200 0 5 a
 W
@@ -137,7 +137,7 @@ skystones, and the essence of a molten fiend.
 light the whole thing ablaze with wild fire and molten essence! Now to wait for
 it to hatch...
 ~
-6 d 0 0 0
+8 d 0 0 0
 A
 5 18222
 P
@@ -146,7 +146,7 @@ T 18223
 W
 2 604 0 12 a
 W
-2 10001 0 4 a
+2 12654 0 4 a
 W
 2 10254 0 3 a
 W
@@ -175,7 +175,7 @@ A
 P
 16 18200 0 6
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 T 18257
@@ -207,7 +207,7 @@ A
 P
 16 18200 0 6
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 W
@@ -239,7 +239,7 @@ A
 P
 16 18200 0 6
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 T 18261
@@ -271,7 +271,7 @@ A
 P
 16 18200 0 6
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 W
@@ -301,7 +301,7 @@ A
 P
 16 18200 0 6
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 W
@@ -331,7 +331,7 @@ A
 P
 16 18200 0 6
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 W
@@ -350,7 +350,7 @@ the wild fire.
 ~
 You hand over the wild fire.
 ~
-7 de 0 0 -1
+9 de 0 0 -1
 A
 1 18217
 A
@@ -361,11 +361,11 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 W
-2 10001 0 1
+2 12654 0 1
 Z
 1 18217
 Z
@@ -379,7 +379,7 @@ an end to the infestation.
 ~
 The Guild thanks you for helping to control the wildling population.
 ~
-8 e 0 0 -1
+11 e 0 0 -1
 A
 1 18211
 A
@@ -390,11 +390,17 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 W
-3 10000 0 4
+3 12658 0 1
+W
+3 12659 0 1
+W
+3 12660 0 1
+W
+3 12661 0 1
 Z
 1 18211
 Z
@@ -420,7 +426,7 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 W
@@ -454,7 +460,7 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 W
@@ -468,7 +474,7 @@ S
 Permafrost: Grandma's Rhubarb Pie~
    Ever since we discovered rhubarb growing outside of the Permafrost portals,
 tavern patrons haven't been able to get enough of it. In fact, the Guild has
-run out of pies again. Collect some rhubarb and back four pies for the guild.
+run out of pies again. Collect some rhubarb and bake four pies for the guild.
 If you don't have any rhubarb fields, try foraging outside one of the portals.
 ~
    Four rhubarb pies! The tavernkeep will be elated. Here's your share of the
@@ -485,7 +491,7 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 W
@@ -516,7 +522,7 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 T 18261
@@ -548,7 +554,7 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 W
@@ -586,7 +592,7 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 T 18261
@@ -615,7 +621,7 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 W
@@ -653,7 +659,7 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 W
@@ -693,7 +699,7 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 W
@@ -723,7 +729,7 @@ P
 P
 17 18200 0 6 a
 R
-7 18200 1
+7 18200 10
 R
 1 -1 50
 W
@@ -853,7 +859,7 @@ unable to expand his collection while he's stuck in this time loop, deep in the
 distant past. You could win his support by traveling to Mill Manor, deep in the
 swamp, and solve the clues there to find the cursed chalice. Malfernes gives
 you a countercurse talisman. Once you have the chalice, 'use' the talisman to
-negate the curse so you can return the chalice to Malefernes in the Primeval.
+negate the curse so you can return the chalice to Malfernes in the Primeval.
 ~
    You have completed the quest. Malfernes takes the chalice from you and
 conjures a stream of wine from the air, filling the chalice. He takes a drink
@@ -866,7 +872,7 @@ A
 P
 0 18280 0 1 a
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 R
@@ -887,8 +893,6 @@ practical jokes. He hands you the Staff of Draconic Imagination and instructs
 you to seek out a flame dragon or a wandering dragon who has abandoned its
 nest, and 'use staff' to capture its image. Then head to the Tower Skycleave
 and 'use staff' again to release the image in the tower.
-   You can use any dragon from the Flame Dragon or Abandoned Dragon Nest
-adventures.
 ~
    Malfernes cackles with glee when you tell him about your escapades at the
 Tower Skycleave.
@@ -899,7 +903,7 @@ A
 P
 0 18280 0 1 a
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 R
@@ -925,7 +929,7 @@ P
 P
 0 18282 0 1 a
 R
-7 18200 1
+7 18200 10
 T 18278
 W
 12 18217 0 1
@@ -937,13 +941,13 @@ Seek Support From Germione~
    Even when an adventurer retires, their affiliation with the guild continues.
 You must seek out one such former member, the hedge witch Germione, who lives in a
 hut on stilts in the swamp. Find the hut, pull down the rope ladder, and pay
-Germione a visit. Perhaps her support will be enouigh to secure your guildhall.
+Germione a visit. Perhaps her support will be enough to secure your guildhall.
    Say the word 'friend' so Germione knows you come in peace.
 ~
    The hedge witch, Germione, agrees to support you in exchange for some
 'errands'.
 ~
-8 0 0 0 -1
+9 0 0 0 -1
 A
 1 18218
 P
@@ -963,7 +967,7 @@ Z
 S
 #18285
 Germione's Ratcatcher~
-   'The secret to training swamp rats is, they can't be trained,' Germoione
+   'The secret to training swamp rats is, they can't be trained,' Germione
 says. 'I have to import city rats and then hex them into swamp rats. You just
 can't train the real swamp rats like you can the city rats.'
    Germione gives you a ratcatcher's net. Find an open sewer in one of your
@@ -977,7 +981,7 @@ A
 P
 0 18284 0 1
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 R
@@ -1001,8 +1005,8 @@ temple.
 (You must leave the Lost Temple's map location in order for it to become a
 Jungle Temple.)
 ~
-   Germione cries as and hugs you as you tell her the tale of your quest to
-avenge beloved Measley's death.
+   Germione cries and hugs you as you tell her the tale of your quest to avenge
+beloved Measley's death.
 ~
 5 0 0 0 -1
 A
@@ -1010,7 +1014,7 @@ A
 P
 0 18284 0 1
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 R
@@ -1038,7 +1042,7 @@ P
 P
 0 18286 0 1 a
 R
-7 18200 1
+7 18200 10
 T 18278
 W
 12 18218 0 1
@@ -1081,8 +1085,8 @@ Procure a Roc Egg~
    Scaldorran has a deep, eternal hunger that can never be sated by earthly
 foods -- such is the fate of all liches. But the abominable Yetsy has recently
 shared a recipe for 1000 Year Eggs, and Scaldorran only needs a good Roc egg to
-make it work. Seek out the gigantic nest of the Roc and and 'use sack' to steal
-the egg, then return it to Scaldorran to gain his favor.
+make it work. Seek out the gigantic nest of the Roc and 'use sack' to steal the
+egg, then return it to Scaldorran to gain his favor.
 Hints:
 - Gigantic Nest adventures don't show up on 'nearby'; try 'scan'.
 - Make sure you steal the egg with 'use sack', not by doing the egg's quest.
@@ -1096,7 +1100,7 @@ A
 P
 0 18288 0 1
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 R
@@ -1123,7 +1127,7 @@ A
 P
 0 18288 0 1
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 R
@@ -1149,7 +1153,7 @@ P
 P
 0 18290 0 1 a
 R
-7 18200 1
+7 18200 10
 R
 6 18280 1
 T 18278
@@ -1202,7 +1206,7 @@ A
 P
 0 18292 0 1
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 R
@@ -1223,20 +1227,20 @@ Message for the Goblins~
    After a long, strange story, you learn that Adventurer 13 has a
 long-standing grudge against Furl, war shaman of the goblins. It seems Furl has
 discovered the secret to immortality, allowing him to resurrect after every
-defeat. Adventurer 13 wants to you track down Furl, whose goblins are known to
+defeat. Adventurer 13 wants you to track down Furl, whose goblins are known to
 hide out in ruined buildings, and defeat him. When you do, let Furl's
 temporarily-rotting corpse know 'The Adventurers send their regards.'
 ~
    Adventurer 13 cackles with glee at the news that you have delivered his
 message to Furl.
 ~
-7 0 0 0 -1
+8 0 0 0 -1
 A
 1 11101
 P
 0 18292 0 1
 R
-7 18200 1
+7 18200 10
 R
 8 18200 1
 R
@@ -1262,7 +1266,7 @@ P
 P
 0 18294 0 1 a
 R
-7 18200 1
+7 18200 10
 R
 6 18284 1
 T 18278

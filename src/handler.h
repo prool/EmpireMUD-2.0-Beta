@@ -149,6 +149,11 @@ extern int increase_empire_coins(empire_data *emp_gaining, empire_data *coin_emp
 void perform_abandon_room(room_data *room);
 void perform_claim_room(room_data *room, empire_data *emp);
 
+// empire needs handlers
+void add_empire_needs(empire_data *emp, int island, int type, int amount);
+extern struct empire_needs *get_empire_needs(empire_data *emp, int island, int type);
+extern bool empire_has_needs_status(empire_data *emp, int island, int type, bitvector_t status);
+
 // empire targeting handlers
 extern struct empire_city_data *find_city(empire_data *emp, room_data *loc);
 extern struct empire_city_data *find_city_entry(empire_data *emp, room_data *location);
@@ -169,6 +174,7 @@ void join_group(char_data *ch, struct group_data *group);
 void leave_group(char_data *ch);
 
 // interaction handlers
+extern bool can_interact_room(room_data *room, int type);
 extern bool check_exclusion_set(struct interact_exclusion_data **set, char code, double percent);
 extern struct interact_exclusion_data *find_exclusion_data(struct interact_exclusion_data **set, char code);
 void free_exclusion_data(struct interact_exclusion_data *list);
@@ -244,6 +250,7 @@ extern bool has_custom_message(struct custom_message *list, int type);
 #define abil_has_custom_message(abil, type)  has_custom_message(ABIL_CUSTOM_MSGS(abil), type)
 
 // object targeting handlers
+extern obj_data *get_component_in_list(int cmp_type, bitvector_t cmp_flags, obj_data *list, bool *kept);
 extern obj_data *get_obj_by_char_share(char_data *ch, char *arg);
 extern obj_data *get_obj_in_equip_vis(char_data *ch, char *arg, obj_data *equipment[]);
 extern obj_data *get_obj_in_list_num(int num, obj_data *list);
@@ -307,15 +314,15 @@ sector_data *reverse_lookup_evolution_for_sector(sector_data *in_sect, int evo_t
 
 // storage handlers
 void add_to_empire_storage(empire_data *emp, int island, obj_vnum vnum, int amount);
-extern bool charge_stored_component(empire_data *emp, int island, int cmp_type, int cmp_flags, int amount, struct resource_data **build_used_list);
+extern bool charge_stored_component(empire_data *emp, int island, int cmp_type, int cmp_flags, int amount, bool use_kept, struct resource_data **build_used_list);
 extern bool charge_stored_resource(empire_data *emp, int island, obj_vnum vnum, int amount);
 extern bool delete_stored_resource(empire_data *emp, obj_vnum vnum);
-extern bool empire_can_afford_component(empire_data *emp, int island, int cmp_type, int cmp_flags, int amount);
+extern bool empire_can_afford_component(empire_data *emp, int island, int cmp_type, int cmp_flags, int amount, bool include_kept);
 extern struct empire_storage_data *find_island_storage_by_keywords(empire_data *emp, int island_id, char *keywords);
-extern int find_lowest_storage_loc(obj_data *obj);
 extern struct empire_storage_data *find_stored_resource(empire_data *emp, int island, obj_vnum vnum);
 extern int get_total_stored_count(empire_data *emp, obj_vnum vnum, bool count_shipping);
-extern bool obj_can_be_stored(obj_data *obj, room_data *loc);
+extern bool obj_can_be_stored(obj_data *obj, room_data *loc, bool retrieval_mode);
+extern bool obj_can_be_retrieved(obj_data *obj, room_data *loc);
 extern bool retrieve_resource(char_data *ch, empire_data *emp, struct empire_storage_data *store, bool stolen);
 extern int store_resource(char_data *ch, empire_data *emp, obj_data *obj);
 extern bool stored_item_requires_withdraw(obj_data *obj);
@@ -379,6 +386,7 @@ extern int get_reputation_by_name(char *name);
 extern int get_reputation_value(char_data *ch, any_vnum vnum);
 extern bool has_reputation(char_data *ch, any_vnum faction, int rep);
 extern int rep_const_to_index(int rep_const);
+void set_reputation(char_data *ch, any_vnum vnum, int rep);
 
 // fight.c
 void appear(char_data *ch);
@@ -404,6 +412,13 @@ extern int limit_crowd_control(char_data *victim, int atype);
 void perform_morph(char_data *ch, morph_data *morph);
 
 // objsave.c
+
+// progress.c
+void cancel_empire_goal(empire_data *emp, struct empire_goal *goal);
+extern struct empire_goal *get_current_goal(empire_data *emp, any_vnum vnum);
+extern bool empire_has_completed_goal(empire_data *emp, any_vnum vnum);
+extern time_t when_empire_completed_goal(empire_data *emp, any_vnum vnum);
+
 
 /**
 * This crash-saves all players in the game.

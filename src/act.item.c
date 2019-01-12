@@ -47,6 +47,7 @@ extern struct faction_reputation_type reputation_levels[];
 extern const struct wear_data_type wear_data[NUM_WEARS];
 
 // extern functions
+void adjust_vehicle_tech(vehicle_data *veh, bool add);
 extern struct shop_temp_list *build_available_shop_list(char_data *ch);
 extern bool can_steal(char_data *ch, empire_data *emp);
 extern bool can_wear_item(char_data *ch, obj_data *item, bool send_messages);
@@ -55,6 +56,7 @@ void free_shop_temp_list(struct shop_temp_list *list);
 extern char *get_room_name(room_data *room, bool color);
 extern struct player_quest *is_on_quest(char_data *ch, any_vnum quest);
 void read_vault(empire_data *emp);
+void record_theft_log(empire_data *emp, obj_vnum vnum, int amount);
 void save_trading_post();
 void trigger_distrust_from_stealth(char_data *ch, empire_data *emp);
 
@@ -199,6 +201,45 @@ int find_eq_pos(char_data *ch, obj_data *obj, char *arg) {
 
 
 /**
+* Finds a lighter. Limited-use lighters that are marked (keep) will NOT be
+* used, but will result in the 'had_keep' argument being set to TRUE.
+*
+* This will return the BEST lighter in the inventory -- either an unlimited
+* lighter, or the one with the fewest charges remaining.
+*
+* @param obj_data *list The list to check (usually ch->carrying).
+* @param bool *had_keep If there's a keep'd lighter that can't be used, this will be set to TRUE (so you can inform the player).
+* @return obj_data* The lighter, if it found one.
+*/
+obj_data *find_lighter_in_list(obj_data *list, bool *had_keep) {
+	obj_data *obj, *best = NULL;
+	
+	*had_keep = FALSE;	// presumably
+	
+	LL_FOREACH2(list, obj, next_content) {
+		if (!IS_LIGHTER(obj)) {
+			continue;	// not a lighter
+		}
+		if (GET_LIGHTER_USES(obj) == UNLIMITED) {
+			if (!best || GET_LIGHTER_USES(best) != UNLIMITED || !OBJ_FLAGGED(best, OBJ_KEEP)) {
+				best = obj;	// new best
+			}
+		}
+		else if (!OBJ_FLAGGED(obj, OBJ_KEEP)) {	// not unlmited; don't use kept items if not unlimited
+			if (!best || (GET_LIGHTER_USES(best) != UNLIMITED && GET_LIGHTER_USES(best) > GET_LIGHTER_USES(obj))) {
+				best = obj;	// new best
+			}
+		}
+		else {
+			*had_keep = TRUE;
+		}
+	}
+	
+	return best;
+}
+
+
+/**
 * Converts a "gotten" object into money, if it's coins. This will extract the
 * object if so.
 *
@@ -219,7 +260,9 @@ bool get_check_money(char_data *ch, obj_data *obj) {
 		case ITEM_COINS: {
 			value = GET_COINS_AMOUNT(obj);
 			increase_coins(ch, emp, value);
-			msg_to_char(ch, "There %s %s.\r\n", (value == 1 ? "was" : "were"), money_amount(emp, value));
+			if (ch->desc) {	// these usually appear with stacked messages
+				stack_msg_to_desc(ch->desc, "There %s %s.\r\n", (value == 1 ? "was" : "were"), money_amount(emp, value));
+			}
 			break;
 		}
 		case ITEM_CURRENCY: {
@@ -281,6 +324,7 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 	player_index_data *index;
 	struct obj_apply *apply;
 	char lbuf[MAX_STRING_LENGTH], part[MAX_STRING_LENGTH], location[MAX_STRING_LENGTH], *temp;
+	obj_data *proto;
 	crop_data *cp;
 	bld_data *bld;
 	int found;
@@ -291,6 +335,9 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 	if (!obj || !ch || !ch->desc) {
 		return;
 	}
+	
+	// used by some things later
+	proto = obj_proto(GET_OBJ_VNUM(obj));
 	
 	// determine location
 	if (IN_ROOM(obj)) {
@@ -334,7 +381,7 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 		msg_to_char(ch, "&0");
 	}
 
-	if (obj->storage) {
+	if (obj->storage && !OBJ_FLAGGED(obj, OBJ_NO_STORE)) {
 		msg_to_char(ch, "Storage locations:");
 		found = 0;
 		for (store = obj->storage; store; store = store->next) {			
@@ -343,6 +390,12 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 			}
 		}		
 		msg_to_char(ch, "\r\n");
+	}
+	if (UNIQUE_OBJ_CAN_STORE(obj)) {
+		msg_to_char(ch, "Storage location: Warehouse\r\n");
+	}
+	if (OBJ_FLAGGED(obj, OBJ_NO_STORE)) {
+		msg_to_char(ch, "Storage location: none (modified object)\r\n");
 	}
 
 	// binding section
@@ -357,7 +410,8 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 		msg_to_char(ch, "\r\n");
 	}
 	
-	if (GET_OBJ_CURRENT_SCALE_LEVEL(obj) > 0) {
+	// show level if scalable OR wearable
+	if (GET_OBJ_CURRENT_SCALE_LEVEL(obj) > 0 && ((GET_OBJ_WEAR(obj) & ~ITEM_WEAR_TAKE) != NOBITS || (proto && OBJ_FLAGGED(proto, OBJ_SCALABLE)))) {
 		msg_to_char(ch, "Level: %d\r\n", GET_OBJ_CURRENT_SCALE_LEVEL(obj));
 	}
 	
@@ -392,8 +446,9 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 			break;
 		}
 		case ITEM_POISON: {
-			extern const struct poison_data_type poison_data[];
-			msg_to_char(ch, "Poison type: %s\r\n", poison_data[GET_POISON_TYPE(obj)].name);
+			if (GET_POISON_AFFECT(obj) != NOTHING) {
+				msg_to_char(ch, "Poison type: %s\r\n", get_generic_name_by_vnum(GET_POISON_AFFECT(obj)));
+			}
 			msg_to_char(ch, "Has %d charges remaining.\r\n", GET_POISON_CHARGES(obj));
 			break;
 		}
@@ -481,12 +536,30 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 			break;
 		}
 		case ITEM_POTION: {
-			extern const struct potion_data_type potion_data[];
-			msg_to_char(ch, "Potion type: %s (%d)\r\n", potion_data[GET_POTION_TYPE(obj)].name, GET_POTION_SCALE(obj));
+			if (GET_POTION_AFFECT(obj) != NOTHING) {
+				msg_to_char(ch, "Potion type: %s\r\n", get_generic_name_by_vnum(GET_POTION_AFFECT(obj)));
+			}
+			if (GET_POTION_COOLDOWN_TYPE(obj) != NOTHING && GET_POTION_COOLDOWN_TIME(obj) > 0) {
+				msg_to_char(ch, "Potion cooldown: %d second%s\r\n", GET_POTION_COOLDOWN_TIME(obj), PLURAL(GET_POTION_COOLDOWN_TIME(obj)));
+			}
 			break;
 		}
 		case ITEM_WEALTH: {
 			msg_to_char(ch, "Adds %d wealth when stored.\r\n", GET_WEALTH_VALUE(obj));
+			msg_to_char(ch, "Automatically minted by workforce: %s\r\n", GET_WEALTH_AUTOMINT(obj) ? "yes" : "no");
+			break;
+		}
+		case ITEM_LIGHTER: {
+			if (GET_LIGHTER_USES(obj) == UNLIMITED) {
+				msg_to_char(ch, "Lighter uses: unlimited\r\n");
+			}
+			else {
+				msg_to_char(ch, "Lighter uses: %d\r\n", GET_LIGHTER_USES(obj));
+			}
+			break;
+		}
+		case ITEM_MINIPET: {
+			msg_to_char(ch, "Grants mini-pet: %s\r\n", get_mob_name_by_proto(GET_MINIPET_VNUM(obj)));
 			break;
 		}
 	}
@@ -660,8 +733,8 @@ static bool perform_exchange(char_data *ch, obj_data *obj, empire_data *emp) {
 	}
 	else {
 		sprintf(buf, "You exchange $p for %s.", money_amount(emp, amt));
-		act(buf, FALSE, ch, obj, NULL, TO_CHAR);
-		act("$n exchanges $p for some coins.", TRUE, ch, obj, NULL, TO_ROOM);
+		act(buf, FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
+		act("$n exchanges $p for some coins.", TRUE, ch, obj, NULL, TO_ROOM | TO_QUEUE);
 		
 		increase_coins(ch, emp, amt);
 		decrease_empire_coins(emp, emp, amt);
@@ -683,7 +756,7 @@ static bool perform_exchange(char_data *ch, obj_data *obj, empire_data *emp) {
 static int perform_put(char_data *ch, obj_data *obj, obj_data *cont) {
 	char_data *mort;
 	
-	if (!drop_otrigger(obj, ch)) {	// also takes care of obj purging self
+	if (!drop_otrigger(obj, ch, DROP_TRIG_PUT)) {	// also takes care of obj purging self
 		return 0;
 	}
 	
@@ -708,9 +781,9 @@ static int perform_put(char_data *ch, obj_data *obj, obj_data *cont) {
 	else {
 		obj_to_obj(obj, cont);
 
-		act("$n puts $p in $P.", TRUE, ch, obj, cont, TO_ROOM);
+		act("$n puts $p in $P.", TRUE, ch, obj, cont, TO_ROOM | TO_QUEUE);
 
-		act("You put $p in $P.", FALSE, ch, obj, cont, TO_CHAR);
+		act("You put $p in $P.", FALSE, ch, obj, cont, TO_CHAR | TO_QUEUE);
 
 		if (IS_IMMORTAL(ch) && ROOM_OWNER(IN_ROOM(ch)) && !EMPIRE_IMM_ONLY(ROOM_OWNER(IN_ROOM(ch)))) {
 			syslog(SYS_GC, GET_ACCESS_LEVEL(ch), TRUE, "ABUSE: %s puts %s into a container in mortal empire (%s) at %s", GET_NAME(ch), GET_OBJ_SHORT_DESC(obj), EMPIRE_NAME(ROOM_OWNER(IN_ROOM(ch))), room_log_identifier(IN_ROOM(ch)));
@@ -969,6 +1042,79 @@ static void wear_message(char_data *ch, obj_data *obj, int where) {
 }
 
 
+/**
+* Attempt to learn a mini-pet. Caution: this may extract the obj.
+*
+* @param char_data *ch The player trying to learn it.
+* @param obj_data *obj The MINIPET item.
+*/
+void use_minipet_obj(char_data *ch, obj_data *obj) {
+	void add_minipet(char_data *ch, any_vnum vnum);
+	extern bool has_minipet(char_data *ch, any_vnum vnum);
+	
+	char_data *mob;
+	
+	if (!ch || IS_NPC(ch)) {
+		return;
+	}
+	else if (!obj || !IS_MINIPET(obj)) {
+		msg_to_char(ch, "You can't use that like that.\r\n");
+	}
+	else if (!(mob = mob_proto(GET_MINIPET_VNUM(obj)))) {
+		msg_to_char(ch, "It doesn't seem to do anything when used.\r\n");
+	}
+	else if (has_minipet(ch, GET_MINIPET_VNUM(obj))) {
+		msg_to_char(ch, "You already have that mini-pet.\r\n");
+	}
+	else {
+		add_minipet(ch, GET_MINIPET_VNUM(obj));
+		msg_to_char(ch, "You gain '%s' as a mini-pet. Use the minipets command to summon it.\r\n", GET_SHORT_DESC(mob));
+		act("$n uses $p.", TRUE, ch, obj, NULL, TO_ROOM);
+		extract_obj(obj);
+	}
+}
+
+
+/**
+* Uses up a charge on a lighter (if not unlimited) and sends a message to the
+* player if it runs out and is lost.
+*
+* @param char_data *ch Optional: The person using the lighter (who gets the message when it's used up; may be NULL).
+* @param obj_data *obj The lighter being used (may be purged if the last charge is used).
+* @return bool TRUE if the item was used up and purged; FALSE if the item was not purged.
+*/
+bool used_lighter(char_data *ch, obj_data *obj) {
+	if (!obj || !IS_LIGHTER(obj)) {
+		return FALSE;	// not even a lighter
+	}
+	
+	if (ch && !consume_otrigger(obj, ch, OCMD_LIGHT, NULL)) {
+		return TRUE;	// trigger kicked us out (return TRUE because possibly used up)
+	}
+	
+	// check binding
+	if (ch && !IS_IMMORTAL(ch) && OBJ_FLAGGED(obj, OBJ_BIND_FLAGS)) {
+		bind_obj_to_player(obj, ch);
+		reduce_obj_binding(obj, ch);
+	}
+	
+	if (GET_LIGHTER_USES(obj) != UNLIMITED) {
+		GET_OBJ_VAL(obj, VAL_LIGHTER_USES) -= 1;	// use 1 charge
+		SET_BIT(GET_OBJ_EXTRA(obj), OBJ_NO_STORE);	// no longer storable
+		
+		if (GET_LIGHTER_USES(obj) <= 0) {
+			if (ch) {
+				act("$p is used up, and you throw it away.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
+			}
+			extract_obj(obj);
+			return TRUE;	// did use it up
+		}
+	}
+	
+	return FALSE;	// did not use it up
+}
+
+
  //////////////////////////////////////////////////////////////////////////////
 //// DROP HELPERS ////////////////////////////////////////////////////////////
 
@@ -989,28 +1135,28 @@ int perform_drop(char_data *ch, obj_data *obj, byte mode, const char *sname) {
 	bool logged;
 	int size;
 	
-	if (!drop_otrigger(obj, ch)) {
+	if (!drop_otrigger(obj, ch, mode == SCMD_JUNK ? DROP_TRIG_JUNK : DROP_TRIG_DROP)) {
 		return 0;
 	}
 
-	if ((mode == SCMD_DROP) && !drop_wtrigger(obj, ch)) {
+	if ((mode == SCMD_DROP) && !drop_wtrigger(obj, ch, DROP_TRIG_DROP)) {
 		return 0;
 	}
 	
 	// can't junk stolen items
 	if (mode == SCMD_JUNK && IS_STOLEN(obj)) {
-		act("$p: You can't junk stolen items!", FALSE, ch, obj, NULL, TO_CHAR);
+		act("$p: You can't junk stolen items!", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
 		return -1;
 	}
 	
 	// don't let people drop bound items in other people's territory
 	if (mode != SCMD_JUNK && OBJ_BOUND_TO(obj) && ROOM_OWNER(IN_ROOM(ch)) && ROOM_OWNER(IN_ROOM(ch)) != GET_LOYALTY(ch)) {
-		act("$p: You can't drop bound items here.", FALSE, ch, obj, NULL, TO_CHAR);
+		act("$p: You can't drop bound items here.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
 		return 0;	// don't break a drop-all
 	}
 	
 	if (GET_OBJ_REQUIRES_QUEST(obj) != NOTHING && !IS_NPC(ch) && !IS_IMMORTAL(ch)) {
-		act("$p: you can't drop quest items.", FALSE, ch, obj, NULL, TO_CHAR);
+		act("$p: you can't drop quest items.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
 		return 0;
 	}
 	
@@ -1024,9 +1170,9 @@ int perform_drop(char_data *ch, obj_data *obj, byte mode, const char *sname) {
 	}
 
 	sprintf(buf, "You %s $p.%s", sname, VANISH(mode));
-	act(buf, FALSE, ch, obj, 0, TO_CHAR);
+	act(buf, FALSE, ch, obj, 0, TO_CHAR | TO_QUEUE);
 	sprintf(buf, "$n %ss $p.%s", sname, VANISH(mode));
-	act(buf, TRUE, ch, obj, 0, TO_ROOM);
+	act(buf, TRUE, ch, obj, 0, TO_ROOM | TO_QUEUE);
 
 	switch (mode) {
 		case SCMD_DROP:
@@ -1093,14 +1239,14 @@ static void perform_drop_coins(char_data *ch, empire_data *type, int amount, byt
 			obj = create_money(type, amount);
 			obj_to_char(obj, ch);	// temporarily
 
-			if (!drop_wtrigger(obj, ch)) {
+			if (!drop_wtrigger(obj, ch, DROP_TRIG_DROP)) {
 				// stays in inventory, which is odd, but better than the alternative (a crash if the script purged the object and we extract it here)
 				return;
 			}
 
 			obj_to_room(obj, IN_ROOM(ch));
-			act("You drop $p.", FALSE, ch, obj, NULL, TO_CHAR);
-			act("$n drops $p.", FALSE, ch, obj, NULL, TO_ROOM);
+			act("You drop $p.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
+			act("$n drops $p.", FALSE, ch, obj, NULL, TO_ROOM | TO_QUEUE);
 			
 			// log dropping items in front of mortals
 			if (IS_IMMORTAL(ch)) {
@@ -1114,9 +1260,9 @@ static void perform_drop_coins(char_data *ch, empire_data *type, int amount, byt
 		}
 		else {
 			snprintf(buf, sizeof(buf), "$n drops %s which disappear%s in a puff of smoke!", money_desc(type, amount), (amount == 1 ? "s" : ""));
-			act(buf, FALSE, ch, 0, 0, TO_ROOM);
+			act(buf, FALSE, ch, 0, 0, TO_ROOM | TO_QUEUE);
 
-			msg_to_char(ch, "You drop %s which disappear%s in a puff of smoke!\r\n", (amount != 1 ? "some coins" : "a coin"), (amount == 1 ? "s" : ""));
+			stack_msg_to_desc(ch->desc, "You drop %s which disappear%s in a puff of smoke!\r\n", (amount != 1 ? "some coins" : "a coin"), (amount == 1 ? "s" : ""));
 		}
 	}
 }
@@ -1146,11 +1292,11 @@ static bool perform_get_from_container(char_data *ch, obj_data *obj, obj_data *c
 		return FALSE;
 	}
 	if (!bind_ok(obj, ch)) {
-		act("$p: item is bound to someone else.", FALSE, ch, obj, NULL, TO_CHAR);
+		act("$p: item is bound to someone else.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
 		return TRUE;	// don't break loop
 	}
 	if (GET_OBJ_REQUIRES_QUEST(obj) != NOTHING && !IS_NPC(ch) && !IS_IMMORTAL(ch) && !is_on_quest(ch, GET_OBJ_REQUIRES_QUEST(obj))) {
-		act("$p: you must be on the quest to get this.", FALSE, ch, obj, NULL, TO_CHAR);
+		act("$p: you must be on the quest to get this.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
 		return TRUE;
 	}
 	if (IN_ROOM(cont) && LAST_OWNER_ID(cont) != idnum && LAST_OWNER_ID(obj) != idnum && (!GET_LOYALTY(ch) || EMPIRE_VNUM(GET_LOYALTY(ch)) != GET_STOLEN_FROM(obj)) && (!GET_LOYALTY(ch) || EMPIRE_VNUM(GET_LOYALTY(ch)) != GET_STOLEN_FROM(cont)) && !can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED)) {
@@ -1167,7 +1313,7 @@ static bool perform_get_from_container(char_data *ch, obj_data *obj, obj_data *c
 		}
 	}
 	if (!IS_NPC(ch) && !CAN_CARRY_OBJ(ch, obj)) {
-		act("$p: you can't hold any more items.", FALSE, ch, obj, 0, TO_CHAR);
+		act("$p: you can't hold any more items.", FALSE, ch, obj, 0, TO_CHAR | TO_QUEUE);
 		return FALSE;
 	}
 	if (mode == FIND_OBJ_INV || can_take_obj(ch, obj)) {
@@ -1178,10 +1324,12 @@ static bool perform_get_from_container(char_data *ch, obj_data *obj, obj_data *c
 			}
 			
 			obj_to_char(obj, ch);
-			act("You get $p from $P.", FALSE, ch, obj, cont, TO_CHAR);
-			act("$n gets $p from $P.", TRUE, ch, obj, cont, TO_ROOM);
+			act("You get $p from $P.", FALSE, ch, obj, cont, TO_CHAR | TO_QUEUE);
+			act("$n gets $p from $P.", TRUE, ch, obj, cont, TO_ROOM | TO_QUEUE);
 			
 			if (stealing) {
+				record_theft_log(emp, GET_OBJ_VNUM(obj), 1);
+				
 				if (emp && IS_IMMORTAL(ch)) {
 					syslog(SYS_GC, GET_ACCESS_LEVEL(ch), TRUE, "ABUSE: %s stealing %s from %s", GET_NAME(ch), GET_OBJ_SHORT_DESC(obj), EMPIRE_NAME(emp));
 				}
@@ -1281,7 +1429,7 @@ static bool perform_get_from_room(char_data *ch, obj_data *obj) {
 	int idnum = IS_NPC(ch) ? NOBODY : GET_IDNUM(ch);
 
 	if (!bind_ok(obj, ch)) {
-		act("$p: item is bound to someone else.", FALSE, ch, obj, NULL, TO_CHAR);
+		act("$p: item is bound to someone else.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
 		return TRUE;	// don't break loop
 	}
 	// check for stealing -- we check not-bound-to because you can always get an item bound to you
@@ -1299,11 +1447,11 @@ static bool perform_get_from_room(char_data *ch, obj_data *obj) {
 		}
 	}
 	if (GET_OBJ_REQUIRES_QUEST(obj) != NOTHING && !IS_NPC(ch) && !IS_IMMORTAL(ch) && !is_on_quest(ch, GET_OBJ_REQUIRES_QUEST(obj))) {
-		act("$p: you must be on the quest to get this.", FALSE, ch, obj, NULL, TO_CHAR);
+		act("$p: you must be on the quest to get this.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
 		return TRUE;
 	}
 	if (!IS_NPC(ch) && !CAN_CARRY_OBJ(ch, obj)) {
-		act("$p: you can't hold any more items.", FALSE, ch, obj, 0, TO_CHAR);
+		act("$p: you can't hold any more items.", FALSE, ch, obj, 0, TO_CHAR | TO_QUEUE);
 		return FALSE;
 	}
 	if (can_take_obj(ch, obj) && get_otrigger(obj, ch)) {
@@ -1313,10 +1461,12 @@ static bool perform_get_from_room(char_data *ch, obj_data *obj) {
 		}
 		
 		obj_to_char(obj, ch);
-		act("You get $p.", FALSE, ch, obj, 0, TO_CHAR);
-		act("$n gets $p.", TRUE, ch, obj, 0, TO_ROOM);
+		act("You get $p.", FALSE, ch, obj, 0, TO_CHAR | TO_QUEUE);
+		act("$n gets $p.", TRUE, ch, obj, 0, TO_ROOM | TO_QUEUE);
 					
 		if (stealing) {
+			record_theft_log(emp, GET_OBJ_VNUM(obj), 1);
+			
 			if (emp && IS_IMMORTAL(ch)) {
 				syslog(SYS_GC, GET_ACCESS_LEVEL(ch), TRUE, "ABUSE: %s stealing %s from %s", GET_NAME(ch), GET_OBJ_SHORT_DESC(obj), EMPIRE_NAME(emp));
 			}
@@ -1430,18 +1580,18 @@ static void perform_give(char_data *ch, char_data *vict, obj_data *obj) {
 	}
 	
 	if (!bind_ok(obj, vict)) {
-		act("$p: item is bound.", FALSE, ch, obj, vict, TO_CHAR);
+		act("$p: item is bound.", FALSE, ch, obj, vict, TO_CHAR | TO_QUEUE);
 		return;
 	}
 	
 	if (GET_OBJ_REQUIRES_QUEST(obj) != NOTHING && !IS_NPC(ch) && !IS_IMMORTAL(ch) && !IS_IMMORTAL(vict)) {
-		act("$p: you can't give this item away.", FALSE, ch, obj, NULL, TO_CHAR);
+		act("$p: you can't give this item away.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
 		return;
 	}
 	
 	// NPCs usually have no carry limit, but 'give' is an exception because otherwise crazy ensues
 	if (!CAN_CARRY_OBJ(vict, obj)) {
-		act("$N seems to have $S hands full.", FALSE, ch, 0, vict, TO_CHAR);
+		act("$N seems to have $S hands full.", FALSE, ch, 0, vict, TO_CHAR | TO_QUEUE);
 		return;
 	}
 
@@ -1451,9 +1601,9 @@ static void perform_give(char_data *ch, char_data *vict, obj_data *obj) {
 		syslog(SYS_GC, GET_ACCESS_LEVEL(ch), TRUE, "ABUSE: %s gives %s to %s", GET_NAME(ch), GET_OBJ_SHORT_DESC(obj), PERS(vict, vict, TRUE));
 	}
 	
-	act("You give $p to $N.", FALSE, ch, obj, vict, TO_CHAR);
-	act("$n gives you $p.", FALSE, ch, obj, vict, TO_VICT);
-	act("$n gives $p to $N.", TRUE, ch, obj, vict, TO_NOTVICT);
+	act("You give $p to $N.", FALSE, ch, obj, vict, TO_CHAR | TO_QUEUE);
+	act("$n gives you $p.", FALSE, ch, obj, vict, TO_VICT | TO_QUEUE);
+	act("$n gives $p to $N.", TRUE, ch, obj, vict, TO_NOTVICT | TO_QUEUE);
 	
 	if (IS_STOLEN(obj) && !IS_NPC(vict) && GET_LOYALTY(vict) && GET_STOLEN_FROM(obj) == EMPIRE_VNUM(GET_LOYALTY(vict))) {
 		// un-steal if this was the original owner
@@ -1513,7 +1663,7 @@ static void perform_give_coins(char_data *ch, char_data *vict, empire_data *type
 		}
 
 		snprintf(buf, sizeof(buf), "$n gives you %d in various coin%s.", amount, amount == 1 ? "" : "s");
-		act(buf, FALSE, ch, NULL, vict, TO_VICT);
+		act(buf, FALSE, ch, NULL, vict, TO_VICT | TO_QUEUE);
 		// to-room/char messages below
 	}
 	else {
@@ -1531,7 +1681,7 @@ static void perform_give_coins(char_data *ch, char_data *vict, empire_data *type
 		increase_coins(vict, type, amount);
 		
 		snprintf(buf, sizeof(buf), "$n gives you %s.", money_amount(type, amount));
-		act(buf, FALSE, ch, NULL, vict, TO_VICT);
+		act(buf, FALSE, ch, NULL, vict, TO_VICT | TO_QUEUE);
 		// to-room/char messages below
 	}
 	
@@ -1541,11 +1691,11 @@ static void perform_give_coins(char_data *ch, char_data *vict, empire_data *type
 	
 	// msg to char
 	snprintf(buf, sizeof(buf), "You give %s to $N.", money_desc(type, amount));
-	act(buf, FALSE, ch, NULL, vict, TO_CHAR);
+	act(buf, FALSE, ch, NULL, vict, TO_CHAR | TO_QUEUE);
 
 	// msg to room
 	snprintf(buf, sizeof(buf), "$n gives %s to $N.", money_desc(type, amount));
-	act(buf, TRUE, ch, NULL, vict, TO_NOTVICT);
+	act(buf, TRUE, ch, NULL, vict, TO_NOTVICT | TO_QUEUE);
 }
 
 
@@ -1612,7 +1762,7 @@ void fill_from_room(char_data *ch, obj_data *obj) {
 		return;
 	}
 	
-	if (HAS_FUNCTION(IN_ROOM(ch), FNC_DRINK_WATER)) {
+	if (room_has_function_and_city_ok(IN_ROOM(ch), FNC_DRINK_WATER)) {
 		if (!IS_COMPLETE(IN_ROOM(ch))) {
 			msg_to_char(ch, "You can't fill your water until it's finished being built.\r\n");
 			return;
@@ -1620,7 +1770,7 @@ void fill_from_room(char_data *ch, obj_data *obj) {
 		act("You gently fill $p with water.", FALSE, ch, obj, 0, TO_CHAR);
 		act("$n gently fills $p with water.", TRUE, ch, obj, 0, TO_ROOM);
 	}
-	else if (HAS_FUNCTION(IN_ROOM(ch), FNC_TAVERN)) {
+	else if (room_has_function_and_city_ok(IN_ROOM(ch), FNC_TAVERN)) {
 		if (get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_TAVERN_TYPE) == 0 || !IS_COMPLETE(IN_ROOM(ch))) {
 			msg_to_char(ch, "This tavern has nothing on tap.\r\n");
 			return;
@@ -1672,10 +1822,11 @@ void scale_item_to_level(obj_data *obj, int level) {
 	
 	int total_share, bonus, iter, amt;
 	int room_lev = 0, room_min = 0, room_max = 0, sig;
-	double share, this_share, points_to_give, per_point;
+	double share, this_share, points_to_give, per_point, base_mod = 1.0;
 	room_data *room = NULL;
 	obj_data *top_obj, *proto;
 	struct obj_apply *apply, *next_apply, *temp;
+	bool scale_negative = FALSE;
 	bitvector_t bits;
 	
 	// configure this here
@@ -1685,6 +1836,19 @@ void scale_item_to_level(obj_data *obj, int level) {
 	
 	// WEAR_POS_x: modifier based on best wear type
 	const double wear_pos_modifier[] = { 0.75, 1.0 };
+	
+	// gather info from the item
+	switch (GET_OBJ_TYPE(obj)) {
+		case ITEM_AMMO:{
+			scale_negative = TRUE;
+			break;
+		}
+		case ITEM_POISON: {
+			scale_negative = TRUE;
+			base_mod = 0.75;
+			break;
+		}
+	}
 	
 	// determine any scale constraints from the room
 	top_obj = get_top_object(obj);
@@ -1769,8 +1933,8 @@ void scale_item_to_level(obj_data *obj, int level) {
 	
 	// helper
 	#define SHARE_OR_BONUS(val)  { \
-		if ((val) > 0) { \
-			total_share += (val); \
+		if ((val) > 0 || scale_negative) { \
+			total_share += ABSOLUTE(val); \
 		} \
 		else if ((val) < 0) { \
 			bonus += -1 * (val); \
@@ -1805,14 +1969,11 @@ void scale_item_to_level(obj_data *obj, int level) {
 		}
 		case ITEM_AMMO: {
 			SHARE_OR_BONUS(GET_AMMO_DAMAGE_BONUS(obj));
+			// negative damage bonus IS treated as a bonus, unlike scaling values
 			break;
 		}
 		case ITEM_PACK: {
 			SHARE_OR_BONUS(GET_PACK_CAPACITY(obj));
-			break;
-		}
-		case ITEM_POTION: {
-			SHARE_OR_BONUS(GET_POTION_SCALE(obj));
 			break;
 		}
 	}
@@ -1844,6 +2005,7 @@ void scale_item_to_level(obj_data *obj, int level) {
 		}
 	}
 	points_to_give *= wear_pos_modifier[sig];
+	points_to_give *= base_mod;	// final modifier
 	
 	// ok get ready
 	points_to_give = MAX(1.0, points_to_give);	// minimum of 1 point
@@ -1917,16 +2079,6 @@ void scale_item_to_level(obj_data *obj, int level) {
 			// negatives aren't really possible here
 			break;
 		}
-		case ITEM_POTION: {
-			// aiming for a scale of 100 at 100 -- and eliminate the wear_pos_modifier since potions are almost always WEAR_TAKE
-			amt = (int)round(this_share * GET_POTION_SCALE(obj) * (100.0 / scale_points_at_100) / wear_pos_modifier[wear_significance[ITEM_WEAR_TAKE]]);
-			if (amt > 0) {
-				points_to_give -= (this_share * GET_POTION_SCALE(obj));
-			}
-			GET_OBJ_VAL(obj, VAL_POTION_SCALE) = amt;
-			// negatives aren't really possible here
-			break;
-		}
 	}
 	
 	// distribute points: applies
@@ -1938,10 +2090,10 @@ void scale_item_to_level(obj_data *obj, int level) {
 			// raw amount
 			per_point = (1.0 / apply_values[(int)apply->location]);
 			
-			if (apply->modifier > 0) {
+			if (apply->modifier > 0 || scale_negative) {
 				// positive benefit
 				amt = round(this_share * apply->modifier * per_point);
-				points_to_give -= (this_share * apply->modifier);
+				points_to_give -= (this_share * ABSOLUTE(apply->modifier));
 				apply->modifier = amt;
 			}
 			else if (apply->modifier < 0) {
@@ -1981,7 +2133,7 @@ void add_shipping_queue(char_data *ch, empire_data *emp, int from_island, int to
 	bool done;
 	
 	if (!emp || from_island == NO_ISLAND || to_island == NO_ISLAND || number < 0 || vnum == NOTHING) {
-		msg_to_char(ch, "Unable to set up shipping: invalid inpue.\r\n");
+		msg_to_char(ch, "Unable to set up shipping: invalid input.\r\n");
 		return;
 	}
 	
@@ -1994,8 +2146,8 @@ void add_shipping_queue(char_data *ch, empire_data *emp, int from_island, int to
 		if (sd->from_island != from_island || sd->to_island != to_island) {
 			continue;
 		}
-		if (sd->status != SHIPPING_QUEUED) {
-			continue;
+		if (sd->status != SHIPPING_QUEUED && sd->status != SHIPPING_WAITING_FOR_SHIP) {
+			continue;	// can combine only with those 2
 		}
 		
 		// found one to add to!
@@ -2031,7 +2183,7 @@ void add_shipping_queue(char_data *ch, empire_data *emp, int from_island, int to
 	
 	// charge resources
 	charge_stored_resource(emp, from_island, vnum, number);
-	EMPIRE_NEEDS_SAVE(emp) = TRUE;
+	EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
 	
 	// messaging
 	isle = get_island(to_island, TRUE);
@@ -2100,7 +2252,7 @@ void deliver_shipment(empire_data *emp, struct shipping_data *shipd) {
 	
 	if ((dock = find_docks(emp, shipd->to_island))) {
 		// unload the shipment at the destination
-		if (shipd->vnum != NOTHING && shipd->amount > 0) {
+		if (shipd->vnum != NOTHING && shipd->amount > 0 && obj_proto(shipd->vnum)) {
 			log_to_empire(emp, ELOG_SHIPPING, "%dx %s: shipped to %s", shipd->amount, get_obj_name_by_proto(shipd->vnum), get_island(shipd->to_island, TRUE)->name);
 			add_to_empire_storage(emp, shipd->to_island, shipd->vnum, shipd->amount);
 		}
@@ -2110,7 +2262,7 @@ void deliver_shipment(empire_data *emp, struct shipping_data *shipd) {
 	}
 	else {
 		// no docks -- unload the shipment at home
-		if (shipd->vnum != NOTHING && shipd->amount > 0) {
+		if (shipd->vnum != NOTHING && shipd->amount > 0 && obj_proto(shipd->vnum)) {
 			log_to_empire(emp, ELOG_SHIPPING, "%dx %s: returned to %s", shipd->amount, get_obj_name_by_proto(shipd->vnum), get_island(shipd->from_island, TRUE)->name);
 			add_to_empire_storage(emp, shipd->from_island, shipd->vnum, shipd->amount);
 		}
@@ -2358,7 +2510,7 @@ void load_shipment(struct empire_data *emp, struct shipping_data *shipd, vehicle
 		newd->amount = shipd->amount - (size_avail - capacity);	// only what's left
 		newd->from_island = shipd->from_island;
 		newd->to_island = shipd->to_island;
-		newd->status = SHIPPING_QUEUED;
+		newd->status = SHIPPING_WAITING_FOR_SHIP;	// at this point, definitely waiting
 		newd->status_time = shipd->status_time;
 		newd->ship_origin = NOWHERE;
 		newd->shipping_id = -1;
@@ -2386,7 +2538,7 @@ void load_shipment(struct empire_data *emp, struct shipping_data *shipd, vehicle
 /**
 * This function attempts to find the ship for a particular shipment, and send
 * it to the room of your choice (may be the destination OR origin). The
-* shipment's ship homeroom will be set to NOWHERE, to avoid re-moving ships.
+* shipment's shipping id will be set to -1, to avoid re-moving ships.
 *
 * @param empire_data *emp The empire whose shipment it is.
 * @param struct shipping_data *shipd The shipment data.
@@ -2411,17 +2563,21 @@ void move_ship_to_destination(empire_data *emp, struct shipping_data *shipd, roo
 	
 	if (ROOM_PEOPLE(IN_ROOM(boat))) {
 		snprintf(buf, sizeof(buf), "$V %s away.", mob_move_types[VEH_MOVE_TYPE(boat)]);
-		act(buf, FALSE, ROOM_PEOPLE(IN_ROOM(boat)), NULL, boat, TO_CHAR | TO_ROOM);
+		act(buf, FALSE, ROOM_PEOPLE(IN_ROOM(boat)), NULL, boat, TO_CHAR | TO_ROOM | TO_QUEUE);
 	}
+	
+	adjust_vehicle_tech(boat, FALSE);
 	vehicle_to_room(boat, to_room);
+	adjust_vehicle_tech(boat, TRUE);
+	
 	if (ROOM_PEOPLE(IN_ROOM(boat))) {
 		snprintf(buf, sizeof(buf), "$V %s in.", mob_move_types[VEH_MOVE_TYPE(boat)]);
-		act(buf, FALSE, ROOM_PEOPLE(IN_ROOM(boat)), NULL, boat, TO_CHAR | TO_ROOM);
+		act(buf, FALSE, ROOM_PEOPLE(IN_ROOM(boat)), NULL, boat, TO_CHAR | TO_ROOM | TO_QUEUE);
 	}
 	
 	VEH_SHIPPING_ID(boat) = -1;
 	
-	// remove the ship homeroom from all shipments that were on this ship (including this one)
+	// remove the shipping id from all shipments that were on this ship (including this one)
 	old = shipd->shipping_id;
 	for (iter = EMPIRE_SHIPPING_LIST(emp); iter; iter = iter->next) {
 		if (iter->shipping_id == old) {
@@ -2447,7 +2603,8 @@ void process_shipping_one(empire_data *emp) {
 		next_shipd = shipd->next;
 		
 		switch (shipd->status) {
-			case SHIPPING_QUEUED: {
+			case SHIPPING_QUEUED:	// both these are 'waiting' states
+			case SHIPPING_WAITING_FOR_SHIP: {
 				if (!last_ship || last_from != shipd->from_island || last_to != shipd->to_island) {
 					// attempt to find a(nother) ship
 					last_ship = find_free_ship(emp, shipd);
@@ -2467,6 +2624,9 @@ void process_shipping_one(empire_data *emp) {
 						sail_shipment(emp, last_ship);
 						last_ship = NULL;
 					}
+				}
+				else {	// did not find a ship
+					shipd->status = SHIPPING_WAITING_FOR_SHIP;
 				}
 				break;
 			}
@@ -2489,7 +2649,7 @@ void process_shipping_one(empire_data *emp) {
 	for (shipd = EMPIRE_SHIPPING_LIST(emp); shipd; shipd = next_shipd) {
 		next_shipd = shipd->next;
 		
-		if (shipd->status == SHIPPING_QUEUED && shipd->shipping_id != -1) {
+		if ((shipd->status == SHIPPING_QUEUED || shipd->status == SHIPPING_WAITING_FOR_SHIP) && shipd->shipping_id != -1) {
 			vehicle_data *boat = find_ship_by_shipping_id(emp, shipd->shipping_id);
 			if (boat) {
 				sail_shipment(emp, boat);
@@ -2498,7 +2658,7 @@ void process_shipping_one(empire_data *emp) {
 	}
 	
 	if (changed) {
-		EMPIRE_NEEDS_SAVE(emp) = TRUE;
+		EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
 	}
 }
 
@@ -2545,12 +2705,16 @@ void sail_shipment(empire_data *emp, vehicle_data *boat) {
 	
 	if (ROOM_PEOPLE(IN_ROOM(boat))) {
 		snprintf(buf, sizeof(buf), "$V %s away.", mob_move_types[VEH_MOVE_TYPE(boat)]);
-		act(buf, FALSE, ROOM_PEOPLE(IN_ROOM(boat)), NULL, boat, TO_CHAR | TO_ROOM);
+		act(buf, FALSE, ROOM_PEOPLE(IN_ROOM(boat)), NULL, boat, TO_CHAR | TO_ROOM | TO_QUEUE);
 	}
+	
+	adjust_vehicle_tech(boat, FALSE);
 	vehicle_to_room(boat, get_ship_pen());
+	adjust_vehicle_tech(boat, TRUE);
+	
 	if (ROOM_PEOPLE(IN_ROOM(boat))) {
 		snprintf(buf, sizeof(buf), "$V %s in.", mob_move_types[VEH_MOVE_TYPE(boat)]);
-		act(buf, FALSE, ROOM_PEOPLE(IN_ROOM(boat)), NULL, boat, TO_CHAR | TO_ROOM);
+		act(buf, FALSE, ROOM_PEOPLE(IN_ROOM(boat)), NULL, boat, TO_CHAR | TO_ROOM | TO_QUEUE);
 	}
 }
 
@@ -3145,7 +3309,7 @@ void trade_post(char_data *ch, char *argument) {
 void warehouse_inventory(char_data *ch, char *argument) {
 	extern const char *unique_storage_flags[];
 
-	char arg[MAX_INPUT_LENGTH], output[MAX_STRING_LENGTH*2], line[MAX_STRING_LENGTH], part[256], flags[256], quantity[256], level[256], objflags[256], *tmp;
+	char arg[MAX_INPUT_LENGTH], output[MAX_STRING_LENGTH*4], line[MAX_STRING_LENGTH], part[256], flags[256], quantity[256], level[256], objflags[256], *tmp;
 	bool imm_access = (GET_ACCESS_LEVEL(ch) >= LVL_CIMPL || IS_GRANTED(ch, GRANT_EMPIRES));
 	struct empire_unique_storage *iter;
 	empire_data *emp = GET_LOYALTY(ch);
@@ -3257,12 +3421,20 @@ void warehouse_identify(char_data *ch, char *argument) {
 	}
 	
 	// access permission
-	if (!imm_access && (!room_has_function_and_city_ok(IN_ROOM(ch), FNC_WAREHOUSE | FNC_VAULT) || !IS_COMPLETE(IN_ROOM(ch)))) {
+	if (!imm_access && !room_has_function_and_city_ok(IN_ROOM(ch), FNC_WAREHOUSE | FNC_VAULT)) {
 		msg_to_char(ch, "You can't do that here.\r\n");
+		return;
+	}
+	if (!imm_access && !IS_COMPLETE(IN_ROOM(ch))) {
+		msg_to_char(ch, "Complete the building first.\r\n");
 		return;
 	}
 	if (!imm_access && (!can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED) || (room_emp && GET_LOYALTY(ch) != room_emp && !has_relationship(GET_LOYALTY(ch), room_emp, DIPL_TRADE)))) {
 		msg_to_char(ch, "You don't have permission to do that here.\r\n");
+		return;
+	}
+	if (!check_in_city_requirement(IN_ROOM(ch), TRUE)) {
+		msg_to_char(ch, "This building must be in a city to use it for that.\r\n");
 		return;
 	}
 	
@@ -3327,20 +3499,28 @@ void warehouse_retrieve(char_data *ch, char *argument) {
 	}
 	
 	// access permission
-	if (!imm_access && (!room_has_function_and_city_ok(IN_ROOM(ch), FNC_WAREHOUSE | FNC_VAULT) || !IS_COMPLETE(IN_ROOM(ch)))) {
+	if (!imm_access && !room_has_function_and_city_ok(IN_ROOM(ch), FNC_WAREHOUSE | FNC_VAULT)) {
 		msg_to_char(ch, "You can't do that here.\r\n");
+		return;
+	}
+	if (!imm_access && !IS_COMPLETE(IN_ROOM(ch))) {
+		msg_to_char(ch, "Complete the building first.\r\n");
 		return;
 	}
 	if (!imm_access && (!can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED) || (room_emp && GET_LOYALTY(ch) != room_emp && !has_relationship(GET_LOYALTY(ch), room_emp, DIPL_TRADE)))) {
 		msg_to_char(ch, "You don't have permission to do that here.\r\n");
 		return;
 	}
-	if (!imm_access && room_has_function_and_city_ok(IN_ROOM(ch), FNC_VAULT) && !has_permission(ch, PRIV_WITHDRAW)) {
+	if (!imm_access && room_has_function_and_city_ok(IN_ROOM(ch), FNC_VAULT) && !has_permission(ch, PRIV_WITHDRAW, IN_ROOM(ch))) {
 		msg_to_char(ch, "You don't have permission to withdraw items here.\r\n");
 		return;
 	}
-	if (!imm_access && room_has_function_and_city_ok(IN_ROOM(ch), FNC_WAREHOUSE) && !has_permission(ch, PRIV_WAREHOUSE)) {
+	if (!imm_access && room_has_function_and_city_ok(IN_ROOM(ch), FNC_WAREHOUSE) && !has_permission(ch, PRIV_WAREHOUSE, IN_ROOM(ch))) {
 		msg_to_char(ch, "You don't have permission to withdraw items here.\r\n");
+		return;
+	}
+	if (!check_in_city_requirement(IN_ROOM(ch), TRUE)) {
+		msg_to_char(ch, "This building must be in a city to use it for that.\r\n");
 		return;
 	}
 	
@@ -3405,7 +3585,7 @@ void warehouse_retrieve(char_data *ch, char *argument) {
 		// load the actual objs
 		while (!done && iter->amount > 0 && (all || amt-- > 0)) {
 			if (iter->obj && !CAN_CARRY_OBJ(ch, iter->obj)) {
-				msg_to_char(ch, "Your arms are full.\r\n");
+				act("Your arms are full.", FALSE, ch, NULL, NULL, TO_CHAR | TO_QUEUE);
 				done = TRUE;
 				break;
 			}
@@ -3425,8 +3605,8 @@ void warehouse_retrieve(char_data *ch, char *argument) {
 				iter->amount -= 1;
 				any = TRUE;
 				obj_to_char(obj, ch);	// inventory size pre-checked
-				act("You retrieve $p.", FALSE, ch, obj, NULL, TO_CHAR);
-				act("$n retrieves $p.", FALSE, ch, obj, NULL, TO_ROOM);
+				act("You retrieve $p.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
+				act("$n retrieves $p.", FALSE, ch, obj, NULL, TO_ROOM | TO_QUEUE);
 				load_otrigger(obj);
 			}
 		}
@@ -3447,7 +3627,7 @@ void warehouse_retrieve(char_data *ch, char *argument) {
 	}
 	else {
 		SAVE_CHAR(ch);
-		EMPIRE_NEEDS_SAVE(GET_LOYALTY(ch)) = TRUE;
+		EMPIRE_NEEDS_STORAGE_SAVE(GET_LOYALTY(ch)) = TRUE;
 	}
 }
 
@@ -3472,21 +3652,30 @@ void warehouse_store(char_data *ch, char *argument) {
 	}
 	
 	// access permission
-	if (!imm_access && (!room_has_function_and_city_ok(IN_ROOM(ch), FNC_WAREHOUSE | FNC_VAULT) || !IS_COMPLETE(IN_ROOM(ch)))) {
+	if (!imm_access && !room_has_function_and_city_ok(IN_ROOM(ch), FNC_WAREHOUSE | FNC_VAULT)) {
 		msg_to_char(ch, "You can't do that here.\r\n");
+		return;
+	}
+	if (!imm_access && !IS_COMPLETE(IN_ROOM(ch))) {
+		msg_to_char(ch, "Complete the building first.\r\n");
 		return;
 	}
 	if (!imm_access && (!can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED) || (room_emp && GET_LOYALTY(ch) != room_emp && !has_relationship(GET_LOYALTY(ch), room_emp, DIPL_TRADE)))) {
 		msg_to_char(ch, "You don't have permission to do that here.\r\n");
 		return;
 	}
-	if (!imm_access && room_has_function_and_city_ok(IN_ROOM(ch), FNC_VAULT) && !has_permission(ch, PRIV_WITHDRAW)) {
+	if (!imm_access && room_has_function_and_city_ok(IN_ROOM(ch), FNC_VAULT) && !has_permission(ch, PRIV_WITHDRAW, IN_ROOM(ch))) {
 		msg_to_char(ch, "You don't have permission to store items here.\r\n");
+		return;
+	}
+	if (!check_in_city_requirement(IN_ROOM(ch), TRUE)) {
+		msg_to_char(ch, "This building must be in a city to use it for that.\r\n");
 		return;
 	}
 	
 	// possible #
 	tmp = any_one_arg(argument, numarg);
+	skip_spaces(&tmp);
 	if (*numarg && is_number(numarg)) {
 		total = atoi(numarg);
 		if (total < 1) {
@@ -3495,9 +3684,13 @@ void warehouse_store(char_data *ch, char *argument) {
 		}
 		argument = tmp;
 	}
-	else if (*argument && *numarg && !str_cmp(numarg, "all")) {
+	else if (*tmp && *numarg && !str_cmp(numarg, "all")) {
 		total = CAN_CARRY_N(ch) + 1;
 		argument = tmp;
+	}
+	else if (!*tmp && !str_cmp(numarg, "all")) {
+		total = CAN_CARRY_N(ch);
+		argument = numarg;
 	}
 	
 	// argument may have moved for numarg
@@ -3566,7 +3759,7 @@ void warehouse_store(char_data *ch, char *argument) {
 
 	if (done) {
 		SAVE_CHAR(ch);
-		EMPIRE_NEEDS_SAVE(GET_LOYALTY(ch)) = TRUE;
+		EMPIRE_NEEDS_STORAGE_SAVE(GET_LOYALTY(ch)) = TRUE;
 	}
 }
 
@@ -3826,6 +4019,10 @@ ACMD(do_drink) {
 
 	if (obj && GET_OBJ_TYPE(obj) != ITEM_DRINKCON) {
 		send_to_char("You can't drink from that!\r\n", ch);
+		return;
+	}
+	if (obj && !bind_ok(obj, ch)) {
+		msg_to_char(ch, "You can't drink from an item that's bound to someone else.\r\n");
 		return;
 	}
 
@@ -4266,9 +4463,6 @@ ACMD(do_exchange) {
 	else if (!(emp = ROOM_OWNER(IN_ROOM(ch)))) {
 		msg_to_char(ch, "This building does not belong to any empire, and can't exchange coins.\r\n");
 	}
-	else if (!EMPIRE_HAS_TECH(emp, TECH_COMMERCE)) {
-		msg_to_char(ch, "This empire does not have Commerce, and cannot exchange coins.\r\n");
-	}
 	else if (!can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED)) {
 		msg_to_char(ch, "You don't have permission to exchange anything here.\r\n");
 	}
@@ -4568,8 +4762,15 @@ ACMD(do_grab) {
 	else if (!*arg)
 		send_to_char("Hold what?\r\n", ch);
 	else if (!(obj = get_obj_in_list_vis(ch, arg, ch->carrying))) {
-		sprintf(buf, "You don't seem to have %s %s.\r\n", AN(arg), arg);
-		send_to_char(buf, ch);
+		if (GET_EQ(ch, WEAR_HOLD) && MATCH_ITEM_NAME(arg, GET_EQ(ch, WEAR_HOLD))) {
+			msg_to_char(ch, "It looks like you're already holding it!\r\n");
+		}
+		else if (GET_EQ(ch, WEAR_RANGED) && MATCH_ITEM_NAME(arg, GET_EQ(ch, WEAR_RANGED))) {
+			msg_to_char(ch, "It looks like you're already holding it!\r\n");
+		}
+		else {
+			msg_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
+		}
 	}
 	else if (!can_wear_item(ch, obj, TRUE)) {
 		// sends own messages
@@ -4703,7 +4904,7 @@ ACMD(do_keep) {
 				qt_keep_obj(ch, obj, FALSE);
 			}
 			sprintf(buf, "You %s $p.", sname);
-			act(buf, FALSE, ch, obj, NULL, TO_CHAR);
+			act(buf, FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
 			obj = next_obj;
 		}
 	}
@@ -4727,34 +4928,52 @@ ACMD(do_keep) {
 }
 
 
+// also do_burn
 ACMD(do_light) {
+	void do_burn_area(char_data *ch, int subcmd);
 	void do_light_vehicle(char_data *ch, vehicle_data *veh, obj_data *flint);
 	
+	const char *cmdname[] = { "light", "burn" };	// also in do_burn_area
+	
 	bool objless = has_player_tech(ch, PTECH_LIGHT_FIRE);
-	obj_data *obj, *flint = NULL;
+	char buf[MAX_STRING_LENGTH];
+	obj_data *obj, *lighter = NULL;
 	vehicle_data *veh;
+	bool kept = FALSE;
 
 	one_argument(argument, arg);
 
 	if (!objless) {
-		flint = get_obj_in_list_num(o_FLINT_SET, ch->carrying);
+		lighter = find_lighter_in_list(ch->carrying, &kept);
 	}
 
-	if (!*arg)
-		msg_to_char(ch, "Light what?\r\n");
-	else if (!IS_NPC(ch) && !objless && !flint)
-		msg_to_char(ch, "You don't have a flint set to light that with.\r\n");
+	if (!*arg) {
+		sprintf(buf, "%s what?\r\n", cmdname[subcmd]);
+		send_to_char(CAP(buf), ch);
+	}
+	else if (!IS_NPC(ch) && !objless && !lighter) {
+		// nothing to light it with
+		if (kept) {
+			msg_to_char(ch, "You need a lighter that isn't marked 'keep'.\r\n");
+		}
+		else {
+			msg_to_char(ch, "You don't have anything to %s that with.\r\n", cmdname[subcmd]);
+		}
+	}
 	else if (!(obj = get_obj_in_list_vis(ch, arg, ch->carrying)) && !(obj = get_obj_in_list_vis(ch, arg, ROOM_CONTENTS(IN_ROOM(ch))))) {
 		// try burning a vehicle
 		if ((veh = get_vehicle_in_room_vis(ch, arg))) {
-			do_light_vehicle(ch, veh, flint);
+			do_light_vehicle(ch, veh, lighter);
+		}
+		else if (!str_cmp(arg, "area") || !str_cmp(arg, "room") || isname(arg, get_room_name(IN_ROOM(ch), FALSE))) {
+			do_burn_area(ch, subcmd);
 		}
 		else {
 			msg_to_char(ch, "You don't have a %s.\r\n", arg);
 		}
 	}
 	else if (!has_interaction(obj->interactions, INTERACT_LIGHT)) {
-		msg_to_char(ch, "You can't light that!\r\n");
+		msg_to_char(ch, "You can't %s that!\r\n", cmdname[subcmd]);
 	}
 	else {
 		if (objless) {
@@ -4762,11 +4981,11 @@ ACMD(do_light) {
 			act("$n lights $p on fire!", FALSE, ch, obj, NULL, TO_ROOM);
 			gain_player_tech_exp(ch, PTECH_LIGHT_FIRE, 15);
 		}
-		else if (flint) {
-			act("You strike $p and light $P.", FALSE, ch, flint, obj, TO_CHAR);
-			act("$n strikes $p and lights $P.", FALSE, ch, flint, obj, TO_ROOM);
+		else if (lighter) {
+			act("You use $p to light $P.", FALSE, ch, lighter, obj, TO_CHAR);
+			act("$n uses $p to light $P.", FALSE, ch, lighter, obj, TO_ROOM);
 		}
-		else {
+		else { // somehow?
 			act("You light $P.", FALSE, ch, NULL, obj, TO_CHAR);
 			act("$n lights $P.", FALSE, ch, NULL, obj, TO_ROOM);
 		}
@@ -4776,12 +4995,16 @@ ACMD(do_light) {
 		run_interactions(ch, obj->interactions, INTERACT_LIGHT, IN_ROOM(ch), NULL, obj, light_obj_interact);
 		extract_obj(obj);
 		command_lag(ch, WAIT_OTHER);
+		
+		if (lighter) {
+			used_lighter(ch, lighter);
+		}
 	}
 }
 
 
 ACMD(do_list) {
-	char buf[MAX_STRING_LENGTH * 2], line[MAX_STRING_LENGTH], rep[256], tmp[256], matching[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH * 2], line[MAX_STRING_LENGTH], rep[256], tmp[256], matching[MAX_INPUT_LENGTH], vstr[128];
 	struct shop_temp_list *stl, *shop_list = NULL;
 	struct shop_item *item;
 	bool any, this;
@@ -4843,16 +5066,23 @@ ACMD(do_list) {
 					*rep = '\0';
 				}
 				
+				if (PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
+					sprintf(vstr, "[%5d] ", SHOP_VNUM(stl->shop));
+				}
+				else {
+					*vstr = '\0';
+				}
+				
 				if (stl->from_mob) {
 					strcpy(tmp, PERS(stl->from_mob, ch, FALSE));
-					snprintf(line, sizeof(line), "%s%s%s sells%s:\r\n", (*buf ? "\r\n" : ""), CAP(tmp), rep, matching);
+					snprintf(line, sizeof(line), "%s%s%s%s sells%s:\r\n", (*buf ? "\r\n" : ""), vstr, CAP(tmp), rep, matching);
 				}
 				else if (stl->from_obj) {
 					strcpy(tmp, GET_OBJ_SHORT_DESC(stl->from_obj));
-					snprintf(line, sizeof(line), "%s%s%s sells%s:\r\n", (*buf ? "\r\n" : ""), CAP(tmp), rep, matching);
+					snprintf(line, sizeof(line), "%s%s%s%s sells%s:\r\n", (*buf ? "\r\n" : ""), vstr, CAP(tmp), rep, matching);
 				}
 				else {
-					snprintf(line, sizeof(line), "%sYou can %sbuy%s%s:\r\n", (*buf ? "\r\n" : ""), (*buf ? "also " : ""), rep, matching);
+					snprintf(line, sizeof(line), "%s%sYou can %sbuy%s%s:\r\n", (*buf ? "\r\n" : ""), vstr, (*buf ? "also " : ""), rep, matching);
 				}
 				
 				if (size + strlen(line) < sizeof(buf)) {
@@ -4872,7 +5102,14 @@ ACMD(do_list) {
 				*rep = '\0';
 			}
 			
-			snprintf(line, sizeof(line), " - %s (%d %s%s)\r\n", GET_OBJ_SHORT_DESC(obj), item->cost, (item->currency == NOTHING ? "coins" : get_generic_string_by_vnum(item->currency, GENERIC_CURRENCY, WHICH_CURRENCY(item->cost))), rep);
+			if (PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
+				sprintf(vstr, "[%5d] ", GET_OBJ_VNUM(obj));
+			}
+			else {
+				*vstr = '\0';
+			}
+			
+			snprintf(line, sizeof(line), " - %s%s (%d %s%s)\r\n", vstr, GET_OBJ_SHORT_DESC(obj), item->cost, (item->currency == NOTHING ? "coins" : get_generic_string_by_vnum(item->currency, GENERIC_CURRENCY, WHICH_CURRENCY(item->cost))), rep);
 			
 			if (size + strlen(line) < sizeof(buf)) {
 				strcat(buf, line);
@@ -4956,7 +5193,7 @@ ACMD(do_pour) {
 				return;
 			}
 		}
-		if (is_abbrev(arg2, "water") && room_has_function_and_city_ok(IN_ROOM(ch), FNC_DRINK_WATER)) {
+		if ((is_abbrev(arg2, "water") || isname(arg2, get_room_name(IN_ROOM(ch), FALSE))) && room_has_function_and_city_ok(IN_ROOM(ch), FNC_DRINK_WATER)) {
 			fill_from_room(ch, to_obj);
 			return;
 		}
@@ -5032,8 +5269,7 @@ ACMD(do_pour) {
 		return;
 	}
 	if (subcmd == SCMD_POUR) {
-		sprintf(buf, "You pour the %s into %s.", get_generic_string_by_vnum(GET_DRINK_CONTAINER_TYPE(from_obj), GENERIC_LIQUID, GSTR_LIQUID_NAME), GET_OBJ_SHORT_DESC(to_obj));
-		send_to_char(buf, ch);
+		msg_to_char(ch, "You pour the %s into %s.\r\n", get_generic_string_by_vnum(GET_DRINK_CONTAINER_TYPE(from_obj), GENERIC_LIQUID, GSTR_LIQUID_NAME), GET_OBJ_SHORT_DESC(to_obj));
 	}
 	if (subcmd == SCMD_FILL) {
 		act("You gently fill $p from $P.", FALSE, ch, to_obj, from_obj, TO_CHAR);
@@ -5253,8 +5489,9 @@ ACMD(do_remove) {
 }
 
 
-ACMD(do_retrieve) {	
+ACMD(do_retrieve) {
 	struct empire_storage_data *store, *next_store;
+	struct empire_island *isle;
 	obj_data *objn;
 	int count = 0, total = 1, number, pos;
 	empire_data *emp, *room_emp = ROOM_OWNER(IN_ROOM(ch));
@@ -5275,6 +5512,14 @@ ACMD(do_retrieve) {
 	}
 	if (!can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED) || (room_emp && emp != room_emp && !has_relationship(emp, room_emp, DIPL_TRADE))) {
 		msg_to_char(ch, "You need to establish a trade pact to retrieve anything here.\r\n");
+		return;
+	}
+	if (GET_ISLAND_ID(IN_ROOM(ch)) == NO_ISLAND || !(isle = get_empire_island(emp, GET_ISLAND_ID(IN_ROOM(ch))))) {
+		msg_to_char(ch, "You can't retrieve anything here.\r\n");
+		return;
+	}
+	if (!check_in_city_requirement(IN_ROOM(ch), TRUE)) {
+		msg_to_char(ch, "This storage building must be in a city to use it.\r\n");
 		return;
 	}
 
@@ -5318,16 +5563,9 @@ ACMD(do_retrieve) {
 
 	/* they hit "ret all" */
 	if (!str_cmp(objname, "all")) {
-		for (store = EMPIRE_STORAGE(emp); store; store = next_store) {
-			next_store = store->next;
-			
-			// same island?
-			if (store->island != GET_ISLAND_ID(IN_ROOM(ch))) {
-				continue;
-			}
-
-			if ((objn = obj_proto(store->vnum)) && obj_can_be_stored(objn, IN_ROOM(ch))) {
-				if (stored_item_requires_withdraw(objn) && !has_permission(ch, PRIV_WITHDRAW)) {
+		HASH_ITER(hh, isle->store, store, next_store) {
+			if ((objn = store->proto) && obj_can_be_retrieved(objn, IN_ROOM(ch))) {
+				if (stored_item_requires_withdraw(objn) && !has_permission(ch, PRIV_WITHDRAW, IN_ROOM(ch))) {
 					msg_to_char(ch, "You don't have permission to withdraw that!\r\n");
 					return;
 				}
@@ -5345,19 +5583,16 @@ ACMD(do_retrieve) {
 	}
 	else {	// not "all"
 		pos = 0;
-		for (store = EMPIRE_STORAGE(emp); store && !found; store = next_store) {
-			next_store = store->next;
-			
-			// island check
-			if (store->island != GET_ISLAND_ID(IN_ROOM(ch))) {
-				continue;
+		HASH_ITER(hh, isle->store, store, next_store) {
+			if (found) {
+				break;
 			}
 			
-			if ((objn = obj_proto(store->vnum)) && obj_can_be_stored(objn, IN_ROOM(ch))) {
+			if ((objn = store->proto) && obj_can_be_retrieved(objn, IN_ROOM(ch))) {
 				if (multi_isname(objname, GET_OBJ_KEYWORDS(objn)) && (++pos == number)) {
 					found = 1;
 					
-					if (stored_item_requires_withdraw(objn) && !has_permission(ch, PRIV_WITHDRAW)) {
+					if (stored_item_requires_withdraw(objn) && !has_permission(ch, PRIV_WITHDRAW, IN_ROOM(ch))) {
 						msg_to_char(ch, "You don't have permission to withdraw that!\r\n");
 						return;
 					}
@@ -5388,10 +5623,7 @@ ACMD(do_retrieve) {
 		if (GET_LOYALTY(ch) == room_emp) {
 			remove_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_CEDED);
 		}
-
-		/* save the empire */
-		SAVE_CHAR(ch);
-		EMPIRE_NEEDS_SAVE(emp) = TRUE;
+		
 		read_vault(emp);
 	}
 }
@@ -5410,11 +5642,8 @@ ACMD(do_roadsign) {
 	else if (!IS_APPROVED(ch) && config_get_bool("build_approval")) {
 		send_config_msg(ch, "need_approval_string");
 	}
-	else if (get_skill_level(ch, SKILL_EMPIRE) <= BASIC_SKILL_CAP) {
-		msg_to_char(ch, "You need the Roads ability and an Empire skill of at least %d to set up road signs.\r\n", BASIC_SKILL_CAP+1);
-	}
-	else if (!has_ability(ch, ABIL_ROADS)) {
-		msg_to_char(ch, "You require the Roads ability to set up road signs.\r\n");
+	else if (!has_player_tech(ch, PTECH_CUSTOMIZE_BUILDING)) {
+		msg_to_char(ch, "You require the Customize Building ability to set up road signs.\r\n");
 	}
 	else if (!IS_ROAD(IN_ROOM(ch)) || !IS_COMPLETE(IN_ROOM(ch))) {
 		msg_to_char(ch, "You can only put up a roadsign on finished roads.\r\n");
@@ -5445,7 +5674,7 @@ ACMD(do_roadsign) {
 			msg_to_char(ch, "The old sign has been replaced.\r\n");
 		}
 
-		gain_ability_exp(ch, ABIL_ROADS, 33.4);
+		gain_player_tech_exp(ch, PTECH_CUSTOMIZE_BUILDING, 33.4);
 		extract_obj(sign);
 	}
 }
@@ -5538,14 +5767,14 @@ ACMD(do_ship) {
 	struct island_info *from_isle, *to_isle;
 	struct empire_storage_data *store;
 	struct shipping_data *sd, *temp;
-	bool done, gave_number = FALSE;
+	bool done, wrong_isle, gave_number = FALSE;
 	vehicle_data *veh;
 	obj_data *proto;
 	int number = 1;
 	size_t size;
 	
 	// SHIPPING_x
-	const char *status_type[] = { "waiting for ship", "en route", "delivered", "\n" };
+	const char *status_type[] = { "preparing", "en route", "delivered", "waiting for ship", "\n" };
 	
 	argument = any_one_word(argument, arg1);	// command
 	argument = any_one_word(argument, arg2);	// number or keywords
@@ -5635,13 +5864,10 @@ ACMD(do_ship) {
 		}
 		
 		// find a matching entry
-		done = FALSE;
+		done = wrong_isle = FALSE;
 		for (sd = EMPIRE_SHIPPING_LIST(GET_LOYALTY(ch)); sd; sd = sd->next) {
-			if (sd->status != SHIPPING_QUEUED || sd->shipping_id != -1) {
+			if ((sd->status != SHIPPING_QUEUED && sd->status != SHIPPING_WAITING_FOR_SHIP) || sd->shipping_id != -1) {
 				continue;	// never cancel one in progress
-			}
-			if (sd->from_island != GET_ISLAND_ID(IN_ROOM(ch))) {
-				continue;
 			}
 			if (gave_number && number != sd->amount) {
 				continue;
@@ -5652,6 +5878,10 @@ ACMD(do_ship) {
 			if (!multi_isname(keywords, GET_OBJ_KEYWORDS(proto))) {
 				continue;
 			}
+			if (sd->from_island != GET_ISLAND_ID(IN_ROOM(ch))) {
+				wrong_isle = TRUE;
+				continue;
+			}
 			
 			// found!
 			msg_to_char(ch, "You cancel the shipment for %d '%s'.\r\n", sd->amount, skip_filler(GET_OBJ_SHORT_DESC(proto)));
@@ -5659,14 +5889,14 @@ ACMD(do_ship) {
 			
 			REMOVE_FROM_LIST(sd, EMPIRE_SHIPPING_LIST(GET_LOYALTY(ch)), next);
 			free(sd);
-			EMPIRE_NEEDS_SAVE(GET_LOYALTY(ch)) = TRUE;
+			EMPIRE_NEEDS_STORAGE_SAVE(GET_LOYALTY(ch)) = TRUE;
 			
 			done = TRUE;
 			break;	// only allow 1st match
 		}
 		
 		if (!done) {
-			msg_to_char(ch, "No shipments like that found to cancel.\r\n");
+			msg_to_char(ch, "No shipments like that found to cancel%s.\r\n", wrong_isle ? " on this island" : "");
 		}
 	}
 	else {
@@ -5766,6 +5996,10 @@ ACMD(do_store) {
 		msg_to_char(ch, "You need to establish a trade pact to store your things here.\r\n");
 		return;
 	}
+	if (!check_in_city_requirement(IN_ROOM(ch), TRUE)) {
+		msg_to_char(ch, "This storage building must be in a city to use it.\r\n");
+		return;
+	}
 
 	two_arguments(argument, arg, buf);
 
@@ -5798,7 +6032,7 @@ ACMD(do_store) {
 		for (obj = ch->carrying; obj; obj = next_obj) {
 			next_obj = obj->next_content;
 			
-			if (!OBJ_FLAGGED(obj, OBJ_KEEP) && OBJ_CAN_STORE(obj) && obj_can_be_stored(obj, IN_ROOM(ch))) {
+			if (!OBJ_FLAGGED(obj, OBJ_KEEP) && OBJ_CAN_STORE(obj) && obj_can_be_stored(obj, IN_ROOM(ch), FALSE)) {
 				if ((store = find_stored_resource(emp, GET_ISLAND_ID(IN_ROOM(ch)), GET_OBJ_VNUM(obj)))) {
 					if (store->amount >= MAX_STORAGE) {
 						full = 1;
@@ -5830,7 +6064,7 @@ ACMD(do_store) {
 		while (obj && (dotmode == FIND_ALLDOT || count < total)) {
 			next_obj = get_obj_in_list_vis(ch, arg, obj->next_content);
 			
-			if ((!OBJ_FLAGGED(obj, OBJ_KEEP) || (total == 1 && dotmode != FIND_ALLDOT)) && OBJ_CAN_STORE(obj) && obj_can_be_stored(obj, IN_ROOM(ch))) {
+			if ((!OBJ_FLAGGED(obj, OBJ_KEEP) || (total == 1 && dotmode != FIND_ALLDOT)) && OBJ_CAN_STORE(obj) && obj_can_be_stored(obj, IN_ROOM(ch), FALSE)) {
 				if ((store = find_stored_resource(emp, GET_ISLAND_ID(IN_ROOM(ch)), GET_OBJ_VNUM(obj)))) {
 					if (store->amount >= MAX_STORAGE) {
 						full = 1;
@@ -5858,10 +6092,7 @@ ACMD(do_store) {
 		if (GET_LOYALTY(ch) == room_emp) {
 			remove_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_CEDED);
 		}
-
-		/* save the empire */
-		SAVE_CHAR(ch);
-		EMPIRE_NEEDS_SAVE(emp) = TRUE;
+		
 		read_vault(emp);
 	}
 }
@@ -5907,8 +6138,11 @@ ACMD(do_trade) {
 	else if (is_abbrev(command, "check")) {
 		trade_check(ch, argument);
 	}
-	else if ((!room_has_function_and_city_ok(IN_ROOM(ch), FNC_TRADING_POST) || !IS_COMPLETE(IN_ROOM(ch))) && !IS_IMMORTAL(ch)) {
+	else if (!room_has_function_and_city_ok(IN_ROOM(ch), FNC_TRADING_POST) && !IS_IMMORTAL(ch)) {
 		msg_to_char(ch, "You can't trade here.\r\n");
+	}
+	else if (!IS_COMPLETE(IN_ROOM(ch)) && !IS_IMMORTAL(ch)) {
+		msg_to_char(ch, "Complete the building first.\r\n");
 	}
 	else if (!can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED) && !IS_IMMORTAL(ch)) {
 		msg_to_char(ch, "You don't have permission to trade here.\r\n");
@@ -5975,6 +6209,10 @@ ACMD(do_use) {
 		}
 		if (IS_AMMO(obj)) {
 			use_ammo(ch, obj);
+			return;
+		}
+		if (IS_MINIPET(obj)) {
+			use_minipet_obj(ch, obj);
 			return;
 		}
 	
@@ -6127,8 +6365,12 @@ ACMD(do_wield) {
 		send_to_char("Wield what?\r\n", ch);
 	}
 	else if (!(obj = get_obj_in_list_vis(ch, arg, ch->carrying))) {
-		sprintf(buf, "You don't seem to have %s %s.\r\n", AN(arg), arg);
-		send_to_char(buf, ch);
+		if (GET_EQ(ch, WEAR_WIELD) && MATCH_ITEM_NAME(arg, GET_EQ(ch, WEAR_WIELD))) {
+			msg_to_char(ch, "It looks like you're already wielding it!\r\n");
+		}
+		else {
+			msg_to_char(ch, "You don't seem to have %s %s.\r\n", AN(arg), arg);
+		}
 	}
 	else if (!CAN_WEAR(obj, ITEM_WEAR_WIELD)) {
 		send_to_char("You can't wield that.\r\n", ch);

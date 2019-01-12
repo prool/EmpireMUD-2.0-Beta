@@ -53,6 +53,7 @@ extern const char *class_role_color[];
 void apply_ability_techs_to_player(char_data *ch, ability_data *abil);
 void resort_empires(bool force);
 extern bool is_class_ability(ability_data *abil);
+void scale_item_to_level(obj_data *obj, int level);
 void update_class(char_data *ch);
 
 // local protos
@@ -549,27 +550,6 @@ void adjust_abilities_to_empire(char_data *ch, empire_data *emp, bool add) {
 	if (has_ability(ch, ABIL_EXARCH_CRAFTS)) {
 		EMPIRE_TECH(emp, TECH_EXARCH_CRAFTS) += mod;
 	}
-	if (has_ability(ch, ABIL_WORKFORCE)) {
-		EMPIRE_TECH(emp, TECH_WORKFORCE) += mod;
-	}
-	if (has_ability(ch, ABIL_SKILLED_LABOR)) {
-		EMPIRE_TECH(emp, TECH_SKILLED_LABOR) += mod;
-	}
-	if (has_ability(ch, ABIL_TRADE_ROUTES)) {
-		EMPIRE_TECH(emp, TECH_TRADE_ROUTES) += mod;
-	}
-	if (has_ability(ch, ABIL_LOCKS)) {
-		EMPIRE_TECH(emp, TECH_LOCKS) += mod;
-	}
-	if (has_ability(ch, ABIL_PROMINENCE)) {
-		EMPIRE_TECH(emp, TECH_PROMINENCE) += mod;
-	}
-	if (has_ability(ch, ABIL_COMMERCE)) {
-		EMPIRE_TECH(emp, TECH_COMMERCE) += mod;
-	}
-	if (has_ability(ch, ABIL_CITY_LIGHTS)) {
-		EMPIRE_TECH(emp, TECH_CITY_LIGHTS) += mod;
-	}
 	if (has_ability(ch, ABIL_PORTAL_MAGIC)) {
 		EMPIRE_TECH(emp, TECH_PORTALS) += mod;
 	}
@@ -606,8 +586,11 @@ bool can_gain_skill_from(char_data *ch, ability_data *abil) {
 * use any ability. Otherwise, it supports an energy pool cost and/or cooldowns,
 * as well as checking that the player has the ability.
 *
+* This function will also provide its other functionality for non-abilities if
+* you pass NO_ABIL or a negative number to the ability parameter.
+*
 * @param char_data *ch The player or NPC.
-* @param any_vnum ability Any ABIL_ const or vnum.
+* @param any_vnum ability Any ABIL_ const or vnum (optional, may be NO_ABIL or a negative number to skip ability checks).
 * @param int cost_pool HEALTH, MANA, MOVE, BLOOD (NOTHING if no charge).
 * @param int cost_amount Mana (or whatever) amount required, if any.
 * @param int cooldown_type Any COOLDOWN_ const, or NOTHING for no cooldown check.
@@ -620,7 +603,7 @@ bool can_use_ability(char_data *ch, any_vnum ability, int cost_pool, int cost_am
 	int time, needs_cost;
 	
 	// purchase check first, or the rest don't make sense.
-	if (!IS_NPC(ch) && ability != NO_ABIL && !has_ability(ch, ability)) {
+	if (!IS_NPC(ch) && ability != NO_ABIL && ability >= 0 && !has_ability(ch, ability)) {
 		msg_to_char(ch, "You have not purchased the %s ability.\r\n", get_ability_name_by_vnum(ability));
 		return FALSE;
 	}
@@ -644,8 +627,8 @@ bool can_use_ability(char_data *ch, any_vnum ability, int cost_pool, int cost_am
 		msg_to_char(ch, "You need %d %s point%s to do that.\r\n", cost_amount, pool_types[cost_pool], PLURAL(cost_amount));
 		return FALSE;
 	}
-	if ((time = get_cooldown_time(ch, cooldown_type)) > 0) {
-		snprintf(buf, sizeof(buf), "%s is still on cooldown for %d second%s.\r\n", get_ability_name_by_vnum(ability), time, (time != 1 ? "s" : ""));
+	if (cooldown_type != NOTHING && (time = get_cooldown_time(ch, cooldown_type)) > 0) {
+		snprintf(buf, sizeof(buf), "Your %s cooldown still has %d second%s.\r\n", get_generic_name_by_vnum(cooldown_type), time, (time != 1 ? "s" : ""));
 		CAP(buf);
 		send_to_char(buf, ch);
 		return FALSE;
@@ -813,6 +796,10 @@ int compute_bonus_exp_per_day(char_data *ch) {
 		perdiem += config_get_int("num_bonus_trait_daily_skills");
 	}
 	
+	if (GET_LOYALTY(ch) && EMPIRE_HAS_TECH(GET_LOYALTY(ch), TECH_BONUS_EXPERIENCE)) {
+		perdiem += 5;
+	}
+	
 	return perdiem;
 }
 
@@ -974,6 +961,10 @@ bool gain_skill(char_data *ch, skill_data *skill, int amount) {
 				skdata->resets = MIN(skdata->resets + 1, MAX_SKILL_RESETS);
 				msg_to_char(ch, "\tyYou have earned a free skill reset in %s. Type 'skill reset %s' to use it.\t0\r\n", SKILL_NAME(skill), SKILL_NAME(skill));
 			}
+			
+			if (!IS_IMMORTAL(ch) && skdata->level == SKILL_MAX_LEVEL(skill)) {
+				log_to_slash_channel_by_name(PLAYER_LOG_CHANNEL, ch, "%s has reached %s %d!", PERS(ch, ch, TRUE), SKILL_NAME(skill), SKILL_MAX_LEVEL(skill));
+			}
 		}
 		else {
 			msg_to_char(ch, "\tyYour %s skill drops to %d.\t0\r\n", SKILL_NAME(skill), skdata->level);
@@ -1019,7 +1010,7 @@ bool gain_skill_exp(char_data *ch, any_vnum skill_vnum, double amount) {
 
 	// this allows bonus skillups...
 	if (GET_DAILY_BONUS_EXPERIENCE(ch) <= 0) {
-		amount /= 50.0;
+		amount /= 25.0;
 	}
 	
 	// gain the exp
@@ -1689,6 +1680,9 @@ ACMD(do_skills) {
 			if (SKILL_FLAGGED(skill, SKILLF_IN_DEVELOPMENT)) {
 				continue;
 			}
+			if (!SKILL_FLAGGED(skill, SKILLF_BASIC) && get_skill_level(ch, SKILL_VNUM(skill)) < 1 && get_skill_exp(ch, SKILL_VNUM(skill)) < 0.1) {
+				continue;	// don't show non-basic skills if the player doesn't have them
+			}
 			
 			strcat(outbuf, get_skill_row_display(ch, skill));
 			if (!found && get_ability_points_available_for_char(ch, SKILL_VNUM(skill)) > 0) {
@@ -2031,7 +2025,7 @@ ACMD(do_specialize) {
 		if (get_skill_level(ch, SKILL_VNUM(sk)) == BASIC_SKILL_CAP) {
 			count = 0;
 			HASH_ITER(hh, GET_SKILL_HASH(ch), plsk, next_plsk) {
-				if (plsk->level > BASIC_SKILL_CAP) {
+				if (SKILL_FLAGGED(plsk->ptr, SKILLF_BASIC) && plsk->level > BASIC_SKILL_CAP) {
 					++count;
 				}
 			}
@@ -2045,7 +2039,7 @@ ACMD(do_specialize) {
 		if (get_skill_level(ch, SKILL_VNUM(sk)) == SPECIALTY_SKILL_CAP) {
 			count = 0;
 			HASH_ITER(hh, GET_SKILL_HASH(ch), plsk, next_plsk) {
-				if (plsk->level > SPECIALTY_SKILL_CAP) {
+				if (SKILL_FLAGGED(plsk->ptr, SKILLF_BASIC) && plsk->level > SPECIALTY_SKILL_CAP) {
 					++count;
 				}
 			}
@@ -2509,6 +2503,7 @@ obj_data *has_sharp_tool(char_data *ch) {
 
 /* tie/untie an npc */
 void perform_npc_tie(char_data *ch, char_data *victim, int subcmd) {
+	bool kept = FALSE;
 	obj_data *rope;
 
 	if (!subcmd && MOB_FLAGGED(victim, MOB_TIED))
@@ -2520,14 +2515,21 @@ void perform_npc_tie(char_data *ch, char_data *victim, int subcmd) {
 		act("$n unties you!", FALSE, ch, 0, victim, TO_VICT | TO_SLEEP);
 		act("$n unties $N.", FALSE, ch, 0, victim, TO_NOTVICT);
 		REMOVE_BIT(MOB_FLAGS(victim), MOB_TIED);
-		obj_to_char((rope = read_object(o_ROPE, TRUE)), ch);
-		load_otrigger(rope);
+		
+		if (GET_ROPE_VNUM(victim) != NOTHING && (rope = read_object(GET_ROPE_VNUM(victim), TRUE))) {
+			obj_to_char(rope, ch);
+			scale_item_to_level(rope, 1);	// minimum scale
+			load_otrigger(rope);
+			act("You receive $p.", FALSE, ch, rope, NULL, TO_CHAR);
+		}
+		GET_ROPE_VNUM(victim) = NOTHING;
 	}
 	else if (!MOB_FLAGGED(victim, MOB_ANIMAL)) {
 		msg_to_char(ch, "You can only tie animals.\r\n");
 	}
-	else if (!(rope = get_obj_in_list_num(o_ROPE, ch->carrying)))
-		msg_to_char(ch, "You don't have any rope.\r\n");
+	else if (!(rope = get_component_in_list(CMP_ROPE, NOBITS, ch->carrying, &kept))) {
+		msg_to_char(ch, "You don't seem to have any rope%s.\r\n", kept ? " that isn't marked 'keep'" : "");
+	}
 	else if (ROOM_SECT_FLAGGED(IN_ROOM(ch), SECTF_FRESH_WATER | SECTF_OCEAN))
 		msg_to_char(ch, "You can't tie it here.\r\n");
 	else {
@@ -2535,6 +2537,7 @@ void perform_npc_tie(char_data *ch, char_data *victim, int subcmd) {
 		act("$n ties you up.", FALSE, ch, 0, victim, TO_VICT | TO_SLEEP);
 		act("$n ties $N up.", FALSE, ch, 0, victim, TO_NOTVICT);
 		SET_BIT(MOB_FLAGS(victim), MOB_TIED);
+		GET_ROPE_VNUM(victim) = GET_OBJ_VNUM(rope);
 		extract_obj(rope);
 	}
 }
@@ -2665,6 +2668,7 @@ void olc_search_skill(char_data *ch, any_vnum vnum) {
 	skill_data *skill = find_skill_by_vnum(vnum), *sk, *next_sk;
 	archetype_data *arch, *next_arch;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	struct archetype_skill *arsk;
 	struct class_skill_req *clsk;
 	struct synergy_ability *syn;
@@ -2700,6 +2704,22 @@ void olc_search_skill(char_data *ch, any_vnum vnum) {
 				size += snprintf(buf + size, sizeof(buf) - size, "CLS [%5d] %s\r\n", CLASS_VNUM(cls), CLASS_NAME(cls));
 				break;	// only need 1
 			}
+		}
+	}
+	
+	// progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		if (size >= sizeof(buf)) {
+			break;
+		}
+		// REQ_x: requirement search
+		any = find_requirement_in_list(PRG_TASKS(prg), REQ_SKILL_LEVEL_OVER, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_SKILL_LEVEL_UNDER, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_CAN_GAIN_SKILL, vnum);
+		
+		if (any) {
+			++found;
+			size += snprintf(buf + size, sizeof(buf) - size, "PRG [%5d] %s\r\n", PRG_VNUM(prg), PRG_NAME(prg));
 		}
 	}
 	
@@ -2822,6 +2842,10 @@ bool remove_vnum_from_skill_abilities(struct skill_ability **list, any_vnum vnum
 		if (iter->vnum == vnum) {
 			LL_DELETE(*list, iter);
 			free(iter);
+			found = TRUE;
+		}
+		else if (iter->prerequisite == vnum) {
+			iter->prerequisite = NOTHING;	// drop prereq
 			found = TRUE;
 		}
 	}
@@ -3254,6 +3278,7 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 	archetype_data *arch, *next_arch;
 	ability_data *abil, *next_abil;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
 	class_data *cls, *next_cls;
 	descriptor_data *desc;
@@ -3301,6 +3326,19 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 		if (found) {
 			SET_BIT(CLASS_FLAGS(cls), CLASSF_IN_DEVELOPMENT);
 			save_library_file_for_vnum(DB_BOOT_CLASS, CLASS_VNUM(cls));
+		}
+	}
+	
+	// update progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_SKILL_LEVEL_OVER, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_SKILL_LEVEL_UNDER, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_CAN_GAIN_SKILL, vnum);
+		
+		if (found) {
+			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+			need_progress_refresh = TRUE;
 		}
 	}
 	
@@ -3378,6 +3416,16 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 			found = remove_vnum_from_class_skill_reqs(&CLASS_SKILL_REQUIREMENTS(GET_OLC_CLASS(desc)), vnum);
 			if (found) {
 				msg_to_desc(desc, "A skill requirement has been deleted from the class you're editing.\r\n");
+			}
+		}
+		if (GET_OLC_PROGRESS(desc)) {
+			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_SKILL_LEVEL_OVER, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_SKILL_LEVEL_UNDER, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_CAN_GAIN_SKILL, vnum);
+		
+			if (found) {
+				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
+				msg_to_desc(desc, "A skill requirement has been deleted from the progression goal you're editing.\r\n");
 			}
 		}
 		if (GET_OLC_QUEST(desc)) {
@@ -4252,8 +4300,7 @@ OLC_MODULE(skilledit_tree) {
 				found = TRUE;
 			}
 			else if (abil && skab->prerequisite == ABIL_VNUM(abil)) {
-				LL_DELETE(SKILL_ABILITIES(skill), skab);
-				free(skab);
+				skab->prerequisite = NO_ABIL;
 				found = found_prq = TRUE;
 			}
 		}
@@ -4265,7 +4312,7 @@ OLC_MODULE(skilledit_tree) {
 			msg_to_char(ch, "You remove all abilities.\r\n");
 		}
 		else {
-			msg_to_char(ch, "You remove the %s ability%s.\r\n", ABIL_NAME(abil), found_prq ? " (and things that required it)" : "");
+			msg_to_char(ch, "You remove the %s ability%s.\r\n", ABIL_NAME(abil), found_prq ? " (and things that required it no longer require anything)" : "");
 		}
 	}
 	else if (is_abbrev(cmd_arg, "change")) {

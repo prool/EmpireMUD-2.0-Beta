@@ -1,0 +1,78 @@
+#10950
+Viscous Muck Dragon~
+Paul Clarke and Owen Morris~
+   A muck dragon is roamings the swamps. These dragons are large, slimy, and
+particularly vicious. Fortunately, they never leave the water. Perhaps if you
+slay the dragon, you can take its riches for yourself.
+~
+10950 10964 225-325
+1 0 ln 0
+L
+1 0
+10950 -1 -1
+9 m 0
+L
+5 0
+1500 -1 -1
+-1 0 0
+S
+#10965
+Giant!~
+Paul Clarke and Owen Morris~
+   You've found a giant hovel in ruins. Perhaps its owner outgrew it? Not to
+worry -- a giant on the loose is usually easy to spot. Use the 'nearby' command
+to find the giant, before it wreaks havoc on the countryside!
+~
+10965 10979 100-175
+3 0 ln 0
+L
+1 0
+10965 -1 -1
+9 c 0
+L
+5 0
+1500 -1 -1
+-1 0 0
+L
+6 0
+400 -1 -1
+-1 0 0
+L
+1 0
+10966 -1 -1
+9 s 0
+L
+1 0
+10967 -1 -1
+9 el 0
+S
+#10980
+Renegade Spellcaster!~
+Paul Clarke and Owen Morris~
+   A renegade spellcaster is on the loose. Track them down before they cause
+trouble for your empire.
+~
+10980 10999 100-175
+2 0 ln 0
+L
+1 0
+10981 -1 -1
+9 bel 0
+L
+1 0
+10982 -1 -1
+9 bel 0
+L
+1 0
+10983 -1 -1
+9 bel 0
+L
+6 0
+250 -1 -1
+-1 0 0
+L
+5 0
+1440 -1 -1
+-1 0 0
+S
+$

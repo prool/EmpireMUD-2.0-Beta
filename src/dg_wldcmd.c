@@ -32,10 +32,11 @@ extern const char *dirs[];
 extern struct instance_data *quest_instance_global;
 
 // external functions
+void adjust_vehicle_tech(vehicle_data *veh, bool add);
 void send_char_pos(char_data *ch, int dam);
 void die(char_data *ch, char_data *killer);
 void sub_write(char *arg, char_data *ch, byte find_invis, int targets);
-extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom);
+extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom, bool allow_fake_loc);
 char_data *get_char_by_room(room_data *room, char *name);
 room_data *get_room(room_data *ref, char *name);
 obj_data *get_obj_by_room(room_data *room, char *name);
@@ -78,14 +79,14 @@ int get_room_scale_level(room_data *room, char_data *targ) {
 	int level = 1;
 	
 	if (COMPLEX_DATA(room) && (inst = COMPLEX_DATA(room)->instance)) {
-		if (inst->level) {
-			level = inst->level;
+		if (INST_LEVEL(inst)) {
+			level = INST_LEVEL(inst);
 		}
-		else if (GET_ADV_MIN_LEVEL(inst->adventure) > 0) {
-			level = GET_ADV_MIN_LEVEL(inst->adventure);
+		else if (GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst)) > 0) {
+			level = GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst));
 		}
-		else if (GET_ADV_MAX_LEVEL(inst->adventure) > 0) {
-			level = GET_ADV_MAX_LEVEL(inst->adventure) / 2; // average?
+		else if (GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) > 0) {
+			level = GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) / 2; // average?
 		}
 	}
 	// backup
@@ -133,7 +134,7 @@ WCMD(do_wadventurecomplete) {
 	
 	inst = quest_instance_global;
 	if (!inst) {
-		inst = find_instance_by_room(room, FALSE);
+		inst = find_instance_by_room(room, FALSE, TRUE);
 	}
 	
 	if (inst) {
@@ -602,6 +603,7 @@ WCMD(do_wteleport) {
 			char_to_room(ch, target);
 			enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
 			qt_visit_room(ch, IN_ROOM(ch));
+			msdp_update_room(ch);	// once we're sure we're staying
 		}
 	}
 	else if (!str_cmp(arg1, "adventure")) {
@@ -611,10 +613,10 @@ WCMD(do_wteleport) {
 			return;
 		}
 		
-		for (iter = 0; iter < inst->size; ++iter) {
+		for (iter = 0; iter < INST_SIZE(inst); ++iter) {
 			// only if it's not the target room, or we'd be here all day
-			if (inst->room[iter] && inst->room[iter] != target) {
-				for (ch = ROOM_PEOPLE(inst->room[iter]); ch; ch = next_ch) {
+			if (INST_ROOM(inst, iter) && INST_ROOM(inst, iter) != target) {
+				for (ch = ROOM_PEOPLE(INST_ROOM(inst, iter)); ch; ch = next_ch) {
 					next_ch = ch->next_in_room;
 					
 					if (!valid_dg_target(ch, DG_ALLOW_GODS)) {
@@ -630,6 +632,7 @@ WCMD(do_wteleport) {
 						}
 						enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
 						qt_visit_room(ch, IN_ROOM(ch));
+						msdp_update_room(ch);	// once we're sure we're staying
 					}
 				}
 			}
@@ -645,11 +648,14 @@ WCMD(do_wteleport) {
 				char_to_room(ch, target);
 				enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
 				qt_visit_room(ch, IN_ROOM(ch));
+				msdp_update_room(ch);	// once we're sure we're staying
 			}
 		}
 		else if ((*arg1 == UID_CHAR && (veh = get_vehicle(arg1))) || (veh = get_vehicle_room(room, arg1))) {
+			adjust_vehicle_tech(veh, FALSE);
 			vehicle_from_room(veh);
 			vehicle_to_room(veh, target);
+			adjust_vehicle_tech(veh, TRUE);
 			entry_vtrigger(veh);
 		}
 		else
@@ -791,6 +797,11 @@ WCMD(do_wforce) {
 		else
 			wld_log(room, "wforce: no target found");
 	}
+}
+
+
+WCMD(do_wheal) {
+	script_heal(room, WLD_TRIGGER, argument);
 }
 
 
@@ -1011,7 +1022,7 @@ WCMD(do_wload) {
 	void setup_generic_npc(char_data *mob, empire_data *emp, int name, int sex);
 	
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-	struct instance_data *inst = find_instance_by_room(room, FALSE);
+	struct instance_data *inst = find_instance_by_room(room, FALSE, TRUE);
 	int number = 0;
 	char_data *mob, *tch;
 	obj_data *object, *cnt;
@@ -1037,7 +1048,7 @@ WCMD(do_wload) {
 		
 		// store instance id
 		if (COMPLEX_DATA(room) && COMPLEX_DATA(room)->instance) {
-			MOB_INSTANCE_ID(mob) = COMPLEX_DATA(room)->instance->id;
+			MOB_INSTANCE_ID(mob) = INST_ID(COMPLEX_DATA(room)->instance);
 			if (MOB_INSTANCE_ID(mob) != NOTHING) {
 				add_instance_mob(real_instance(MOB_INSTANCE_ID(mob)), GET_MOB_VNUM(mob));
 			}
@@ -1047,9 +1058,9 @@ WCMD(do_wload) {
 			scale_mob_to_level(mob, atoi(target));
 			SET_BIT(MOB_FLAGS(mob), MOB_NO_RESCALE);
 		}
-		else if (COMPLEX_DATA(room) && COMPLEX_DATA(room)->instance && COMPLEX_DATA(room)->instance->level > 0) {
+		else if (COMPLEX_DATA(room) && COMPLEX_DATA(room)->instance && INST_LEVEL(COMPLEX_DATA(room)->instance) > 0) {
 			// instance level-locked
-			scale_mob_to_level(mob, COMPLEX_DATA(room)->instance->level);
+			scale_mob_to_level(mob, INST_LEVEL(COMPLEX_DATA(room)->instance));
 		}
 		
 		char_to_room(mob, room);
@@ -1072,8 +1083,8 @@ WCMD(do_wload) {
 			obj_to_room(object, room);
 
 			// adventure is level-locked?		
-			if (inst && inst->level > 0) {
-				scale_item_to_level(object, inst->level);
+			if (inst && INST_LEVEL(inst) > 0) {
+				scale_item_to_level(object, INST_LEVEL(inst));
 			}
 		
 			load_otrigger(object);
@@ -1102,9 +1113,9 @@ WCMD(do_wload) {
 		if (*target && isdigit(*target)) {
 			scale_item_to_level(object, atoi(target));
 		}
-		else if ((inst = find_instance_by_room(room, FALSE)) && inst->level > 0) {
+		else if ((inst = find_instance_by_room(room, FALSE, TRUE)) && INST_LEVEL(inst) > 0) {
 			// scaling by locked adventure
-			scale_item_to_level(object, inst->level);
+			scale_item_to_level(object, INST_LEVEL(inst));
 		}
 		
 		if (in_room) {	// load in room
@@ -1187,7 +1198,7 @@ WCMD(do_wmorph) {
 
 
 WCMD(do_wdamage) {
-	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH];
+	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
 	double modifier = 1.0;
 	char_data *ch;
 	int type;
@@ -1202,6 +1213,13 @@ WCMD(do_wdamage) {
 
 	if (*modarg) {
 		modifier = atof(modarg) / 100.0;
+	}
+	
+	// send negatives to %heal% instead
+	if (modifier < 0) {
+		sprintf(buf, "%s health %.2f", name, -atof(modarg));
+		script_heal(room, WLD_TRIGGER, buf);
+		return;
 	}
 	
 	ch = get_char_by_room(room, name);
@@ -1462,8 +1480,8 @@ WCMD(do_wscale) {
 	else if (*lvl_arg) {
 		level = atoi(lvl_arg);
 	}
-	else if ((inst = find_instance_by_room(room, FALSE))) {
-		level = inst->level;
+	else if ((inst = find_instance_by_room(room, FALSE, TRUE))) {
+		level = INST_LEVEL(inst);
 	}
 	else {
 		level = 0;
@@ -1477,7 +1495,7 @@ WCMD(do_wscale) {
 	// scale adventure
 	if (!str_cmp(arg, "instance")) {
 		void scale_instance_to_level(struct instance_data *inst, int level);
-		if (inst || (inst = find_instance_by_room(room, FALSE))) {
+		if (inst || (inst = find_instance_by_room(room, FALSE, TRUE))) {
 			scale_instance_to_level(inst, level);
 		}
 	}
@@ -1501,8 +1519,7 @@ WCMD(do_wscale) {
 			scale_item_to_level(obj, level);
 		}
 		else if ((proto = obj_proto(GET_OBJ_VNUM(obj))) && OBJ_FLAGGED(proto, OBJ_SCALABLE)) {
-			fresh = read_object(GET_OBJ_VNUM(obj), TRUE);
-			scale_item_to_level(fresh, level);
+			fresh = fresh_copy_obj(obj, level);
 			swap_obj_for_obj(obj, fresh);
 			extract_obj(obj);
 		}
@@ -1528,6 +1545,7 @@ const struct wld_command_info wld_cmd_info[] = {
 	{ "wechoaround", do_wsend, SCMD_WECHOAROUND },
 	{ "wechoneither", do_wechoneither, NO_SCMD },
 	{ "wforce", do_wforce, NO_SCMD },
+	{ "wheal", do_wheal, NO_SCMD },
 	{ "wload", do_wload, NO_SCMD },
 	{ "wmorph", do_wmorph, NO_SCMD },
 	{ "wpurge", do_wpurge, NO_SCMD },

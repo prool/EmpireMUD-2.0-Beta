@@ -3,47 +3,57 @@ hut~
 -1 1
 8 289 0 1 -1
 B
-5100 b bdeklmno
+5100 b op
 R
-25 20 1 0
+25 4 1 0
+R
+7 20 1 272
 S
 #5101
 cabin~
 -1 1
 8 289 0 1 -1
 B
-5101 b bdeklmno
+5101 b op
 R
 21 6 1 0
+R
+7 20 1 272
 S
 #5102
 house~
 -1 1
 8 289 0 1 -1
 B
-5102 b bdeklmno
+5102 b op
 R
 21 4 1 0
 R
 16 8 1 0
+R
+7 20 1 272
 S
 #5103
 mudhut~
 -1 1
 8 289 0 1 -1
 B
-5103 e bdeklmno
+5103 e op
 R
-25 10 1 0
+1000 4 5 0
+R
+25 3 1 0
 R
 22 10 1 0
+R
+7 8 1 272
 S
 #5104
 pueblo~
 -1 1
 8 289 0 1 -1
 B
-5104 e bdeklmno
+5104 e op
 R
 21 6 1 0
 R
@@ -54,7 +64,7 @@ cliffdwelling~
 -1 1
 8 289 0 1 -1
 B
-5105 c bcdeklmno
+5105 c cop
 R
 21 10 1 0
 R
@@ -67,9 +77,9 @@ well~
 B
 5106 b 0
 R
-25 5 1 0
+1000 10 5 0
 R
-21 1 1 0
+25 3 1 0
 R
 22 10 1 0
 S
@@ -78,7 +88,7 @@ mine~
 -1 1
 8 289 0 1 -1
 B
-5107 c bcdeklmno
+5107 c cop
 R
 21 4 1 0
 S
@@ -87,7 +97,7 @@ forge~
 -1 1
 8 289 0 1 -1
 B
-5108 be bdeklmno
+5108 be op
 R
 21 4 1 0
 R
@@ -96,45 +106,53 @@ R
 22 15 1 0
 R
 175 10 0 0
+R
+7 20 1 272
 S
 #5109
 mill~
 -1 1
-8 289 0 1 -1
+8 289 r 1 -1
 B
-5109 be bdeklmno
+5109 be op
 R
 21 4 1 0
 R
 3 2 1 8192
 R
 16 8 1 0
+R
+7 20 1 272
 S
 #5110
 potter~
 -1 1
 8 289 0 1 -1
 B
-5110 be bdeklmno
+5110 be op
 R
 21 4 1 0
 R
 3 1 1 8192
 R
 16 8 1 0
+R
+7 20 1 272
 S
 #5111
 stable~
 -1 1
 8 289 0 1 -1
 B
-5111 be bdeklmno
+5111 be op
 R
 21 8 1 0
 R
 19 8 1 0
 R
 16 16 1 0
+R
+7 20 1 272
 S
 #5112
 fence~
@@ -143,7 +161,9 @@ fence~
 B
 5112 be 0
 R
-25 20 1 0
+25 2 1 0
+R
+7 16 1 272
 S
 #5113
 gate~
@@ -152,7 +172,9 @@ gate~
 B
 5113 be 0
 R
-25 20 1 0
+25 2 1 0
+R
+7 8 1 272
 R
 18 1 1 262144
 S
@@ -161,27 +183,33 @@ cannery~
 -1 1
 8 289 0 1 -1
 B
-5114 be bdeklmno
+5114 be op
 R
-25 20 1 0
+25 4 1 0
+R
+7 20 1 272
 S
 #5115
 foundry~
 -1 1
 8 289 0 1 -1
 B
-5115 be bdeklmno
+5115 be op
 R
-25 20 1 0
+25 4 1 0
+R
+7 20 1 272
 S
 #5116
 granary~
 -1 1
 8 289 0 1 -1
 B
-5116 be bdeklmno
+5116 be op
 R
-25 20 1 0
+25 4 1 0
+R
+7 20 1 272
 S
 #5117
 gravelpit~
@@ -190,7 +218,9 @@ gravelpit~
 B
 5117 be 0
 R
-25 20 1 0
+25 4 1 0
+R
+7 20 1 272
 S
 #5118
 lumberyard~
@@ -199,34 +229,42 @@ lumberyard~
 B
 5118 be 0
 R
-25 20 1 0
+25 4 1 0
+R
+7 20 1 272
 S
 #5119
 smokehouse~
 -1 1
 8 289 0 1 -1
 B
-5119 be bdeklmno
+5119 be op
 R
-25 20 1 0
+25 4 1 0
+R
+7 20 1 272
 S
 #5120
 tannery~
 -1 1
 8 289 0 1 -1
 B
-5120 be bdeklmno
+5120 be op
 R
-25 20 1 0
+25 4 1 0
+R
+7 20 1 272
 S
 #5121
 utilityshed~
 -1 1
 8 289 0 1 -1
 B
-5121 be bdeklmno
+5121 be op
 R
-25 20 1 0
+25 4 1 0
+R
+7 20 1 272
 S
 #5122
 quarry~
@@ -235,9 +273,11 @@ quarry~
 B
 5122 be c
 R
+1000 10 5 0
+R
 21 4 1 0
 R
-25 20 1 0
+25 4 1 0
 S
 #5123
 claypit~
@@ -246,62 +286,72 @@ claypit~
 B
 5123 be a
 R
+1000 10 5 0
+R
 21 4 1 0
 R
-25 20 1 0
+25 4 1 0
 S
 #5124
 stonehouse~
 -1 1
-8 40 0 1 -1
+8 289 q 1 -1
 B
-5124 be bdeklmno
+5124 be op
 R
 16 6 1 0
 R
 3 6 1 8192
+R
+7 20 1 272
 S
 #5125
 largehouse~
 -1 1
-8 40 0 1 -1
+8 289 q 1 -1
 B
-5125 be bdeklmno
+5125 be op
 R
 16 4 1 0
 R
 19 1 1 0
 R
 3 12 1 2
+R
+7 20 1 272
 S
 #5126
 treehouse~
 -1 1
-8 40 0 1 -1
+8 289 q 1 -1
 B
-5126 d bdeklmno
+5126 d op
 R
 16 6 1 0
 R
 19 2 1 0
+R
+7 20 1 272
 S
 #5127
 treecomplex~
 -1 1
-8 40 0 1 -1
+8 289 q 1 -1
 B
-5127 d bdeklmno
+5127 d op
 R
 16 20 1 0
 R
 19 8 1 0
+R
+7 40 1 272
 S
 #5128
 undergroundcomplex~
 -1 1
-8 40 0 1 -1
+8 289 q 1 -1
 B
-5128 be bdeklmno
+5128 be op
 R
 3 2 1 0
 R
@@ -312,9 +362,9 @@ S
 #5129
 minecomplex~
 -1 1
-8 40 0 1 -1
+8 289 q 1 -1
 B
-5129 c bcdeklmno
+5129 c cop
 R
 16 30 1 0
 R
@@ -323,48 +373,54 @@ S
 #5130
 alchemist~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
-5130 be bdeklmno
+5130 be op
 R
 16 4 1 0
 R
 19 2 1 0
 R
 3 12 1 2
+R
+7 20 1 272
 S
 #5131
 apiary~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
-5131 be bdeklmno
+5131 be op
 R
 16 12 1 0
 R
 19 4 1 0
 R
 916 8 0 0
+R
+7 20 1 272
 S
 #5132
 bakery~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
-5132 be bdeklmno
+5132 be op
 R
 16 4 1 0
 R
 19 2 1 0
 R
 3 12 1 2
+R
+7 20 1 272
 S
 #5133
 bridge~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
-5133 f 0
+5133 f op
 R
 3 8 1 0
 R
@@ -375,65 +431,75 @@ S
 #5134
 carpenter~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
-5134 be bdeklmno
+5134 be op
 R
 16 4 1 0
 R
 19 2 1 0
 R
 3 12 1 2
+R
+7 20 1 272
 S
 #5135
 glassblower~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
-5135 be bdeklmno
+5135 be op
 R
 16 4 1 0
 R
 19 2 1 0
 R
 3 12 1 2
+R
+7 20 1 272
 S
 #5136
 pigeonpost~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
-5136 be bdeklmno
+5136 be op
 R
 16 12 1 0
 R
 19 4 1 0
+R
+7 20 1 272
 S
 #5137
 tailor~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
-5137 be bdeklmno
+5137 be op
 R
 16 4 1 0
 R
 19 2 1 0
 R
 3 12 1 2
+R
+7 20 1 272
 S
 #5138
 tavern~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
-5138 be bdeklmno
+5138 be op
 R
 16 10 1 0
 R
 19 4 1 0
 R
 3 12 1 2
+R
+7 20 1 272
 R
 143 20 0 0
 R
@@ -442,18 +508,20 @@ S
 #5139
 warehouse~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
-5139 be bdeklmno
+5139 be op
 R
 16 20 1 0
 R
 19 8 1 0
+R
+7 20 1 272
 S
 #5140
 steps~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
 5140 be 0
 R
@@ -462,7 +530,7 @@ S
 #5141
 statue~
 -1 1
-8 43 0 1 -1
+8 289 q 1 -1
 B
 5141 be 0
 R
@@ -475,7 +543,7 @@ S
 #5142
 henge~
 -1 1
-8 43 0 1 -1
+8 300 q 1 -1
 B
 5142 be 0
 R
@@ -484,7 +552,7 @@ S
 #5143
 megalith~
 -1 1
-8 43 0 1 -1
+8 289 q 1 -1
 B
 5143 be 0
 R
@@ -493,7 +561,7 @@ S
 #5144
 cemetery~
 -1 1
-8 43 0 1 -1
+8 289 q 1 -1
 B
 5144 be 0
 R
@@ -502,20 +570,22 @@ S
 #5145
 park~
 -1 1
-8 43 0 1 -1
+8 289 0 1 -1
 B
 5145 b 0
 R
-25 25 1 0
+1001 3 5 0
+R
+25 5 1 0
 R
 3 4 1 0
 S
 #5146
 tomb~
 -1 1
-8 43 0 1 -1
+8 289 q 1 -1
 B
-5146 be bdeklmno
+5146 be op
 R
 16 4 1 0
 R
@@ -526,22 +596,24 @@ S
 #5147
 shrine~
 -1 1
-8 43 0 1 -1
+8 289 0 1 -1
 B
-5147 be bdeklmno
+5147 be op
 R
 16 4 1 0
 R
 19 2 1 0
 R
 3 12 1 0
+R
+7 20 1 272
 S
 #5148
 temple~
 -1 1
-8 43 0 1 -1
+8 289 q 1 -1
 B
-5148 be bdeklmno
+5148 be op
 R
 16 12 1 0
 R
@@ -552,9 +624,9 @@ S
 #5149
 library~
 -1 1
-8 48 0 1 -1
+8 300 q 1 -1
 B
-5149 be bdeklmno
+5149 be op
 R
 16 100 1 0
 R
@@ -565,9 +637,9 @@ S
 #5150
 hightemple~
 -1 1
-8 48 0 1 -1
+8 300 q 1 -1
 B
-5150 be bdeklmno
+5150 be op
 R
 16 24 1 0
 R
@@ -578,9 +650,9 @@ S
 #5151
 pyramid~
 -1 1
-8 48 0 1 -1
+8 300 q 1 -1
 B
-5151 e bdeklmno
+5151 e op
 R
 16 100 1 0
 R
@@ -591,7 +663,7 @@ S
 #5152
 docks~
 -1 1
-8 45 0 1 -1
+8 289 q 1 -1
 B
 5152 be ah
 R
@@ -602,7 +674,7 @@ S
 #5153
 shipyard~
 -1 1
-8 45 0 1 -1
+8 289 q 1 -1
 B
 5153 be a
 R
@@ -613,7 +685,7 @@ S
 #5154
 upgraded shipyard~
 -1 1
-8 45 k 1 -1
+8 300 kq 1 -1
 B
 5154 be a
 R
@@ -624,18 +696,18 @@ S
 #5155
 swampwalk~
 -1 1
-8 208 0 1 -1
+8 300 q 1 -1
 B
 5155 m 0
 R
 16 4 1 0
 R
-25 40 1 0
+7 40 1 272
 S
 #5156
 swampplatform~
 -1 1
-8 208 0 1 -1
+8 300 q 1 -1
 B
 5156 m 0
 R
@@ -643,51 +715,51 @@ R
 R
 19 4 1 0
 R
-25 40 1 0
+7 40 1 272
 S
 #5157
 swamphut~
 -1 1
-8 208 0 1 -1
+8 300 q 1 -1
 B
-5157 m bdeklmno
+5157 m mop
 R
-16 20 1 0
+25 20 1 0
 R
 19 8 1 0
 R
-25 40 1 0
+7 40 1 272
 S
 #5158
 swampmanor~
 -1 1
-8 208 0 1 -1
+8 300 q 1 -1
 B
-5158 m bdeklmno
+5158 m mop
 R
 16 30 1 0
 R
 19 12 1 0
 R
-25 60 1 0
+7 60 1 272
 S
 #5159
 swampcomplex~
 -1 1
-8 208 0 1 -1
+8 300 q 1 -1
 B
-5159 m bdeklmno
+5159 m mop
 R
 16 40 1 0
 R
 19 16 1 0
 R
-25 80 1 0
+7 80 1 272
 S
 #5160
 courtyard~
 -1 1
-8 42 m 1 -1
+8 300 m 1 -1
 B
 5160 bde 0
 R
@@ -698,22 +770,24 @@ S
 #5161
 trapperspost~
 -1 1
-8 42 0 1 -1
+8 300 q 1 -1
 B
-5161 del bdeklmno
+5161 del op
 R
 16 18 1 0
 R
 19 4 1 0
+R
+7 40 1 272
 R
 15 8 1 32
 S
 #5162
 baths~
 -1 1
-8 42 0 1 -1
+8 300 0 1 -1
 B
-5162 be bdeklmno
+5162 be op
 R
 3 4 1 8192
 R
@@ -726,7 +800,7 @@ S
 #5163
 fountain~
 -1 1
-8 42 m 1 -1
+8 300 m 1 -1
 B
 5163 be 0
 R
@@ -735,9 +809,9 @@ S
 #5164
 sorcerytower~
 -1 1
-8 42 m 1 -1
+8 300 mq 1 -1
 B
-5164 be bdeklmno
+5164 be op
 R
 16 80 1 0
 R
@@ -750,9 +824,9 @@ S
 #5165
 portcullis~
 -1 1
-8 42 m 1 -1
+8 300 mq 1 -1
 B
-5165 be bdeklmno
+5165 be op
 R
 16 60 1 0
 R
@@ -763,9 +837,9 @@ S
 #5166
 greathall~
 -1 1
-8 42 m 1 -1
+8 300 mq 1 -1
 B
-5166 be bdeklmno
+5166 be op
 R
 16 60 1 0
 R
@@ -776,31 +850,31 @@ S
 #5167
 guardtower~
 -1 1
-8 44 m 1 -1
+8 289 mq 1 -1
 B
-5167 be bdeklmno
+5167 be op
 R
 16 12 1 0
 R
 19 3 1 0
 S
 #5168
-upgraded guard tower~
+advanced guard tower upgrade~
 -1 1
-8 47 km 1 -1
+8 300 kmq 1 -1
 B
-5168 be bdeklmno
+5168 be op
 R
 16 12 1 0
 R
 19 3 1 0
 S
 #5169
-upgraded guard tower 2~
+superior guard tower upgrade~
 -1 1
-8 47 km 1 -1
+8 300 kmq 1 -1
 B
-5169 be bdeklmno
+5169 be op
 R
 16 24 1 0
 R
@@ -809,20 +883,22 @@ S
 #5170
 mountainoutpost~
 -1 1
-8 44 0 1 -1
+8 300 q 1 -1
 B
-5170 c bcdeklmno
+5170 c cop
 R
 16 12 1 0
 R
 19 3 1 0
+R
+7 20 1 272
 S
 #5171
 barracks~
 -1 1
-8 44 0 1 -1
+8 300 q 1 -1
 B
-5171 be bdeklmno
+5171 be op
 R
 16 40 1 0
 R
@@ -833,9 +909,9 @@ S
 #5172
 trainingyard~
 -1 1
-8 44 0 1 -1
+8 300 q 1 -1
 B
-5172 be bdeklmno
+5172 be op
 R
 16 40 1 0
 R
@@ -846,20 +922,22 @@ S
 #5173
 gatehouse~
 -1 1
-8 44 0 1 -1
+8 289 q 1 -1
 B
-5173 be bdeklmno
+5173 be op
 R
 16 10 1 0
 R
 19 4 1 0
 R
 3 10 1 0
+R
+7 20 1 272
 S
 #5174
 wall~
 -1 1
-8 44 0 1 -1
+8 289 q 1 -1
 B
 5174 be 0
 R
@@ -868,7 +946,7 @@ S
 #5175
 greatwall~
 -1 1
-8 141 0 1 -1
+8 300 q 1 -1
 B
 5174 bce 0
 R
@@ -879,9 +957,9 @@ S
 #5176
 rivergate~
 -1 1
-8 141 0 1 -1
+8 300 q 1 -1
 B
-5176 f f
+5176 f fqtu
 R
 16 20 1 0
 R
@@ -894,7 +972,7 @@ S
 #5177
 terracedgarden~
 -1 1
-8 200 0 1 -1
+8 300 q 1 -1
 B
 5177 c 0
 R
@@ -904,12 +982,14 @@ R
 R
 22 60 1 0
 R
+7 20 1 272
+R
 1202 30 0 0
 S
 #5178
 raftgarden~
 -1 1
-8 200 0 1 -1
+8 300 q 1 -1
 B
 5178 f 0
 R
@@ -917,14 +997,16 @@ R
 R
 19 4 1 0
 R
-25 60 1 0
+7 60 1 272
+R
+7 20 1 272
 R
 1205 30 0 0
 S
 #5179
 oasisgarden~
 -1 1
-8 200 0 1 -1
+8 300 q 1 -1
 B
 5179 j 0
 R
@@ -934,6 +1016,8 @@ R
 R
 22 60 1 0
 R
+7 20 1 272
+R
 1204 15 0 0
 R
 1203 15 0 0
@@ -941,9 +1025,9 @@ S
 #5180
 estuarygarden~
 -1 1
-8 200 0 1 -1
+8 300 q 1 -1
 B
-5180 f i
+5180 t 0
 R
 16 12 1 0
 R
@@ -951,12 +1035,14 @@ R
 R
 22 60 1 0
 R
+7 20 1 272
+R
 1200 30 0 0
 S
 #5181
 shadygarden~
 -1 1
-8 200 0 1 -1
+8 300 q 1 -1
 B
 5181 bd 0
 R
@@ -964,16 +1050,18 @@ R
 R
 19 4 1 0
 R
-25 60 1 0
+7 60 1 272
+R
+7 20 1 272
 R
 1201 30 0 0
 S
 #5182
 mint~
 -1 0
-8 134 0 1 -1
+8 300 q 1 -1
 B
-5182 be bdeklmno
+5182 be op
 R
 16 12 1 0
 R
@@ -981,31 +1069,37 @@ R
 R
 3 12 1 0
 R
+7 20 1 272
+R
 1309 4 0 0
 S
 #5183
 tradingpost~
 -1 1
-8 217 0 1 -1
+8 300 q 1 -1
 B
-5183 be bdeklmno
+5183 be op
 R
 16 12 1 0
 R
 19 4 1 0
+R
+7 20 1 272
 S
 #5184
 secretcache~
 -1 1
 8 149 0 1 -1
 B
-5184 be bdeklmno
+5184 be op
 R
 16 20 1 0
 R
 19 6 1 0
 R
 3 20 1 0
+R
+7 40 1 272
 R
 177 5 0 0
 S
@@ -1025,22 +1119,24 @@ S
 #5186
 househaven~
 -1 1
-8 46 0 1 -1
+8 300 q 1 -1
 B
-5186 b bdeklmno
+5186 b op
 R
 16 8 1 0
 R
 19 2 1 0
 R
 3 12 1 2
+R
+7 20 1 272
 S
 #5187
 burrowhaven~
 -1 1
-8 46 0 1 -1
+8 300 q 1 -1
 B
-5187 d bdeklmno
+5187 d op
 R
 16 12 1 0
 R
@@ -1051,9 +1147,9 @@ S
 #5188
 pueblohaven~
 -1 1
-8 46 0 1 -1
+8 300 q 1 -1
 B
-5188 e bdeklmno
+5188 e op
 R
 16 4 1 0
 R
@@ -1064,9 +1160,9 @@ S
 #5189
 cavehaven~
 -1 1
-8 46 0 1 -1
+8 300 q 1 -1
 B
-5189 c bdeklmno
+5189 c op
 R
 16 30 1 0
 R
@@ -1092,7 +1188,7 @@ S
 #5191
 drainage~
 -1 1
-8 266 0 1 -1
+8 300 q 1 -1
 B
 5191 j 0
 R
@@ -1100,14 +1196,14 @@ R
 R
 19 4 1 0
 R
-25 40 1 0
+7 40 1 272
 S
 #5192
 oilmaker~
 -1 1
-8 39 0 1 -1
+8 289 q 1 -1
 B
-5192 be bdeklmno
+5192 be op
 R
 21 4 1 0
 R
@@ -1116,19 +1212,23 @@ R
 16 8 1 0
 R
 19 4 1 0
+R
+7 20 1 272
 S
 #5193
 cabinetofcuriosities~
 -1 1
-8 42 0 1 -1
+8 300 0 1 -1
 B
-5193 be bdeklmno
+5193 be op
 R
 16 4 1 0
 R
 19 2 1 0
 R
 3 12 1 2
+R
+7 20 1 272
 S
 #5194
 familygravesite~
@@ -1142,5 +1242,78 @@ R
 25 4 1 0
 R
 22 4 1 0
+S
+#5195
+celestialforge~
+-1 1
+8 300 q 1 -1
+B
+5195 bce cop
+R
+16 100 1 0
+R
+19 40 1 0
+R
+3 48 1 0
+R
+610 5 0 0
+R
+611 5 0 0
+R
+1115 20 0 0
+S
+#5196
+oceanfishery~
+-1 0
+8 289 q 1 -1
+B
+5196 q 0
+R
+21 8 1 0
+R
+7 20 1 272
+S
+#5197
+stilthouse~
+-1 1
+8 289 q 1 -1
+B
+5197 qu op
+R
+21 8 1 0
+R
+16 8 1 0
+R
+19 2 1 0
+R
+7 20 1 272
+S
+#5198
+coastalshrine~
+-1 1
+8 300 q 1 -1
+B
+5198 q 0
+R
+16 4 1 0
+R
+19 2 1 0
+R
+3 18 1 0
+S
+#5199
+mountainwell~
+-1 0
+8 300 q 1 -1
+B
+5199 c 0
+R
+1000 10 5 0
+R
+25 3 1 0
+R
+21 2 1 0
+R
+22 10 1 0
 S
 $

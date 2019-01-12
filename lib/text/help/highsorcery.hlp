@@ -26,8 +26,6 @@ Debuff type:  High Sorcery
 
 Ablate deals damage to your victim and will cause bits of his armor to burn
 off, leaving him less resistant to physical damage.
-
-See also: BATTLEMAGE CLASS
 #
 "ARCANE POWER"
 
@@ -50,8 +48,6 @@ Cost:  based on damage
 
 Arclight is the Archmage's best magical attack. It deals direct damage to the
 target.
-
-See also: ARCHMAGE CLASS
 #
 CHRONOBLAST
 
@@ -65,8 +61,6 @@ Debuff type:  High Sorcery
 
 Chronoblast uses the artificer's knowledge of clocks to slow down the enemy,
 and the transition into a slower time frame deals serious magical damage.
-
-See also: ARTIFICER CLASS
 #
 "CITY TELEPORTATION"
 
@@ -114,6 +108,10 @@ This ritual allows a sorcerer to quickly clear a large area of land through
 ritual magic. It will bring down forests and crops within 3 tiles of the
 caster, one resource at a time, repeating until it completes (or until you run
 out of mana). These resources are transferred to the caster.
+
+On claimed land, you can only devastate forest tiles if you have chop
+permission and can only devastate crop tiles if you have harvest permission.
+These locations will be skipped if you don't have the right privileges.
 
 Gains experience each time you complete the ritual, devastating a tile.
 
@@ -233,9 +231,9 @@ Foresight (High Sorcery ability)
 Usage:  foresight [person]
 Cost:  30 mana
 
-When granted the gift of foresight, a person gains +5, +10, or +15 Dodge
-(based on skill, modified by Intelligence) as she begins to see the arc of an
-opponent's weapon before it strikes.
+When granted the gift of foresight, a person gains extra Dodge (based on skill,
+modified by Intelligence) as she begins to see the arc of an opponent's weapon
+before it strikes.
 
 If your target is in combat, you will join the combat upon using this ability.
 
@@ -332,8 +330,8 @@ Portal Master (High Sorcery ability)
 Command:  collapse <portal>
 Cost:  15 mana
 
-Becoming a Portal Master removes the range limit on your empire's portals.
-It also allows you to collapse portals yourself.
+Becoming a Portal Master removes the same-island-only limit on your empire's
+portals. It also allows you to collapse portals yourself.
 
 You can gain Portal Master skill whenever someone in your empire opens a
 portal, and whenever you collapse a portal.
@@ -424,21 +422,6 @@ Teleportation).
 
 See also: CITY TELEPORTATION, RITUAL
 #
-SCOUR
-
-Scour
-High Sorcery Synergy Ability: 100 Empire
-
-Usage:  scour [victim]
-Cooldown:  6 seconds
-Cost:  based on damage
-Debuff type:  High Sorcery
-
-Scour will scrub away at your opponent, damaging them magically over time (in
-addition to damage with the initial hit). This DoT stacks up to 5 times.
-
-See also: DOT, EXARCH CLASS
-#
 SHADOWLASH "SHADOW LASH"
 
 Shadowlash
@@ -453,7 +436,7 @@ Shadowlash calls forth a tentacle of pure shadow, which wraps itself around
 your victim's head for both instantaneous and lasting damage. It also blinds
 your victim briefly. The DoT effect stacks up to 3 times.
 
-See also: DOT, OCCULTIST CLASS
+See also: DOT
 #
 "SIEGE RITUAL"
 
@@ -520,8 +503,6 @@ Debuff type:  High Sorcery
 
 Soulchain wraps the victim in a painful spiritual binding, sapping his
 intelligence as well as dealing magical damage.
-
-See also: LICH CLASS
 #
 STAFFMAKING "STAFF MAKING" STAFF STAVES "POWERFUL STAVES"
 
@@ -643,7 +624,7 @@ Thornlash wraps a coil of thorny vines around your victim. The vines cause
 immediate pain, while the thorns dig in and deal poison damage over time. This
 DoT effect stacks up to 3 times.
 
-See also: DOT, THEURGE CLASS
+See also: DOT
 #
 VIGOR
 

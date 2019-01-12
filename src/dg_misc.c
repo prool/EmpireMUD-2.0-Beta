@@ -142,7 +142,7 @@ void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int script_
 
 		value = atoi(value_p);
 		duration = atoi(duration_p);
-		if (duration == 0 || duration < -1) {
+		if ((duration == 0 || duration < -1) && str_cmp(value_p, "off")) {
 			script_log("Trigger: %s, VNum %d. dg_affect: need positive duration!", GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig));
 			script_log("Line was: dg_affect %s %s %s %s (%d)", charname, property, value_p, duration_p, duration);
 			return;
@@ -176,7 +176,7 @@ void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int script_
 		return;
 	}
 	
-	if (duration == -1 && !IS_NPC(ch)) {
+	if (duration == -1 && !IS_NPC(ch) && str_cmp(value_p, "off")) {
 		script_log("Trigger: %s, VNum %d. dg_affect: cannot use infinite duration on player target", GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig));
 		return;
 	}
@@ -384,8 +384,8 @@ void do_dg_build(room_data *target, char *argument) {
 		disassociate_building(target);
 	
 		construct_building(target, GET_BLD_VNUM(bld));
-		special_building_setup(NULL, target);
 		complete_building(target);
+		special_building_setup(NULL, target);
 	
 		if (dir != NO_DIR) {
 			create_exit(target, SHIFT_DIR(target, dir), dir, FALSE);
@@ -408,6 +408,7 @@ void do_dg_build(room_data *target, char *argument) {
 * @param vehicle_data *veh Optional: A vehicle whose ownership to change.
 */
 void do_dg_own(empire_data *emp, char_data *vict, obj_data *obj, room_data *room, vehicle_data *veh) {
+	void adjust_vehicle_tech(vehicle_data *veh, bool add);
 	void kill_empire_npc(char_data *ch);
 	void setup_generic_npc(char_data *mob, empire_data *emp, int name, int sex);
 	
@@ -423,16 +424,18 @@ void do_dg_own(empire_data *emp, char_data *vict, obj_data *obj, room_data *room
 		obj->last_empire_id = emp ? EMPIRE_VNUM(emp) : NOTHING;
 	}
 	if (veh) {
-		if (VEH_OWNER(veh) && emp != VEH_OWNER(veh) ) {
+		if (VEH_OWNER(veh) && emp != VEH_OWNER(veh)) {
 			VEH_SHIPPING_ID(veh) = -1;
 			if (VEH_INTERIOR_HOME_ROOM(veh)) {
 				abandon_room(VEH_INTERIOR_HOME_ROOM(veh));
 			}
+			adjust_vehicle_tech(veh, FALSE);
 		}
 		VEH_OWNER(veh) = emp;
 		if (emp && VEH_INTERIOR_HOME_ROOM(veh)) {
 			claim_room(VEH_INTERIOR_HOME_ROOM(veh), emp);
 		}
+		adjust_vehicle_tech(veh, TRUE);
 	}
 	if (room) {
 		if (ROOM_OWNER(room) && emp != ROOM_OWNER(room)) {
@@ -480,7 +483,7 @@ void dg_purge_instance(void *owner, struct instance_data *inst, char *argument) 
 	}
 	else if (is_abbrev(arg1, "mobile")) {
 		LL_FOREACH_SAFE(character_list, mob, next_mob) {
-			if (!IS_NPC(mob) || GET_MOB_VNUM(mob) != vnum || EXTRACTED(mob)) {
+			if (!IS_NPC(mob) || GET_MOB_VNUM(mob) != vnum || EXTRACTED(mob) || MOB_INSTANCE_ID(mob) != INST_ID(inst)) {
 				continue;
 			}
 			
@@ -496,19 +499,19 @@ void dg_purge_instance(void *owner, struct instance_data *inst, char *argument) 
 		}
 	}
 	else if (is_abbrev(arg1, "object")) {
-		for (iter = 0; iter < inst->size; ++iter) {
-			if (!inst->room[iter]) {
+		for (iter = 0; iter < INST_SIZE(inst); ++iter) {
+			if (!INST_ROOM(inst, iter)) {
 				continue;
 			}
 			
-			LL_FOREACH_SAFE2(ROOM_CONTENTS(inst->room[iter]), obj, next_obj, next_content) {
+			LL_FOREACH_SAFE2(ROOM_CONTENTS(INST_ROOM(inst, iter)), obj, next_obj, next_content) {
 				if (GET_OBJ_VNUM(obj) != vnum) {
 					continue;
 				}
 				
 				// found!
-				if (*argument && ROOM_PEOPLE(inst->room[iter])) {
-					act(argument, FALSE, ROOM_PEOPLE(inst->room[iter]), NULL, NULL, TO_CHAR | TO_ROOM);
+				if (*argument && ROOM_PEOPLE(INST_ROOM(inst, iter))) {
+					act(argument, FALSE, ROOM_PEOPLE(INST_ROOM(inst, iter)), NULL, NULL, TO_CHAR | TO_ROOM);
 				}
 			
 				if (obj == owner) {
@@ -743,6 +746,65 @@ void do_dg_terraform(room_data *target, sector_data *sect) {
 }
 
 
+/**
+* For the has_component and charge_component script functions. Both are
+* expected to look like:
+*   %actor.has_component(type, amount, <optional comma-separated flags>)%
+*
+* Examples: %actor.has_component(fibers, 3, plant, hard)%
+*           %actor.charge_component(sapling, 1)%
+*
+* @param char *argument The text inside the (parens).
+* @param int *cmp_type An int pointer to pass back the component type.
+* @param int *number An int pointer to pass back the number requested.
+* @param bitvector_t *cmp_flags A pointer to pass back and component flags.
+* @return bool TRUE if the string parsed correctly; FALSE if this was not a valid string.
+*/
+bool parse_script_component_args(char *argument, int *cmp_type, int *number, bitvector_t *cmp_flags) {
+	extern const char *component_flags[];
+	extern const char *component_types[];
+	
+	char str_arg[256], num_arg[256], arg[256], temp[256];
+	bitvector_t flag;
+	
+	*cmp_type = 0;
+	*number = 0;
+	*cmp_flags = NOBITS;
+	
+	comma_args(argument, str_arg, temp);	// type?
+	strcpy(arg, temp);
+	comma_args(arg, num_arg, temp);	/// number
+	strcpy(arg, temp);
+	
+	// basic args
+	if (!*str_arg || !*num_arg) {
+		return FALSE;	// first 2 args are required
+	}
+	if ((*cmp_type = search_block(str_arg, component_types, FALSE)) == NOTHING) {
+		return FALSE;	// not a valid type
+	}
+	if (!isdigit(*num_arg) || (*number = atoi(num_arg)) < 0) {
+		return FALSE;	// invalid number
+	}
+	
+	// any remaining args? these will be bits
+	while (*arg) {
+		comma_args(arg, str_arg, temp);
+		strcpy(arg, temp);
+		
+		if ((flag = search_block(str_arg, component_flags, FALSE)) != NOTHING) {
+			*cmp_flags |= BIT(flag);
+		}
+		else {
+			return FALSE;	// not a valid component flag
+		}
+	}
+	
+	// if we survived to here, we got a full match (and already set the pointers)
+	return TRUE;
+}
+
+
 void send_char_pos(char_data *ch, int dam) {
 	switch (GET_POS(ch)) {
 		case POS_MORTALLYW:
@@ -868,6 +930,9 @@ void script_damage(char_data *vict, char_data *killer, int level, int dam_type, 
 	}
 	
 	dam = level / 7.0;
+	if (level > 100) {
+		dam *= 1.0 + ((level - 100) / 40.0);
+	}
 	dam *= modifier;
 	
 	// full immunity
@@ -950,4 +1015,157 @@ void script_damage_over_time(char_data *vict, any_vnum atype, int level, int dam
 
 	// add the affect
 	apply_dot_effect(vict, atype, ceil((double)dur_seconds / SECS_PER_REAL_UPDATE), dam_type, (int) dam, MAX(1, max_stacks), cast_by);
+}
+
+
+/**
+* Central processor for %heal% -- this is used to restore scaled health/move/
+* mana, and (optionally) to remove debuffs and dots.
+*
+* Expected parameters in the string: <target> <what to heal> [scale modifier]
+* Example: %self% mana 100
+*
+* @param void *thing The thing calling the script (mob, room, obj, veh)
+* @param int type What type "thing" is (MOB_TRIGGER, etc)
+* @param char *argument The text passed to the command.
+*/
+void script_heal(void *thing, int type, char *argument) {
+	extern char_data *get_char_by_room(room_data *room, char *name);
+	extern char_data *get_char_by_vehicle(vehicle_data *veh, char *name);
+	extern int get_room_scale_level(room_data *room, char_data *targ);
+	extern const double apply_values[];
+	extern const bool aff_is_bad[];
+	
+	char targ_arg[MAX_INPUT_LENGTH], what_arg[MAX_INPUT_LENGTH], *scale_arg, log_root[MAX_STRING_LENGTH];
+	struct affected_type *aff, *next_aff;
+	int pos, amount, level = -1;
+	char_data *victim = NULL;
+	double scale = 100.0;
+	bool done_aff;
+	bitvector_t bitv;
+	
+	// 3 args: target, what, scale
+	scale_arg = any_one_arg(argument, targ_arg);
+	scale_arg = any_one_arg(scale_arg, what_arg);
+	skip_spaces(&scale_arg);
+	if (*targ_arg == UID_CHAR) {
+		victim = get_char(targ_arg);
+	}	// otherwise we'll determine victim later
+	
+	// determine how to log errors
+	switch (type) {
+		case MOB_TRIGGER: {
+			level = get_approximate_level((char_data*)thing);
+			if (!victim) {
+				victim = get_char_room_vis((char_data*)thing, targ_arg);
+			}
+			
+			snprintf(log_root, sizeof(log_root), "Mob (%s, VNum %d)::", GET_SHORT((char_data*)thing), GET_MOB_VNUM((char_data*)thing));
+			break;
+		}
+		case OBJ_TRIGGER: {
+			level = GET_OBJ_CURRENT_SCALE_LEVEL((obj_data*)thing);
+			if (!victim) {
+				victim = get_char_by_obj((obj_data*)thing, targ_arg);
+			}
+			
+			snprintf(log_root, sizeof(log_root), "Obj (%s, VNum %d)::", GET_OBJ_SHORT_DESC((obj_data*)thing), GET_OBJ_VNUM((obj_data*)thing));
+			break;
+		}
+		case VEH_TRIGGER: {
+			level = VEH_SCALE_LEVEL((vehicle_data*)thing);
+			if (!victim) {
+				victim = get_char_by_vehicle((vehicle_data*)thing, targ_arg);
+			}
+			
+			snprintf(log_root, sizeof(log_root), "Veh (%s, VNum %d)::", VEH_SHORT_DESC((vehicle_data*)thing), VEH_VNUM((vehicle_data*)thing));
+			break;
+		}
+		case WLD_TRIGGER:
+		default: {
+			level = get_room_scale_level((room_data*)thing, NULL);
+			if (!victim) {
+				victim = get_char_by_room((room_data*)thing, targ_arg);
+			}
+			
+			snprintf(log_root, sizeof(log_root), "Room %d ::", GET_ROOM_VNUM((room_data*)thing));
+			break;
+		}
+	}
+	
+	if (!*targ_arg || !*what_arg) {
+		script_log("%s script_heal: Invalid arguments: %s", log_root, argument);
+		return;
+	}
+	if (level < 0) {
+		script_log("%s script_heal: Unable to detect level", log_root);
+		return;
+	}
+	if (!victim) {
+		script_log("%s script_heal: Unable to find target: %s", log_root, targ_arg);
+		return;
+	}
+	if (IS_DEAD(victim)) {
+		return;	// fail silently on dead people
+	}
+	
+	// process scale arg (optional)
+	if (*scale_arg && (scale = atof(scale_arg)) < 1) {
+		script_log("%s script_heal: Invalid scale argument: %s", log_root, scale_arg);
+		return;
+	}
+	scale /= 100.0;	// convert to percent
+	
+	// now the real work
+	if (is_abbrev(what_arg, "health") || is_abbrev(what_arg, "hitpoints")) {
+		amount = (394 * level / 55.0 - 5580 / 11.0) * scale;
+		amount = MAX(30, amount);
+		GET_HEALTH(victim) = MIN(GET_MAX_HEALTH(victim), GET_HEALTH(victim) + amount);
+		
+		if (GET_POS(victim) < POS_SLEEPING) {
+			GET_POS(victim) = POS_STANDING;
+		}
+	}
+	else if (is_abbrev(what_arg, "mana")) {
+		amount = (292 * level / 55.0 - 3940 / 11.0) * scale;
+		amount = MAX(40, amount);
+		GET_MANA(victim) = MIN(GET_MAX_MANA(victim), GET_MANA(victim) + amount);
+	}
+	else if (is_abbrev(what_arg, "moves")) {
+		amount = (37 * level / 11.0 - 1950 / 11.0) * scale;
+		amount = MAX(75, amount);
+		GET_MOVE(victim) = MIN(GET_MAX_MOVE(victim), GET_MOVE(victim) + amount);
+	}
+	else if (is_abbrev(what_arg, "dots")) {
+		while (victim->over_time_effects) {
+			dot_remove(victim, victim->over_time_effects);
+		}
+	}
+	else if (is_abbrev(what_arg, "debuffs")) {
+	
+		LL_FOREACH_SAFE(victim->affected, aff, next_aff) {
+			// can't cleanse penalties (things cast by self)
+			if (aff->cast_by == CAST_BY_ID(victim)) {
+				continue;
+			}
+			
+			done_aff = FALSE;
+			if (aff->location != APPLY_NONE && (apply_values[(int) aff->location] == 0.0 || aff->modifier < 0)) {
+				affect_remove(victim, aff);
+				done_aff = TRUE;
+			}
+			if (!done_aff && (bitv = aff->bitvector) != NOBITS) {
+				// check each bit
+				for (pos = 0; bitv && !done_aff; ++pos, bitv >>= 1) {
+					if (IS_SET(bitv, BIT(0)) && aff_is_bad[pos]) {
+						affect_remove(victim, aff);
+						done_aff = TRUE;
+					}
+				}
+			}
+		}
+	}
+	else {
+		script_log("%s script_heal: Invalid thing to heal: %s", log_root, what_arg);
+	}
 }

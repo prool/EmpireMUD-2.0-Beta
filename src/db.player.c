@@ -55,7 +55,8 @@ void update_class(char_data *ch);
 // local protos
 void clear_player(char_data *ch);
 void delete_player_character(char_data *ch);
-static bool member_is_timed_out(time_t created, time_t last_login, double played_hours);
+time_t get_member_timeout_time(time_t created, time_t last_login, double played_hours);
+void purge_bound_items(int idnum);
 char_data *read_player_from_file(FILE *fl, char *name, bool normal, char_data *ch);
 int sort_players_by_idnum(player_index_data *a, player_index_data *b);
 int sort_players_by_name(player_index_data *a, player_index_data *b);
@@ -150,6 +151,34 @@ char_data *find_player_in_room_by_id(room_data *room, int id) {
 		}
 	}
 	return NULL;
+}
+
+
+/**
+* Checks if a user is in the anonymous host list -- the list of sites that
+* are public and hide a player's real IP address. This is used to prevent
+* cheating via unlinked alts or multiplaying.
+*
+* You can disable this by turning off the 'restrict_anonymous_hosts' config.
+*
+* @param descriptor_data *desc The user.
+* @return bool TRUE if the player is from an anonymous public host, FALSE if not.
+*/
+bool has_anonymous_host(descriptor_data *desc) {
+	extern const char *anonymous_public_hosts[];
+	int iter;
+	
+	if (!config_get_bool("restrict_anonymous_hosts")) {
+		return FALSE;	// don't bother
+	}
+	
+	for (iter = 0; *anonymous_public_hosts[iter] != '\n'; ++iter) {
+		if (!str_cmp(desc->host, anonymous_public_hosts[iter])) {
+			return TRUE;	// FOUND!
+		}
+	}
+	
+	return FALSE;	// not found
 }
 
 
@@ -741,6 +770,9 @@ void check_delayed_load(char_data *ch) {
 	fclose(fl);	
 	
 	update_reputations(ch);
+	
+	// definitely safe to save delay file
+	DONT_SAVE_DELAY(ch) = FALSE;
 }
 
 
@@ -762,6 +794,7 @@ void free_char(char_data *ch) {
 	struct player_slash_history *slash_hist, *next_slash_hist;
 	struct player_craft_data *pcd, *next_pcd;
 	struct player_currency *cur, *next_cur;
+	struct minipet_data *mini, *next_mini;
 	struct interaction_item *interact;
 	struct pursuit_data *purs;
 	struct player_tech *ptech;
@@ -866,6 +899,9 @@ void free_char(char_data *ch) {
 		if (GET_DISGUISED_NAME(ch)) {
 			free(GET_DISGUISED_NAME(ch));
 		}
+		if (GET_MOVEMENT_STRING(ch)) {
+			free(GET_MOVEMENT_STRING(ch));
+		}
 		
 		free_resource_list(GET_ACTION_RESOURCES(ch));
 		
@@ -898,6 +934,7 @@ void free_char(char_data *ch) {
 				}
 				free(history);
 			}
+			HASH_DEL(GET_SLASH_HISTORY(ch), slash_hist);
 			free(slash_hist);
 		}
 		
@@ -935,6 +972,7 @@ void free_char(char_data *ch) {
 			free(abil);
 		}
 		HASH_ITER(hh, GET_ABILITY_GAIN_HOOKS(ch), hook, next_hook) {
+			HASH_DEL(GET_ABILITY_GAIN_HOOKS(ch), hook);
 			free(hook);
 		}
 		HASH_ITER(hh, GET_CURRENCIES(ch), cur, next_cur) {
@@ -944,6 +982,10 @@ void free_char(char_data *ch) {
 		HASH_ITER(hh, GET_LEARNED_CRAFTS(ch), pcd, next_pcd) {
 			HASH_DEL(GET_LEARNED_CRAFTS(ch), pcd);
 			free(pcd);
+		}
+		HASH_ITER(hh, GET_MINIPETS(ch), mini, next_mini) {
+			HASH_DEL(GET_MINIPETS(ch), mini);
+			free(mini);
 		}
 		HASH_ITER(hh, GET_MOUNT_LIST(ch), mount, next_mount) {
 			HASH_DEL(GET_MOUNT_LIST(ch), mount);
@@ -981,6 +1023,9 @@ void free_char(char_data *ch) {
 	}
 	if (ch->player.long_descr && (!proto || ch->player.long_descr != proto->player.long_descr)) {
 		free(ch->player.long_descr);
+	}
+	if (ch->player.look_descr && (!proto || ch->player.look_descr != proto->player.look_descr)) {
+		free(ch->player.look_descr);
 	}
 	if (ch->proto_script && (!proto || ch->proto_script != proto->proto_script)) {
 		free_proto_scripts(&ch->proto_script);
@@ -1077,12 +1122,13 @@ char_data *load_player(char *name, bool normal) {
 * @return char_data* The loaded character.
 */
 char_data *read_player_from_file(FILE *fl, char *name, bool normal, char_data *ch) {
+	void add_minipet(char_data *ch, any_vnum vnum);
 	void loaded_obj_to_char(obj_data *obj, char_data *ch, int location, obj_data ***cont_row);
 	extern obj_data *Obj_load_from_file(FILE *fl, obj_vnum vnum, int *location, char_data *notify);
 	extern struct mail_data *parse_mail(FILE *fl, char *first_line);
 	
 	char line[MAX_INPUT_LENGTH], error[MAX_STRING_LENGTH], str_in[MAX_INPUT_LENGTH];
-	int account_id = NOTHING, ignore_pos = 0, reward_pos = 0;
+	int account_id = NOTHING, ignore_pos = 0;
 	struct lore_data *lore, *last_lore = NULL, *new_lore;
 	struct over_time_effect_type *dot, *last_dot = NULL;
 	struct affected_type *af, *next_af, *af_list = NULL;
@@ -1206,9 +1252,9 @@ char_data *read_player_from_file(FILE *fl, char *name, bool normal, char_data *c
 					account_id = atoi(line + length + 1);
 				}
 				else if (PFILE_TAG(line, "Action:", length)) {
-					if (sscanf(line + length + 1, "%d %d %d %d", &i_in[0], &i_in[1], &i_in[2], &i_in[3]) == 4) {
+					if (sscanf(line + length + 1, "%d %lf %d %d", &i_in[0], &dbl_in, &i_in[2], &i_in[3]) == 4) {
 						GET_ACTION(ch) = i_in[0];
-						GET_ACTION_CYCLE(ch) = i_in[1];
+						GET_ACTION_CYCLE(ch) = dbl_in;
 						GET_ACTION_TIMER(ch) = i_in[2];
 						GET_ACTION_ROOM(ch) = i_in[3];
 					}
@@ -1426,10 +1472,10 @@ char_data *read_player_from_file(FILE *fl, char *name, bool normal, char_data *c
 					}
 				}
 				else if (PFILE_TAG(line, "Description:", length)) {
-					if (GET_LONG_DESC(ch)) {
-						free(GET_LONG_DESC(ch));
+					if (GET_LOOK_DESC(ch)) {
+						free(GET_LOOK_DESC(ch));
 					}
-					GET_LONG_DESC(ch) = fread_string(fl, error);
+					GET_LOOK_DESC(ch) = fread_string(fl, error);
 				}
 				else if (PFILE_TAG(line, "Disguised Name:", length)) {
 					if (GET_DISGUISED_NAME(ch)) {
@@ -1578,6 +1624,9 @@ char_data *read_player_from_file(FILE *fl, char *name, bool normal, char_data *c
 				else if (PFILE_TAG(line, "Last Tip:", length)) {
 					GET_LAST_TIP(ch) = atoi(line + length + 1);
 				}
+				else if (PFILE_TAG(line, "Last Vehicle:", length)) {
+					GET_LAST_VEHICLE(ch) = atoi(line + length + 1);
+				}
 				else if (PFILE_TAG(line, "Last Room:", length)) {
 					GET_LAST_ROOM(ch) = atoi(line + length + 1);
 				}
@@ -1589,6 +1638,9 @@ char_data *read_player_from_file(FILE *fl, char *name, bool normal, char_data *c
 				}
 				else if (PFILE_TAG(line, "Last Corpse Id:", length)) {
 					GET_LAST_CORPSE_ID(ch) = atoi(line + length + 1);
+				}
+				else if (PFILE_TAG(line, "Last Goal Check:", length)) {
+					GET_LAST_GOAL_CHECK(ch) = atol(line + length + 1);
 				}
 				else if (PFILE_TAG(line, "Last Offense:", length)) {
 					GET_LAST_OFFENSE_SEEN(ch) = atol(line + length + 1);
@@ -1651,6 +1703,11 @@ char_data *read_player_from_file(FILE *fl, char *name, bool normal, char_data *c
 						GET_MAX_POOL(ch, num) = i_in[0];
 					}
 				}
+				else if (PFILE_TAG(line, "Mini-pet:", length)) {
+					if (sscanf(line + length + 1, "%d", &i_in[0]) == 1) {
+						add_minipet(ch, i_in[0]);
+					}
+				}
 				else if (PFILE_TAG(line, "Morph:", length)) {
 					GET_MORPH(ch) = morph_proto(atoi(line + length + 1));
 				}
@@ -1666,6 +1723,12 @@ char_data *read_player_from_file(FILE *fl, char *name, bool normal, char_data *c
 				}
 				else if (PFILE_TAG(line, "Mount Vnum:", length)) {
 					GET_MOUNT_VNUM(ch) = atoi(line + length + 1);
+				}
+				else if (PFILE_TAG(line, "Mvstring:", length)) {
+					if (GET_MOVEMENT_STRING(ch)) {
+						free(GET_MOVEMENT_STRING(ch));
+					}
+					GET_MOVEMENT_STRING(ch) = str_dup(trim(line + length + 1));
 				}
 				BAD_TAG_WARNING(line);
 				break;
@@ -1839,9 +1902,10 @@ char_data *read_player_from_file(FILE *fl, char *name, bool normal, char_data *c
 					}
 				}
 				else if (PFILE_TAG(line, "Rewarded:", length)) {
-					if (reward_pos < MAX_REWARDS_PER_DAY) {
-						GET_REWARDED_TODAY(ch, reward_pos++) = atoi(line + length + 1);
-					}
+					// old data; ignore
+				}
+				else if (PFILE_TAG(line, "Rope vnum:", length)) {
+					GET_ROPE_VNUM(ch) = atoi(line + length + 1);
 				}
 				BAD_TAG_WARNING(line);
 				break;
@@ -1995,7 +2059,7 @@ char_data *read_player_from_file(FILE *fl, char *name, bool normal, char_data *c
 	// Players who have been out for 1 hour get a free restore
 	RESTORE_ON_LOGIN(ch) = (((int) (time(0) - ch->prev_logon)) >= 1 * SECS_PER_REAL_HOUR);
 	if (GET_LOYALTY(ch)) {
-		REREAD_EMPIRE_TECH_ON_LOGIN(ch) = (EMPIRE_MEMBERS(GET_LOYALTY(ch)) < 1 || member_is_timed_out(ch->player.time.birth, ch->prev_logon, ((double)ch->player.time.played) / SECS_PER_REAL_HOUR));
+		REREAD_EMPIRE_TECH_ON_LOGIN(ch) = (EMPIRE_MEMBERS(GET_LOYALTY(ch)) < 1 || get_member_timeout_time(ch->player.time.birth, ch->prev_logon, ((double)ch->player.time.played) / SECS_PER_REAL_HOUR) <= time(0));
 	}
 	
 	free(cont_row);
@@ -2063,7 +2127,7 @@ void save_char(char_data *ch, room_data *load_room) {
 	rename(tempname, filename);
 	
 	// delayed data?
-	if (!NEEDS_DELAYED_LOAD(ch)) {
+	if (!NEEDS_DELAYED_LOAD(ch) && !DONT_SAVE_DELAY(ch)) {
 		if (!get_filename(GET_PC_NAME(ch), filename, DELAYED_FILE)) {
 			log("SYSERR: save_char: Unable to get delayed filename for '%s'", GET_PC_NAME(ch));
 			return;
@@ -2163,7 +2227,7 @@ void update_player_index(player_index_data *index, char_data *ch) {
 		if (index->last_host) {
 			free(index->last_host);
 		}
-		index->last_host = str_dup(ch->desc ? ch->desc->host : ch->prev_host);
+		index->last_host = str_dup((ch->desc && !PLR_FLAGGED(ch, PLR_KEEP_LAST_LOGIN_INFO)) ? ch->desc->host : ch->prev_host);
 	}
 }
 
@@ -2185,6 +2249,7 @@ void write_player_primary_data_to_file(FILE *fl, char_data *ch) {
 	struct player_skill_data *skill, *next_skill;
 	struct player_craft_data *pcd, *next_pcd;
 	struct player_currency *cur, *next_cur;
+	struct minipet_data *mini, *next_mini;
 	struct mount_data *mount, *next_mount;
 	struct player_slash_channel *slash;
 	struct over_time_effect_type *dot;
@@ -2204,6 +2269,9 @@ void write_player_primary_data_to_file(FILE *fl, char_data *ch) {
 		log("SYSERR: write_player_primary_data_to_file called with NPC");
 		return;
 	}
+	
+	// prevent MANY additional affect_totals
+	pause_affect_total = TRUE;
 	
 	// save these for later, as they are sometimes changed by removing and re-adding gear
 	for (iter = 0; iter < NUM_POOLS; ++iter) {
@@ -2293,7 +2361,7 @@ void write_player_primary_data_to_file(FILE *fl, char_data *ch) {
 	}
 	fprintf(fl, "Access Level: %d\n", GET_ACCESS_LEVEL(ch));
 	if (GET_ACTION(ch) != ACT_NONE) {
-		fprintf(fl, "Action: %d %d %d %d\n", GET_ACTION(ch), GET_ACTION_CYCLE(ch), GET_ACTION_TIMER(ch), GET_ACTION_ROOM(ch));
+		fprintf(fl, "Action: %d %.1f %d %d\n", GET_ACTION(ch), GET_ACTION_CYCLE(ch), GET_ACTION_TIMER(ch), GET_ACTION_ROOM(ch));
 		for (iter = 0; iter < NUM_ACTION_VNUMS; ++iter) {
 			fprintf(fl, "Action-vnum: %d %d\n", iter, GET_ACTION_VNUM(ch, iter));
 		}
@@ -2365,8 +2433,8 @@ void write_player_primary_data_to_file(FILE *fl, char_data *ch) {
 	// 'D'
 	fprintf(fl, "Daily Cycle: %d\n", GET_DAILY_CYCLE(ch));
 	fprintf(fl, "Daily Quests: %d\n", GET_DAILY_QUESTS(ch));
-	if (GET_LONG_DESC(ch)) {
-		strcpy(temp, NULLSAFE(GET_LONG_DESC(ch)));
+	if (GET_LOOK_DESC(ch)) {
+		strcpy(temp, NULLSAFE(GET_LOOK_DESC(ch)));
 		strip_crlf(temp);
 		fprintf(fl, "Description:\n%s~\n", temp);
 	}
@@ -2422,6 +2490,7 @@ void write_player_primary_data_to_file(FILE *fl, char_data *ch) {
 	}
 	fprintf(fl, "Last Death: %ld\n", GET_LAST_DEATH_TIME(ch));
 	fprintf(fl, "Last Direction: %d\n", GET_LAST_DIR(ch));
+	fprintf(fl, "Last Goal Check: %ld\n", GET_LAST_GOAL_CHECK(ch));
 	fprintf(fl, "Last Known Level: %d\n", GET_LAST_KNOWN_LEVEL(ch));
 	fprintf(fl, "Last Room: %d\n", GET_LAST_ROOM(ch));
 	if (GET_LAST_TELL(ch) != NOBODY) {
@@ -2429,6 +2498,9 @@ void write_player_primary_data_to_file(FILE *fl, char_data *ch) {
 	}
 	if (GET_LAST_TIP(ch)) {
 		fprintf(fl, "Last Tip: %d\n", GET_LAST_TIP(ch));
+	}
+	if ((IN_ROOM(ch) && GET_SITTING_ON(ch)) || (!IN_ROOM(ch) && GET_LAST_VEHICLE(ch) != NOTHING)) {
+		fprintf(fl, "Last Vehicle: %d\n", IN_ROOM(ch) ? VEH_VNUM(GET_SITTING_ON(ch)) : GET_LAST_VEHICLE(ch));
 	}
 	fprintf(fl, "Last Offense: %ld\n", GET_LAST_OFFENSE_SEEN(ch));
 	if (GET_LASTNAME(ch)) {
@@ -2447,6 +2519,9 @@ void write_player_primary_data_to_file(FILE *fl, char_data *ch) {
 	if (GET_MAPSIZE(ch)) {
 		fprintf(fl, "Mapsize: %d\n", GET_MAPSIZE(ch));
 	}
+	HASH_ITER(hh, GET_MINIPETS(ch), mini, next_mini) {
+		fprintf(fl, "Mini-pet: %d\n", mini->vnum);
+	}
 	if (IS_MORPHED(ch)) {
 		fprintf(fl, "Morph: %d\n", MORPH_VNUM(GET_MORPH(ch)));
 	}
@@ -2458,6 +2533,11 @@ void write_player_primary_data_to_file(FILE *fl, char_data *ch) {
 	}
 	if (GET_MOUNT_VNUM(ch) != NOTHING) {
 		fprintf(fl, "Mount Vnum: %d\n", GET_MOUNT_VNUM(ch));
+	}
+	if (GET_MOVEMENT_STRING(ch)) {
+		strcpy(temp, GET_MOVEMENT_STRING(ch));
+		temp[245] = '\0';	// ensure not longer than this (we would not be able to load it)
+		fprintf(fl, "Mvstring: %s\n", temp);
 	}
 	
 	// 'O'
@@ -2496,10 +2576,8 @@ void write_player_primary_data_to_file(FILE *fl, char_data *ch) {
 			fprintf(fl, "Resource: %d %s\n", GET_RESOURCE(ch, iter), materials[iter].name);
 		}
 	}
-	for (iter = 0; iter < MAX_REWARDS_PER_DAY; ++iter) {
-		if (GET_REWARDED_TODAY(ch, iter) > 0) {
-			fprintf(fl, "Rewarded: %d\n", GET_REWARDED_TODAY(ch, iter));
-		}
+	if (GET_ROPE_VNUM(ch) != NOTHING) {
+		fprintf(fl, "Rope vnum: %d\n", GET_ROPE_VNUM(ch));
 	}
 	
 	// 'S'
@@ -2539,7 +2617,7 @@ void write_player_primary_data_to_file(FILE *fl, char_data *ch) {
 	if (USING_AMMO(ch)) {
 		fprintf(fl, "Using Ammo: %d\n", USING_AMMO(ch));
 	}
-	if (USING_POISON(ch)) {
+	if (USING_POISON(ch) != NOTHING) {
 		fprintf(fl, "Using Poison: %d\n", USING_POISON(ch));
 	}
 	
@@ -2576,7 +2654,9 @@ void write_player_primary_data_to_file(FILE *fl, char_data *ch) {
 		GET_DEFICIT(ch, iter) = deficit[iter];
 	}
 	
-	// affect_total(ch); // unnecessary, I think (?)
+	// resume affect totals and run it
+	pause_affect_total = FALSE;
+	affect_total(ch);	// not 100% sure this function needs this, but at least now it only does it once -pc 4/22/18
 }
 
 
@@ -3081,6 +3161,26 @@ void check_learned_crafts(char_data *ch) {
 
 
 /**
+* Checks that all empires' learned crafts are valid, and removes bad entries.
+*/
+void check_learned_empire_crafts(void) {
+	void remove_learned_craft_empire(empire_data *emp, any_vnum vnum, bool full_remove);
+	
+	struct player_craft_data *pcd, *next_pcd;
+	empire_data *emp, *next_emp;
+	craft_data *craft;
+	
+	HASH_ITER(hh, empire_table, emp, next_emp) {
+		HASH_ITER(hh, EMPIRE_LEARNED_CRAFTS(emp), pcd, next_pcd) {
+			if (!(craft = craft_proto(pcd->vnum)) || !CRAFT_FLAGGED(craft, CRAFT_LEARNED)) {
+				remove_learned_craft_empire(emp, pcd->vnum, TRUE);
+			}
+		}
+	}
+}
+
+
+/**
 * Checks that all a player's currencies are valid.
 *
 * @param char_data *ch The player to check.
@@ -3196,8 +3296,6 @@ void clean_old_history(char_data *ch) {
 * @param char_data *ch The player charater to clear.
 */
 void clear_player(char_data *ch) {
-	int iter;
-	
 	if (!ch) {
 		return;
 	}
@@ -3219,10 +3317,7 @@ void clear_player(char_data *ch) {
 	GET_LAST_TELL(ch) = NOBODY;
 	GET_TEMPORARY_ACCOUNT_ID(ch) = NOTHING;
 	GET_IMMORTAL_LEVEL(ch) = -1;	// Not an immortal
-	
-	for (iter = 0; iter < MAX_REWARDS_PER_DAY; ++iter) {
-		GET_REWARDED_TODAY(ch, iter) = -1;
-	}
+	GET_LAST_VEHICLE(ch) = NOTHING;
 }
 
 
@@ -3293,9 +3388,11 @@ void delete_player_character(char_data *ch) {
 	}
 	
 	clear_private_owner(GET_IDNUM(ch));
+	purge_bound_items(GET_IDNUM(ch));
 
 	// Check the empire
 	if ((emp = GET_LOYALTY(ch)) != NULL) {
+		log_to_empire(emp, ELOG_MEMBERS, "%s has left the empire", PERS(ch, ch, TRUE));
 		GET_LOYALTY(ch) = NULL;
 		GET_RANK(ch) = 0;
 	}
@@ -3336,14 +3433,15 @@ void enter_player_game(descriptor_data *d, int dolog, bool fresh) {
 	void apply_all_ability_techs(char_data *ch);
 	void assign_class_abilities(char_data *ch, class_data *cls, int role);
 	void check_delayed_load(char_data *ch);
+	void check_minipets(char_data *ch);
 	void clean_lore(char_data *ch);
 	void clean_player_kills(char_data *ch);
 	extern room_data *find_home(char_data *ch);
 	extern room_data *find_load_room(char_data *ch);
 	void give_level_zero_abilities(char_data *ch);
-	void msdp_update_room(char_data *ch);
 	void refresh_all_quests(char_data *ch);
 	void reset_combat_meters(char_data *ch);
+	extern bool validate_sit_on_vehicle(char_data *ch, vehicle_data *veh, bool message);
 	
 	extern bool global_mute_slash_channel_joins;
 
@@ -3354,8 +3452,11 @@ void enter_player_game(descriptor_data *d, int dolog, bool fresh) {
 	char lbuf[MAX_STRING_LENGTH];
 	struct affected_type *af;
 	player_index_data *index;
+	vehicle_data *veh;
 	empire_data *emp;
 	int iter, duration;
+	
+	pause_affect_total = TRUE;	// prevent unnecessary totaling
 
 	reset_char(ch);
 	check_delayed_load(ch);	// ensure everything is loaded
@@ -3552,16 +3653,22 @@ void enter_player_game(descriptor_data *d, int dolog, bool fresh) {
 			REREAD_EMPIRE_TECH_ON_LOGIN(ch) = FALSE;
 		}
 		else {
-			// reread members to adjust greatness
-			read_empire_members(emp, FALSE);
+			// reread members to adjust greatness: trigger a delayed refresh because multiple things may trigger it at once
+			TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_MEMBERS);
 		}
 	}
 	
 	// remove stale coins
 	cleanup_coins(ch);
 	
-	// verify abils -- TODO should this remove/re-add abilities for the empire? do class abilities affect that?
+	// verify abils
+	if (emp) {
+		adjust_abilities_to_empire(ch, emp, FALSE);
+	}
 	assign_class_abilities(ch, NULL, NOTHING);
+	if (emp) {
+		adjust_abilities_to_empire(ch, emp, TRUE);
+	}
 	give_level_zero_abilities(ch);
 	
 	if (!IS_IMMORTAL(ch)) {
@@ -3575,6 +3682,17 @@ void enter_player_game(descriptor_data *d, int dolog, bool fresh) {
 			af = create_flag_aff(ATYPE_HOSTILE_DELAY, duration, AFF_IMMUNE_PHYSICAL | AFF_NO_ATTACK | AFF_HARD_STUNNED, ch);
 			affect_join(ch, af, ADD_DURATION);
 			msg_to_char(ch, "\trYou are stunned for %d second%s because you logged in in hostile territory.\r\n", duration, PLURAL(duration));
+		}
+	}
+	
+	// attempt to put them back in a vehicle
+	if (GET_LAST_VEHICLE(ch) != NOTHING) {
+		LL_FOREACH2(ROOM_VEHICLES(IN_ROOM(ch)), veh, next_in_room) {
+			if (VEH_VNUM(veh) == GET_LAST_VEHICLE(ch) && validate_sit_on_vehicle(ch, veh, FALSE)) {
+				sit_on_vehicle(ch, veh);
+				GET_POS(ch) = POS_SITTING;
+				break;	// only need 1
+			}
 		}
 	}
 
@@ -3592,6 +3710,7 @@ void enter_player_game(descriptor_data *d, int dolog, bool fresh) {
 	refresh_all_quests(ch);
 	check_learned_crafts(ch);
 	check_currencies(ch);
+	check_minipets(ch);
 	
 	// break last reply if invis
 	if (GET_LAST_TELL(ch) && (repl = is_playing(GET_LAST_TELL(ch))) && (GET_INVIS_LEV(repl) > GET_ACCESS_LEVEL(ch) || (!IS_IMMORTAL(ch) && PRF_FLAGGED(repl, PRF_INCOGNITO)))) {
@@ -3609,6 +3728,9 @@ void enter_player_game(descriptor_data *d, int dolog, bool fresh) {
 	
 	// now is a good time to save and be sure we have a good save file
 	SAVE_CHAR(ch);
+	
+	pause_affect_total = FALSE;
+	affect_total(ch);
 }
 
 
@@ -3734,6 +3856,7 @@ void init_player(char_data *ch) {
 	set_title(ch, NULL);
 	ch->player.short_descr = NULL;
 	ch->player.long_descr = NULL;
+	ch->player.look_descr = NULL;
 	GET_PROMPT(ch) = NULL;
 	GET_FIGHT_PROMPT(ch) = NULL;
 	POOFIN(ch) = NULL;
@@ -3782,6 +3905,27 @@ void init_player(char_data *ch) {
 	// script allocation
 	if (!SCRIPT(ch)) {
 		create_script_data(ch, MOB_TRIGGER);
+	}
+}
+
+
+/**
+* When a character is deleted, also clean up items bound to only them.
+*
+* @param int idnum The idnum to clear bound objects for.
+*/
+void purge_bound_items(int idnum) {
+	obj_data *obj, *next_obj;
+	
+	LL_FOREACH_SAFE(object_list, obj, next_obj) {
+		if (obj->bound_to && obj->bound_to->idnum == idnum && !obj->bound_to->next) {
+			// bound to exactly 1 idnum and it's this one
+			if (IN_ROOM(obj) && ROOM_PEOPLE(IN_ROOM(obj))) {
+				act("$p vanishes with a wisp of smoke.", FALSE, NULL, obj, NULL, TO_ROOM);
+			}
+			
+			extract_obj(obj);
+		}
 	}
 }
 
@@ -3906,15 +4050,10 @@ void start_new_character(char_data *ch) {
 		GET_ACCESS_LEVEL(ch) = LVL_MORTAL;
 	}
 	// auto-authorization
-	if (!IS_APPROVED(ch) && config_get_bool("auto_approve")) {
+	if (!IS_APPROVED(ch) && config_get_bool("auto_approve") && ch->desc && !has_anonymous_host(ch->desc)) {
 		// only approve the character automatically
 		SET_BIT(PLR_FLAGS(ch), PLR_APPROVED);
 	}
-	
-	GET_HEALTH(ch) = GET_MAX_HEALTH(ch);
-	GET_MOVE(ch) = GET_MAX_MOVE(ch);
-	GET_MANA(ch) = GET_MAX_MANA(ch);
-	GET_BLOOD(ch) = GET_MAX_BLOOD(ch);
 
 	/* Standard conditions */
 	GET_COND(ch, THIRST) = 0;
@@ -3981,7 +4120,6 @@ void start_new_character(char_data *ch) {
 			// special case for vampire
 			if (sk->skill == SKILL_VAMPIRE && !IS_VAMPIRE(ch)) {
 				make_vampire(ch, TRUE);
-				GET_BLOOD(ch) = GET_MAX_BLOOD(ch);
 			}
 		}
 		
@@ -4066,6 +4204,12 @@ void start_new_character(char_data *ch) {
 	// set up class/level data
 	update_class(ch);
 	
+	// restore pools (last, in case they changed during bonus traits or somewhere)
+	GET_HEALTH(ch) = GET_MAX_HEALTH(ch);
+	GET_MOVE(ch) = GET_MAX_MOVE(ch);
+	GET_MANA(ch) = GET_MAX_MANA(ch);
+	GET_BLOOD(ch) = GET_MAX_BLOOD(ch);
+	
 	// prevent a repeat
 	REMOVE_BIT(PLR_FLAGS(ch), PLR_NEEDS_NEWBIE_SETUP);
 }
@@ -4074,64 +4218,70 @@ void start_new_character(char_data *ch) {
  //////////////////////////////////////////////////////////////////////////////
 //// EMPIRE PLAYER MANAGEMENT ////////////////////////////////////////////////
 
-// this is used to ensure each account only contributes once to the empire
+// tracks players in an empire to determine which one contributes greatness
 struct empire_member_reader_data {
 	empire_data *empire;
 	int account_id;
+	int player_id;
 	int greatness;
-	
 	struct empire_member_reader_data *next;
 };
 
 
-/**
-* Add a given user's data to the account list of accounts on the empire member reader data
-*
-* @param struct empire_member_reader_data **list A pointer to the existing list.
-* @param int empire which empire entry the player is in
-* @param int account_id which account id the player has
-* @param int greatness the player's greatness
-*/
-static void add_to_account_list(struct empire_member_reader_data **list, empire_data *empire, int account_id, int greatness) {
-	struct empire_member_reader_data *emrd;
-	bool found = FALSE;
-	
-	for (emrd = *list; emrd && !found; emrd = emrd->next) {
-		if (emrd->empire == empire && emrd->account_id == account_id) {
-			found = TRUE;
-			emrd->greatness = MAX(emrd->greatness, greatness);
-		}
+// simple sorter for the member-reading data
+int sort_emrd(struct empire_member_reader_data *a, struct empire_member_reader_data *b) {
+	if (EMPIRE_VNUM(a->empire) != EMPIRE_VNUM(b->empire)) {
+		return EMPIRE_VNUM(a->empire) - EMPIRE_VNUM(b->empire);
 	}
-	
-	if (!found) {
-		CREATE(emrd, struct empire_member_reader_data, 1);
-		emrd->empire = empire;
-		emrd->account_id = account_id;
-		emrd->greatness = greatness;
-		
-		emrd->next = *list;
-		*list = emrd;
+	if (a->account_id != b->account_id) {
+		return a->account_id - b->account_id;
 	}
+	if (a->greatness != b->greatness) {
+		return b->greatness - a->greatness;
+	}
+	return a->player_id - b->player_id;
 }
 
 
 /**
-* Determines is an empire member is timed out based on his playtime, creation
+* Add a given user's data to the account list on the empire member reader data
+*
+* @param struct empire_member_reader_data **list A pointer to the existing list.
+* @param int empire which empire entry the player is in
+* @param int account_id which account id the player has
+* @param int player_id the id of the player contributing
+* @param int greatness the player's greatness
+*/
+void add_to_emrd_list(struct empire_member_reader_data **list, empire_data *empire, int account_id, int player_id, int greatness) {
+	struct empire_member_reader_data *emrd;
+	
+	CREATE(emrd, struct empire_member_reader_data, 1);
+	emrd->empire = empire;
+	emrd->account_id = account_id;
+	emrd->player_id = player_id;
+	emrd->greatness = greatness;
+	
+	LL_INSERT_INORDER(*list, emrd, sort_emrd);
+}
+
+
+/**
+* Determines when an empire member is timed out based on his playtime, creation
 * time, and last login.
 *
 * @param time_t created The player character's birth time.
 * @param time_t last_login The player's last login time.
 * @param double played_hours Number of hours the player has played, total.
-* @return bool TRUE if the member has timed out and should not be counted; FALSE if they're ok.
+* @return time_t The timestamp when the member would time out (may be past, present, or future).
 */
-static bool member_is_timed_out(time_t created, time_t last_login, double played_hours) {
+time_t get_member_timeout_time(time_t created, time_t last_login, double played_hours) {
 	int member_timeout_full = config_get_int("member_timeout_full") * SECS_PER_REAL_DAY;
 	int member_timeout_newbie = config_get_int("member_timeout_newbie") * SECS_PER_REAL_DAY;
 	int minutes_per_day_full = config_get_int("minutes_per_day_full");
 	int minutes_per_day_newbie = config_get_int("minutes_per_day_newbie");
 
 	if (played_hours >= config_get_int("member_timeout_max_threshold")) {
-		return (last_login + member_timeout_full) < time(0);
+		return (last_login + member_timeout_full);
 	}
 	else {
 		double days_played = (double)(time(0) - created) / SECS_PER_REAL_DAY;
@@ -4140,7 +4290,7 @@ static bool member_is_timed_out(time_t created, time_t last_login, double played
 		
 		// when playtime drops this low, the character is ALWAYS timed out
 		if (avg_min_per_day <= 1) {
-			return TRUE;
+			return last_login;
 		}
 		
 		if (avg_min_per_day >= minutes_per_day_full) {
@@ -4156,30 +4306,41 @@ static bool member_is_timed_out(time_t created, time_t last_login, double played
 			timeout = member_timeout_newbie + (prc * scale);
 		}
 		
-		return (last_login + timeout) < time(0);
+		return (last_login + timeout);
 	}
 }
 
 
 /**
-* Calls member_is_timed_out() using a player_index_data.
+* Calls get_member_timeout_time() using a player_index_data.
 *
 * @param player_index_data *index A pointer to the playertable entry.
 * @return bool TRUE if the member has timed out and should not be counted; FALSE if they're ok.
 */
 bool member_is_timed_out_index(player_index_data *index) {
-	return member_is_timed_out(index->birth, index->last_logon, ((double)index->played) / SECS_PER_REAL_HOUR);
+	return get_member_timeout_time(index->birth, index->last_logon, ((double)index->played) / SECS_PER_REAL_HOUR) <= time(0);
 }
 
 
 /**
-* Calls member_is_timed_out() using a char_data.
+* Calls get_member_timeout_time() using a char_data.
+*
+* @param char_data *ch A character to compute timeout on.
+* @return time_t When the member would time out (past/present/future).
+*/
+time_t get_member_timeout_ch(char_data *ch) {
+	return get_member_timeout_time(ch->player.time.birth, ch->prev_logon, ((double)ch->player.time.played) / SECS_PER_REAL_HOUR);
+}
+
+
+/**
+* Calls get_member_timeout_time() using a char_data.
 *
 * @param char_data *ch A character to compute timeout on.
 * @return bool TRUE if the member has timed out and should not be counted; FALSE if they're ok.
 */
 bool member_is_timed_out_ch(char_data *ch) {
-	return member_is_timed_out(ch->player.time.birth, ch->prev_logon, ((double)ch->player.time.played) / SECS_PER_REAL_HOUR);
+	return get_member_timeout_ch(ch) <= time(0);
 }
 
 
@@ -4199,8 +4360,9 @@ void read_empire_members(empire_data *only_empire, bool read_techs) {
 	player_index_data *index, *next_index;
 	empire_data *e, *emp, *next_emp;
 	char_data *ch;
-	time_t logon;
+	time_t logon, curtime = time(0), timeout;
 	bool is_file;
+	int level, last_account, last_empire, acct_greatness;
 
 	HASH_ITER(hh, empire_table, emp, next_emp) {
 		if (!only_empire || emp == only_empire) {
@@ -4210,6 +4372,9 @@ void read_empire_members(empire_data *only_empire, bool read_techs) {
 			EMPIRE_TOTAL_PLAYTIME(emp) = 0;
 			EMPIRE_LAST_LOGON(emp) = 0;
 			EMPIRE_IMM_ONLY(emp) = 0;
+			EMPIRE_NEXT_TIMEOUT(emp) = 0;
+			EMPIRE_MIN_LEVEL(emp) = 0;
+			EMPIRE_MAX_LEVEL(emp) = 0;
 		}
 	}
 	
@@ -4240,15 +4405,27 @@ void read_empire_members(empire_data *only_empire, bool read_techs) {
 			EMPIRE_TOTAL_MEMBER_COUNT(e) += 1;
 			
 			// only count players who have logged on in recent history
-			if (!is_file || !member_is_timed_out_ch(ch)) {
-				add_to_account_list(&account_list, e, GET_ACCOUNT(ch)->id, GET_GREATNESS(ch));
+			timeout = get_member_timeout_ch(ch);
+			
+			if (!is_file || timeout > curtime) {
+				add_to_emrd_list(&account_list, e, GET_ACCOUNT(ch)->id, GET_IDNUM(ch), GET_GREATNESS(ch));
 				
 				// not account-restricted
 				EMPIRE_TOTAL_PLAYTIME(e) += (ch->player.time.played / SECS_PER_REAL_HOUR);
+				level = is_file ? GET_HIGHEST_KNOWN_LEVEL(ch) : (int) GET_COMPUTED_LEVEL(ch);
+				if (!EMPIRE_MIN_LEVEL(e) || level < EMPIRE_MIN_LEVEL(e)) {
+					EMPIRE_MIN_LEVEL(e) = level;
+				}
+				EMPIRE_MAX_LEVEL(e) = MAX(EMPIRE_MAX_LEVEL(e), level);
 
 				if (read_techs) {
 					adjust_abilities_to_empire(ch, e, TRUE);
 				}
+			}
+			
+			// update next timeout check
+			if (timeout > curtime) {
+				EMPIRE_NEXT_TIMEOUT(e) = MIN(EMPIRE_NEXT_TIMEOUT(e), timeout);
 			}
 		}
 		
@@ -4257,11 +4434,35 @@ void read_empire_members(empire_data *only_empire, bool read_techs) {
 		}
 	}
 	
-	// now apply the best from each account, and clear out the list
+	// vars for processing accounts
+	last_account = -1;
+	last_empire = -1;
+	acct_greatness = 0;
+	
+	// this list is pre-sorted by account, then greatness (descending), then player id
 	while ((emrd = account_list)) {
-		EMPIRE_MEMBERS(emrd->empire) += 1;
-		EMPIRE_GREATNESS(emrd->empire) += emrd->greatness;
+		index = find_player_index_by_idnum(emrd->player_id);
+		if (last_account != emrd->account_id || last_empire != EMPIRE_VNUM(emrd->empire)) {
+			// found a new account/empire: the first player is always the highest greatness
+			last_account = emrd->account_id;
+			last_empire = EMPIRE_VNUM(emrd->empire);
+			acct_greatness = emrd->greatness;
+			
+			EMPIRE_MEMBERS(emrd->empire) += 1;
+			EMPIRE_GREATNESS(emrd->empire) += emrd->greatness;
+			index->contributing_greatness = TRUE;
+			
+			// will re-calculate if it drops below this
+			index->greatness_threshold = (emrd->next && emrd->next->empire == emrd->empire) ? emrd->next->greatness : 0;
+		}
+		else {	// same account again
+			index->contributing_greatness = FALSE;
+			
+			// will re-calculate if it rises above this
+			index->greatness_threshold = acct_greatness;
+		}
 		
+		// free data
 		account_list = emrd->next;
 		free(emrd);
 	}
@@ -4275,6 +4476,9 @@ void read_empire_members(empire_data *only_empire, bool read_techs) {
 			if (only_empire) {
 				break;
 			}
+		}
+		else if (!only_empire || emp == only_empire) {	// refresh
+			et_change_greatness(emp);
 		}
 	}
 	
@@ -4310,7 +4514,15 @@ PROMO_APPLY(promo_skillups) {
 	
 	HASH_ITER(hh, GET_SKILL_HASH(ch), skill, next_skill) {
 		if (skill->level > 0) {
-			set_skill(ch, skill->vnum, MIN(BASIC_SKILL_CAP, skill->level * 1.5));
+			if (get_skill_level(ch, skill->vnum) < BASIC_SKILL_CAP) {
+				set_skill(ch, skill->vnum, MIN(BASIC_SKILL_CAP, skill->level * 1.5));
+			}
+			else if (get_skill_level(ch, skill->vnum) < SPECIALTY_SKILL_CAP) {
+				set_skill(ch, skill->vnum, MIN(SPECIALTY_SKILL_CAP, skill->level * 1.5));
+			}
+			else {
+				set_skill(ch, skill->vnum, MIN(CLASS_SKILL_CAP, skill->level * 1.5));
+			}
 		}
 	}
 }

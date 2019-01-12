@@ -257,6 +257,7 @@ void olc_search_faction(char_data *ch, any_vnum vnum) {
 	faction_data *fct = find_faction_by_vnum(vnum);
 	faction_data *iter, *next_iter, *find;
 	quest_data *qiter, *next_qiter;
+	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
 	shop_data *shop, *next_shop;
 	char_data *mob, *next_mob;
@@ -285,6 +286,21 @@ void olc_search_faction(char_data *ch, any_vnum vnum) {
 		if (MOB_FACTION(mob) == fct) {
 			++found;
 			size += snprintf(buf + size, sizeof(buf) - size, "MOB [%5d] %s\r\n", GET_MOB_VNUM(mob), GET_SHORT_DESC(mob));
+		}
+	}
+	
+	// progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		if (size >= sizeof(buf)) {
+			break;
+		}
+		// REQ_x: requirement search
+		any = find_requirement_in_list(PRG_TASKS(prg), REQ_REP_OVER, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_REP_UNDER, vnum);
+		
+		if (any) {
+			++found;
+			size += snprintf(buf + size, sizeof(buf) - size, "PRG [%5d] %s\r\n", PRG_VNUM(prg), PRG_NAME(prg));
 		}
 	}
 	
@@ -456,6 +472,7 @@ void free_faction_relations(struct faction_relation *hash) {
 	struct faction_relation *tmp, *next;
 	
 	HASH_ITER(hh, hash, tmp, next) {
+		HASH_DEL(hash, tmp);
 		free(tmp);
 	}
 }
@@ -886,6 +903,52 @@ int rep_const_to_index(int rep_const) {
 
 
 /**
+* Sets a reputation to a specific level. This will be constrained by the
+* faction's min/max reputation.
+*
+* @param char_data *ch The player.
+* @param any_vnum vnum The faction to set rep with.
+* @param int rep Any REP_ constant to set it to.
+*/
+void set_reputation(char_data *ch, any_vnum vnum, int rep) {
+	int rep_idx, min_idx, max_idx, old_rep;
+	struct player_faction_data *pfd;
+	faction_data *fct;
+	
+	if (IS_NPC(ch) || rep == REP_NONE) {
+		return;
+	}
+	if (!(fct = find_faction_by_vnum(vnum)) || FACTION_FLAGGED(fct, FCT_IN_DEVELOPMENT)) {
+		return;	// faction doesn't exist?
+	}
+	if (!(pfd = get_reputation(ch, vnum, TRUE))) {
+		return;	// unable to get a rep entry?
+	}
+	if ((rep_idx = rep_const_to_index(rep)) == NOTHING) {
+		return;	// no valid reputation?
+	}
+	
+	// bounds
+	min_idx = rep_const_to_index(FCT_MIN_REP(fct));
+	rep_idx = MAX(rep_idx, min_idx);
+	max_idx = rep_const_to_index(FCT_MAX_REP(fct));
+	rep_idx = MIN(rep_idx, max_idx);
+	
+	// seems ok
+	old_rep = pfd->rep;
+	
+	pfd->rep = rep;
+	pfd->value = reputation_levels[rep_idx].value;
+	
+	// and message
+	if (old_rep != pfd->rep) {
+		msg_to_char(ch, "%sYou are now %s with %s.\t0\r\n", reputation_levels[rep_idx].color, reputation_levels[rep_idx].name, FCT_NAME(fct));
+		qt_change_reputation(ch, FCT_VNUM(fct));
+	}
+}
+
+
+/**
 * Updates all of a player's REP_ consts on their factions.
 *
 * @param char_data *ch The player.
@@ -974,6 +1037,7 @@ void olc_delete_faction(char_data *ch, any_vnum vnum) {
 	faction_data *fct, *iter, *next_iter, *find;
 	char_data *mob, *next_mob, *chiter;
 	quest_data *qiter, *next_qiter;
+	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
 	shop_data *shop, *next_shop;
 	descriptor_data *desc;
@@ -1012,6 +1076,18 @@ void olc_delete_faction(char_data *ch, any_vnum vnum) {
 		if (MOB_FACTION(mob) == fct) {
 			MOB_FACTION(mob) = NULL;
 			save_library_file_for_vnum(DB_BOOT_MOB, GET_MOB_VNUM(mob));
+		}
+	}
+	
+	// update progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_REP_OVER, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_REP_UNDER, vnum);
+		
+		if (found) {
+			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+			need_progress_refresh = TRUE;
 		}
 	}
 	
@@ -1065,6 +1141,15 @@ void olc_delete_faction(char_data *ch, any_vnum vnum) {
 			if (MOB_FACTION(GET_OLC_MOBILE(desc)) == fct) {
 				MOB_FACTION(GET_OLC_MOBILE(desc)) = NULL;
 				msg_to_char(desc->character, "The allegiance faction for the mob you're editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_PROGRESS(desc)) {
+			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_REP_OVER, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_REP_UNDER, vnum);
+		
+			if (found) {
+				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
+				msg_to_desc(desc, "A faction used by the progression goal you're editing has been deleted.\r\n");
 			}
 		}
 		if (GET_OLC_QUEST(desc)) {

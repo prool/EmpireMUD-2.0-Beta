@@ -32,9 +32,10 @@ extern const char *alt_dirs[];
 extern struct instance_data *quest_instance_global;
 
 // external functions
+void adjust_vehicle_tech(vehicle_data *veh, bool add);
 void obj_command_interpreter(obj_data *obj, char *argument);
 void send_char_pos(char_data *ch, int dam);
-extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom);
+extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom, bool allow_fake_loc);
 char_data *get_char_by_obj(obj_data *obj, char *name);
 obj_data *get_obj_by_obj(obj_data *obj, char *name);
 room_data *get_room(room_data *ref, char *name);
@@ -84,14 +85,14 @@ int get_obj_scale_level(obj_data *obj, char_data *targ) {
 		level = GET_OBJ_CURRENT_SCALE_LEVEL(obj);
 	}
 	else if (orm && COMPLEX_DATA(orm) && (inst = COMPLEX_DATA(orm)->instance)) {
-		if (inst->level) {
-			level = inst->level;
+		if (INST_LEVEL(inst)) {
+			level = INST_LEVEL(inst);
 		}
-		else if (GET_ADV_MIN_LEVEL(inst->adventure) > 0) {
-			level = GET_ADV_MIN_LEVEL(inst->adventure);
+		else if (GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst)) > 0) {
+			level = GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst));
 		}
-		else if (GET_ADV_MAX_LEVEL(inst->adventure) > 0) {
-			level = GET_ADV_MAX_LEVEL(inst->adventure) / 2; // average?
+		else if (GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) > 0) {
+			level = GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) / 2; // average?
 		}
 	}
 	
@@ -147,7 +148,7 @@ OCMD(do_oadventurecomplete) {
 	
 	inst = quest_instance_global;
 	if (!inst) {
-		inst = room ? find_instance_by_room(room, FALSE) : NULL;
+		inst = room ? find_instance_by_room(room, FALSE, TRUE) : NULL;
 	}
 	
 	if (inst) {
@@ -250,6 +251,11 @@ OCMD(do_oforce) {
 }
 
 
+OCMD(do_oheal) {
+	script_heal(obj, OBJ_TRIGGER, argument);
+}
+
+
 OCMD(do_obuildingecho) {
 	room_data *froom, *home_room, *iter;
 	room_data *orm = obj_room(obj);
@@ -261,7 +267,7 @@ OCMD(do_obuildingecho) {
 	if (!*room_number || !*msg) {
 		obj_log(obj, "obuildingecho called with too few args");
 	}
-	else if (!(froom = get_room(orm, arg))) {
+	else if (!(froom = get_room(orm, room_number))) {
 		obj_log(obj, "obuildingecho called with invalid target");
 	}
 	else {
@@ -799,7 +805,7 @@ OCMD(do_opurge) {
 		room_data *room = obj_room(obj);
 		struct instance_data *inst = quest_instance_global;
 		if (!inst) {
-			inst = room ? find_instance_by_room(room, FALSE) : NULL;
+			inst = room ? find_instance_by_room(room, FALSE, TRUE) : NULL;
 		}
 		
 		if (!inst) {
@@ -950,19 +956,20 @@ OCMD(do_oteleport) {
 			}
 			enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
 			qt_visit_room(ch, IN_ROOM(ch));
+			msdp_update_room(ch);
 		}
 	}
 	else if (!str_cmp(arg1, "adventure")) {
 		// teleport all players in the adventure
-		if (!orm || !(inst = find_instance_by_room(orm, FALSE))) {
+		if (!orm || !(inst = find_instance_by_room(orm, FALSE, TRUE))) {
 			obj_log(obj, "oteleport: 'adventure' mode called outside any adventure");
 			return;
 		}
 		
-		for (iter = 0; iter < inst->size; ++iter) {
+		for (iter = 0; iter < INST_SIZE(inst); ++iter) {
 			// only if it's not the target room, or we'd be here all day
-			if (inst->room[iter] && inst->room[iter] != target) {
-				for (ch = ROOM_PEOPLE(inst->room[iter]); ch; ch = next_ch) {
+			if (INST_ROOM(inst, iter) && INST_ROOM(inst, iter) != target) {
+				for (ch = ROOM_PEOPLE(INST_ROOM(inst, iter)); ch; ch = next_ch) {
 					next_ch = ch->next_in_room;
 					
 					if (!valid_dg_target(ch, DG_ALLOW_GODS)) {
@@ -978,6 +985,7 @@ OCMD(do_oteleport) {
 						}
 						enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
 						qt_visit_room(ch, IN_ROOM(ch));
+						msdp_update_room(ch);
 					}
 				}
 			}
@@ -993,11 +1001,14 @@ OCMD(do_oteleport) {
 				}
 				enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
 				qt_visit_room(ch, IN_ROOM(ch));
+				msdp_update_room(ch);
 			}
 		}
 		else if ((veh = get_vehicle_near_obj(obj, arg1))) {
+			adjust_vehicle_tech(veh, FALSE);
 			vehicle_from_room(veh);
 			vehicle_to_room(veh, target);
+			adjust_vehicle_tech(veh, TRUE);
 			entry_vtrigger(veh);
 		}
 		else {
@@ -1111,6 +1122,7 @@ OCMD(do_oterraform) {
 
 
 OCMD(do_dgoload) {
+	struct obj_binding *copy_obj_bindings(struct obj_binding *from);
 	void setup_generic_npc(char_data *mob, empire_data *emp, int name, int sex);
 	
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
@@ -1137,7 +1149,7 @@ OCMD(do_dgoload) {
 	}
 	
 	if (obj_room(obj)) {
-		inst = find_instance_by_room(obj_room(obj), FALSE);
+		inst = find_instance_by_room(obj_room(obj), FALSE, TRUE);
 	}
 
 	if (is_abbrev(arg1, "mobile")) {
@@ -1147,7 +1159,7 @@ OCMD(do_dgoload) {
 		}
 		mob = read_mobile(number, TRUE);
 		if (COMPLEX_DATA(room) && COMPLEX_DATA(room)->instance) {
-			MOB_INSTANCE_ID(mob) = COMPLEX_DATA(room)->instance->id;
+			MOB_INSTANCE_ID(mob) = INST_ID(COMPLEX_DATA(room)->instance);
 			if (MOB_INSTANCE_ID(mob) != NOTHING) {
 				add_instance_mob(real_instance(MOB_INSTANCE_ID(mob)), GET_MOB_VNUM(mob));
 			}
@@ -1180,6 +1192,11 @@ OCMD(do_dgoload) {
 		
 			// must scale now if possible
 			scale_item_to_level(object, GET_OBJ_CURRENT_SCALE_LEVEL(obj));
+			
+			// copy existing bindings
+			if (OBJ_FLAGGED(object, OBJ_BIND_ON_PICKUP) && OBJ_BOUND_TO(obj)) {
+				OBJ_BOUND_TO(object) = copy_obj_bindings(OBJ_BOUND_TO(obj));
+			}
 
 			load_otrigger(object);
 			return;
@@ -1209,6 +1226,11 @@ OCMD(do_dgoload) {
 		else {
 			// default
 			scale_item_to_level(object, GET_OBJ_CURRENT_SCALE_LEVEL(obj));
+		}
+		
+		// copy existing bindings
+		if (OBJ_FLAGGED(object, OBJ_BIND_ON_PICKUP) && OBJ_BOUND_TO(obj)) {
+			OBJ_BOUND_TO(object) = copy_obj_bindings(OBJ_BOUND_TO(obj));
 		}
 		
 		if (in_room) {	// load in the room
@@ -1269,7 +1291,7 @@ OCMD(do_dgoload) {
 
 
 OCMD(do_odamage) {
-	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH];
+	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
 	double modifier = 1.0;
 	char_data *ch;
 	int type;
@@ -1285,6 +1307,13 @@ OCMD(do_odamage) {
 
 	if (*modarg) {
 		modifier = atof(modarg) / 100.0;
+	}
+	
+	// send negatives to %heal% instead
+	if (modifier < 0) {
+		sprintf(buf, "%s health %.2f", name, -atof(modarg));
+		script_heal(obj, OBJ_TRIGGER, buf);
+		return;
 	}
 
 	ch = get_char_by_obj(obj, name);
@@ -1610,7 +1639,7 @@ OCMD(do_oscale) {
 		void scale_instance_to_level(struct instance_data *inst, int level);
 		room_data *orm = obj_room(obj);
 		struct instance_data *inst;
-		if ((inst = find_instance_by_room(orm, FALSE))) {
+		if ((inst = find_instance_by_room(orm, FALSE, TRUE))) {
 			scale_instance_to_level(inst, level);
 		}
 	}
@@ -1634,8 +1663,7 @@ OCMD(do_oscale) {
 			scale_item_to_level(otarg, level);
 		}
 		else if ((proto = obj_proto(GET_OBJ_VNUM(otarg))) && OBJ_FLAGGED(proto, OBJ_SCALABLE)) {
-			fresh = read_object(GET_OBJ_VNUM(otarg), TRUE);
-			scale_item_to_level(fresh, level);
+			fresh = fresh_copy_obj(otarg, level);
 			swap_obj_for_obj(otarg, fresh);
 			if (otarg == obj) {
 				dg_owner_purged = 1;
@@ -1667,6 +1695,7 @@ const struct obj_command_info obj_cmd_info[] = {
 	{ "oechoaround", do_osend, SCMD_OECHOAROUND },
 	{ "oechoneither", do_oechoneither, NO_SCMD },
 	{ "oforce", do_oforce, NO_SCMD },
+	{ "oheal", do_oheal, NO_SCMD },
 	{ "oload", do_dgoload, NO_SCMD },
 	{ "omorph", do_omorph, NO_SCMD },
 	{ "oown", do_oown, NO_SCMD },

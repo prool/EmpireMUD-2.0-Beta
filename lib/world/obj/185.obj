@@ -81,14 +81,13 @@ the jade idol~
 A small jade idol of a serpent is displayed here.~
 This ancient idol is carved from a single gemstone! It looks valuable!
 ~
-15 0 a 6
+15 0 a 8
 10 0 0
 12 0
 R
-5184 a
-R
 5611 a
 T 18509
+T 9800
 S
 #18510
 passageway secret~
@@ -151,10 +150,9 @@ A jaguar cub whistle is lying here.~
 This whistle can summon a noncombat pet!
 Type 'use whistle' to summon it.
 ~
-3 p a 7
+19 p a 8
 18515 0 0
 2 0
-T 9900
 S
 #18516
 totem jaguar~

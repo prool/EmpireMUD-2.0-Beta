@@ -23,6 +23,7 @@ ok_string Okay.
 public_logins 0
 starting_year 1150
 welcome_message Welcome to your EmpireMUD! Prepare to face your destiny!
+who_list_sort 0
 *
 * Actions configs
 chip_timer 4
@@ -35,10 +36,11 @@ fishing_timer 40
 garden_depletion 440
 gather_base_timer 4
 gather_depletion 50
-harvest_timer 20
+harvest_timer 24
 high_depletion 250
 max_chore_resource 200
 max_chore_resource_over_total 25
+max_chore_resource_per_member 100
 max_chore_resource_skilled 750
 mining_timer 45
 panning_timer 10
@@ -59,7 +61,7 @@ trench_initial_value -500
 bonus_city_point_techs 10
 bonus_city_point_wealth 4000
 cities_on_newbie_islands 0
-city_trait_radius 100
+city_overage_timeout 168
 disrepair_limit 10
 disrepair_limit_unfinished 2
 disrepair_major 60
@@ -74,8 +76,10 @@ players_per_city_point 2
 * Empire configs
 building_population_timer 48
 empire_log_ttl 30
-land_outside_city_modifier 0.200000
-land_per_greatness 35
+land_frontier_modifier 0.050000
+land_min_cap 15
+land_outside_city_modifier 0.350000
+land_per_greatness 15
 land_per_tech 15
 land_per_wealth 0.100000
 member_timeout_full 120
@@ -84,6 +88,7 @@ member_timeout_newbie 7
 minutes_per_day_full 150
 minutes_per_day_newbie 15
 newbie_island_day_limit 7
+outskirts_modifier 4.000000
 redesignate_time 60
 time_to_empire_delete 104
 time_to_empire_emptiness 2
@@ -189,6 +194,7 @@ war_cost_min 5000
 war_login_delay 30
 *
 * World configs
+adjust_instance_limits 1
 arctic_percent 6.000000
 default_adventure_sect 31
 default_building_sect 10
@@ -203,7 +209,7 @@ naturalize_unclaimable 1
 nearby_sector_distance 2
 newbie_adventure_cap 25
 ocean_pool_size 1000
-tropics_percent 35.000000
+tropics_percent 40.000000
 water_crop_distance 4
 *
 * Approval configs
@@ -217,6 +223,7 @@ join_empire_approval 1
 manage_empire_approval 1
 need_approval_string You must be approved before you can do that.
 quest_approval 1
+restrict_anonymous_hosts 1
 skill_gain_approval 1
 tell_approval 1
 terraform_approval 1

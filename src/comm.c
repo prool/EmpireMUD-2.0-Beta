@@ -76,6 +76,7 @@ extern bool is_fight_ally(char_data *ch, char_data *frenemy);
 RETSIGTYPE checkpointing(int sig);
 RETSIGTYPE hupsig(int sig);
 RETSIGTYPE reap(int sig);
+RETSIGTYPE import_evolutions(int sig);
 RETSIGTYPE unrestrict_game(int sig);
 char *make_prompt(descriptor_data *point);
 char *prompt_str(char_data *ch);
@@ -127,17 +128,22 @@ int tics_passed = 0;					/* for extern checkpointing			*/
 int scheck = 0;							/* for syntax checking mode			*/
 struct timeval null_time;				/* zero-valued time structure		*/
 FILE *logfile = NULL;					/* Where to send the log messages	*/
-bool gain_cond_messsage = FALSE;		/* gain cond send messages			*/
+bool gain_cond_message = FALSE;		/* gain cond send messages			*/
 int dg_act_check;	/* toggle for act_trigger */
 unsigned long pulse = 0;	/* number of pulses since game start */
 static bool reboot_recovery = FALSE;
 int mother_desc;
 ush_int port;
+bool do_evo_import = FALSE;	// triggered by SIGUSR1 to import evolutions
 
 // vars to prevent running multiple cycles during a missed-pulse catch-up cycle
 bool catch_up_combat = FALSE;	// frequent_combat()
 bool catch_up_actions = FALSE;	// update_actions()
 bool catch_up_mobs = FALSE;	// mobile_activity()
+
+// vars for detecting slow IPs and preventing repeat-lag
+char **detected_slow_ips = NULL;
+int num_slow_ips = 0;
 
 /* Reboot data (default to a normal reboot once per week) */
 struct reboot_control_data reboot_control = { SCMD_REBOOT, 7.5 * (24 * 60), SHUTDOWN_NORMAL, FALSE };
@@ -160,6 +166,28 @@ struct reboot_control_data reboot_control = { SCMD_REBOOT, 7.5 * (24 * 60), SHUT
 
  //////////////////////////////////////////////////////////////////////////////
 //// HELPERS /////////////////////////////////////////////////////////////////
+
+/**
+* Adds an IP address to the list of slow IPs to not look up. This persists
+* until reboot.
+*
+* @param char *ip The IP to add.
+*/
+void add_slow_ip(char *ip) {
+	if (!ip || !*ip) {
+		return;	// no work
+	}
+	
+	if (num_slow_ips > 0 && detected_slow_ips) {
+		RECREATE(detected_slow_ips, char*, num_slow_ips+1);
+	}
+	else {
+		CREATE(detected_slow_ips, char*, num_slow_ips+1);
+	}
+	
+	detected_slow_ips[num_slow_ips++] = str_dup(ip);
+}
+
 
 // wipes the last act message on the descriptor
 void clear_last_act_message(descriptor_data *desc) {
@@ -210,7 +238,7 @@ inline void empire_sleep(struct timeval *timeout) {
 * @param char_data *ch The player to update (no effect if no descriptor).
 */
 void msdp_update_room(char_data *ch) {
-	extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom);
+	extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom, bool allow_fake_loc);
 	extern char *get_room_name(room_data *room, bool color);
 	extern const char *alt_dirs[];
 	
@@ -227,8 +255,8 @@ void msdp_update_room(char_data *ch) {
 	}
 
 	// determine area name: we'll use it twice
-	if ((inst = find_instance_by_room(IN_ROOM(ch), FALSE))) {
-		snprintf(area_name, sizeof(area_name), "%s", GET_ADV_NAME(inst->adventure));
+	if ((inst = find_instance_by_room(IN_ROOM(ch), FALSE, FALSE))) {
+		snprintf(area_name, sizeof(area_name), "%s", GET_ADV_NAME(INST_ADVENTURE(inst)));
 	}
 	else if ((city = find_city(ROOM_OWNER(IN_ROOM(ch)), IN_ROOM(ch)))) {
 		snprintf(area_name, sizeof(area_name), "%s", city->name);
@@ -276,6 +304,8 @@ void msdp_update_room(char_data *ch) {
 	MSDPSetNumber(desc, eMSDP_ROOM_VNUM, IS_IMMORTAL(ch) ? GET_ROOM_VNUM(IN_ROOM(ch)) : 0);
 	MSDPSetString(desc, eMSDP_ROOM_NAME, get_room_name(IN_ROOM(ch), FALSE));
 	MSDPSetTable(desc, eMSDP_ROOM_EXITS, exits);
+	
+	MSDPUpdate(desc);
 }
 
 
@@ -296,6 +326,7 @@ static void msdp_update(void) {
 	extern int total_bonus_healing(char_data *ch);
 	extern int get_total_score(empire_data *emp);
 	extern const char *damage_types[];
+	extern const char *genders[];
 	extern const double hit_per_dex;
 	extern const char *seasons[];
 	
@@ -318,7 +349,8 @@ static void msdp_update(void) {
 
 			MSDPSetString(d, eMSDP_ACCOUNT_NAME, GET_NAME(ch));
 			MSDPSetString(d, eMSDP_CHARACTER_NAME, PERS(ch, ch, FALSE));
-
+			
+			MSDPSetString(d, eMSDP_GENDER, genders[GET_SEX(ch)]);
 			MSDPSetNumber(d, eMSDP_HEALTH, GET_HEALTH(ch));
 			MSDPSetNumber(d, eMSDP_HEALTH_MAX, GET_MAX_HEALTH(ch));
 			MSDPSetNumber(d, eMSDP_HEALTH_REGEN, health_gain(ch, TRUE));
@@ -427,10 +459,12 @@ static void msdp_update(void) {
 				MSDPSetString(d, eMSDP_EMPIRE_NAME, EMPIRE_NAME(GET_LOYALTY(ch)));
 				MSDPSetString(d, eMSDP_EMPIRE_ADJECTIVE, EMPIRE_ADJECTIVE(GET_LOYALTY(ch)));
 				MSDPSetString(d, eMSDP_EMPIRE_RANK, strip_color(EMPIRE_RANK(GET_LOYALTY(ch), GET_RANK(ch)-1)));
-				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY, EMPIRE_CITY_TERRITORY(GET_LOYALTY(ch)) + EMPIRE_OUTSIDE_TERRITORY(GET_LOYALTY(ch)));
-				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_MAX, land_can_claim(GET_LOYALTY(ch), FALSE));
-				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_OUTSIDE, EMPIRE_OUTSIDE_TERRITORY(GET_LOYALTY(ch)));
-				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_OUTSIDE_MAX, land_can_claim(GET_LOYALTY(ch), TRUE));
+				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY, EMPIRE_TERRITORY(GET_LOYALTY(ch), TER_TOTAL));
+				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_MAX, land_can_claim(GET_LOYALTY(ch), TER_TOTAL));
+				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_OUTSIDE, EMPIRE_TERRITORY(GET_LOYALTY(ch), TER_OUTSKIRTS));
+				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_OUTSIDE_MAX, land_can_claim(GET_LOYALTY(ch), TER_OUTSKIRTS));
+				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_FRONTIER, EMPIRE_TERRITORY(GET_LOYALTY(ch), TER_FRONTIER));
+				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_FRONTIER_MAX, land_can_claim(GET_LOYALTY(ch), TER_FRONTIER));
 				MSDPSetNumber(d, eMSDP_EMPIRE_WEALTH, GET_TOTAL_WEALTH(GET_LOYALTY(ch)));
 				MSDPSetNumber(d, eMSDP_EMPIRE_SCORE, get_total_score(GET_LOYALTY(ch)));
 			}
@@ -442,6 +476,8 @@ static void msdp_update(void) {
 				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_MAX, 0);
 				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_OUTSIDE, 0);
 				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_OUTSIDE_MAX, 0);
+				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_FRONTIER, 0);
+				MSDPSetNumber(d, eMSDP_EMPIRE_TERRITORY_FRONTIER_MAX, 0);
 				MSDPSetNumber(d, eMSDP_EMPIRE_WEALTH, 0);
 				MSDPSetNumber(d, eMSDP_EMPIRE_SCORE, 0);
 			}
@@ -756,9 +792,9 @@ void perform_reboot(void) {
 		}
 		
 		SAVE_CHAR(och);
-		extract_all_items(och);
 		
 		// extract is not actually necessary since we're rebooting, right?
+		// extract_all_items(och);
 		// extract_char(och);
 	}
 
@@ -881,9 +917,9 @@ void heartbeat(int heart_pulse) {
 	void check_expired_cooldowns();
 	void check_idle_passwords();
 	void check_newbie_islands();
+	void check_progress_refresh();
 	void check_wars();
 	void chore_update();
-	void detect_evos_per_hour();
 	void display_automessages();
 	void extract_pending_chars();
 	void free_freeable_triggers();
@@ -891,14 +927,17 @@ void heartbeat(int heart_pulse) {
 	void generate_adventure_instances();
 	void output_map_to_file();
 	void point_update();
+	void process_import_evolutions();
 	void process_imports();
+	void process_theft_logs();
 	void prune_instances();
 	void real_update();
 	void reduce_city_overages();
 	void reduce_outside_territory();
 	void reduce_stale_empires();
 	void reset_instances();
-	void run_map_evolutions();
+	void run_delayed_refresh();
+	void run_external_evolutions();
 	void run_mob_echoes();
 	void sanity_check();
 	void save_data_table(bool force);
@@ -906,6 +945,7 @@ void heartbeat(int heart_pulse) {
 	void update_actions();
 	void update_empire_npc_data();
 	void update_guard_towers();
+	void update_instance_world_size();
 	void update_players_online_stats();
 	void update_trading_post();
 	void weather_and_time(int mode);
@@ -913,13 +953,13 @@ void heartbeat(int heart_pulse) {
 	static int mins_since_crashsave = 0;
 	bool debug_log = FALSE;
 	
-	#define HEARTBEAT(x)  !(heart_pulse % ((x) * PASSES_PER_SEC))
+	#define HEARTBEAT(x)  !(heart_pulse % (int)((x) * PASSES_PER_SEC))
 	
 	// TODO go through this, arrange it better, combine anything combinable
 
 	// only get a gain condition message on the hour
 	if (HEARTBEAT(SECS_PER_MUD_HOUR)) {
-		gain_cond_messsage = TRUE;
+		gain_cond_message = TRUE;
 	}
 	
 	event_process();
@@ -930,9 +970,11 @@ void heartbeat(int heart_pulse) {
 		if (debug_log && HEARTBEAT(15)) { log("debug  2:\t%lld", microtime()); }
 	}
 
-	if (HEARTBEAT(1)) {
+	if (HEARTBEAT(0.2)) {
 		update_actions();		
 		if (debug_log && HEARTBEAT(15)) { log("debug  3:\t%lld", microtime()); }
+	}
+	if (HEARTBEAT(1)) {
 		check_expired_cooldowns();	// descriptor list
 		if (debug_log && HEARTBEAT(15)) { log("debug  4:\t%lld", microtime()); }
 	}
@@ -975,6 +1017,8 @@ void heartbeat(int heart_pulse) {
 	if (HEARTBEAT(SECS_PER_MUD_HOUR)) {
 		point_update();
 		if (debug_log && HEARTBEAT(15)) { log("debug 12:\t%lld", microtime()); }
+		process_theft_logs();
+		if (debug_log && HEARTBEAT(15)) { log("debug 12.1:\t%lld", microtime()); }
 	}
 	else if (HEARTBEAT(SECS_PER_REAL_UPDATE)) {
 		// only call real_update if we didn't also point_update
@@ -1036,8 +1080,6 @@ void heartbeat(int heart_pulse) {
 	if (HEARTBEAT(SECS_PER_REAL_HOUR)) {
 		reduce_stale_empires();
 		if (debug_log && HEARTBEAT(15)) { log("debug 21:\t%lld", microtime()); }
-		detect_evos_per_hour();
-		if (debug_log && HEARTBEAT(15)) { log("debug 21.5:\t%lld", microtime()); }
 	}
 	
 	if (HEARTBEAT(30 * SECS_PER_REAL_MIN)) {
@@ -1058,12 +1100,14 @@ void heartbeat(int heart_pulse) {
 	}
 	
 	if (HEARTBEAT(SECS_PER_MUD_HOUR)) {
-		if (time_info.hours == 12) {
-			process_imports();
+		if (time_info.hours == 0) {
+			run_external_evolutions();
 			if (debug_log && HEARTBEAT(15)) { log("debug 25:\t%lld", microtime()); }
 		}
-		// evos happen every hour
-		run_map_evolutions();
+		if (time_info.hours == 12) {
+			process_imports();
+			if (debug_log && HEARTBEAT(15)) { log("debug 25.5:\t%lld", microtime()); }
+		}
 		if (debug_log && HEARTBEAT(15)) { log("debug 26:\t%lld", microtime()); }
 	}
 	
@@ -1079,12 +1123,25 @@ void heartbeat(int heart_pulse) {
 	if (HEARTBEAT(SECS_PER_REAL_DAY)) {
 		clean_empire_offenses();
 		if (debug_log && HEARTBEAT(15)) { log("debug 28:\t%lld", microtime()); }
+		update_instance_world_size();
+		if (debug_log && HEARTBEAT(15)) { log("debug 28.2:\t%lld", microtime()); }
+	}
+	
+	// check if we've been asked to import new evolutions
+	if (do_evo_import) {
+		do_evo_import = FALSE;
+		process_import_evolutions();
+		if (debug_log && HEARTBEAT(15)) { log("debug 28.5:\t%lld", microtime()); }
 	}
 	
 	// this goes roughly last -- update MSDP users
 	if (HEARTBEAT(1)) {
 		msdp_update();
 		if (debug_log && HEARTBEAT(15)) { log("debug 29:\t%lld", microtime()); }
+		check_progress_refresh();
+		if (debug_log && HEARTBEAT(15)) { log("debug 30:\t%lld", microtime()); }
+		run_delayed_refresh();
+		if (debug_log && HEARTBEAT(15)) { log("debug 31:\t%lld", microtime()); }
 	}
 
 	/* Every pulse! Don't want them to stink the place up... */
@@ -1092,7 +1149,10 @@ void heartbeat(int heart_pulse) {
 	free_freeable_triggers();
 
 	/* Turn this off */
-	gain_cond_messsage = FALSE;
+	gain_cond_message = FALSE;
+	
+	// prevent accidentally leaving this on
+	pause_affect_total = FALSE;
 	
 	// check for immediate reboot
 	if (reboot_control.immediate == TRUE) {
@@ -1502,7 +1562,13 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 			free(to->desc->last_act_message);
 		}
 		to->desc->last_act_message = strdup(lbuf);
-		SEND_TO_Q(lbuf, to->desc);
+		
+		if (IS_SET(act_flags, TO_QUEUE)) {
+			stack_simple_msg_to_desc(to->desc, lbuf);
+		}
+		else {	// send normally
+			SEND_TO_Q(lbuf, to->desc);
+		}
 	}
 
 	if ((IS_NPC(to) && dg_act_check) && (to != ch)) {
@@ -1596,11 +1662,110 @@ void send_to_room(const char *messg, room_data *room) {
 }
 
 
+/**
+* Flushes a descriptor's stacked messages, adding (x2) where needed.
+*
+* @param descriptor_data *desc The descriptor to send the messages to.
+*/
+void send_stacked_msgs(descriptor_data *desc) {
+	char output[MAX_STRING_LENGTH+24];
+	struct stack_msg *iter, *next_iter;
+	int len, rem;
+	
+	if (!desc) {
+		return;
+	}
+	
+	LL_FOREACH_SAFE(desc->stack_msg_list, iter, next_iter) {
+		if (iter->count > 1) {
+			// deconstruct to add the (x2)
+			len = strlen(iter->string);
+			rem = (len > 1 && ISNEWL(iter->string[len-1])) ? 1 : 0;
+			rem += (len > 2 && ISNEWL(iter->string[len-2])) ? 1 : 0;
+			// rebuild
+			snprintf(output, sizeof(output), "%*.*s (x%d)%s", (len-rem), (len-rem), iter->string, iter->count, (rem > 0 ? "\r\n" : ""));
+			SEND_TO_Q(output, desc);
+		}
+		else {
+			SEND_TO_Q(NULLSAFE(iter->string), desc);
+		}
+		
+		// free it up
+		LL_DELETE(desc->stack_msg_list, iter);
+		if (iter->string) {
+			free(iter->string);
+		}
+		free(iter);
+	}
+	
+	desc->stack_msg_list = NULL;
+}
+
+
+/**
+* Similar to msg_to_desc, but the message is put in a queue for stacking and
+* then sent on a very short delay. If more than one identical message is sent
+* in this time, it stacks with (x2).
+*
+* @param descriptor_data *desc The player.
+* @param const char *messg... va_arg format.
+*/
+void stack_msg_to_desc(descriptor_data *desc, const char *messg, ...) {
+	char output[MAX_STRING_LENGTH];
+	va_list tArgList;
+	
+	if (!messg || !desc) {
+		return;
+	}
+	
+	va_start(tArgList, messg);
+	vsprintf(output, messg, tArgList);
+	va_end(tArgList);
+	stack_simple_msg_to_desc(desc, output);
+}
+
+
+/**
+* Similar to msg_to_desc, but the message is put in a queue for stacking and
+* then sent on a very short delay. If more than one identical message is sent
+* in this time, it stacks with (x2).
+*
+* @param descriptor_data *desc The player.
+* @param const char *messg A string to send.
+*/
+void stack_simple_msg_to_desc(descriptor_data *desc, const char *messg) {
+	struct stack_msg *iter, *stm;
+	bool found = FALSE;
+	
+	if (!messg || !desc) {
+		return;
+	}
+	
+	// look in queue
+	LL_FOREACH(desc->stack_msg_list, iter) {
+		if (!strcmp(iter->string, messg)) {
+			++iter->count;
+			found = TRUE;
+			break;
+		}
+	}
+	
+	// add
+	if (!found) {
+		CREATE(stm, struct stack_msg, 1);
+		stm->string = str_dup(messg);
+		stm->count = 1;
+		LL_APPEND(desc->stack_msg_list, stm);
+	}
+}
+
+
  //////////////////////////////////////////////////////////////////////////////
 //// SOCKETS /////////////////////////////////////////////////////////////////
 
 
 void close_socket(descriptor_data *d) {
+	struct stack_msg *stacked;
 	descriptor_data *temp;
 
 	REMOVE_FROM_LIST(d, descriptor_list, next);
@@ -1680,6 +1845,16 @@ void close_socket(descriptor_data *d) {
 		free(d->file_storage);
 	}
 	
+	// leftover stacked messages
+	while ((stacked = d->stack_msg_list)) {
+		d->stack_msg_list = stacked->next;
+		
+		if (stacked->string) {
+			free(stacked->string);
+		}
+		free(stacked);
+	}
+	
 	ProtocolDestroy(d->pProtocol);
 
 	// OLC_x: olc data
@@ -1712,6 +1887,9 @@ void close_socket(descriptor_data *d) {
 	}
 	if (d->olc_morph) {
 		free_morph(d->olc_morph);
+	}
+	if (d->olc_progress) {
+		free_progress(d->olc_progress);
 	}
 	if (d->olc_building) {
 		free_building(d->olc_building);
@@ -1832,7 +2010,10 @@ int get_max_players(void) {
 		}
 
 		/* set the current to the maximum */
-		limit.rlim_cur = limit.rlim_max;
+		#ifndef OPEN_MAX
+			#define OPEN_MAX limit.rlim_max
+		#endif
+		limit.rlim_cur = MIN(OPEN_MAX, limit.rlim_max);
 		if (setrlimit(RLIMIT_NOFILE, &limit) < 0) {
 			perror("SYSERR: calling setrlimit");
 			exit(1);
@@ -2018,6 +2199,11 @@ bool is_slow_ip(char *ip) {
 			return TRUE;
 		}
 	}
+	for (iter = 0; iter < num_slow_ips; ++iter) {
+		if (!strncmp(ip, detected_slow_ips[iter], strlen(detected_slow_ips[iter]))) {
+			return TRUE;
+		}
+	}
 	
 	return FALSE;
 }
@@ -2108,6 +2294,7 @@ int new_descriptor(int s) {
 	struct sockaddr_in peer;
 	struct hostent *from;
 	bool slow_ip;
+	time_t when;
 
 	/* accept the new connection */
 	i = sizeof(peer);
@@ -2139,12 +2326,19 @@ int new_descriptor(int s) {
 
 	/* find the sitename */
 	slow_ip = config_get_bool("nameserver_is_slow") || is_slow_ip(inet_ntoa(peer.sin_addr));
+	when = time(0);
 	if (slow_ip || !(from = gethostbyaddr((char *) &peer.sin_addr, sizeof(peer.sin_addr), AF_INET))) {
 		/* resolution failed */
 		if (!slow_ip) {
 			char buf[MAX_STRING_LENGTH];
-			snprintf(buf, sizeof(buf), "SYSERR: gethostbyaddr [%s]", inet_ntoa(peer.sin_addr));
+			snprintf(buf, sizeof(buf), "Warning: gethostbyaddr [%s]", inet_ntoa(peer.sin_addr));
 			perror(buf);
+			
+			// did it take longer than 5 seconds to look up?
+			if (when + 5 < time(0)) {
+				log("- added %s to slow IP list", inet_ntoa(peer.sin_addr));
+				add_slow_ip(inet_ntoa(peer.sin_addr));
+			}
 		}
 
 		/* find the numeric site address */
@@ -3226,7 +3420,16 @@ char *replace_prompt_codes(char_data *ch, char *str) {
 					tmp = i;
 					break;
 				case 'a': {	// action
-					strcpy(i, action_data[!IS_NPC(ch) ? GET_ACTION(ch) : ACT_NONE].name);
+					if (!IS_NPC(ch) && GET_ACTION(ch) != ACT_NONE) {
+						strcpy(i, action_data[GET_ACTION(ch)].name);
+					}
+					else if (GET_FEEDING_FROM(ch)) {
+						strcpy(i, "feeding");
+					}
+					else {
+						*i = '\0';
+					}
+					
 					tmp = i;
 					break;
 				}
@@ -3258,6 +3461,11 @@ char *replace_prompt_codes(char_data *ch, char *str) {
 						sprintf(i, "%%%c", *str);
 					}
 					
+					tmp = i;
+					break;
+				}
+				case 'I': {	// inventory (capital i)
+					sprintf(i, "%d/%d", IS_CARRYING_N(ch), CAN_CARRY_N(ch));
 					tmp = i;
 					break;
 				}
@@ -3295,6 +3503,11 @@ char *replace_prompt_codes(char_data *ch, char *str) {
 
  //////////////////////////////////////////////////////////////////////////////
 //// SIGNAL PROCESSING ///////////////////////////////////////////////////////
+
+// triggers import of evolutions
+RETSIGTYPE import_evolutions(int sig) {
+	do_evo_import = TRUE;
+}
 
 RETSIGTYPE unrestrict_game(int sig) {
 	syslog(SYS_INFO, 0, TRUE, "Received SIGUSR2 - completely unrestricting game (emergent)");
@@ -3365,6 +3578,9 @@ sigfunc *my_signal(int signo, sigfunc * func) {
 void signal_setup(void) {
 	struct itimerval itime;
 	struct timeval interval;
+	
+	// user signal 1: indicates we have waiting evos to import
+	my_signal(SIGUSR1, import_evolutions);
 
 	/*
 	 * user signal 2: unrestrict game.  Used for emergencies if you lock
@@ -3564,6 +3780,11 @@ void game_loop(socket_t mother_desc) {
 					d->has_prompt = 1;	/* To get newline before next cmd output. */
 				else if (perform_alias(d, comm))    /* Run it through aliasing system */
 					get_from_q(&d->input, comm, &aliased);
+				
+				if (PRF_FLAGGED(d->character, PRF_EXTRA_SPACING)) {
+					SEND_TO_Q("\r\n", d);	// for people who don't get a crlf from localecho
+				}
+				
 				command_interpreter(d->character, comm); /* Send it to interpreter */
 			}
 		}
@@ -3571,6 +3792,9 @@ void game_loop(socket_t mother_desc) {
 		/* Send queued output out to the operating system (ultimately to user). */
 		for (d = descriptor_list; d; d = next_d) {
 			next_d = d->next;
+			
+			send_stacked_msgs(d);
+			
 			if (*(d->output) && FD_ISSET(d->descriptor, &output_set)) {
 				/* Output for this player is ready */
 				if (process_output(d) < 0) {
@@ -3590,7 +3814,7 @@ void game_loop(socket_t mother_desc) {
 			if (!d->has_prompt) {
 				char prompt[MAX_STRING_LENGTH];
 				int wantsize;
-		
+				
 				strcpy(prompt, make_prompt(d));
 				wantsize = strlen(prompt);
 				strncpy(prompt, ProtocolOutput(d, prompt, &wantsize), MAX_STRING_LENGTH);

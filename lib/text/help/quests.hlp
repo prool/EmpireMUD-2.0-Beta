@@ -131,13 +131,18 @@ These basic daily quests can be completed for a little extra bonus experience.
 They can be started from an artisan in the listed building (for example, the
 miller for the mill).
 
-Grain for the Miller (Mill, requires Empire 15)
+Grain for the Miller (Mill)
 Forge Horseshoes (Stable, requires Trade 15)
 Steal a Trinket (Tavern, requires Stealth 15)
 Disenchant Trinkets (Tower of Sorcery, requires High Sorcery 15)
 Deliver a Letter (Pigeon Post, requires Tower of Sorcery, Forge and Alchemist)
+Herbs for the Alchemist (Alchemist, requires Survival 50)
+Flowers for the Alchemist (Alchemist, requires Survival 15-49)
+Fetch a Trophy (Tavern, requires Battle 15)
 
-You can only do these quests in your own empire.
+You can only do these quests in your own empire. You must have the Citizens
+tech (Thriving Community goal) before artisans will move in and start offering
+these quests.
 
 See also: DAILY QUESTS
 #

@@ -96,6 +96,10 @@ bool audit_craft(craft_data *craft, char_data *ch) {
 			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft creates building with different vnum");
 			problem = TRUE;
 		}
+		if (IS_SET(GET_CRAFT_BUILD_ON(craft), BLD_ON_FLAT_TERRAIN | BLD_FACING_CROP | BLD_FACING_OPEN_BUILDING | BLD_ANY_FOREST)) {
+			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Building has invalid build-on flags!");
+			problem = TRUE;
+		}
 	}
 	else if (CRAFT_FLAGGED(craft, CRAFT_VEHICLE)) {	// vehicles only
 		if (GET_CRAFT_OBJECT(craft) == NOTHING || !vehicle_proto(GET_CRAFT_OBJECT(craft))) {
@@ -185,7 +189,7 @@ char *list_one_craft(craft_data *craft, bool detail) {
 	static char output[MAX_STRING_LENGTH];
 	
 	if (detail) {
-		snprintf(output, sizeof(output), "[%5d] %s", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
+		snprintf(output, sizeof(output), "[%5d] %s (%s)", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft), craft_types[GET_CRAFT_TYPE(craft)]);
 	}
 	else {
 		snprintf(output, sizeof(output), "[%5d] %s", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
@@ -204,7 +208,12 @@ char *list_one_craft(craft_data *craft, bool detail) {
 void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 	void cancel_gen_craft(char_data *ch);
 	void remove_craft_from_table(craft_data *craft);
+	void remove_learned_craft(char_data *ch, any_vnum vnum);
+	void remove_learned_craft_empire(empire_data *emp, any_vnum vnum, bool full_remove);
 	
+	struct progress_perk *perk, *next_perk;
+	progress_data *prg, *next_prg;
+	empire_data *emp, *next_emp;
 	obj_data *obj, *next_obj;
 	descriptor_data *desc;
 	craft_data *craft;
@@ -222,10 +231,23 @@ void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 	
 	// find players who are crafting it and stop them (BEFORE removing from table)
 	for (iter = character_list; iter; iter = iter->next) {
-		if (!IS_NPC(iter) && GET_ACTION(iter) == ACT_GEN_CRAFT && GET_ACTION_VNUM(iter, 0) == GET_CRAFT_VNUM(craft)) {
+		if (IS_NPC(iter)) {
+			continue;
+		}
+		
+		// currently crafting
+		if (GET_ACTION(iter) == ACT_GEN_CRAFT && GET_ACTION_VNUM(iter, 0) == GET_CRAFT_VNUM(craft)) {
 			msg_to_char(iter, "The craft you were making has been deleted.\r\n");
 			cancel_gen_craft(iter);
 		}
+		
+		// possibly learned
+		remove_learned_craft(ch, vnum);
+	}
+	
+	// find empires who had this in their learned list
+	HASH_ITER(hh, empire_table, emp, next_emp) {
+		remove_learned_craft_empire(emp, vnum, TRUE);
 	}
 	
 	// remove from table -- nothing else to check here
@@ -243,12 +265,32 @@ void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 		}
 	}
 	
+	// update progression
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		LL_FOREACH_SAFE(PRG_PERKS(prg), perk, next_perk) {
+			if (perk->type == PRG_PERK_CRAFT && perk->value == vnum) {
+				LL_DELETE(PRG_PERKS(prg), perk);
+				free(perk);
+				save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+			}
+		}
+	}
+	
 	// olc editor updates
 	for (desc = descriptor_list; desc; desc = desc->next) {
 		if (GET_OLC_OBJECT(desc)) {
 			if (IS_RECIPE(GET_OLC_OBJECT(desc)) && GET_RECIPE_VNUM(GET_OLC_OBJECT(desc)) == vnum) {
 				GET_OBJ_VAL(GET_OLC_OBJECT(desc), VAL_RECIPE_VNUM) = 0;
 				msg_to_char(desc->character, "The recipe used by the item you're editing was deleted.\r\n");
+			}
+		}
+		else if (GET_OLC_PROGRESS(desc)) {
+			LL_FOREACH_SAFE(PRG_PERKS(GET_OLC_PROGRESS(desc)), perk, next_perk) {
+				if (perk->type == PRG_PERK_CRAFT && perk->value == vnum) {
+					LL_DELETE(PRG_PERKS(GET_OLC_PROGRESS(desc)), perk);
+					free(perk);
+					save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(GET_OLC_PROGRESS(desc)));
+				}
 			}
 		}
 	}
@@ -269,6 +311,8 @@ void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 void olc_search_craft(char_data *ch, craft_vnum vnum) {
 	char buf[MAX_STRING_LENGTH];
 	craft_data *craft = craft_proto(vnum);
+	struct progress_perk *perk, *next_perk;
+	progress_data *prg, *next_prg;
 	obj_data *obj, *next_obj;
 	int size, found;
 	
@@ -285,6 +329,17 @@ void olc_search_craft(char_data *ch, craft_vnum vnum) {
 		if (IS_RECIPE(obj) && GET_RECIPE_VNUM(obj) == vnum) {
 			++found;
 			size += snprintf(buf + size, sizeof(buf) - size, "OBJ [%5d] %s\r\n", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
+		}
+	}
+	
+	// progression
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		LL_FOREACH_SAFE(PRG_PERKS(prg), perk, next_perk) {
+			if (perk->type == PRG_PERK_CRAFT && perk->value == vnum) {
+				++found;
+				size += snprintf(buf + size, sizeof(buf) - size, "PRG [%5d] %s\r\n", PRG_VNUM(prg), PRG_NAME(prg));
+				break;
+			}
 		}
 	}
 	
@@ -541,16 +596,6 @@ OLC_MODULE(cedit_buildfacing) {
 	
 	if (GET_CRAFT_TYPE(craft) != CRAFT_TYPE_BUILD) {
 		msg_to_char(ch, "You can only set that property on a building.\r\n");
-	}
-	else if (!str_cmp(argument, "generic")) {
-		GET_CRAFT_BUILD_FACING(craft) = config_get_bitvector("generic_facing");
-		
-		if (PRF_FLAGGED(ch, PRF_NOREPEAT)) {
-			send_config_msg(ch, "ok_string");
-		}
-		else {
-			msg_to_char(ch, "This recipe has been set to use generic facing.\r\n");
-		}
 	}
 	else {
 		GET_CRAFT_BUILD_FACING(craft) = olc_process_flag(ch, argument, "build-facing", "buildfacing", bld_on_flags, GET_CRAFT_BUILD_FACING(craft));

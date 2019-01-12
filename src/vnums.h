@@ -26,8 +26,6 @@
 // NOTE: many of these are used just for spawn data and if we could do that in
 // file instead of code, these would not be needed
 
-// TODO: guard towers could use a flag plus a damage config of some kind
-
 #define BUILDING_RUINS_OPEN  5006	// custom icons and db.world.c
 #define BUILDING_RUINS_CLOSED  5007	// custom icons and db.world.c
 #define BUILDING_TUNNEL  5008  // building.c
@@ -41,13 +39,14 @@
 
 #define BUILDING_STEPS  5140	// custom icons
 
-#define BUILDING_SWAMPWALK  5155
+#define BUILDING_SWAMPWALK  5155	// road icon
 
 #define BUILDING_TRAPPERS_POST  5161	// workforce.c
 
 #define BUILDING_GATEHOUSE  5173	// custom icons, rituals
 #define BUILDING_WALL  5174
 
+#define BUILDING_BOARDWALK  5206	// road icon
 
 // Room building vnums
 #define RTYPE_SHIP_HOLDING_PEN  5509	// for the shipping system's storage room
@@ -76,7 +75,6 @@
 #define o_HOPS  143
 #define o_BARLEY  145
 #define o_HANDAXE  181	// TODO: this is special-cased for mining
-#define o_FLINT_SET  183	// TODO: this is special-cased for lighting fires
 
 // brewing items
 #define o_APPLES  3002
@@ -85,9 +83,6 @@
 
 // clay
 #define o_BRICKS  257	// TODO: create a workforce brickmaking ability/craft
-
-// Sewn items
-#define o_ROPE  2035
 
 // Wood crafts
 #define o_STAKE  915	// could be a flag
@@ -110,12 +105,6 @@
 #define o_NOCTURNIUM_SPIKE  1119
 
 // herbs
-#define o_WHITEGRASS  1200
-#define o_FIVELEAF  1201
-#define o_REDTHORN  1202
-#define o_MAGEWHISPER  1203
-#define o_DAGGERBITE  1204
-#define o_BILEBERRIES  1205
 #define o_IRIDESCENT_IRIS  1206
 
 // misc stuff
@@ -204,6 +193,8 @@
 #define VEHICLE_REPAIRMAN  273
 #define OVERSEER  274
 #define PRESS_WORKER  276
+#define MINE_SUPERVISOR  277
+#define FISHERMAN  279
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -272,8 +263,6 @@
 #define ATYPE_ASTRALCLAW  3067
 #define ATYPE_CHRONOBLAST  3068
 #define ATYPE_DISPIRIT  3069
-#define ATYPE_ERODE  3070
-#define ATYPE_SCOUR  3071
 #define ATYPE_SHADOWLASH_BLIND  3072
 #define ATYPE_SHADOWLASH_DOT  3073
 #define ATYPE_SOULCHAIN  3074
@@ -286,6 +275,8 @@
 #define ATYPE_TRICK_SHOT  3081
 #define ATYPE_BUFF  3082
 #define ATYPE_DOT  3085
+#define ATYPE_UNSTUCK  3101
+#define ATYPE_POTION  3102
 
 
 // GENERIC_COOLDOWN entires used by the code
@@ -321,7 +312,6 @@
 #define COOLDOWN_SUMMON_BODYGUARD  2030
 #define COOLDOWN_SUMMON_THUG  2031
 #define COOLDOWN_SUMMON_SWIFT  2032
-#define COOLDOWN_REWARD  2033
 #define COOLDOWN_SEARCH  2034
 #define COOLDOWN_TERRIFY  2035
 #define COOLDOWN_DARKNESS  2036
@@ -350,14 +340,13 @@
 #define COOLDOWN_CHRONOBLAST  2059
 #define COOLDOWN_DEATHTOUCH  2060
 #define COOLDOWN_DISPIRIT  2061
-#define COOLDOWN_ERODE  2062
-#define COOLDOWN_SCOUR  2063
 #define COOLDOWN_SHADOWLASH  2064
 #define COOLDOWN_SOULCHAIN  2065
 #define COOLDOWN_STARSTRIKE  2066
 #define COOLDOWN_THORNLASH  2067
 #define COOLDOWN_KITE  2068
 #define COOLDOWN_CHARGE  2069
+#define COOLDOWN_PLEDGE  2087
 
 
 // LIQ_x: Some different kind of liquids (vnums of GENERIC_LIQUID)

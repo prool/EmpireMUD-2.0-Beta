@@ -1,13 +1,17 @@
 #100
-Magiterranean: The Grove~
+OLD Magiterranean: The Grove~
 Paul Clarke~
    A small grove deep in the Magiterranean, the plane of nature magic. This is
 a place where the forces of nature run deep, and interlopers are unwelcome.
 The grove is but a small part of the greater realm, and can be found in deep
 forests.
+   Enter the portal, but be prepared for both unfriendly druids and hidden
+predators as you explore the otherworldly forest of the Magiterranean.
+
+This adventure is deprecated and replaced with 12650.
 ~
 10000 10005 1-75
-50 0 k 0
+50 0 ak 0
 L
 5 0
 4320 -1 -1
@@ -27,7 +31,7 @@ druids! You can do this quest alone or with friends, but there's no combat
 here. This adventure is for farmers and gardeners.
 ~
 10225 10249 15-0
-5 0 k 0
+5 0 km 0
 L
 3 a
 5179 10225 10225
@@ -55,7 +59,7 @@ magi-netically modified crops into our world.
 (This adventure contains only the magical crops on the map.)
 ~
 10500 10549 5-0
-1 60 d 0
+1 60 dlm 0
 L
 1 0
 10500 -1 -1
@@ -119,7 +123,7 @@ L
 -1 0 0
 S
 #120
-Mountain Cave: Red Dragon~
+OLD Mountain Cave: Red Dragon~
 Paul Clarke~
    Enter a cavernous mountain cave and find yourself face-to-claw with a giant
 red dragon! Bring a healer and a tank, and see how you fare against the most
@@ -139,7 +143,7 @@ L
 14 c c
 S
 #121
-The Swamp Hag~
+OLD The Swamp Hag~
 Paul Clarke~
    You have stumbled upon a strange, raised house in the swamp. It's old,
 dilapidated, and surrounded by unfriendly swamp creatures. What sort of person
@@ -253,7 +257,7 @@ L
 14 c bdegkln
 S
 #127
-Abandoned Dragon Nest~
+Wandering Dragon~
 Paul Clarke~
    The dragon nest appears abandoned, which means a dragon is on the loose
 nearby. Can you find and defeat it? Be careful, it might take a pair of stout
@@ -337,7 +341,7 @@ Paul Clarke~
 The mountain has opened up and lava is flowing forth at the surface!
 ~
 10190 10199 0-0
-1 0 dg 0
+1 0 dgl 0
 L
 4 0
 10190 10190 10190
@@ -355,6 +359,8 @@ Paul Clarke~
 closely together. Sewers squirrel away the dirtiest parts of society, keeping
 the foul stench of mankind's unmentionable waste out of sight, and out of mind.
 But the sewer attracts two more of society's unwanted: the poor, and the rats.
+   Enter the sewer and see if you can help out the people who dwell within. If
+not, perhaps you can at least clear out the rats.
 ~
 10011 10027 1-50
 30 30 bek 0
@@ -413,7 +419,7 @@ tower are designed for different level ranges, so use the 'consider' command
 judiciously before you attack things.
 ~
 10030 10099 30-200
-1 240 k 0
+1 240 kl 0
 L
 1 0
 10030 -1 -1
@@ -487,7 +493,7 @@ Notes for implementors:
   the notes.
 ~
 10730 10749 0-25
-1 0 a 0
+1 0 al 0
 L
 5 0
 10080 -1 -1
@@ -502,8 +508,8 @@ Goblin Mines~
 Paul Clarke~
    The goblins have fled the mines and something tells you it's not good.
 Venture into the goblin mines and see what sends even goblins running for their
-lives! And maybe if you can find those goblins, they'll be willing to reward
-you for clearing out the mine.
+lives! And maybe if you can find those goblins running around outside, they'll
+be willing to reward you for clearing out the mine.
 
 Directions for implementors:
 - Increase the instance limit to the number of newbie islands in your game.
@@ -511,7 +517,7 @@ Directions for implementors:
 - Make sure your newbie islands have mountains.
 ~
 10750 10774 0-25
-1 10 ehj 0
+1 10 ehjl 0
 L
 5 0
 10080 -1 -1

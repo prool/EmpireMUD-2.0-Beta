@@ -43,6 +43,7 @@
 // external vars
 extern struct message_list fight_messages[MAX_MESSAGES];
 extern const double hit_per_dex;
+extern struct character_size_data size_data[];
 
 // external funcs
 ACMD(do_flee);
@@ -50,6 +51,7 @@ bool check_scaling(char_data *mob, char_data *based_on);
 extern struct resource_data *combine_resources(struct resource_data *combine_a, struct resource_data *combine_b);
 extern int determine_best_scale_level(char_data *ch, bool check_group);
 void end_pursuit(char_data *ch, char_data *target);
+void scale_item_to_level(obj_data *obj, int level);
 
 // locals
 int damage(char_data *ch, char_data *victim, int dam, int attacktype, byte damtype);
@@ -165,11 +167,11 @@ bool check_hit_vs_dodge(char_data *attacker, char_data *victim, bool off_hand) {
 	
 	// modify caps based on abilities/roles
 	if (!IS_NPC(victim) || !MOB_FLAGGED(victim, MOB_HARD | MOB_GROUP)) {
-		if (GET_CLASS_ROLE(victim) != ROLE_TANK && (GET_CLASS_ROLE(victim) != ROLE_SOLO || !check_solo_role(victim))) {
+		if (IS_NPC(victim) || (GET_CLASS_ROLE(victim) != ROLE_TANK && (GET_CLASS_ROLE(victim) != ROLE_SOLO || !check_solo_role(victim)))) {
 			min_npc_to_hit += 20;	// higher hit min if not in tank/solo-role
 			min_pc_to_hit += 20;
 		}
-		if (!has_player_tech(victim, PTECH_DODGE_CAP)) {
+		if (IS_NPC(victim) || !has_player_tech(victim, PTECH_DODGE_CAP)) {
 			min_npc_to_hit += 20;	// higher hit min if lacking dodge-cap tech
 			min_pc_to_hit += 20;
 		}
@@ -228,6 +230,9 @@ int get_attack_type(char_data *ch, obj_data *weapon) {
 		if (AFF_FLAGGED(ch, AFF_CLAWS)) {
 			w_type = TYPE_VAMPIRE_CLAWS;
 		}
+		else if (IS_MORPHED(ch)) {
+			w_type = MORPH_ATTACK_TYPE(GET_MORPH(ch));
+		}
 		else if (IS_NPC(ch) && (MOB_ATTACK_TYPE(ch) != 0) && !AFF_FLAGGED(ch, AFF_DISARM)) {
 			w_type = MOB_ATTACK_TYPE(ch);
 		}
@@ -239,9 +244,6 @@ int get_attack_type(char_data *ch, obj_data *weapon) {
 			else {
 				w_type = TYPE_HIT;
 			}
-		}
-		else if (IS_MORPHED(ch)) {
-			w_type = MORPH_ATTACK_TYPE(GET_MORPH(ch));
 		}
 		else if (AFF_FLAGGED(ch, AFF_DISARM) && weapon && IS_WEAPON(weapon) && attack_hit_info[GET_WEAPON_TYPE(weapon)].damage_type == DAM_MAGICAL) {
 			w_type = TYPE_MANA_BLAST;
@@ -716,6 +718,7 @@ int reduce_damage_from_skills(int dam, char_data *victim, char_data *attacker, i
 	if (!self) {
 		if (has_ability(victim, ABIL_NOBLE_BEARING) && check_solo_role(victim)) {
 			dam -= GET_GREATNESS(victim);
+			gain_ability_exp(victim, ABIL_NOBLE_BEARING, 15);
 		}
 		
 		// damage reduction (usually from armor/spells)
@@ -1235,13 +1238,20 @@ obj_data *die(char_data *ch, char_data *killer) {
 	void despawn_charmies(char_data *ch);
 	void kill_empire_npc(char_data *ch);
 	
-	char_data *ch_iter, *player;
+	char_data *ch_iter, *player, *killmaster;
 	obj_data *corpse = NULL;
 	struct mob_tag *tag;
+	int iter;
 	
 	// no need to repeat
 	if (EXTRACTED(ch)) {
 		return NULL;
+	}
+	
+	// find a player in the chain -- in case a pet kills the mob
+	killmaster = killer;
+	while (killmaster && IS_NPC(killmaster) && killmaster->master && IN_ROOM(killmaster) == IN_ROOM(killmaster->master)) {
+		killmaster = killmaster->master;
 	}
 	
 	// remove all DoTs (BEFORE phoenix)
@@ -1264,11 +1274,11 @@ obj_data *die(char_data *ch, char_data *killer) {
 	}
 	
 	// hostile activity triggers distrust unless the ch is pvp-flagged or already hostile
-	if (!IS_NPC(killer) && GET_LOYALTY(ch) && GET_LOYALTY(killer) != GET_LOYALTY(ch)) {
+	if (!IS_NPC(killmaster) && GET_LOYALTY(ch) && GET_LOYALTY(killmaster) != GET_LOYALTY(ch)) {
 		// we check the ch's master if it's an NPC and the master is a PC
 		char_data *check = (IS_NPC(ch) && ch->master && !IS_NPC(ch->master)) ? ch->master : ch;
-		if ((IS_NPC(check) || !IS_PVP_FLAGGED(check)) && !IS_HOSTILE(check) && (!ROOM_OWNER(IN_ROOM(killer)) || ROOM_OWNER(IN_ROOM(killer)) != GET_LOYALTY(killer))) {
-			trigger_distrust_from_hostile(killer, GET_LOYALTY(ch));
+		if ((IS_NPC(check) || !IS_PVP_FLAGGED(check)) && !IS_HOSTILE(check) && (!ROOM_OWNER(IN_ROOM(killer)) || ROOM_OWNER(IN_ROOM(killer)) != GET_LOYALTY(killmaster))) {
+			trigger_distrust_from_hostile(killmaster, GET_LOYALTY(ch));
 		}
 	}
 	
@@ -1302,8 +1312,8 @@ obj_data *die(char_data *ch, char_data *killer) {
 	
 	// for players, die() ends here, until they respawn or quit
 	if (!IS_NPC(ch)) {
-		if (ch != killer) {
-			add_player_kill(ch, killer);
+		if (ch != killmaster) {
+			add_player_kill(ch, killmaster);
 		}
 		add_cooldown(ch, COOLDOWN_DEATH_RESPAWN, config_get_int("death_release_minutes") * SECS_PER_REAL_MIN);
 		msg_to_char(ch, "Type 'respawn' to come back at your tomb.\r\n");
@@ -1316,7 +1326,7 @@ obj_data *die(char_data *ch, char_data *killer) {
 
 	/* To make ordinary commands work in scripts.  welcor*/  
 	GET_POS(ch) = POS_STANDING;
-	if (death_mtrigger(ch, killer)) {
+	if (death_mtrigger(ch, killmaster)) {
 		death_cry(ch);
 	}
 	GET_POS(ch) = POS_DEAD;
@@ -1343,10 +1353,19 @@ obj_data *die(char_data *ch, char_data *killer) {
 		}
 	}
 
-	drop_loot(ch, killer);
+	drop_loot(ch, killmaster);
 	if (MOB_FLAGGED(ch, MOB_UNDEAD)) {
-		if (!IS_NPC(killer) && IS_NPC(ch)) {
-			recursive_loot_set(ch->carrying, GET_IDNUM(killer), GET_LOYALTY(killer));
+		// remove any gear
+		for (iter = 0; iter < NUM_WEARS; ++iter) {
+			if (GET_EQ(ch, iter)) {
+				remove_otrigger(GET_EQ(ch, iter), ch);
+				if (GET_EQ(ch, iter)) {	// if it wasn't lost to a trigger
+					obj_to_char(unequip_char(ch, iter), ch);
+				}
+			}
+		}
+		if (!IS_NPC(killmaster) && IS_NPC(ch)) {
+			recursive_loot_set(ch->carrying, GET_IDNUM(killmaster), GET_LOYALTY(killmaster));
 		}
 		while (ch->carrying) {
 			obj_to_room(ch->carrying, IN_ROOM(ch));
@@ -1357,8 +1376,8 @@ obj_data *die(char_data *ch, char_data *killer) {
 		obj_to_room(corpse, IN_ROOM(ch));
 		
 		// tag corpse
-		if (corpse && !IS_NPC(killer)) {
-			recursive_loot_set(corpse, GET_IDNUM(killer), GET_LOYALTY(killer));
+		if (corpse && !IS_NPC(killmaster)) {
+			recursive_loot_set(corpse, GET_IDNUM(killmaster), GET_LOYALTY(killmaster));
 		}
 		
 		load_otrigger(corpse);
@@ -1371,8 +1390,6 @@ obj_data *die(char_data *ch, char_data *killer) {
 
 // this drops the loot to the inventory of the 'ch' who is interacting -- so run it on the mob itself, usually
 INTERACTION_FUNC(loot_interact) {
-	void scale_item_to_level(obj_data *obj, int level);
-	
 	obj_data *obj;
 	int iter, scale_level = 0;
 	
@@ -1441,7 +1458,7 @@ void drop_loot(char_data *mob, char_data *killer) {
 	run_global_mob_interactions(mob, mob, INTERACT_LOOT, loot_interact);
 	
 	// coins?
-	if (killer && !IS_NPC(killer) && (!GET_LOYALTY(mob) || GET_LOYALTY(mob) == GET_LOYALTY(killer) || char_has_relationship(killer, mob, DIPL_WAR))) {
+	if (killer && !IS_NPC(killer) && (!GET_LOYALTY(mob) || GET_LOYALTY(mob) == GET_LOYALTY(killer) || char_has_relationship(killer, mob, DIPL_WAR | DIPL_THIEVERY))) {
 		coins = mob_coins(mob);
 		coin_emp = GET_LOYALTY(mob);
 		if (coins > 0) {
@@ -1462,15 +1479,22 @@ void drop_loot(char_data *mob, char_data *killer) {
 */
 obj_data *make_corpse(char_data *ch) {	
 	char shortdesc[MAX_INPUT_LENGTH], longdesc[MAX_INPUT_LENGTH], kws[MAX_INPUT_LENGTH];
-	obj_data *corpse, *o, *next_o;
-	int i;
+	obj_data *corpse, *rope, *o, *next_o;
+	int i, size;
 	bool human = (!IS_NPC(ch) || MOB_FLAGGED(ch, MOB_HUMAN));
 
 	corpse = read_object(o_CORPSE, TRUE);
+	size = GET_SIZE(ch);
 	
 	// store as person's last corpse id
 	if (!IS_NPC(ch)) {
 		GET_LAST_CORPSE_ID(ch) = obj_script_id(corpse);
+	}
+	else {	// mob corpse setup
+		if (!size_data[size].can_take_corpse) {
+			REMOVE_BIT(GET_OBJ_WEAR(corpse), ITEM_WEAR_TAKE);
+		}
+		SET_BIT(GET_OBJ_EXTRA(corpse), size_data[size].corpse_flags);
 	}
 	
 	// binding
@@ -1482,15 +1506,15 @@ obj_data *make_corpse(char_data *ch) {
 	}
 	
 	if (human) {
-		sprintf(kws, "corpse body %s", skip_filler(PERS(ch, ch, FALSE)));
+		sprintf(kws, "%s %s %s", GET_OBJ_KEYWORDS(corpse), skip_filler(PERS(ch, ch, FALSE)), size_data[size].corpse_keywords);
 		sprintf(shortdesc, "%s's body", PERS(ch, ch, FALSE));
-		snprintf(longdesc, sizeof(longdesc), "%s's body is lying here.", PERS(ch, ch, FALSE));
+		snprintf(longdesc, sizeof(longdesc), size_data[size].body_long_desc, PERS(ch, ch, FALSE));
 		CAP(longdesc);
 	}
 	else {
-		sprintf(kws, "corpse body %s", skip_filler(PERS(ch, ch, FALSE)));
+		sprintf(kws, "%s %s %s", GET_OBJ_KEYWORDS(corpse), skip_filler(PERS(ch, ch, FALSE)), size_data[size].corpse_keywords);
 		sprintf(shortdesc, "the corpse of %s", PERS(ch, ch, FALSE));
-		snprintf(longdesc, sizeof(longdesc), "%s's corpse is festering on the ground.", PERS(ch, ch, FALSE));
+		snprintf(longdesc, sizeof(longdesc), size_data[size].corpse_long_desc, PERS(ch, ch, FALSE));
 		CAP(longdesc);
 	}
 	
@@ -1517,14 +1541,19 @@ obj_data *make_corpse(char_data *ch) {
 		for (i = 0; i < NUM_WEARS; i++) {
 			if (GET_EQ(ch, i)) {
 				remove_otrigger(GET_EQ(ch, i), ch);
-				obj_to_obj(unequip_char(ch, i), corpse);
+				if (GET_EQ(ch, i)) {	// if it wasn't eaten by a trigger
+					obj_to_obj(unequip_char(ch, i), corpse);
+				}
 			}
 		}
 		
 		// rope if it was tied
-		if (MOB_FLAGGED(ch, MOB_TIED)) {
-			obj_to_obj(read_object(o_ROPE, TRUE), corpse);
+		if (MOB_FLAGGED(ch, MOB_TIED) && GET_ROPE_VNUM(ch) != NOTHING && (rope = read_object(GET_ROPE_VNUM(ch), TRUE))) {
+			scale_item_to_level(rope, 1);
+			obj_to_obj(rope, corpse);
+			load_otrigger(rope);
 		}
+		GET_ROPE_VNUM(ch) = NOTHING;
 
 		IS_CARRYING_N(ch) = 0;
 		ch->carrying = NULL;
@@ -1578,6 +1607,7 @@ void perform_resurrection(char_data *ch, char_data *rez_by, room_data *loc, any_
 	// move character
 	char_to_room(ch, loc);
 	qt_visit_room(ch, IN_ROOM(ch));
+	msdp_update_room(ch);
 	
 	// take care of the corpse
 	if ((corpse = find_obj(GET_LAST_CORPSE_ID(ch), FALSE)) && IS_CORPSE(corpse)) {
@@ -2269,6 +2299,7 @@ bool can_fight(char_data *ch, char_data *victim) {
 	extern bitvector_t pk_ok;
 	
 	empire_data *ch_emp, *victim_emp;
+	obj_data *obj;
 
 	if (!ch || !victim) {
 		syslog(SYS_ERROR, 0, TRUE, "SYSERR: can_fight() called without ch or victim");
@@ -2354,6 +2385,14 @@ bool can_fight(char_data *ch, char_data *victim) {
 	if (IS_PVP_FLAGGED(ch) && IS_PVP_FLAGGED(victim)) {
 		return TRUE;
 	}
+	// is stealing from you
+	if (GET_LOYALTY(ch)) {
+		LL_FOREACH2(victim->carrying, obj, next_content) {
+			if (IS_STOLEN(obj) && obj->last_empire_id == EMPIRE_VNUM(GET_LOYALTY(ch))) {
+				return TRUE;	// has at least 1 stolen obj in inventory
+			}
+		}
+	}
 
 	// playtime
 	if (!has_one_day_playtime(ch) || !has_one_day_playtime(victim)) {
@@ -2366,7 +2405,7 @@ bool can_fight(char_data *ch, char_data *victim) {
 		return TRUE;
 
 	if (IS_SET(pk_ok, PK_WAR)) {
-		if (has_relationship(ch_emp, victim_emp, DIPL_WAR)) {
+		if (has_relationship(ch_emp, victim_emp, DIPL_WAR) || has_relationship(victim_emp, ch_emp, DIPL_THIEVERY)) {
 			return TRUE;
 		}
 
@@ -2581,7 +2620,7 @@ void besiege_room(char_data *attacker, room_data *to_room, int damage) {
 		else {
 			msg_to_char(c, "You are hit and killed!\r\n");
 			if (!IS_NPC(c)) {
-				mortlog("%s has been killed by siege damage at (%d, %d)!", PERS(c, c, 1), X_COORD(IN_ROOM(c)), Y_COORD(IN_ROOM(c)));
+				log_to_slash_channel_by_name(DEATH_LOG_CHANNEL, c, "%s has been killed by siege damage at (%d, %d)!", PERS(c, c, 1), X_COORD(IN_ROOM(c)), Y_COORD(IN_ROOM(c)));
 				syslog(SYS_DEATH, 0, TRUE, "DEATH: %s has been killed by siege damage at %s", GET_NAME(c), room_log_identifier(IN_ROOM(c)));
 			}
 			die(c, c);
@@ -2607,6 +2646,7 @@ void besiege_room(char_data *attacker, room_data *to_room, int damage) {
 * @return bool TRUE if the target survives, FALSE if it's extracted
 */
 bool besiege_vehicle(char_data *attacker, vehicle_data *veh, int damage, int siege_type) {
+	void adjust_vehicle_tech(vehicle_data *veh, bool add);
 	void fully_empty_vehicle(vehicle_data *veh);
 
 	static struct resource_data *default_res = NULL;
@@ -2683,7 +2723,7 @@ bool besiege_vehicle(char_data *attacker, vehicle_data *veh, int damage, int sie
 				LL_FOREACH_SAFE2(ROOM_PEOPLE(vrl->room), ch, next_ch, next_in_room) {
 					act("You are killed as $V is destroyed!", FALSE, ch, NULL, veh, TO_CHAR);
 					if (!IS_NPC(ch)) {
-						mortlog("%s has been killed by siege damage at (%d, %d)!", PERS(ch, ch, TRUE), X_COORD(IN_ROOM(ch)), Y_COORD(IN_ROOM(ch)));
+						log_to_slash_channel_by_name(DEATH_LOG_CHANNEL, ch, "%s has been killed by siege damage at (%d, %d)!", PERS(ch, ch, TRUE), X_COORD(IN_ROOM(ch)), Y_COORD(IN_ROOM(ch)));
 						syslog(SYS_DEATH, 0, TRUE, "DEATH: %s has been killed by siege damage at %s", GET_NAME(ch), room_log_identifier(IN_ROOM(ch)));
 					}
 					die(ch, ch);
@@ -2693,10 +2733,15 @@ bool besiege_vehicle(char_data *attacker, vehicle_data *veh, int damage, int sie
 		if (VEH_SITTING_ON(veh)) {
 			act("You are killed as $V is destroyed!", FALSE, VEH_SITTING_ON(veh), NULL, veh, TO_CHAR);
 			if (!IS_NPC(VEH_SITTING_ON(veh))) {
-				mortlog("%s has been killed by siege damage at (%d, %d)!", PERS(VEH_SITTING_ON(veh), VEH_SITTING_ON(veh), TRUE), X_COORD(IN_ROOM(veh)), Y_COORD(IN_ROOM(veh)));
+				log_to_slash_channel_by_name(DEATH_LOG_CHANNEL, VEH_SITTING_ON(veh), "%s has been killed by siege damage at (%d, %d)!", PERS(VEH_SITTING_ON(veh), VEH_SITTING_ON(veh), TRUE), X_COORD(IN_ROOM(veh)), Y_COORD(IN_ROOM(veh)));
 				syslog(SYS_DEATH, 0, TRUE, "DEATH: %s has been killed by siege damage at %s", GET_NAME(VEH_SITTING_ON(veh)), room_log_identifier(IN_ROOM(veh)));
 			}
 			die(ch, ch);
+		}
+		
+		if (VEH_OWNER(veh)) {
+			// do this before removing it from room
+			adjust_vehicle_tech(veh, FALSE);
 		}
 		
 		vehicle_from_room(veh);	// remove from room first to destroy anything inside
@@ -2704,6 +2749,7 @@ bool besiege_vehicle(char_data *attacker, vehicle_data *veh, int damage, int sie
 		
 		if (VEH_OWNER(veh) && VEH_IS_COMPLETE(veh)) {
 			qt_empire_players(VEH_OWNER(veh), qt_lose_vehicle, VEH_VNUM(veh));
+			et_lose_vehicle(VEH_OWNER(veh), VEH_VNUM(veh));
 		}
 		
 		extract_vehicle(veh);
@@ -2855,7 +2901,7 @@ int damage(char_data *ch, char_data *victim, int dam, int attacktype, byte damty
 	
 	// look for an instance to lock (before running triggers)
 	if (!IS_NPC(ch) && IS_ADVENTURE_ROOM(IN_ROOM(ch)) && COMPLEX_DATA(IN_ROOM(ch)) && (inst = COMPLEX_DATA(IN_ROOM(ch))->instance)) {
-		if (ADVENTURE_FLAGGED(inst->adventure, ADV_LOCK_LEVEL_ON_COMBAT) && !IS_IMMORTAL(ch)) {
+		if (ADVENTURE_FLAGGED(INST_ADVENTURE(inst), ADV_LOCK_LEVEL_ON_COMBAT) && !IS_IMMORTAL(ch)) {
 			lock_instance_level(IN_ROOM(ch), determine_best_scale_level(ch, TRUE));
 		}
 	}
@@ -3089,7 +3135,6 @@ void death_log(char_data *ch, char_data *killer, int type) {
 	}
 
 	if (ch == killer && has_killer) {
-		free(msg);
 		syslog(SYS_ERROR, 0, TRUE, "Unusual error in death_log(): ch == killer, but combat attack type passed");
 		msg = "%s has been killed at";
 		has_killer = FALSE;
@@ -3102,7 +3147,7 @@ void death_log(char_data *ch, char_data *killer, int type) {
 	else
 		sprintf(output, msg, PERS(ch, ch, 1));
 
-	mortlog("%s (%d, %d)", output, X_COORD(IN_ROOM(ch)), Y_COORD(IN_ROOM(ch)));
+	log_to_slash_channel_by_name(DEATH_LOG_CHANNEL, ch, "%s (%d, %d)", output, X_COORD(IN_ROOM(ch)), Y_COORD(IN_ROOM(ch)));
 	syslog(SYS_DEATH, 0, TRUE, "DEATH: %s %s", output, room_log_identifier(IN_ROOM(ch)));
 }
 
@@ -3116,10 +3161,11 @@ void death_log(char_data *ch, char_data *killer, int type) {
 * @param bool melee if TRUE goes straight to melee; otherwise WAITING
 */
 void engage_combat(char_data *ch, char_data *vict, bool melee) {
-	// nope
+	/* Don't bother with can-fight here -- it has certainly been pre-checked before anything that would engage combat
 	if (!can_fight(ch, vict)) {
 		return;
 	}
+	*/
 
 	// this prevents players from using things that engage combat over and over
 	if (GET_POS(vict) == POS_INCAP && GET_POS(ch) >= POS_FIGHTING) {
@@ -3188,7 +3234,7 @@ void heal(char_data *ch, char_data *vict, int amount) {
 */
 int hit(char_data *ch, char_data *victim, obj_data *weapon, bool combat_round) {
 	void add_pursuit(char_data *ch, char_data *target);
-	extern int apply_poison(char_data *ch, char_data *vict, int type);
+	extern int apply_poison(char_data *ch, char_data *vict);
 	extern const double basic_speed;
 	
 	struct instance_data *inst;
@@ -3229,7 +3275,7 @@ int hit(char_data *ch, char_data *victim, obj_data *weapon, bool combat_round) {
 	
 	// look for an instance to lock (before running triggers)
 	if (!IS_NPC(ch) && IS_ADVENTURE_ROOM(IN_ROOM(ch)) && COMPLEX_DATA(IN_ROOM(ch)) && (inst = COMPLEX_DATA(IN_ROOM(ch))->instance)) {
-		if (ADVENTURE_FLAGGED(inst->adventure, ADV_LOCK_LEVEL_ON_COMBAT) && !IS_IMMORTAL(ch)) {
+		if (ADVENTURE_FLAGGED(INST_ADVENTURE(inst), ADV_LOCK_LEVEL_ON_COMBAT) && !IS_IMMORTAL(ch)) {
 			lock_instance_level(IN_ROOM(ch), determine_best_scale_level(ch, TRUE));
 		}
 	}
@@ -3369,7 +3415,8 @@ int hit(char_data *ch, char_data *victim, obj_data *weapon, bool combat_round) {
 			if (!IS_NPC(ch) && has_ability(ch, ABIL_CLAWS) && w_type == TYPE_VAMPIRE_CLAWS && can_gain_exp_from(ch, victim)) {
 				gain_ability_exp(ch, ABIL_CLAWS, 2);
 			}
-			if (!IS_NPC(ch) && GET_EQ(ch, WEAR_WIELD) && IS_BLOOD_WEAPON(GET_EQ(ch, WEAR_WIELD)) && w_type == TYPE_SLASH && can_gain_exp_from(ch, victim)) {
+			if (!IS_NPC(ch) && GET_EQ(ch, WEAR_WIELD) && IS_BLOOD_WEAPON(GET_EQ(ch, WEAR_WIELD)) && w_type == GET_WEAPON_TYPE(GET_EQ(ch, WEAR_WIELD)) && can_gain_exp_from(ch, victim)) {
+				// this verifies w_type to make sure it's a normal weapon attack
 				gain_ability_exp(ch, ABIL_READY_BLOOD_WEAPONS, 2);
 			}
 			
@@ -3450,7 +3497,7 @@ int hit(char_data *ch, char_data *victim, obj_data *weapon, bool combat_round) {
 			
 			// poison could kill too
 			if (!IS_NPC(ch) && has_player_tech(ch, PTECH_POISON) && weapon && attack_hit_info[w_type].weapon_type == WEAPON_SHARP) {
-				if (!number(0, 1) && apply_poison(ch, victim, USING_POISON(ch)) < 0) {
+				if (!number(0, 1) && apply_poison(ch, victim) < 0) {
 					// dedz
 					result = -1;
 				}
@@ -3492,6 +3539,7 @@ void perform_execute(char_data *ch, char_data *victim, int attacktype, int damty
 	bool revert = TRUE;
 	char_data *m;
 	obj_data *weapon;
+	bool msg;
 
 	/* stop_fighting() is split around here to help with exp */
 
@@ -3531,9 +3579,13 @@ void perform_execute(char_data *ch, char_data *victim, int attacktype, int damty
 
 	if (revert && IS_MORPHED(victim)) {
 		sprintf(buf, "%s reverts into $n!", PERS(victim, victim, FALSE));
+		msg = !CHAR_MORPH_FLAGGED(victim, MORPHF_NO_MORPH_MESSAGE);
 
 		perform_morph(victim, NULL);
-		act(buf, TRUE, victim, 0, 0, TO_ROOM);
+		
+		if (msg) {
+			act(buf, TRUE, victim, 0, 0, TO_ROOM);
+		}
 	}
 	
 	if (ch == victim) {
@@ -3811,6 +3863,12 @@ void perform_violence_missile(char_data *ch, obj_data *weapon) {
 		return;
 	}
 	
+	// update ammo
+	if (best) {
+		GET_OBJ_VAL(best, VAL_AMMO_QUANTITY) -= 1;
+		SET_BIT(GET_OBJ_EXTRA(best), OBJ_NO_STORE);	// can no longer be stored
+	}
+	
 	// compute
 	success = check_hit_vs_dodge(ch, vict, FALSE);
 	
@@ -3856,7 +3914,7 @@ void perform_violence_missile(char_data *ch, obj_data *weapon) {
 				}
 			
 				LL_FOREACH(GET_OBJ_APPLIES(best), apply) {
-					af = create_mod_aff(atype, 1, apply->location, -1 * apply->modifier, ch);
+					af = create_mod_aff(atype, 1, apply->location, apply->modifier, ch);
 					affect_to_char(vict, af);
 					free(af);
 				}
@@ -3919,7 +3977,6 @@ void perform_violence_missile(char_data *ch, obj_data *weapon) {
 	
 	// ammo countdown/extract (only if the ammo wasn't extracted by a script)
 	if (purge && best) {
-		GET_OBJ_VAL(best, VAL_AMMO_QUANTITY) -= 1;
 		if (GET_AMMO_QUANTITY(best) <= 0) {
 			extract_obj(best);
 		}

@@ -4,6 +4,7 @@ A Broken Binding Circle~
 &0{&R**&0}~
 1000 0 bd 0
 0 0 0 -1
+T 12014
 S
 #12001
 Binding Circle~
@@ -28,6 +29,8 @@ and as cold as a long-forgotten memory. The altar is clean of blood, as no
 sacrifices have been made here in many years. All you hear is the cold echo of
 a past no one remembers.
 ~
+F
+B
 M
 12017 33.00 0
 R
@@ -39,5 +42,6 @@ A Broken Binding Circle~
 &0{&C**&0}~
 1000 0 bd 0
 0 0 0 -1
+T 12040
 S
 $

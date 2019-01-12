@@ -4,13 +4,11 @@ the dragon's hoard~
 The dragon's hoard is piled here!~
 The hoard is a stack of rare and precious golden coins.
 ~
-15 e a 1
+15 e a 2
 25 0 0
 4 0
 R
 5611 a
-R
-5184 a
 S
 #10301
 egg dragon~
@@ -19,10 +17,9 @@ A dragon egg is sitting here.~
 This dragon egg looks ready to hatch and summon you a noncombat pet!
 Type 'use egg' to summon it.
 ~
-3 p a 3
+19 p a 4
 10301 0 0
 14 0
-T 9900
 S
 #10302
 seeds firefruit fruit~
@@ -260,10 +257,9 @@ A wyvern whistle is lying here.~
 The wyvern whistle can be used to summon a noncombat pet!
 Type 'use whistle' to summon it.
 ~
-3 p a 4
+19 p a 5
 10334 0 0
 14 0
-T 9900
 S
 #10335
 whistle emerald~

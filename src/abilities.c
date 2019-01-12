@@ -46,6 +46,7 @@ void perform_ability_command(char_data *ch, ability_data *abil, char *argument);
 // external consts
 extern const char *ability_custom_types[];
 extern const char *ability_data_types[];
+extern const char *ability_effects[];
 extern const char *ability_gain_hooks[];
 extern const char *ability_flags[];
 extern const char *ability_target_flags[];
@@ -114,6 +115,10 @@ char *ability_data_display(struct ability_data_list *adl) {
 	switch (adl->type) {
 		case ADL_PLAYER_TECH: {
 			snprintf(output, sizeof(output), "%s: %s", temp, player_tech_types[adl->vnum]);
+			break;
+		}
+		case ADL_EFFECT: {
+			snprintf(output, sizeof(output), "%s: %s", temp, ability_effects[adl->vnum]);
 			break;
 		}
 		default: {
@@ -711,6 +716,40 @@ double standard_ability_scale(char_data *ch, ability_data *abil, int level, bitv
 //// ABILITY COMMANDS ////////////////////////////////////////////////////////
 
 /**
+* For abilities with 'effects' data, this function manages them. This function
+* is silent unless an effect happens.
+*
+* @param ability_dta *abil The ability being used.
+* @param char_data *ch The character using the ability.
+*/
+void apply_ability_effects(ability_data *abil, char_data *ch) {
+	struct ability_data_list *data;
+	
+	if (!abil || !ch) {
+		return;	// no harm
+	}
+	
+	LL_FOREACH(ABIL_DATA(abil), data) {
+		if (data->type != ADL_EFFECT) {
+			continue;
+		}
+		
+		// ABIL_EFFECT_x: applying the effect
+		switch (data->vnum) {
+			case ABIL_EFFECT_DISMOUNT: {
+				if (IS_RIDING(ch)) {
+					msg_to_char(ch, "You climb down from your mount.\r\n");
+					act("$n climbs down from $s mount.", TRUE, ch, NULL, NULL, TO_ROOM);
+					perform_dismount(ch);
+				}
+				break;
+			}
+		}
+	}
+}
+
+
+/**
 * This checks if "string" is an ability's command, and performs it if so.
 *
 * @param char_data *ch The actor.
@@ -800,7 +839,7 @@ void call_ability(char_data *ch, ability_data *abil, char *argument, char_data *
 		return;
 	}
 	
-	violent = (ABILITY_FLAGGED(abil, ABILF_VIOLENT) || IS_SET(ABIL_TYPES(abil), ABILT_DAMAGE));
+	violent = (ABILITY_FLAGGED(abil, ABILF_VIOLENT) || IS_SET(ABIL_TYPES(abil), ABILT_DAMAGE | ABILT_DOT));
 	invis = ABILITY_FLAGGED(abil, ABILF_INVISIBLE) ? TRUE : FALSE;
 	
 	if (RMT_FLAGGED(IN_ROOM(ch), RMT_PEACEFUL) && violent) {
@@ -857,7 +896,7 @@ void call_ability(char_data *ch, ability_data *abil, char *argument, char_data *
 	}
 	
 	// ready to start the ability:
-	if (ABILITY_FLAGGED(abil, ABILF_VIOLENT)) {
+	if (violent) {
 		if (SHOULD_APPEAR(ch)) {
 			appear(ch);
 		}
@@ -868,6 +907,9 @@ void call_ability(char_data *ch, ability_data *abil, char *argument, char_data *
 			check_combat_start(cvict);
 		}
 	}
+	
+	// locked in! apply the effects
+	apply_ability_effects(abil, ch);
 	
 	// counterspell?
 	if (ABILITY_FLAGGED(abil, ABILF_COUNTERSPELLABLE) && violent && cvict && cvict != ch && trigger_counterspell(cvict)) {
@@ -1016,7 +1058,7 @@ void call_ability(char_data *ch, ability_data *abil, char *argument, char_data *
 		}
 	}
 	
-	/* special handling for damage... integrate this into the for() loop above
+	/* special handling for damage... integrate this into the for() loop above -- don't forget about exp tho
 	if (IS_SET(ABIL_TYPES(abil), ABILT_DAMAGE) && !data->stop) {
 		if (mag_damage(level, ch, cvict, abil) == -1) {
 			data->stop = TRUE;
@@ -1034,12 +1076,12 @@ void call_ability(char_data *ch, ability_data *abil, char *argument, char_data *
 		// check if should be in combat
 		if (cvict && cvict != ch && !ABILITY_FLAGGED(abil, ABILF_NO_ENGAGE) && !EXTRACTED(cvict) && !IS_DEAD(cvict)) {
 			// auto-assist if we used an ability on someone who is fighting
-			if (!ABILITY_FLAGGED(abil, ABILF_VIOLENT) && FIGHTING(cvict) && !FIGHTING(ch)) {
+			if (!violent && FIGHTING(cvict) && !FIGHTING(ch)) {
 				engage_combat(ch, FIGHTING(cvict), ABILITY_FLAGGED(abil, ABILF_RANGED | ABILF_RANGED_ONLY) ? FALSE : TRUE);
 			}
 			
 			// auto-attack if used on an enemy
-			if (ABILITY_FLAGGED(abil, ABILF_VIOLENT) && CAN_SEE(cvict, ch) && !FIGHTING(cvict)) {
+			if (violent && AWAKE(cvict) && !FIGHTING(cvict)) {
 				engage_combat(cvict, ch, ABILITY_FLAGGED(abil, ABILF_RANGED | ABILF_RANGED_ONLY) ? FALSE : TRUE);
 			}
 		}
@@ -1579,6 +1621,7 @@ void olc_search_ability(char_data *ch, any_vnum vnum) {
 	morph_data *morph, *next_morph;
 	quest_data *quest, *next_quest;
 	skill_data *skill, *next_skill;
+	progress_data *prg, *next_prg;
 	augment_data *aug, *next_aug;
 	struct synergy_ability *syn;
 	social_data *soc, *next_soc;
@@ -1644,6 +1687,20 @@ void olc_search_ability(char_data *ch, any_vnum vnum) {
 		if (MORPH_ABILITY(morph) == vnum) {
 			++found;
 			size += snprintf(buf + size, sizeof(buf) - size, "MPH [%5d] %s\r\n", MORPH_VNUM(morph), MORPH_SHORT_DESC(morph));
+		}
+	}
+	
+	// progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		if (size >= sizeof(buf)) {
+			break;
+		}
+		// REQ_x: requirement search
+		any = find_requirement_in_list(PRG_TASKS(prg), REQ_HAVE_ABILITY, vnum);
+		
+		if (any) {
+			++found;
+			size += snprintf(buf + size, sizeof(buf) - size, "PRG [%5d] %s\r\n", PRG_VNUM(prg), PRG_NAME(prg));
 		}
 	}
 	
@@ -2204,6 +2261,7 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 	morph_data *morph, *next_morph;
 	quest_data *quest, *next_quest;
 	skill_data *skill, *next_skill;
+	progress_data *prg, *next_prg;
 	augment_data *aug, *next_aug;
 	social_data *soc, *next_soc;
 	class_data *cls, *next_cls;
@@ -2268,6 +2326,17 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 			MORPH_ABILITY(morph) = NOTHING;
 			SET_BIT(MORPH_FLAGS(morph), MORPHF_IN_DEVELOPMENT);
 			save_library_file_for_vnum(DB_BOOT_MORPH, MORPH_VNUM(morph));
+		}
+	}
+	
+	// update progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_HAVE_ABILITY, vnum);
+		
+		if (found) {
+			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+			need_progress_refresh = TRUE;
 		}
 	}
 	
@@ -2357,6 +2426,14 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 				msg_to_desc(desc, "The required ability has been deleted from the morph you're editing.\r\n");
 			}
 		}
+		if (GET_OLC_PROGRESS(desc)) {
+			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_HAVE_ABILITY, vnum);
+		
+			if (found) {
+				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
+				msg_to_desc(desc, "An ability used by the progression goal you're editing has been deleted.\r\n");
+			}
+		}
 		if (GET_OLC_QUEST(desc)) {
 			found = delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_HAVE_ABILITY, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_HAVE_ABILITY, vnum);
@@ -2426,7 +2503,10 @@ void olc_fullsearch_abil(char_data *ch, char *argument) {
 		// figure out a type
 		argument = any_one_arg(argument, type_arg);
 		
-		if (is_abbrev(type_arg, "-affects")) {
+		if (!strcmp(type_arg, "-")) {
+			continue;	// just skip stray dashes
+		}
+		else if (is_abbrev(type_arg, "-affects")) {
 			argument = any_one_word(argument, val_arg);
 			if ((lookup = search_block(val_arg, affected_bits, FALSE)) != NOTHING) {
 				only_affs |= BIT(lookup);
@@ -3363,6 +3443,7 @@ OLC_MODULE(abiledit_data) {
 	bool found;
 	
 	// determine valid types first
+	allowed_types |= ADL_EFFECT;
 	if (IS_SET(ABIL_TYPES(abil), ABILT_PLAYER_TECH)) {
 		allowed_types |= ADL_PLAYER_TECH;
 	}
@@ -3422,6 +3503,13 @@ OLC_MODULE(abiledit_data) {
 				case ADL_PLAYER_TECH: {
 					if ((val_id = search_block(val_arg, player_tech_types, FALSE)) == NOTHING) {
 						msg_to_char(ch, "Invalid player tech '%s'.\r\n", val_arg);
+						return;
+					}
+					break;
+				}
+				case ADL_EFFECT: {
+					if ((val_id = search_block(val_arg, ability_effects, FALSE)) == NOTHING) {
+						msg_to_char(ch, "Invalid ability effect '%s'.\r\n", val_arg);
 						return;
 					}
 					break;

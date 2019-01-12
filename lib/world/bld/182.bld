@@ -13,7 +13,7 @@ S
 Adventurer's Guild~
 The Adventurer's Guildhall~
 &t[&j@@&t]~
-96 10 jnR 0
+96 10 jlnR 0
 0 0 0 18216
 C
 nearby~
@@ -30,6 +30,7 @@ R
 R
 1002 1 5 0
 T 18216
+T 18215
 S
 #18217
 Guildhall Tower~
@@ -86,6 +87,8 @@ small safe is tucked in the corner, and securely locked.
 ~
 F
 H
+U
+1 5193
 S
 #18221
 Strange Egg~

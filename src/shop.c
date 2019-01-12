@@ -1151,7 +1151,7 @@ OLC_MODULE(shopedit_allegiance) {
 		msg_to_char(ch, "Set the shop's allegiance to which faction (or 'none')?\r\n");
 	}
 	else if (!str_cmp(argument, "none")) {
-		msg_to_char(ch, "You set its allegience to 'none'.\r\n");
+		msg_to_char(ch, "You set its allegiance to 'none'.\r\n");
 		SHOP_ALLEGIANCE(shop) = NULL;
 	}
 	else if (!(fct = find_faction(argument))) {
@@ -1221,7 +1221,6 @@ OLC_MODULE(shopedit_items) {
 	argument = any_one_arg(argument, cmd_arg);	// add/remove/change/copy
 	
 	if (is_abbrev(cmd_arg, "copy")) {
-		// usage: qedit starts/ends copy <from type> <from vnum> <starts/ends>
 		argument = any_one_arg(argument, type_arg);	// just "quest" for now
 		argument = any_one_arg(argument, vnum_arg);	// any vnum for that type
 		
@@ -1266,7 +1265,6 @@ OLC_MODULE(shopedit_items) {
 		}
 	}	// end 'copy'
 	else if (is_abbrev(cmd_arg, "remove")) {
-		// usage: qedit starts|ends remove <number | all>
 		skip_spaces(&argument);	// only arg is number
 		
 		if (!*argument) {
@@ -1299,7 +1297,6 @@ OLC_MODULE(shopedit_items) {
 		}
 	}	// end 'remove'
 	else if (is_abbrev(cmd_arg, "add")) {
-		// usage: qedit starts|ends add <type> <vnum>
 		argument = any_one_arg(argument, vnum_arg);
 		argument = any_one_arg(argument, cost_arg);
 		argument = any_one_arg(argument, cur_arg);
@@ -1342,7 +1339,6 @@ OLC_MODULE(shopedit_items) {
 		}
 	}	// end 'add'
 	else if (is_abbrev(cmd_arg, "change")) {
-		// usage: qedit starts|ends change <number> vnum <number>
 		argument = any_one_arg(argument, num_arg);
 		argument = any_one_arg(argument, field_arg);
 		argument = any_one_arg(argument, val_arg);

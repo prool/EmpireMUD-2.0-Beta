@@ -198,6 +198,10 @@ int GET_MAX_BLOOD(char_data *ch) {
 			if (has_ability(ch, ABIL_ANCIENT_BLOOD)) {
 				base *= 2;
 			}
+			
+			if (HAS_BONUS_TRAIT(ch, BONUS_BLOOD)) {
+				base += config_get_int("pool_bonus_amount") * (1 + (get_approximate_level(ch) / 25));
+			}
 		}
 	}
 
@@ -218,7 +222,7 @@ void make_vampire(char_data *ch, bool lore) {
 	
 	if (!IS_NPC(ch)) {
 		/* set BEFORE set as a vampire! */
-		GET_APPARENT_AGE(ch) = GET_AGE(ch);
+		GET_APPARENT_AGE(ch) = GET_REAL_AGE(ch);
 		
 		if (get_skill_level(ch, SKILL_VAMPIRE) < 1) {
 			gain_skill(ch, find_skill_by_vnum(SKILL_VAMPIRE), 1);
@@ -1196,7 +1200,7 @@ ACMD(do_regenerate) {
 			}
 			case REGEN_MOVE: {
 				msg_to_char(ch, "You focus your blood into your sore muscles.\r\n");
-				act("$n seems envigorated.", TRUE, ch, NULL, NULL, TO_ROOM);
+				act("$n seems invigorated.", TRUE, ch, NULL, NULL, TO_ROOM);
 				GET_MOVE(ch) = MIN(GET_MAX_MOVE(ch), GET_MOVE(ch) + amount);
 				break;
 			}
@@ -1290,6 +1294,7 @@ ACMD(do_veintap) {
 		charge_ability_cost(ch, BLOOD, amt, NOTHING, 0, WAIT_ABILITY);
 		GET_OBJ_VAL(container, VAL_DRINK_CONTAINER_CONTENTS) += amt;
 		GET_OBJ_VAL(container, VAL_DRINK_CONTAINER_TYPE) = LIQ_BLOOD;
+		GET_OBJ_TIMER(container) = UNLIMITED;
 		
 		gain_ability_exp(ch, ABIL_VEINTAP, 33.4);
 	}

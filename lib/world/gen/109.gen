@@ -7,4 +7,172 @@ dragon token~
 T1
 dragon tokens~
 S
+#10950
+swamp dragon attack~
+3 0
+0 0 0 0
+S
+#10956
+unclean~
+4 0
+0 0 0 0
+T0
+You are no longer covered in mud.~
+T1
+$n is no longer covered in mud.~
+T2
+You are covered in mud.~
+T3
+$n is covered in mud.~
+S
+#10957
+stunned~
+4 0
+0 0 0 0
+T0
+You are no longer stunned.~
+S
+#10958
+swamp breath~
+4 0
+0 0 0 0
+T0
+You are no longer poisoned by the muck dragon's swamp breath.~
+T2
+You are poisoned by the swamp breath!~
+T3
+$n looks nauseous.~
+S
+#10959
+burrowed~
+4 0
+0 0 0 0
+S
+#10966
+giant attack~
+3 0
+0 0 0 0
+S
+#10967
+stunned~
+4 0
+0 0 0 0
+T0
+You are no longer stunned by the giant's attack.~
+S
+#10968
+dazed~
+4 0
+0 0 0 0
+T0
+You are no longer dazed by the ground tremor.~
+T2
+You are dazed by the ground tremor!~
+S
+#10972
+carve stone~
+2 0
+0 0 0 0
+T0
+You chisel away at the giant stone head...~
+T1
+$n chisels away at the giant stone head...~
+S
+#10973
+repair causeway~
+2 0
+0 0 0 0
+T0
+You make some basic repairs on the causeway, but it was built to last and doesn't need much.~
+T1
+$n makes some basic repairs to the causeway.~
+S
+#10975
+polish head~
+2 0
+0 0 0 0
+T0
+You polish the giant stone head.~
+T1
+$n polishes the giant stone head.~
+S
+#10981
+rogue spellcaster attack~
+3 0
+0 0 0 0
+S
+#10982
+spellcasting~
+4 0
+0 0 0 0
+S
+#10984
+stunned~
+4 0
+0 0 0 0
+T0
+You are no longer stunned.~
+S
+#10985
+bleeding~
+4 0
+0 0 0 0
+T0
+You are no longer bleeding.~
+S
+#10986
+energy drain~
+4 0
+0 0 0 0
+T0
+You recover from the energy draining spell.~
+S
+#10990
+airborne~
+4 0
+0 0 0 0
+T0
+You hit the ground.~
+T1
+$n hits the ground.~
+S
+#10991
+dust cloud~
+4 0
+0 0 0 0
+S
+#10992
+baleful polymorph~
+4 0
+0 0 0 0
+T0
+You are no longer stunned by your sudden transformation.~
+S
+#10993
+ugly stick~
+4 0
+0 0 0 0
+T0
+Your features return to normal.~
+T1
+$n's appearance returns to normal.~
+T2
+You feel your features shift, weakening you!~
+T3
+$n's features suddenly shift, becoming hideous!~
+S
+#10994
+ugly stick~
+4 0
+0 0 0 0
+S
+#10995
+disarmed~
+4 0
+0 0 0 0
+T0
+You retrieve your weapon.~
+T1
+$n retrieves $s weapon.~
+S
 $

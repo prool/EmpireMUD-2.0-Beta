@@ -38,8 +38,9 @@ extern const char *dirs[];
 extern struct instance_data *quest_instance_global;
 
 // external functions
+void adjust_vehicle_tech(vehicle_data *veh, bool add);
 void die(char_data *ch, char_data *killer);
-extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom);
+extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom, bool allow_fake_loc);
 extern char_data *get_char_by_vehicle(vehicle_data *veh, char *name);
 extern obj_data *get_obj_by_vehicle(vehicle_data *veh, char *name);
 extern room_data *get_room(room_data *ref, char *name);
@@ -90,14 +91,14 @@ int get_vehicle_scale_level(vehicle_data *veh, char_data *targ) {
 		level = VEH_SCALE_LEVEL(veh);
 	}
 	else if (orm && COMPLEX_DATA(orm) && (inst = COMPLEX_DATA(orm)->instance)) {
-		if (inst->level) {
-			level = inst->level;
+		if (INST_LEVEL(inst)) {
+			level = INST_LEVEL(inst);
 		}
-		else if (GET_ADV_MIN_LEVEL(inst->adventure) > 0) {
-			level = GET_ADV_MIN_LEVEL(inst->adventure);
+		else if (GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst)) > 0) {
+			level = GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst));
 		}
-		else if (GET_ADV_MAX_LEVEL(inst->adventure) > 0) {
-			level = GET_ADV_MAX_LEVEL(inst->adventure) / 2; // average?
+		else if (GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) > 0) {
+			level = GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) / 2; // average?
 		}
 	}
 	
@@ -139,7 +140,7 @@ VCMD(do_vadventurecomplete) {
 	
 	inst = quest_instance_global;
 	if (!inst) {
-		inst = room ? find_instance_by_room(room, FALSE) : NULL;
+		inst = room ? find_instance_by_room(room, FALSE, TRUE) : NULL;
 	}
 	
 	if (inst) {
@@ -244,6 +245,11 @@ VCMD(do_vforce) {
 }
 
 
+VCMD(do_vheal) {	// mmmm, veal
+	script_heal(veh, VEH_TRIGGER, argument);
+}
+
+
 VCMD(do_vbuildingecho) {
 	char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
 	room_data *froom, *home_room, *iter;
@@ -255,7 +261,7 @@ VCMD(do_vbuildingecho) {
 	if (!*room_number || !*msg) {
 		veh_log(veh, "vbuildingecho called with too few args");
 	}
-	else if (!(froom = get_room(orm, arg))) {
+	else if (!(froom = get_room(orm, room_number))) {
 		veh_log(veh, "vbuildingecho called with invalid target");
 	}
 	else {
@@ -614,7 +620,7 @@ VCMD(do_vpurge) {
 		room_data *room = IN_ROOM(veh);
 		struct instance_data *inst = quest_instance_global;
 		if (!inst) {
-			inst = room ? find_instance_by_room(room, FALSE) : NULL;
+			inst = room ? find_instance_by_room(room, FALSE, TRUE) : NULL;
 		}
 		if (!inst) {
 			veh_log(veh, "vpurge: vehicle using purge instance outside of an instance");
@@ -768,19 +774,20 @@ VCMD(do_vteleport) {
 			}
 			enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
 			qt_visit_room(ch, IN_ROOM(ch));
+			msdp_update_room(ch);	// once we're sure we're staying
 		}
 	}
 	else if (!str_cmp(arg1, "adventure")) {
 		// teleport all players in the adventure
-		if (!orm || !(inst = find_instance_by_room(orm, FALSE))) {
+		if (!orm || !(inst = find_instance_by_room(orm, FALSE, TRUE))) {
 			veh_log(veh, "vteleport: 'adventure' mode called outside any adventure");
 			return;
 		}
 		
-		for (iter = 0; iter < inst->size; ++iter) {
+		for (iter = 0; iter < INST_SIZE(inst); ++iter) {
 			// only if it's not the target room, or we'd be here all day
-			if (inst->room[iter] && inst->room[iter] != target) {
-				for (ch = ROOM_PEOPLE(inst->room[iter]); ch; ch = next_ch) {
+			if (INST_ROOM(inst, iter) && INST_ROOM(inst, iter) != target) {
+				for (ch = ROOM_PEOPLE(INST_ROOM(inst, iter)); ch; ch = next_ch) {
 					next_ch = ch->next_in_room;
 					
 					if (!valid_dg_target(ch, DG_ALLOW_GODS)) {
@@ -796,6 +803,7 @@ VCMD(do_vteleport) {
 						}
 						enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
 						qt_visit_room(ch, IN_ROOM(ch));
+						msdp_update_room(ch);	// once we're sure we're staying
 					}
 				}
 			}
@@ -811,11 +819,14 @@ VCMD(do_vteleport) {
 				}
 				enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
 				qt_visit_room(ch, IN_ROOM(ch));
+				msdp_update_room(ch);	// once we're sure we're staying
 			}
 		}
 		else if ((v = get_vehicle_near_vehicle(veh, arg1))) {
+			adjust_vehicle_tech(v, FALSE);
 			vehicle_from_room(v);
 			vehicle_to_room(v, target);
+			adjust_vehicle_tech(v, FALSE);
 			entry_vtrigger(v);
 		}
 		else {
@@ -954,7 +965,7 @@ VCMD(do_dgvload) {
 		return;
 	}
 	
-	inst = find_instance_by_room(room, FALSE);
+	inst = find_instance_by_room(room, FALSE, TRUE);
 	
 	if (is_abbrev(arg1, "mobile")) {
 		if (!mob_proto(number)) {
@@ -963,7 +974,7 @@ VCMD(do_dgvload) {
 		}
 		mob = read_mobile(number, TRUE);
 		if (COMPLEX_DATA(room) && COMPLEX_DATA(room)->instance) {
-			MOB_INSTANCE_ID(mob) = COMPLEX_DATA(room)->instance->id;
+			MOB_INSTANCE_ID(mob) = INST_ID(COMPLEX_DATA(room)->instance);
 			if (MOB_INSTANCE_ID(mob) != NOTHING) {
 				add_instance_mob(real_instance(MOB_INSTANCE_ID(mob)), GET_MOB_VNUM(mob));
 			}
@@ -1084,7 +1095,7 @@ VCMD(do_dgvload) {
 
 
 VCMD(do_vdamage) {
-	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH];
+	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
 	double modifier = 1.0;
 	char_data *ch;
 	int type;
@@ -1100,6 +1111,13 @@ VCMD(do_vdamage) {
 
 	if (*modarg) {
 		modifier = atof(modarg) / 100.0;
+	}
+	
+	// send negatives to %heal% instead
+	if (modifier < 0) {
+		sprintf(buf, "%s health %.2f", name, -atof(modarg));
+		script_heal(veh, VEH_TRIGGER, buf);
+		return;
 	}
 
 	ch = get_char_by_vehicle(veh, name);
@@ -1516,7 +1534,7 @@ VCMD(do_vscale) {
 	if (!str_cmp(arg, "instance")) {
 		void scale_instance_to_level(struct instance_data *inst, int level);
 		struct instance_data *inst;
-		if ((inst = find_instance_by_room(IN_ROOM(veh), FALSE))) {
+		if ((inst = find_instance_by_room(IN_ROOM(veh), FALSE, TRUE))) {
 			scale_instance_to_level(inst, level);
 		}
 	}
@@ -1537,8 +1555,7 @@ VCMD(do_vscale) {
 			scale_item_to_level(otarg, level);
 		}
 		else if ((proto = obj_proto(GET_OBJ_VNUM(otarg))) && OBJ_FLAGGED(proto, OBJ_SCALABLE)) {
-			fresh = read_object(GET_OBJ_VNUM(otarg), TRUE);
-			scale_item_to_level(fresh, level);
+			fresh = fresh_copy_obj(otarg, level);
 			swap_obj_for_obj(otarg, fresh);
 			extract_obj(otarg);
 		}
@@ -1588,6 +1605,7 @@ const struct vehicle_command_info veh_cmd_info[] = {
 	{ "vechoaround", do_vsend, SCMD_VECHOAROUND },
 	{ "vechoneither", do_vechoneither, NO_SCMD },
 	{ "vforce", do_vforce, NO_SCMD },
+	{ "vheal", do_vheal, NO_SCMD },
 	{ "vload", do_dgvload, NO_SCMD },
 	{ "vmorph", do_vmorph, NO_SCMD },
 	{ "vpurge", do_vpurge, NO_SCMD },
