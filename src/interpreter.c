@@ -2012,6 +2012,8 @@ void start_creation_process(descriptor_data *d) {
 bool check_multiplaying(descriptor_data *d) {
 	descriptor_data *c, *next_c;
 	bool ok = TRUE;
+
+	return TRUE; // allow multiplaying. prool
 	
 	if (ACCOUNT_FLAGGED(d->character, ACCT_MULTI_CHAR)) {
 		return TRUE;
