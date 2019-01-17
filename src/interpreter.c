@@ -25,6 +25,8 @@
 #include "vnums.h"
 #include "dg_scripts.h"
 
+#include "prool.h" // prool
+
 /**
 * Contents:
 *   Command Prototypes
@@ -1219,6 +1221,98 @@ void command_interpreter(char_data *ch, char *argument) {
 		if (check_command_trigger(ch, arg, line, CMDTRG_ABBREV)) {
 			return;
 		}
+		// prool: russian and other prool command
+		//printf("prooldebug arg='%s'\n", arg);
+		//printf("prooldebug argument='%s'\n", argument);
+		if (!strcmp(arg,"prool"))
+			{
+			snprintf(prool_buf,PROOL_LEN,"\bprool info - &Yинформация от Пруля:&0\n\nprooltran=%i\nВключение и выключение экспериментального переводчика командами\nprool_on и prool_off\nprooltran - управление переводчиком, например prooltran 110\n",ch->player_specials->prooltran[0]);
+			msg_to_char(ch,prool_buf);
+			return;
+			}
+		else if (!strcmp(arg,"пруль"))
+			{
+			msg_to_char(ch,"\b&Yпервая кириллическая команда Пруля&0\n");
+			return;
+			}
+		else if (!strcmp(arg,"prool_on"))
+			{
+			msg_to_char(ch,"\bПрульпереводчик включен\n");
+			ch->player_specials->prooltran[0]=1;
+			ch->player_specials->prooltran[1]=1;
+			return;
+			}
+		else if (!strcmp(arg,"prool_off"))
+			{
+			msg_to_char(ch,"\bПрульпереводчик выключен\n");
+			ch->player_specials->prooltran[0]=0;
+			return;
+			}
+		else if (!strcmp(arg,"prooltran"))
+			{char *cc;
+			cc=strchr(argument,' ');
+			if (cc==0)
+				{
+				}
+			else
+				{
+				cc++;
+				if (*cc){if (*cc=='1') {ch->player_specials->prooltran[0]=1;}
+					else if (*cc=='0') {ch->player_specials->prooltran[0]=0;}
+					}
+				cc++;
+				if (*cc){if (*cc=='1') {ch->player_specials->prooltran[1]=1;}
+					else if (*cc=='0') {ch->player_specials->prooltran[1]=0;}
+					}
+				cc++;
+				if (*cc){if (*cc=='1') {ch->player_specials->prooltran[2]=1;}
+					else if (*cc=='0') {ch->player_specials->prooltran[2]=0;}
+					}
+				cc++;
+				if (*cc){if (*cc=='1') {ch->player_specials->prooltran[3]=1;}
+					else if (*cc=='0') {ch->player_specials->prooltran[3]=0;}
+					}
+				}
+			snprintf(prool_buf,PROOL_LEN,"\bprool translator=%i word tran.=%i string tran.=%i bilingua=%i\n", 
+			ch->player_specials->prooltran[0],
+			ch->player_specials->prooltran[1],
+			ch->player_specials->prooltran[2],
+			ch->player_specials->prooltran[3]
+			);
+			msg_to_char(ch, prool_buf);
+
+			return;
+			}
+		else if (!strcmp(arg,"duhmada"))
+			{int number;
+			obj_data *obj;
+
+			msg_to_char(ch, "Дух мада выдал вам припасы\n");
+
+			number=2112; // bottle of water
+			obj = read_object(number, TRUE);
+			if (CAN_WEAR(obj, ITEM_WEAR_TAKE))
+			obj_to_char(obj, ch);
+			else
+			obj_to_room(obj, IN_ROOM(ch));
+			act("$n makes a strange magical gesture.", TRUE, ch, 0, 0, TO_ROOM);
+			act("$n has created $p!", FALSE, ch, obj, 0, TO_ROOM);
+			act("You create $p.", FALSE, ch, obj, 0, TO_CHAR);
+
+			number=3313; // bread
+			obj = read_object(number, TRUE);
+			if (CAN_WEAR(obj, ITEM_WEAR_TAKE))
+			obj_to_char(obj, ch);
+			else
+			obj_to_room(obj, IN_ROOM(ch));
+			act("$n makes a strange magical gesture.", TRUE, ch, 0, 0, TO_ROOM);
+			act("$n has created $p!", FALSE, ch, obj, 0, TO_ROOM);
+			act("You create $p.", FALSE, ch, obj, 0, TO_CHAR);
+
+			return;
+			}
+		else
+		// end of prool
 		// otherwise, no match
 		send_config_msg(ch, "huh_string");
 	}
@@ -2105,6 +2199,7 @@ void send_login_motd(descriptor_data *desc, int bad_pws) {
  */
 int perform_dupe_check(descriptor_data *d) {
 	void refresh_all_quests(char_data *ch);
+	char proolbuf [PROOL_LEN]; // prool
 	
 	descriptor_data *k, *next_k;
 	char_data *target = NULL, *ch, *next_ch;
@@ -2214,16 +2309,22 @@ int perform_dupe_check(descriptor_data *d) {
 			SEND_TO_Q("Reconnecting.\r\n", d);
 			act("$n has reconnected.", TRUE, d->character, 0, 0, TO_ROOM);
 			syslog(SYS_LOGIN, GET_INVIS_LEV(d->character), TRUE, "%s [%s] has reconnected.", GET_NAME(d->character), d->host);
+			sprintf(proolbuf,"%s %s reconnected", GET_NAME(d->character),d->host);
+			prool_log(proolbuf);
 			break;
 		case USURP:
 			SEND_TO_Q("You take over your own body, already in use!\r\n", d);
 			act("$n suddenly keels over in pain, surrounded by a white aura...\r\n"
 				"$n's body has been taken over by a new spirit!", TRUE, d->character, 0, 0, TO_ROOM);
 			syslog(SYS_LOGIN, GET_INVIS_LEV(d->character), TRUE, "%s has re-logged in ... disconnecting old socket.", GET_NAME(d->character));
+			sprintf(proolbuf,"%s %s relogged in old socket", GET_NAME(d->character),d->host);
+			prool_log(proolbuf);
 			break;
 		case UNSWITCH:
 			SEND_TO_Q("Reconnecting to unswitched char.", d);
 			syslog(SYS_LOGIN, GET_INVIS_LEV(d->character), TRUE, "%s [%s] has reconnected.", GET_NAME(d->character), d->host);
+			sprintf(proolbuf,"%s %s reconnected-2", GET_NAME(d->character),d->host);
+			prool_log(proolbuf);
 			break;
 	}
 	
@@ -2294,6 +2395,7 @@ void nanny(descriptor_data *d, char *arg) {
 	int load_result, i, iter;
 	bool show_start = FALSE;
 	char_data *temp_char;
+	char proolbuf [PROOL_LEN]; // prool
 	
 	// this avoids treating telnet negotiation as menu input
 	if (d->no_nanny) {
@@ -2473,6 +2575,8 @@ void nanny(descriptor_data *d, char *arg) {
 				
 				if (!PLR_FLAGGED(d->character, PLR_INVSTART)) {
 					syslog(SYS_LOGIN, GET_INVIS_LEV(d->character), TRUE, "%s [%s] has connected.", GET_NAME(d->character), PLR_FLAGGED(d->character, PLR_IPMASK) ? "masked" : d->host);
+			sprintf(proolbuf,"%s %s connected", GET_NAME(d->character),d->host);
+			prool_log(proolbuf);
 				}
 
 				// check here if they need more traits than they have (IF they are an existing char?)

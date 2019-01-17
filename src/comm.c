@@ -26,6 +26,8 @@
 #include "dg_event.h"
 #include "vnums.h"
 
+#include "prool.h" // prool
+
 /**
 * Contents:
 *   Data
@@ -808,6 +810,7 @@ void perform_reboot(void) {
 	// If this is a reboot, restart the mud!
 	if (reboot_control.type == SCMD_REBOOT) {
 		log("Reboot: performing live reboot");
+		prool_log("Reboot: performing live reboot");
 		
 		chdir("..");
 				
@@ -851,15 +854,18 @@ void perform_reboot(void) {
 			case SHUTDOWN_DIE: {
 				touch(KILLSCRIPT_FILE);
 				log("Shutdown die: mud will not reboot");
+				prool_log("Shutdown die: mud will not reboot");
 				break;
 			}
 			case SHUTDOWN_PAUSE: {
 				touch(PAUSE_FILE);
 				log("Shutdown pause: mud will not reboot until '%s' is removed", PAUSE_FILE);
+				prool_log("Shutdown pause: mud will not reboot until pause file is removed");
 				break;
 			}
 			default: {
 				log("Shutting down: the mud will reboot shortly");
+				prool_log("Shutting down: the mud will reboot shortly");
 				break;
 			}
 		}
@@ -1238,18 +1244,33 @@ void act(const char *str, int hide_invisible, char_data *ch, const void *obj, co
 * @param descriptor_data *d The player's descriptor.
 * @param const char *messg... va_arg format.
 */
+	
 void msg_to_desc(descriptor_data *d, const char *messg, ...) {
 	char output[MAX_STRING_LENGTH];
 	va_list tArgList;
+
+	char_data *ch; // prool
 	
 	if (!messg || !d) {
 		return;
 	}
+
+//	printf("prooldebug msg_to_desc()\n");
 	
 	va_start(tArgList, messg);
 	vsprintf(output, messg, tArgList);
 
-	SEND_TO_Q(output, d);
+	ch=d->character;
+
+	if (ch)
+		if(ch->player_specials->prooltran[0]) {
+			prool_translator_2 (output, prool_buf,ch);
+			SEND_TO_Q(prool_buf, ch->desc);
+			}
+		else
+			SEND_TO_Q(output, d);
+	else
+		SEND_TO_Q(output, d);
 
 	va_end(tArgList);
 }
@@ -1268,11 +1289,21 @@ void msg_to_char(char_data *ch, const char *messg, ...) {
 	
 	if (!messg || !ch->desc)
 		return;
+
+//	printf("prooldebug msg_to_char '%s'\n", messg); // prool
 	
 	va_start(tArgList, messg);
 	vsprintf(output, messg, tArgList);
 
+//	printf("prooldebug msg_to_char output '%s'\n", output); // prool
+
+if(ch->player_specials->prooltran[0]) {
+	prool_translator_2 (output, prool_buf,ch);
+	SEND_TO_Q(prool_buf, ch->desc);
+}
+else	{
 	SEND_TO_Q(output, ch->desc);
+}
 
 	va_end(tArgList);
 }
@@ -1294,6 +1325,8 @@ void msg_to_vehicle(vehicle_data *veh, bool awake_only, const char *messg, ...) 
 	if (!messg || !veh) {
 		return;
 	}
+
+//	printf("prooldebug msg_to_vehicle()\n"); // prool
 	
 	va_start(tArgList, messg);
 	vsprintf(output, messg, tArgList);
@@ -1310,12 +1343,18 @@ void msg_to_vehicle(vehicle_data *veh, bool awake_only, const char *messg, ...) 
 		}
 		
 		// looks valid
-		SEND_TO_Q(output, desc);
+if(ch->player_specials->prooltran[0]) {
+	prool_translator_2 (output, prool_buf,ch);
+	SEND_TO_Q(prool_buf, desc);
+}
+else	{
+	SEND_TO_Q(output, desc);
+}
+
 	}
 	
 	va_end(tArgList);
 }
-
 
 /**
 * Sends olc audit info to the player.
@@ -1338,24 +1377,35 @@ void olc_audit_msg(char_data *ch, any_vnum vnum, const char *messg, ...) {
 	va_end(tArgList);
 }
 
-
 void send_to_all(const char *messg, ...) {
 	descriptor_data *i;
 	char output[MAX_STRING_LENGTH];
 	va_list tArgList;
+	char_data *ch; // prool
 
 	if (!messg)
 		return;
+
+//	printf("prooldebug send_to_all()\n"); // prool
 
 	va_start(tArgList, messg);
 	vsprintf(output, messg, tArgList);
 
 	for (i = descriptor_list; i; i = i->next)
-		if (STATE(i) == CON_PLAYING)
-			SEND_TO_Q(output, i);
+		if (STATE(i) == CON_PLAYING) {
+			ch = i->character;
+			if (ch)
+				if(ch->player_specials->prooltran[0]) {
+					prool_translator_2 (output, prool_buf,ch);
+					SEND_TO_Q(prool_buf, i);
+					}
+				else
+					SEND_TO_Q(output, i);
+			else
+				SEND_TO_Q(output, i);
+			}
 	va_end(tArgList);
 }
-
 
 /* higher-level communication: the act() function */
 void perform_act(const char *orig, char_data *ch, const void *obj, const void *vict_obj, const char_data *to, bitvector_t act_flags) {
@@ -1567,7 +1617,13 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 			stack_simple_msg_to_desc(to->desc, lbuf);
 		}
 		else {	// send normally
-			SEND_TO_Q(lbuf, to->desc);
+		if (to->player_specials->prooltran[0]) {
+			prool_translator_2 (lbuf, prool_buf,to);
+			SEND_TO_Q(prool_buf, to->desc);
+			}
+else {
+		SEND_TO_Q(lbuf, to->desc);
+}
 		}
 	}
 
@@ -1578,10 +1634,17 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 
 // this is the pre-circle3.1 send_to_char that doesn't have va_args
 void send_to_char(const char *messg, char_data *ch) {
-	if (ch->desc && messg)
+	if (ch->desc && messg) {
+//		printf("prooldebug send_to_char()\n"); // prool
+if (ch->player_specials->prooltran[0]) {
+		prool_translator_2 (messg, prool_buf,ch);
+		SEND_TO_Q(prool_buf, ch->desc);
+}
+else {
 		SEND_TO_Q(messg, ch->desc);
 }
-
+	}
+}
 
 /**
 * Sends a message to the entire group, except for ch.
@@ -1644,11 +1707,15 @@ void send_to_outdoor(bool weather, const char *messg, ...) {
 		if (weather && ROOM_AFF_FLAGGED(IN_ROOM(i->character), ROOM_AFF_NO_WEATHER)) {
 			continue;
 		}
-		SEND_TO_Q(output, i);
+		if (i->character->player_specials->prooltran[0]) {
+			prool_translator_2 (output, prool_buf,i->character);
+			SEND_TO_Q(prool_buf, i);
+			}
+		else
+			SEND_TO_Q(output, i);
 	}
 	va_end(tArgList);
 }
-
 
 void send_to_room(const char *messg, room_data *room) {
 	char_data *i;
@@ -1656,11 +1723,19 @@ void send_to_room(const char *messg, room_data *room) {
 	if (messg == NULL)
 		return;
 
+//	printf("prooldebug send_to_room '%s'\n", messg); // prool
+
 	for (i = ROOM_PEOPLE(room); i; i = i->next_in_room)
 		if (i->desc)
-			SEND_TO_Q(messg, i->desc);
+		{
+		if (i->player_specials->prooltran[0]) {
+			prool_translator_2 (messg, prool_buf,i);
+			SEND_TO_Q(prool_buf, i->desc);
+			}
+			else
+				SEND_TO_Q(messg, i->desc);
+		}
 }
-
 
 /**
 * Flushes a descriptor's stacked messages, adding (x2) where needed.
@@ -1798,11 +1873,16 @@ void close_socket(descriptor_data *d) {
 			if (!IS_NPC(d->character)) {
 				SAVE_CHAR(d->character);
 				syslog(SYS_LOGIN, GET_INVIS_LEV(d->character), TRUE, "Closing link to: %s.", GET_NAME(d->character));
+			char proolbuf[PROOL_LEN];
+			sprintf(proolbuf,"%s closing link", GET_NAME(d->character));
+			prool_log(proolbuf);
 			}
 			d->character->desc = NULL;
 		}
 		else {
 			syslog(SYS_LOGIN, 0, TRUE, "Losing player: %s.", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>");
+				snprintf(prool_buf,PROOL_LEN,"Losing player %s", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>");
+				prool_log(prool_buf);
 			free_char(d->character);
 		}
 	}
@@ -2332,7 +2412,8 @@ int new_descriptor(int s) {
 		if (!slow_ip) {
 			char buf[MAX_STRING_LENGTH];
 			snprintf(buf, sizeof(buf), "Warning: gethostbyaddr [%s]", inet_ntoa(peer.sin_addr));
-			perror(buf);
+			//perror(buf); // rem by prool
+			prool_log(buf);
 			
 			// did it take longer than 5 seconds to look up?
 			if (when + 5 < time(0)) {
@@ -2417,7 +2498,8 @@ ssize_t perform_socket_read(socket_t desc, char *read_point, size_t space_left) 
 
 	/* read() returned 0, meaning we got an EOF. */
 	if (ret == 0) {
-		log("WARNING: EOF on socket read (connection broken by peer)");
+		//log("WARNING: EOF on socket read (connection broken by peer)"); // rem by prool
+		prool_log("WARNING: EOF on socket read (connection broken by peer)");
 		return (-1);
 	}
 
@@ -2449,7 +2531,8 @@ ssize_t perform_socket_read(socket_t desc, char *read_point, size_t space_left) 
 	 * We don't know what happened, cut them off. This qualifies for
 	 * a SYSERR because we have no idea what happened at this point.
 	 */
-	perror("perform_socket_read: about to lose connection");
+	//perror("perform_socket_read: about to lose connection"); // rem by prool
+	prool_log("perform_socket_read: about to lose connection");
 	return (-1);
 }
 
@@ -2645,7 +2728,7 @@ int process_input(descriptor_data *t) {
 						space_left++;
 				}
 			}
-			else if (isascii(*ptr) && isprint(*ptr)) {
+			else if (((unsigned char)*ptr)>=32U/*isascii(*ptr) && isprint(*ptr)*/) { // prool: enable non ASCII chars (f.e., cyrillic, UTF-8, etc)
 				if ((*(write_point++) = *ptr) == '$') {		/* copy one character */
 					*(write_point++) = '$';	/* if it's a $, double it */
 					space_left -= 2;
@@ -3535,6 +3618,7 @@ RETSIGTYPE checkpointing(int sig) {
 
 RETSIGTYPE hupsig(int sig) {
 	log("SYSERR: Received SIGHUP, SIGINT, or SIGTERM. Shutting down...");
+	prool_log("SYSERR: Received SIGHUP, SIGINT, or SIGTERM. Shutting down...");
 	reboot_control.type = SCMD_SHUTDOWN;
 	perform_reboot();
 	// exit(1);
@@ -3896,6 +3980,7 @@ void init_game(ush_int port) {
 		reboot_recover();
 
 	log("Entering game loop.");
+	log("Empire MUD запустился"); // prool
 	game_loop(mother_desc);
 
 	save_all_players();
@@ -3915,6 +4000,8 @@ int main(int argc, char **argv) {
 
 	int pos = 1;
 	const char *dir;
+
+	prool_init(); // prool
 
 	/* Initialize these to check for overruns later. */
 	plant_magic(buf);
@@ -4011,6 +4098,7 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 	log("Using %s as data directory.", dir);
+	prool_log("EmpireMUD starts");
 
 	if (scheck) {
 		boot_world();
@@ -4123,6 +4211,7 @@ void reboot_recover(void) {
 		}
 
 		sprintf(buf, "\r\nRestoring %s...\r\n", name);
+		prool_log(buf);
 		if (write_to_descriptor(desc, buf) < 0) {
 			close(desc);
 			continue;
