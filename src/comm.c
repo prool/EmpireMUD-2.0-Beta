@@ -3980,7 +3980,8 @@ void init_game(ush_int port) {
 		reboot_recover();
 
 	log("Entering game loop.");
-	log("Empire MUD запустился"); // prool
+	log("Empire MUD started"); // prool
+	log("------------------"); // prool
 	game_loop(mother_desc);
 
 	save_all_players();
