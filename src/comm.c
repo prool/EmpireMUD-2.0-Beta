@@ -1880,7 +1880,7 @@ void close_socket(descriptor_data *d) {
 			d->character->desc = NULL;
 		}
 		else {
-			syslog(SYS_LOGIN, 0, TRUE, "Losing player: %s.", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>");
+			if (GET_NAME(d->character)) syslog(SYS_LOGIN, 0, TRUE, "Losing player: %s.", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>"); // modif. by prool
 				snprintf(prool_buf,PROOL_LEN,"Losing player %s", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>");
 				prool_log(prool_buf);
 			free_char(d->character);
