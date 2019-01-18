@@ -6,23 +6,23 @@ allow_extended_color_codes 0
 automessage_color &y
 hiring_builders 0
 hiring_coders 0
-huh_string Huh?!?
-mud_contact 
-mud_created 2015
-mud_hostname 
+huh_string Bad command
+mud_contact proolix@gmail.com
+mud_created 2018
+mud_hostname glorymud.kharkov.org
 mud_icon 
-mud_ip 
-mud_location 
+mud_ip 185.82.217.164
+mud_location Europe
 mud_minimum_age 
-mud_name EmpireMUD
+mud_name GloryMUD
 mud_status Live
-mud_website
-newyear_message The ground under you shakes violently!
+mud_website glorymud.kharkov.org
+newyear_message Happy New Year! С Новым Годом!
 no_person No-one by that name here.
-ok_string Okay.
+ok_string Ok.
 public_logins 0
 starting_year 1150
-welcome_message Welcome to your EmpireMUD! Prepare to face your destiny!
+welcome_message Welcome to GloryMUD! Добро пожаловать!
 who_list_sort 0
 *
 * Actions configs

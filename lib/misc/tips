@@ -9,6 +9,12 @@ The website has a graphical world map at http://empiremud.net/map-viewer/
 You can see a list of what's changed recently at http://empiremud.net/patch-notes/
 *
 * General tips
+Русский язык можно включить командой language rus
+Помощь от Пруля можно получить по команде help prool
+Команда dukhmada выдает немного припасов (еды, воды и прочего)
+Сайт этого мада glorymud.kharkov.org
+Пруль (Prool) - имплементор (главный админ) этого мада
+Е-мейл Пруля proolix@gmail.com
 You can always ask for help on the /newbie channel.
 You can type 'messages' to see any recent announcements.
 Type 'progress' to see your empire's progression goals.
