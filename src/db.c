@@ -26,6 +26,8 @@
 #include "vnums.h"
 #include "dg_scripts.h"
 
+#include "prool.h"
+
 /**
 * Contents:
 *   Global Data
@@ -1745,7 +1747,10 @@ char_data *read_mobile(mob_vnum nr, bool with_triggers) {
 	int iter;
 
 	if (!(proto = mob_proto(nr))) {
-		log("WARNING: Mobile vnum %d does not exist in database.", nr);
+		char prool_buf[PROOL_LEN];
+		//log("WARNING: Mobile vnum %d does not exist in database.", nr);
+		snprintf(prool_buf,PROOL_LEN,"WARNING: Mobile vnum %d does not exist in database.",nr);
+		prool_log(prool_buf);
 		// grab first one (bug)
 		proto = mobile_table;
 	}
