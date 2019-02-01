@@ -27,6 +27,8 @@
 #include "skills.h"
 #include "vnums.h"
 
+#include "prool.h"
+
 #define PULSES_PER_MUD_HOUR     (SECS_PER_MUD_HOUR*PASSES_PER_SEC)
 #define player_script_radius  25	// map tiles away that players may be for scripts to trigger
 
@@ -7038,6 +7040,7 @@ void init_lookup_table(void) {
 }
 
 char_data *find_char_by_uid_in_lookup_table(int uid) {
+	char prool_buf[PROOL_LEN];
 	int bucket = (int) (uid & (BUCKET_COUNT - 1));
 	struct lookup_table_t *lt = &lookup_table[bucket];
 
@@ -7046,7 +7049,9 @@ char_data *find_char_by_uid_in_lookup_table(int uid) {
 	if (lt)
 		return (char_data*)(lt->c);
 
-	log("find_char_by_uid_in_lookup_table : No entity with number %d in lookup table", uid);
+	//log("find_char_by_uid_in_lookup_table : No entity with number %d in lookup table", uid);
+	snprintf(prool_buf,PROOL_LEN,"find_char_by_uid_in_lookup_table : No entity with number %d in lookup table", uid);
+	prool_log(prool_buf);
 	return NULL;
 }
 
