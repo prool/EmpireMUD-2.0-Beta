@@ -16,40 +16,14 @@ else
 end
 ~
 #9001
-Wolf Animation~
-0 bw 3
+Wolf Pack~
+0 n 100
 ~
-* This script is no longer used. It was replaced by custom strings.
-* Wolf Animation (9001-9003)
-* Time of day is important, can't have wolves howling at the sun...
-if ((%time.hour% < 7) && (%time.hour% > 19))
-  * Can't have wolves howling at the rain clouds either...
-  if (%weather% == clear)
-    %echo% self.name points %self.hisher% muzzle toward the sky and howls.
-  end
-else
-  if (%self.name% == a snarling wolf)
-    %echo% %self.name% looks directly at you, opens %self.hisher% mouth to show %self.hisher% fangs, and growls deep in %self.hisher% chest as %self.hisher% hackles stand on end...
-  else
-    switch (%random.4%)
-      case 1
-        * scratch
-        %echo% %self.name% scratches %self.hisher% ear with a hind foot.
-      break
-      case 2
-        * roll
-        %echo% %self.name% rolls around, all four paws in the air, making odd snorting sounds.
-      break
-      case 3
-        * Yawn
-        %echo% %self.name% yawns, showing off an impressive set of gleaming white fangs.
-      break
-      default
-        %echo% %self.name% pants, with %self.hisher% tongue hanging out and tail gently wagging.
-      break
-    done
-  end
-end
+set num %random.2%
+while %num% > 0
+  eval num %num% - 1
+  %load% mob 9003 ally
+done
 ~
 #9002
 Herd Cats~
@@ -358,6 +332,85 @@ switch (%random.3)
   break
 done
 ~
+#9027
+Feed to Tame: Fruit/Veg/Grain~
+0 j 100
+~
+* Amount of tameness required
+set target 5
+if %actor.cooldown(9027)%
+  %send% %actor% You can't feed wild animals again yet...
+  return 0
+  halt
+end
+nop %actor.set_cooldown(9027, 5)%
+wait 3
+if !%object.is_component(fruit)% && !%object.is_component(vegetable)% && !%object.is_component(grain)%
+  %echo% %self.name% does not seem interested.
+  drop all
+  halt
+end
+* Block NPCs
+if %actor.is_npc%
+  halt
+end
+* Load tameness
+if %self.varexists(tameness)%
+  set tameness %self.tameness%
+else
+  set tameness 0
+end
+eval tameness %tameness% + 1
+if %actor.charisma% > %random.10%
+  eval tameness %tameness% + 1
+end
+remote tameness %self.id%
+* Messaging
+if %self.name% ~= horse
+  set emotion and nickers
+elseif %self.name% ~= elephant
+  set emotion and trumpets happily
+else
+  set emotion and chews contentedly
+end
+%echo% %self.name% eats %object.shortdesc% %emotion%.
+if %tameness% >= %target%
+  %send% %actor% %self.heshe% really seems to like you.
+  %echoaround% %actor% %self.heshe% really seems to like %actor.name%.
+end
+mjunk all
+~
+#9028
+Tameness Required to Tame~
+0 c 0
+tame~
+* Amount of tameness required
+set target 5
+* Check target and tech
+if (!%actor.has_tech(Tame)% || %actor.char_target(%arg%)% != %self%)
+  return 0
+  halt
+end
+* Skill checks / load tameness
+if %actor.ability(Summon Animals)%
+  set tameness %target%
+  %send% %actor% You whistle at %self.name%...
+  %echoaround% %actor% %actor.name% whistles at %self.name%...
+elseif %self.varexists(tameness)%
+  set tameness %self.tameness%
+else
+  set tameness 0
+end
+if %tameness% < %target%
+  %send% %actor% You can't seem to get close enough to %self.name% to tame %self.himher%. Try feeding %self.himher% some fruit.
+  return 1
+  halt
+else
+  * Ok to tame
+  return 0
+  halt
+end
+~
 #9030
 Butcher detect~
 1 c 3
@@ -544,6 +597,17 @@ else
   return 0
   halt
 end
+~
+#9061
+Hypnotoad fight~
+0 k 75
+~
+wait 1
+dg_affect #9061 %actor% STUNNED on 15
+%send% %actor% You lock eyes with %self.name% and black out for a moment...
+%echoaround% %actor% %actor.name% locks eyes with %self.name% and appears dazed...
+wait 1
+flee
 ~
 #9064
 Wandering Vampire combat~

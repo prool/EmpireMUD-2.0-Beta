@@ -3129,7 +3129,10 @@ ACMD(do_barde) {
 	
 	one_argument(argument, arg);
 
-	if (!room_has_function_and_city_ok(IN_ROOM(ch), FNC_STABLE)) {
+	if (!has_player_tech(ch, PTECH_BARDE)) {
+		msg_to_char(ch, "You don't have the correct ability to barde animals.\r\n");
+	}
+	else if (!room_has_function_and_city_ok(IN_ROOM(ch), FNC_STABLE)) {
 		msg_to_char(ch, "You must barde animals in the stable.\r\n");
 	}
 	else if (!IS_COMPLETE(IN_ROOM(ch))) {
@@ -3199,6 +3202,7 @@ ACMD(do_barde) {
 		}
 
 		if (found) {
+			gain_player_tech_exp(ch, PTECH_BARDE, 50);
 			if (!IS_NPC(ch)) {
 				extract_resources(ch, res, TRUE, NULL);
 			}
@@ -5667,7 +5671,7 @@ ACMD(do_progress) {
 	extern progress_data *find_current_progress_goal_by_name(empire_data *emp, char *name);
 	extern progress_data *find_progress_goal_by_name(char *name);
 	extern progress_data *find_purchasable_goal_by_name(empire_data *emp, char *name);
-	void get_progress_perks_display(struct progress_perk *list, char *save_buffer);
+	void get_progress_perks_display(struct progress_perk *list, char *save_buffer, bool show_vnums);
 	void get_tracker_display(struct req_data *tracker, char *save_buffer);
 	void purchase_goal(empire_data *emp, progress_data *prg, char_data *purchased_by);
 	
@@ -6052,7 +6056,7 @@ ACMD(do_progress) {
 		}
 		
 		if (PRG_PERKS(prg)) {
-			get_progress_perks_display(PRG_PERKS(prg), buf);
+			get_progress_perks_display(PRG_PERKS(prg), buf, FALSE);
 			msg_to_char(ch, "Rewards:\r\n%s", buf);
 		}
 		if ((goal = get_current_goal(emp, PRG_VNUM(prg)))) {

@@ -819,6 +819,11 @@ const char *player_tech_types[] = {
 	"Where-Upgrade",
 	"Dodge-Cap",
 	"Skinning-Upgrade",
+	"Barde",
+	"Herd",	// 55
+	"Milk",
+	"Shear",
+	"Tame",
 	"\n"
 };
 
@@ -2132,8 +2137,8 @@ const char *item_types[] = {
 	"PAINT",
 	"*MAIL",
 	"WEALTH",
-	"*CART",
-	"*SHIP",
+	"*",
+	"*",
 	"LIGHTER",
 	"MINIPET",
 	"MISSILE-WEAPON",
@@ -2743,7 +2748,7 @@ const char *bld_on_flags[] = {
 };
 
 
-// BLD_x -- feel free to re-use the *DEPRECATED flags, as they should no longer appear on anything
+// BLD_x -- feel free to re-use the * flags, as they should no longer appear on anything
 const char *bld_flags[] = {
 	"ROOM",	// 0
 	"ALLOW-MOUNTS",
@@ -2761,38 +2766,38 @@ const char *bld_flags[] = {
 	"!PAINT",
 	"ATTACH-ROAD",
 	"BURNABLE",	// 15
-	"*FORGE-DEPRECATED",
-	"*COOKING-FIRE-DEPRECATED",
-	"*ALCHEMIST-DEPRECATED",
-	"*STABLE-DEPRECATED",
-	"*LIBRARY-DEPRECATED",	// 20
-	"*APIARY-DEPRECATED",
-	"*GLASSBLOWER-DEPRECATED",
-	"*DOCKS-DEPRECATED",
-	"*MAIL-DEPRECATED",
-	"*MILL-DEPRECATED",	// 25
-	"*POTTER-DEPRECATED",
-	"*TAILOR-DEPRECATED",
-	"*BATHS-DEPRECATED",
+	"*",
+	"*",
+	"*",
+	"*",
+	"*",	// 20
+	"*",
+	"*",
+	"*",
+	"*",
+	"*",	// 25
+	"*",
+	"*",
+	"*",
 	"SAIL",
-	"*TOMB-DEPRECATED",	// 30
-	"*MINT-DEPRECATED",
-	"*VAULT-DEPRECATED",
+	"*",	// 30
+	"*",
+	"*",
 	"ITEM-LIMIT",
 	"LONG-AUTOSTORE",
-	"*WAREHOUSE-DEPRECATED",	// 35
-	"*TRADING-POST-DEPRECATED",
+	"*",	// 35
+	"*",
 	"HIGH-DEPLETION",
-	"*PORTAL-DEPRECATED",
-	"*BEDROOM-DEPRECATED",
+	"*",
+	"*",
 	"!DELETE",	// 40
-	"*SUMMON-DEPRECATED",
+	"*",
 	"NEED-BOAT",
 	"LOOK-OUT",
 	"2ND-TERRITORY",
-	"*SHIPYARD-DEPRECATED",	// 45
+	"*",	// 45
 	"UPGRADED",
-	"*PRESS-DEPRECATED",
+	"*",
 	"\n"
 };
 
@@ -3624,10 +3629,10 @@ const char *trig_attach_types[] = {
 	"Mobile",
 	"Object",
 	"Room",
-	"*RMT",	// rmt_trigger -- never set on an actual trigger
-	"*ADV",	// adv_trigger -- never set on an actual trigger
+	"*RMT (use Room)",	// rmt_trigger -- never set on an actual trigger
+	"*ADV (use Room)",	// adv_trigger -- never set on an actual trigger
 	"Vehicle",
-	"*BDG",	// bdg_trigger -- actually just uses room triggers
+	"*BDG (use Room)",	// bdg_trigger -- actually just uses room triggers
 	"\n"
 };
 
@@ -3729,6 +3734,7 @@ const char *interact_types[] = {
 	"FISH",
 	"PAN",
 	"QUARRY",
+	"TAME",
 	"\n"
 };
 
@@ -3759,6 +3765,7 @@ const int interact_attach_types[NUM_INTERACTS] = {
 	TYPE_ROOM,	// fish
 	TYPE_ROOM,	// pan
 	TYPE_ROOM,	// quarry
+	TYPE_MOB,	// tame
 };
 
 
@@ -3788,6 +3795,7 @@ const byte interact_vnum_types[NUM_INTERACTS] = {
 	TYPE_OBJ,	// fish
 	TYPE_OBJ,	// pan
 	TYPE_OBJ,	// quarry
+	TYPE_MOB,	// tame
 };
 
 

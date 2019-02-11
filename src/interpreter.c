@@ -406,6 +406,7 @@ ACMD(do_swim);
 ACMD(do_switch);
 ACMD(do_syslog);
 
+ACMD(do_tame);
 ACMD(do_tan);
 ACMD(do_tavern);
 ACMD(do_tedit);
@@ -1002,6 +1003,7 @@ cpp_extern const struct command_info cmd_info[] = {
 
 	SIMPLE_CMD( "tell", POS_DEAD, do_tell, NO_MIN, CTYPE_COMM ),
 	SIMPLE_CMD( "take", POS_RESTING, do_get, NO_MIN, CTYPE_MOVE ),
+	STANDARD_CMD( "tame", POS_STANDING, do_tame, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_SKILL, CMD_NO_ANIMALS, NO_ABIL ),
 	STANDARD_CMD( "tan", POS_STANDING, do_tan, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_EMPIRE, CMD_NO_ANIMALS, NO_ABIL ),
 	SCMD_CMD( "taste", POS_RESTING, do_eat, NO_MIN, CTYPE_UTIL, SCMD_TASTE ),
 	STANDARD_CMD( "tavern", POS_STANDING, do_tavern, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_EMPIRE, CMD_NO_ANIMALS, NO_ABIL ),
@@ -1140,7 +1142,7 @@ void command_interpreter(char_data *ch, char *argument) {
 	extern bool check_ability(char_data *ch, char *string, bool exact);
 	extern bool check_social(char_data *ch, char *string, bool exact);
 	int cmd, length, iter;
-	char *line;
+	char arg[MAX_INPUT_LENGTH], *line;
 
 	/* just drop to next line for hitting CR */
 	skip_spaces(&argument);
@@ -1334,7 +1336,7 @@ void command_interpreter(char_data *ch, char *argument) {
 	}
 	
 	// Command trigger (3/3): exact match on abbreviated command
-	else if (check_command_trigger(ch, (char*)cmd_info[cmd].command, line, CMDTRG_EXACT)) {
+	else if (strlen(arg) < strlen(cmd_info[cmd].command) && check_command_trigger(ch, (char*)cmd_info[cmd].command, line, CMDTRG_EXACT)) {
 		return;
 	}
 	

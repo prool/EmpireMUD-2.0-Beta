@@ -977,6 +977,11 @@ Available techs are:
  &cWhere-Upgrade&0 * - Increases the range of the 'where' command.
  &cDodge-Cap&0 - Improves the player's maximum dodge percent.
  &cSkinning-Upgrade&0 - Skinning always succeeds.
+ &cBarde&0 - Can barde animals.
+ &cHerd&0 - Can herd animals.
+ &cMilk&0 - Can milk animals (in a stable).
+ &cShear&0 - Can shear animals (in a stable).
+ &cTame&0 - Can tame animals.
 
 * Marked techs trigger ability gains on their own without gain hooks.
 
@@ -1882,9 +1887,6 @@ Usage:  .flags [add | remove] <flags>
 When set on a building, these flags affect all interior rooms, too. When set
 on a designate-able room (a building where the ROOM flag is set), they only
 affect players in that room.
-
-(Some former building flags were moved to the 'functions' list, and their
-former building flags still show up in the editor as DEPRECATED.)
 
 Available flags:
  ROOM - this is a room that can be added with the designate command if it has
@@ -3731,6 +3733,7 @@ Mob interaction types:
  BARDE - Mob loaded when the Barde ability is used in a stable.
  LOOT - Items dropped into the corpse when the mob is killed.
  PICKPOCKET - Items gained from the pickpocket skill.
+ TAME - Becomes another mob when it is 'tamed'.
  
 Object interaction types:
  LIGHT - Item something is converted into when lit on fire.
@@ -5034,15 +5037,13 @@ Available types:
  FOOD - edible
  RECIPE - can be 'learned' to give a craft
  PORTAL - transports a player to another place (never set .wear TAKE)
- *BOARD - a message board
+ *BOARD - a message board (internal use only)
  CORPSE - a corpse
  COINS - a pile of coins
  CURRENCY - a pile of adventure currency
  PAINT - used for painting buildings
- *MAIL - a letter
+ *MAIL - a letter (internal use only)
  WEALTH - adds to empire wealth when stored
- *CART - use vehicles instead
- *SHIP - use vehicles instead
  LIGHTER - can light fires
  MINIPET - teaches a mini-pet to the player on 'use'
  MISSILE-WEAPON - a bow, or similar (requires .wear RANGED)
