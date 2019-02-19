@@ -27,6 +27,8 @@
 #include "dg_event.h"
 #include "vnums.h"
 
+#include "prool.h"
+
 /**
 * Contents:
 *   Affect Handlers
@@ -1363,6 +1365,8 @@ bool match_char_name(char_data *ch, char_data *target, char *name, bitvector_t f
 void perform_idle_out(char_data *ch) {
 	extern bool dismiss_any_minipet(char_data *ch);
 	extern obj_data *player_death(char_data *ch);
+
+			char proolbuf[PROOL_LEN];
 	
 	empire_data *emp = NULL;
 	bool died = FALSE;
@@ -1398,6 +1402,9 @@ void perform_idle_out(char_data *ch) {
 	dismiss_any_minipet(ch);
 	
 	syslog(SYS_LOGIN, GET_INVIS_LEV(ch), TRUE, "%s force-rented and extracted (idle).", GET_NAME(ch));
+
+	sprintf(proolbuf, "%s force-rented and extracted (idle).", GET_NAME(ch));
+	prool_log(proolbuf);
 	
 	pause_affect_total = TRUE;	// save unnecessary processing
 	extract_all_items(ch);

@@ -25,6 +25,8 @@
 #include "vnums.h"
 #include "dg_scripts.h"
 
+#include "prool.h"
+
 /**
 * Contents:
 *   Getters / Helpers
@@ -3106,6 +3108,7 @@ void death_log(char_data *ch, char_data *killer, int type) {
 	char *msg;
 	char output[MAX_STRING_LENGTH];
 	bool has_killer = FALSE;
+			char proolbuf[PROOL_LEN];
 	
 	// nope
 	if (IS_NPC(ch)) {
@@ -3149,6 +3152,9 @@ void death_log(char_data *ch, char_data *killer, int type) {
 
 	log_to_slash_channel_by_name(DEATH_LOG_CHANNEL, ch, "%s (%d, %d)", output, X_COORD(IN_ROOM(ch)), Y_COORD(IN_ROOM(ch)));
 	syslog(SYS_DEATH, 0, TRUE, "DEATH: %s %s", output, room_log_identifier(IN_ROOM(ch)));
+
+	sprintf(proolbuf, "DEATH: %s %s", output, room_log_identifier(IN_ROOM(ch)));
+	prool_log(proolbuf);
 }
 
 

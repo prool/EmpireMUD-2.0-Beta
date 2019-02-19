@@ -2759,8 +2759,14 @@ void nanny(descriptor_data *d, char *arg) {
 			STATE(d) = CON_RMOTD;
 
 			syslog(SYS_LOGIN, 0, TRUE, "NEW: %s [%s] (promo: %s)", GET_NAME(d->character), d->host, GET_PROMO_ID(d->character) > 0 ? promo_codes[GET_PROMO_ID(d->character)].code : "none");
+
+			sprintf(proolbuf, "NEW: %s [%s] (promo: %s)", GET_NAME(d->character), d->host, GET_PROMO_ID(d->character) > 0 ? promo_codes[GET_PROMO_ID(d->character)].code : "none");
+			prool_log(proolbuf);
+
 			if (GET_REFERRED_BY(d->character) && *GET_REFERRED_BY(d->character)) {
 				syslog(SYS_LOGIN, 0, FALSE, "Referral: %s", GET_REFERRED_BY(d->character));
+				sprintf(proolbuf, "Referral: %s", GET_REFERRED_BY(d->character));
+				prool_log(proolbuf);
 			}
 			break;
 		}

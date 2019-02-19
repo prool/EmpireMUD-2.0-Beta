@@ -23,6 +23,8 @@
 #include "dg_scripts.h"
 #include "vnums.h"
 
+#include "prool.h"
+
 /**
 * Contents:
 *   Helpers
@@ -452,6 +454,7 @@ ACMD(do_meters) {
 ACMD(do_respawn) {
 	extern room_data *find_load_room(char_data *ch);
 	extern obj_data *player_death(char_data *ch);
+			char proolbuf[PROOL_LEN];
 	
 	if (!IS_DEAD(ch) && !IS_INJURED(ch, INJ_STAKED)) {
 		msg_to_char(ch, "You aren't even dead yet!\r\n");
@@ -472,6 +475,10 @@ ACMD(do_respawn) {
 		qt_visit_room(ch, IN_ROOM(ch));
 		
 		syslog(SYS_DEATH, GET_INVIS_LEV(ch), TRUE, "%s has respawned at %s", GET_NAME(ch), room_log_identifier(IN_ROOM(ch)));
+
+		sprintf(proolbuf, "%s has respawned at %s", GET_NAME(ch), room_log_identifier(IN_ROOM(ch)));
+		prool_log(proolbuf);
+
 		act("$n rises from the dead!", TRUE, ch, NULL, NULL, TO_ROOM);
 		look_at_room(ch);
 		
