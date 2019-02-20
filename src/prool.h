@@ -10,6 +10,8 @@ Function prototypes
 
 extern char prool_buf[];
 extern char prool_buf_tr[];
+extern int log_status;
+
 #if 0 // prool: obsolete
 extern int prool_tr; // 1 - translator enable. 0 - disable
 extern int prool_tr_w; // 1 - word translator enable. 0 - disable

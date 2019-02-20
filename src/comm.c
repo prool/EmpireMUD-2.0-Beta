@@ -2043,7 +2043,7 @@ struct in_addr *get_bind_addr() {
 
 	/* Put the address that we've finally decided on into the logs */
 	if (bind_addr.s_addr == htonl(INADDR_ANY))
-		log("Binding to all IP interfaces on this host.");
+		prool_log("Binding to all IP interfaces on this host.");
 	else
 		log("Binding only to IP address %s", inet_ntoa(bind_addr));
 
@@ -2146,7 +2146,8 @@ int get_max_players(void) {
 		log("SYSERR: Non-positive max player limit!  (Set at %d using %s).", max_descs, method);
 		exit(1);
 	}
-	log("   Setting player limit to %d using %s.", max_descs, method);
+	log_status=0; // prool
+	log("Setting player limit to %d using %s.", max_descs, method);
 	return (max_descs);
 }
 
@@ -3958,11 +3959,11 @@ void init_game(ush_int port) {
 
 	empire_srandom(time(0));
 
-	log("Finding player limit.");
+	prool_log("Finding player limit.");
 	max_players = get_max_players();
 
 	if (!reboot_recovery) {
-		log("Opening mother connection.");
+		prool_log("Opening mother connection.");
 		mother_desc = init_socket(port);
 	}
 
@@ -3973,15 +3974,15 @@ void init_game(ush_int port) {
 
 	boot_db();
 
-	log("Signal trapping.");
+	prool_log("Signal trapping.");
 	signal_setup();
 
 	if (reboot_recovery)
 		reboot_recover();
 
-	log("Entering game loop.");
-	log("Empire MUD started"); // prool
-	log("------------------"); // prool
+	prool_log("Entering game loop.");
+	log_status=1; // prool
+	log("Glory MUD by prool started =========>");
 	game_loop(mother_desc);
 
 	save_all_players();
@@ -4091,22 +4092,22 @@ int main(int argc, char **argv) {
 	 * Moved here to distinguish command line options and to show up
 	 * in the log if stderr is redirected to a file.
 	 */
-	log("%s", version);
-	log("%s", DG_SCRIPT_VERSION);
+	//log("%s", version);
+	//log("%s", DG_SCRIPT_VERSION);
 
 	if (chdir(dir) < 0) {
 		perror("SYSERR: Fatal error changing to data directory");
 		exit(1);
 	}
-	log("Using %s as data directory.", dir);
+	//log("Using %s as data directory.", dir);
 	prool_log("EmpireMUD starts");
 
 	if (scheck) {
 		boot_world();
-		log("Done.");
+		prool_log("Done.");
 	}
 	else {
-		log("Running game on port %d.", port);
+		//log("Running game on port %d.", port);
 		init_game(port);
 	}
 
@@ -4153,7 +4154,7 @@ void setup_log(const char *filename, int fd) {
 	if (filename == NULL || *filename == '\0') {
 		/* No filename, set us up with the descriptor we just opened. */
 		logfile = s_fp;
-		puts("Using file descriptor for logging.");
+		prool_log("Using file descriptor for logging.");
 		return;
 	}
 

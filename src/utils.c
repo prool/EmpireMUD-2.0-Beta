@@ -26,6 +26,8 @@
 #include "vnums.h"
 #include "dg_scripts.h"
 
+#include "prool.h"
+
 /**
 * Contents:
 *   Basic Utils
@@ -1616,7 +1618,11 @@ int touch(const char *path) {
 void basic_mud_log(const char *format, ...) {
 	va_list args;
 	time_t ct = time(0);
-	char *time_s = asctime(localtime(&ct));
+	char *time_s;
+
+if (log_status==0) return;
+
+	time_s = asctime(localtime(&ct));
 
 	if (logfile == NULL) {
 		puts("SYSERR: Using log() before stream was initialized!");

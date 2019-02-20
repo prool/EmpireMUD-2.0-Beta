@@ -8161,7 +8161,7 @@ void clean_empire_logs(void) {
 	empire_data *iter, *next_iter;
 	time_t now = time(0);
 	
-	log("Cleaning stale empire logs...");
+	prool_log("Cleaning stale empire logs...");
 
 	HASH_ITER(hh, empire_table, iter, next_iter) {
 		for (elog = EMPIRE_LOGS(iter); elog; elog = next_elog) {

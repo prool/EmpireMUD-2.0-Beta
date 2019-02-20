@@ -16,6 +16,8 @@ Prool functions
 #include "structs.h"
 #include "prool.h"
 
+// prool's static variables
+int log_status;
 char prool_buf [PROOL_LEN];
 char prool_buf_tr [PROOL_LEN];
 
@@ -531,6 +533,8 @@ void prool_init(void)
 
 //printf("prool: cwd=%s\n", get_current_dir_name());
 #define ACC_NAME "lib/players/accounts/index"
+
+log_status=1;
 
 f=fopen(ACC_NAME,"r");
 
