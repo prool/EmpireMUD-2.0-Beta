@@ -3409,7 +3409,8 @@ const char *trig_types[] = {
 	"Finish-Quest",
 	"Player-in-Room",
 	"Reboot",
-	"Buy",	// 24
+	"Buy",
+	"Kill",	// 25
 	"\n"
 };
 
@@ -3440,6 +3441,7 @@ const bitvector_t mtrig_argument_types[] = {
 	NOBITS,	// player-in-room
 	NOBITS,	// reboot
 	NOBITS,	// buy
+	TRIG_ARG_PERCENT,	// kill
 };
 
 
@@ -3469,7 +3471,8 @@ const char *otrig_types[] = {
 	"Finish-Quest",
 	"Player-in-Room",
 	"Reboot",
-	"Buy",	// 24
+	"Buy",
+	"Kill",	// 25
 	"\n"
 };
 
@@ -3500,6 +3503,7 @@ const bitvector_t otrig_argument_types[] = {
 	NOBITS,	// player-in-room
 	NOBITS,	// reboot
 	TRIG_ARG_OBJ_WHERE,	// buy
+	TRIG_ARG_PERCENT,	// kill
 };
 
 
@@ -3529,7 +3533,8 @@ const char *vtrig_types[] = {
 	"Finish-Quest",
 	"Player-in-Room",
 	"Reboot",
-	"Buy",	// 24
+	"Buy",
+	"Kill",	// 25
 	"\n"
 };
 
@@ -3561,6 +3566,7 @@ const bitvector_t vtrig_argument_types[] = {
 	NOBITS,	// player-in-room
 	NOBITS,	// reboot
 	NOBITS,	// buy
+	TRIG_ARG_PERCENT,	// kill
 };
 
 
@@ -3854,6 +3860,8 @@ const char *requirement_types[] = {
 	"DIPLOMACY",
 	"HAVE-CITY",
 	"EMPIRE-MILITARY",
+	"EMPIRE-PRODUCED-OBJECT",
+	"EMPIRE-PRODUCED-COMPONENT",
 	"\n",
 };
 
@@ -3894,6 +3902,8 @@ const bool requirement_amt_type[] = {
 	REQ_AMT_NUMBER,	// diplomacy
 	REQ_AMT_NUMBER,	// have city
 	REQ_AMT_NUMBER,	// empire military
+	REQ_AMT_NUMBER,	// empire produced object
+	REQ_AMT_NUMBER,	// empire produced component
 };
 
 
@@ -3933,6 +3943,8 @@ const bool requirement_needs_tracker[] = {
 	FALSE,	// diplomacy
 	FALSE,	// have city
 	FALSE,	// empire military
+	FALSE,	// empire produced object
+	FALSE,	// empire produced component
 };
 
 

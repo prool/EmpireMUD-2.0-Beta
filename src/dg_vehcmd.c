@@ -669,8 +669,8 @@ VCMD(do_vquest) {
 
 
 VCMD(do_vsiege) {
-	void besiege_room(char_data *attacker, room_data *to_room, int damage);
-	extern bool besiege_vehicle(char_data *attacker, vehicle_data *veh, int damage, int siege_type);
+	void besiege_room(char_data *attacker, room_data *to_room, int damage, vehicle_data *by_vehicle);
+	extern bool besiege_vehicle(char_data *attacker, vehicle_data *veh, int damage, int siege_type, vehicle_data *by_vehicle);
 	extern room_data *dir_to_room(room_data *room, int dir, bool ignore_entrance);
 	extern bool find_siege_target_for_vehicle(char_data *ch, vehicle_data *veh, char *arg, room_data **room_targ, int *dir, vehicle_data **veh_targ);
 	extern bool validate_siege_target_room(char_data *ch, vehicle_data *veh, room_data *to_room);
@@ -719,12 +719,12 @@ VCMD(do_vsiege) {
 	
 	if (room_targ) {
 		if (validate_siege_target_room(NULL, NULL, room_targ)) {
-			besiege_room(NULL, room_targ, dam);
+			besiege_room(NULL, room_targ, dam, veh);
 		}
 	}
 	else if (veh_targ) {
 		self = (veh_targ == veh);
-		res = besiege_vehicle(NULL, veh_targ, dam, SIEGE_PHYSICAL);
+		res = besiege_vehicle(NULL, veh_targ, dam, SIEGE_PHYSICAL, veh);
 		if (self && !res) {
 			dg_owner_purged = TRUE;
 		}
@@ -1045,6 +1045,11 @@ VCMD(do_dgvload) {
 		
 		tch = get_char_near_vehicle(veh, arg1);
 		if (tch) {
+			// mark as "gathered" like a resource
+			if (!IS_NPC(tch) && GET_LOYALTY(tch)) {
+				add_production_total(GET_LOYALTY(tch), GET_OBJ_VNUM(object), 1);
+			}
+			
 			if (*arg2 && (pos = find_eq_pos_script(arg2)) >= 0 && !GET_EQ(tch, pos) && can_wear_on_pos(object, pos)) {
 				equip_char(tch, object, pos);
 				load_otrigger(object);

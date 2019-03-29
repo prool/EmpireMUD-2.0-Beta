@@ -323,6 +323,11 @@ INTERACTION_FUNC(devastate_crop) {
 	sprintf(buf, "$n's powerful ritual devastates the %s crops!", GET_CROP_NAME(cp));
 	act(buf, FALSE, ch, NULL, NULL, TO_ROOM);
 	
+	// mark gained
+	if (GET_LOYALTY(ch)) {
+		add_production_total(GET_LOYALTY(ch), interaction->vnum, num);
+	}
+	
 	while (num-- > 0) {
 		obj_to_char_or_room((newobj = read_object(interaction->vnum, TRUE)), ch);
 		scale_item_to_level(newobj, 1);	// minimum level
@@ -357,6 +362,11 @@ INTERACTION_FUNC(devastate_trees) {
 		obj_to_char_or_room((newobj = read_object(interaction->vnum, TRUE)), ch);
 		scale_item_to_level(newobj, 1);	// minimum level
 		load_otrigger(newobj);
+	}
+	
+	// mark gained
+	if (GET_LOYALTY(ch)) {
+		add_production_total(GET_LOYALTY(ch), interaction->vnum, interaction->quantity);
 	}
 	
 	return TRUE;
@@ -1908,8 +1918,8 @@ RITUAL_SETUP_FUNC(start_siege_ritual) {
 
 
 RITUAL_FINISH_FUNC(perform_siege_ritual) {
-	void besiege_room(char_data *attacker, room_data *to_room, int damage);
-	bool besiege_vehicle(char_data *attacker, vehicle_data *veh, int damage, int siege_type);
+	void besiege_room(char_data *attacker, room_data *to_room, int damage, vehicle_data *by_vehicle);
+	bool besiege_vehicle(char_data *attacker, vehicle_data *veh, int damage, int siege_type, vehicle_data *by_vehicle);
 	extern vehicle_data *find_vehicle(int n);
 	extern bool validate_siege_target_room(char_data *ch, vehicle_data *veh, room_data *to_room);
 	extern bool validate_siege_target_vehicle(char_data *ch, vehicle_data *veh, vehicle_data *target);
@@ -1957,7 +1967,7 @@ RITUAL_FINISH_FUNC(perform_siege_ritual) {
 				trigger_distrust_from_hostile(ch, ROOM_OWNER(room_targ));
 			}
 			
-			besiege_room(ch, room_targ, dam);
+			besiege_room(ch, room_targ, dam, NULL);
 			
 			if (SECT(room_targ) != secttype) {
 				msg_to_char(ch, "It is destroyed!\r\n");
@@ -1969,7 +1979,7 @@ RITUAL_FINISH_FUNC(perform_siege_ritual) {
 				trigger_distrust_from_hostile(ch, VEH_OWNER(veh_targ));
 			}
 			
-			besiege_vehicle(ch, veh_targ, dam, SIEGE_MAGICAL);
+			besiege_vehicle(ch, veh_targ, dam, SIEGE_MAGICAL, NULL);
 		}
 		
 		gain_ability_exp(ch, ABIL_SIEGE_RITUAL, 33.4);

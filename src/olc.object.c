@@ -46,6 +46,7 @@ extern const char *obj_custom_types[];
 extern const char *offon_types[];
 extern const char *paint_colors[];
 extern const char *paint_names[];
+extern const char *size_types[];
 extern const char *storage_bits[];
 extern const char *wear_bits[];
 
@@ -457,6 +458,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	struct archetype_gear *gear, *next_gear;
 	obj_data *proto, *obj_iter, *next_obj;
 	struct global_data *glb, *next_glb;
+	struct empire_production_total *egt;
 	archetype_data *arch, *next_arch;
 	room_template *rmt, *next_rmt;
 	sector_data *sect, *next_sect;
@@ -566,6 +568,14 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 				free(trade);	// certified
 				EMPIRE_NEEDS_SAVE(emp) = TRUE;
 			}
+		}
+		
+		// delete gather totals
+		HASH_FIND_INT(EMPIRE_PRODUCTION_TOTALS(emp), &vnum, egt);
+		if (egt) {
+			HASH_DEL(EMPIRE_PRODUCTION_TOTALS(emp), egt);
+			free(egt);
+			EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
 		}
 	}
 	
@@ -715,9 +725,11 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	
 	// update progress
 	HASH_ITER(hh, progress_table, prg, next_prg) {
+		// REQ_x:
 		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_GET_OBJECT, vnum);
 		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_WEARING, vnum);
 		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_WEARING_OR_HAS, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 		if (found) {
 			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
@@ -728,6 +740,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	
 	// update quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
+		// QG_x, QR_x, REQ_x:
 		found = delete_quest_giver_from_list(&QUEST_STARTS_AT(quest), QG_OBJECT, vnum);
 		found |= delete_quest_giver_from_list(&QUEST_ENDS_AT(quest), QG_OBJECT, vnum);
 		found |= delete_quest_reward_from_list(&QUEST_REWARDS(quest), QR_OBJECT, vnum);
@@ -737,6 +750,8 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_WEARING, vnum);
 		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_WEARING_OR_HAS, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_WEARING_OR_HAS, vnum);
+		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
+		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 		if (found) {
 			SET_BIT(QUEST_FLAGS(quest), QST_IN_DEVELOPMENT);
@@ -774,9 +789,11 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	
 	// update socials
 	HASH_ITER(hh, social_table, soc, next_soc) {
+		// REQ_x:
 		found = delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_GET_OBJECT, vnum);
 		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_WEARING, vnum);
 		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_WEARING_OR_HAS, vnum);
+		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 		if (found) {
 			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
@@ -900,9 +917,11 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			}
 		}
 		if (GET_OLC_PROGRESS(desc)) {
+			// REQ_x:
 			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_GET_OBJECT, vnum);
 			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_WEARING, vnum);
 			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_WEARING_OR_HAS, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 			if (found) {
 				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
@@ -910,6 +929,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			}
 		}
 		if (GET_OLC_QUEST(desc)) {
+			// QG_x, QR_x, REQ_x:
 			found = delete_quest_giver_from_list(&QUEST_STARTS_AT(GET_OLC_QUEST(desc)), QG_OBJECT, vnum);
 			found |= delete_quest_giver_from_list(&QUEST_ENDS_AT(GET_OLC_QUEST(desc)), QG_OBJECT, vnum);
 			found |= delete_quest_reward_from_list(&QUEST_REWARDS(GET_OLC_QUEST(desc)), QR_OBJECT, vnum);
@@ -919,6 +939,8 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_WEARING, vnum);
 			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_WEARING_OR_HAS, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_WEARING_OR_HAS, vnum);
+			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
+			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 			if (found) {
 				SET_BIT(QUEST_FLAGS(GET_OLC_QUEST(desc)), QST_IN_DEVELOPMENT);
@@ -948,9 +970,11 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			}
 		}
 		if (GET_OLC_SOCIAL(desc)) {
+			// REQ_x:
 			found = delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_GET_OBJECT, vnum);
 			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_WEARING, vnum);
 			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_WEARING_OR_HAS, vnum);
+			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
@@ -1427,6 +1451,7 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 		any = find_requirement_in_list(PRG_TASKS(prg), REQ_GET_OBJECT, vnum);
 		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_WEARING, vnum);
 		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_WEARING_OR_HAS, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 		if (any) {
 			++found;
@@ -1439,6 +1464,7 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 		if (size >= sizeof(buf)) {
 			break;
 		}
+		// QG_x, QR_x, REQ_x:
 		any = find_quest_giver_in_list(QUEST_STARTS_AT(quest), QG_OBJECT, vnum);
 		any |= find_quest_giver_in_list(QUEST_ENDS_AT(quest), QG_OBJECT, vnum);
 		any |= find_quest_reward_in_list(QUEST_REWARDS(quest), QR_OBJECT, vnum);
@@ -1448,6 +1474,8 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_WEARING, vnum);
 		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_WEARING_OR_HAS, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_WEARING_OR_HAS, vnum);
+		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
+		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 		if (any) {
 			++found;
@@ -1505,9 +1533,11 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 		if (size >= sizeof(buf)) {
 			break;
 		}
+		// REQ_x:
 		any = find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_GET_OBJECT, vnum);
 		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_WEARING, vnum);
 		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_WEARING_OR_HAS, vnum);
+		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 		if (any) {
 			++found;
@@ -1853,6 +1883,7 @@ void olc_get_values_display(char_data *ch, char *storage) {
 		}
 		case ITEM_CORPSE: {
 			sprintf(storage + strlen(storage), "<%scorpseof\t0> %d %s\r\n", OLC_LABEL_VAL(GET_CORPSE_NPC_VNUM(obj), 0), GET_CORPSE_NPC_VNUM(obj), get_mob_name_by_proto(GET_CORPSE_NPC_VNUM(obj)));
+			sprintf(storage + strlen(storage), "<%ssize\t0> %s\r\n", OLC_LABEL_VAL(GET_CORPSE_SIZE(obj), 0), size_types[GET_CORPSE_SIZE(obj)]);
 			break;
 		}
 		case ITEM_WEAPON: {
@@ -2953,6 +2984,18 @@ OLC_MODULE(oedit_script) {
 OLC_MODULE(oedit_short_description) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	olc_process_string(ch, argument, "short description", &GET_OBJ_SHORT_DESC(obj));
+}
+
+
+OLC_MODULE(oedit_size) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	
+	if (!IS_CORPSE(obj)) {
+		msg_to_char(ch, "You can only set the size on a corpse.\r\n");
+	}
+	else {
+		GET_OBJ_VAL(obj, VAL_CORPSE_SIZE) = olc_process_type(ch, argument, "size", "size", size_types, GET_CORPSE_SIZE(obj));
+	}
 }
 
 
