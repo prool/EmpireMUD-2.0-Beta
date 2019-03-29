@@ -1143,11 +1143,33 @@ void command_interpreter(char_data *ch, char *argument) {
 	extern bool check_social(char_data *ch, char *string, bool exact);
 	int cmd, length, iter;
 	char arg[MAX_INPUT_LENGTH], *line;
+	char prool_buf[MAX_INPUT_LENGTH+512];
 
 	/* just drop to next line for hitting CR */
 	skip_spaces(&argument);
 	if (!*argument)
 		return;
+
+#if 1 // prool: logging commands
+	if (ch)
+		snprintf(prool_buf,MAX_INPUT_LENGTH+512,"cmd log %i '%s' '%s'",
+		ch->vnum, ch->player.name, argument);
+	else
+		snprintf(prool_buf,MAX_INPUT_LENGTH+512,"cmd log ch==NULL");
+	prool_log(prool_buf);
+
+#if 0 // prool: commands logging to console
+	printf("prool log cmd ");
+	if (ch)
+		{
+		printf("%i ",ch->vnum);
+		printf("'%s' ", ch->player.name);
+		}
+	else
+		printf("[NULL] ");
+	printf("'%s'\n", argument);
+#endif // ... logging to console
+#endif // ... logging commands
 
 	/*
 	 * special case to handle one-character, non-alphanumeric commands;
