@@ -3000,7 +3000,7 @@ int write_to_descriptor(socket_t desc, const char *txt) {
 
 
 /* Add a new string to a player's output queue */
-void write_to_output(const char *txt, descriptor_data *t) {
+void write_to_output(const char *txt, descriptor_data *t) { // tyt byl prool
 	const char *overflow_txt = "**OVERFLOW**\r\n";
 	int size, wantsize;
 	char protocol_txt[MAX_STRING_LENGTH];

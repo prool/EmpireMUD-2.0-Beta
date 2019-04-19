@@ -1,7 +1,7 @@
 /* Code by Prool
 http://prool.kharkov.org http://mud.kharkov.org https://github.com/prool/EmpireMUD-2.0-Beta
 <proolix@gmail.com>
-(CC) 2017-2018
+(CC) 2017-2019
 
 Function prototypes
 */
@@ -26,3 +26,6 @@ void poisk (char *in, char *out, int bi);
 void prool_init(void);
 char *ptime(void);
 void prool_log(char *str);
+
+void koi_to_utf8(char *str_i, char *str_o);
+void utf8_to_koi(char *str_i, char *str_o);

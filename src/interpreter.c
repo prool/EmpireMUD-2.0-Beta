@@ -1250,26 +1250,56 @@ void command_interpreter(char_data *ch, char *argument) {
 		//printf("prooldebug argument='%s'\n", argument);
 		if (!strcmp(arg,"prool"))
 			{
-			snprintf(prool_buf,PROOL_LEN,"\bprool info - &Yинформация от Пруля:&0\n\nprooltran=%i\nВключение и выключение экспериментального переводчика командами\nprool_on и prool_off\nprooltran - управление переводчиком, например prooltran 110\n",ch->player_specials->prooltran[0]);
+snprintf(prool_buf,PROOL_LEN,
+"\bprool info - &Yинформация от Пруля:&0\n\n\
+prooltran=%i\n\
+codetable=%i\n\n\
+Читайте help prool\n"
+,ch->player_specials->prooltran[0]
+,ch->player_specials->prool_codetable
+);
 			msg_to_char(ch,prool_buf);
 			return;
 			}
 		else if (!strcmp(arg,"пруль"))
 			{
-			msg_to_char(ch,"\b&Yпервая кириллическая команда Пруля&0\n");
+			msg_to_char(ch,"\b&YProol's 1st test cyrillic command. Первая тестовая кириллическая команда Пруля&0\n");
 			return;
 			}
 		else if (!strcmp(arg,"prool_on"))
 			{
-			msg_to_char(ch,"\bПрульпереводчик включен\n");
+			msg_to_char(ch,"\bTranslator enabled. Прульпереводчик включен\n");
 			ch->player_specials->prooltran[0]=1;
 			ch->player_specials->prooltran[1]=1;
+			ch->player_specials->prooltran[2]=0;
+			ch->player_specials->prooltran[3]=0;
 			return;
 			}
 		else if (!strcmp(arg,"prool_off"))
 			{
-			msg_to_char(ch,"\bПрульпереводчик выключен\n");
+			msg_to_char(ch,"\bTranslator disabled. Прульпереводчик выключен\n");
 			ch->player_specials->prooltran[0]=0;
+			ch->player_specials->prooltran[1]=0;
+			ch->player_specials->prooltran[2]=0;
+			ch->player_specials->prooltran[3]=0;
+			return;
+			}
+		else if (!strcmp(arg,"prool_koi"))
+			{
+			msg_to_char(ch,"\bSet koi8-r codetable. Включена кодировка koi8-r\n");
+			ch->player_specials->prool_codetable=1;
+			return;
+			}
+		else if (!strcmp(arg,"prool_win"))
+			{
+			msg_to_char(ch,"\bSet Win codetable. Включена кодировка Win\n");
+			ch->player_specials->prool_codetable=2;
+			return;
+			}
+		else if (!strcmp(arg,"prool_utf"))
+			{
+			msg_to_char(ch,"\bSet UTF-8 codetable. Включена кодировка UTF-8\n");
+			ch->player_specials->prool_codetable=0;
 			return;
 			}
 		else if (!strcmp(arg,"prooltran"))
@@ -1320,8 +1350,8 @@ void command_interpreter(char_data *ch, char *argument) {
 			else
 			obj_to_room(obj, IN_ROOM(ch));
 			act("$n makes a strange magical gesture.", TRUE, ch, 0, 0, TO_ROOM);
-			act("$n has created $p!", FALSE, ch, obj, 0, TO_ROOM);
-			act("You create $p.", FALSE, ch, obj, 0, TO_CHAR);
+			act("$n has received $p!", FALSE, ch, obj, 0, TO_ROOM);
+			act("You receive $p.", FALSE, ch, obj, 0, TO_CHAR);
 
 			number=3313; // bread
 			obj = read_object(number, TRUE);
@@ -1330,8 +1360,8 @@ void command_interpreter(char_data *ch, char *argument) {
 			else
 			obj_to_room(obj, IN_ROOM(ch));
 			act("$n makes a strange magical gesture.", TRUE, ch, 0, 0, TO_ROOM);
-			act("$n has created $p!", FALSE, ch, obj, 0, TO_ROOM);
-			act("You create $p.", FALSE, ch, obj, 0, TO_CHAR);
+			act("$n has received $p!", FALSE, ch, obj, 0, TO_ROOM);
+			act("You receive $p.", FALSE, ch, obj, 0, TO_CHAR);
 
 			return;
 			}

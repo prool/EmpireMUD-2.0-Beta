@@ -1,7 +1,7 @@
 /* Code by Prool
 http://prool.kharkov.org http://mud.kharkov.org https://github.com/prool/EmpireMUD-2.0-Beta
 <proolix@gmail.com>
-(CC) 2017-2018
+(CC) 2017-2019
 
 Prool functions
 */
@@ -11,6 +11,7 @@ Prool functions
 #include <unistd.h>
 #include <time.h>
 #include <ctype.h>
+#include <iconv.h>
 
 #include "sysdep.h"
 #include "structs.h"
@@ -296,6 +297,7 @@ char *prool_translator_2 (char *input, char *out, char_data *ch)
 {
 char buffer [PROOL_LEN];
 char perevod [PROOL_LEN];
+char tmp [PROOL_LEN];
 char *cc, *cc2, *cc3;
 int bi; // bilingua mode
 
@@ -359,6 +361,15 @@ if (*cc==0) break;
 }
 
 //printf("prool tr2 out='%s'\n", out);
+
+// coder
+
+if (ch->player_specials->prool_codetable==1) // koi8-r
+	{
+	utf8_to_koi(out, tmp);
+	strcpy(out,tmp);
+	}
+
 return out;
 } // end prool_translator_2
 
@@ -584,3 +595,54 @@ fp=fopen("empire-prool.log", "a");
 fprintf(fp,"%s %s\n",ptime(),str);
 fclose(fp);
 }
+
+#if 1 // #ifdef HAVE_ICONV
+void koi_to_utf8(char *str_i, char *str_o)
+{
+	iconv_t cd;
+	size_t len_i, len_o = MAX_SOCK_BUF * 6;
+	size_t i;
+
+	if ((cd = iconv_open("UTF-8","KOI8-R")) == (iconv_t) - 1)
+	{
+		printf("koi_to_utf8: iconv_open error\n");
+		return;
+	}
+	len_i = strlen(str_i);
+	if ((i = iconv(cd, &str_i, &len_i, &str_o, &len_o)) == (size_t) - 1)
+	{
+		printf("koi_to_utf8: iconv error\n");
+		return;
+	}
+	*str_o = 0;
+	if (iconv_close(cd) == -1)
+	{
+		printf("koi_to_utf8: iconv_close error\n");
+		return;
+	}
+}
+
+void utf8_to_koi(char *str_i, char *str_o)
+{
+	iconv_t cd;
+	size_t len_i, len_o = MAX_SOCK_BUF * 6;
+	size_t i;
+
+	if ((cd = iconv_open("KOI8-R", "UTF-8")) == (iconv_t) - 1)
+	{
+		printf("utf8_to_koi: iconv_open error\n");
+		return;
+	}
+	len_i = strlen(str_i);
+	if ((i=iconv(cd, &str_i, &len_i, &str_o, &len_o)) == (size_t) - 1)
+	{
+		printf("utf8_to_koi: iconv error\n");
+		// return;
+	}
+	if (iconv_close(cd) == -1)
+	{
+		printf("utf8_to_koi: iconv_close error\n");
+		return;
+	}
+}
+#endif // HAVE_ICONV

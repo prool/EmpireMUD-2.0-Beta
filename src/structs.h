@@ -3889,6 +3889,7 @@ struct player_special_data {
 
 	// prool's parameters
 	int prooltran[4]; // translator parameters
+	int prool_codetable; // codetable (0 - UTF-8 (no encoding), 1 - koi8-r, 2 - Win (cp1251))
 };
 
 
