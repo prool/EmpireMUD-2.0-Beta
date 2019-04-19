@@ -1251,7 +1251,7 @@ void command_interpreter(char_data *ch, char *argument) {
 		if (!strcmp(arg,"prool"))
 			{
 snprintf(prool_buf,PROOL_LEN,
-"\bprool info - &Yинформация от Пруля:&0\n\n\
+"prool info - &Yинформация от Пруля:&0\n\n\
 prooltran=%i\n\
 codetable=%i\n\n\
 Читайте help prool\n"
@@ -1263,12 +1263,12 @@ codetable=%i\n\n\
 			}
 		else if (!strcmp(arg,"пруль"))
 			{
-			msg_to_char(ch,"\b&YProol's 1st test cyrillic command. Первая тестовая кириллическая команда Пруля&0\n");
+			msg_to_char(ch,"&YProol's 1st test cyrillic command. Первая тестовая кириллическая команда Пруля&0\n");
 			return;
 			}
 		else if (!strcmp(arg,"prool_on"))
 			{
-			msg_to_char(ch,"\bTranslator enabled. Прульпереводчик включен\n");
+			msg_to_char(ch,"Translator enabled. Прульпереводчик включен\n");
 			ch->player_specials->prooltran[0]=1;
 			ch->player_specials->prooltran[1]=1;
 			ch->player_specials->prooltran[2]=0;
@@ -1277,7 +1277,7 @@ codetable=%i\n\n\
 			}
 		else if (!strcmp(arg,"prool_off"))
 			{
-			msg_to_char(ch,"\bTranslator disabled. Прульпереводчик выключен\n");
+			msg_to_char(ch,"Translator disabled. Прульпереводчик выключен\n");
 			ch->player_specials->prooltran[0]=0;
 			ch->player_specials->prooltran[1]=0;
 			ch->player_specials->prooltran[2]=0;
@@ -1286,19 +1286,19 @@ codetable=%i\n\n\
 			}
 		else if (!strcmp(arg,"prool_koi"))
 			{
-			msg_to_char(ch,"\bSet koi8-r codetable. Включена кодировка koi8-r\n");
+			msg_to_char(ch,"Set koi8-r codetable. Включена кодировка koi8-r\n");
 			ch->player_specials->prool_codetable=1;
 			return;
 			}
 		else if (!strcmp(arg,"prool_win"))
 			{
-			msg_to_char(ch,"\bSet Win codetable. Включена кодировка Win\n");
+			msg_to_char(ch,"Set Win codetable. Включена кодировка Win\n");
 			ch->player_specials->prool_codetable=2;
 			return;
 			}
 		else if (!strcmp(arg,"prool_utf"))
 			{
-			msg_to_char(ch,"\bSet UTF-8 codetable. Включена кодировка UTF-8\n");
+			msg_to_char(ch,"Set UTF-8 codetable. Включена кодировка UTF-8\n");
 			ch->player_specials->prool_codetable=0;
 			return;
 			}
@@ -1327,7 +1327,7 @@ codetable=%i\n\n\
 					else if (*cc=='0') {ch->player_specials->prooltran[3]=0;}
 					}
 				}
-			snprintf(prool_buf,PROOL_LEN,"\bprool translator=%i word tran.=%i string tran.=%i bilingua=%i\n", 
+			snprintf(prool_buf,PROOL_LEN,"prool translator=%i word tran.=%i string tran.=%i bilingua=%i\n", 
 			ch->player_specials->prooltran[0],
 			ch->player_specials->prooltran[1],
 			ch->player_specials->prooltran[2],

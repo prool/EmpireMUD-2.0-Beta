@@ -300,6 +300,7 @@ char perevod [PROOL_LEN];
 char tmp [PROOL_LEN];
 char *cc, *cc2, *cc3;
 int bi; // bilingua mode
+int i;
 
 //return "[prool fool!]";
 
@@ -366,6 +367,7 @@ if (*cc==0) break;
 
 if (ch->player_specials->prool_codetable==1) // koi8-r
 	{
+	for (i=0;i<PROOL_LEN;i++) tmp[i]=0;
 	utf8_to_koi(out, tmp);
 	strcpy(out,tmp);
 	}
