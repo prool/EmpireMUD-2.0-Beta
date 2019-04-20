@@ -1286,20 +1286,20 @@ codetable=%i\n\n\
 			}
 		else if (!strcmp(arg,"prool_koi"))
 			{
-			msg_to_char(ch,"Set koi8-r codetable. Включена кодировка koi8-r\n");
 			ch->player_specials->prool_codetable=1;
+			msg_to_char(ch,"Set koi8-r codetable. Включена кодировка koi8-r\n");
 			return;
 			}
 		else if (!strcmp(arg,"prool_win"))
 			{
-			msg_to_char(ch,"Set Win codetable. Включена кодировка Win\n");
 			ch->player_specials->prool_codetable=2;
+			msg_to_char(ch,"Set Win codetable. Включена кодировка Win\n");
 			return;
 			}
 		else if (!strcmp(arg,"prool_utf"))
 			{
-			msg_to_char(ch,"Set UTF-8 codetable. Включена кодировка UTF-8\n");
 			ch->player_specials->prool_codetable=0;
+			msg_to_char(ch,"Set UTF-8 codetable. Включена кодировка UTF-8\n");
 			return;
 			}
 		else if (!strcmp(arg,"prooltran"))

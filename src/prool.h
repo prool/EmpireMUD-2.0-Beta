@@ -29,3 +29,6 @@ void prool_log(char *str);
 
 void koi_to_utf8(char *str_i, char *str_o);
 void utf8_to_koi(char *str_i, char *str_o);
+void utf8_to_win(char *str_i, char *str_o);
+void coder (char *str, int table);
+void coder2 (char *str, char *out, int table);

@@ -1,4 +1,4 @@
-PROOL DUHMADA PROOL_ON PROOL_OFF
+PROOL DUHMADA PROOL_ON PROOL_OFF PROOL_WIN PROOL_KOI PROOL_UTF
 This is help from Prool. Codepage UTF-8!
 Это помощь от Пруля.
 
@@ -7,11 +7,13 @@ prool_off - выключение переводчика (translator off)
 
 prooltran [0000] - управление переводчиком (например prooltran 1101 или prooltran 1100)
      (см. также help prooltran)
-     
+
 duhmada - команда выдачи припасов (еда, вода, etc)
 
+prool_koi, prool_win, prool_utf - команды переключения кодировок кириллицы
+
 prool - первая тестовая команда, созданная Прулем
-пруль - первая тестовая кириллическая команда 
+пруль - первая тестовая кириллическая команда (глючит)
 
 Помощь для Пруля - help forprool
 #

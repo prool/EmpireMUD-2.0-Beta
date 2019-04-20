@@ -1267,8 +1267,10 @@ void msg_to_desc(descriptor_data *d, const char *messg, ...) {
 			prool_translator_2 (output, prool_buf,ch);
 			SEND_TO_Q(prool_buf, ch->desc);
 			}
-		else
+		else	{
+			coder(output, ch->player_specials->prool_codetable);
 			SEND_TO_Q(output, d);
+			}
 	else
 		SEND_TO_Q(output, d);
 
@@ -1302,8 +1304,9 @@ if(ch->player_specials->prooltran[0]) {
 	SEND_TO_Q(prool_buf, ch->desc);
 }
 else	{
+	coder(output, ch->player_specials->prool_codetable);
 	SEND_TO_Q(output, ch->desc);
-}
+	}
 
 	va_end(tArgList);
 }
@@ -1348,8 +1351,9 @@ if(ch->player_specials->prooltran[0]) {
 	SEND_TO_Q(prool_buf, desc);
 }
 else	{
+	coder(output, ch->player_specials->prool_codetable);
 	SEND_TO_Q(output, desc);
-}
+	}
 
 	}
 	
@@ -1399,8 +1403,10 @@ void send_to_all(const char *messg, ...) {
 					prool_translator_2 (output, prool_buf,ch);
 					SEND_TO_Q(prool_buf, i);
 					}
-				else
+				else	{
+					coder(output, ch->player_specials->prool_codetable);
 					SEND_TO_Q(output, i);
+					}
 			else
 				SEND_TO_Q(output, i);
 			}
@@ -1621,9 +1627,10 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 			prool_translator_2 (lbuf, prool_buf,to);
 			SEND_TO_Q(prool_buf, to->desc);
 			}
-else {
-		SEND_TO_Q(lbuf, to->desc);
-}
+else	{
+	coder(lbuf, to->player_specials->prool_codetable);
+	SEND_TO_Q(lbuf, to->desc);
+	}
 		}
 	}
 
@@ -1634,15 +1641,13 @@ else {
 
 // this is the pre-circle3.1 send_to_char that doesn't have va_args
 void send_to_char(const char *messg, char_data *ch) {
+	char tmp[PROOL_LEN];
 	if (ch->desc && messg) {
 //		printf("prooldebug send_to_char()\n"); // prool
-if (ch->player_specials->prooltran[0]) {
+if (1/*ch->player_specials->prooltran[0]*/) {
 		prool_translator_2 (messg, prool_buf,ch);
 		SEND_TO_Q(prool_buf, ch->desc);
-}
-else {
-		SEND_TO_Q(messg, ch->desc);
-}
+		}
 	}
 }
 
@@ -1711,8 +1716,10 @@ void send_to_outdoor(bool weather, const char *messg, ...) {
 			prool_translator_2 (output, prool_buf,i->character);
 			SEND_TO_Q(prool_buf, i);
 			}
-		else
+		else	{
+			coder(output, i->character->player_specials->prool_codetable);
 			SEND_TO_Q(output, i);
+			}
 	}
 	va_end(tArgList);
 }
@@ -1728,12 +1735,14 @@ void send_to_room(const char *messg, room_data *room) {
 	for (i = ROOM_PEOPLE(room); i; i = i->next_in_room)
 		if (i->desc)
 		{
-		if (i->player_specials->prooltran[0]) {
+		if (1/*i->player_specials->prooltran[0]*/) {
 			prool_translator_2 (messg, prool_buf,i);
 			SEND_TO_Q(prool_buf, i->desc);
 			}
-			else
+			else	{
+				coder(messg, i->player_specials->prool_codetable);
 				SEND_TO_Q(messg, i->desc);
+				}
 		}
 }
 

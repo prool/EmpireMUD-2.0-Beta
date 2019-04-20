@@ -297,10 +297,8 @@ char *prool_translator_2 (char *input, char *out, char_data *ch)
 {
 char buffer [PROOL_LEN];
 char perevod [PROOL_LEN];
-char tmp [PROOL_LEN];
 char *cc, *cc2, *cc3;
 int bi; // bilingua mode
-int i;
 
 //return "[prool fool!]";
 
@@ -322,6 +320,7 @@ out[0]=0;
 
 if (input[0]=='\b') { // строки с таким символом в начале не переводятся!
 	strcpy(out,input+1);
+	coder(out, ch->player_specials->prool_codetable);
 	return out;
 }
 
@@ -335,6 +334,7 @@ if (tran_s(input,buffer,ch)==0)
 
 if (ch->player_specials->prooltran[1]==0) {
 	strcpy(out,input);
+	coder(out, ch->player_specials->prool_codetable);
 	return out;
 }
 
@@ -365,15 +365,51 @@ if (*cc==0) break;
 
 // coder
 
-if (ch->player_specials->prool_codetable==1) // koi8-r
-	{
-	for (i=0;i<PROOL_LEN;i++) tmp[i]=0;
-	utf8_to_koi(out, tmp);
-	strcpy(out,tmp);
-	}
+coder(out, ch->player_specials->prool_codetable);
 
 return out;
 } // end prool_translator_2
+
+void coder (char *str, int table)
+{
+char tmp [PROOL_LEN];
+int i;
+
+if (table==1) // koi8-r
+	{
+	for (i=0;i<PROOL_LEN;i++) tmp[i]=0;
+	utf8_to_koi(str, tmp);
+	strcpy(str,tmp); // tyt byl gluck (kogda param 1 byl const char *)
+	}
+else if (table==2) // win (cp1251)
+	{
+	for (i=0;i<PROOL_LEN;i++) tmp[i]=0;
+	utf8_to_win(str, tmp);
+	// копирование tmp->str
+	for (i=0;i<PROOL_LEN;i++)
+		{
+		if (tmp[i]==0) break;
+		if (tmp[i]==-1)
+			{*str++=-1; *str++=-1;} // удвоение 'я'
+		else	*str++=tmp[i];
+		}
+	*str=0;
+	}
+}
+
+#if 0
+void coder2 (char *str, char *out, int table)
+{
+int i;
+
+if (table==1) // koi8-r
+	{
+	utf8_to_koi(str, out);
+	}
+else
+	strcpy(out,str);
+}
+#endif
 
 void poisk (char *in, char *out, int bi) // поиск слова в словаре Мюллера
 {
@@ -644,6 +680,30 @@ void utf8_to_koi(char *str_i, char *str_o)
 	if (iconv_close(cd) == -1)
 	{
 		printf("utf8_to_koi: iconv_close error\n");
+		return;
+	}
+}
+
+void utf8_to_win(char *str_i, char *str_o)
+{
+	iconv_t cd;
+	size_t len_i, len_o = MAX_SOCK_BUF * 6;
+	size_t i;
+
+	if ((cd = iconv_open("CP1251", "UTF-8")) == (iconv_t) - 1)
+	{
+		printf("utf8_to_win: iconv_open error\n");
+		return;
+	}
+	len_i = strlen(str_i);
+	if ((i=iconv(cd, &str_i, &len_i, &str_o, &len_o)) == (size_t) - 1)
+	{
+		printf("utf8_to_win: iconv error\n");
+		// return;
+	}
+	if (iconv_close(cd) == -1)
+	{
+		printf("utf8_to_win: iconv_close error\n");
 		return;
 	}
 }
