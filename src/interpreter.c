@@ -1247,18 +1247,16 @@ void command_interpreter(char_data *ch, char *argument) {
 			return;
 		}
 		// prool: russian and other prool command
-		printf("prooldebug arg='%s'\n", arg);
-		printf("prooldebug argument='%s'\n", argument);
+		//printf("prooldebug arg='%s'\n", arg);
+		//printf("prooldebug argument='%s'\n", argument);
 		if (!strcmp(arg,"prool"))
 			{
-snprintf(prool_buf,PROOL_LEN,
+			snprintf(prool_buf,PROOL_LEN,
 "prool info - &Yинформация от Пруля:&0\n\n\
 prooltran=%i\n\
 codetable=%i\n\n\
 Читайте help prool\n"
-,ch->player_specials->prooltran[0]
-,ch->player_specials->prool_codetable
-);
+			,ch->player_specials->prooltran[0] ,ch->player_specials->prool_codetable);
 			msg_to_char(ch,prool_buf);
 			return;
 			}
