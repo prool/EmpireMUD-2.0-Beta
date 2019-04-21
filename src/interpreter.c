@@ -1129,7 +1129,6 @@ cpp_extern const struct command_info cmd_info[] = {
 	STANDARD_CMD( "\n", POS_DEAD, NULL, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_UTIL, NOBITS, NO_ABIL )
 };
 
-
  //////////////////////////////////////////////////////////////////////////////
 //// COMMAND INTERPRETER /////////////////////////////////////////////////////
 
@@ -1149,6 +1148,8 @@ void command_interpreter(char_data *ch, char *argument) {
 	skip_spaces(&argument);
 	if (!*argument)
 		return;
+
+	encoder(argument, ch); // prool
 
 #if 1 // prool: logging commands
 	if (ch)
@@ -1246,8 +1247,8 @@ void command_interpreter(char_data *ch, char *argument) {
 			return;
 		}
 		// prool: russian and other prool command
-		//printf("prooldebug arg='%s'\n", arg);
-		//printf("prooldebug argument='%s'\n", argument);
+		printf("prooldebug arg='%s'\n", arg);
+		printf("prooldebug argument='%s'\n", argument);
 		if (!strcmp(arg,"prool"))
 			{
 snprintf(prool_buf,PROOL_LEN,
@@ -1261,7 +1262,7 @@ codetable=%i\n\n\
 			msg_to_char(ch,prool_buf);
 			return;
 			}
-		else if (!strcmp(arg,"пруль"))
+		else if (!strcmp(argument,"пруль"))
 			{
 			msg_to_char(ch,"&YProol's 1st test cyrillic command. Первая тестовая кириллическая команда Пруля&0\n");
 			return;

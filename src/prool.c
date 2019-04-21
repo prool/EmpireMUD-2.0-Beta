@@ -397,6 +397,30 @@ else if (table==2) // win (cp1251)
 	}
 }
 
+void encoder (char *str, char_data *ch)
+{
+char tmp [PROOL_LEN];
+int i;
+int table;
+
+if (!ch) return;
+
+table=ch->player_specials->prool_codetable;
+
+if (table==1) // koi8-r
+	{
+	for (i=0;i<PROOL_LEN;i++) tmp[i]=0;
+	koi_to_utf8(str, tmp);
+	strcpy(str,tmp);
+	}
+else if (table==2) // win (cp1251)
+	{
+	for (i=0;i<PROOL_LEN;i++) tmp[i]=0;
+	win_to_utf8(str, tmp);
+	strcpy(str,tmp);
+	}
+}
+
 #if 0
 void coder2 (char *str, char *out, int table)
 {
@@ -691,6 +715,30 @@ void utf8_to_win(char *str_i, char *str_o)
 	size_t i;
 
 	if ((cd = iconv_open("CP1251", "UTF-8")) == (iconv_t) - 1)
+	{
+		printf("utf8_to_win: iconv_open error\n");
+		return;
+	}
+	len_i = strlen(str_i);
+	if ((i=iconv(cd, &str_i, &len_i, &str_o, &len_o)) == (size_t) - 1)
+	{
+		printf("utf8_to_win: iconv error\n");
+		// return;
+	}
+	if (iconv_close(cd) == -1)
+	{
+		printf("utf8_to_win: iconv_close error\n");
+		return;
+	}
+}
+
+void win_to_utf8(char *str_i, char *str_o)
+{
+	iconv_t cd;
+	size_t len_i, len_o = MAX_SOCK_BUF * 6;
+	size_t i;
+
+	if ((cd = iconv_open("UTF-8", "CP1251")) == (iconv_t) - 1)
 	{
 		printf("utf8_to_win: iconv_open error\n");
 		return;
