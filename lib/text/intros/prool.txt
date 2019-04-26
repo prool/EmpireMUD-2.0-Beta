@@ -1,10 +1,9 @@
-&YGlory MUD by Prool&0
+by Prool&0
 Started at 2018 year
 http://glorymud.kharkov.org
 proolix@gmail.com
 
 Languages: English, Russian
-
 For Russian help use 'help prool' (codetable UTF-8!)
 
 Based on EmpireMUD code (http://empiremud.net)
@@ -12,11 +11,3 @@ Based on EmpireMUD code (http://empiremud.net)
 Enter your character name: 
 
 :
-
-
-
-
-
-
-
-

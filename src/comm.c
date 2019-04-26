@@ -960,15 +960,35 @@ void heartbeat(int heart_pulse) {
 	bool debug_log = FALSE;
 	
 	#define HEARTBEAT(x)  !(heart_pulse % (int)((x) * PASSES_PER_SEC))
+
+	//printf("prool debug: heart beat %i\r\n", heart_pulse);
 	
 	// TODO go through this, arrange it better, combine anything combinable
 
 	// only get a gain condition message on the hour
 	if (HEARTBEAT(SECS_PER_MUD_HOUR)) {
+		//printf("prool debug: heart beat hour %i %s\r\n", heart_pulse,ptime());
 		gain_cond_message = TRUE;
 	}
 	
 	event_process();
+
+#if 1 // prool
+	if (HEARTBEAT(4*60)) // 4 min - create web statistics
+		{FILE *fstat;
+		printf("prool create web statictics %i %s\r\n", heart_pulse, ptime());
+		fstat=fopen("/var/www/glorymud.kharkov.org/who.html","w");
+		if (fstat)
+			{
+			fprintf(fstat,"Online %i", prool_who());
+			fclose(fstat);
+			}
+		else
+			{
+			printf("Can't open web stat\n");
+			}
+		}
+#endif
 
 	// this is meant to be slightly longer than the mobile_activity pulse, and is mentioned in help files
 	if (HEARTBEAT(13)) {
@@ -2463,6 +2483,11 @@ int new_descriptor(int s) {
 	descriptor_list = newd;
 	
 	ProtocolNegotiate(newd);
+
+	// prool:
+	char prool_buf2[512];
+	snprintf(prool_buf2, 512, "&YGlory MUD. Online=%i\r\n", prool_who());
+	SEND_TO_Q(prool_buf2, newd);
 	SEND_TO_Q(intros[number(0, num_intros-1)], newd);
 
 	return (0);

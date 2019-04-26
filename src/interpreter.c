@@ -1254,9 +1254,10 @@ void command_interpreter(char_data *ch, char *argument) {
 			snprintf(prool_buf,PROOL_LEN,
 "prool info - &Yинформация от Пруля:&0\n\n\
 prooltran=%i\n\
-codetable=%i\n\n\
+codetable=%i\n\
+online=%i\n\n\
 Читайте help prool\n"
-			,ch->player_specials->prooltran[0] ,ch->player_specials->prool_codetable);
+			,ch->player_specials->prooltran[0] ,ch->player_specials->prool_codetable, prool_who());
 			msg_to_char(ch,prool_buf);
 			return;
 			}

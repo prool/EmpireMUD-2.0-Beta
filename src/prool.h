@@ -32,3 +32,4 @@ void utf8_to_koi(char *str_i, char *str_o);
 void utf8_to_win(char *str_i, char *str_o);
 void coder (char *str, int table);
 void encoder (char *str, char_data *ch);
+int prool_who (void);

@@ -24,6 +24,8 @@
 #include "dg_scripts.h"
 #include "vnums.h"
 
+#include "prool.h"
+
 /**
 * Contents:
 *   Helpers
@@ -1807,6 +1809,28 @@ char *one_who_line(char_data *ch, bool shortlist, bool screenreader) {
 	return out;
 }
 
+int prool_who (void)
+{
+	descriptor_data *d;
+	char_data *tch;
+	int counter;
+
+	counter=0;
+
+	for (d = descriptor_list; d; d = d->next) {
+	//printf("prool_who\r\n");
+		if (STATE(d) != CON_PLAYING)
+			continue;
+
+		if (d->original)
+			tch = d->original;
+		else if (!(tch = d->character))
+			continue;
+	counter++;
+	}
+
+return counter;
+}
 
 /**
 * Builds part of the WHO list.
