@@ -976,11 +976,11 @@ void heartbeat(int heart_pulse) {
 #if 1 // prool
 	if (HEARTBEAT(4*60)) // 4 min - create web statistics
 		{FILE *fstat;
-		printf("prool create web statictics %i %s\r\n", heart_pulse, ptime());
+		//printf("prool create web statictics %i %s\r\n", heart_pulse, ptime());
 		fstat=fopen("/var/www/glorymud.kharkov.org/who.html","w");
 		if (fstat)
 			{
-			fprintf(fstat,"Online %i", prool_who());
+			fprintf(fstat,"%s Online %i", ptime(), prool_who());
 			fclose(fstat);
 			}
 		else
@@ -3015,7 +3015,7 @@ int write_to_descriptor(socket_t desc, const char *txt) {
 
 		if (bytes_written < 0) {
 			/* Fatal error.  Disconnect the player. */
-			perror("SYSERR: Write to socket");
+			//perror("SYSERR: Write to socket");
 			return (-1);
 		}
 		else if (bytes_written == 0) {
