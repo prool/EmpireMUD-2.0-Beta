@@ -985,7 +985,7 @@ void heartbeat(int heart_pulse) {
 			}
 		else
 			{
-			printf("Can't open web stat\n");
+			//printf("Can't open web stat\n");
 			}
 		}
 #endif
