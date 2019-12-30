@@ -1,4 +1,4 @@
-Russification (UTF-8 codetable) by Prool, proolix@gmail.com
+Russification (UTF-8 codetable) by Prool
 
 Compile under Android 6.0 (dirty instruction)
 ---------------------------------------------
@@ -17,10 +17,12 @@ make
 
 cd ..
 
+{Execute chapter 5 "Create a world" (see below)}
+
 bin/empire
 
 ---
-Prool, proolix@gmailcom, mud.kharkov.org
+Prool, proolix@gmail.com, mud.kharkov.org
 =========================================================================
 
 Warning: Always back up your EmpireMUD before updating your git checkout. Some
