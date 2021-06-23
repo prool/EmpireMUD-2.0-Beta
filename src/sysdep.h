@@ -107,9 +107,11 @@
 #include <memory.h>
 #endif
 
+#if 0 // prool fool
 extern char *malloc(), *calloc(), *realloc();
 extern void free ();
 
+#endif
 extern void abort (), exit ();
 
 #endif  /* Standard headers.  */
