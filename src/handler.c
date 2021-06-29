@@ -70,7 +70,7 @@ extern const int confused_dirs[NUM_2D_DIRS][2][NUM_OF_DIRS];
 extern const char *drinks[];
 extern int get_north_for_char(char_data *ch);
 extern struct complex_room_data *init_complex_data();
-const struct wear_data_type wear_data[NUM_WEARS];
+extern const struct wear_data_type wear_data[NUM_WEARS];
 
 // external funcs
 void adjust_building_tech(empire_data *emp, room_data *room, bool add);
