@@ -2547,7 +2547,7 @@ void nanny(descriptor_data *d, char *arg) {
 					return;
 				}
 				/* check and make sure no other copies of this player are logged in */
-				if (!check_multiplaying(d)) {
+				if (0/*!check_multiplaying(d)*/) {// prool: multiplaying enabled!
 					SEND_TO_Q("\r\n\033[31mAccess Denied: Multiplaying detected\033[0m\r\n", d);
 
 					SEND_TO_Q("There is already a character logged in from the same IP address or account as\r\n", d);
@@ -2832,7 +2832,7 @@ void nanny(descriptor_data *d, char *arg) {
 			}
 	
 			// READY TO ENTER THE GAME
-			if (!check_multiplaying(d)) {
+			if (0/*!check_multiplaying(d)*/) { // prool: multiplaying enabled
 				SEND_TO_Q("\r\n\033[31mAccess Denied: Multiplaying detected\033[0m\r\n", d);
 				SEND_TO_Q("There is already someone logged in from the same IP address as you. If you\r\n", d);
 				SEND_TO_Q("are controlling that character, you must remove it from the game before this\r\n", d);

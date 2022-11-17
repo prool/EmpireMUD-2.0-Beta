@@ -1687,7 +1687,7 @@ void close_socket(descriptor_data *d) {
 			d->character->desc = NULL;
 		}
 		else {
-			syslog(SYS_LOGIN, 0, TRUE, "Losing player: %s", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>");
+			//syslog(SYS_LOGIN, 0, TRUE, "Losing player: %s", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>"); // prool
 			free_char(d->character);
 		}
 	}
@@ -2230,9 +2230,11 @@ int new_descriptor(int s) {
 	if (slow_ip || !(from = gethostbyaddr((char *) &peer.sin_addr, sizeof(peer.sin_addr), AF_INET))) {
 		/* resolution failed */
 		if (!slow_ip) {
+#if 0 // prool
 			char buf[MAX_STRING_LENGTH];
 			snprintf(buf, sizeof(buf), "Warning: gethostbyaddr [%s]", inet_ntoa(peer.sin_addr));
 			perror(buf);
+#endif
 			
 			// did it take longer than 3 seconds to look up?
 			if (when + 3 < time(0)) {
@@ -2316,7 +2318,7 @@ ssize_t perform_socket_read(socket_t desc, char *read_point, size_t space_left) 
 
 	/* read() returned 0, meaning we got an EOF. */
 	if (ret == 0) {
-		log("WARNING: EOF on socket read (connection broken by peer)");
+		//log("WARNING: EOF on socket read (connection broken by peer)"); // prool
 		return (-1);
 	}
 
@@ -2348,7 +2350,7 @@ ssize_t perform_socket_read(socket_t desc, char *read_point, size_t space_left) 
 	 * We don't know what happened, cut them off. This qualifies for
 	 * a SYSERR because we have no idea what happened at this point.
 	 */
-	perror("perform_socket_read: about to lose connection");
+	//perror("perform_socket_read: about to lose connection"); // prool
 	return (-1);
 }
 
@@ -2544,7 +2546,7 @@ int process_input(descriptor_data *t) {
 						space_left++;
 				}
 			}
-			else if (isascii(*ptr) && isprint(*ptr)) {
+			else if (((unsigned char)*ptr)>=32U/*isascii(*ptr) && isprint(*ptr)*/) { // prool: enable non ASCII chars (f.e., cyrillic, UTF-8, etc)
 				if ((*(write_point++) = *ptr) == '$') {		/* copy one character */
 					*(write_point++) = '$';	/* if it's a $, double it */
 					space_left -= 2;
@@ -2796,7 +2798,7 @@ int write_to_descriptor(socket_t desc, const char *txt) {
 
 		if (bytes_written < 0) {
 			/* Fatal error.  Disconnect the player. */
-			perror("SYSERR: Write to socket");
+			//perror("SYSERR: Write to socket"); // prool
 			return (-1);
 		}
 		else if (bytes_written == 0) {
@@ -3804,11 +3806,11 @@ void game_loop(socket_t mother_desc) {
 void init_game(ush_int port) {
 	empire_srandom(time(0));
 
-	log("Finding player limit.");
+	//log("Finding player limit."); // prool
 	max_players = get_max_players();
 
 	if (!reboot_recovery) {
-		log("Opening mother connection.");
+		//log("Opening mother connection."); // prool
 		mother_desc = init_socket(port);
 	}
 
@@ -3816,13 +3818,13 @@ void init_game(ush_int port) {
 
 	boot_db();
 
-	log("Signal trapping.");
+	//log("Signal trapping."); // prool
 	signal_setup();
 
 	if (reboot_recovery)
 		reboot_recover();
 
-	log("Entering game loop.");
+	//log("Entering game loop."); // prool
 	game_loop(mother_desc);
 
 	save_all_players(FALSE);
