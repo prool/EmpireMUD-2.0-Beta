@@ -1327,7 +1327,7 @@ elseif %move% == 3
       if %self.is_enemy(%ch%)%
         if !%ch.var(did_sfdodge)%
           %echo% &&mThe shaking floor knocks ~%ch% to the floor!&&0
-          if %cycle% == %diff% && %diff% >= 3 && (%self.level% + 100) > %ch.level%
+          if %cycle% == %diff% && %diff% >= 3 && (%self.level% + 100) > %ch.level% && !%ch.aff_flagged(!STUN)%
             dg_affect #11814 %ch% STUNNED on 5
           end
           dg_affect #11818 %ch% TO-HIT -%debuff% 15
@@ -1503,7 +1503,7 @@ if %move% == 1 && !%self.aff_flagged(BLIND)%
     %morph% %targ% %vnum%
     %echoaround% %targ% &&m%old_shortdesc% grows long ears and a tail... and becomes ~%targ%!&&0
     %send% %targ% &&m**** You are suddenly transformed into %targ.name%! ****&&0 (fastmorph normal)
-    if %diff% == 4 && (%self.level% + 100) > %targ.level%
+    if %diff% == 4 && (%self.level% + 100) > %targ.level% && !%targ.aff_flagged(!STUN)%
       dg_affect #11851 %targ% STUNNED on 5
     elseif %diff% >= 2
       nop %targ.command_lag(ABILITY)%
@@ -1632,7 +1632,7 @@ elseif %move% == 4
         %echo% &&m~%ch% is hit by pixy dust and starts to shrink!&&0
         dg_affect #11820 %ch% BONUS-PHYSICAL -%penalty% 30
         dg_affect #11821 %ch% BONUS-MAGICAL -%penalty% 30
-        if %diff% == 4 && (%self.level% + 100) > %ch.level%
+        if %diff% == 4 && (%self.level% + 100) > %ch.level% && !%ch.aff_flagged(!STUN)%
           dg_affect #11851 %ch% STUNNED on 10
         end
         if %diff% >= 2
@@ -1766,7 +1766,7 @@ if %move% == 1 && !%self.aff_flagged(BLIND)%
     %send% %targ% &&mYou trip and fall!&&0
     %echoaround% %targ% &&m~%targ% trips and falls!&&0
     if %diff% > 2
-      if (%self.level% + 100) > %targ.level%
+      if (%self.level% + 100) > %targ.level% && !%targ.aff_flagged(!STUN)%
         dg_affect #11814 %targ% STUNNED on 10
       end
       eval dam 40 + (%diff% * 20)
@@ -1880,6 +1880,8 @@ if %mode% == clear
     end
     if %arg% == free || %arg% == all
       dg_affect #11888 %ch% off
+      dg_affect #11861 %targ% off
+      dg_affect #11949 %ch% off
       rdelete did_sffree %ch.id%
       rdelete needs_sffree %ch.id%
     end
@@ -2106,6 +2108,7 @@ elseif %type% == free
   %echoaround% %actor% ~%actor% frees ~%targ%!
   dg_affect #11888 %targ% off
   dg_affect #11861 %targ% off
+  dg_affect #11949 %targ% off
 end
 ~
 #11823
@@ -3260,6 +3263,8 @@ Storytime using script1-5~
 * NOTE: waits for %line_gap% (9 sec) after all commands EXCEPT do/vforce/set
 set line_gap 9 sec
 set story_gap 180 sec
+* random wait to offset competing scripts slightly
+wait %random.30%
 * find story number
 if %self.varexists(story)%
   eval story %self.story% + 1
@@ -3922,7 +3927,7 @@ elseif %move% == 3
   * Complete Darkness
   skyfight clear interrupt
   if %diff% == 1
-    * normal: prevent his attack			-> TODO change this to a debuff
+    * normal: prevent his attack      -> TODO change this to a debuff?
     nop %self.add_mob_flag(NO-ATTACK)%
   end
   skyfight setup interrupt all
@@ -4042,6 +4047,7 @@ elseif %move% == 5
     end
   end
 end
+nop %self.remove_mob_flag(NO-ATTACK)%
 ~
 #11849
 Trixton Vye: Mercenary leader combat script~
@@ -4386,7 +4392,7 @@ if %move% == 1 && !%self.aff_flagged(BLIND)%
     %morph% %target% %vnum%
     %echoaround% %target% &&m%old_shortdesc% is suddenly transformed into ~%target%!&&0
     %send% %target% &&m**** You are suddenly transformed into %target.name%! ****&&0 (fastmorph normal)
-    if %diff% == 4 && (%self.level% + 100) > %target.level%
+    if %diff% == 4 && (%self.level% + 100) > %target.level% && !%target.aff_flagged(!STUN)%
       dg_affect #11851 %target% STUNNED on 5
     elseif %diff% >= 2
       nop %target.command_lag(ABILITY)%
@@ -4480,7 +4486,7 @@ elseif %move% == 3
       else
         set any 1
         %echo% &&mThe rosy pink light strikes ~%ch% in the chest and streams right through *%ch%!&&0
-        if %diff% == 4 && (%self.level% + 100) > %ch.level%
+        if %diff% == 4 && (%self.level% + 100) > %ch.level% && !%ch.aff_flagged(!STUN)%
           dg_affect #11851 %ch% STUNNED on 10
         end
         if %diff% >= 3
@@ -4795,7 +4801,25 @@ if %actor% != %self%
 end
 set spirit %instance.mob(11900)%
 set room %self.room%
-if %arg% == scaldopen
+if %arg% == caiusniamh
+  if %room.people(11931)%
+    say I have been discussing the otherworlder with Niamh here. Specifically, where we might locate a second one.
+  else
+    say Madame Niamh and I have been discussing where we might locate a second otherworlder.
+  end
+elseif %arg% == scaldniamh1
+  if %room.people(11931)%
+    say Little Niamh here goes through apprentices so fast I can't be bothered with their names.
+  else
+    say Frankly I can't be bothered with the apprentice names, either, at the rate Niamh goes through them.
+  end
+elseif %arg% == scaldniamh2
+  if %room.people(11931)%
+    say Healthy appreciation for the DARK ARTS, eh, Niamh?
+  else
+    say Always did like her, though. Niamh. She has a healthy respect for the DARK ARTS.
+  end
+elseif %arg% == scaldopen
   set rescuer %spirit.var(lich_released,0)%
   if !%rescuer%
     say I should have known none of those unlettered louts would open it.
