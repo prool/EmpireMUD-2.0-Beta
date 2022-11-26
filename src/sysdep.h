@@ -107,10 +107,12 @@
 #include <memory.h>
 #endif
 
+#ifndef MACOS // prool
 extern char *malloc(), *calloc(), *realloc();
 extern void free ();
 
 extern void abort (), exit ();
+#endif // prool
 
 #endif  /* Standard headers.  */
 

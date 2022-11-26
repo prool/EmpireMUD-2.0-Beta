@@ -1,3 +1,10 @@
+From Prool:
+Read, please, readme-prool.txt
+For example, for tips for compilation in macOS Catalina.
+Prool, http://prool.kharkov.org
+
+-------------
+
 Warning: Always back up your EmpireMUD before updating your git checkout. Some
 patches may require playerfile conversions or may have other unexpected side-
 effects.

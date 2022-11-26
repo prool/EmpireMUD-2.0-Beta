@@ -19,6 +19,9 @@
 #include "conf.h"
 #include "sysdep.h"
 
+#ifdef MACOS // prool
+#include <stdlib.h>
+#endif // prool
 
 /*
  * init_socket sets up the mother descriptor - creates the socket, sets
