@@ -25,16 +25,22 @@ fan of knives~
 0 0 0 0
 T0
 You pull a knife out of your chest.~
+T5
+...$e has a knife sticking out of $m!~
 S
 #11812
 recovering~
 4 0
 0 0 0 0
+T0
+You recover from that poorly-timed dodge.~
 S
 #11813
 distracted~
 4 0
 0 0 0 0
+T0
+You refocus on the fight.~
 S
 #11814
 prone~
@@ -62,6 +68,8 @@ T0
 Your ankle wound starts to feel better.~
 T4
 $e is bleeding from $s ankle.~
+T5
+...$e is bleeding from the ankle.~
 S
 #11817
 embiggened~
@@ -78,13 +86,8 @@ off-balance~
 0 0 0 0
 T0
 You regain your balance.~
-S
-#11819
-spellcasting~
-4 0
-0 0 0 0
 T5
-...$e is casting a spell -- this is your time to strike!~
+...$e is off-balance.~
 S
 #11820
 miniaturized~
@@ -98,6 +101,8 @@ T2
 You suddenly shrink to the size of a pixy!~
 T3
 $n suddenly shrinks to the size of a pixy!~
+T5
+...$e has shrunk to the size of a pixy!~
 S
 #11821
 miniaturized~
@@ -114,13 +119,22 @@ T5
 ...$e is struggling to get free!~
 S
 #11823
-blinding bomb~
+blinding barrage~
 4 0
 0 0 0 0
 T0
 You can see again.~
 T5
 ...$e has been blinded by the barrage!~
+S
+#11824
+rain of arrows~
+4 0
+0 0 0 0
+T0
+You pull an arrow from your chest.~
+T5
+...$e has arrows sticking out of $m.~
 S
 #11832
 conditional visibility~
@@ -148,7 +162,7 @@ T5
 ...$e is bleeding badly!~
 S
 #11843
-flame brand~
+firebrand~
 4 0
 0 0 0 0
 T0
@@ -164,6 +178,8 @@ S
 enchanted weapon~
 4 0
 0 0 0 0
+T5
+...$s weapon is glowing!~
 S
 #11845
 weapon sheathed~
@@ -172,19 +188,41 @@ weapon sheathed~
 T5
 ...$e is focused on a big attack -- this is your chance to strike!~
 S
+#11847
+arcane tattoos~
+4 0
+0 0 0 0
+T1
+The golden tattoos on $n's arms stop glowing.~
+T5
+...$s arms are covered in glowing gold tattoos!~
+S
 #11848
-poisoned~
+viper venom~
 4 0
 0 0 0 0
 T0
-You are no longer poisoned.~
+The viper venom no longer stings.~
+T5
+...$e looks a bit ill.~
 S
 #11849
 blood curse~
 4 0
 0 0 0 0
 T0
-Your blood curse wears off.~
+The blood curse ends.~
+T5
+...$e is afflicted by a blood curse!~
+S
+#11850
+corpse's touch~
+4 0
+0 0 0 0
+T0
+The deathly pallor of the corpse's touch wears off.~
+T5
+...$e looks deathly pale.~
 S
 #11851
 stunned~
@@ -202,22 +240,21 @@ boss stunned~
 T5
 ...$e's stunned -- now is the time to strike!~
 S
-#11853
-chain lightning~
-4 0
-0 0 0 0
-T0
-The lightning shock wears off.~
-S
 #11854
 dodged penalty~
 4 0
 0 0 0 0
+T5
+...this is your chance to strike!~
 S
 #11855
 arcane tattoos~
 4 0
 0 0 0 0
+T1
+The silver tattoos on $n's arms stop glowing.~
+T5
+...$s arms are covered in glowing silver tattoos!~
 S
 #11856
 timely dodge~
@@ -230,6 +267,8 @@ belt of Venus~
 0 0 0 0
 T0
 You are no longer affected by the belt of Venus.~
+T5
+...$e seems to be moving very slowly.~
 S
 #11858
 venomous jab~
@@ -237,6 +276,17 @@ venomous jab~
 0 0 0 0
 T0
 The venom burns itself out of your system.~
+T5
+...$e looks like $e's going to be sick.~
+S
+#11859
+gash of Cronus~
+4 0
+0 0 0 0
+T0
+The gash of Cronus fades.~
+T5
+...$e seems to be moving slowly.~
 S
 #11860
 complete darkness~
@@ -269,22 +319,17 @@ S
 absorbed spell~
 4 0
 0 0 0 0
+T5
+...$e has absorbed some power!~
 S
 #11865
-flying~
+condensed ether~
 4 0
 0 0 0 0
 T0
-Your flying wears off.~
-T1
-$n stops flying.~
+The condensed ether fades and you can move again.~
 T5
-...$e is flying on winged boots!~
-S
-#11866
-magic sword~
-4 0
-0 0 0 0
+...$e's being slowed by condensed ether!~
 S
 #11867
 momentarily stunned~
@@ -297,6 +342,8 @@ S
 blowback~
 4 0
 0 0 0 0
+T5
+...$e seems to be weakened!~
 S
 #11869
 shadow flail~
@@ -309,6 +356,10 @@ S
 shadow flail~
 4 0
 0 0 0 0
+T0
+You recover from the flailing tendril.~
+T5
+...$e seems off-balance from the tendril.~
 S
 #11871
 wave of guilt~
@@ -316,6 +367,8 @@ wave of guilt~
 0 0 0 0
 T0
 The wave of guilt fades.~
+T5
+...$e has a guilty look.~
 S
 #11872
 deathbolt~
@@ -323,6 +376,8 @@ deathbolt~
 0 0 0 0
 T0
 The deathbolt fades, at least for now.~
+T5
+...$e is glowing from the deathbolt.~
 S
 #11873
 slightly drained~
@@ -337,6 +392,19 @@ R 6600
 R 6340
 T0
 magic rock candies~
+S
+#11883
+power of Skycleave~
+4 0
+0 0 0 0
+T0
+The power of Skycleave fades from you.~
+T2
+You feel a torrent of power course through your body!~
+T4
+$e has a strange violet glow about $m.~
+T5
+...$e has a strange violet glow!~
 S
 #11885
 pure morning dew~

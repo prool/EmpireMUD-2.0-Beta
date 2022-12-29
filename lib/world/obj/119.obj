@@ -12,9 +12,11 @@ attunement will take more skystones than the previous one.
 natural essence. The attunement spell is nearly impossible to cast because a
 sorcerer's own soul too easily taints the magic and spoils the attunement.
 ~
-3 p a 0 6
+3 p a 0 7
 0 0 0
 1 0
+C
+1 1
 S
 #11901
 controller skycleave~
@@ -22,13 +24,16 @@ a skycleave controller~
 A skycleave controller is lying here.~
 Usage:
   skycleave goto <template vnum>
-  skycleave secret passage
+  skycleave info
   skycleave phase <floor number>
+  skycleave secret passage
   skycleave status
 ~
-3 0 a 0 4
+3 0 a 0 5
 0 0 0
 0 0
+C
+100 100
 T 11901
 S
 #11902
@@ -41,9 +46,11 @@ wizard's hat and surrounded in a wavy purple line.
    Even after Skycleave became locked in time, the souvenir mugs helped spread
 its legend across the land.
 ~
-5 0 a 0 5
+5 0 a 0 6
 8 8 11902
 6 0
+C
+50 50
 M
 4
 You tip your mug and sip $T.~
@@ -60,9 +67,11 @@ high precipice, framed by rays from the setting sun.
    Skycleave notoriously reverse-distilled its wine from vinegar in a process
 not well-understood by outsiders.
 ~
-5 0 a 0 3
+5 0 a 0 4
 4 4 11903
 8 0
+C
+50 50
 M
 4
 You drink $T from $p.~
@@ -144,9 +153,11 @@ miraculously, there's no sign of any water splashing outside the stone rim.
 It looks like some people have tossed coins into the water, perhaps for luck.
 Around the fountain, a long round bench provides ample seating.
 ~
-5 j 0 0 7
+5 j 0 0 8
 1000000 1000000 0
 1 0
+C
+100 100
 M
 4
 You drink a handful of water from the fountain, but it's not very good.~
@@ -164,12 +175,14 @@ and clouded, and its light has gone out. Peering through the windows, you see
 dusty rolls of clothing beneath a tarnished metal claw.
    You can 'play' the claw game to win a prize.
    The claw machine was originally built to exploit the sunk cost fallacy and
-was merely a sorcery faire exhibit, but when it rapidly outpaced expectations,
+was merely a Sorcerie Faire exhibit, but when it rapidly outpaced expectations,
 it gained a permanent berth in the gift shop.
 ~
-3 0 0 0 4
+3 0 0 0 5
 0 0 0
 0 0
+C
+50 50
 T 11907
 S
 #11908
@@ -186,9 +199,11 @@ ceiling, threatening to reach down and grab any one of them.
 was merely a sorcery faire exhibit, but when it rapidly outpaced expectations,
 it gained a permanent berth in the gift shop.
 ~
-3 0 0 0 5
+3 0 0 0 6
 0 0 0
 0 0
+C
+50 50
 T 11908
 S
 #11909
@@ -205,9 +220,11 @@ its earliest wooden tower to the magnificent stone structure of today. The
 modern tower's blocks were cut from stones of power collected from across the
 land.
 ~
-3 p a 0 7
+3 p a 0 8
 0 0 0
 12 0
+C
+1 1
 M
 21
 trinket~
@@ -230,9 +247,11 @@ but its masters manage to put a price on it nonetheless. And as the key to
 selling magic is bringing in customers, the tower has devised many clever ways
 to bring people back over and over again.
 ~
-3 p a 0 8
+3 p a 0 9
 0 0 0
 12 0
+C
+1 1
 M
 21
 warpstone~
@@ -248,7 +267,7 @@ Where its wings and elytra should be, there is only a shining, crackling flame.
 The bug seems no worse for the wear as it skitters around its glass jar on its
 scarlet red legs.
    The Tower Skycleave is home to a great many wonders, which it proudly shares
-with all the world, for a small fee. The tower's sorcerers often enchant
+with all the world -- for a small fee. The tower's sorcerers often enchant
 mundane objects and simple animals to create extraordinary tools which are
 unparalleled in even the most extraordinary shops.
 ~
@@ -278,9 +297,11 @@ tag.
 any found elsewhere in the world. Among them, the long-lasting potions are a
 perennial favorite that draw even experienced adventurers to the store.
 ~
-25 p a 0 5
+25 p a 0 6
 -1 0 -1
 8 0
+C
+50 50
 M
 4
 You pull the cork and chug the waterwalking phial...~
@@ -322,9 +343,9 @@ Skycleave's pixy track.
 stats by racing it. You can also 'name jar <name>' to give the pixy a name or,
 if you're feeling benevolent, you can 'release' it, but you'll lose the jar.
    Pixy jars were first created by Grand High Sorcerer Kofi, who preferred
-glass. But sorcerers preferring not to see the little creatures banging against
-the glass as they tried to break free and eventually clay jars took over. Kofi,
-in a violent stroke of irony, was felled by pixies in the end.
+glass. But most sorcerers preferred not to see the little creatures banging
+against the glass as they tried to break free, and eventually clay jars took
+over. Kofi, in a violent stroke of irony, was felled by pixies in the end.
 ~
 3 0 a 0 5
 0 0 0
@@ -343,9 +364,11 @@ something brownish-green, and you try not to think too hard about what it might
 be. Chicken bones and scraps of food line the corners of some of the cages, and
 the whole room reeks of desperation.
 ~
-3 0 0 0 1
+3 0 0 0 2
 0 0 0
 2 0
+C
+50 50
 S
 #11916
 page diary time-traveler's~
@@ -369,7 +392,7 @@ left, where parts are missing, but also along the edges. It reads, in part:
 
    ...cking Gobbrabakh of Orka again. Why is it every time I grasp at the dream
 of escaping this ill-fated tower, I find myself knee-deep in somebody else's
-problem. No time for any of that, ironically.
+problem? No time for any of that, ironically.
    Have been through these events 2413 times, give or take a missed tally, I
 find little hope remains for a way out. How foolish I feel that I spent that
 full week devising a way to bind myself to this wretched loop in hopes of
@@ -404,13 +427,14 @@ practiced hand. It reads:
    On this, my ninetieth (ninety-first?) voyage through this infernal time
 loop, I am astonished to have found myself in a most grueling combat against
 Jozef Knezz himself. I thought myself to have searched every rotten corner of
-this smol place; plundered every mote of conversation; seen all their was to see.
+this smol place; plundered every mote of conversation; seen all their was to
+see...
    More is trapped in the heartwood of time than I had yet realized. What
 follows here is my list of foes trapped herein:
-   * The pixy queen and her loyal kin.
-   * Venjer the Fox and her kin.
-   * Kara Virduke, Bleak Rojjer, Trixton Vye, and their like.
-   * High Sorcerer Barrosh, not in his right mind.
+   * The pixy queen and her loyal kin
+   * Venjer the Fox and her kin
+   * Kara Virduke, Bleak Rojjer, Trixton Vye, and their like
+   * High Sorcerer Barrosh, not in his right mind
    * The Shade of Mezvienne
    * The Shadow Ascendant
    * Mezvienne the Enchantress
@@ -483,9 +507,11 @@ who live in these quarters. The dispenser is made of fine porcelain, shaped
 like a tall kettle, and always cool to the touch despite the piping hot tea
 that pours out. Unfortunately the only cups around here appear to be dirty.
 ~
-5 0 0 0 12
+5 0 0 0 13
 1000 1000 11921
 6 0
+C
+100 100
 M
 4
 You drink a small cup of $T from $p.~
@@ -501,9 +527,11 @@ A long lever sticks out of the wall.~
    This rusted old lever is undoubtedly what opens the secret passage from the
 inside. It looks like you can pull it.
 ~
-3 0 0 0 3
+3 0 0 0 4
 0 0 0
 0 0
+C
+50 50
 T 11922
 S
 #11923
@@ -517,9 +545,11 @@ stray droplets of paint have ruined the wall or floor.
 Grand High Sorcerer Celiya's likeness into view, the brush pauses only to dunk
 itself in one of the pots of paint that sit on the floor.
 ~
-3 0 0 0 1
+3 0 0 0 2
 0 0 0
 0 0
+C
+50 50
 E
 celiya canvas unfinished current sorcerer grand final~
    At the end of the walkway, just before the stairs, Grand High Sorcerer
@@ -583,9 +613,11 @@ years in their unending search to create the simplest, most marketable magical
 products money can buy. In an era of desperately short life expectancies, the
 sorcerers were surprised to find a strong market for potions of great duration.
 ~
-25 p a 0 5
+25 p a 0 6
 -1 0 -1
 8 0
+C
+50 50
 M
 4
 You pull the cork and chug the perfect sight phial...~
@@ -609,9 +641,11 @@ and tidbits the sorcerers carry on their persons. A combination of spells and
 potions allows them to carry fantastical amounts often exceeding their own
 weight.
 ~
-25 p a 0 6
+25 p a 0 7
 -1 0 -1
 8 0
+C
+50 50
 M
 4
 You pull the cork and chug the lighter burdens phial...~
@@ -632,9 +666,11 @@ MM in magenta.
 and spoiled food into a tea so hearty that the sorcerers often live on nothing
 else.
 ~
-5 0 a 0 6
+5 0 a 0 7
 4 4 11926
 6 0
+C
+50 50
 M
 4
 You sip $T from the teacup.~
@@ -654,10 +690,35 @@ dressed in simple wool clothing but wrapped in a soft purple robe. His lips are
 bright blue, as are the corners of his eyes. It looks like he might have been
 poisoned!
 ~
-10 0 0 0 2
+10 0 0 0 3
 11927 3 0
 7 0
+C
+250 250
 T 11836
+S
+#11928
+box configuration moonshadow shadowy puzzle~
+the Moonshadow Configuration~
+A shadowy puzzle box lies on the ground.~
+   As you touch the strange shadow box, your head is filled with images of
+a pitch black, freeze-you-to-the-bone winter night. Though it's not large, the
+box is lighter than it looks. But as it drains all heat from your fingers, it
+seems to grow heavy, and its square sides begin to grow with pale blue lines
+like intricate filigree. This is the Moonshadow Configuration, the puzzle box
+that holds the key to the dark gate of the shadow realms.
+   Use the Moonshadow Configuration to gain a minipet from the elemental plane
+of shadow.
+   The Shadow Hide plumbed the darkest depths of the shadow realm. It was one
+of only two places she ever felt at home. Her mastery over the darkness was her
+path to power and prestige, and in her unwavering determination, she left her
+the timidness and humanity of her youth in the shadows.
+~
+19 o a 0 8
+11853 0 0
+10 0
+C
+1 1
 S
 #11929
 bread crummy crumby very~
@@ -694,9 +755,120 @@ Some breadcrumbs form a trail on the ground.~
    Someone must have been eating bread as they passed through here. The
 breadcrumbs form a clear trail on the ground.
 ~
-3 0 0 0 1
+3 0 0 0 2
 0 0 0
 7 48
+C
+1 1
+S
+#11931
+dress green~
+a green dress~
+A green dress is lying on the ground.~
+   The green dress is a bit tight in the middle, but it has a fashionable,
+modern cut that would look stylish on anyone. The color is, perhaps, somwhere
+between honeydew and laurel; it's rarely found on clothing because green dyes
+are notoriously ephemeral. Nevertheless, the dress has an even and unfaded tone
+that would stand out even in a summer meadow.
+   This dress grants a new 'dance' social to the wearer.
+   When traveling far afield, it is often safest to go unseen.
+~
+2 mp ad 0 8
+0 0 0
+11 0
+A
+5 1 0
+A
+5 1 6
+C
+1 1
+M
+12
+$n is dressed all in green.~
+M
+9
+$n squeezes into a little green dress.~
+M
+8
+You squeeze into the green dress, even if it's a little small.~
+S
+#11932
+coat hat suspicious hugh mann's manns~
+Hugh Mann's suspicious coat and hat~
+A suspicious coat and hat are lying on the ground.~
+   The coat is long enough to drape on the ground and although it's made of
+leather, it's lighter than it looks. The material is thin and has the faintest
+aroma of chicken. Hooks fasten it on the front with a flap to ensure the wearer
+is fully protected.
+   This coat and hat grant a new 'cough' social to the wearer.
+   The rare goblin who returns from Skycleave with treasure earns a new name.
+~
+2 p ad 0 7
+-1 -1 -1
+10 0
+A
+5 1 0
+C
+1 1
+M
+8
+You don $p and conceal your identity as best you can.~
+M
+9
+$n dons a coat and hat and suddenly blends into the crowd.~
+M
+12
+Someone is standing here in a low hat and full-length coat... it might be $n.~
+S
+#11933
+chrysanthemum glass orange~
+an orange glass chrysanthemum~
+An orange glass chrysanthemum sits delicately on the floor.~
+   The delicate orange flower has dozens -- perhaps hundreds -- of tiny,
+translucent petals. It is, perhaps, larger than a real chrysanthemum bloom, and
+surprisingly cold to the touch. In low light, it glows as mana flows up through
+the petals.
+   Harinder felt in her bones when she had reached her final midwinter and
+died naked under the full moon with the glass chrysanthemum in her hands, just
+as her parents had done, in order to pass her impetus to the next generation.
+~
+3 mp ao 0 2
+0 0 0
+8 0
+A
+7 1 0
+A
+16 1 0
+A
+22 1 0
+A
+23 1 0
+A
+5 1 0
+C
+250 250
+S
+#11934
+watch pocket nocturnium~
+a nocturnium pocket watch~
+A nocturnium pocket watch is lying here.~
+   This curious little round device pops open when you squeeze it, revealing
+a face with the numbers 1 through 12 and a pair of pointing arrows that rotate
+slowly forward and then, without warning, they whir and spring backward,
+returning to their start.
+   Upon discovering that Skycleave was trapped in a time loop, Henri fashioned
+a device that would permit him to pass his memories forward from one instance
+of the loop to the next, even after he had bound himself to the loop.
+~
+3 mp ao 0 3
+0 0 0
+2 0
+A
+24 1 0
+A
+5 1 0
+C
+250 250
 S
 #11935
 shard crafting skycleaver~
@@ -768,14 +940,16 @@ bedroom, both carved from stone.
 tower and drive it out of the carpenter. You can drive it from any interior
 room; look out a window to see where you are.
    The Tower Skycleave has existed in many forms over the years, from Abaris's
-original clay brick tower to Wong's legendary stone tower. When he arrived at
-Skycleave, Waltur had the same dream: to build a greater Skycleave; one that
+original wooden tower to Wong's legendary stone tower. When he arrived at
+Skycleave, Waltur had the same dream: to build a greater Skycleave -- one that
 the world would never stop talking about. When he became Chief Magineer, he
 immediately set to work building prototypes for a new tower.
 ~
-3 0 a 0 1
+3 0 a 0 2
 0 0 0
 1 0
+C
+1 1
 S
 #11939
 cornerstone stone hanging garden~
@@ -791,9 +965,11 @@ looks.
 mythological hanging gardens of Babylon, the magineers of Skycleave set out to
 replicate the majestic site.
 ~
-3 0 a 0 1
+3 0 a 0 2
 0 0 0
 1 0
+C
+1 1
 S
 #11940
 pattern magitanium skycleaver greaves tank leg~
@@ -802,9 +978,11 @@ The magitanium skycleaver greaves pattern is on the ground.~
 This pattern will teach you to forge: magitanium skycleaver greaves.
 These are a tank item worn on the legs.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11840 0 0
 0 0
+C
+1 1
 S
 #11941
 pattern shadowhide skycleaver trousers melee leg~
@@ -813,9 +991,11 @@ The shadowhide skycleaver trousers pattern is on the ground.~
 This pattern will teach you to sew: shadowhide skycleaver trousers.
 These are a melee item worn on the legs.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11841 0 0
 0 0
+C
+1 1
 S
 #11942
 pattern thundersilk skycleaver leggings caster~
@@ -824,9 +1004,11 @@ The thundersilk skycleaver leggings pattern is on the ground.~
 This pattern will teach you to sew: thundersilk skycleaver leggings.
 These are a caster item worn on the legs.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11842 0 0
 0 0
+C
+1 1
 S
 #11943
 pattern soulcloth skycleaver skirt healer leg~
@@ -835,9 +1017,11 @@ The soulcloth skycleaver skirt pattern is on the ground.~
 This pattern will teach you to sew: soulcloth skycleaver skirt.
 This is a healer item worn on the legs.
 ~
-7 0 a 0 3
+7 0 a 0 4
 11843 0 0
 0 0
+C
+1 1
 S
 #11944
 pattern moxteel skycleaver shinguards pvp solo leg~
@@ -846,9 +1030,11 @@ The moxteel skycleaver shinguards pattern is on the ground.~
 This pattern will teach you to forge: moxteel skycleaver shinguards.
 These are a pvp/solo item worn on the legs.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11844 0 0
 0 0
+C
+1 1
 S
 #11945
 pattern magitanium skycleaver girdle tank waist~
@@ -857,9 +1043,11 @@ The magitanium skycleaver girdle pattern is on the ground.~
 This pattern will teach you to forge: magitanium skycleaver girdle.
 This is a tank item worn on the waist.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11845 0 0
 0 0
+C
+1 1
 S
 #11946
 pattern shadowhide skycleaver strap melee waist~
@@ -868,9 +1056,11 @@ The shadowhide skycleaver strap pattern is on the ground.~
 This pattern will teach you to sew: shadowhide skycleaver strap.
 This is a melee item worn on the waist.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11846 0 0
 0 0
+C
+1 1
 S
 #11947
 pattern thundersilk skycleaver cincture caster waist~
@@ -879,9 +1069,11 @@ The thundersilk skycleaver cincture pattern is on the ground.~
 This pattern will teach you to sew: thundersilk skycleaver cincture.
 This is a caster item worn on the waist.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11847 0 0
 0 0
+C
+1 1
 S
 #11948
 pattern soulcloth skycleaver sash healer waist~
@@ -890,9 +1082,11 @@ The soulcloth skycleaver sash pattern is on the ground.~
 This pattern will teach you to sew: soulcloth skycleaver sash.
 This is a healer item worn on the waist.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11848 0 0
 0 0
+C
+1 1
 S
 #11949
 pattern moxteel skycleaver belt pvp solo waist~
@@ -901,9 +1095,11 @@ The moxteel skycleaver belt pattern is on the ground.~
 This pattern will teach you to forge: moxteel skycleaver belt.
 This is a pvp/solo item worn on the waist.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11849 0 0
 0 0
+C
+1 1
 S
 #11950
 pattern magitanium skycleaver wristguard tank wrist~
@@ -912,9 +1108,11 @@ The magitanium skycleaver wristguard pattern is on the ground.~
 This pattern will teach you to forge: magitanium skycleaver wristguard.
 This is a tank item worn on the wrist.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11850 0 0
 0 0
+C
+1 1
 S
 #11951
 pattern shadowhide skycleaver cuffs melee wrist~
@@ -923,9 +1121,11 @@ The shadowhide skycleaver cuffs pattern is on the ground.~
 This pattern will teach you to sew: shadowhide skycleaver cuffs.
 These are a melee item worn on the wrist.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11851 0 0
 0 0
+C
+1 1
 S
 #11952
 pattern thundersilk skycleaver wristband caster wrist~
@@ -934,9 +1134,11 @@ The thundersilk skycleaver wristband pattern is on the ground.~
 This pattern will teach you to sew: thundersilk skycleaver wristband.
 This is a caster item worn on the wrist.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11852 0 0
 0 0
+C
+1 1
 S
 #11953
 pattern soulcloth skycleaver bracelet healer wrist~
@@ -945,9 +1147,11 @@ The soulcloth skycleaver bracelet pattern is on the ground.~
 This pattern will teach you to sew: soulcloth skycleaver bracelet.
 This is a healer item worn on the wrist.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11853 0 0
 0 0
+C
+1 1
 S
 #11954
 pattern moxteel skycleaver wristcuff pvp solo wrist~
@@ -956,9 +1160,11 @@ The moxteel skycleaver wristcuff pattern is on the ground.~
 This pattern will teach you to forge: moxteel skycleaver wristcuff.
 This is a pvp/solo item worn on the wrist.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11854 0 0
 0 0
+C
+1 1
 S
 #11955
 design magitanium skycleaver studs tank ear~
@@ -967,9 +1173,11 @@ The magitanium skycleaver studs design is on the ground.~
 This design will teach you to forge: magitanium skycleaver studs.
 These are a tank item worn on the ears.
 ~
-7 0 a 0 3
+7 0 a 0 4
 11855 0 0
 0 0
+C
+1 1
 S
 #11956
 design shadowhide skycleaver earrings melee~
@@ -978,9 +1186,11 @@ The shadowhide skycleaver earrings design is on the ground.~
 This design will teach you to forge: shadowhide skycleaver earrings.
 These are a melee item worn on the ears.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11856 0 0
 0 0
+C
+1 1
 S
 #11957
 design thundersilk skycleaver earrings caster~
@@ -989,9 +1199,11 @@ The thundersilk skycleaver earrings design is on the ground.~
 This design will teach you to forge: thundersilk skycleaver earrings.
 These are a caster item worn on the ears.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11857 0 0
 0 0
+C
+1 1
 S
 #11958
 design soulcloth skycleaver earrings healer~
@@ -1000,9 +1212,11 @@ The soulcloth skycleaver earrings design is on the ground.~
 This design will teach you to forge: soulcloth skycleaver earrings.
 These are a healer item worn on the ears.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11858 0 0
 0 0
+C
+1 1
 S
 #11959
 design moxteel skycleaver earrings pvp solo ear~
@@ -1011,9 +1225,24 @@ The moxteel skycleaver earrings design is on the ground.~
 This design will teach you to forge: moxteel skycleaver earrings.
 These are a pvp/solo item worn on the ears.
 ~
-7 0 a 0 2
+7 0 a 0 3
 11859 0 0
 0 0
+C
+1 1
+S
+#11960
+donation generous laboratory~
+a generous donation to the laboratory~
+A donation is lying here.~
+   Buy this to donate a skystone to Magineer Waltur and his laboratory. There
+are never enough attuned skystones to go around. This purchase grants you +20
+reputation with the Tower Skycleave, which caps at Venerated.
+~
+3 z a 0 3
+0 0 0
+12 0
+T 11805
 S
 #11961
 dew crystalline~
@@ -1030,9 +1259,11 @@ lost to time.
 long was it sapped by Smol Nes-Pik, and long did languish in their care, until
 it was rendered into lumber by a wizard of budding renown.
 ~
-3 p a 0 5
+3 p a 0 6
 0 0 0
 12 0
+C
+100 100
 T 11961
 T 11963
 S
@@ -1046,9 +1277,11 @@ you can see the goblin cages. The next, it's Scaldorran's lab. There's no time
 to look at details before the next image appears, so you're not sure how useful
 a mirror like this would be.
 ~
-8 j 0 0 2
+8 j 0 0 3
 11800 0 0
 3 0
+C
+100 100
 T 11962
 S
 #11963
@@ -1059,9 +1292,29 @@ A strange mirror occupies much of the wall.~
 mirror doesn't show you standing here in the Grand High Sorcerer's quarters,
 but instead reflects you standing in the great hall on the first floor!
 ~
-8 j 0 0 1
+8 j 0 0 2
 11800 0 0
 3 0
+C
+100 100
+S
+#11964
+stone brilliant eternal sunshine~
+a brilliant stone of eternal sunshine~
+A brilliant stone shines on the ground.~
+   This little amber stone shines nearly as brightly with the sun, making it
+hard to look at. Curiously, if you enclose it in your hands or pocket, no light
+shines through.
+   You can use the stone of eternal sunshine to gain a reset in the skill tree
+of your choice. This will allow you to clear your purchased abilities in that
+skill at a later time.
+   Some find it helpful to free themselves from the memories that might other-
+wise distract from their insatiable quest for knowledge.
+~
+3 0 a 0 4
+0 0 0
+12 0
+T 263
 S
 #11965
 tear jade~
@@ -1077,11 +1330,28 @@ Gobbrabakh of Orka, a city now lost to time.
 the jade they planned to return. When one of their people died, jade tears
 would be placed over their eyes to guide them to their ancestors.
 ~
-3 p a 0 7
+3 p a 0 8
 0 0 0
 12 0
+C
+100 100
 T 11965
 T 11963
+S
+#11966
+desk somber niamhs niamh's~
+Niamh's desk~
+A somber desk stands near the center of the office.~
+   The desk is large and somewhat austere. It's pitch black, but unlike most of
+the black tower's ebony, there is no woodgrain, no knots, not even the
+slightest imperfection on the surface. It is well and truly black, almost as if
+it was carved from a shadow instead of a tree.
+~
+3 0 0 0 5
+0 0 0
+0 0
+C
+250 250
 S
 #11967
 desk oak tall austere~
@@ -1092,9 +1362,11 @@ occupant stand and, indeed, there is no chair. As if that weren't imposing
 enough, the desk stands on a raised dais. No name adorns the desk, which is
 covered in loose papers that nearly cover an old ink stain.
 ~
-3 0 0 0 2
+3 0 0 0 3
 0 0 0
 0 0
+C
+250 250
 E
 spot stain~
 It looks like someone has spilled shimmering ink on the desk.
@@ -1118,12 +1390,14 @@ comfortably, but it has just one chair. It is carved from ebony, inlaid with
 ivory lettering in an ancient language you can't decipher. The writing covers
 all visible portions of the desk, perhaps as an enchantment to protect the desk
 or tower. The nameplate on the desk, also made from ivory, displays the full
-name and title of Grand High Sorcerer Jozef Anton Knezz, Fifteenth Master of
+name and title of Grand High Sorcerer Jozef Robert Knezz, Fifteenth Master of
 the Tower Skycleave.
 ~
-3 0 0 0 4
+3 0 0 0 5
 0 0 0
 0 0
+C
+250 250
 E
 painting frame~
    The painting shows Knezz, Celiya, and Barrosh posing almost comically
@@ -1142,9 +1416,11 @@ outside depicting an academy of scholars apparently studying the higher magical
 arts. The placard on the desk indicates that it belongs to Celiya, one of the
 Tower Skycleave's longest-serving High Sorcerers.
 ~
-3 0 0 0 3
+3 0 0 0 4
 0 0 0
 0 0
+C
+250 250
 E
 painting frame inspirational~
 You examine the painting:
@@ -1169,9 +1445,11 @@ water. Every once in a while, one or more of the animal shapes will leap into
 the air and escape the confines of the fountain for a time, before returning to
 splash into the water and disappear.
 ~
-5 j 0 0 6
+5 j 0 0 7
 1000000 1000000 0
 1 0
+C
+100 100
 M
 4
 You catch a bubble of water in your mouth as it flies from the fountain.~
@@ -1193,30 +1471,36 @@ magic. Now, the heartwood is burned.
 again and fall into a pile, before raising themselves up and burning themselves
 down again, and again, and again.
 ~
-3 0 0 0 3
+3 0 0 0 4
 0 0 0
 12 0
+C
+250 250
 S
 #11972
 stains blood~
 the blood in the arena~
 Blood stains the shining sand of the arena.~
-Spatters of red and green blood crisscross the center of the arena.
+Spatters of blood crisscross the center of the arena.
 ~
-3 0 0 0 2
+3 0 0 0 3
 0 0 0
 7 2
+C
+1 1
 T 11972
 S
 #11973
 stains blood~
 the blood in the arena~
 Blood stains the shining sand of the arena.~
-Spatters of red and green blood crisscross the center of the arena.
+Spatters of blood crisscross the center of the arena.
 ~
-3 0 0 0 3
+3 0 0 0 4
 0 0 0
 7 4
+C
+1 1
 M
 18
 One of the goblins rakes the sand and smooths it out.~
@@ -1227,9 +1511,11 @@ a torch~
 A torch has been dropped here.~
 The torch is made from striped brown and black wood.
 ~
-1 ch ano 0 5
+1 ch ano 0 6
 0 2 12
 0 72
+C
+50 50
 S
 #11976
 trinkets goblin~
@@ -1241,9 +1527,11 @@ green, small shell discs that might be earrings, and square jade tokens.
 utilitarian work, finding humans would pay for fine stitching even when they
 would not pay for figurines or jewelry.
 ~
-15 0 a 0 1
+15 0 a 0 2
 1 0 0
 14 0
+C
+100 100
 R
 4 5193 0
 S
@@ -1251,7 +1539,8 @@ S
 mussels steamed~
 some steamed mussels~
 Some steamed mussles are lying on the ground.~
-   The mussels have a fragrant riparian smell.
+   The mussels have a fragrant riparian smell. The shells have opened slightly,
+making it easier to pry them apart.
    Since time immemorial, people have gathered and cooked shellfish as a simple
 and bountiful food source.
 ~
@@ -1287,9 +1576,11 @@ river but you could certainly cook them up.
    Rivers provide a plentiful and sustainable food source as much for the
 shellfish as for the fisherman.
 ~
-6 0 a 0 6
+6 0 a 0 7
 6 0 0
 7 48
+C
+1 1
 M
 4
 You eat some slimy mussels fresh from the shells.~
@@ -1309,7 +1600,7 @@ A fishing net is hanging nearby.~
 flow through while fish are trapped. The tiny knots show evidence of repair all
 over, a sign someone used this net for a long time.
    Agriculture is not the sole lifestyle that has led people to create cities.
-Fishing, too, can provide enough food for civilization to rise.
+Fishing, too, can provide enough food for civilization to arise.
 ~
 3 0 ao b 1
 0 0 0
@@ -1340,9 +1631,11 @@ Piles of clams, oysters, and scallops are stacked around the cauldrons.~
 here. Though you can see oysters, scallops, and even mussels, by far the most
 numerous piles here are clams.
 ~
-6 0 0 0 7
+6 0 0 0 8
 500 0 0
 7 0
+C
+1 1
 M
 4
 You take a sample of clams, oysters, and scallops from the pile and eat them one by one.~
@@ -1357,9 +1650,11 @@ There is a barrel of water with a ladle.~
    The oak barrel is bound with wooden hoops and sealed with pitch. The top is
 open, with a wooden ladle hanging from the rim.
 ~
-5 0 0 0 8
+5 0 0 0 9
 1000 1000 0
 0 0
+C
+100 100
 M
 4
 You drink a ladle of water from the barrel.~
@@ -1377,15 +1672,17 @@ keys painted on the side and a crossed hazel branch and wand stamped in the
 blue wax seal on top. The jar jingles when you shake it, then screams. It
 sounds like there's a pixy in there!
    You can 'use jar' to gain the little pixy as a minipet.
-   Skycleavers have long kept pixies, one of the few naturally occurring
-magically-attuned creatures, for use in advanced magic. Pixies were notoriously
+   Skycleavers have long kept pixies, one of the few naturally occurring,
+magically attuned creatures, for use in advanced magic. Pixies were notoriously
 difficult to contain until the sorcerers discovered a form of clay through
 which mana has been drawn over a long period of time. This clay, when fired,
 can hold even a pixy queen.
 ~
-19 p a 0 9
+19 p a 0 10
 11982 0 0
 6 0
+C
+1 1
 S
 #11983
 suit silk shimmering~
@@ -1397,6 +1694,7 @@ carefully you can see not a single stitch or thread, even when you pull at the
 seams. The cut of the suit is sleek and androgynous, and though the foreign
 style is hard to place, this suit would turn heads in any court with its
 shining gold embellishments.
+   This suit grants a new 'bow' social to the wearer.
    As the golden age of Smol Nes-Pik was tarnished into rot and ruin and the
 last leaves fell from the great tree, Sparo Vehl sat resolute on the obsidian
 throne as the beacon of hope for her people.
@@ -1428,6 +1726,7 @@ A set of treesilk robes hang in the air.~
 thick silhouette as they pad layer upon layer. The silk is quite fine, showing
 neither hem nor stitch. Golden threadwork and filigree shape root-like tendrils
 around the bottom of the robes, but the torso and sleeves are undecorated.
+   This suit grants a new 'cheer' social to the wearer.
    When the last of their great trees fell, the tresydions chose to follow them
 into history, such is the cost of the vow they once took.
 ~
@@ -1458,6 +1757,7 @@ A brown silk suit is neatly folded on the ground.~
 craftsmanship is such that no stitch or hem is visible. The reddish-brown color
 is like a clay brick or a tree trunk, and the wide, straight cut of the suit
 gives it a strong elegance, like a tree beside a pond.
+   This suit grants a new 'comfort' social to the wearer.
    When Lotte left Smol Kai-Pik for the first time at the age of sixty-three,
 she little imagined the splendor she would find in the world. Nor could she
 conceive of the somber truth that she would never return home again.
@@ -1489,6 +1789,7 @@ A green silk tunic is hanging in the air.~
 not a single stitch can be seen. The silk is dyed a verdant green, at home in
 the canopy of any great tree, embellished with golden needlework in the shape
 of leaves.
+   This suit grants a new 'dance' social to the wearer.
    Fine clothing such as this were common at all levels of Smol Nes-Pik, woven
 by artisans born and raised on the great tree, and from silk spun in its crown.
 The green dye was sourced from the tree's very sap. Wearing the tree, as it was
@@ -1519,16 +1820,19 @@ tattered lich robes~
 Some tattered lich robes are hanging here.~
    These robes are tattered and torn, and it will surely make you look like a
 lich to wear them.
+   These robes grant a new 'greet' social to the wearer.
    Liches are born when a great sorcerer dies, as the impression they made in
 the magic of the fabric of the world does not easily fade. A lich is,
 therefore, not exactly the sorcerer, nor is it a ghost. It is something new,
 something different; something not shackled by the doubts or mores of mankind.
 ~
-2 p ad 0 6
+2 p ad 0 7
 0 0 0
 11 0
 A
 5 1 0
+C
+1 1
 M
 12
 The lich $n drifts before you.~
@@ -1546,15 +1850,18 @@ A set of page robes is lying on the ground.~
    These plain jute robes are commonly worn by Skycleave pages. They spare
 hardly a stitch for fashion or embellishment. Like a monk's robe, they
 advertise only humility and low station.
+   These robes grant a new 'nod' social to the wearer.
    The Tower Skycleave employs a great number of pages, many of whom possess no
 magical talent to speak of. Instead, the pages usually rely on enchanted
 trinkets to simplify their work.
 ~
-2 p ad 0 5
+2 p ad 0 6
 0 0 0
 11 0
 A
 5 1 0
+C
+1 1
 M
 12
 $n is bustling about.~
@@ -1572,16 +1879,19 @@ A set of apprentice robes has been left here.~
    The layered cotton robes are airy and light, though the workmanship on them
 suggests they were made at low cost. The layers are made in various shades of
 white and gray, with simple stitching on the seams and hems.
+   These robes grant a new 'shrug' social to the wearer.
    The Tower Skycleave invests a great deal into its apprentices and saddles
 them with the highest expectations. Every high sorcerer in the tower began
-their storied career as an apprentice who outshone their peers, the more
-disappointing of whom now line the tower's cupboards and cabinets.
+their storied career as an apprentice who outshone their peers, though even the
+most disappointing among them find ways to contribute to the tower.
 ~
-2 p ad 0 5
+2 p ad 0 6
 0 0 0
 11 0
 A
 5 1 0
+C
+1 1
 M
 12
 Apprentice $n is standing here.~
@@ -1598,14 +1908,18 @@ a goblin's vest~
 A goblin has left its vest here, perhaps.~
    This vest is small, and slightly too snug. Nevertheless, those tiny green
 fingers make fine clothing.
-   No goblins that has entered Skycleave has ever left again. The sorcerers can
-little comprehend why, then, the goblins continue to invade it.
+   This vest grants a new 'tap' social to the wearer.
+   According to Skycleave's staff, no goblins that has entered the tower has
+ever left again. The sorcerers can little comprehend why, then, the goblins
+continue to invade it.
 ~
-2 o ad 0 4
+2 o ad 0 5
 -1 -1 -1
 11 0
 A
 5 1 0
+C
+1 1
 M
 12
 $n is standing here, squeezed into a very small vest.~
@@ -1623,16 +1937,19 @@ A glimmering doublet is lying on the ground.~
    The doublet is close-fitting and brilliantly embellished with hazel leaves
 set against a background pattern that reminds you of bricks. The garment shines
 in every color, all at once.
+   This doublet grants a new 'wave' social to the wearer.
    The Tower Skycleave creates a fashion craze from time to time because what
-seems to be magical, impossible clothing is a simple feat for such powerful
+appears to be magical, impossible clothing is a simple feat for such powerful
 sorcerers. Before long, the villagers usually realize the clothing is gaudy and
 impractical. But not before emptying their purses for it.
 ~
-2 o ad 0 4
+2 o ad 0 5
 -1 -1 -1
 10 0
 A
 5 1 0
+C
+1 1
 M
 12
 $n glimmers in the light.~
@@ -1658,9 +1975,11 @@ claimed.
    Calamander forests are cultivated by certain schools of sorcery because the
 bicolor wood excels at focusing and amplifying raw mana.
 ~
-3 0 a 0 3
+3 0 a 0 4
 0 0 0
 0 0
+C
+100 100
 R
 4 5193 0
 T 11992
@@ -1717,9 +2036,11 @@ interest. All of this belies the fantastically valuable lumber inside.
 and brown wood. As rare as it is beautiful, calamander can only be found in the
 most remote jungles.
 ~
-3 e a 0 12
+3 e a 0 13
 0 0 0
 0 0
+C
+1 1
 I 11 617 100.00 1  # LIGHT: magical fire
 I 16 11996 100.00 1  # SCRAPE: striped calamander pillar
 I 16 11998 5.00 1  # SCRAPE: fine calamander sapling
@@ -1750,9 +2071,11 @@ striped black and brown wood for which the tree is world-renowned.
    The Tower Skycleave features several fine pieces of furniture crafted from
 fine calamander wood. The high sorcerers often store spare mana in the wood.
 ~
-3 e a 0 8
+3 e a 0 9
 0 0 0
 0 0
+C
+1 1
 I 11 617 100.00 1  # LIGHT: magical fire
 M
 0
@@ -1781,9 +2104,11 @@ a collection of calamander trinkets is a conspicuous way of showing off wealth.
 appearance. It is exceedingly rare, found only in the most remote jungles, and
 it makes the finest woodwork.
 ~
-3 e a 0 7
+3 e a 0 8
 0 0 0
 0 0
+C
+1 1
 I 11 617 100.00 1  # LIGHT: magical fire
 M
 0
@@ -1831,14 +2156,16 @@ A piece of jade cheese is lying on the ground.~
    This little bit of cheese has a stem, almost like it grew on a tree. It has
 a distinctly marbled jade color, but it tastes like a slightly funky cheese.
    Though no cheese truly grows from a plant in nature, the magineers at
-Skycleave have been extraordinarily successful at grafting unusual foods onto
-magical trees.
+Skycleave have been extraordinarily successful at grafting unusual foods in
+magical arbors.
 ~
-6 g a 0 8
+6 g a 0 9
 6 0 0
 7 12
 B
 L
+C
+50 50
 M
 4
 You pop $p in your mouth and the world seems to turn green for a second as you swallow it.~

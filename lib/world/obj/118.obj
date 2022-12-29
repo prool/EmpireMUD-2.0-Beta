@@ -7,9 +7,11 @@ foul), crisps, crackers, carrots, cuts of fish and game, brightly colored
 birds, and pots set into the table that hold soup. It has an inviting aroma
 that feels like it's exactly what you need right now.
 ~
-6 0 0 0 3
+6 0 0 0 4
 1000 0 0
 7 0
+C
+100 100
 M
 4
 You eat some fruits and cheeses from the buffet.~
@@ -24,7 +26,7 @@ A pair of bustling shoes seem to be walking in circles.~
    These shoes are made from fine cloth and leather, and bear the imprint of
 the Tower Skycleave on the heel.
    The tower is renowned for sorcerers and their apprentices who never tire as
-they walk up and down the tower's long spiral staircase. One thing is certain:
+they trudge up and down the tower's long spiral walkway. One thing is certain:
 These shoes were made for walking.
 ~
 2 mo ag 0 6
@@ -53,6 +55,8 @@ There's... sort of an aura hovering here.~
    It glows with... something. Surely this experimental aura was cooked up by
 the sorcerers of the Tower Skycleave, notorious for its unusual magics and
 well-funded research and development.
+   Unbridled innovation is the skeleton key to progress -- at least, according
+to Professor Scaldorran.
 ~
 2 mo ak 0 8
 -1 -1 -1
@@ -90,26 +94,28 @@ use the secret passage on floor 2 (&gP&0), and tried to play the broken claw
 game (&cC&0). Each of these tasks must be completed (or not) during the "rescue"
 phase of their respective floors.
    Here are the outcomes:
-                          &cC&gP&yS&rK&0  glimmering doublet
+                          &cC&gP&yS&rK&0  loyal footstool
                           -&gP&yS&rK&0  goblin's vest
-                          &cC&0-&yS&rK&0  apprentice robes
-                          &cC&gP&0-&rK&0  lich robes
-                          &cC&gP&yS&0-  piping teapot
-                          &cC&gP&0--  hopping lamp
-                          -&gP&yS&0-  complimentary mirror
+                          &cC&0-&yS&rK&0  souvenir swab
+                          &cC&gP&0-&rK&0  caged goblin
+                          &cC&gP&yS&0-  little goblin
+                          &cC&gP&0--  hiding shadow
+                          -&gP&yS&0-  glimmering doublet
                           --&yS&rK&0  page robes
-                          &cC&0-&yS&0-  loyal footstool
-                          -&gP&0-&rK&0  crystal ball
-                          &cC&0--&rK&0  singing hat
+                          &cC&0-&yS&0-  enchanted doorstop
+                          -&gP&0-&rK&0  apprentice robes
+                          &cC&0--&rK&0  water bug
                           ---&rK&0  adoring fan
-                          --&yS&0-  clingy cloak
-                          -&gP&0--  brave toaster
+                          --&yS&0-  lich robes
+                          -&gP&0--  clingy cloak
                           &cC&0---  liberated wand
-                          ----  walking shoes
+                          ----  crystal ball
 ~
-3 p a 0 2
+3 p a 0 3
 0 0 0
 0 0
+C
+1 1
 S
 #11804
 flagon everflowing flowing~
@@ -146,9 +152,11 @@ a looker~
 A looker is here.~
 This item causes the player to 'look' when it loads, then vanishes.
 ~
-3 0 a 0 2
+3 0 a 0 3
 0 0 0
 0 1
+C
+1 1
 T 11805
 S
 #11806
@@ -189,13 +197,15 @@ seal are emblazoned with the coat of arms of the Tower Skycleave. There doesn't
 seem to be a way to open the jar, but you can hear beads rolling around inside.
    Possession of this jar allows you to morph into the following
 anthropomorphic household items: teapot, broom, sponge, bucket, mop
-   Though it has become an all-too common punishment for students at the Tower
-Skycleave, punitive transformation is nevertheless a longstanding tradition for
-pupils who prove disappointing.
+   Though it has become all-too common for students at the Tower Skycleave,
+punitive transformation is nevertheless a longstanding tradition for pupils who
+prove disappointing.
 ~
-3 o a 0 2
+3 o a 0 3
 0 0 0
 0 0
+C
+50 50
 S
 #11808
 sapling blue~
@@ -222,11 +232,13 @@ S
 directory stone slab~
 the directory~
 There is a directory engraved on a stone slab.~
-This look description is updated by a script.
+This look description is updated by trigger 11811.
 ~
-3 0 0 0 3
+3 0 0 0 4
 0 0 0
 1 0
+C
+100 100
 T 11811
 S
 #11810
@@ -241,13 +253,15 @@ began setting traps to capture any goblin who dared enter. But even caged --
 or perhaps even moreso when caged -- a goblin is a crafty sort, and it requires
 a skilled wrangler to keep them under control.
 ~
-1 hmo an 0 4
+1 hmo an 0 5
 0 1 7
 7 0
 A
 18 3 0
 A
 13 1 0
+A
+5 1 6
 C
 150 250
 T 11902
@@ -265,13 +279,15 @@ have long faced what they euphemistically call "the goblin problem". It's a
 common occurrence for goblins to attempt to steal the tower's priceless relics,
 so wrangler spears are often stashed around the tower.
 ~
-1 ehmo an b 8
+1 ehmo an b 9
 0 1 3
 0 0
 A
 18 2 0
 A
 13 2 0
+A
+5 1 6
 C
 150 250
 M
@@ -290,14 +306,21 @@ An intricate glass hatchet is sticking out of the ground.~
 fine point that it requires no sharpening. The glass grip of the handle seems
 to fit your hand perfectly, such that the hatchet almost becomes an extension
 of your wrist.
+   Glass is capable of forming an exceptional edge, far sharper than any bronze
+or iron, though natural glasses like obsidian are desperately fragile and
+ephemeral.
 ~
-1 mo an a 7
+1 mo an a 10
 0 4 2
 8 0
 A
 1 1 0
 A
-17 2 0
+17 5 0
+A
+21 3 0
+A
+5 1 6
 C
 150 250
 T 11902
@@ -314,17 +337,19 @@ Grand High Sorcerer Kofi and though the tower no longer manufactures them, the
 artificers are still known to shape old glass ingots into tools and weapons
 from time to time.
 ~
-1 emno an 0 7
+1 emno an 0 12
 0 4 1
 8 0
 A
 1 1 0
 A
-17 1 0
-A
 9 1 0
 A
-21 1 0
+21 4 0
+A
+17 4 0
+A
+5 1 6
 C
 150 250
 T 11902
@@ -341,13 +366,19 @@ the great sorcerer Celiya, one of the famed leaders of Skycleave.
 history is strictly mythological -- and fantastical indeed -- it has produced
 so many High Sorcerers that few question its claims of descent from divinity.
 ~
-1 eimo an 0 8
+1 eimo an 0 11
 0 4 17
 0 0
 A
 8 1 0
 A
-17 2 0
+9 1 0
+A
+17 4 0
+A
+22 3 0
+A
+5 1 6
 C
 150 250
 T 11902
@@ -364,13 +395,15 @@ staff, pulsing like a heartbeat.
 refers only to the current holder of the Apollus Chair, the sorcerer who
 oversees magics related to disease, poison, and healing.
 ~
-1 ehmo an 0 8
+1 ehmo an 0 10
 0 0 19
 0 0
 A
 8 1 0
 A
-23 2 0
+23 8 0
+A
+5 1 6
 C
 150 250
 T 11902
@@ -383,23 +416,22 @@ A scrimshawed bone club is lying here.~
 it's hard to imagine what it might have come from. The entire length of the
 club, save for the leather-wrapped handle, is carved in intricate scrimshaw,
 depicting the aftermath of a great war. In the scene on the club, a single hero
-stands over countless fallen foes, some of whom now serve the hero and others
+stands over countless fallen foes, some of whom now serve the hero while others
 merely fertilize their fields.
-   It is said one does not attack a feramancer in the field, a phrase oft-
-repeated since the Battle of Tuskrun Downs. As the Galradian army cut at his
-flanks, the Wildermage Indrik summoned a thousand great beasts, from far and
-wide. The earth shook, the Galradians were trampled to dust, and what few
-beasts they felled were carved in celebration and honor by Indrik himself.
+   Carving a great victory -- or defeat -- into the bones of the fallen is an
+ancient tradition.
 ~
-1 emo an 0 11
+1 emo an 0 13
 0 3 5
 14 0
 A
 2 1 0
 A
-18 2 0
+18 5 0
 A
-21 2 0
+21 3 0
+A
+5 1 6
 C
 150 250
 T 11902
@@ -412,19 +444,20 @@ A scrimshawed bone staff is lying here.~
 to tip, the entire staff has been carved with intricate scrimshaw. You lack the
 knowledge to understand the meaning behind the carvings, but the pale blue glow
 they emanate in the dark tells you their purpose is to channel mana.
-   When he had defeated the Galradian army, Wildermage Indrik carved the bones
-of his greatest allies to celebrate the victory they seized from the tusks of
-defeat.
+   When he had defeated his last foe, Wildermage Indrik carved the bones of his
+fallen allies to celebrate the victory they seized from the tusks of defeat.
 ~
-1 emo an 0 11
+1 emo an 0 13
 0 3 18
 14 0
 A
 2 1 0
 A
-18 2 0
+18 5 0
 A
-22 2 0
+22 3 0
+A
+5 1 6
 C
 150 250
 T 11902
@@ -437,7 +470,7 @@ A goblin rain bow is lying here.~
 durable with glue and bits of hide. The bow is relatively undecorated, but as
 you pull on the string you find it sturdy and strong. The only writing on the
 bow appears to be the goblin symbol for rain.
-   The goblins have long-forgotten the stories of the original rain bows, so
+   The goblins have long forgotten the stories of the original rain bows, so
 called because they were shot off the gobbrabakhs during the driest months to
 strike water from clouds.
 ~
@@ -462,15 +495,15 @@ otherworlder's strange tools and inscrutible magics led the Tower Skycleaver to
 study him, that they might learn enough to stand their ground if an army of
 otherworlders should follow.
 ~
-27 emo aq 0 15
+27 emo aq 0 17
 3 0 0
 2 0
 A
 2 1 0
 A
-18 4 0
+18 6 0
 A
-13 1 0
+13 4 0
 A
 17 -3 0
 C
@@ -496,15 +529,15 @@ life of its own when an errant spell from Scaldorran brought all the costumes
 to life. For his part, Scaldorran insisted he was only trying to liven up the
 party.
 ~
-27 emo aq 0 15
+27 emo aq 0 16
 1 0 0
 14 0
 A
 9 1 0
 A
-17 2 0
+17 4 0
 A
-21 3 0
+21 6 0
 A
 18 -3 0
 C
@@ -531,15 +564,15 @@ image. For these sorcerers, living in death as a shadow of the spells they wove
 in life is still a form of immortality, but few erudite wizards would consider
 the lich to be the same person.
 ~
-27 emo aq 0 16
+27 emo aq 0 17
 0 0 0
 11 0
 A
 9 1 0
 A
-17 2 0
+17 4 0
 A
-22 3 0
+22 6 0
 A
 23 -3 0
 C
@@ -564,18 +597,18 @@ they feel effortlessly light.
    After Knezz ascended as Grand High Sorcerer, he grew tired of relying on
 page boys to help him don his heavy robes. What began as a lazy enchantment to
 stand the robes on their own soon became a complex animus spell. Perhaps
-growing tired of casting his own spells, Knezz eventually enchanted the long
-sleeves of the robe to move his arms for him.
+thinking himself above casting his own spells, Knezz eventually enchanted the
+long sleeves of the robe to move his arms for him as well.
 ~
-27 emo aq 0 17
+27 emo aq 0 18
 0 0 0
 11 0
 A
 9 1 0
 A
-7 2 0
+7 4 0
 A
-23 3 0
+23 6 0
 A
 22 -3 0
 C
@@ -599,15 +632,15 @@ rogue.
    The goblins once traded for weapons and armor, but as their society fell,
 they began to imitate the crafts they had once purchased.
 ~
-27 emo aq 0 17
+27 emo aq 0 19
 2 0 0
 0 0
 A
 9 1 0
 A
-17 2 0
+17 4 0
 A
-18 2 0
+18 4 0
 C
 150 250
 M
@@ -627,8 +660,7 @@ strap and handle on the back, giving its bearer a superior view of the battle
 without compromising saftey. And despite being made from glass, the shield
 takes blow after blow, ringing out like a bell but never shattering.
    Glass armaments were the clear choice under Grand High Sorcerer Kofi, but
-since have become rather rare. The shield more closely resembles the tower as
-it looked during Kofi's tenure.
+since have become rather rare.
 ~
 23 emo ao 0 15
 0 0 0
@@ -657,7 +689,7 @@ and pops the blade makes in the heat.
 Permafrost Wars, though most melted before High Sorcerer Chun devised a spell
 that could preserve them on our plane.
 ~
-1 imo ano f 17
+1 imo ano f 19
 0 1 4
 2 0
 A
@@ -798,6 +830,7 @@ An otherwordly bodysuit is lying crumpled on the ground.~
    The paper-thin bodysuit has the look of scale armor, with many dazzling tiny
 shapes that seem to reinforce it even if they don't make it thicker. Every
 square inch of it catches and reflects light like nothing you've ever seen!
+   This suit grants new 'applaud' and 'clap' socials to the wearer.
    The Shadow Hide found the otherworlder in the burning wreckage of a round
 metal carriage at the bottom of a steep crater. To the erudite lords of
 Skycleave, this was an unparalleled prize and it earned her high acclaim.
@@ -831,9 +864,11 @@ keeping whatever is up there at bay.
    Use the 'difficulty' command to set the difficulty for the next floor before
 proceeding.
 ~
-3 0 0 0 4
+3 0 0 0 5
 0 0 0
 10 0
+C
+250 250
 S
 #11832
 crates wall stacked wooden boxes~
@@ -845,9 +880,11 @@ labeled as precious relics, dangerous artifacts, and irreplaceable books. All
 of the crates are nailed shut. The floor around and under the crates looks
 scorched.
 ~
-3 0 0 0 3
+3 0 0 0 4
 0 0 0
 0 0
+C
+50 50
 T 11835
 S
 #11833
@@ -866,9 +903,11 @@ to have a thick brow ridge above where the eyes would be.
    The sculpture is warded by a shimmering wall of light that surrounds the
 dais and prevents you from getting too close.
 ~
-3 0 0 0 2
+3 0 0 0 3
 0 0 0
 2 0
+C
+250 250
 S
 #11834
 table overturned heavy barricade~
@@ -879,9 +918,11 @@ unceremoniously onto its side and one of the legs is cracked. Still, this
 hefty mahogany table provides a safe spot to fling spells -- or arrows -- at
 any threat.
 ~
-3 0 0 0 2
+3 0 0 0 3
 0 0 0
 0 0
+C
+50 50
 I 11 11835 100.00 1 b  # LIGHT: burning barricade
 T 11835
 S
@@ -894,9 +935,11 @@ against intruders or rescuers, you cannot tell. The makeshift barricade has
 collapsed as it burns. Luckily, it doesn't seem to catch any of the tower's
 rare and expensive ebony paneling on fire.
 ~
-3 c 0 0 3
+3 c 0 0 4
 0 0 0
 0 12
+C
+50 50
 S
 #11836
 repository rough-worked worked pedestal scaldorran's scaldorrans lich~
@@ -912,9 +955,11 @@ the death of a sorcerer. But when a sorcerer commands vast power and abundant
 cleverness, it is possible to prepare a repository to anchor their magic to the
 mortal plane after their body has rotted and their soul has moved on.
 ~
-3 0 0 0 4
+3 0 0 0 5
 0 0 0
 4 0
+C
+250 250
 T 11836
 S
 #11837
@@ -952,9 +997,11 @@ standing on legs. The tower and legs are both made of stone, though the tower
 is a bit crooked and doesn't form a perfect cylinder. In all regards except for
 the legs, it resembles a little sorcery tower.
 ~
-3 0 0 0 1
+3 0 0 0 2
 0 0 0
 1 0
+C
+150 150
 S
 #11840
 greaves skycleaver magitanium set~
@@ -966,18 +1013,18 @@ it can catch even the tiniest glint of light. These greaves are truly a
 warrior's dream.
    For a brief time, dubbed "magitanium mania" by High Sorcerer Barrosh, every
 pen, clasp, button, and plate in Skycleave was made from magitanium. Still,
-among the innovations credited to the Tower, magitanium is most valued by
-smiths across the land.
+among the innovations credited to the Tower, magitanium is the one most valued
+by smiths across the land.
 ~
-27 mp af 0 21
+27 mp af 0 22
 3 0 0
 2 0
 A
 2 1 0
 A
-12 3 0
+12 4 0
 A
-24 3 0
+24 4 0
 C
 150 275
 T 11940
@@ -994,7 +1041,7 @@ when rubbed together, while the inside is lined with the finest cloth.
 hiding from others. Though it was her brother who dubbed her "Niamh the Shadow
 Hide", she reclaimed the title for herself at Skycleave.
 ~
-27 mp af 0 22
+27 mp af 0 23
 1 0 0
 7 0
 A
@@ -1002,7 +1049,7 @@ A
 A
 9 1 0
 A
-21 5 0
+21 8 0
 C
 150 275
 T 11940
@@ -1015,10 +1062,10 @@ A pair of thundersilk skycleaver leggings is lying here.~
 material that channels every stray spark of static electricity in the air
 straight into a sorcerer's body to strengthen their offensive magic.
    Thundersilk was once made by pixies, masters of silk, from the coccoons of
-moths that pupated at the lightning-kissed tops of the pixy trees. No pixy
-cities yet remain that produce it.
+moths that pupated at the lightning-kissed tops of the trees. No pixy cities
+yet remain that produce it.
 ~
-27 mp af 0 23
+27 mp af 0 24
 0 0 0
 11 0
 A
@@ -1026,7 +1073,7 @@ A
 A
 9 1 0
 A
-22 5 0
+22 8 0
 C
 150 275
 T 11940
@@ -1042,7 +1089,7 @@ from the infinitely dark, unseeable void that lies at the heart of the fabric.
 When the cloth is done, it is boiled along with the weaver in a stone cauldron,
 trapping the weaver's soul within. This is considered the greatest honor.
 ~
-27 mp af 0 25
+27 mp af 0 26
 0 0 0
 11 0
 A
@@ -1050,7 +1097,7 @@ A
 A
 9 1 0
 A
-23 5 0
+23 8 0
 C
 150 275
 M
@@ -1070,11 +1117,9 @@ legs. They're small, thin, and shockingly light. This is moxteel, a
 magic-infused metal that weighs less than any normal metal while deflecting
 blows even when they should be strong enough to pierce it.
    Moxteel was a late invention of Skycleave, after the fad for enchanted glass
-armor had started to wane. Though the name is commonly constructed as mocking
-steel-wearers, it was, in truth, invented by a sorcerer who fancied herself
-The Moxie Witch.
+armor had started to wane.
 ~
-27 mp af 0 22
+27 mp af 0 23
 2 0 0
 2 0
 A
@@ -1082,9 +1127,9 @@ A
 A
 9 1 0
 A
-17 3 0
+17 5 0
 A
-18 2 0
+18 3 0
 C
 150 275
 T 11940
@@ -1239,9 +1284,8 @@ because it's made from magitanium and because of the honeycomb structure
 inside, where the magitanium has been shaped to disperse even the most powerful
 impacts. As you run your fingers over the wristguard, the iridescent swirls of
 the magitanium seem to follow every movement.
-   Magitanium originated in a rivalry between High Sorcerer Itania the Moxie
-Witch and though she didn't invent it, Itania is credited both with introducing
-the metal to Skycleave's artisan sorcerers, and with naming it.
+   Magitanium originated outside the tower, but it triggered a small feud when
+some sorcerers preferred it over moxteel.
 ~
 27 mp aj 0 23
 3 0 0
@@ -1274,7 +1318,7 @@ against other fabrics.
 Skycleave, the Shadow Hide immediately began infusing it into every jewel,
 trinket, device, and creature, and she found a different result with each.
 ~
-27 mp aj 0 24
+27 mp aj 0 25
 1 0 0
 7 0
 A
@@ -1282,9 +1326,9 @@ A
 A
 9 1 0
 A
-17 2 0
+17 4 0
 A
-21 2 0
+21 4 0
 C
 150 275
 T 11940
@@ -1302,7 +1346,7 @@ before.
 cities. There existed a particular technique for unraveling the coccoon while
 the pupa slept soundly, able to emerge without cutting the precious silk.
 ~
-27 mp aj 0 26
+27 mp aj 0 27
 0 0 0
 11 0
 A
@@ -1310,9 +1354,9 @@ A
 A
 9 1 0
 A
-17 2 0
+17 4 0
 A
-22 2 0
+22 4 0
 C
 150 275
 M
@@ -1335,7 +1379,7 @@ release an ear-piercing screech that leaves you momentarily stunned.
 placed into an ever-burning fire, of which few are known, and the sheer value
 of soulcloth is such that this has never been tested.
 ~
-27 mp aj 0 27
+27 mp aj 0 28
 0 0 0
 11 0
 A
@@ -1343,9 +1387,9 @@ A
 A
 9 1 0
 A
-7 2 0
+7 4 0
 A
-23 2 0
+23 4 0
 C
 150 275
 M
@@ -1363,22 +1407,20 @@ A moxteel skycleaver wristcuff is lying here.~
    This powerful, light, shimmering wristcuff is made from moxteel, an
 enchanted metal that sparkles like white glitter equally in sunlight or candle
 light.
-   The Moxie Witch came into her name long before she began to dabble in
-metallurgy. While cleaning her grandfather's tower as an adolescent, she fell
-into a barmy blue portal and returned laden with strange bottles filled with
-her namesake fizzy beverage.
+   Moxteel took its name from the way its thinness and exceptional durability
+make a mockery of traditional steel.
 ~
-27 mp aj 0 25
+27 mp aj 0 26
 2 0 0
 2 0
 A
 2 1 0
 A
-17 2 0
+17 4 0
 A
-18 1 0
+18 3 0
 A
-13 1 0
+13 2 0
 C
 150 275
 M
@@ -1532,9 +1574,9 @@ magical metal so light you can barely feel them. The earrings have a red glint
 to them not native to the moxteel, suggesting they might carry a powerful
 enchantment.
    The process for creating moxteel is tightly guarded by the Tower Skycleave
-even after the Moxie Witch was twice abducted by envious ironmongers who forced
-the secret out of her. Both abductors vanished within a fortnight of her
-release.
+even after its sorcerers were twice abducted by envious ironmongers who forced
+the secret out by nefarious means. Both abductors vanished within a fortnight
+of the kidnappings.
 ~
 2 mp am 0 28
 0 0 0
@@ -1574,9 +1616,11 @@ gold ink and an elegant script:
                         4. Cultivator is single-use
                 5. Skycleave does not warrant against death
 ~
-3 gp a 0 1
+3 gp a 0 2
 0 0 0
 12 0
+C
+50 50
 T 11860
 S
 #11861
@@ -1627,9 +1671,11 @@ touch it, but it's solid. You can't force your arm through and it seems to be
 impervious to magic. This powerful shadow magic must be coming from somewhere
 nearby.
 ~
-3 0 0 0 3
+3 0 0 0 4
 0 0 0
 10 0
+C
+250 250
 T 11887
 S
 #11864
@@ -1640,17 +1686,19 @@ Someone has left their mana deconfabulator on the ground.~
 particularly heavy. It's made from striped magewood and nocturnium straps, with
 a crystal orb on one end and an eventide horn on the other. You don't see a way
 to turn it on; or, perhaps it isn't working any more.
+   You can 'use' this deconfabulator to cast a temporary counterspell.
    Magical energy, often called mana, is a tangled thing, often tainted by the
 stray thoughts and dreams of wizards and sorcerers. Purifying mana is nearly
 impossible, but deconfabulating it can be done with the right equipment.
 ~
-15 e a 0 4
+15 e a 0 5
 1 0 0
 2 0
 C
 150 150
 R
 4 5193 0
+T 11850
 S
 #11865
 condenser ether~
@@ -1659,15 +1707,17 @@ An ether condenser is humming on the ground.~
    The odd black metal box is inscribed all over with golden letters in a
 script you don't read. It makes a low hum and is, at all times, cold to the
 touch, but you can't figure out how to open it, nor what it's doing.
-   Some mages have posited that the ether can be used as a source of mana.
+   You can 'use' this condenser to throw it at an enemy in combat.
+   Magic scholars have posited that the ether can be used as a source of mana.
 ~
-15 e a 0 4
+15 e a 0 5
 1 0 0
 2 0
 C
 150 150
 R
 4 5193 0
+T 11850
 S
 #11866
 man wooden carved~
@@ -1697,16 +1747,18 @@ There is a dynamic reconfabulator on the ground.~
 ring around it and a nocturnium stake through the center. You have no knowledge
 of how to use it -- if, indeed, it serves some function or purpose at all. But
 you do notice that it's ice cold to the touch.
+   You can 'use' this reconfabulator to throw it at an enemy in combat.
    When mana becomes too pure, it sometimes becomes explosive. As this can be a
 side-effect of deconfabulation, the proper solution is a reconfabulator.
 ~
-15 e a 0 4
+15 e a 0 5
 1 0 0
 2 0
 C
 150 150
 R
 4 5193 0
+T 11850
 S
 #11868
 prototype wellstone miniature~
@@ -1758,9 +1810,11 @@ A swirling vortex atop the tower keeps you from climbing the stairs.~
 can't even climb the stairs. It sounds like somebody is locked in mortal combat
 above you and you won't be able to climb the stairs until someone has died.
 ~
-3 0 0 0 4
+3 0 0 0 5
 0 0 0
 10 0
+C
+250 250
 T 11887
 S
 #11871
@@ -1773,12 +1827,14 @@ red and blue light traveling from the heart to the top of the column and then
 back down again.
    Time itself is being drawn up into the heartwood, then echoed back on itself
 in an endless cycle. Surely this is what is responsible for the sorry state of
-the Tower Skycleave. Your only hope now is to burn the heartwood in hopes of
-ending the cycle and rescuing the sorcerers from this odious time loop.
+the Tower Skycleave. Your only recourse now is to burn the heartwood in hopes
+of ending the cycle and rescuing the sorcerers from this odious time loop.
 ~
-3 j 0 0 5
+3 j 0 0 6
 0 0 0
 12 0
+C
+250 250
 T 11971
 S
 #11872
@@ -1810,8 +1866,8 @@ potion red glittering~
 a glittering red potion~
 A glittering red potion is sitting on the ground.~
    The red potion swirls as you hold it up to the light, glittering with flecks
-of yellow, like pixy dust in caught in a whirlpool. There's no label on the
-flask and no way to tell what effect it will have but to quaff it.
+of yellow, like pixy dust caught in a whirlpool. There's no label on the flask
+and no way to tell what effect it will have but to quaff it.
    Potions are a quick way to shore up one's particular deficiencies.
 ~
 25 m a 0 6
@@ -1835,8 +1891,8 @@ look like knitted metal. At the center of the charm, the negative space between
 the filigree forms the outline of a person. The whole thing dangles from a
 thin gold chain, tarnished at the back from heavy wear.
    The Tower Skycleave is a notoriously high-performing school of magic. Part
-of their excellent grade point average, and equally notorious, is low tolerance
-for under-achievers.
+of the school's excellent grade point average, and equally notorious, is its
+low tolerance for under-achievers.
 ~
 2 0 ac 0 7
 0 0 0
@@ -1889,12 +1945,14 @@ holes run the length of the flute. It's difficult to play, but the music is
 transcendental.
    Hold the flute to play it.
    Joiago learned to play the flute at a young age from his grandmother, who
-gifted him one made by pixies. In the right hands, it has the power to evoke
-powerful emotions and draw listeners into an enchanted dance.
+gifted him one made by pixies in an earlier age. In the right hands, it has the
+power to evoke powerful emotions and draw listeners into an enchanted dance.
 ~
-22 0 ao 0 3
+22 0 ao 0 5
 1 0 0
 12 0
+C
+1 1
 M
 2
 You play a soft, sad melody on the flute...~
@@ -2015,6 +2073,7 @@ You pause to clean the little flute.~
 M
 3
 $n pauses to clean $s flute.~
+T 11812
 S
 #11878
 knife gemstone stone~
@@ -2026,7 +2085,7 @@ with no seam or joint; the two minerals seem to flow into each other. At the
 base of the handle, the knife is finished with opal that equally has no
 boundary.
    The magic required to fuse dissimilar gemstones is deeply rooted in Tagra
-Nes, where the ancestral grandmothers, the Ebru, guard it from beyond death.
+Nes, whose ancestral grandmothers, the Ebru, guard it from beyond death.
 ~
 1 mo ano f 8
 0 1 4
@@ -2068,8 +2127,8 @@ it can be hard to tell them apart from the real thing. But these are sweet to
 the tongue, evoking the taste of maple syrup or honey as the initial crunch
 melts away into cloying sweetness.
    Tagra Nes once performed the noble task of drawing up mana from deep beneath
-the earth and releasing it into the world, a task it performed ceaselessly day
-and night for 8200 years, but not a day longer.
+the earth and releasing it into the world, a task it performed ceaselessly
+beneath both sun and stars for 8200 years, but not a day longer.
 ~
 6 m a 0 9
 24 0 0
@@ -2125,13 +2184,15 @@ pool shimmering water dew~
 the dew pool~
 A pool of shimmering water creates dancing patterns on the shell's curved ceiling.~
    The pool is cut into the floor of the seashell. It's wide, but shallow, and
-you take care not to trip into it as there's no railing or step around it. The
-viridescent light from the glowing shell shimmers off of the water, dancing
-around on the ceiling.
+you take care not to trip into it as there's no railing or step protecting it.
+The viridescent light from the glowing shell shimmers off of the water and
+dances around on the ceiling.
 ~
-5 0 0 0 6
+5 0 0 0 7
 1000000 1000000 11885
 12 0
+C
+100 100
 M
 4
 You kneel down and drink the $T from the pool.~
@@ -2148,12 +2209,12 @@ A gnarled old wand lies on the ground.~
 fallen twig. It is perhaps a foot and a half long, lightly discolored around
 the base, and otherwise the only notable feature is the initials carved into
 the end.
-   Sophisticated magic users fall broadly into two categories: those who prefer
-staves and those who prefer wands. While a staff is larger and therefore easier
-to channel mana through, a wand is more easily concealed and capable of a much
-finer focus.
+   Though Skycleave is known for its towering staves, capable of channeling
+tremendous manaflows for enormous spells, it also contains a number of wands of
+true power. These relics of an earlier age have brought both renown and ruin to
+even the greatest wizards of myth and legend.
 ~
-1 mpwx ano 0 6
+1 mpwx ao 0 7
 0 1 22
 0 0
 A
@@ -2199,9 +2260,11 @@ avoid falling in. Each one is almost as wide as your armspan, and round in
 shape, but none of them is very deep. The pools closer to the stairs are
 well-lit, while the ones in the back of the grotto are difficult to see.
 ~
-5 0 0 0 4
+5 0 0 0 5
 1000000 1000000 11885
 12 0
+C
+100 100
 M
 4
 You kneel down and drink the $T from one of the pools.~
@@ -2222,9 +2285,11 @@ nevertheless a great work of art.
    Destroying the sculpture is the furthest thing from your mind. Or, it was,
 until just now. Vanity and narcissism are common pitfalls of great sorcerers.
 ~
-3 0 0 0 4
+3 0 0 0 5
 0 0 0
 8 0
+C
+150 150
 T 11886
 S
 #11887
@@ -2237,9 +2302,11 @@ reach through it. As you try, you see visions of the pixy queen in your mind.
 A crooked grin breaks on her face as she laughs -- cackles, even -- at your
 attempt to pass her impenetrable shield.
 ~
-3 c 0 0 2
+3 0 0 0 4
 0 0 0
 10 0
+C
+250 250
 T 11887
 S
 #11888
@@ -2251,12 +2318,14 @@ the great tree. Something in the sap calls to you, like a siren. You touch it,
 almost unconsciously, and it starts to creep up your fingers. You recoil,
 equally unconsciously, but as you wipe it off your fingers, you feel a
 revolting urge to taste it.
-   To the people of Smol Nes-Pik, wasting the tree's sap is a great crime, as
-every last pint of it is precious.
+   In Smol Nes-Pik, wasting the tree's sap is a great crime, as every last
+pint of it is precious.
 ~
-3 0 0 0 3
+3 0 0 0 4
 0 0 0
 0 0
+C
+1 1
 M
 18
 The sap dries up and crystallizes.~
@@ -2270,9 +2339,11 @@ Thousands of tiny splinters hover in the air!~
 drawing more and more wood from the sides of the hollow, until the air is so
 full of them you can hardly breathe!
 ~
-3 0 0 0 1
+3 0 0 0 2
 0 0 0
 0 0
+C
+1 1
 S
 #11890
 struggle~
@@ -2280,9 +2351,11 @@ the struggle~
 The struggle is real.~
 You're struggling to get free! (struggle)
 ~
-3 p a 0 2
+3 p a 0 3
 0 0 0
 0 5
+C
+150 150
 M
 17
 Your struggle ends.~
@@ -2298,13 +2371,34 @@ Sap is flowing from the tree.~
    The sap has totally encased you! You can do little else but watch the Great
 Tree fall into rot and ruin.
 ~
-3 0 0 0 2
+3 0 0 0 3
 0 0 0
 0 10
+C
+1 1
 M
 18
 Sap drips onto you.~
 T 11954
+S
+#11892
+jelly protium blob~
+some protium jelly~
+There is a blob of protium jelly here.~
+   It seems like water. In your hands, it even feels like water. But somehow,
+it holds itself together. This is an odd curiosity indeed, sure to be of great
+interest to scholars and sorcerers alike.
+   Skycleave once held the keys to many elemental planes. But over the years,
+as apprentices repeatedly unleashed primordial horrors upon the world, those
+keys were melted, one by one, until only water and shadow remained.
+~
+15 0 a 0 6
+1 0 0
+10 0
+C
+150 150
+R
+4 5193 0
 S
 #11893
 leash fox leather fine~
@@ -2331,8 +2425,8 @@ A wooden Venus figurine is lying here.~
 hips and large breasts; aside from a prominent belly button, there is little
 detail beyond that. Her face is smooth and undetailed except for two square
 impressions where her eyes would be.
-   Many types of statuette with women's forms are described as Venus figurines,
-though they rarely relate to the Greek goddess.
+   Many types of statuettes with women's forms are described as Venus
+figurines, though they rarely relate to the Greek goddess.
 ~
 15 0 a 0 8
 1 0 0
@@ -2406,15 +2500,18 @@ S
 skystone stone depleted~
 a depleted skystone~
 A depleted skystone has been tossed aside.~
-   The smooth, palm-sized stone has a light blue color to it.
+   The smooth, palm-sized stone has a light blue color to it. It seems to have
+lost its luster and doesn't quite reflect light the way most skystones do.
    Skystone attunement causes a terrible strain on the soul or natural essence
 of the person the stone is attuned to. The process rarely succeeds at enriching
 the stone as the stone's power is easily absorbed by an injured soul rather
 than the other way around.
 ~
-15 0 a 0 8
+15 0 a 0 9
 1 0 0
 1 0
+C
+1 1
 R
 4 5193 0
 S
@@ -2428,8 +2525,10 @@ and knapped into a rough circle.
    All colors of jade are prized by goblins, light blue most of all for its
 resemblance to the sky.
 ~
-3 p a 0 8
+3 p a 0 9
 0 0 0
 1 0
+C
+1 1
 S
 $

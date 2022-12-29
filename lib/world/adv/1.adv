@@ -163,14 +163,14 @@ L
 -1 0 0
 S
 #122
-Ruins: Three Banditos~
+Ruins: Three Banditos (moved to 10105)~
 Paul Clarke~
    It looks like someone has been camping out in these ruins. You've found the
 hideout of infamous bandits Berk, Jorr, and Tranc! These three are not renowned
 for fighting fair, but if you're lucky, maybe only one of them is home.
 ~
 10105 10109 100-200
-20 0 cdk 0
+20 0 acdk 0
 L
 0 ac
 5007 -1 -1 -1
@@ -401,16 +401,17 @@ L
 -1 0 0
 S
 #160
-The Tower Skycleave~
+OLD The Tower Skycleave~
 Paul Clarke~
    The Tower Skycleave is renowned throughout the land for its powerful
 sorcerers and unconventional research. It funds its discoveries through patents
 and tourism, and a sign out front eagerly encourages you to visit. Parts of the
 tower are designed for different level ranges, so use the 'consider' command
 judiciously before you attack things.
+   This adventure has been replaced by 11800.
 ~
 10030 10099 30-200
-1 240 kl 0
+1 240 akl 0
 L
 1 0
 10030 -1 -1 -1

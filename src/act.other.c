@@ -2876,7 +2876,7 @@ ACMD(do_minipets) {
 	struct minipet_data *mini, *next_mini;
 	char_data *mob, *to_summon;
 	size_t size;
-	int count;
+	int count, number;
 	
 	skip_spaces(&argument);
 	
@@ -2949,6 +2949,8 @@ ACMD(do_minipets) {
 		}
 	}
 	else {
+		number = get_number(&argument);
+		
 		to_summon = NULL;	// to find
 		HASH_ITER(hh, GET_MINIPETS(ch), mini, next_mini) {
 			if (!(mob = mob_proto(mini->vnum))) {
@@ -2957,7 +2959,7 @@ ACMD(do_minipets) {
 			else if (!multi_isname(argument, GET_PC_NAME(mob))) {
 				continue;	// no match
 			}
-			else {
+			else if (--number == 0) {
 				to_summon = mob;
 				break;	// FOUND!
 			}
@@ -3003,13 +3005,15 @@ ACMD(do_morph) {
 	int count;
 	char *tmp;
 	
+	skip_spaces(&argument);
+	fast = (subcmd == SCMD_FASTMORPH || FIGHTING(ch) || GET_POS(ch) == POS_FIGHTING);
+	normal = (!str_cmp(argument, "normal") | !str_cmp(argument, "norm"));
+	
 	// safety first: mobs must use %morph%
-	if (IS_NPC(ch)) {
+	if (IS_NPC(ch) && (!fast || !normal)) {
 		msg_to_char(ch, "You can't morph.\r\n");
 		return;
 	}
-	
-	skip_spaces(&argument);
 	
 	if (!*argument) {
 		count = 1;	// counting 'normal'
@@ -3071,14 +3075,12 @@ ACMD(do_morph) {
 	
 	// initialize
 	morph = NULL;
-	fast = (subcmd == SCMD_FASTMORPH || FIGHTING(ch) || GET_POS(ch) == POS_FIGHTING);
-	normal = (!str_cmp(argument, "normal") | !str_cmp(argument, "norm"));
 	multiplier = fast ? 3.0 : 1.0;
 	
 	if (normal && !IS_MORPHED(ch)) {
 		msg_to_char(ch, "You aren't morphed.\r\n");
 	}
-	else if (GET_ACTION(ch) != ACT_NONE) {
+	else if (!IS_NPC(ch) && GET_ACTION(ch) != ACT_NONE) {
 		msg_to_char(ch, "You're too busy to morph now!\r\n");
 	}
 	else if (!normal && !(morph = find_morph_by_name(ch, argument))) {
@@ -3170,20 +3172,28 @@ ACMD(do_order) {
 	char name[MAX_INPUT_LENGTH], message[MAX_INPUT_LENGTH];
 	bool found = FALSE;
 	room_data *org_room;
-	char_data *vict;
+	char_data *vict = NULL;
 	struct follow_type *k;
 
 	half_chop(argument, name, message);
 
-	if (!*name || !*message)
-		send_to_char("Order who to do what?\r\n", ch);
-	else if (!(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM)) && !is_abbrev(name, "followers"))
+	if (!*name || !*message) {
+		send_to_char("Order whom to do what?\r\n", ch);
+	}
+	else if (!vict && is_abbrev(name, "companion") && !(vict = GET_COMPANION(ch))) {
+		msg_to_char(ch, "You don't have a companion to order.\r\n");
+	}
+	else if (!vict && !(vict = get_char_vis(ch, name, NULL, FIND_CHAR_ROOM)) && !is_abbrev(name, "followers")) {
 		send_to_char("That person isn't here.\r\n", ch);
+	}
 	else if (ch == vict) {
 		send_to_char("You can order yourself around all you want.\r\n", ch);
 	}
 	else if (vict && MOB_FLAGGED(vict, MOB_NO_COMMAND)) {
 		act("You can't command $M.", FALSE, ch, NULL, vict, TO_CHAR);
+	}
+	else if (vict && IN_ROOM(ch) != IN_ROOM(vict)) {
+		msg_to_char(ch, "You can't order someone who's not here.\r\n");
 	}
 	else {
 		if (AFF_FLAGGED(ch, AFF_CHARM)) {

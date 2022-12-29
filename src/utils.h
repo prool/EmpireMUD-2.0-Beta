@@ -2249,6 +2249,7 @@ char *get_informative_color(char_data *ch, bool dismantling, bool unfinished, bo
 
 // mobact.c
 void add_pursuit(char_data *ch, char_data *target);
+bool check_reset_mob(char_data *ch, bool force);
 bool check_scaling(char_data *mob, char_data *attacker);
 void despawn_mob(char_data *ch);
 int determine_best_scale_level(char_data *ch, bool check_group);
@@ -2338,6 +2339,7 @@ void extract_crop_variety(char_data *ch, int amount);
 bool find_quest_giver_in_list(struct quest_giver *list, int type, any_vnum vnum);
 bool find_quest_reward_in_list(struct quest_reward *list, int type, any_vnum vnum);
 char *get_quest_name_by_proto(any_vnum vnum);
+void get_quest_reward_display(struct quest_reward *list, char *save_buffer, bool show_vnums);
 void get_tracker_display(struct req_data *tracker, char *save_buffer);
 void give_quest_rewards(char_data *ch, struct quest_reward *list, int reward_level, empire_data *quest_giver_emp, int instance_id);
 struct player_completed_quest *has_completed_quest(char_data *ch, any_vnum quest, int instance_id);

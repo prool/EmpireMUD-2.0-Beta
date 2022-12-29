@@ -887,9 +887,14 @@ switch %random.3%
         %damage% %actor% 100
       elseif %grinch_level% == 2
         set grinch_target %random.enemy%
-        %send% %grinch_target% ~%self% pulls out a gift and throws it at you!
-        %echoaround% %grinch_target% ~%self% pulls out a gift and throws it at ~%grinch_target%!
-        %damage% %grinch_target% 100
+        if !%grinch_target%
+          set grinch_target %actor%
+        end
+        if %grinch_target%
+          %send% %grinch_target% ~%self% pulls out a gift and throws it at you!
+          %echoaround% %grinch_target% ~%self% pulls out a gift and throws it at ~%grinch_target%!
+          %damage% %grinch_target% 100
+        end
       elseif %grinch_level% == 3
         %echo% ~%self% pulls out a gift and throws it on the ground, causing everyone to go flying!
         %aoe% 100
@@ -3128,7 +3133,7 @@ if %actor.quest_finished(%questid%)%
 end
 ~
 #16678
-Open Stocking (winter wonderland dailies) 2021~
+Open Stocking (winter wonderland dailies) 2021-2022~
 1 c 2
 open~
 if !%arg% || %actor.obj_target(%arg.car%)% != %self%
@@ -3349,7 +3354,7 @@ done
 krampus low health recovery~
 0 l 20
 ~
-if %self.cooldown(16682)%
+if %self.cooldown(16683)%
   halt
 end
 if !%self.varexists(CatchAHeal)%
@@ -3487,7 +3492,7 @@ end
 * and loop
 eval CookieTotal %Cookie16660% + %Cookie16661% + %Cookie16662%
 set item %actor.inventory%
-while (%item% && (%all% || %CookieCount% == 0))
+while (%item% && (%all% || %CookieCount% == 0) && %CookieTotal% < %Needs%)
   set next_item %item.next_in_list%
   * use %ok% to control what we do in this loop
   if %all%
@@ -3513,7 +3518,7 @@ while (%item% && (%all% || %CookieCount% == 0))
     end
   end
   * still ok? see if we need one of these
-  if %ok%
+  if %ok% && !%item.is_flagged(*KEEP)%
     set WhatCookie Cookie%item.vnum%
     eval CookieCount %CookieCount% + 1
     %send% %actor% # You stash @%item% in @%self%.
@@ -3522,9 +3527,6 @@ while (%item% && (%all% || %CookieCount% == 0))
     remote %WhatCookie% %self.id%
     %purge% %item%
     eval CookieTotal %CookieTotal% + 1
-    if %CookieTotal% >= %Needs%
-      break
-    end
   end
   * and repeat the loop
   set item %next_item%
