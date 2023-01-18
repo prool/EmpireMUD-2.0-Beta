@@ -19,6 +19,18 @@ if %actor.is_pc% && %actor.empire%
   nop %actor.empire.start_progress(10200)%
 end
 ~
+#10203
+Goblin Challenge: Better error message when attacking early~
+0 B 0
+~
+if %self.aff_flagged(!ATTACK)%
+  %send% %actor% You'll have to wait a moment. ~%self% is still getting ready.
+  return 0
+else
+  detach 10203 %self.id%
+  return 1
+end
+~
 #10204
 Zelkab Bruiser Combat~
 0 k 10
@@ -755,31 +767,33 @@ while %vnum% <= %end_room%
     set last 0
     while %mob%
       set next_mob %mob.next_in_room%
-      if %mob.vnum% >= 10250 && %mob.vnum% <= 10299
-        * wipe difficulty flags
-        nop %mob.remove_mob_flag(HARD)%
-        nop %mob.remove_mob_flag(GROUP)%
-      end
-      if %boss_mobs% ~= %mob.vnum%
-        * scale as boss
-        if %difficulty% == 2
-          nop %mob.add_mob_flag(HARD)%
-        elseif %difficulty% == 3
-          nop %mob.add_mob_flag(GROUP)%
-        elseif %difficulty% == 4
-          nop %mob.add_mob_flag(HARD)%
-          nop %mob.add_mob_flag(GROUP)%
+      if %mob.is_npc%
+        if %mob.vnum% >= 10250 && %mob.vnum% <= 10299
+          * wipe difficulty flags
+          nop %mob.remove_mob_flag(HARD)%
+          nop %mob.remove_mob_flag(GROUP)%
         end
-      elseif %hard_mini% && %mini_mobs% ~= %mob.vnum%
-        * scale as miniboss
-        nop %mob.add_mob_flag(HARD)%
-      end
-      * on normal, remove duplicate mobs
-      if %difficulty% == 1
-        if %mob.vnum% == %last%
-          %purge% %mob%
-        else
-          set last %mob.vnum%
+        if %boss_mobs% ~= %mob.vnum%
+          * scale as boss
+          if %difficulty% == 2
+            nop %mob.add_mob_flag(HARD)%
+          elseif %difficulty% == 3
+            nop %mob.add_mob_flag(GROUP)%
+          elseif %difficulty% == 4
+            nop %mob.add_mob_flag(HARD)%
+            nop %mob.add_mob_flag(GROUP)%
+          end
+        elseif %hard_mini% && %mini_mobs% ~= %mob.vnum%
+          * scale as miniboss
+          nop %mob.add_mob_flag(HARD)%
+        end
+        * on normal, remove duplicate mobs
+        if %difficulty% == 1
+          if %mob.vnum% == %last%
+            %purge% %mob%
+          else
+            set last %mob.vnum%
+          end
         end
       end
       * and loop
@@ -1235,7 +1249,7 @@ end
 * all other cases will return 1
 * switch MUST set vnum_list, abil_list, and name_list
 switch %self.vnum%
-  case 10269 
+  case 10269
     * book of primordial weapon schematics
     set vnum_list 10268 10270 10272 10282 10266
     set abil_list 196 196 170 170 196

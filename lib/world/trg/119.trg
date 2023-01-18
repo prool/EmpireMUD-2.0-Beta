@@ -96,7 +96,17 @@ elseif information /= %mode% || status /= %mode%
       set phase B
     end
     set diff %spirit.var(diff%floor%)%
-    %send% %actor% Floor %floor%: Phase %phase%, Difficulty %diff%
+    if %spirit.var(start%floor%)%
+      set started , Started by %spirit.var(start%floor%)%
+    else
+      set started
+    end
+    if %spirit.var(finish%floor%)%
+      set ended , Finished by %spirit.var(finish%floor%)%
+    else
+      set ended
+    end
+    %send% %actor% Floor %floor%: Phase %phase%, Difficulty %diff%%started%%ended%
     eval floor %floor% + 1
   done
   if %spirit.lab_open%
@@ -773,7 +783,8 @@ while %place% <= 3
   set strname str%place%
   eval area %%area%place%%%
   eval prev_area %%prev_area%place%%%
-  eval rand_luck %%random.luck%place%%%
+  eval luck %%luck%place%%%
+  eval rand_luck %%random.%luck%%%
   eval area_name %%area_name%area%%%
   eval pix_name %%name%place%%%
   eval temp_str %%%strname%%%
@@ -2278,8 +2289,14 @@ while %count% < 12
   set room %actor.room%
   set to_room 0
   * see where we're at
-  if %actor.position% != Sleeping || !%room.function(BEDROOM)% || !%actor.can_teleport_room% || !%actor.canuseroom_guest%
-    * still awake or no bedroom? nothing to do
+  if %actor.position% != Sleeping
+    if %teleported%
+      * already moved and woke up
+      dg_affect #11927 %actor% off silent
+      halt
+    end
+  elseif !%room.function(BEDROOM)% || !%actor.can_teleport_room% || !%actor.canuseroom_guest%
+    * no bedroom? nothing to do
   elseif %dreams_only%
     switch %random.7%
       case 1
@@ -2334,6 +2351,8 @@ while %count% < 12
     %echoaround% %actor% ~%actor% appears out of nowhere, asleep on the floor!
     %send% %actor% You dream you're flying -- and it feels so real!
     remote skycleave_wake_room %actor.id%
+    set skycleave_wake 0
+    remote skycleave_wake %actor.id%
     * teleport fellows
     set ch %room.people%
     while %ch%
@@ -2347,6 +2366,7 @@ while %count% < 12
         if %ch.is_pc%
           nop %ch.link_adventure_summon%
           remote skycleave_wake_room %ch.id%
+          remote skycleave_wake %ch.id%
         end
         %echoaround% %ch% ~%ch% appears out of nowhere!
         if %ch.position% != Sleeping
@@ -2692,6 +2712,15 @@ elseif open /= %cmd% && %room.template% == 11989
     %echoaround% %actor% ~%actor% moves toward the gate but is blocked by the guards.
     return 1
   end
+elseif open /= %cmd% && (%room.template% == 11839 || %room.template% == 11939)
+  * bagel helper
+  if (%arg% == bagel || %arg% == painting || %arg% == east || %arg% == secret)
+    if %room.east(room)%
+      %send% %actor% The secret door is already open.
+    else
+      %send% %actor% No, that's not it...
+    return 1
+  end
 elseif search /= %cmd% && (%room.template% == 11815 || %room.template% == 11915)
   * goblin cages: searching without skill?
   if !%actor.ability(Search)%
@@ -2846,7 +2875,7 @@ while %count% <= 2
       break
       case 14
         if %instance.mob(11929)%
-          set rumor%count%_text I heard Mezvienne mind-controlled Profressor Barrosh.
+          set rumor%count%_text I heard Mezvienne mind-controlled Professor Barrosh.
         else
           set rumor%count%_text I heard Barrosh got Paige and Grace killed when he was mind-controlled.
         end
@@ -3251,6 +3280,7 @@ if !%to_room%
   halt
 end
 set skycleave_wake_room %room.template%
+set skycleave_wake 0
 set ch %room.people%
 while %ch%
   set next_ch %ch.next_in_room%
@@ -3261,6 +3291,7 @@ while %ch%
     %echoaround% %ch% ~%ch% appears out of nowhere, asleep on the branch!
     %send% %ch% You dream you're falling -- the kind where you really feel it!
     remote skycleave_wake_room %ch.id%
+    remote skycleave_wake %ch.id%
     * bring followers
     set fol %room.people%
     while %fol%
@@ -3349,13 +3380,17 @@ end
 #11945
 Skycleave Dreams: Triple Wake or Pinch Self to Exit~
 2 c 0
-wake pinch scriptwake~
+wake pinch scriptwake run jump trip fall~
 * Teleports the player home if they type 'wake' 3 times while already awake
 * also accepts 'pinch <me/self/name>' or 'scriptwake MODE'
 if !%actor.is_pc%
   return 0
   halt
 end
+set room %actor.room%
+set fall_kws run jump trip fall
+set fall_rooms 11983 11984 11985 11986 11987 11988 11989 11991 11992
+set non_fall_rooms 11975 11976 11977 11978 11979 11980 11981 11982
 if %actor.position% == Standing || %actor.position% == Resting || %actor.position% == Sitting || %cmd% == scriptwake
   * separate behavior for pinch vs wake:
   if %cmd.mudcommand% == wake
@@ -3386,6 +3421,29 @@ if %actor.position% == Standing || %actor.position% == Resting || %actor.positio
       %send% %actor% You pinch yourself -- OUCH -- and suddenly wake up!
       %echoaround% %actor% ~%actor% pinches *%actor%self, lets out a short gasp, and vanishes!
     end
+  elseif (%fall_kws% ~= %cmd%) && (%fall_rooms% ~= %room.template%)
+    * fall ok
+    if jump /= %cmd% || fall /= %cmd%
+      %send% %actor% You feel dizzy as you look down over the edge but cannot bring yourself to jump.
+      return 1
+      halt
+    else
+      %send% %actor% You run along the top of the city but trip and fall off the edge!
+      %send% %actor% As you plummet toward the rocks, you pinch yourself and wake up sweating.
+      %echoaround% %actor% ~%actor% runs along the top of the city but trips and goes over the edge!
+    end
+  elseif (%fall_kws% ~= %cmd%) && (%non_fall_rooms% ~= %room.template%)
+    * non-fall room
+    if jump /= %cmd% || run /= %cmd%
+      %send% %actor% There's not really room to do that in here.
+    elseif trip /= %cmd%
+      %send% %actor% You trip over your own two feet.
+      %echoaround% %actor% ~%actor% trips over ^%actor% own two feet.
+    elseif fall /= %cmd%
+      %send% %actor% You can't really do that here.
+    end
+    return 1
+    halt
   elseif %cmd% == scriptwake
   set scare_kws skulls shelves walls alcoves bones ribs femurs piles
     switch %arg%
@@ -3406,11 +3464,11 @@ if %actor.position% == Standing || %actor.position% == Resting || %actor.positio
     done
     %send% %actor% You wake up in a cold sweat!
   else
+    * not a wake condition
     return 0
     halt
   end
   * If we made it this far, we teleport them:
-  set room %actor.room%
   * check stored room first
   set wake_room 0
   if %actor.varexists(skycleave_wake_room)%
@@ -3453,7 +3511,7 @@ if %actor.position% == Standing || %actor.position% == Resting || %actor.positio
         nop %ch.cancel_adventure_summon%
       end
       %send% %ch% You wake up with the hazy feeling you were just somewhere else.
-      %echoneither% %actor% %ch% ~%ch% wakes up.
+      %at% %target% %echoneither% %actor% %ch% ~%ch% wakes up.
     end
     set ch %next_ch%
   done
@@ -4331,7 +4389,7 @@ end
 #11961
 Smol Nes-Pik: Drink dew of Tagra Nes~
 1 c 2
-drink~
+drink use~
 * Causes a teleport if the players sleeps in their home after drinking this
 if !%arg% || %actor.obj_target(%arg%)% != %self%
   return 0
@@ -4351,8 +4409,13 @@ while %count% < 12
   set to_room 0
   * see where we're at
   if %actor.position% != Sleeping
-    * still awake?
-    if (%count% // 4) == 1 && !%teleported%
+    * awake?
+    if %teleported%
+      * teleported and woke up
+      dg_affect #11961 %actor% off silent
+      halt
+    elseif (%count% // 4) == 1
+      * hasn't slept yet
       %send% %actor% You feel tired.
     end
   elseif !%room.function(BEDROOM)% || !%actor.can_teleport_room% || !%actor.canuseroom_guest%
@@ -4415,6 +4478,8 @@ while %count% < 12
     %echoaround% %actor% ~%actor% appears out of nowhere, asleep on the floor!
     %send% %actor% You dream you're falling -- the kind where you really feel it!
     remote skycleave_wake_room %actor.id%
+    set skycleave_wake 0
+    remote skycleave_wake %actor.id%
     * teleport fellows
     set ch %room.people%
     while %ch%
@@ -4428,6 +4493,7 @@ while %count% < 12
         if %ch.is_pc%
           nop %ch.link_adventure_summon%
           remote skycleave_wake_room %ch.id%
+          remote skycleave_wake %ch.id%
         end
         %echoaround% %ch% ~%ch% appears out of nowhere!
         if %ch.position% != Sleeping
@@ -4484,10 +4550,8 @@ if !%arg% || %actor.obj_target(%arg%)% != %self%
 end
 switch %self.vnum%
   case 11961
-    if %cmd.mudcommand% == drink
-      %send% %actor% You can't drink the dew again so soon; it's still in your system.
-      return 1
-    end
+    %send% %actor% You can't drink the dew again so soon; it's still in your system.
+    return 1
   break
   case 11965
     if %cmd.mudcommand% == use
@@ -4571,8 +4635,12 @@ while %count% < 12
   set to_room 0
   * see where we're at
   if %actor.position% != Sleeping
-    * still awake?
-    if (%count% // 4) == 1 && !%teleported%
+    * awake?
+    if %teleported%
+      * already moved and woke
+      dg_affect #11965 %actor% off silent
+      halt
+    elseif (%count% // 4) == 1
       %send% %actor% You feel tired.
     end
   elseif !%room.function(BEDROOM)% || %room.template% == 11975 || !%actor.can_teleport_room% || !%actor.canuseroom_guest%
@@ -4644,6 +4712,8 @@ while %count% < 12
     %echoaround% %actor% ~%actor% appears out of nowhere, asleep on the bed!
     %send% %actor% You dream you're falling -- the kind where you really feel it!
     remote skycleave_wake_room %actor.id%
+    set skycleave_wake 0
+    remote skycleave_wake %actor.id%
     * teleport fellows
     set ch %room.people%
     while %ch%
@@ -4657,6 +4727,7 @@ while %count% < 12
         if %ch.is_pc%
           nop %ch.link_adventure_summon%
           remote skycleave_wake_room %ch.id%
+          remote skycleave_wake %ch.id%
         end
         %echoaround% %ch% ~%ch% appears out of nowhere!
         if %ch.position% != Sleeping
@@ -4674,9 +4745,17 @@ done
 dg_affect #11961 %actor% off silent
 ~
 #11966
-Skycleave: Time-traveler's diary replacement~
+Skycleave: Shared get trigger (diary replacement, struggle)~
 1 g 100
 ~
+if %self.vnum% == 11890
+  * the struggle-- just purge
+  %send% %actor% # You can't get that.
+  return 0
+  %purge% %self%
+  halt
+end
+* otherwise: Time-traveler's diary:
 * gives the pages in order if not owned, or at random if owned
 set diary_list 11918 11920 11919
 set list_size 3
@@ -4998,6 +5077,11 @@ done
 * ok go
 %send% %actor% You burn %self.shortdesc%!
 %echoaround% %actor% ~%actor% burns %self.shortdesc%!
+* mark who did this
+set spirit %instance.mob(11900)%
+set finish4 %actor.name%
+remote finish4 %spirit.id%
+* and phase transition
 %load% mob 11898
 %load% mob 11895
 %purge% %self%
@@ -5180,6 +5264,7 @@ if !%to_room%
   halt
 end
 set skycleave_wake_room %room.template%
+set skycleave_wake 0
 set ch %room.people%
 while %ch%
   set next_ch %ch.next_in_room%
@@ -5190,6 +5275,7 @@ while %ch%
     %echoaround% %ch% ~%ch% appears out of nowhere, asleep on the bed!
     %send% %ch% You dream you're falling -- the kind where you really feel it!
     remote skycleave_wake_room %ch.id%
+    remote skycleave_wake %ch.id%
     * bring followers
     set fol %room.people%
     while %fol%
@@ -5540,7 +5626,7 @@ if %move% == 1
           if %diff% >= 2
             %send% %ch% That really hurt! Your leg is immobilized.
             dg_affect #11956 %ch% off silent
-            dg_affect #11956 %ch% IMMOBILIZE on 10
+            dg_affect #11956 %ch% IMMOBILIZED on 10
           end
           %damage% %ch% 100 physical
         elseif %ch.is_pc%
@@ -6083,7 +6169,7 @@ elseif %move% == 3
   set cycle 0
   set broke 0
   set needed %room.players_present%
-  while !%broke% && %cycle% < 5
+  while !%broke% && %cycle% <= 4
     wait 4 s
     if %self.sfinterrupt_count% >= 1 && (%self.sfinterrupt_count% >= %needed% || %self.sfinterrupt_count% == 4)
       set broke 1
@@ -6103,7 +6189,11 @@ elseif %move% == 3
         wait 5 s
       end
     else
-      %echo% &&AA bolt strikes the water above you, triggering a lightning wave!&&0
+      if %cycle% < 4
+        %echo% &&A**** A bolt strikes the water above you, triggering a lightning wave! ****&&0 (interrupt)
+      else
+        %echo% &&AA bolt strikes the water above you, triggering a lightning wave!&&0
+      end
       set ch %room.people%
       while %ch%
         set next_ch %ch.next_in_room%
@@ -6408,7 +6498,7 @@ elseif %move% == 3
   done
   if !%any%
     * full miss
-    %echo% &&m~%self% looks dizzy as &%self% throws the last knife.&&0
+    %echo% &&m~%self% gives a shocked look as glitter blows back into her face!&&0
     dg_affect #11852 %self% HARD-STUNNED on 5
   end
   skyfight clear dodge
