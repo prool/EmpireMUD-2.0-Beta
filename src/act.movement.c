@@ -1215,17 +1215,24 @@ int move_cost(char_data *ch, room_data *from, room_data *to, int dir, bitvector_
 	}
 	
 	/* move points needed is avg. move loss for src and destination sect type */	
-	
-	// open buildings and incomplete non-closed buildings use average of current & original sect's move cost
-	if (!ROOM_IS_CLOSED(from)) {
+	if (IS_INCOMPLETE(from)) {
+		// incomplte: full base cost
+		cost_from = GET_SECT_MOVE_LOSS(BASE_SECT(from));
+	}
+	else if (!ROOM_IS_CLOSED(from)) {
+		// open buildings: average of base/current
 		cost_from = (GET_SECT_MOVE_LOSS(SECT(from)) + GET_SECT_MOVE_LOSS(BASE_SECT(from))) / 2.0;
 	}
 	else {
+		// current sect cost
 		cost_from = GET_SECT_MOVE_LOSS(SECT(from));
 	}
 	
 	// cost for the space moving to
-	if (!ROOM_IS_CLOSED(to)) {
+	if (IS_INCOMPLETE(to)) {
+		cost_to = GET_SECT_MOVE_LOSS(BASE_SECT(to));
+	}
+	else if (!ROOM_IS_CLOSED(to)) {
 		cost_to = (GET_SECT_MOVE_LOSS(SECT(to)) + GET_SECT_MOVE_LOSS(BASE_SECT(to))) / 2.0;
 	}
 	else {
@@ -2148,7 +2155,7 @@ ACMD(do_circle) {
 	command_lag(ch, WAIT_MOVEMENT);
 	
 	// triggers?
-	if (!enter_wtrigger(IN_ROOM(ch), ch, dir, "move") || !greet_mtrigger(ch, dir, "move") || !greet_vtrigger(ch, dir, "move")) {
+	if (!entry_mtrigger(ch, "move") || !enter_wtrigger(IN_ROOM(ch), ch, dir, "move") || !greet_mtrigger(ch, dir, "move") || !greet_vtrigger(ch, dir, "move")) {
 		char_from_room(ch);
 		char_to_room(ch, was_in);
 		if (ch->desc) {
@@ -2340,6 +2347,9 @@ ACMD(do_follow) {
 				GET_BECKONED_BY(ch) = 0;
 			}
 		}
+		
+		// short delay prevents abuse in pvp (maybe)
+		command_lag(ch, WAIT_ABILITY);
 	}
 }
 
@@ -2388,12 +2398,18 @@ ACMD(do_gen_door) {
 }
 
 
-ACMD(do_land) {	
+ACMD(do_land) {
 	if (!AFF_FLAGGED(ch, AFF_FLY)) {
 		msg_to_char(ch, "You aren't flying.\r\n");
 		return;
 	}
-
+	
+	// ensure morph isn't the cause
+	if (affected_by_spell_and_apply(ch, ATYPE_MORPH, NOTHING, AFF_FLY)) {
+		msg_to_char(ch, "You can't land in this form.\r\n");
+		return;
+	}
+	
 	affects_from_char_by_aff_flag(ch, AFF_FLY, FALSE);
 	
 	if (!AFF_FLAGGED(ch, AFF_FLY)) {
@@ -2423,6 +2439,7 @@ ACMD(do_move) {
 ACMD(do_portal) {
 	bool all_access = ((IS_IMMORTAL(ch) && (GET_ACCESS_LEVEL(ch) >= LVL_CIMPL || IS_GRANTED(ch, GRANT_TRANSFER))) || (IS_NPC(ch) && !AFF_FLAGGED(ch, AFF_CHARM)));
 	char arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH * 2], line[MAX_STRING_LENGTH];
+	char *dir_str;
 	struct temp_portal_data *port, *next_port, *portal_list = NULL;
 	room_data *near = NULL, *target = NULL;
 	obj_data *portal, *end, *obj;
@@ -2509,7 +2526,9 @@ ACMD(do_portal) {
 				lsize += snprintf(line + lsize, sizeof(line) - lsize, "%2d.", count);
 			}
 			
-			lsize += snprintf(line + lsize, sizeof(line) - lsize, "%s %s (%s%s&0) - %d tile%s", coord_display_room(ch, port->room, TRUE), get_room_name(port->room, FALSE), ROOM_OWNER(port->room) ? EMPIRE_BANNER(ROOM_OWNER(port->room)) : "\t0", ROOM_OWNER(port->room) ? EMPIRE_ADJECTIVE(ROOM_OWNER(port->room)) : "not claimed", port->distance, PLURAL(port->distance));
+			dir_str = get_partial_direction_to(ch, IN_ROOM(ch), port->room, PRF_FLAGGED(ch, PRF_SCREEN_READER) ? FALSE : TRUE);
+			
+			lsize += snprintf(line + lsize, sizeof(line) - lsize, "%s %s (%s%s&0) - %d %s", coord_display_room(ch, port->room, TRUE), get_room_name(port->room, FALSE), ROOM_OWNER(port->room) ? EMPIRE_BANNER(ROOM_OWNER(port->room)) : "\t0", ROOM_OWNER(port->room) ? EMPIRE_ADJECTIVE(ROOM_OWNER(port->room)) : "not claimed", port->distance, (*dir_str ? dir_str : "away"));
 			
 			if ((port->distance > max_out_of_city_portal && (!ch_in_city || !port->in_city)) || (!has_player_tech(ch, PTECH_PORTAL_UPGRADE) && (!GET_LOYALTY(ch) || !EMPIRE_HAS_TECH(GET_LOYALTY(ch), TECH_MASTER_PORTALS)) && GET_ISLAND(IN_ROOM(ch)) != GET_ISLAND(port->room))) {
 				lsize += snprintf(line + lsize, sizeof(line) - lsize, " &r(too far)&0");

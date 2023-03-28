@@ -370,6 +370,11 @@ bool audit_generic(generic_data *gen, char_data *ch) {
 			}
 			break;
 		}
+		case GENERIC_LANGUAGE: {
+			// everything here is optional
+			// maybe
+			break;
+		}
 	}
 	
 	return problem;
@@ -502,6 +507,10 @@ void olc_search_generic(char_data *ch, any_vnum vnum) {
 		// QR_x: event rewards
 		any = find_event_reward_in_list(EVT_RANK_REWARDS(event), QR_CURRENCY, vnum);
 		any |= find_event_reward_in_list(EVT_THRESHOLD_REWARDS(event), QR_CURRENCY, vnum);
+		any |= find_event_reward_in_list(EVT_RANK_REWARDS(event), QR_SPEAK_LANGUAGE, vnum);
+		any |= find_event_reward_in_list(EVT_THRESHOLD_REWARDS(event), QR_SPEAK_LANGUAGE, vnum);
+		any |= find_event_reward_in_list(EVT_RANK_REWARDS(event), QR_RECOGNIZE_LANGUAGE, vnum);
+		any |= find_event_reward_in_list(EVT_THRESHOLD_REWARDS(event), QR_RECOGNIZE_LANGUAGE, vnum);
 		
 		if (any) {
 			++found;
@@ -546,6 +555,12 @@ void olc_search_generic(char_data *ch, any_vnum vnum) {
 		any = find_requirement_in_list(PRG_TASKS(prg), REQ_GET_CURRENCY, vnum);
 		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_GET_COMPONENT, vnum);
 		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_SPEAK_LANGUAGE, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_RECOGNIZE_LANGUAGE, vnum);
+		
+		// PRG_PERK_x:
+		any |= find_progress_perk_in_list(PRG_PERKS(prg), PRG_PERK_SPEAK_LANGUAGE, vnum);
+		any |= find_progress_perk_in_list(PRG_PERKS(prg), PRG_PERK_RECOGNIZE_LANGUAGE, vnum);
 		
 		if (any) {
 			++found;
@@ -558,14 +573,22 @@ void olc_search_generic(char_data *ch, any_vnum vnum) {
 		if (size >= sizeof(buf)) {
 			break;
 		}
-		// QR_x, REQ_x: quest types
+		// REQ_x: quest types
 		any = find_requirement_in_list(QUEST_TASKS(quest), REQ_GET_CURRENCY, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_GET_CURRENCY, vnum);
 		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_GET_COMPONENT, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_GET_COMPONENT, vnum);
 		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
+		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_SPEAK_LANGUAGE, vnum);
+		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_SPEAK_LANGUAGE, vnum);
+		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_RECOGNIZE_LANGUAGE, vnum);
+		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_RECOGNIZE_LANGUAGE, vnum);
+		
+		// QR_x: quest types
 		any |= find_quest_reward_in_list(QUEST_REWARDS(quest), QR_CURRENCY, vnum);
+		any |= find_quest_reward_in_list(QUEST_REWARDS(quest), QR_SPEAK_LANGUAGE, vnum);
+		any |= find_quest_reward_in_list(QUEST_REWARDS(quest), QR_RECOGNIZE_LANGUAGE, vnum);
 		
 		if (any) {
 			++found;
@@ -588,9 +611,12 @@ void olc_search_generic(char_data *ch, any_vnum vnum) {
 		if (size >= sizeof(buf)) {
 			break;
 		}
+		// REQ_x: social requirements
 		any = find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_GET_CURRENCY, vnum);
 		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_GET_COMPONENT, vnum);
 		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
+		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_SPEAK_LANGUAGE, vnum);
+		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_RECOGNIZE_LANGUAGE, vnum);
 		
 		if (any) {
 			++found;
@@ -877,6 +903,61 @@ generic_data *find_generic_by_name(int type, char *name, bool exact) {
 
 
 /**
+* Finds a generic by type and name while ignoring spaces, dashes, and
+* apostrophes. For example, "Guardian Tongue" would match "guardian-tongue" or
+* "guardiantongue". It also accepts abbrevs.
+*
+* @param int type Any GENERIC_ type.
+* @param char *name The name to search.
+* @return generic_data* The generic, or NULL if it doesn't exist.
+*/
+generic_data *find_generic_no_spaces(int type, char *name) {
+	generic_data *gen, *next_gen;
+	int gen_pos, name_pos;
+	char *skip = " -'";
+	
+	HASH_ITER(sorted_hh, sorted_generics, gen, next_gen) {
+		if (GEN_TYPE(gen) != type) {
+			continue;
+		}
+		
+		// compare names
+		for (gen_pos = name_pos = 0; name[name_pos] && GEN_NAME(gen)[gen_pos]; ++gen_pos, ++name_pos) {
+			// ensure we're not at a skippable char
+			while (name[name_pos] && strchr(skip, name[name_pos])) {
+				++name_pos;
+			}
+			while (GEN_NAME(gen)[gen_pos] && strchr(skip, GEN_NAME(gen)[gen_pos])) {
+				++gen_pos;
+			}
+			
+			// did we hit the end
+			if (!name[name_pos]) {
+				// end of name: successful abbrev
+				return gen;
+			}
+			else if (!GEN_NAME(gen)[gen_pos]) {
+				// end of generic's name: not a match
+				break;
+			}
+			else if (LOWER(name[name_pos]) != LOWER(GEN_NAME(gen)[gen_pos])) {
+				// not a match
+				break;
+			}
+		}
+		
+		// if we made it here, it's only a match if name reached the end
+		if (!name[name_pos]) {
+			return gen;
+		}
+		// otherwise, move on
+	}
+	
+	return NULL;	// did not find
+}
+
+
+/**
 * @param any_vnum vnum Any generic vnum
 * @return generic_data* The generic, or NULL if it doesn't exist
 */
@@ -1031,12 +1112,15 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 	generic_data *gen, *gen_iter, *next_gen;
 	char_data *chiter, *next_ch;
 	bool found, any_quest = FALSE, any_progress = FALSE;
+	char name[256];
 	int res_type;
 	
 	if (!(gen = real_generic(vnum))) {
 		msg_to_char(ch, "There is no such generic %d.\r\n", vnum);
 		return;
 	}
+	
+	snprintf(name, sizeof(name), "%s", NULLSAFE(GEN_NAME(gen)));
 	
 	switch (GEN_TYPE(gen)) {
 		case GENERIC_ACTION: {
@@ -1188,6 +1272,7 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 	HASH_ITER(hh, augment_table, aug, next_aug) {
 		if (remove_thing_from_resource_list(&GET_AUG_RESOURCES(aug), res_type, vnum)) {
 			SET_BIT(GET_AUG_FLAGS(aug), AUG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Augment %d %s set IN-DEV due to deleted generic", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
 			save_library_file_for_vnum(DB_BOOT_AUG, GET_AUG_VNUM(aug));
 		}
 	}
@@ -1195,6 +1280,7 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 	// update buildings
 	HASH_ITER(hh, building_table, bld, next_bld) {
 		if (remove_thing_from_resource_list(&GET_BLD_YEARLY_MAINTENANCE(bld), res_type, vnum)) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Building %d %s lost deleted maintenance generic", GET_BLD_VNUM(bld), GET_BLD_NAME(bld));
 			save_library_file_for_vnum(DB_BOOT_BLD, GET_BLD_VNUM(bld));
 		}
 	}
@@ -1209,6 +1295,7 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 		found |= remove_thing_from_resource_list(&GET_CRAFT_RESOURCES(craft), res_type, vnum);
 		if (found) {
 			SET_BIT(GET_CRAFT_FLAGS(craft), CRAFT_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Craft %d %s set IN-DEV due to deleted generic", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
 			save_library_file_for_vnum(DB_BOOT_CRAFT, GET_CRAFT_VNUM(craft));
 		}
 	}
@@ -1218,9 +1305,14 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 		// QR_x: event reward types
 		found = delete_event_reward_from_list(&EVT_RANK_REWARDS(event), QR_CURRENCY, vnum);
 		found |= delete_event_reward_from_list(&EVT_THRESHOLD_REWARDS(event), QR_CURRENCY, vnum);
+		found |= delete_event_reward_from_list(&EVT_RANK_REWARDS(event), QR_SPEAK_LANGUAGE, vnum);
+		found |= delete_event_reward_from_list(&EVT_THRESHOLD_REWARDS(event), QR_SPEAK_LANGUAGE, vnum);
+		found |= delete_event_reward_from_list(&EVT_RANK_REWARDS(event), QR_RECOGNIZE_LANGUAGE, vnum);
+		found |= delete_event_reward_from_list(&EVT_THRESHOLD_REWARDS(event), QR_RECOGNIZE_LANGUAGE, vnum);
 		
 		if (found) {
 			// SET_BIT(EVT_FLAGS(event), EVTF_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Event %d %s had rewards for a deleted generic (removed rewards but did not set IN-DEV)", EVT_VNUM(event), EVT_NAME(event));
 			save_library_file_for_vnum(DB_BOOT_EVT, EVT_VNUM(event));
 		}
 	}
@@ -1228,6 +1320,7 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 	// update other generics
 	HASH_ITER(hh, generic_table, gen_iter, next_gen) {
 		if (delete_generic_relation(&GEN_RELATIONS(gen_iter), vnum)) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Generic %d %s lost deleted related generic", GEN_VNUM(gen_iter), GEN_NAME(gen_iter));
 			save_library_file_for_vnum(DB_BOOT_GEN, GEN_VNUM(gen_iter));
 		}
 	}
@@ -1249,19 +1342,28 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 		}
 		
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Object %d %s lost deleted generic", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
 			save_library_file_for_vnum(DB_BOOT_OBJ, GET_OBJ_VNUM(obj));
 		}
 	}
 	
 	// update progress
 	HASH_ITER(hh, progress_table, prg, next_prg) {
+		// REQ_x: progress tasks
 		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_GET_CURRENCY, vnum);
 		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_GET_COMPONENT, vnum);
 		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_SPEAK_LANGUAGE, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_RECOGNIZE_LANGUAGE, vnum);
+		
+		// PRG_PERK_x: perks
+		found |= delete_progress_perk_from_list(&PRG_PERKS(prg), PRG_PERK_SPEAK_LANGUAGE, vnum);
+		found |= delete_progress_perk_from_list(&PRG_PERKS(prg), PRG_PERK_RECOGNIZE_LANGUAGE, vnum);
 		
 		if (found) {
 			any_progress = TRUE;
 			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Progress %d %s set IN-DEV due to deleted generic", PRG_VNUM(prg), PRG_NAME(prg));
 			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
 			need_progress_refresh = TRUE;
 		}
@@ -1269,19 +1371,27 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 	
 	// remove from quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
-		// REQ_x, QR_x: quest types
+		// REQ_x: quest types
 		found = delete_requirement_from_list(&QUEST_TASKS(quest), REQ_GET_CURRENCY, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_GET_CURRENCY, vnum);
 		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_GET_COMPONENT, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_GET_COMPONENT, vnum);
 		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
+		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_SPEAK_LANGUAGE, vnum);
+		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_SPEAK_LANGUAGE, vnum);
+		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_RECOGNIZE_LANGUAGE, vnum);
+		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_RECOGNIZE_LANGUAGE, vnum);
 		
+		// QR_x: quest types
 		found |= delete_quest_reward_from_list(&QUEST_REWARDS(quest), QR_CURRENCY, vnum);
+		found |= delete_quest_reward_from_list(&QUEST_REWARDS(quest), QR_SPEAK_LANGUAGE, vnum);
+		found |= delete_quest_reward_from_list(&QUEST_REWARDS(quest), QR_RECOGNIZE_LANGUAGE, vnum);
 		
 		if (found) {
 			any_quest = TRUE;
 			SET_BIT(QUEST_FLAGS(quest), QST_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Quest %d %s set IN-DEV due to deleted generic", QUEST_VNUM(quest), QUEST_NAME(quest));
 			save_library_file_for_vnum(DB_BOOT_QST, QUEST_VNUM(quest));
 		}
 	}
@@ -1290,18 +1400,23 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 	HASH_ITER(hh, shop_table, shop, next_shop) {
 		if (find_currency_in_shop_item_list(SHOP_ITEMS(shop), vnum)) {
 			SET_BIT(SHOP_FLAGS(shop), SHOP_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Shop %d %s set IN-DEV due to deleted generic", SHOP_VNUM(shop), SHOP_NAME(shop));
 			save_library_file_for_vnum(DB_BOOT_SHOP, SHOP_VNUM(shop));
 		}
 	}
 	
 	// update socials
 	HASH_ITER(hh, social_table, soc, next_soc) {
+		// REQ_x: social requirements
 		found = delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_GET_CURRENCY, vnum);
 		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_GET_COMPONENT, vnum);
 		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
+		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_SPEAK_LANGUAGE, vnum);
+		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_RECOGNIZE_LANGUAGE, vnum);
 		
 		if (found) {
 			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Social %d %s set IN-DEV due to deleted generic", SOC_VNUM(soc), SOC_NAME(soc));
 			save_library_file_for_vnum(DB_BOOT_SOC, SOC_VNUM(soc));
 		}
 	}
@@ -1309,6 +1424,7 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 	// update vehicles
 	HASH_ITER(hh, vehicle_table, veh, next_veh) {
 		if (remove_thing_from_resource_list(&VEH_YEARLY_MAINTENANCE(veh), res_type, vnum)) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Vehicle %d %s lost deleted maintenance generic", VEH_VNUM(veh), VEH_SHORT_DESC(veh));
 			save_library_file_for_vnum(DB_BOOT_VEH, VEH_VNUM(veh));
 		}
 	}
@@ -1366,10 +1482,14 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 			// QR_x: event reward types
 			found = delete_event_reward_from_list(&EVT_RANK_REWARDS(GET_OLC_EVENT(desc)), QR_CURRENCY, vnum);
 			found |= delete_event_reward_from_list(&EVT_THRESHOLD_REWARDS(GET_OLC_EVENT(desc)), QR_CURRENCY, vnum);
+			found |= delete_event_reward_from_list(&EVT_RANK_REWARDS(GET_OLC_EVENT(desc)), QR_SPEAK_LANGUAGE, vnum);
+			found |= delete_event_reward_from_list(&EVT_THRESHOLD_REWARDS(GET_OLC_EVENT(desc)), QR_SPEAK_LANGUAGE, vnum);
+			found |= delete_event_reward_from_list(&EVT_RANK_REWARDS(GET_OLC_EVENT(desc)), QR_RECOGNIZE_LANGUAGE, vnum);
+			found |= delete_event_reward_from_list(&EVT_THRESHOLD_REWARDS(GET_OLC_EVENT(desc)), QR_RECOGNIZE_LANGUAGE, vnum);
 		
 			if (found) {
 				// SET_BIT(EVT_FLAGS(GET_OLC_EVENT(desc)), EVTF_IN_DEVELOPMENT);
-				msg_to_desc(desc, "A generic currency used as a reward by the event you are editing was deleted.\r\n");
+				msg_to_desc(desc, "A generic used as a reward by the event you are editing was deleted.\r\n");
 			}
 		}
 		if (GET_OLC_OBJECT(desc)) {
@@ -1391,9 +1511,15 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 			}
 		}
 		if (GET_OLC_PROGRESS(desc)) {
+			// REQ_x: progress tasks
 			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_GET_CURRENCY, vnum);
 			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_GET_COMPONENT, vnum);
 			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_SPEAK_LANGUAGE, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_RECOGNIZE_LANGUAGE, vnum);
+			
+			found |= delete_progress_perk_from_list(&PRG_PERKS(GET_OLC_PROGRESS(desc)), PRG_PERK_SPEAK_LANGUAGE, vnum);
+			found |= delete_progress_perk_from_list(&PRG_PERKS(GET_OLC_PROGRESS(desc)), PRG_PERK_RECOGNIZE_LANGUAGE, vnum);
 		
 			if (found) {
 				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
@@ -1401,15 +1527,22 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 			}
 		}
 		if (GET_OLC_QUEST(desc)) {
-			// REQ_x, QR_x: quest types
+			// REQ_x: quest types
 			found = delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_GET_CURRENCY, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_GET_CURRENCY, vnum);
 			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_GET_COMPONENT, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_GET_COMPONENT, vnum);
 			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
+			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_SPEAK_LANGUAGE, vnum);
+			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_SPEAK_LANGUAGE, vnum);
+			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_RECOGNIZE_LANGUAGE, vnum);
+			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_RECOGNIZE_LANGUAGE, vnum);
 			
+			// QR_x: quest types
 			found |= delete_quest_reward_from_list(&QUEST_REWARDS(GET_OLC_QUEST(desc)), QR_CURRENCY, vnum);
+			found |= delete_quest_reward_from_list(&QUEST_REWARDS(GET_OLC_QUEST(desc)), QR_SPEAK_LANGUAGE, vnum);
+			found |= delete_quest_reward_from_list(&QUEST_REWARDS(GET_OLC_QUEST(desc)), QR_RECOGNIZE_LANGUAGE, vnum);
 		
 			if (found) {
 				SET_BIT(QUEST_FLAGS(GET_OLC_QUEST(desc)), QST_IN_DEVELOPMENT);
@@ -1422,9 +1555,12 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 			}
 		}
 		if (GET_OLC_SOCIAL(desc)) {
+			// REQ_x: social requirements
 			found = delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_GET_CURRENCY, vnum);
 			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_GET_COMPONENT, vnum);
 			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_EMPIRE_PRODUCED_COMPONENT, vnum);
+			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_SPEAK_LANGUAGE, vnum);
+			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_RECOGNIZE_LANGUAGE, vnum);
 		
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
@@ -1438,8 +1574,8 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 		}
 	}
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted generic %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Generic %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted generic %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Generic %d (%s) deleted.\r\n", vnum, name);
 	
 	free_generic(gen);
 	
@@ -1453,6 +1589,8 @@ void olc_delete_generic(char_data *ch, any_vnum vnum) {
 			}
 		}
 	}
+	
+	check_languages_all();
 }
 
 
@@ -1520,6 +1658,11 @@ void save_olc_generic(descriptor_data *desc) {
 	// update computed relations
 	if (GEN_TYPE(gen) == GENERIC_COMPONENT || GEN_RELATIONS(gen) || GEN_COMPUTED_RELATIONS(gen)) {
 		compute_generic_relations();
+	}
+	
+	// update player languages
+	if (GEN_TYPE(gen) == GENERIC_LANGUAGE) {
+		check_languages_all();
 	}
 }
 
@@ -1676,6 +1819,10 @@ void do_stat_generic(char_data *ch, generic_data *gen) {
 			size += snprintf(buf + size, sizeof(buf) - size, "Cycle: \ty%.2f day%s\t0\r\n", GET_MOON_CYCLE_DAYS(gen), PLURAL(GET_MOON_CYCLE_DAYS(gen)));
 			break;
 		}
+		case GENERIC_LANGUAGE: {
+			// no known properties
+			break;
+		}
 	}
 
 	page_string(ch->desc, buf, TRUE);
@@ -1754,6 +1901,10 @@ void olc_show_generic(char_data *ch) {
 		}
 		case GENERIC_MOON: {
 			sprintf(buf + strlen(buf), "<%scycle\t0> %.2f day%s\r\n", OLC_LABEL_VAL(GET_MOON_CYCLE(gen), 0), GET_MOON_CYCLE_DAYS(gen), PLURAL(GET_MOON_CYCLE_DAYS(gen)));
+			break;
+		}
+		case GENERIC_LANGUAGE: {
+			// no properties
 			break;
 		}
 	}

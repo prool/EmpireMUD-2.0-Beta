@@ -216,7 +216,7 @@ bool check_build_location_and_dir(char_data *ch, room_data *room, craft_data *ty
 	}
 	if (make_veh && (is_upgrade || !ROOM_IS_CLOSED(room)) && !vehicle_allows_climate(make_veh, room, NULL)) {
 		if (ch) {
-			msg_to_char(ch, "You can't %s %s here.\r\n", command, VEH_SHORT_DESC(make_veh));
+			msg_to_char(ch, "You can't %s %s here.\r\n", command, get_vehicle_short_desc(make_veh, ch));
 		}
 		return FALSE;
 	}
@@ -856,6 +856,7 @@ void finish_building(char_data *ch, room_data *room) {
 void finish_dismantle(char_data *ch, room_data *room) {
 	obj_data *newobj, *proto;
 	craft_data *type;
+	char to[256];
 	
 	msg_to_char(ch, "You finish dismantling the building.\r\n");
 	act("$n finishes dismantling the building.", FALSE, ch, 0, 0, TO_ROOM);
@@ -887,6 +888,12 @@ void finish_dismantle(char_data *ch, room_data *room) {
 	}
 	
 	disassociate_building(room);
+	
+	// message to update the room
+	strcpy(to, GET_SECT_NAME(SECT(IN_ROOM(ch))));
+	strtolower(to);
+	sprintf(buf, "This area is now %s%s%s.", (to[strlen(to)-1] == 's' ? "" : AN(to)), (to[strlen(to)-1] == 's' ? "" : " "), to);
+	act(buf, FALSE, ch, NULL, NULL, TO_CHAR | TO_ROOM);
 }
 
 
@@ -2032,6 +2039,7 @@ char *vnum_to_interlink(room_vnum vnum) {
 * @param vehicle_data *veh The vehicle they targeted.
 */
 void do_dismantle_vehicle(char_data *ch, vehicle_data *veh) {
+	char_data *ch_iter;
 	craft_data *craft;
 	
 	if (!ch || !veh || IS_NPC(ch)) {
@@ -2091,6 +2099,16 @@ void do_dismantle_vehicle(char_data *ch, vehicle_data *veh) {
 		msg_to_char(ch, "You can't dismantle it while someone is inside.\r\n");
 	}
 	else {
+		// ensure nobody is building it
+		if (!VEH_IS_DISMANTLING(veh)) {
+			DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), ch_iter, next_in_room) {
+				if (ch_iter != ch && !IS_NPC(ch_iter) && (GET_ACTION(ch_iter) == ACT_BUILDING || GET_ACTION(ch_iter) == ACT_MAINTENANCE || GET_ACTION(ch_iter) == ACT_GEN_CRAFT) && GET_ACTION_VNUM(ch_iter, 1) == VEH_CONSTRUCTION_ID(veh)) {
+					msg_to_char(ch, "You can't start dismantling it while someone is working on it.\r\n");
+					return;
+				}
+			}
+		}
+		
 		// ok: start dismantle
 		act("You begin to dismantle $V.", FALSE, ch, NULL, veh, TO_CHAR);
 		act("$n begins to dismantle $V.", FALSE, ch, NULL, veh, TO_ROOM);
@@ -2106,6 +2124,7 @@ void do_dismantle_vehicle(char_data *ch, vehicle_data *veh) {
 
 ACMD(do_dismantle) {
 	vehicle_data *veh;
+	char_data *ch_iter;
 	craft_data *type;
 
 	if (IS_NPC(ch)) {
@@ -2235,6 +2254,20 @@ ACMD(do_dismantle) {
 	if (ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_NO_DISMANTLE)) {
 		msg_to_char(ch, "You can't dismantle this building (use 'manage no-dismantle' to toggle).\r\n");
 		return;
+	}
+	if (!can_see_in_dark_room(ch, IN_ROOM(ch), TRUE)) {
+		msg_to_char(ch, "It's too dark to start dismantling.\r\n");
+		return;
+	}
+	
+	// ensure nobody is building
+	if (!IS_DISMANTLING(IN_ROOM(ch))) {
+		DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), ch_iter, next_in_room) {
+			if (ch_iter != ch && !IS_NPC(ch_iter) && (GET_ACTION(ch_iter) == ACT_BUILDING || GET_ACTION(ch_iter) == ACT_MAINTENANCE)) {
+				msg_to_char(ch, "You can't start dismantling while someone is still building it.\r\n");
+				return;
+			}
+		}
 	}
 	
 	if (!dismantle_wtrigger(IN_ROOM(ch), ch, TRUE)) {
@@ -3223,7 +3256,7 @@ ACMD(do_upgrade) {
 	// process the list of upgrades -- this will build the 'upgrade to what'
 	// output if there's no arg2, will find the craft if there is, and can also
 	// find the craft if there's no arg2 but there's also only 1 option
-	size = snprintf(output, sizeof(output), "Upgrade %s to what:", (from_veh ? VEH_SHORT_DESC(from_veh) : "it"));
+	size = snprintf(output, sizeof(output), "Upgrade %s to what:", (from_veh ? get_vehicle_short_desc(from_veh, ch) : "it"));
 	to_craft = NULL;	// possibly the one the player requested
 	found = 0;
 	
@@ -3369,7 +3402,7 @@ ACMD(do_upgrade) {
 		msg_to_char(ch, "You're already busy doing something else.\r\n");
 		return;
 	}
-	if (!check_can_craft(ch, to_craft)) {
+	if (!check_can_craft(ch, to_craft, FALSE)) {
 		// sends own messages
 		return;
 	}

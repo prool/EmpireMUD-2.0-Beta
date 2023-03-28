@@ -394,8 +394,8 @@ if %actor.is_npc% || !%arg.car% || !(%self.name% ~= %arg.car%)
   halt
 end
 * Level check
-if (%actor.is_npc% || %actor.level% < 150) && !%actor.is_immortal%
-  %send% %actor% You must be at least level 150 to play the claw game.
+if (%actor.is_npc% || %actor.level% < 125) && !%actor.is_immortal%
+  %send% %actor% You must be at least level 125 to play the claw game.
   halt
 end
 * Check if they've already played in this instance
@@ -585,7 +585,7 @@ remote needs_stop_command %actor.id%
 set cycle 0
 while %cycle% < 3
   set loc %instance.nearest_rmt(11800)%
-  if !%loc% || %actor.stop_command% || %actor.room% != %room% || %actor.fighting% || !%actor.home% || %self.carried_by% != %actor% || %actor.aff_flagged(DISTRACTED)% || %actor.action%
+  if !%loc% || %actor.stop_command% || %actor.room% != %room% || %actor.fighting% || %self.carried_by% != %actor% || %actor.aff_flagged(DISTRACTED)% || %actor.action%
     %force% %actor% stop cleardata
     %send% %actor% @%self% stops glowing.
     halt
@@ -2527,7 +2527,7 @@ end
 Elemental Plane of Water: Boss death and loot check~
 0 f 100
 ~
-set min_level 150
+set min_level 125
 set room %self.room%
 set ch %room.people%
 set any_ok 0
@@ -2719,6 +2719,7 @@ elseif open /= %cmd% && (%room.template% == 11839 || %room.template% == 11939)
       %send% %actor% The secret door is already open.
     else
       %send% %actor% No, that's not it...
+    end
     return 1
   end
 elseif search /= %cmd% && (%room.template% == 11815 || %room.template% == 11915)
@@ -2752,6 +2753,10 @@ elseif (%lich_cmds% ~= %cmd%) && (%room.template% == 11836 || %room.template% ==
   end
 elseif look /= %cmd% && %room.template% == 11981
   return 0
+  if %actor.obj_target(%arg.car%)% || %actor.char_target(%arg.car%)%
+    * probably hit something in inventory
+    halt
+  end
   wait 0
   if skulls /= %arg% || shelves /= %arg%
     %force% %actor% scriptwake skulls
@@ -2760,6 +2765,10 @@ elseif look /= %cmd% && %room.template% == 11981
   elseif bones /= %arg% || ribs /= %arg% || femurs /= %arg% || piles /= %arg%
     %force% %actor% scriptwake bones
   end
+elseif search /= %cmd% && %room.template% == 11981
+  %send% %actor% As you're searching in the dark, the light glinting off a grinning skull catches you off guard... You stumble backwards and fall into a pile of bones!
+  %force% %actor% scriptwake skulls
+  return 1
 end
 ~
 #11937
@@ -2795,21 +2804,43 @@ if !%target%
 end
 * per-person time limit (mobs and players both)
 set varname limit_%target.id%
-if %self.var(%varname%,0)% + 60 > %timestamp%
+if %self.var(%varname%,0)% + 29 > %timestamp%
   * too soon
   halt
 end
 set %varname% %timestamp%
 remote %varname% %self.id%
+* determine random rumor list
+if !%self.var(rumor_list)%
+  set rumor_list 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
+  set rumor_count 19
+else
+  * attempt to pull lists
+  set rumor_list %self.var(rumor_list,1)%
+  set rumor_count %self.var(rumor_count,1)%
+end
 * pick 2 rumors
 set rumor1 0
 set rumor2 0
 set rumor1_text
 set rumor2_text
 set count 1
-while %count% <= 2
+while %count% <= 2 && %rumor_count% >= 1
   * This should be the number of cases in the switch below
-  set rumor %random.19%
+  eval pos %%random.%rumor_count%%%
+  set temp_list %rumor_list%
+  set rumor_list
+  while %temp_list%
+    set this %temp_list.car%
+    set temp_list %temp_list.cdr%
+    eval pos %pos% - 1
+    if %pos% == 0
+      set rumor %this%
+    else
+      set rumor_list %rumor% %rumor_list%
+    end
+  done
+  eval rumor_count %rumor_count% - 1
   if %count% == 1 || %rumor% != %rumor1%
     * found valid rumor
     set rumor%count% %rumor%
@@ -2924,22 +2955,27 @@ while %count% <= 2
           set rumor1_text %msg%
         end
       break
-      case 20
-          set rumor%count%_text I heard
-          set rumor%count%_text I heard
-        end
-      break
     done
     eval count %count% + 1
   else
     * did not find a valid rumor: repeat
   end
 done
+* store back
+if %rumor_list%
+  remote rumor_list %self.id%
+  remote rumor_count %self.id%
+else
+  rdelete rumor_list %self.id%
+  rdelete rumor_count %self.id%
+end
 * say the rumors
-say %rumor1_text%
-wait 3 sec
-if %target.room% == %self.room% && %target.is_npc% && %response_mobs% ~= %target.vnum% && %rumor2_text%
-  %force% %target% say Oh? %rumor2_text%
+if !%rumor1_text.empty%
+  say %rumor1_text%
+  wait 3 sec
+  if %target.room% == %self.room% && %target.is_npc% && %response_mobs% ~= %target.vnum% && !%rumor2_text.empty%
+    %force% %target% say Oh? %rumor2_text%
+  end
 end
 ~
 #11938
@@ -3094,7 +3130,7 @@ Skycleave: Only drops loot for unique fighters~
 * mob only loses !LOOT flag if a unique person over min_level has tagged it
 * can also work in reverse, adding it
 set room %self.room%
-set min_level 150
+set min_level 125
 set done 0
 if %actor.is_pc% && %actor.level% >= %min_level% && %self.is_tagged_by(%actor%)%
   set varname pc%actor.id%
@@ -3140,7 +3176,7 @@ switch %self.vnum%
     else
       %echo% &&mThe Grand High Sorceress gives you a coy smile as she disappears in a burst of magenta glitter, dropping something as she vanishes!&&0
       * chance of mount:
-      if !%room.people(11852)% && %random.100% <= 4
+      if !%room.people(11852)% && %random.100% <= 10
         %load% mob 11852
       end
     end
@@ -3599,7 +3635,7 @@ set ch %self.room.people%
 set fail 0
 while %ch%
   if %ch.varexists(skycleave_queen)%
-    %send% %actor% You catch ~%self% cast a stray wink in your direction.
+    %send% %ch% You catch ~%self% cast a stray wink in your direction.
   elseif %ch.is_pc%
     set fail 1
   end
@@ -4965,60 +5001,73 @@ set ne_rooms 11970 11934 11922 11904
 set se_rooms 11963 11933 11913 11903
 set sw_rooms 11962 11932 11912 11902
 set nw_rooms 11961 11931 11911
-set template %self.room.template%
-if %template% == 11908
-  * final location
-  switch %self.vnum%
-    case 11854
-      %echo% ~%self% runs toward the fountain, trips, and rolls in!
-    break
-    case 11855
-      %echo% ~%self% flows its long liquid body into the fountain!
-    break
-    case 11856
-      %echo% ~%self% swoops upward and then dives into the fountain!
-    break
-    case 11857
-      %echo% ~%self% bounds straight into the fountain!
-    break
-    case 11858
-      %echo% ~%self% leaps into the air and lands in the fountain with a splash!
-    break
-  done
-  %echo% You watch as it joins with the fountain's water and vanishes.
-  * process followers
-  makeuid water room i11972
-  set ch %self.room.people%
-  while %ch%
-    set next_ch %ch.next_in_room%
-    if %ch.leader%
-      if %ch.leader% == %self% || %ch.leader.leader% == %self%
-        %send% %ch% You follow ~%self% into the fountain!
-        %echoaround% %ch% ~%ch% follows ~%self% into the fountain!
-        %teleport% %ch% %water%
-        %load% obj 11805 %ch%
+set count 0
+while %count% < 2
+  set template %self.room.template%
+  if %template% == 11908
+    * final location
+    switch %self.vnum%
+      case 11854
+        %echo% ~%self% runs toward the fountain, trips, and rolls in!
+      break
+      case 11855
+        %echo% ~%self% flows its long liquid body into the fountain!
+      break
+      case 11856
+        %echo% ~%self% swoops upward and then dives into the fountain!
+      break
+      case 11857
+        %echo% ~%self% bounds straight into the fountain!
+      break
+      case 11858
+        %echo% ~%self% leaps into the air and lands in the fountain with a splash!
+      break
+    done
+    %echo% You watch as it joins with the fountain's water and vanishes.
+    * process followers
+    makeuid water room i11972
+    set ch %self.room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %ch.leader%
+        if %ch.leader% == %self% || %ch.leader.leader% == %self%
+          %send% %ch% You follow ~%self% into the fountain!
+          %echoaround% %ch% ~%ch% follows ~%self% into the fountain!
+          %teleport% %ch% %water%
+          %load% obj 11805 %ch%
+          %at% %water% %echoaround% %ch% ~%ch% dives in from above!
+        end
       end
-    end
-    set ch %next_ch%
-  done
-  %purge% %self%
-elseif %template% == 11901
-  north
-elseif %down_rooms% ~= %template%
-  down
-elseif %ne_rooms% ~= %template%
-  northeast
-elseif %se_rooms% ~= %template%
-  southeast
-elseif %sw_rooms% ~= %template%
-  southwest
-elseif %nw_rooms% ~= %template%
-  northwest
-else
-  * unknown room?
-  %echo% ~%self% splashes to the ground and soaks in.
-  %purge% %self%
-end
+      set ch %next_ch%
+    done
+    %purge% %self%
+    halt
+  elseif %template% == 11901
+    north
+  elseif %down_rooms% ~= %template%
+    down
+  elseif %ne_rooms% ~= %template%
+    northeast
+  elseif %se_rooms% ~= %template%
+    southeast
+  elseif %sw_rooms% ~= %template%
+    southwest
+  elseif %nw_rooms% ~= %template%
+    northwest
+  else
+    * unknown room?
+    %echo% ~%self% splashes to the ground and soaks in.
+    %purge% %self%
+    halt
+  end
+  * only allow repeat with followers:
+  if %self.follower% && %count% == 0
+    wait 6 s
+  else
+    halt
+  end
+  eval count %count% + 1
+done
 ~
 #11970
 Goblin's Dream: Arena challenge spawner~
@@ -5079,7 +5128,7 @@ done
 %echoaround% %actor% ~%actor% burns %self.shortdesc%!
 * mark who did this
 set spirit %instance.mob(11900)%
-set finish4 %actor.name%
+set finish4 %actor.real_name%
 remote finish4 %spirit.id%
 * and phase transition
 %load% mob 11898
@@ -5129,7 +5178,7 @@ Goblin's Dream: Arena challenge death~
 ~
 * This both spawns the next mob and manages the !LOOT flag based on unique fighters
 set room %self.room%
-set min_level 150
+set min_level 125
 set must_fight_timer_obj 11972
 set delay_obj 11973
 * we will return 0 no matter what
@@ -5329,7 +5378,7 @@ elseif %cmd.mudcommand% == time
 elseif %cmd.mudcommand% == weather
   if %room.template% == 11981
     %send% %actor% It's hard to tell the weather from in here.
-  else if %indoor_list% ~= %room.template%
+  elseif %indoor_list% ~= %room.template%
     %send% %actor% It's hard to tell the weather from in here, but a lot of sun is coming from above.
   else
     %send% %actor% The sky is cloudless and sunny.
@@ -5599,6 +5648,7 @@ skyfight lockout 30 35
 if %move% == 1
   * Hammer Dance
   skyfight clear dodge
+  %subecho% %room% &&y~%self% shouts, 'Time for the hammer dance!'&&0
   %echo% &&j~%self% starts singing and dancing around wildly with his hammers out...&&0
   if %diff% == 1
     nop %self.add_mob_flag(NO-ATTACK)%
@@ -5661,8 +5711,9 @@ elseif %move% == 2 && !%self.aff_flagged(BLIND)%
   skyfight clear dodge
   set targ %self.fighting%
   set id %targ.id%
-  %send% %targ% &&j**** &&Z~%self% shouts as he leaps high into the air! ****&&0 (dodge)
-  %echoaround% %targ% &&j~%self% shouts as he leaps high into the air!&&0
+  %subecho% %room% &&y~%self% shouts, 'I'm going to ring your bell!'&&0
+  %send% %targ% &&j**** &&Z~%self% leaps high into the air! ****&&0 (dodge)
+  %echoaround% %targ% &&j~%self% leaps high into the air!&&0
   skyfight setup dodge %targ%
   wait 8 s
   dg_affect #11955 %self% off
@@ -5744,6 +5795,7 @@ elseif %move% == 4 && !%self.aff_flagged(BLIND)%
     halt
   end
   dg_affect #11953 %self% DISARMED on 30
+  %subecho% %room% &&y~%self% shouts, 'Hammer throw!'&&0
   if !%targ% || %targ.id% != %id%
     * gone
     dg_affect #11953 %self% off silent
@@ -6617,7 +6669,8 @@ skyfight lockout 30 35
 if %move% == 1
   * Axe-nado
   skyfight clear dodge
-  %echo% &&j~%self% winds up and lets out a war cry as she starts to spin with her axe out...&&0
+  %subecho% %room% &&y~%self% shouts, 'Axe tornado!'&&0
+  %echo% &&j~%self% winds up and starts to spin with her axe out...&&0
   eval dodge %diff% * 40
   dg_affect #11958 %self% DODGE %dodge% 20
   if %diff% == 1
@@ -6630,7 +6683,8 @@ if %move% == 1
     nop %self.remove_mob_flag(NO-ATTACK)%
     halt
   end
-  %echo% &&j**** ~%self% screams as she whirls right toward you with her axe out! ****&&0 (dodge)
+  %subecho% %room% &&y~%self% shouts, 'Aaaaaaaaaaaahhhh!'&&0
+  %echo% &&j**** ~%self% whirls right toward you with her axe out! ****&&0 (dodge)
   set cycle 1
   set hit 0
   eval wait 10 - %diff%
@@ -6676,6 +6730,7 @@ elseif %move% == 2
   skyfight clear dodge
   set targ %self.fighting%
   set id %targ.id%
+  %subecho% %room% &&y~%self% shouts, 'Aha!'&&0
   %send% %targ% &&j**** &&Z~%self% shouts triumphantly as she slashes at the sand in front of you! ****&&0 (dodge)
   %echoaround% %targ% &&j~%self% shouts triumphantly as she slashes at the sand!&&0
   skyfight setup dodge %targ%
@@ -6701,7 +6756,7 @@ elseif %move% == 2
       dg_affect #11851 %targ% STUNNED on 15
     else
       %send% %targ% &&jYou're blind!&&0
-      dg_affect #11959 %ch% BLIND on 10
+      dg_affect #11959 %targ% BLIND on 10
     end
     if %diff% >= 3
       %damage% %targ% 100 physical
@@ -6724,6 +6779,7 @@ elseif %move% == 3
     dg_affect #11958 %self% off
     halt
   end
+  %subecho% %room% &&y~%self% shouts, 'Yaaaaaaaaaaaaaaaaaa!'&&0
   if %self.var(sfinterrupt_count,0)% < %requires%
     %echo% &&j**** Sand is flying everywhere as ~%self% whirls around with her axe, screaming... ****&&0 (interrupt)
   end
@@ -6756,6 +6812,7 @@ elseif %move% == 3
 elseif %move% == 4
   * Rain of Hatchets
   skyfight clear dodge
+  %subecho% %room% &&y~%self% shouts, 'Alalalalalalalalala!'&&0
   %echo% &&j~%self% lets out a piercing war cry as she throws hatchet after hatchet into the air... this won't be good.&&0
   if %diff% == 1
     nop %self.add_mob_flag(NO-ATTACK)%
@@ -6845,6 +6902,7 @@ skyfight lockout 30 35
 if %move% == 1
   * Thornlash
   skyfight clear dodge
+  %subecho% %room% &&y~%self% shouts, 'Time to dance!'&&0
   %echo% &&j~%self% screams as she furiously lashes both her thorny whips around the arena!&&0
   eval dodge %diff% * 40
   dg_affect #11950 %self% DODGE %dodge% 20

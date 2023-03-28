@@ -1128,7 +1128,10 @@ GLB_VALIDATOR(validate_global_map_spawns) {
 GLB_FUNCTION(run_global_map_spawns) {
 	struct glb_map_spawn_bean *data = (struct glb_map_spawn_bean*)other_data;
 	if (data) {
-		spawn_one_list(data->room, GET_GLOBAL_SPAWNS(glb));
+		return (spawn_one_list(data->room, GET_GLOBAL_SPAWNS(glb)) > 0);
+	}
+	else {
+		return FALSE;
 	}
 }
 
@@ -1761,7 +1764,7 @@ void scale_mob_to_level(char_data *mob, int level) {
 	for (iter = 0; iter < NUM_POOLS; ++iter) {
 		mob->points.current_pools[iter] = mob->points.max_pools[iter] - pools_down[iter];
 		// ensure minimum of 1 after scaling:
-		mob->points.current_pools[iter] = MAX(1, MIN(mob->points.max_pools[iter], mob->points.current_pools[iter]));
+		mob->points.current_pools[iter] = MIN(mob->points.max_pools[iter], MAX(1, mob->points.current_pools[iter]));
 	}
 	for (iter = 0; iter < NUM_ATTRIBUTES; ++iter) {
 		mob->aff_attributes[iter] = mob->real_attributes[iter];

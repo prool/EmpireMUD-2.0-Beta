@@ -190,6 +190,7 @@
 #define GET_ARCH_FEMALE_RANK(arch)  ((arch)->female_rank)
 #define GET_ARCH_FLAGS(arch)  ((arch)->flags)
 #define GET_ARCH_GEAR(arch)  ((arch)->gear)
+#define GET_ARCH_LANGUAGE(arch)  ((arch)->language)
 #define GET_ARCH_LORE(arch)  ((arch)->lore)
 #define GET_ARCH_MALE_RANK(arch)  ((arch)->male_rank)
 #define GET_ARCH_NAME(arch)  ((arch)->name)
@@ -575,6 +576,7 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 #define EMPIRE_TERRITORY(emp, type)  ((emp)->territory[(type)])
 #define EMPIRE_WEALTH(emp)  ((emp)->wealth)
 #define EMPIRE_POPULATION(emp)  ((emp)->population)
+#define EMPIRE_LANGUAGES(emp)  ((emp)->languages)
 #define EMPIRE_LEARNED_CRAFTS(emp)  ((emp)->learned_crafts)
 #define EMPIRE_MAPOUT_TOKEN(emp)  ((emp)->mapout_token)
 #define EMPIRE_MEMBER_ACCOUNTS(emp)  ((emp)->member_accounts)
@@ -840,6 +842,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define MOB_DYNAMIC_SEX(ch)  ((ch)->mob_specials.dynamic_sex)
 #define MOB_FACTION(ch)  ((ch)->mob_specials.faction)
 #define MOB_INSTANCE_ID(ch)  ((ch)->mob_specials.instance_id)
+#define MOB_LANGUAGE(ch)  ((ch)->mob_specials.language)
 #define MOB_MOVE_TYPE(ch)  ((ch)->mob_specials.move_type)
 #define MOB_PURSUIT(ch)  ((ch)->mob_specials.pursuit)
 #define MOB_PURSUIT_LEASH_LOC(ch)  ((ch)->mob_specials.pursuit_leash_loc)
@@ -934,11 +937,12 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define OBJVAL_FLAGGED(obj, flag)  (IS_SET(GET_OBJ_VAL((obj), 1), (flag)))
 #define CAN_WEAR(obj, part)  (IS_SET(GET_OBJ_WEAR(obj), (part)))
 #define TOOL_FLAGGED(obj, flag)  IS_SET(GET_OBJ_TOOL_FLAGS(obj), (flag))
+#define WORN_OR_CARRIED_BY(obj, ch)  ((obj)->worn_by == (ch) || (obj)->carried_by == (ch))
 
 // for stacking, sotring, etc
 #define OBJ_CAN_STACK(obj)  (GET_OBJ_TYPE(obj) != ITEM_CONTAINER && !IS_AMMO(obj))
 #define OBJ_CAN_STORE(obj)  (GET_OBJ_STORAGE(obj) && GET_OBJ_REQUIRES_QUEST(obj) == NOTHING && !OBJ_BOUND_TO(obj) && !OBJ_FLAGGED((obj), OBJ_NO_STORE | OBJ_SUPERIOR | OBJ_ENCHANTED) && !IS_STOLEN(obj))
-#define UNIQUE_OBJ_CAN_STORE(obj, allow_bound)  ((allow_bound || !OBJ_BOUND_TO(obj)) && !OBJ_CAN_STORE(obj) && !OBJ_FLAGGED((obj), OBJ_NO_STORE | OBJ_JUNK) && GET_OBJ_TIMER(obj) == UNLIMITED && GET_OBJ_REQUIRES_QUEST(obj) == NOTHING && !IS_STOLEN(obj))
+#define UNIQUE_OBJ_CAN_STORE(obj, allow_bound)  ((allow_bound || (!OBJ_BOUND_TO(obj) && !OBJ_FLAGGED((obj), OBJ_BIND_ON_PICKUP))) && !OBJ_CAN_STORE(obj) && !OBJ_FLAGGED((obj), OBJ_NO_STORE | OBJ_JUNK) && GET_OBJ_TIMER(obj) == UNLIMITED && GET_OBJ_REQUIRES_QUEST(obj) == NOTHING && !IS_STOLEN(obj))
 #define OBJ_STACK_FLAGS  (OBJ_SUPERIOR | OBJ_KEEP | OBJ_ENCHANTED | OBJ_HARD_DROP | OBJ_GROUP_DROP | OBJ_BIND_ON_EQUIP | OBJ_BIND_ON_PICKUP)
 #define OBJS_ARE_SAME(o1, o2)  (GET_OBJ_VNUM(o1) == GET_OBJ_VNUM(o2) && GET_OBJ_CURRENT_SCALE_LEVEL(o1) == GET_OBJ_CURRENT_SCALE_LEVEL(o2) && ((GET_OBJ_EXTRA(o1) & OBJ_STACK_FLAGS) == (GET_OBJ_EXTRA(o2) & OBJ_STACK_FLAGS)) && (GET_OBJ_SHORT_DESC(o1) == GET_OBJ_SHORT_DESC(o2) || !strcmp(GET_OBJ_SHORT_DESC(o1), GET_OBJ_SHORT_DESC(o2))) && (GET_OBJ_LONG_DESC(o1) == GET_OBJ_LONG_DESC(o2) || !strcmp(GET_OBJ_LONG_DESC(o1), GET_OBJ_LONG_DESC(o2))) && (!IS_DRINK_CONTAINER(o1) || GET_DRINK_CONTAINER_TYPE(o1) == GET_DRINK_CONTAINER_TYPE(o2)) && (!IS_BOOK(o1) || !IS_BOOK(o2) || GET_BOOK_ID(o1) == GET_BOOK_ID(o2)) && (!IS_AMMO(o1) || !IS_AMMO(o2) || GET_AMMO_QUANTITY(o1) == GET_AMMO_QUANTITY(o2)) && (IS_STOLEN(o1) == IS_STOLEN(o2)) && identical_bindings((o1),(o2)))
 
@@ -1176,6 +1180,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define GET_IMMORTAL_LEVEL(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->immortal_level))
 #define GET_INFORMATIVE_FLAGS(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->informative_flags))
 #define GET_INVIS_LEV(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->invis_level))
+#define GET_LANGUAGES(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->languages))
 #define GET_LARGEST_INVENTORY(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->largest_inventory))
 #define GET_LAST_COMPANION(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_companion))
 #define GET_LAST_CORPSE_ID(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_corpse_id))
@@ -1224,6 +1229,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define GET_SKILL_HASH(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->skill_hash))
 #define GET_SKILL_LEVEL(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->skill_level))
 #define GET_SLASH_CHANNELS(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->slash_channels))
+#define GET_SPEAKING(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->speaking))
 #define GET_TECHS(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->techs))
 #define GET_TEMPORARY_ACCOUNT_ID(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->temporary_account_id))
 #define GET_TITLE(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->title))
@@ -1436,6 +1442,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define HAS_FUNCTION(room, flag)  ((GET_BUILDING(room) && IS_SET(GET_BLD_FUNCTIONS(GET_BUILDING(room)), (flag))) || (GET_ROOM_TEMPLATE(room) && IS_SET(GET_RMT_FUNCTIONS(GET_ROOM_TEMPLATE(room)), (flag))))
 
 // room types
+#define CAN_LOOK_OUT(room)  (ROOM_BLD_FLAGGED((room), BLD_LOOK_OUT) || RMT_FLAGGED((room), RMT_LOOK_OUT))
 #define IS_ADVENTURE_ROOM(room)  ROOM_SECT_FLAGGED((room), SECTF_ADVENTURE)
 #define IS_ANY_BUILDING(room)  ROOM_SECT_FLAGGED((room), SECTF_MAP_BUILDING | SECTF_INSIDE)
 #define IS_DISMANTLING(room)  (ROOM_AFF_FLAGGED((room), ROOM_AFF_DISMANTLING))
@@ -1467,6 +1474,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define GET_RMT_QUEST_LOOKUPS(rmt)  ((rmt)->quest_lookups)
 #define GET_RMT_SHOP_LOOKUPS(rmt)  ((rmt)->shop_lookups)
 #define GET_RMT_SCRIPTS(rmt)  ((rmt)->proto_script)
+#define GET_RMT_SUBZONE(rmt)  ((rmt)->subzone)
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -1897,6 +1905,7 @@ bool find_sect_within_distance_from_room(room_data *room, sector_vnum sect, int 
 bool get_coord_shift(int start_x, int start_y, int x_shift, int y_shift, int *new_x, int *new_y);
 int get_direction_to(room_data *from, room_data *to);
 room_data *get_map_location_for(room_data *room);
+char *get_partial_direction_to(char_data *ch, room_data *from, room_data *to, bool abbrev);
 int get_room_blocking_height(room_data *room, bool *blocking_vehicle);
 bool is_deep_mine(room_data *room);
 void lock_icon(room_data *room, struct icon_data *use_icon);
@@ -1920,6 +1929,7 @@ void apply_one_passive_buff(char_data *ch, ability_data *abil);
 bool check_ability(char_data *ch, char *string, bool exact);
 ability_data *find_ability_on_skill(char *name, skill_data *skill);
 ability_data *find_player_ability_by_tech(char_data *ch, int ptech);
+void get_ability_type_display(struct ability_type *list, char *save_buffer, bool for_players);
 int get_player_level_for_ability(char_data *ch, any_vnum abil_vnum);
 bool is_class_ability(ability_data *abil);
 char_data *load_companion_mob(char_data *leader, struct companion_data *cd);
@@ -1997,7 +2007,7 @@ room_data *find_docks(empire_data *emp, int island_id);
 int find_free_shipping_id(empire_data *emp);
 obj_data *find_lighter_in_list(obj_data *list, bool *had_keep);
 bool get_check_money(char_data *ch, obj_data *obj);
-void identify_obj_to_char(obj_data *obj, char_data *ch);
+void identify_obj_to_char(obj_data *obj, char_data *ch, bool simple);
 int obj_carry_size(obj_data *obj);
 void process_shipping();
 void remove_armor_by_type(char_data *ch, int armor_type);
@@ -2061,7 +2071,7 @@ bool valid_no_trace(room_data *room);
 
 // act.trade.c
 void cancel_gen_craft(char_data *ch);
-bool check_can_craft(char_data *ch, craft_data *type);
+bool check_can_craft(char_data *ch, craft_data *type, bool continuing);
 bool find_and_bind(char_data *ch, obj_vnum vnum);
 int get_craft_scale_level(char_data *ch, craft_data *craft);
 int get_crafting_level(char_data *ch);
@@ -2142,6 +2152,7 @@ char empire_banner_to_mapout_token(const char *banner);
 bool valid_rank_name(char_data *ch, char *newname);
 
 // event.c
+void delete_player_from_running_events(char_data *ch);
 int gain_event_points(char_data *ch, any_vnum event_vnum, int points);
 struct player_event_data *get_event_data(char_data *ch, int event_id);
 struct event_running_data *only_one_running_event(int *count);
@@ -2209,6 +2220,7 @@ void mark_instance_completed(struct instance_data *inst);
 void prune_instances();
 void remove_instance_fake_loc(struct instance_data *inst);
 void reset_instance(struct instance_data *inst);
+bool same_subzone(room_data *a, room_data *b);
 void scale_instance_to_level(struct instance_data *inst, int level);
 void set_instance_fake_loc(struct instance_data *inst, room_data *loc);
 void unlink_instance_entrance(room_data *room, struct instance_data *inst, bool run_cleanup);
@@ -2303,8 +2315,10 @@ void check_for_eligible_goals(empire_data *emp);
 void check_progress_refresh();
 int count_diplomacy(empire_data *emp, bitvector_t dip_flags);
 bool empire_meets_goal_prereqs(empire_data *emp, progress_data *prg);
+bool delete_progress_perk_from_list(struct progress_perk **list, int type, int value);
 progress_data *find_current_progress_goal_by_name(empire_data *emp, char *name);
 progress_data *find_progress_goal_by_name(char *name);
+bool find_progress_perk_in_list(struct progress_perk *list, int type, int value);
 progress_data *find_purchasable_goal_by_name(empire_data *emp, char *name);
 void full_reset_empire_progress(empire_data *only_emp);
 void purchase_goal(empire_data *emp, progress_data *prg, char_data *purchased_by);
@@ -2370,6 +2384,7 @@ void qt_gain_building(char_data *ch, any_vnum vnum);
 void qt_gain_tile_sector(char_data *ch, sector_vnum vnum);
 void qt_change_coins(char_data *ch);
 void qt_change_currency(char_data *ch, any_vnum vnum, int total);
+void qt_change_language(char_data *ch, any_vnum vnum, int level);
 void qt_empire_wealth(char_data *ch, any_vnum amount);
 void qt_event_start_stop(any_vnum event_vnum);
 void qt_gain_vehicle(char_data *ch, vehicle_data *veh);

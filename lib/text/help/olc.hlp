@@ -555,7 +555,11 @@ wears off.
 If you don't specify an ability, it will just say 'buff' and will have no wear-
 off message.
 
-See also: OLC ABILITIES, BUFF ABILITY
+If you use the LIMIT-CROWD-CONTROL flag, using this buff will cancel it on
+other mobs in the same room. For example, sapping 1 mob cancels anyone else
+you have sapped.
+
+See also: OLC ABILITIES, BUFF ABILITY, ABILEDIT FLAGS
 #d
 "ABILEDIT APPLY" "ABILEDIT APPLIES"
 
@@ -818,8 +822,10 @@ The following ability flags are available:
  &cTANK-ROLE&0 - Bonus for tank role, weaker without it.
  &cRANGED-ONLY&0 - Cannot be used in melee combat.
  &cIGNORE-SUN&0 - For a vampire ability, won't check sunlight.
+ &cUNSCALED-BUFF&0 - Uses exact apply values rather than scaling them.
+ &cLIMIT-CROWD-CONTROL&0 - Cancels the same affectvnum on other mobs in the room.
 
-See also: OLC ABILITIES
+See also: OLC ABILITIES, ABILEDIT AFFECTVNUM
 #d
 "ABILEDIT FULLSEARCH"
 
@@ -1220,6 +1226,9 @@ The following types are available (each has its own help file):
  &cCOMPANION&0 - Adds 1 or more mobs to the player's 'companions' command.
  &cSUMMON-ANY&0 - Player chooses from a list of mobs to summon.
  &cSUMMON-RANDOM&0 - Player summons a random mob from this list.
+ &cMORPH&0 - Ability has morphs that require ir.
+ &cAUGMENT&0 - Used for augments/enchanting.
+ &cCUSTOM&0 - Ability is hard-coded, not parameterized.
 
 See also: OLC ABILITIES, BUFF ABILITY, CRAFT ABILITY, DAMAGE ABILITY,
    DOT ABILITY, PLAYER-TECH ABILITY, PASSIVE-BUFF ABILITY,
@@ -1763,7 +1772,7 @@ been instantiated.
 
 See also: OLC ADVENTURES
 #d
-"AFFECT FLAGS"
+"AFFECT FLAGS" "AFF FLAGS" "AFFECT BITS" "AFF BITS"
 
 The following affect flags are available:
  BLIND - Unable to see.
@@ -1804,6 +1813,7 @@ The following affect flags are available:
  !WHERE - Cannot be found using the 'where' command.
  WATERWALK - Does not need to swim and doesn't drown. Unlike the AQUATIC mob
    flag, this allows it to move on both water and land.
+ LIGHT - Character provides light to the room.
 #d
 ARCHEDIT "OLC ARCHETYPES" "ARCHETYPE OLC" "ARCHETYPE EDITOR"
 
@@ -1900,6 +1910,18 @@ wield, hold.
 The hold slot is generally a light, e.g. the newbie torch (2104).
 
 See also: OLC ARCHETYPES, OLC GLOBALS, GEDIT TYPE
+#d
+"ARCHEDIT LANGUAGE"
+
+Usage:  .language <vnum | name | none>
+
+This sets which language the player will start with, if any.
+
+If players have more than one archetype that give languages, they will speak
+all of those languages. If no archetypes provide a language, you should ensure
+you have at least one BASIC-flagged language for players to speak.
+
+See also: OLC ARCHETYPES, LANGUAGE, GENERIC LANGUAGE
 #d
 "ARCHEDIT LORE"
 
@@ -3720,6 +3742,24 @@ However, this is not required if you have a compelling reason not to.
 
 See also: GENERIC COMPONENTS
 #d
+"GENERIC LANGUAGE" "LANGUAGE GENERICS" "LANGUAGE EDITOR"
+
+The 'language' generic type creates languages that players and NPCs can speak.
+
+Languages only have a name and some flags. Players can refer to a language by
+its whole name, or can remove the spaces or replace spaces with dashes. For
+example, a language called "Old High Western" can also be referred to as
+"old-high-western" or "oldhighwestern".
+
+Flags used by languages:
+  BASIC - All players can automatically speak this language.
+  IN-DEVELOPMENT - Language is not available.
+
+EmpireMUD comes with language [150] English and all characters start with this
+language. Add the IN-DEV flag to disable it.
+
+See also: OLC GENERICS, SPEAK, SET LANGUAGE, SHOW LANGUAGES
+#d
 "GENERIC MOON" "MOON GENERICS" "MOON EDITOR" "GENEDIT CYCLE"
 
 The 'moon' generic type controls what moons appear in the sky. These are shown
@@ -4153,6 +4193,7 @@ map editor commands make instant changes to the map where you're standing.
 You can get help on any of the mapeditor commands with &yHELP MAPEDIT <COMMAND>&0.
 The following commands are available:
  complete - Finishes the building you're standing in.
+ convert2newbie - Converts an island's terrains to/from newbie terrains.
  decay - Performs 1 year of decay (building, trench, mine data) on the tile.
  decustomize - Removes custom icon, name, and description.
  deleteexit - Removes an exit (careful about cutting off building interiors).
@@ -4200,6 +4241,28 @@ Example:
  > .map terrain plains
  > build largehouse north
  > .map complete
+
+See also: MAP OLC
+#d
+"MAPEDIT CONVERT2NEWBIE" CONVERT2NEWBIE
+
+Usage:  .map convert2newbie confirm
+        .map convert2newbie undo
+
+This command converts an island's terrains to or from newbie terrains (which
+look the same but have lower move costs and other small changes. This applies
+to the whole island you're on when you use it.
+
+Note that this is separate from setting the NEWBIE flag on the island.
+
+See also: MAP OLC, ISLAND COMMAND
+#d
+"MAPEDIT DECAY"
+
+Usage:  .map decay
+
+Performs 1 year of decay (building, trench, mine data) on the tile, as if the
+new year had just rolled over.
 
 See also: MAP OLC
 #d
@@ -4557,6 +4620,7 @@ Available mob flags:
  SILENT - Mob will not display custom strings while this flag is on.
  COINS - Mob will drop coins on death/pickpocket.
  NO-COMMAND - Cannot be commanded/ordered.
+ NO-UNCONSCIOUS - Cannot be knocked unconscious (from toggle autokill).
 
 See also: OLC MOBILES
 #d
@@ -4594,7 +4658,7 @@ To search other fields, you can generally use the normal "search" option for
 other OLC types. For example, to find all mobs with the "Dismissable"
 trigger, use ".t search 9901".
 #d
-"MEDIT INTERACTION" "BEDIT INTERACTION" "OEDIT INTERACTION" "REDIT INTERACTION" "SECTEDIT INTERACTION" "CROPEDIT INTERACTION" "GEDIT INTERACTION" "VEDIT INTERACTION" INTERACTIONS
+INTERACTION "MEDIT INTERACTION" "BEDIT INTERACTION" "OEDIT INTERACTION" "REDIT INTERACTION" "SECTEDIT INTERACTION" "CROPEDIT INTERACTION" "GEDIT INTERACTION" "VEDIT INTERACTION" INTERACTIONS INTERACT
 
 Usage:  .interaction add <type> <quantity> <vnum> <percent> [exclusion code | restrictions]
         .interaction change <number> <field> <value>
@@ -4699,7 +4763,7 @@ Example of possible multiple results from shear:
  3. SHEAR: 1x some wool 5.00%
 
 See also: OLC BUILDINGS, OLC CROPS, OLC MOBILES, OLC SECTORS, OLC VEHICLES,
-  PRODUCTION INTERACTION, OLC WORKFORCE
+  PRODUCTION INTERACTION, OLC WORKFORCE, OLC DEPLETIONS
 #d
 "MEDIT KEYWORDS"
 
@@ -4717,6 +4781,19 @@ Example:
  keywords: dragon fiery huge red
 
 See also: MEDIT SHORTDESCRIPTION, MEDIT LONGDESCRIPTION
+#d
+"MEDIT LANGUAGE" "MOB LANGUAGE"
+
+Usage:  .language <vnum | name | default>
+
+This changes which language a mob will use for any say/shout actions it takes.
+Mobs can also use the #language tag at the start of any say/shout (unless they
+were ordered/commanded by a player).
+
+Mobs without this property will use the global default, set with the
+'default_language_vnum' mob config.
+
+See also: OLC MOBILES, SAY, SPEAK, MEDIT CUSTOM, CONFIG
 #d
 "MEDIT MAXLEVEL" "MEDIT MAX LEVEL"
 
@@ -5730,7 +5807,7 @@ Usage:  .minipet <mob vnum>
 This command assigns which mob is taught by a MINIPET item, when used with the
 'use' command.
 
-See also: MINIPETS
+See also: MINIPETS, MINIPET ITEM
 #d
 "OEDIT MINLEVEL" "OEDIT MIN LEVEL"
 
@@ -6753,8 +6830,7 @@ Usage:  .flags [add | remove] <flags>
 The following progress goal flags are available:
  &cIN-DEVELOPMENT&0 - Empires cannot start or complete this goal.
  &cPURCHASABLE&0 - This goal is purchased, not unlocked by tasks.
- &cSCRIPT-ONLY&0 - For scripts; cannot be purchased and won't be earned unless a
-               script starts it first.
+ &cNO-AUTOSTART&0 - Must be added or started by a script or quest.
  &cHIDDEN&0 - Will not show up in lists until completed.
  &cNO-ANNOUNCE&0 - Does not announce/log completion.
  &cNO-PREVIEW&0 - Mortals can't view this goal before starting it.
@@ -6822,6 +6898,8 @@ Perk types:
  Greatness-territory - Increases territory per greatness point.
  Workforce-cap - Raises the maximum workforce cap.
  Territory - Directly adds to the total territory for an empire.
+ Speak-language - All members can speak this language.
+ Recognize-language - All members can recognize this language when spoken.
 
 Note: To grant progress points for a goal, set the 'value' field instead.
 
@@ -6858,7 +6936,8 @@ Task types that do not apply to empire progression:
  &rCOMPLETED-QUEST, NOT-COMPLETED-QUEST, NOT-ON-QUEST, SKILL-LEVEL-OVER,
  SKILL-LEVEL-UNDER, TRIGGERED, VISIT-BUILDING, VISIT-ROOM-TEMPLATE,
  VISIT-SECTOR, HAVE-ABILITY, REP-OVER, REP-UNDER, WEARING, WEARING-OR-HAS,
- GET-CURRENCY, CAN-GAIN-SKILL, LEVEL-UNDER, LEVEL-OVER&0
+ GET-CURRENCY, CAN-GAIN-SKILL, LEVEL-UNDER, LEVEL-OVER, SPEAK-LANGUAGE,
+ RECOGNIZE-LANGUAGE&0
 
 See also: OLC PROGRESS, REQUIREMENTS
 #d
@@ -7010,6 +7089,11 @@ Available reward types:
  REPUTATION - Gain/lose faction reputation.
  CURRENCY - Gives generic currency (e.g. tokens).
  EVENT-POINTS - Points toward an event (only happens if the event is running).
+ SPEAK-LANGUAGE - Can now speak a language.
+ RECOGNIZE-LANGUAGE - Can now recognize a language (will not override one the
+    player can already speak).
+ GRANT-PROGRESS - Player's empire completes a progress goal.
+ START-PROGRESS - Player's empire starts a NO-AUTOSTART progress goal.
 
 Note: If you set empire coins as the reward, but the mob is not part of an
 empire, the player will receive misc coins instead.
@@ -7170,6 +7254,31 @@ This is different from the spawn data set on crops, sectors, and buildings.
 
 See also: OLC ROOM TEMPLATES, ADVEDIT RESET TIME, VNUM
 #d
+"REDIT SUBZONE" "REDIT SUB-ZONE" "REDIT SUB ZONE" SUBZONE SUB-ZONE "SUB ZONE"
+
+Usage:  .subzone <vnum | none>
+
+Room templates have an optional numerical property called subzone. This divides
+an adventure up for commands like "where", "shout", and also %subecho%. It is
+usually used with the !LOCATION flag, which indicates that a room is not "at"
+the map location where the adventure instance is linked.
+
+If you are using this property, you should set the subzone id to the vnum of a
+room template in that subzone. All room templates with the same subzone id are
+"in the same place". The same subzone can be used across multiple adventures,
+if they are all conceptually "in the same non-map place".
+
+An example of a subzone is the Portal to the Primeval adventure, which takes
+place through a portal. All the room templates in the adventure are in the
+"same place" but that place is not "at the map location where the portal
+spawned".
+
+Note: Without a !LOCATION flag, a room with a subzone will still share the
+where/shout range of other areas around it as if it has no subzone. However,
+the %subecho% command will still work as expected without the !LOCATION flag.
+
+See also: REDIT FLAG, %SUBECHO%
+#d
 REQUIREMENTS "QEDIT TASKS" "QEDIT PREREQS" "QEDIT PREREQUISITES" "SOCEDIT REQUIREMENTS"
 
 Usage:  .<field> add <type> <vnum> [group] [custom text]
@@ -7233,6 +7342,8 @@ Available tasks:
  &cEVENT-NOT-RUNNING&0 - Not available while the event is running.
  &cLEVEL-UNDER&0 - Composite/total level not higher than this.
  &cLEVEL-OVER&0 - Composite/total level not lower than this.
+ &cSPEAK-LANGUAGE&0 - Player knows how to speak a language.
+ &cRECOGNIZE-LANGUAGE&0 - Player can recognize or speak a language.
 
 &r*&0 Some types require a trackable quest, and cannot be used as prereqs.
 ^ If a type requires flags and you use more than one flag, you MUST put the

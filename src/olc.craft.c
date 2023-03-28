@@ -133,10 +133,12 @@ bool audit_craft(craft_data *craft, char_data *ch) {
 			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Vehicle craft with quantity > 1");
 			problem = TRUE;
 		}
+		/* probably don't need this:
 		if (GET_CRAFT_TIME(craft) > 1) {
 			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Vehicle craft with time set");
 			problem = TRUE;
 		}
+		*/
 	}
 	else if (CRAFT_FLAGGED(craft, CRAFT_SOUP) && !find_generic(GET_CRAFT_OBJECT(craft), GENERIC_LIQUID)) {	// soups only
 		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Invalid liquid type on soup recipe");
@@ -242,18 +244,20 @@ char *list_one_craft(craft_data *craft, bool detail) {
 * @param craft_vnum vnum The vnum to delete.
 */
 void olc_delete_craft(char_data *ch, craft_vnum vnum) {
-	struct progress_perk *perk, *next_perk;
 	progress_data *prg, *next_prg;
 	empire_data *emp, *next_emp;
 	obj_data *obj, *next_obj;
 	descriptor_data *desc;
 	craft_data *craft;
 	char_data *iter;
+	char name[256];
 	
 	if (!(craft = craft_proto(vnum))) {
 		msg_to_char(ch, "There is no such craft %d.\r\n", vnum);
 		return;
 	}
+	
+	snprintf(name, sizeof(name), "%s", NULLSAFE(GET_CRAFT_NAME(craft)));
 	
 	if (HASH_COUNT(craft_table) <= 1) {
 		msg_to_char(ch, "You can't delete the last craft.\r\n");
@@ -292,18 +296,16 @@ void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 	HASH_ITER(hh, object_table, obj, next_obj) {
 		if (IS_RECIPE(obj) && GET_RECIPE_VNUM(obj) == vnum) {
 			set_obj_val(obj, VAL_RECIPE_VNUM, 0);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Object %d %s lost deleted learnable craft", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
 			save_library_file_for_vnum(DB_BOOT_OBJ, GET_OBJ_VNUM(obj));
 		}
 	}
 	
 	// update progression
 	HASH_ITER(hh, progress_table, prg, next_prg) {
-		LL_FOREACH_SAFE(PRG_PERKS(prg), perk, next_perk) {
-			if (perk->type == PRG_PERK_CRAFT && perk->value == vnum) {
-				LL_DELETE(PRG_PERKS(prg), perk);
-				free(perk);
-				save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
-			}
+		if (delete_progress_perk_from_list(&PRG_PERKS(prg), PRG_PERK_CRAFT, vnum)) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Progress %d %s lost deleted craft perk", PRG_VNUM(prg), PRG_NAME(prg));
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
 		}
 	}
 	
@@ -316,18 +318,15 @@ void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 			}
 		}
 		else if (GET_OLC_PROGRESS(desc)) {
-			LL_FOREACH_SAFE(PRG_PERKS(GET_OLC_PROGRESS(desc)), perk, next_perk) {
-				if (perk->type == PRG_PERK_CRAFT && perk->value == vnum) {
-					LL_DELETE(PRG_PERKS(GET_OLC_PROGRESS(desc)), perk);
-					free(perk);
-					save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(GET_OLC_PROGRESS(desc)));
-				}
+			if (delete_progress_perk_from_list(&PRG_PERKS(GET_OLC_PROGRESS(desc)), PRG_PERK_CRAFT, vnum)) {
+				save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(GET_OLC_PROGRESS(desc)));
+				msg_to_char(desc->character, "A craft used by the progress goal you're editing was deleted.\r\n");
 			}
 		}
 	}
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted craft recipe %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Craft recipe %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted craft recipe %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Craft recipe %d (%s) deleted.\r\n", vnum, name);
 	
 	free_craft(craft);
 }
@@ -495,7 +494,6 @@ void olc_fullsearch_craft(char_data *ch, char *argument) {
 void olc_search_craft(char_data *ch, craft_vnum vnum) {
 	char buf[MAX_STRING_LENGTH];
 	craft_data *craft = craft_proto(vnum);
-	struct progress_perk *perk, *next_perk;
 	progress_data *prg, *next_prg;
 	obj_data *obj, *next_obj;
 	int size, found;
@@ -518,12 +516,9 @@ void olc_search_craft(char_data *ch, craft_vnum vnum) {
 	
 	// progression
 	HASH_ITER(hh, progress_table, prg, next_prg) {
-		LL_FOREACH_SAFE(PRG_PERKS(prg), perk, next_perk) {
-			if (perk->type == PRG_PERK_CRAFT && perk->value == vnum) {
-				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "PRG [%5d] %s\r\n", PRG_VNUM(prg), PRG_NAME(prg));
-				break;
-			}
+		if (find_progress_perk_in_list(PRG_PERKS(prg), PRG_PERK_CRAFT, vnum)) {
+			++found;
+			size += snprintf(buf + size, sizeof(buf) - size, "PRG [%5d] %s\r\n", PRG_VNUM(prg), PRG_NAME(prg));
 		}
 	}
 	

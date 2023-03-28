@@ -51,9 +51,10 @@ obj_data *find_water_container(char_data *ch, obj_data *list);
 *
 * @param char_data *ch The person crafting, or trying to.
 * @param craft_data *type The craft they are attempting.
+* @param bool continuing If TRUE, skips things that are only required to start a craft (like crafting level).
 * @return bool TRUE if okay, FALSE if not.
 */
-bool check_can_craft(char_data *ch, craft_data *type) {
+bool check_can_craft(char_data *ch, craft_data *type, bool continuing) {
 	char buf1[MAX_STRING_LENGTH], *str, *ptr;
 	vehicle_data *craft_veh;
 	bool wait, room_wait, makes_building;
@@ -66,7 +67,7 @@ bool check_can_craft(char_data *ch, craft_data *type) {
 	makes_building = (CRAFT_IS_BUILDING(type) || (craft_veh && VEH_FLAGGED(craft_veh, VEH_BUILDING)));
 	
 	// attribute-based checks
-	if (GET_CRAFT_MIN_LEVEL(type) > get_crafting_level(ch)) {
+	if (GET_CRAFT_MIN_LEVEL(type) > get_crafting_level(ch) && !continuing) {
 		msg_to_char(ch, "You need to have a crafting level of %d to %s that.\r\n", GET_CRAFT_MIN_LEVEL(type), command);
 	}
 	else if (!can_see_in_dark_room(ch, IN_ROOM(ch), TRUE)) {
@@ -100,16 +101,16 @@ bool check_can_craft(char_data *ch, craft_data *type) {
 	}
 	
 	// building type checks
-	else if (makes_building && ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_UNCLAIMABLE)) {
+	else if (makes_building && ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_UNCLAIMABLE) && !continuing) {
 		msg_to_char(ch, "You can't %s that on unclaimable land.\r\n", command);
 	}
-	else if (makes_building && ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_HAS_INSTANCE)) {
+	else if (makes_building && ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_HAS_INSTANCE) && !continuing) {
 		msg_to_char(ch, "You can't %s here until the adventure is gone.\r\n", command);
 	}
-	else if (makes_building && !can_build_or_claim_at_war(ch, IN_ROOM(ch))) {
+	else if (makes_building && !can_build_or_claim_at_war(ch, IN_ROOM(ch)) && !continuing) {
 		msg_to_char(ch, "You can't %s that here while at war with the empire that controls this area.\r\n", command);
 	}
-	else if (makes_building && (!can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY) || !has_permission(ch, PRIV_BUILD, IN_ROOM(ch)))) {
+	else if (makes_building && (!can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY) || !has_permission(ch, PRIV_BUILD, IN_ROOM(ch))) && !continuing) {
 		msg_to_char(ch, "You don't have permission to %s that here.\r\n", command);
 	}
 	
@@ -638,6 +639,10 @@ void resume_craft_building(char_data *ch, craft_data *craft) {
 		msg_to_char(ch, "You are already doing something.\r\n");
 		return;
 	}
+	if (GET_POS(ch) < POS_STANDING) {
+		send_low_pos_msg(ch);
+		return;
+	}
 	
 	start_action(ch, ACT_BUILDING, 0);
 	GET_ACTION_VNUM(ch, 0) = GET_CRAFT_VNUM(craft);
@@ -673,6 +678,14 @@ void resume_craft_vehicle(char_data *ch, vehicle_data *veh, craft_data *craft) {
 	// ensure they CAN resume
 	if (GET_ACTION(ch) != ACT_NONE) {
 		msg_to_char(ch, "You are already doing something.\r\n");
+		return;
+	}
+	if (VEH_IS_DISMANTLING(veh)) {
+		msg_to_char(ch, "You can't work on that -- it's being dismantled! (Try using 'dismantle' to do that instead.)\r\n");
+		return;
+	}
+	if (GET_POS(ch) < POS_STANDING) {
+		send_low_pos_msg(ch);
 		return;
 	}
 	
@@ -1158,7 +1171,12 @@ void process_gen_craft_vehicle(char_data *ch, craft_data *type) {
 	char_data *vict;
 	
 	// basic setup
-	if (!type || !check_can_craft(ch, type) || !(veh = find_finishable_vehicle(ch, NULL, GET_ACTION_VNUM(ch, 1), &junk)) || VEH_IS_DISMANTLING(veh)) {
+	if (!type || !check_can_craft(ch, type, TRUE) || !(veh = find_finishable_vehicle(ch, NULL, GET_ACTION_VNUM(ch, 1), &junk)) || VEH_IS_DISMANTLING(veh)) {
+		cancel_gen_craft(ch);
+		return;
+	}
+	if (VEH_IS_DISMANTLING(veh)) {
+		act("You can't work on $V because it's being dismantled.", FALSE, ch, NULL, veh, TO_CHAR);
 		cancel_gen_craft(ch);
 		return;
 	}
@@ -1414,8 +1432,8 @@ bool validate_item_rename(char_data *ch, obj_data *obj, char *name) {
 	else if (has_cap || ((proto = obj_proto(GET_OBJ_VNUM(obj))) && GET_OBJ_SHORT_DESC(obj) != GET_OBJ_SHORT_DESC(proto))) {
 		act("You can't rename $p.", FALSE, ch, obj, NULL, TO_CHAR);
 	}
-	else if (strchr(name, '&') || strchr(name, '%')) {
-		msg_to_char(ch, "Item names cannot contain the \t& or %% symbols.\r\n");
+	else if (strchr(name, COLOUR_CHAR) || strchr(name, '%')) {
+		msg_to_char(ch, "Item names cannot contain the \t%c or %% symbols.\r\n", COLOUR_CHAR);
 	}
 	else if (!str_str(name, must_have)) {
 		msg_to_char(ch, "The new name must contain '%s'.\r\n", must_have);
@@ -1725,7 +1743,7 @@ void do_gen_craft_vehicle(char_data *ch, craft_data *type, int dir) {
 		return;
 	}
 	if (found_other) {
-		msg_to_char(ch, "You can't %s that while %s is unfinished here.\r\n", gen_craft_data[GET_CRAFT_TYPE(type)].command, VEH_SHORT_DESC(found_other));
+		msg_to_char(ch, "You can't %s that while %s is unfinished here.\r\n", gen_craft_data[GET_CRAFT_TYPE(type)].command, get_vehicle_short_desc(found_other, ch));
 		return;
 	}
 	if (!check_build_location_and_dir(ch, IN_ROOM(ch), type, dir, FALSE, NULL, NULL)) {
@@ -2053,7 +2071,7 @@ ACMD(do_gen_craft) {
 		// this should be unreachable
 		msg_to_char(ch, "You have not learned that recipe.\r\n");
 	}
-	else if (!check_can_craft(ch, type)) {
+	else if (!check_can_craft(ch, type, FALSE)) {
 		// sends its own messages
 	}
 	else if (CRAFT_IS_VEHICLE(type)) {
@@ -2335,6 +2353,9 @@ ACMD(do_recipes) {
 			if (IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_IN_DEVELOPMENT) && !IS_IMMORTAL(ch)) {
 				continue;
 			}
+			if (GET_CRAFT_TYPE(craft) == CRAFT_TYPE_WORKFORCE) {
+				continue;	// don't show workforce
+			}
 		
 			// has right abil?
 			if (GET_CRAFT_ABILITY(craft) != NO_ABIL && !has_ability(ch, GET_CRAFT_ABILITY(craft))) {
@@ -2581,8 +2602,9 @@ ACMD(do_reforge) {
 			if (reforge_data[subcmd].ability != NO_ABIL) {
 				gain_ability_exp(ch, reforge_data[subcmd].ability, 50);
 			}
-
-			load_otrigger(obj);
+			
+			// this seems like it should not be running a load trigger
+			// load_otrigger(obj);
 		}
 	}
 	else if (is_abbrev(arg2, "superior")) {
@@ -2592,9 +2614,6 @@ ACMD(do_reforge) {
 		
 		if (OBJ_FLAGGED(obj, OBJ_SUPERIOR)) {
 			msg_to_char(ch, "It is already superior.\r\n");
-		}
-		else if (OBJ_FLAGGED(obj, OBJ_HARD_DROP | OBJ_GROUP_DROP)) {
-			msg_to_char(ch, "You cannot make an item superior if it came from a Hard, Group, or Boss mob.\r\n");
 		}
 		else if (!proto || !OBJ_FLAGGED(proto, OBJ_SCALABLE) || !(ctype = find_craft_for_obj_vnum(GET_OBJ_VNUM(obj)))) {
 			msg_to_char(ch, "It can't be made superior.\r\n");
@@ -2616,6 +2635,10 @@ ACMD(do_reforge) {
 			
 			new = read_object(GET_OBJ_VNUM(proto), TRUE);
 			GET_OBJ_EXTRA(new) |= GET_OBJ_EXTRA(obj) & preserve_flags;
+			
+			// ensure no hard/group
+			REMOVE_BIT(GET_OBJ_EXTRA(new), OBJ_HARD_DROP);
+			REMOVE_BIT(GET_OBJ_EXTRA(new), OBJ_GROUP_DROP);
 			
 			// transfer bindings
 			OBJ_BOUND_TO(new) = OBJ_BOUND_TO(obj);

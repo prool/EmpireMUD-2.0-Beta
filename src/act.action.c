@@ -131,7 +131,7 @@ const struct action_data_struct action_data[] = {
 	{ "chanting", "is chanting a strange song.", NOBITS, perform_ritual, NULL },	// ACT_CHANTING
 	{ "prospecting", "is prospecting.", ACTF_FAST_PROSPECT, process_prospecting, NULL },	// ACT_PROSPECTING
 	{ "filling", "is filling in the trench.", ACTF_HASTE | ACTF_FAST_CHORES | ACTF_FAST_EXCAVATE, process_fillin, NULL },	// ACT_FILLING_IN
-	{ "reclaiming", "is reclaiming this acre!", NOBITS, process_reclaim, NULL },	// ACT_RECLAIMING
+	{ "reclaiming", "is reclaiming the area!", NOBITS, process_reclaim, NULL },	// ACT_RECLAIMING
 	{ "escaping", "is running toward the window!", NOBITS, process_escaping, NULL },	// ACT_ESCAPING
 	{ "running", "runs past you.", ACTF_ALWAYS_FAST | ACTF_EVEN_FASTER | ACTF_FASTER_BONUS | ACTF_ANYWHERE, process_running, cancel_movement_string },	// unused
 	{ "ritual", "is performing an arcane ritual.", NOBITS, perform_ritual, NULL },	// ACT_RITUAL
@@ -144,8 +144,8 @@ const struct action_data_struct action_data[] = {
 	{ "crafting", "is working on something.", NOBITS, process_gen_craft, cancel_gen_craft },	// ACT_GEN_CRAFT
 	{ "sailing", "is sailing the ship.", ACTF_VEHICLE_SPEEDS | ACTF_SITTING, process_driving, cancel_driving },	// ACT_SAILING
 	{ "piloting", "is piloting the vessel.", ACTF_VEHICLE_SPEEDS | ACTF_SITTING, process_driving, cancel_driving },	// ACT_PILOTING
-	{ "skillswap", "is swapping skill sets.", NOBITS, process_swap_skill_sets, NULL },	// ACT_SWAP_SKILL_SETS
-	{ "maintenance", "is repairing the building.", ACTF_HASTE | ACTF_FAST_CHORES, process_maintenance, NULL },	// ACT_MAINTENANCE
+	{ "skill-swapping", "is swapping skill sets.", NOBITS, process_swap_skill_sets, NULL },	// ACT_SWAP_SKILL_SETS
+	{ "repairing", "is repairing the building.", ACTF_HASTE | ACTF_FAST_CHORES, process_maintenance, NULL },	// ACT_MAINTENANCE
 	{ "burning", "is preparing to burn the area.", ACTF_FAST_CHORES, process_burn_area, NULL },	// ACT_BURN_AREA
 	{ "hunting", "is low to the ground, hunting.", ACTF_FINDER, process_hunting, NULL },	// ACT_HUNTING
 	{ "foraging", "is looking around for food.", ACTF_ALWAYS_FAST | ACTF_FINDER | ACTF_HASTE, process_foraging, NULL },	// ACT_FORAGING
@@ -205,7 +205,7 @@ const struct gen_interact_data_t gen_interact_data[] = {
 * @param char_data *ch The actor.
 */
 void cancel_action(char_data *ch) {
-	if (GET_ACTION(ch) != ACT_NONE) {
+	if (!IS_NPC(ch) && GET_ACTION(ch) != ACT_NONE) {
 		// is there a cancel function?
 		if (action_data[GET_ACTION(ch)].cancel_function != NULL) {
 			(action_data[GET_ACTION(ch)].cancel_function)(ch);
@@ -316,6 +316,10 @@ void update_actions(void) {
 			continue;
 		}
 		if (GET_POS(ch) < POS_SITTING || GET_POS(ch) == POS_FIGHTING || (!IS_SET(act_flags, ACTF_SITTING) && GET_POS(ch) < POS_STANDING)) {
+			// in most positions, they should know why they're stopping... these two are an exception:
+			if (GET_POS(ch) == POS_SITTING || GET_POS(ch) == POS_RESTING) {
+				msg_to_char(ch, "You can't keep %s while %s.\r\n", action_data[GET_ACTION(ch)].name, (GET_POS(ch) == POS_RESTING ? "resting" : "sitting"));
+			}
 			cancel_action(ch);
 			continue;
 		}
@@ -2132,7 +2136,7 @@ void process_mining(char_data *ch) {
 		amt = round(GET_OBJ_CURRENT_SCALE_LEVEL(tool) / 6.66) * (OBJ_FLAGGED(tool, OBJ_SUPERIOR) ? 2 : 1);
 		amt = MAX(min_progress_per_mine, amt);
 		
-		GET_ACTION_TIMER(ch) -= GET_STRENGTH(ch) + 3 * (tool ? get_base_dps(tool) : 0);
+		GET_ACTION_TIMER(ch) -= amt;
 
 		act("You pick at the walls with $p, looking for ore.", FALSE, ch, tool, 0, TO_CHAR | TO_SPAMMY);
 		act("$n picks at the walls with $p, looking for ore.", FALSE, ch, tool, 0, TO_ROOM | TO_SPAMMY);
@@ -3147,8 +3151,8 @@ ACMD(do_forage) {
 	else if (GET_ACTION(ch) != ACT_NONE) {
 		send_to_char("You're already busy.\r\n", ch);
 	}
-	else if (!IS_OUTDOORS(ch)) {
-		send_to_char("You can only forage for things outdoors!\r\n", ch);
+	else if (!IS_OUTDOORS(ch) && !can_interact_room(IN_ROOM(ch), INTERACT_FORAGE)) {
+		send_to_char("You don't see anything to forage for here.\r\n", ch);
 	}
 	else if (!can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED)) {
 		msg_to_char(ch, "You don't have permission to forage for anything here.\r\n");

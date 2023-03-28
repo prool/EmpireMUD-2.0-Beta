@@ -469,6 +469,8 @@ typedef struct vehicle_data vehicle_data;
 #define REQ_LEVEL_UNDER  38
 #define REQ_LEVEL_OVER  39
 #define REQ_OWN_VEHICLE_FUNCTION  40
+#define REQ_SPEAK_LANGUAGE  41
+#define REQ_RECOGNIZE_LANGUAGE  42
 
 
 // REQ_AMT_x: How numbers displayed for different REQ_ types
@@ -540,6 +542,7 @@ typedef struct vehicle_data vehicle_data;
 #define ABILF_RANGED_ONLY  BIT(12)	// m. requires ranged combat
 #define ABILF_IGNORE_SUN  BIT(13)	// n. vampire ability ignores sunlight
 #define ABILF_UNSCALED_BUFF  BIT(14)	// o. buff does not scale at all (fixed values)
+#define ABILF_LIMIT_CROWD_CONTROL  BIT(15)	// p. cancels same buff on others in the room (using affectvnum)
 
 #define ABILITY_ROLE_FLAGS  (ABILF_CASTER_ROLE | ABILF_HEALER_ROLE | ABILF_MELEE_ROLE | ABILF_TANK_ROLE)
 
@@ -554,6 +557,9 @@ typedef struct vehicle_data vehicle_data;
 #define ABILT_COMPANION  BIT(7)	// grants companions
 #define ABILT_SUMMON_ANY  BIT(8)	// player can summon from a list of mobs
 #define ABILT_SUMMON_RANDOM  BIT(9)	// player can summon a mob at random from a list
+#define ABILT_MORPH  BIT(10)	// ability has morphs that require it
+#define ABILT_AUGMENT  BIT(11)	// related to augments/enchants
+#define ABILT_CUSTOM  BIT(12)	// ability is hard-coded
 /*
 #define ABILT_UNAFFECTS  BIT(2)
 #define ABILT_POINTS  BIT(3)	// e.g. heal?
@@ -1005,6 +1011,7 @@ typedef struct vehicle_data vehicle_data;
 #define AFF_IMMUNE_DAMAGE  BIT(35)	// J. Cannot take damage
 #define AFF_NO_WHERE  BIT(36)	// K. cannot be found using 'WHERE'
 #define AFF_WATERWALK  BIT(37)	// L. won't drown or be affected by water restrictions
+#define AFF_LIGHT  BIT(38)	// M. has a light (lights up the room)
 
 
 // Injury flags -- IS_INJURED
@@ -1258,7 +1265,8 @@ typedef struct vehicle_data vehicle_data;
 #define OFFENSE_BURNED_BUILDING  8
 #define OFFENSE_BURNED_VEHICLE  9
 #define OFFENSE_PICKPOCKETED  10
-#define NUM_OFFENSES  11	// total
+#define OFFENSE_RECLAIMED  11
+#define NUM_OFFENSES  12	// total
 
 
 // OFF_x: offense flags
@@ -1554,6 +1562,7 @@ typedef struct vehicle_data vehicle_data;
 #define GENERIC_CURRENCY  5	// tokens, for shops
 #define GENERIC_COMPONENT  6	// types of generic objects
 #define GENERIC_MOON  7	// moon in the sky
+#define GENERIC_LANGUAGE  8	// language a player can speak
 
 
 // GEN_x: generic flags
@@ -1566,6 +1575,12 @@ typedef struct vehicle_data vehicle_data;
 
 // how many ints a generic stores (update write_generic_to_file if you change this)
 #define NUM_GENERIC_VALUES  4
+
+
+// LANG_x: how well someone speaks a language
+#define LANG_UNKNOWN  0	// default: does not speak it, cannot recognize it
+#define LANG_RECOGNIZE  1	// knows which language it is, but can't speak it
+#define LANG_SPEAK  2	// full comprehension and speaking
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -1608,6 +1623,7 @@ typedef struct vehicle_data vehicle_data;
 #define MOB_SILENT  BIT(33)	// H. will not set off custom strings
 #define MOB_COINS  BIT(34)	// I. mob drops coins on death/pickpocket
 #define MOB_NO_COMMAND  BIT(35)	// J. mob cannot be commanded/ordered
+#define MOB_NO_UNCONSCIOUS  BIT(36)	// K. mob cannot be knocked out; it's always killed instead
 
 
 // MOB_CUSTOM_x: custom message types
@@ -2511,6 +2527,7 @@ typedef enum {
 #define SYS_SYSTEM  BIT(9)	// system stuff
 #define SYS_VALID  BIT(10)	// validation logs
 #define SYS_EMPIRE  BIT(11)	// empire-related logs
+#define SYS_EVENT  BIT(12)	// event news and points
 
 
 // WAIT_x: Wait types for the command_lag() function.
@@ -2538,7 +2555,7 @@ typedef enum {
 // PRG_x: progress flags
 #define PRG_IN_DEVELOPMENT  BIT(0)	// a. not available to players
 #define PRG_PURCHASABLE  BIT(1)	// b. can buy it
-#define PRG_SCRIPT_ONLY  BIT(2)	// c. cannot buy/achieve it
+#define PRG_NO_AUTOSTART  BIT(2)	// c. only started or added via script/quest
 #define PRG_HIDDEN  BIT(3)	// d. progress does not show up
 #define PRG_NO_ANNOUNCE  BIT(4)	// e. never announces when this goal is achieved
 #define PRG_NO_PREVIEW  BIT(5)	// f. cannot view it until you're on it
@@ -2553,6 +2570,8 @@ typedef enum {
 #define PRG_PERK_TERRITORY_PER_GREATNESS  5	// increases territory per greatness
 #define PRG_PERK_WORKFORCE_CAP  6	// higher workforce caps
 #define PRG_PERK_TERRITORY  7	// grants bonus territory (flat rate)
+#define PRG_PERK_SPEAK_LANGUAGE  8	// whole empire may speak
+#define PRG_PERK_RECOGNIZE_LANGUAGE  9	// whole empire may recognize
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -2592,6 +2611,10 @@ typedef enum {
 #define QR_REPUTATION  7
 #define QR_CURRENCY  8
 #define QR_EVENT_POINTS  9
+#define QR_SPEAK_LANGUAGE  10
+#define QR_RECOGNIZE_LANGUAGE  11
+#define QR_GRANT_PROGRESS  12
+#define QR_START_PROGRESS  13
 
 
 // indicates empire (rather than misc) coins for a reward
@@ -3737,6 +3760,7 @@ struct room_template {
 	bitvector_t flags;	// RMT_
 	bitvector_t base_affects;	// ROOM_AFF_
 	bitvector_t functions;	// FNC_
+	rmt_vnum subzone;	// for subdividing where/shout/etc
 	
 	// lists
 	struct adventure_spawn *spawns;	// list of objs/mobs
@@ -3769,6 +3793,7 @@ struct archetype_data {
 	char *male_rank;
 	char *female_rank;
 	
+	generic_data *language;	// optional starting language (generic)
 	struct archetype_skill *skills;	// linked list
 	struct archetype_gear *gear;	// linked list
 	int attributes[NUM_ATTRIBUTES];	// starting attributes (default 1)
@@ -4007,6 +4032,7 @@ struct mob_special_data {
 	int max_scale_level;	// maximum level this mob may be scaled to
 	
 	int name_set;	// NAMES_x
+	any_vnum language;	// default language (NOTHING to use global default instead)
 	struct custom_message *custom_msgs;	// any custom messages
 	faction_data *faction;	// if any
 	
@@ -4386,6 +4412,14 @@ struct player_ability_data {
 };
 
 
+// languages a player knows -- also used for empires
+struct player_language {
+	any_vnum vnum;	// vnum of the language (generic)
+	byte level;	// LANG_ constant for how well they speak it
+	UT_hash_handle hh;	// player's language hash
+};
+
+
 // remembers a tile a player has seen before
 struct player_map_memory {
 	room_vnum vnum;	// map loc
@@ -4546,6 +4580,8 @@ struct player_special_data {
 	ubyte class_progression;	// % of the way from SPECIALTY_SKILL_CAP to CLASS_SKILL_CAP
 	ubyte class_role;	// ROLE_ chosen by the player
 	class_data *character_class;  // character's class as determined by top skills
+	any_vnum speaking;	// current language
+	struct player_language *languages;	// languages the player speaks/recognizes
 	struct player_craft_data *learned_crafts;	// crafts learned from patterns
 	struct minipet_data *minipets;	// collection of summonable pets
 	struct ability_gain_hook *gain_hooks;	// hash table of when to gain ability xp
@@ -5275,6 +5311,7 @@ struct empire_data {
 	struct offense_data *offenses;	// doubly-linked list
 	struct empire_goal *goals;	// current goal trackers (hash by vnum)
 	struct empire_completed_goal *completed_goals;	// actually a hash (vnum)
+	struct player_language *languages;	// languages available to the whole empire
 	struct player_craft_data *learned_crafts;	// crafts available to the whole empire
 	struct theft_log *theft_logs;	// recently stolen items
 	struct empire_production_total *production_totals;	// totals of items produced by the empire (hash by vnum)

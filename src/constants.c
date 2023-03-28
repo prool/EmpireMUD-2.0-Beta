@@ -112,7 +112,7 @@ const char *reboot_type[] = { "reboot", "shutdown" };
  //////////////////////////////////////////////////////////////////////////////
 //// ABILITY CONSTANTS ///////////////////////////////////////////////////////
 
-// ABILF_x: ability flags
+// ABILF_x (1/2): ability flags
 const char *ability_flags[] = {
 	"VIOLENT",	// 0
 	"COUNTERSPELLABLE",
@@ -129,11 +129,34 @@ const char *ability_flags[] = {
 	"RANGED-ONLY",
 	"IGNORE-SUN",
 	"UNSCALED-BUFF",
+	"LIMIT-CROWD-CONTROL",
 	"\n"
 };
 
 
-// ABILT_x: ability type flags
+// ABILF_x (2/2): ability flags shown to players as notes
+const char *ability_flag_notes[] = {
+	"violent",	// 0
+	"counterspellable",
+	"toggles on/off",
+	"",	// INVISIBLE
+	"",	// !ENGAGE
+	"ranged",	// 5
+	"can't be used in animal form",
+	"can't be used while invulnerable",
+	"stronger in caster role",
+	"stronger in healer role",
+	"stronger in melee role",	// 10
+	"stronger in tank role",
+	"can only be used at range",
+	"unaffected by sun",
+	"",	// UNSCALED-BUFF
+	"limited crowd control",
+	"\n"
+};
+
+
+// ABILT_x (1/2): ability type flags
 const char *ability_type_flags[] = {
 	"CRAFT",	// 0
 	"BUFF",
@@ -145,6 +168,40 @@ const char *ability_type_flags[] = {
 	"COMPANION",
 	"SUMMON-ANY",
 	"SUMMON-RANDOM",
+	"MORPH",
+	"AUGMENT",
+	"CUSTOM",
+/*
+	"UNAFFECTS",
+	"POINTS",
+	"ALTER-OBJS",
+	"GROUPS",
+	"MASSES",
+	"AREAS",
+	"CREATIONS",
+	"MANUAL",
+	"ROOMS",
+	"CRAFT",
+*/
+	"\n"
+};
+
+
+// ABILT_x (2/2): ability types as shown to players
+const char *ability_type_notes[] = {
+	"crafting",	// 0
+	"buff",
+	"damage",
+	"damage-over-time",
+	"player tech",
+	"passive buff",	// 5
+	"ready weapon",
+	"companion",
+	"summon",
+	"summon",
+	"morphing",
+	"augment",
+	"custom",
 /*
 	"UNAFFECTS",
 	"POINTS",
@@ -958,6 +1015,7 @@ const char *syslog_types[] = {
 	"system",
 	"validation",
 	"empire",
+	"event",
 	"\n"
 };
 
@@ -1259,6 +1317,7 @@ const char *affected_bits[] = {
 	"IMMUNE-DAMAGE",	// 35
 	"!WHERE",
 	"WATERWALK",
+	"LIGHT",
 	"\n"
 };
 
@@ -1302,6 +1361,7 @@ const char *affected_bits_consider[] = {
 	"",	// 35 - immune-damage
 	"",	// !where
 	"",	// waterwalk
+	"",	// light
 	"\n"
 };
 
@@ -1343,6 +1403,7 @@ const bool aff_is_bad[] = {
 	TRUE,
 	FALSE,	// hard-stunned (not 'bad' because it's uncleansable)
 	FALSE,	// 35 - immune-damage
+	FALSE,
 	FALSE,
 	FALSE,
 };
@@ -1728,7 +1789,7 @@ const char *craft_flag_for_info[] = {
 	"requires fire",
 	"",	// soup
 	"",	// in-dev
-	"",	// upgrade
+	"is an upgrade",	// upgrade
 	"",	// dismantle-only
 	"in-city only",
 	"",	// vehicle
@@ -1809,6 +1870,7 @@ const struct offense_info_type offense_info[NUM_OFFENSES] = {
 	{ "burned building", 5 },
 	{ "burned vehicle", 5 },
 	{ "pickpocketed", 5 },	// 10
+	{ "reclaimed a tile", 2 }
 };
 
 
@@ -2117,6 +2179,7 @@ const char *generic_types[] = {
 	"CURRENCY",	// 5
 	"COMPONENT",
 	"MOON",
+	"LANGUAGE",
 	"\n"
 };
 
@@ -2131,6 +2194,7 @@ const bool generic_types_uses_in_dev[] = {
 	FALSE,	// CURRENCY	// 5
 	FALSE,	// COMPONENT
 	TRUE,	// MOON
+	TRUE,	// LANGUAGE
 };
 
 
@@ -2138,6 +2202,15 @@ const bool generic_types_uses_in_dev[] = {
 const char *generic_flags[] = {
 	"BASIC",	// 0
 	"IN-DEVELOPMENT",
+	"\n"
+};
+
+
+// LANG_x: how well someone speaks a language
+const char *language_types[] = {
+	"unknown",	// 0
+	"recognizes",
+	"speaks",
 	"\n"
 };
 
@@ -2183,6 +2256,7 @@ const char *action_bits[] = {
 	"SILENT",
 	"COINS",
 	"NO-COMMAND",	// 35
+	"NO-UNCONSCIOUS",
 	"\n"
 };
 
@@ -2343,7 +2417,7 @@ const struct wear_data_type wear_data[NUM_WEARS] = {
 	{ "<worn around neck> ", "neck", ITEM_WEAR_NECK, TRUE, 1.0, NO_WEAR, "You're already wearing enough around your neck.", "$n wears $p around $s neck.", "You wear $p around your neck.", TRUE, TRUE },
 	{ " <worn as clothes> ", "clothes", ITEM_WEAR_CLOTHES, TRUE, 0, NO_WEAR, "You're already wearing $p as clothes.", "$n wears $p as clothing.", "You wear $p as clothing.", TRUE, TRUE },
 	{ "   <worn as armor> ", "armor", ITEM_WEAR_ARMOR, TRUE, 2.0, NO_WEAR, "You're already wearing $p as armor.", "$n wears $p as armor.", "You wear $p as armor.", TRUE, TRUE },
-	{ " <worn about body> ", "body", ITEM_WEAR_ABOUT, TRUE, 1.0, NO_WEAR, "You're already wearing $p about your body.", "$n wears $p about $s body.", "You wear $p around your body.", TRUE, TRUE },
+	{ " <worn about body> ", "about", ITEM_WEAR_ABOUT, TRUE, 1.0, NO_WEAR, "You're already wearing $p about your body.", "$n wears $p about $s body.", "You wear $p around your body.", TRUE, TRUE },
 	{ "    <worn on arms> ", "arms", ITEM_WEAR_ARMS, TRUE, 1.0, NO_WEAR, "You're already wearing $p on your arms.", "$n wears $p on $s arms.", "You wear $p on your arms.", TRUE, TRUE },
 	{ "  <worn on wrists> ", "wrists", ITEM_WEAR_WRISTS, TRUE, 1.0, NO_WEAR, "You're already wearing $p on your wrists.", "$n wears $p on $s wrists.", "You wear $p on your wrists.", TRUE, TRUE },
 	{ "   <worn on hands> ", "hands", ITEM_WEAR_HANDS, TRUE, 1.0, NO_WEAR, "You're already wearing $p on your hands.", "$n puts $p on $s hands.", "You put $p on your hands.", TRUE, TRUE },
@@ -2889,7 +2963,7 @@ const char *progress_types[] = {
 const char *progress_flags[] = {
 	"IN-DEVELOPMENT",
 	"PURCHASABLE",
-	"SCRIPT-ONLY",
+	"NO-AUTOSTART",
 	"HIDDEN",
 	"NO-ANNOUNCE",
 	"NO-PREVIEW",
@@ -2907,6 +2981,8 @@ const char *progress_perk_types[] = {
 	"Greatness-territory",
 	"Workforce-cap",
 	"Territory",
+	"Speak-language",
+	"Recognize-language",
 	"\n"
 };
 
@@ -2955,6 +3031,10 @@ const char *quest_reward_types[] = {
 	"REPUTATION",
 	"CURRENCY",
 	"EVENT-POINTS",
+	"SPEAK-LANGUAGE",	// 10
+	"RECOGNIZE-LANGUAGE",
+	"GRANT-PROGRESS",
+	"START-PROGRESS",
 	"\n",
 };
 
@@ -4420,6 +4500,8 @@ const char *requirement_types[] = {
 	"LEVEL-UNDER",
 	"LEVEL-OVER",
 	"OWN-VEHICLE-FUNCTION",	// 40
+	"SPEAK-LANGUAGE",
+	"RECOGNIZE-LANGUAGE",
 	"\n",
 };
 
@@ -4466,6 +4548,8 @@ const bool requirement_amt_type[] = {
 	REQ_AMT_NONE,	// event not running
 	REQ_AMT_THRESHOLD,	// level under
 	REQ_AMT_THRESHOLD,	// level over
+	REQ_AMT_NONE,	// speak-language
+	REQ_AMT_NONE,	// recognize-language
 };
 
 
@@ -4511,6 +4595,8 @@ const bool requirement_needs_tracker[] = {
 	FALSE,	// event not running
 	FALSE,	// level under
 	FALSE,	// level over
+	FALSE,	// speak-language
+	FALSE,	// recognize-language
 };
 
 

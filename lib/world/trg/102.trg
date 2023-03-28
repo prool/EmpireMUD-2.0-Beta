@@ -52,7 +52,7 @@ done
 Zelkab Death~
 0 f 100
 ~
-if %self.mob_flagged(NO-CORPSE)% || !%self.varexists(difficulty)%
+if !%self.varexists(difficulty)%
   * This is probably a summoned copy.
   halt
 end
@@ -62,9 +62,6 @@ set difficulty %self.difficulty%
 set mob %self.room.people%
 remote difficulty %mob.id%
 set mob_diff %difficulty%
-if %mob.vnum% >= 10204 && %mob.vnum% <= 10205
-  eval mob_diff %mob_diff% + 1
-end
 dg_affect %mob% !ATTACK on 5
 nop %mob.remove_mob_flag(HARD)%
 nop %mob.remove_mob_flag(GROUP)%
@@ -111,16 +108,13 @@ done
 Garlgarl Death~
 0 f 100
 ~
-if %self.mob_flagged(NO-CORPSE)% || !%self.varexists(difficulty)%
+if !%self.varexists(difficulty)%
   * This is probably a summoned copy.
   halt
 end
 return 0
 set difficulty %self.difficulty%
-set mob_diff %difficulty%
-if %mob.vnum% >= 10204 && %mob.vnum% <= 10205
-  eval mob_diff %mob_diff% + 1
-end
+eval mob_diff %difficulty% - 1
 set mob_num 10202
 while %mob_num% <= 10203
   %load% mob %mob_num%
@@ -129,7 +123,10 @@ while %mob_num% <= 10203
   dg_affect %mob% !ATTACK on 5
   nop %mob.remove_mob_flag(HARD)%
   nop %mob.remove_mob_flag(GROUP)%
-  if %mob_diff% == 1
+  if %mob_diff% == 0
+    %mob.remove_mob_flag(DPS)%
+    %mob.remove_mob_flag(TANK)%
+  elseif %mob_diff% == 1
     * Then we don't need to do anything
   elseif %mob_diff% == 2
     nop %mob.add_mob_flag(HARD)%
@@ -159,7 +156,7 @@ Filks Archer Combat~
 Filks Death~
 0 f 100
 ~
-if %self.mob_flagged(NO-CORPSE)% || !%self.varexists(difficulty)%
+if !%self.varexists(difficulty)%
   * This is probably a summoned copy.
   halt
 end
@@ -178,9 +175,6 @@ if !%found%
   set mob %self.room.people%
   remote difficulty %mob.id%
   set mob_diff %difficulty%
-  if %mob.vnum% >= 10204 && %mob.vnum% <= 10205
-    eval mob_diff %mob_diff% + 1
-  end
   dg_affect %mob% !ATTACK on 5
   nop %mob.remove_mob_flag(HARD)%
   nop %mob.remove_mob_flag(GROUP)%
@@ -213,7 +207,7 @@ Walts Sapper Combat~
 Walts Death~
 0 f 100
 ~
-if %self.mob_flagged(NO-CORPSE)% || !%self.varexists(difficulty)%
+if !%self.varexists(difficulty)%
   * This is probably a summoned copy.
   halt
 end
@@ -232,9 +226,6 @@ if !%found%
   set mob %self.room.people%
   remote difficulty %mob.id%
   set mob_diff %difficulty%
-  if %mob.vnum% >= 10204 && %mob.vnum% <= 10205
-    eval mob_diff %mob_diff% + 1
-  end
   dg_affect %mob% !ATTACK on 5
   nop %mob.remove_mob_flag(HARD)%
   nop %mob.remove_mob_flag(GROUP)%
@@ -280,7 +271,7 @@ done
 Nilbog Death~
 0 f 100
 ~
-if %self.mob_flagged(NO-CORPSE)% || !%self.varexists(difficulty)%
+if !%self.varexists(difficulty)%
   * This is probably a summoned copy.
   halt
 end
@@ -290,9 +281,6 @@ set difficulty %self.difficulty%
 set mob %self.room.people%
 remote difficulty %mob.id%
 set mob_diff %difficulty%
-if %mob.vnum% >= 10204 && %mob.vnum% <= 10205
-  eval mob_diff %mob_diff% + 1
-end
 dg_affect %mob% !ATTACK on 5
 nop %mob.remove_mob_flag(HARD)%
 nop %mob.remove_mob_flag(GROUP)%
@@ -333,7 +321,7 @@ switch %random.4%
 done
 ~
 #10216
-Filks Respawn~
+Filks Respawn - deprecated~
 0 b 100
 ~
 * Respawns Walts if needed
@@ -354,11 +342,12 @@ if (!%found%)
   if %walts%
     %echo% ~%walts% respawns.
     nop %walts.add_mob_flag(!LOOT)%
+    nop %walts.add_mob_flag(NO-CORPSE)%
   end
 end
 ~
 #10217
-Walts Respawn~
+Walts Respawn - deprecated~
 0 b 100
 ~
 * Respawns Filks if needed
@@ -379,6 +368,7 @@ if (!%found%)
   if %filks%
     %echo% ~%filks% respawns.
     nop %filks.add_mob_flag(!LOOT)%
+    nop %filks.add_mob_flag(NO-CORPSE)%
   end
 end
 ~
@@ -392,13 +382,13 @@ set fighting 0
 set person %room.people%
 while %person%
   if %person.vnum% == 10202
-    if %person.fighting% || %person.mob_flagged(NO-CORPSE)%
+    if %person.fighting% || %person.disabled%
       set fighting 1
     end
     set goblin %person%
     set filks_present 1
   elseif %person.vnum% == 10203
-    if %person.fighting% || %person.mob_flagged(NO-CORPSE)%
+    if %person.fighting% || %person.disabled%
       set fighting 1
     end
     set walts_present 1
@@ -413,6 +403,7 @@ if %filks_present% && !%walts_present% && !%fighting%
   if %new_mob.vnum% == 10203
     %echo% ~%new_mob% respawns.
     nop %new_mob.add_mob_flag(!LOOT)%
+    nop %new_mob.add_mob_flag(NO-CORPSE)%
   end
 elseif %walts_present% && !%filks_present% && !%fighting%
   * Respawn Filks
@@ -421,18 +412,19 @@ elseif %walts_present% && !%filks_present% && !%fighting%
   if %new_mob.vnum% == 10202
     %echo% ~%new_mob% respawns.
     nop %new_mob.add_mob_flag(!LOOT)%
+    nop %new_mob.add_mob_flag(NO-CORPSE)%
   end
 end
 if %new_mob%
   set difficulty %goblin.difficulty%
   remote difficulty %new_mob.id%
-  set mob_diff %difficulty%
-  if %mob.vnum% >= 10204 && %mob.vnum% <= 10205
-    eval mob_diff %mob_diff% + 1
-  end
+  eval mob_diff %difficulty% - 1
   nop %new_mob.remove_mob_flag(HARD)%
   nop %new_mob.remove_mob_flag(GROUP)%
-  if %mob_diff% == 1
+  if %mob_diff% == 0
+    %mob.remove_mob_flag(DPS)%
+    %mob.remove_mob_flag(TANK)%
+  elseif %mob_diff% == 1
     * Then we don't need to do anything
   elseif %mob_diff% == 2
     nop %new_mob.add_mob_flag(HARD)%
@@ -442,6 +434,7 @@ if %new_mob%
     nop %new_mob.add_mob_flag(HARD)%
     nop %new_mob.add_mob_flag(GROUP)%
   end
+  nop %new_mob.unscale_and_reset%
 end
 ~
 #10225
@@ -692,11 +685,11 @@ if %actor.is_pc% && %actor.empire%
 end
 ~
 #10256
-Primeval adventure completer~
+Primeval: Start delayed despawn~
 0 f 100
 ~
 %buildingecho% %self.room% A bone-shattering roar echoes through the air!
-%adventurecomplete%
+%at% i10251 %load% mob 10276
 return 0
 ~
 #10257
@@ -1323,6 +1316,22 @@ done
 %send% %actor% You study @%self% and learn: %name_list%
 %echoaround% %actor% ~%actor% studies @%self%.
 %purge% %self%
+~
+#10276
+Primeval: Initialize delayed despawner~
+0 n 100
+~
+set spawn_time %timestamp%
+remote spawn_time %self.id%
+~
+#10277
+Primeval: Delayed despawn~
+0 ab 10
+~
+if %self.var(spawn_time,0)% + 1800 < %timestamp%
+  %adventurecomplete%
+  %purge% %self%
+end
 ~
 #10296
 Primeval Portal loot replacer~
