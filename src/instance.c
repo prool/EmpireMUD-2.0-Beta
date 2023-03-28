@@ -1144,7 +1144,7 @@ void despawn_instance_vehicles(struct instance_data *inst) {
 		
 		// call destroy trig: if it returns 0, we won't try to echo
 		// but this purge CANNOT be prevented by the trigger
-		if (destroy_vtrigger(veh)) {		
+		if (destroy_vtrigger(veh, "despawn")) {		
 			if (ROOM_PEOPLE(IN_ROOM(veh))) {
 				act("$V is gone.", FALSE, ROOM_PEOPLE(IN_ROOM(veh)), NULL, veh, TO_CHAR | TO_ROOM);
 			}
@@ -2139,6 +2139,65 @@ void remove_instance_fake_loc(struct instance_data *inst) {
 	}
 	
 	need_instance_save = TRUE;
+}
+
+
+/**
+* Determines if two rooms are in the same "space" using subzones. Players who
+* are not in instances or not in a subzone are all considered to be in the same
+* global world; however, instances can be subdivided into different spaces or
+* subzones for commands like "where" and "shout".
+*
+* @param room_data *a The first location.
+* @param room_data *b The second location.
+* @return bool TRUE if a and b are in the same subzone/space; FALSE if not.
+*/
+bool same_subzone(room_data *a, room_data *b) {
+	rmt_vnum subzone_a, subzone_b;
+	struct instance_data *inst_a, *inst_b;
+	bool noloc_a, noloc_b;
+	
+	if (!a || !b) {
+		return FALSE;	// safety first
+	}
+	
+	subzone_a = GET_ROOM_TEMPLATE(a) ? GET_RMT_SUBZONE(GET_ROOM_TEMPLATE(a)) : NOWHERE;
+	subzone_b = GET_ROOM_TEMPLATE(b) ? GET_RMT_SUBZONE(GET_ROOM_TEMPLATE(b)) : NOWHERE;
+	
+	if (subzone_a == NOWHERE && subzone_b == NOWHERE) {
+		return TRUE;	// neither player is in a subzone
+	}
+	
+	noloc_a = RMT_FLAGGED(a, RMT_NO_LOCATION) ? TRUE : FALSE;
+	noloc_b = RMT_FLAGGED(b, RMT_NO_LOCATION) ? TRUE : FALSE;
+	
+	if (subzone_a == subzone_b) {
+		// same non-nowhere subzone
+		inst_a = COMPLEX_DATA(a) ? COMPLEX_DATA(a)->instance : NULL;
+		inst_b = COMPLEX_DATA(b) ? COMPLEX_DATA(b)->instance : NULL;
+		
+		if (inst_a == inst_b) {
+			return TRUE;	// same subzone, same instance (ignore noloc)
+		}
+		if (inst_a && inst_b && INST_ADVENTURE(inst_a) != INST_ADVENTURE(inst_b)) {
+			return (noloc_a == noloc_b);	// same subzone, different adventure (use noloc)
+		}
+		if (inst_a && inst_b) {
+			return (!noloc_a && !noloc_b);	// same subzone, same adventure, different instance: only if BOTH aren't noloc
+		}
+		
+		// if we got here, they are almost certainly separate
+		// including same subzone but different instance of the same adventure...
+		// TODO: might want a flag that says different instances of the same adventure are in the same subzone
+		return FALSE;
+	}
+	else {
+		// different non-nowhere subzone: always different subzones:
+		return FALSE;
+	}
+	
+	// did we somehow get here? probably separate subzones
+	return FALSE;
 }
 
 

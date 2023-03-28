@@ -98,6 +98,7 @@ ACMD(do_coins);
 ACMD(do_collapse);
 ACMD(do_colorburst);
 ACMD(do_combine);
+ACMD(do_compare);
 ACMD(do_command);
 ACMD(do_commands);
 ACMD(do_companions);
@@ -158,7 +159,6 @@ ACMD(do_empires);
 ACMD(do_endwar);
 ACMD(do_enervate);
 ACMD(do_enroll);
-ACMD(do_entangle);
 ACMD(do_enter);
 ACMD(do_equipment);
 ACMD(do_esay);
@@ -385,6 +385,7 @@ ACMD(do_sneak);
 ACMD(do_snoop);
 ACMD(do_socials);
 ACMD(do_soulsight);
+ACMD(do_speak);
 ACMD(do_spec_comm);
 ACMD(do_specialize);
 ACMD(do_split);
@@ -501,6 +502,7 @@ ACMD(do_mtransform);
 ACMD(do_mbuildingecho);
 ACMD(do_mown);
 ACMD(do_mregionecho);
+ACMD(do_msubecho);
 ACMD(do_mvehicleecho);
 ACMD(do_vdelete);
 ACMD(do_mfollow);
@@ -565,6 +567,8 @@ cpp_extern const struct command_info cmd_info[] = {
 	
 	SIMPLE_CMD( "at", POS_DEAD, do_at, LVL_START_IMM, CTYPE_IMMORTAL ),
 	SIMPLE_CMD( "abandon", POS_RESTING, do_abandon, NO_MIN, CTYPE_EMPIRE ),
+	SIMPLE_CMD( "ability", POS_DEAD, do_skills, NO_MIN, CTYPE_UTIL ),
+	SIMPLE_CMD( "abilities", POS_DEAD, do_skills, NO_MIN, CTYPE_UTIL ),
 	SCMD_CMD( "accept", POS_DEAD, do_accept, NO_MIN, CTYPE_UTIL, SCMD_ACCEPT ),
 	SIMPLE_CMD( "adventure", POS_RESTING, do_adventure, NO_MIN, CTYPE_UTIL ),
 	GRANT_CMD( "addnotes", POS_STANDING, do_addnotes, LVL_CIMPL, CTYPE_IMMORTAL, GRANT_EDITNOTES ),
@@ -629,6 +633,7 @@ cpp_extern const struct command_info cmd_info[] = {
 	SIMPLE_CMD( "collapse", POS_STANDING, do_collapse, NO_MIN, CTYPE_SKILL ),
 	ABILITY_CMD( "colorburst", POS_FIGHTING, do_colorburst, NO_MIN, CTYPE_COMBAT, ABIL_COLORBURST ),
 	SIMPLE_CMD( "combine", POS_RESTING, do_combine, NO_MIN, CTYPE_UTIL ),
+	SIMPLE_CMD( "compare", POS_RESTING, do_compare, NO_MIN, CTYPE_SKILL ),
 	ABILITY_CMD( "command", POS_STANDING, do_command, NO_MIN, CTYPE_SKILL, ABIL_VAMP_COMMAND ),
 	SCMD_CMD( "commands", POS_DEAD, do_commands, NO_MIN, CTYPE_UTIL, SCMD_COMMANDS ),
 	SIMPLE_CMD( "companions", POS_DEAD, do_companions, NO_MIN, CTYPE_SKILL ),
@@ -700,7 +705,6 @@ cpp_extern const struct command_info cmd_info[] = {
 	GRANT_CMD( "endwar", POS_DEAD, do_endwar, LVL_CIMPL, CTYPE_IMMORTAL, GRANT_EMPIRES ),
 	ABILITY_CMD( "enervate", POS_FIGHTING, do_enervate, NO_MIN, CTYPE_COMBAT, ABIL_ENERVATE ),
 	SIMPLE_CMD( "enter", POS_STANDING, do_enter, NO_MIN, CTYPE_MOVE ),
-	ABILITY_CMD( "entangle", POS_FIGHTING, do_entangle, NO_MIN, CTYPE_COMBAT, ABIL_ENTANGLE ),
 	SIMPLE_CMD( "enroll", POS_DEAD, do_enroll, NO_MIN, CTYPE_EMPIRE ),
 	SIMPLE_CMD( "equipment", POS_DEAD, do_equipment, NO_MIN, CTYPE_UTIL ),
 	SIMPLE_CMD( "esay", POS_DEAD, do_esay, NO_MIN, CTYPE_EMPIRE ),
@@ -793,7 +797,7 @@ cpp_extern const struct command_info cmd_info[] = {
 	SIMPLE_CMD( "islands", POS_DEAD, do_islands, NO_MIN, CTYPE_EMPIRE ),
 
 	ABILITY_CMD( "jab", POS_FIGHTING, do_jab, NO_MIN, CTYPE_COMBAT, ABIL_JAB ),
-	SCMD_CMD( "junk", POS_RESTING, do_drop, NO_MIN, CTYPE_UTIL, SCMD_JUNK ),
+	STANDARD_CMD( "junk", POS_RESTING, do_drop, NO_MIN, NO_GRANTS, SCMD_JUNK, CTYPE_UTIL, CMD_NO_ABBREV, NO_ABIL ),
 
 	SIMPLE_CMD( "kill", POS_FIGHTING, do_hit, NO_MIN, CTYPE_COMBAT ),
 	SCMD_CMD( "keep", POS_DEAD, do_keep, NO_MIN, CTYPE_UTIL, SCMD_KEEP ),
@@ -966,7 +970,7 @@ cpp_extern const struct command_info cmd_info[] = {
 	ABILITY_CMD( "shadowstep", POS_STANDING, do_shadowstep, NO_MIN, CTYPE_MOVE, ABIL_SHADOWSTEP ),
 	STANDARD_CMD( "shear", POS_STANDING, do_shear, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_BUILD, CMD_NO_ANIMALS, NO_ABIL ),
 	SIMPLE_CMD( "sheathe", POS_RESTING, do_sheathe, NO_MIN, CTYPE_COMBAT ),
-	SIMPLE_CMD( "ship", POS_RESTING, do_ship, NO_MIN, CTYPE_EMPIRE ),
+	SIMPLE_CMD( "ship", POS_SLEEPING, do_ship, NO_MIN, CTYPE_EMPIRE ),
 	SIMPLE_CMD( "shoot", POS_FIGHTING, do_shoot, NO_MIN, CTYPE_COMBAT ),
 	SCMD_CMD( "shout", POS_RESTING, do_pub_comm, NO_MIN, CTYPE_COMM, SCMD_SHOUT ),
 	SIMPLE_CMD( "show", POS_DEAD, do_show, LVL_START_IMM, CTYPE_IMMORTAL ),
@@ -986,6 +990,7 @@ cpp_extern const struct command_info cmd_info[] = {
 	GRANT_CMD( "snoop", POS_DEAD, do_snoop, LVL_CIMPL, CTYPE_IMMORTAL, GRANT_SNOOP ),
 	SIMPLE_CMD( "socials", POS_DEAD, do_socials, NO_MIN, CTYPE_UTIL ),
 	ABILITY_CMD( "soulsight", POS_RESTING, do_soulsight, NO_MIN, CTYPE_SKILL, ABIL_SOULSIGHT ),
+	SIMPLE_CMD( "speak", POS_DEAD, do_speak, NO_MIN, CTYPE_UTIL ),
 	SIMPLE_CMD( "specialize", POS_STANDING, do_specialize, NO_MIN, CTYPE_UTIL ),
 	SIMPLE_CMD( "split", POS_RESTING, do_split, NO_MIN, CTYPE_UTIL ),
 	SIMPLE_CMD( "stand", POS_RESTING, do_stand, NO_MIN, CTYPE_MOVE ),
@@ -1127,6 +1132,7 @@ cpp_extern const struct command_info cmd_info[] = {
 	STANDARD_CMD( "mbuildingecho", POS_DEAD, do_mbuildingecho, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_IMMORTAL, CMD_IMM_OR_MOB_ONLY | CMD_STAY_HIDDEN, NO_ABIL ),
 	STANDARD_CMD( "mvehicleecho", POS_DEAD, do_mvehicleecho, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_IMMORTAL, CMD_IMM_OR_MOB_ONLY | CMD_STAY_HIDDEN, NO_ABIL ),
 	STANDARD_CMD( "mregionecho", POS_DEAD, do_mregionecho, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_IMMORTAL, CMD_IMM_OR_MOB_ONLY | CMD_STAY_HIDDEN, NO_ABIL ),
+	STANDARD_CMD( "msubecho", POS_DEAD, do_msubecho, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_IMMORTAL, CMD_IMM_OR_MOB_ONLY | CMD_STAY_HIDDEN, NO_ABIL ),
 	STANDARD_CMD( "mfollow", POS_DEAD, do_mfollow, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_IMMORTAL, CMD_IMM_OR_MOB_ONLY | CMD_STAY_HIDDEN, NO_ABIL ),
 
 	/* this must be last */
@@ -2479,6 +2485,9 @@ void nanny(descriptor_data *d, char *arg) {
 					/* undo it just in case they are set */
 					REMOVE_BIT(PLR_FLAGS(d->character), PLR_MAILING);
 
+					// flush messages because updated items appear here
+					send_stacked_msgs(d);
+					
 					SEND_TO_Q("Password: ", d);
 					ProtocolNoEcho(d, true);
 					d->idle_tics = 0;

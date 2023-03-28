@@ -550,6 +550,17 @@ void real_update_char(char_data *ch) {
 	
 	// put stuff that happens when dead here
 	
+	// DEAD players: check for auto-respawn
+	if (IS_DEAD(ch) && ch->desc && get_cooldown_time(ch, COOLDOWN_DEATH_RESPAWN) == 0) {
+		do_respawn(ch, "", 0, 0);
+		return;
+	}
+	
+	// DEAD players: check idle early
+	if (IS_DEAD(ch) && !IS_NPC(ch) && (GET_IDNUM(ch) % REAL_UPDATES_PER_MUD_HOUR) == point_update_cycle && !check_idling(ch)) {
+		return;
+	}
+	
 	// everything beyond here only matters if still alive
 	if (IS_DEAD(ch)) {
 		return;
@@ -661,6 +672,9 @@ void real_update_char(char_data *ch) {
 			}
 			dot_remove(ch, dot);
 		}
+	}
+	if (took_dot) {
+		cancel_action(ch);
 	}
 	
 	// biting -- this is usually PC-only, but NPCs could learn to do it
@@ -900,11 +914,6 @@ void real_update_char(char_data *ch) {
 	if (IS_NPC(ch) && (ABSOLUTE(GET_MOB_VNUM(ch)) % 2) == mobile_activity_cycle) {
 		run_mobile_activity(ch);
 	}
-	
-	// players: check for auto-respawn
-	if (ch->desc && IS_DEAD(ch) && get_cooldown_time(ch, COOLDOWN_DEATH_RESPAWN) == 0) {
-		do_respawn(ch, "", 0, 0);
-	}
 }
 
 
@@ -925,6 +934,11 @@ static bool check_one_city_for_ruin(empire_data *emp, struct empire_city_data *c
 	bool found_building = FALSE;
 	vehicle_data *veh;
 	int x, y;
+	
+	// skip recently-founded cities
+	if (get_room_extra_data(city->location, ROOM_EXTRA_FOUND_TIME) + (12 * SECS_PER_REAL_HOUR) > time(0)) {
+		return FALSE;
+	}
 	
 	for (x = -1 * radius; x <= radius && !found_building; ++x) {
 		for (y = -1 * radius; y <= radius && !found_building; ++y) {
@@ -1017,7 +1031,7 @@ void check_wars(void) {
 						rev->start_time = time(0);
 					}
 					
-					syslog(SYS_INFO, 0, TRUE, "DIPL: The war between %s and %s has timed out", EMPIRE_NAME(emp), EMPIRE_NAME(enemy));
+					syslog(SYS_EMPIRE, 0, TRUE, "DIPL: The war between %s and %s has timed out", EMPIRE_NAME(emp), EMPIRE_NAME(enemy));
 					log_to_empire(emp, ELOG_DIPLOMACY, "The war with %s is over", EMPIRE_NAME(enemy));
 					log_to_empire(enemy, ELOG_DIPLOMACY, "The war with %s is over", EMPIRE_NAME(emp));
 				}
@@ -1030,7 +1044,7 @@ void check_wars(void) {
 				REMOVE_BIT(pol->type, DIPL_THIEVERY);
 				pol->start_time = time(0);
 								
-				syslog(SYS_INFO, 0, TRUE, "DIPL: %s's thievery permit against %s has timed out", EMPIRE_NAME(emp), EMPIRE_NAME(enemy));
+				syslog(SYS_EMPIRE, 0, TRUE, "DIPL: %s's thievery permit against %s has timed out", EMPIRE_NAME(emp), EMPIRE_NAME(enemy));
 				log_to_empire(emp, ELOG_DIPLOMACY, "The thievery permit against %s has timed out", EMPIRE_NAME(enemy));
 			}
 		}
@@ -1449,8 +1463,12 @@ bool check_autostore(obj_data *obj, bool force, empire_data *override_emp) {
 	int islid, home_idnum = NOBODY;
 	
 	// easy exclusions
-	if (obj->carried_by || obj->worn_by || !CAN_WEAR(obj, ITEM_WEAR_TAKE)) {
-		return TRUE;
+	top_obj = get_top_object(obj);
+	if (top_obj->carried_by || top_obj->worn_by) {
+		return TRUE;	// on a person
+	}
+	if (!CAN_WEAR(obj, ITEM_WEAR_TAKE) && !OBJ_CAN_STORE(obj)) {
+		return TRUE;	// no-take AND no-store
 	}
 	
 	// timer check (if not forced)
@@ -1459,7 +1477,6 @@ bool check_autostore(obj_data *obj, bool force, empire_data *override_emp) {
 	}
 	
 	// ensure object is in a room, or in an object in a room
-	top_obj = get_top_object(obj);
 	real_loc = IN_ROOM(top_obj);
 	in_veh = top_obj->in_vehicle;
 	if (in_veh) {

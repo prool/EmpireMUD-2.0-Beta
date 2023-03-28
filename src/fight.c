@@ -2469,6 +2469,10 @@ bool can_fight(char_data *ch, char_data *victim) {
 	if (IS_PVP_FLAGGED(ch) && IS_PVP_FLAGGED(victim)) {
 		return TRUE;
 	}
+	// reclaiming?
+	if (!IS_NPC(victim) && GET_ACTION(victim) == ACT_RECLAIMING) {
+		return TRUE;
+	}
 	// is stealing from you
 	if (GET_LOYALTY(ch)) {
 		DL_FOREACH2(victim->carrying, obj, next_content) {
@@ -2671,7 +2675,7 @@ void besiege_room(char_data *attacker, room_data *to_room, int damage, vehicle_d
 		}
 		else {	// not over-damaged
 			// apply needed maintenance if we did more than 10% damage
-			if (GET_BUILDING(to_room) && damage >= (GET_BLD_MAX_DAMAGE(GET_BUILDING(to_room)) / 10)) {
+			if (GET_BUILDING(to_room) && !IS_DISMANTLING(to_room) && damage >= (GET_BLD_MAX_DAMAGE(GET_BUILDING(to_room)) / 10)) {
 				old_list = GET_BUILDING_RESOURCES(to_room);
 				GET_BUILDING_RESOURCES(to_room) = combine_resources(old_list, GET_BLD_YEARLY_MAINTENANCE(GET_BUILDING(to_room)) ? GET_BLD_YEARLY_MAINTENANCE(GET_BUILDING(to_room)) : default_res);
 				free_resource_list(old_list);
@@ -2779,7 +2783,7 @@ bool besiege_vehicle(char_data *attacker, vehicle_data *veh, int damage, int sie
 	}
 	else {
 		// return 0 prevents the destruction
-		if (!destroy_vtrigger(veh)) {
+		if (!destroy_vtrigger(veh, (siege_type == SIEGE_BURNING ? "burning" : "siege"))) {
 			VEH_HEALTH(veh) = MAX(1, VEH_HEALTH(veh));	// ensure health
 			remove_vehicle_flags(veh, VEH_ON_FIRE);	// cancel fire
 			return TRUE;
@@ -3621,19 +3625,18 @@ void perform_execute(char_data *ch, char_data *victim, int attacktype, int damty
 	bool msg;
 
 	/* stop_fighting() is split around here to help with exp */
-
-	/* Probably sent here by damage() */
-	if (ch == victim)
-		ok = TRUE;
-
-	/* Sent here by damage() */
-	if (attacktype > NUM_ATTACK_TYPES || WOULD_EXECUTE(ch, victim)) {
-		ok = TRUE;
-	}
 	
-	// victim is already incapacitated and we're attacking it again?
-	if (GET_POS(victim) == POS_INCAP) {
-		ok = TRUE;
+	if (MOB_FLAGGED(victim, MOB_NO_UNCONSCIOUS)) {
+		ok = TRUE;	// never knock unconscious
+	}
+	else if (ch == victim) {
+		ok = TRUE;	// Probably sent here by damage()
+	}
+	else if (attacktype > NUM_ATTACK_TYPES || WOULD_EXECUTE(ch, victim)) {
+		ok = TRUE;	// Sent here by damage()
+	}
+	else if (GET_POS(victim) == POS_INCAP) {
+		ok = TRUE;	// victim is already incapacitated and we're attacking it again?
 	}
 
 	/* Sent here by do_execute() */
@@ -4186,7 +4189,7 @@ void fight_wait_run(char_data *ch, double speed) {
 	}
 
 	// animals try to flee ranged combat
-	if (IS_NPC(ch) && !GET_LEADER(ch) && MOB_FLAGGED(ch, MOB_ANIMAL) && !number(0, 10)) {
+	if (IS_NPC(ch) && !GET_LEADER(ch) && MOB_FLAGGED(ch, MOB_ANIMAL) && !MOB_FLAGGED(ch, MOB_HARD | MOB_GROUP) && !number(0, 10)) {
 		do_flee(ch, "", 0, 0);
 	}
 	

@@ -4868,7 +4868,7 @@ void replace_question_color(char *input, char *color, char *output) {
 	*output = '\0';
 	
 	for (ipos = 0, opos = 0; ipos < strlen(input); ++ipos) {
-		if (input[ipos] == '&' && input[ipos+1] == '?') {
+		if (input[ipos] == COLOUR_CHAR && input[ipos+1] == '?') {
 			// copy replacement color instead
 			strcpy(output + opos, color);
 			opos += strlen(color);
@@ -5205,8 +5205,8 @@ char *strip_color(char *input) {
 	int iter, pos;
 
 	for (iter = 0, pos = 0; pos < (MAX_STRING_LENGTH-1) && iter < strlen(input); ++iter) {
-		if (input[iter] == '&') {
-			if (input[iter+1] == '&') {
+		if (input[iter] == COLOUR_CHAR) {
+			if (input[iter+1] == COLOUR_CHAR) {
 				// double &: copy both
 				lbuf[pos++] = input[iter];
 				lbuf[pos++] = input[++iter];
@@ -5217,7 +5217,7 @@ char *strip_color(char *input) {
 			}
 		}
 		else if (input[iter] == '\t') {
-			if (input[iter+1] == '&' || input[iter+1] == '\t') {
+			if (input[iter+1] == COLOUR_CHAR || input[iter+1] == '\t') {
 				// double \t: copy both
 				lbuf[pos++] = input[iter];
 				lbuf[pos++] = input[++iter];
@@ -6128,6 +6128,117 @@ int get_direction_to(room_data *from, room_data *to) {
 	}
 	
 	return dir;
+}
+
+
+/**
+* This gets the direction on a 16-direction circle that includes partial
+* directions like east-northeast (ene). This helps point players in the
+* correct direction. Since these are not legitimate game directions, they are
+* returned as strings not intergers.
+*
+* @param char_data *ch The player viewing it, for purposes of map rotation (Optional: may be NULL).
+* @param room_data *from The origin point.
+* @param room_data *to The desitination point.
+* @param bool abbrev If TRUE, gets e.g. "ene". If FALSE, gets e.g. "east-northeast".
+* @return char* The string for the direction. May be an empty string if to == from.
+*/
+char *get_partial_direction_to(char_data *ch, room_data *from, room_data *to, bool abbrev) {
+	room_data *origin = HOME_ROOM(from), *dest = HOME_ROOM(to);
+	int from_x = X_COORD(origin), from_y = Y_COORD(origin);
+	int to_x = X_COORD(dest), to_y = Y_COORD(dest);
+	int x_diff = to_x - from_x, y_diff = to_y - from_y;
+	int iter;
+	double radians, slope, degrees;
+	
+	char *partial_dirs[][2] = {
+		// counter-clockwise from ENE, ending with E
+		{ "east-northeast", "ene" },
+		{ "northeast", "ne" },
+		{ "north-northeast", "nne" },
+		{ "north", "n" },
+		{ "north-northwest", "nnw" },
+		{ "northwest", "nw" },
+		{ "west-northwest", "wnw" },
+		{ "west", "w" },
+		{ "west-southwest", "wsw" },
+		{ "southwest", "sw" },
+		{ "south-southwest", "ssw" },
+		{ "south", "s" },
+		{ "south-southeast", "sse" },
+		{ "southeast", "se" },
+		{ "east-southeast", "ese" },
+		{ "east", "e" }		// must be last for the iterator to work
+	};
+	
+	// adjust for edges
+	if (WRAP_X) {
+		if (x_diff < (-1 * MAP_WIDTH / 2)) {
+			x_diff += MAP_WIDTH;
+		}
+		if (x_diff > (MAP_WIDTH / 2)) {
+			x_diff -= MAP_WIDTH;
+		}
+	}
+	if (WRAP_Y) {
+		if (y_diff < (-1 * MAP_HEIGHT / 2)) {
+			y_diff += MAP_HEIGHT;
+		}
+		if (y_diff > (MAP_HEIGHT / 2)) {
+			y_diff -= MAP_HEIGHT;
+		}
+	}
+
+	// tolerance: 1 e/w per 5 north would still count as "north"
+	if (x_diff == 0 && y_diff == 0) {
+		return "";
+	}
+	else if (x_diff == 0) {
+		degrees = (y_diff > 0 ? 90 : 270);
+	}
+	else {
+		slope = (double) y_diff / (double) x_diff;
+		radians = atan(slope);
+		
+		// convert to degrees and adjust for direction
+		degrees = 180 * radians / M_PI;
+		if (x_diff < 0) {
+			// quadrant II or III: add 180
+			degrees += 180;
+		}
+		else if (y_diff < 0) {
+			// quadrant IV: add 360
+			degrees += 360;
+		}
+		else {	// (y_diff > 0)
+			// quadrant I: no adjustment
+		}
+	}
+	
+	// rotate for character
+	if (ch) {
+		degrees += get_north_for_char(ch) * 90.0;
+		if (degrees >= 360.0) {
+			degrees -= 360.0;
+		}
+	}
+	
+	// convert 0 to 360 to help with the detection below
+	if (degrees <= .001) {
+		degrees = 360.0;
+	}
+	
+	// each dir is 22.5 degrees of the circle (11.25 each way)
+	// so we remove that first 11.25 and do East (0 degrees) at the end...
+	for (iter = 0; strcmp(partial_dirs[iter][1], "e"); ++iter) {
+		if ((degrees - 11.25) < ((iter + 1) * 22.5)) {
+			// found!
+			return partial_dirs[iter][(abbrev ? 1 : 0)];
+		}
+	}
+	
+	// if we got here, it's only because it's the last direction: east
+	return partial_dirs[iter][(abbrev ? 1 : 0)];
 }
 
 

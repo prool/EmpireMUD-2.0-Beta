@@ -318,6 +318,7 @@ are player-only), in addition to some special commands:
 &c%send%&0 - Sends a message to one person.
 &c%siege%&0 - Deals siege damage to a vehicle or building.
 &c%slay%&0 - Instantly kills the target.
+&c%subecho%&0 - Sends a message to everyone in a given subzone.
 &c%teleport%&0 - Moves players to a target room.
 &c%terracrop%&0 - Changes the terrain to a certain crop type.
 &c%terraform%&0 - Changes the terrain to a certain sector type.
@@ -410,7 +411,12 @@ When using field  - The variable returns:
 &ccan_act&0 - True if the character could take a timed action (not stunned, etc).
 &ccan_afford(amt)&0 - Checks if the actor has enough coins of any converted type.
 &ccan_gain_new_skills&0 - Checks if the character can gain a new skill from 0.
+&ccan_recognize_lang(lang,on|off)&0 - Whether the character can at least
+   recognize a language. Optional on/off 2nd arg grants/removes this from the
+   player. Cannot add/remove if the player speaks (instead of recognizes) it.
 &ccan_see(target)&0 - Whether the character can see a person/object/vehicle.
+&ccan_speak(lang,on|off)&0 - Whether the character can speak a language. Optional
+   on/off 2nd arg grants/removes this from the player.
 &ccan_start_quest(vnum)&0 - Whether or not the character can start a quest.
 &ccanbeseen&0 - True if the actor can be seen by the mob with the script
    (always true for non-mob triggers). See-also &ccan_see()&0
@@ -465,6 +471,7 @@ When using field  - The variable returns:
 &cfind_lighter&0 - Finds an available LIGHTER in the inventory, if one exists.
    Note: Players may also light things with %actor.has_tech(Light-Fire)%.
 &cfirstname&0 - The actor's first name (or first keyword, for mobs).
+&cflush_queue&0 - Use this to send messages queued with the # modifier (%ECHO%).
 &cfollower&0 - The first follower, if any, of the character.
 &cfollower(name)&0 - The follower of the actor (as an id) with name supplied.
 &cgain_skill(sk,amt)&0 - Gives the player points in a skill, or takes them.
@@ -492,6 +499,8 @@ When using field  - The variable returns:
 &chealth&0 - The current hit points of the actor.
 &cheshe&0 - Returns the correct pronoun (he/she/it). Use &%actor% for this in
    echoes and sends.
+&chighest_level&0 - Returns the highest-ever level for a player or maximum scale
+   level for NPCs.
 &chimher&0 - Returns the correct pronoun (him/her/it). Use *%actor% for this in
    echoes and sends.
 &chisher&0 - Returns the correct pronoun (his/her/its). Use ^%actor% for this
@@ -564,7 +573,8 @@ When using field  - The variable returns:
 &cobj_target_inv(name)&0 - Finds a targeted object in the character's inventory.
 &con_quest(vnum)&0 - TRUE if the player is currently on that quest.
 &cparse_dir(dir)&0 - Gets the real direction that the char thinks is 'dir',
-   based on whether or not they have Navigation/alcohol.
+   based on whether or not they have Navigation/alcohol. Bad directions return
+   an empty string.
 &cpc_name&0 - Player's name or mob's keyword list, rather than short desc
 &cplr_flagged(FLAG)&0 - Returns TRUE if the player has the given flag (ADV-SUMMON).
    If called with no argument, lists current flags instead.
@@ -574,6 +584,7 @@ When using field  - The variable returns:
    tasks completed.
 &cquest_triggered(vnum)&0 - TRUE if the player is on the quest and that quest
    has a 'triggered' task that has already been completed.
+&creal_name&0 - Their real name (not morphed, not disguised).
 &cremove_companion(vnum)&0 - Takes away a companion mob. If it comes from an
    ability, the player will get a fresh copy of it automatically.
 &cremove_lastname(name)&0 - Removes a name from a player's lastname list.
@@ -591,6 +602,7 @@ When using field  - The variable returns:
 &cset_skill(name,level)&0 - Change a player's skill level, also gain_skill()
 &csex&0 - The actor's sex, as a string: MALE, FEMALE, or NEUTRAL.
 &cskill(name)&0 - The player's level in the given skill.
+&cspeaking&0 - Vnum of the language the character is set to speak.
 &cstr&0 - The actor's Strength.
 &cthirst&0 or &cthirst(hours)&0 - Returns how thirsty the player is, or makes
    them more or less thirsty (0 is not thirsty).

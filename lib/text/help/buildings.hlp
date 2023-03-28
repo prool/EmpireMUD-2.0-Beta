@@ -194,7 +194,10 @@ CARPENTER
 The carpenter is a workshop for all manner of crafts. Certain craft items,
 such as wagons, require a carpenter shop for you to build them in.
 
-See also:  CRAFT, WOODWORKING
+To get a horse (or other mount) into a carpenter to harness to a vehicle, use
+the 'lead' command.
+
+See also:  CRAFT, LEAD, WOODWORKING
 #
 CAVEHAVEN "CAVE HAVEN" "OBSCURE CAVE"
 
@@ -753,7 +756,7 @@ PAINTER PAINTSHOP "PAINT SHOP" "PAINTER'S WORKSHOP" "PAINTERS WORKSHOP"
 [PP]  Painter's Workshop  (Foundations goal)
 
 Command:  build painter <direction>
-Requires:  Architect ability, Foundations goal
+Requires:  Foundations goal
 Stored here:  paints
 
 This building is used to make and store paints.
@@ -981,6 +984,8 @@ SWAMPWALK "SWAMP WALK"
 The swamp walk, though never very stable, makes travel through the swamp
 much easier. Swamp animals may still harass you, but you will avoid random
 attacks by crocodilians. This can also be built on marshes.
+
+Clay pits count as in-city territory when built in the outskirts (4x radius).
 
 See also: BUILDING
 #

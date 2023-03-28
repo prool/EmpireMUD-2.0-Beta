@@ -2018,8 +2018,8 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd, char *
 			if (isspace(*p)) {
 				continue;
 			}
-			else if (*p == '&' && *(p + 1)) {
-				++p;	// skip one for &
+			else if (*p == COLOUR_CHAR && *(p + 1)) {
+				++p;	// skip one for & (color char)
 			}
 			else if (isdigit(*p) || isalpha(*p)) {
 				// found an alpha/numeric char? cap it and break
@@ -2208,6 +2208,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 		"send",
 		"siege",
 		"slay",
+		"subecho",
 		"teleport",
 		"terracrop",
 		"terraform",
@@ -2678,6 +2679,44 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 					strcpy(str, "UNKNOWN");
 				}
 			}
+			else if (!str_cmp(var, "language")) {
+				generic_data *lang = NULL;
+				
+				// look up language
+				if (subfield && *subfield) {
+					if (isdigit(*subfield)) {
+						lang = find_generic(atoi(subfield), GENERIC_LANGUAGE);
+					}
+					if (!lang) {
+						lang = find_generic_no_spaces(GENERIC_LANGUAGE, subfield);
+					}
+				}
+				
+				if (!str_cmp(field, "name")) {
+					snprintf(str, slen, "%s", lang ? GEN_NAME(lang) : "");
+				}
+				else if (!str_cmp(field, "short")) {
+					char temp[1024];
+					int pos;
+					
+					strcpy(temp, lang ? GEN_NAME(lang) : "");
+					for (pos = 0; pos < strlen(temp); ++pos) {
+						if (temp[pos] == ' ') {
+							temp[pos] = '-';
+						}
+						else {
+							temp[pos] = LOWER(temp[pos]);
+						}
+					}
+					snprintf(str, slen, "%s", temp);
+				}
+				else if (!str_cmp(field, "vnum")) {
+					snprintf(str, slen, "%d", lang ? GEN_VNUM(lang) : -1);
+				}
+				else {
+					snprintf(str, slen, "UNKNOWN");
+				}
+			}
 			else if (!str_cmp(var, "random")) {
 				if (!str_cmp(field, "char") || !str_cmp(field, "ally") || !str_cmp(field, "enemy")) {
 					bool ally = (!str_cmp(field, "ally") ? TRUE : FALSE);
@@ -3057,7 +3096,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 					/*
 					else if (!str_cmp(field, "coins")) {
 						// TODO possibly a way to specify coin type or do it by actor's loyalty?
-						// nop %ch.coins(10)%
+						// nop %c.coins(10)%
 						if (subfield && *subfield) {
 							int addition = atoi(subfield);
 							increase_coins(c, OTHER_COIN, addition);
@@ -3095,6 +3134,76 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							cancel_adventure_summon(c);
 						}
 						*str = '\0';
+					}
+					else if (!str_cmp(field, "can_recognize_lang")) {
+						// arg1: language name/vnum
+						// arg2: optional on/off to toggle recognize
+						char arg1[256], arg2[256];
+						int mode;
+						generic_data *lang = NULL;
+						
+						comma_args(subfield, arg1, arg2);
+						
+						// load language
+						if (*arg1) {
+							if (isdigit(*arg1)) {
+								lang = find_generic(atoi(arg1), GENERIC_LANGUAGE);
+							}
+							if (!lang) {
+								lang = find_generic_no_spaces(GENERIC_LANGUAGE, arg1);
+							}
+						}
+						
+						// optional toggle on/off
+						if (!IS_NPC(c) && *arg2 && lang) {
+							if (!str_cmp(arg2, "1") || !str_cmp(arg2, "on")) {
+								if (speaks_language(c, GEN_VNUM(lang)) != LANG_SPEAK) {
+									add_language(c, GEN_VNUM(lang), LANG_RECOGNIZE);
+								}
+							}
+							else if (!str_cmp(arg2, "0") || !str_cmp(arg2, "off")) {
+								if (speaks_language(c, GEN_VNUM(lang)) != LANG_SPEAK) {
+									add_language(c, GEN_VNUM(lang), LANG_UNKNOWN);
+								}
+							}
+							check_languages(c);
+						}
+						
+						// and show recognizability
+						mode = lang ? speaks_language(c, GEN_VNUM(lang)) : LANG_UNKNOWN;
+						snprintf(str, slen, "%d", (mode == LANG_RECOGNIZE || mode == LANG_SPEAK) ? 1 : 0);
+					}
+					else if (!str_cmp(field, "can_speak")) {
+						// arg1: language name/vnum
+						// arg2: optional on/off to toggle speaking
+						char arg1[256], arg2[256];
+						generic_data *lang = NULL;
+						
+						comma_args(subfield, arg1, arg2);
+						
+						// load language
+						if (*arg1) {
+							if (isdigit(*arg1)) {
+								lang = find_generic(atoi(arg1), GENERIC_LANGUAGE);
+							}
+							if (!lang) {
+								lang = find_generic_no_spaces(GENERIC_LANGUAGE, arg1);
+							}
+						}
+						
+						// optional toggle on/off
+						if (!IS_NPC(c) && *arg2 && lang) {
+							if (!str_cmp(arg2, "1") || !str_cmp(arg2, "on")) {
+								add_language(c, GEN_VNUM(lang), LANG_SPEAK);
+							}
+							else if (!str_cmp(arg2, "0") || !str_cmp(arg2, "off")) {
+								add_language(c, GEN_VNUM(lang), LANG_UNKNOWN);
+							}
+							check_languages(c);
+						}
+						
+						// and show speakability
+						snprintf(str, slen, "%d", (lang && speaks_language(c, GEN_VNUM(lang)) == LANG_SPEAK) ? 1 : 0);
 					}
 					else if (!str_cmp(field, "can_start_quest")) {
 						if (subfield && *subfield && isdigit(*subfield)) {
@@ -3474,6 +3583,12 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							snprintf(str, slen, "%s", GET_PC_NAME(c));
 						}
 					}
+					else if (!str_cmp(field, "flush_queue")) {
+						if (c->desc) {
+							send_stacked_msgs(c->desc);
+						}
+						*str = '\0';
+					}
 					else if (!str_cmp(field, "follower")) {
 						struct follow_type *fol;
 						bool fnd = FALSE;
@@ -3716,6 +3831,16 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 
 					else if (!str_cmp(field, "heshe"))
 						snprintf(str, slen, "%s", HSSH(c));
+
+					else if (!str_cmp(field, "highest_level")) {
+						if (IS_NPC(c)) {
+							int lev = get_approximate_level(c);
+							snprintf(str, slen, "%d", MAX(lev, GET_MAX_SCALE_LEVEL(c)));
+						}
+						else {
+							snprintf(str, slen, "%d", GET_HIGHEST_KNOWN_LEVEL(c));
+						}
+					}
 
 					else if (!str_cmp(field, "himher"))
 						snprintf(str, slen, "%s", HMHR(c));
@@ -4121,8 +4246,8 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 								snprintf(str, slen, "%s", dirs[dir]);	// real dir
 							}
 							else {
-								// bad direction -- just give them their arg back
-								snprintf(str, slen, "%s", subfield);
+								// bad direction -- empty result
+								*str = '\0';
 							}
 						}
 						else {	// missing arg
@@ -4209,7 +4334,10 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 					break;
 				}
 				case 'r': {	// char.r*
-					if (!str_cmp(field, "remove_companion")) {
+					if (!str_cmp(field, "real_name")) {
+						snprintf(str, slen, "%s", PERS(c, c, TRUE));
+					}
+					else if (!str_cmp(field, "remove_companion")) {
 						if (!IS_NPC(c) && subfield && *subfield && isdigit(*subfield)) {
 							remove_companion(c, atoi(subfield));
 						}
@@ -4371,6 +4499,9 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 						if (*str != '1') {							
 							snprintf(str, slen, "0");
 						}
+					}
+					else if (!str_cmp(field, "speaking")) {
+						snprintf(str, slen, "%d", IS_NPC(c) ? (MOB_LANGUAGE(c) != NOTHING ? MOB_LANGUAGE(c) : config_get_int("default_language_vnum")) : GET_SPEAKING(c));
 					}
 					
 					break;
@@ -5541,6 +5672,15 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 					else if (!str_cmp(field, "starboard")) {
 						direction_vars(r, STARBOARD, subfield, str, slen);
 					}
+					else if (!str_cmp(field, "subzone")) {
+						if (GET_ROOM_TEMPLATE(r) && GET_RMT_SUBZONE(GET_ROOM_TEMPLATE(r)) != NOWHERE) {
+							snprintf(str, slen, "%d", GET_RMT_SUBZONE(GET_ROOM_TEMPLATE(r)));
+						}
+						else {
+							// no valid subzone: show a -1
+							snprintf(str, slen, "-1");
+						}
+					}
 					else if (!str_cmp(field, "sun")) {
 						snprintf(str, slen, "%s", sun_types[get_sun_status(r)]);
 					}
@@ -6170,7 +6310,77 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 					break;
 				}
 				case 'c': {	// emp.c*
-					if (!str_cmp(field, "coins")) {
+					if (!str_cmp(field, "can_recognize_lang")) {
+						// arg1: language name/vnum
+						// arg2: optional on/off to toggle recognize
+						char arg1[256], arg2[256];
+						int mode;
+						generic_data *lang = NULL;
+						
+						comma_args(subfield, arg1, arg2);
+						
+						// load language
+						if (*arg1) {
+							if (isdigit(*arg1)) {
+								lang = find_generic(atoi(arg1), GENERIC_LANGUAGE);
+							}
+							if (!lang) {
+								lang = find_generic_no_spaces(GENERIC_LANGUAGE, arg1);
+							}
+						}
+						
+						// optional toggle on/off
+						if (*arg2 && lang) {
+							if (!str_cmp(arg2, "1") || !str_cmp(arg2, "on")) {
+								if (speaks_language_empire(e, GEN_VNUM(lang)) != LANG_SPEAK) {
+									add_language_empire(e, GEN_VNUM(lang), LANG_RECOGNIZE);
+								}
+							}
+							else if (!str_cmp(arg2, "0") || !str_cmp(arg2, "off")) {
+								if (speaks_language_empire(e, GEN_VNUM(lang)) != LANG_SPEAK) {
+									add_language_empire(e, GEN_VNUM(lang), LANG_UNKNOWN);
+								}
+							}
+							check_languages_empire(e);
+						}
+						
+						// and show recognizability
+						mode = lang ? speaks_language_empire(e, GEN_VNUM(lang)) : LANG_UNKNOWN;
+						snprintf(str, slen, "%d", (mode == LANG_RECOGNIZE || mode == LANG_SPEAK) ? 1 : 0);
+					}
+					else if (!str_cmp(field, "can_speak")) {
+						// arg1: language name/vnum
+						// arg2: optional on/off to toggle speaking
+						char arg1[256], arg2[256];
+						generic_data *lang = NULL;
+						
+						comma_args(subfield, arg1, arg2);
+						
+						// load language
+						if (*arg1) {
+							if (isdigit(*arg1)) {
+								lang = find_generic(atoi(arg1), GENERIC_LANGUAGE);
+							}
+							if (!lang) {
+								lang = find_generic_no_spaces(GENERIC_LANGUAGE, arg1);
+							}
+						}
+						
+						// optional toggle on/off
+						if (*arg2 && lang) {
+							if (!str_cmp(arg2, "1") || !str_cmp(arg2, "on")) {
+								add_language_empire(e, GEN_VNUM(lang), LANG_SPEAK);
+							}
+							else if (!str_cmp(arg2, "0") || !str_cmp(arg2, "off")) {
+								add_language_empire(e, GEN_VNUM(lang), LANG_UNKNOWN);
+							}
+							check_languages_empire(e);
+						}
+						
+						// and show speakability
+						snprintf(str, slen, "%d", (lang && speaks_language_empire(e, GEN_VNUM(lang)) == LANG_SPEAK) ? 1 : 0);
+					}
+					else if (!str_cmp(field, "coins")) {
 						snprintf(str, slen, "%d", (int) EMPIRE_COINS(e));
 					}
 					break;

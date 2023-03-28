@@ -411,8 +411,9 @@ bool run_identifies_to(char_data *ch, obj_data **obj, bool *extract) {
 *
 * @param obj_data *obj The item to identify.
 * @param char_data *ch The person to show the data to.
+* @param bool simple If TRUE, hides some of the info.
 */
-void identify_obj_to_char(obj_data *obj, char_data *ch) {
+void identify_obj_to_char(obj_data *obj, char_data *ch, bool simple) {
 	struct string_hash *str_iter, *next_str, *str_hash = NULL;
 	vehicle_data *veh, *veh_iter, *next_veh;
 	bld_data *bld, *bld_iter, *next_bld;
@@ -465,19 +466,19 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 	snprintf(lbuf, sizeof(lbuf), "Your analysis of %s$p\t0%s reveals:", obj_color_by_quality(obj, ch), location);
 	act(lbuf, FALSE, ch, obj, NULL, TO_CHAR);
 	
-	if (GET_OBJ_REQUIRES_QUEST(obj) != NOTHING) {
+	if (!simple && GET_OBJ_REQUIRES_QUEST(obj) != NOTHING) {
 		msg_to_char(ch, "Quest: %s\r\n", get_quest_name_by_proto(GET_OBJ_REQUIRES_QUEST(obj)));
 	}
 	
 	// if it has any wear bits other than TAKE, show if they can't use it
-	if (CAN_WEAR(obj, ~ITEM_WEAR_TAKE)) {
+	if (!simple && CAN_WEAR(obj, ~ITEM_WEAR_TAKE)) {
 		// the TRUE causes it to send a message if unusable
 		msg_to_char(ch, "&r");
 		can_wear_item(ch, obj, TRUE);
 		msg_to_char(ch, "&0");
 	}
 
-	if (GET_OBJ_STORAGE(obj) && !OBJ_FLAGGED(obj, OBJ_NO_STORE) && OBJ_CAN_STORE(obj)) {
+	if (!simple && GET_OBJ_STORAGE(obj) && !OBJ_FLAGGED(obj, OBJ_NO_STORE) && OBJ_CAN_STORE(obj)) {
 		LL_FOREACH(GET_OBJ_STORAGE(obj), store) {
 			if (store->type == TYPE_BLD && (bld = building_proto(store->vnum))) {
 				add_string_hash(&str_hash, GET_BLD_NAME(bld), 1);
@@ -539,7 +540,7 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 	}
 	
 	// other storage
-	if (CAN_WEAR(obj, ITEM_WEAR_TAKE)) {
+	if (!simple && CAN_WEAR(obj, ITEM_WEAR_TAKE)) {
 		library = (IS_BOOK(obj) && book_proto(GET_BOOK_ID(obj)));
 		if (UNIQUE_OBJ_CAN_STORE(obj, FALSE)) {
 			msg_to_char(ch, "Storage location: Home, Warehouse%s\r\n", (library ? ", Library" : ""));
@@ -556,7 +557,7 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 	}
 
 	// binding section
-	if (OBJ_BOUND_TO(obj)) {
+	if (!simple && OBJ_BOUND_TO(obj)) {
 		struct obj_binding *bind;		
 		msg_to_char(ch, "Bound to:");
 		any = FALSE;
@@ -569,7 +570,7 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 	
 	// show level if scalable OR wearable
 	if (GET_OBJ_CURRENT_SCALE_LEVEL(obj) > 0 && ((GET_OBJ_WEAR(obj) & ~ITEM_WEAR_TAKE) != NOBITS || (proto && OBJ_FLAGGED(proto, OBJ_SCALABLE)))) {
-		msg_to_char(ch, "Level: %d\r\n", GET_OBJ_CURRENT_SCALE_LEVEL(obj));
+		msg_to_char(ch, "Level: %s%d\t0\r\n", color_by_difficulty(ch, GET_OBJ_CURRENT_SCALE_LEVEL(obj)), GET_OBJ_CURRENT_SCALE_LEVEL(obj));
 	}
 	
 	// only show gear if equippable (has more than ITEM_WEAR_TRADE)
@@ -578,8 +579,10 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 			msg_to_char(ch, "Gear rating: %.1f\r\n", rating);
 		}
 		
-		prettier_sprintbit(GET_OBJ_WEAR(obj) & ~ITEM_WEAR_TAKE, wear_bits, buf);
-		msg_to_char(ch, "Can be worn on: %s\r\n", buf);
+		if (!simple) {
+			prettier_sprintbit(GET_OBJ_WEAR(obj) & ~ITEM_WEAR_TAKE, wear_bits, buf);
+			msg_to_char(ch, "Can be worn on: %s\r\n", buf);
+		}
 	}
 	
 	// flags
@@ -616,7 +619,7 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 		}
 		case ITEM_RECIPE: {
 			craft_data *cft = craft_proto(GET_RECIPE_VNUM(obj));
-			msg_to_char(ch, "Teaches craft: %s (%s)\r\n", cft ? GET_CRAFT_NAME(cft) : "UNKNOWN", cft ? craft_types[GET_CRAFT_TYPE(cft)] : "?");
+			msg_to_char(ch, "Teaches craft: %s (%s%s)\r\n", cft ? GET_CRAFT_NAME(cft) : "UNKNOWN", cft ? craft_types[GET_CRAFT_TYPE(cft)] : "?", (cft && has_learned_craft(ch, GET_CRAFT_VNUM(cft))) ? ", learned" : "");
 			break;
 		}
 		case ITEM_WEAPON: {
@@ -724,21 +727,21 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 			break;
 		}
 		case ITEM_MINIPET: {
-			msg_to_char(ch, "Grants minipet: %s\r\n", get_mob_name_by_proto(GET_MINIPET_VNUM(obj), TRUE));
+			msg_to_char(ch, "Grants minipet: %s%s\r\n", get_mob_name_by_proto(GET_MINIPET_VNUM(obj), TRUE), has_minipet(ch, GET_MINIPET_VNUM(obj)) ? " (owned)" :"");
 			break;
 		}
 	}
 	
 	// data that isn't type-based:
-	if (OBJ_FLAGGED(obj, OBJ_PLANTABLE) && (cp = crop_proto(GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE)))) {
+	if (!simple && OBJ_FLAGGED(obj, OBJ_PLANTABLE) && (cp = crop_proto(GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE)))) {
 		ordered_sprintbit(GET_CROP_CLIMATE(cp), climate_flags, climate_flags_order, CROP_FLAGGED(cp, CROPF_ANY_LISTED_CLIMATE) ? TRUE : FALSE, lbuf);
 		msg_to_char(ch, "Plants %s (%s%s).\r\n", GET_CROP_NAME(cp), GET_CROP_CLIMATE(cp) ? lbuf : "any climate", (CROP_FLAGGED(cp, CROPF_REQUIRES_WATER) ? "; must be near water" : ""));
 	}
 	
-	if (has_interaction(GET_OBJ_INTERACTIONS(obj), INTERACT_COMBINE)) {
+	if (!simple && has_interaction(GET_OBJ_INTERACTIONS(obj), INTERACT_COMBINE)) {
 		msg_to_char(ch, "It can be combined.\r\n");
 	}
-	if (has_interaction(GET_OBJ_INTERACTIONS(obj), INTERACT_SEPARATE)) {
+	if (!simple && has_interaction(GET_OBJ_INTERACTIONS(obj), INTERACT_SEPARATE)) {
 		msg_to_char(ch, "It can be separated.\r\n");
 	}
 	
@@ -757,7 +760,7 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 	}
 	
 	// component info
-	if (GET_OBJ_COMPONENT(obj) != NOTHING && (comp = find_generic(GET_OBJ_COMPONENT(obj), GENERIC_COMPONENT))) {
+	if (!simple && GET_OBJ_COMPONENT(obj) != NOTHING && (comp = find_generic(GET_OBJ_COMPONENT(obj), GENERIC_COMPONENT))) {
 		msg_to_char(ch, "Component type: %s%s\r\n", GEN_NAME(comp), GEN_FLAGGED(comp, GEN_BASIC) ? " (basic)" : "");
 	
 		if (GEN_COMPUTED_RELATIONS(comp)) {
@@ -767,7 +770,7 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 	}
 	
 	// recipes
-	if (GET_OBJ_VNUM(obj) != NOTHING) {
+	if (!simple && GET_OBJ_VNUM(obj) != NOTHING) {
 		size = line_size = snprintf(lbuf, sizeof(lbuf), "Allows: ");
 		any = FALSE;
 		HASH_ITER(sorted_hh, sorted_crafts, craft, next_craft) {
@@ -792,32 +795,43 @@ void identify_obj_to_char(obj_data *obj, char_data *ch) {
 	}
 	
 	// some custom messages
-	LL_FOREACH(GET_OBJ_CUSTOM_MSGS(obj), ocm) {
-		switch (ocm->type) {
-			case OBJ_CUSTOM_LONGDESC: {
-				sprintf(lbuf, "Gives long description: %s", ocm->msg);
-				act(lbuf, FALSE, ch, NULL, NULL, TO_CHAR);
-				break;
-			}
-			case OBJ_CUSTOM_LONGDESC_FEMALE: {
-				if (GET_SEX(ch) == SEX_FEMALE) {
+	if (!simple) {
+		LL_FOREACH(GET_OBJ_CUSTOM_MSGS(obj), ocm) {
+			switch (ocm->type) {
+				case OBJ_CUSTOM_LONGDESC: {
 					sprintf(lbuf, "Gives long description: %s", ocm->msg);
+					temp = str_replace("$n", "$o", lbuf);
+					strcpy(lbuf, temp);
+					free(temp);
 					act(lbuf, FALSE, ch, NULL, NULL, TO_CHAR);
+					break;
 				}
-				break;
-			}
-			case OBJ_CUSTOM_LONGDESC_MALE: {
-				if (GET_SEX(ch) == SEX_MALE) {
-					sprintf(lbuf, "Gives long description: %s", ocm->msg);
-					act(lbuf, FALSE, ch, NULL, NULL, TO_CHAR);
+				case OBJ_CUSTOM_LONGDESC_FEMALE: {
+					if (GET_SEX(ch) == SEX_FEMALE) {
+						sprintf(lbuf, "Gives long description: %s", ocm->msg);
+						temp = str_replace("$n", "$o", lbuf);
+						strcpy(lbuf, temp);
+						free(temp);
+						act(lbuf, FALSE, ch, NULL, NULL, TO_CHAR);
+					}
+					break;
 				}
-				break;
+				case OBJ_CUSTOM_LONGDESC_MALE: {
+					if (GET_SEX(ch) == SEX_MALE) {
+						sprintf(lbuf, "Gives long description: %s", ocm->msg);
+						temp = str_replace("$n", "$o", lbuf);
+						strcpy(lbuf, temp);
+						free(temp);
+						act(lbuf, FALSE, ch, NULL, NULL, TO_CHAR);
+					}
+					break;
+				}
 			}
 		}
 	}
 	
 	// equipment sets?
-	if (GET_OBJ_EQ_SETS(obj)) {
+	if (!simple && GET_OBJ_EQ_SETS(obj)) {
 		any = FALSE;
 		msg_to_char(ch, "Equipment sets:");
 		LL_FOREACH(GET_OBJ_EQ_SETS(obj), oset) {
@@ -1356,7 +1370,7 @@ void do_shop_identify(char_data *ch, obj_data *shop_obj) {
 	obj_from_room(obj);
 	
 	// show id and desc
-	identify_obj_to_char(obj, ch);
+	identify_obj_to_char(obj, ch, FALSE);
 	if (GET_OBJ_ACTION_DESC(obj)) {
 		msg_to_char(ch, "%s", GET_OBJ_ACTION_DESC(obj));
 	}
@@ -1626,6 +1640,120 @@ static void perform_drop_coins(char_data *ch, empire_data *type, int amount, byt
 
  //////////////////////////////////////////////////////////////////////////////
 //// EQUIPMENT SET HELPERS ///////////////////////////////////////////////////
+
+/**
+* Helps a character understand their equipment and what they need.
+*
+* @param char_data *ch The character.
+* @param char *argument Any additional args after "eq anaylze"
+*/
+void do_eq_analyze(char_data *ch, char *argument) {
+	char low_string[MAX_STRING_LENGTH], empty_string[MAX_STRING_LENGTH], quality_string[MAX_STRING_LENGTH];
+	size_t low_size, empty_size, quality_size;
+	int items = 0, low = 0, empty = 0, quality = 0;
+	double average_level, average_quality, slots, total_level, total_quality;
+	int pos, my_level;
+	obj_data *obj;
+	
+	#define _obj_quality(obj)  (1 + (OBJ_FLAGGED(obj, OBJ_HARD_DROP) ? 1 : 0) + (OBJ_FLAGGED(obj, OBJ_GROUP_DROP) ? 2 : 0) + (OBJ_FLAGGED(obj, OBJ_SUPERIOR) ? 4 : 0))
+	
+	if (!ch || !ch->desc) {
+		return;
+	}
+	
+	my_level = get_approximate_level(ch);
+	slots = total_level = total_quality = 0.0;
+	
+	// first pass to determine averages and look for empties
+	for (pos = 0; pos < NUM_WEARS; ++pos) {
+		if (!wear_data[pos].count_stats || wear_data[pos].gear_level_mod < 0.1) {
+			continue;	// doesn't count enough to matter
+		}
+		
+		// compute
+		slots += wear_data[pos].gear_level_mod;
+		if ((obj = GET_EQ(ch, pos))) {
+			++items;
+			total_level += GET_OBJ_CURRENT_SCALE_LEVEL(obj) * wear_data[pos].gear_level_mod;
+			total_quality += _obj_quality(obj) * wear_data[pos].gear_level_mod;
+		}
+	}
+	
+	slots = MAX(1, slots);
+	average_level = total_level / slots;
+	average_quality = total_quality / slots;
+	*low_string = *empty_string = *quality_string = '\0';
+	low_size = empty_size = quality_size = 0;
+	
+	// 2nd pass to look for low levels and build errors
+	for (pos = 0; pos < NUM_WEARS; ++pos) {
+		if (!wear_data[pos].count_stats || wear_data[pos].gear_level_mod < 0.1) {
+			continue;	// doesn't count enough to matter
+		}
+		
+		if ((obj = GET_EQ(ch, pos))) {
+			// level
+			if (GET_OBJ_CURRENT_SCALE_LEVEL(obj) + 64 < my_level) {
+				++low;
+				if (low_size < sizeof(low_string)) {
+					low_size += snprintf(low_string + low_size, sizeof(low_string) - low_size, "%s%s", (*low_string ? ", " : ""), wear_data[pos].name);
+				}
+			}
+			// quality
+			if (_obj_quality(obj) < average_quality) {
+				++quality;
+				if (quality_size < sizeof(quality_string)) {
+					quality_size += snprintf(quality_string + quality_size, sizeof(quality_string) - quality_size, "%s%s", (*quality_string ? ", " : ""), wear_data[pos].name);
+				}
+			}
+		}
+		else {	// no item
+			++empty;
+			if (empty_size < sizeof(empty_string)) {
+				empty_size += snprintf(empty_string + empty_size, sizeof(empty_string) - empty_size, "%s%s", (*empty_string ? ", " : ""), wear_data[pos].name);
+			}
+		}
+	}
+	
+	// output:
+	msg_to_char(ch, "Equipment analysis:\r\n");
+	msg_to_char(ch, "Wearing %d item%s with an average level of %.1f%s.\r\n", items, PLURAL(items), average_level, (average_level + 75 < my_level) ? " (low)" : "");
+	if (empty) {
+		msg_to_char(ch, "%d empty slot%s: %s\r\n", empty, PLURAL(empty), empty_string);
+	}
+	if (low) {
+		msg_to_char(ch, "%d low-level slot%s: %s\r\n", low, PLURAL(low), low_string);
+	}
+	if (quality) {
+		msg_to_char(ch, "%d lower-quality slot%s: %s\r\n", quality, PLURAL(quality), quality_string);
+	}
+	
+	// help if none of those are low
+	if (!empty && !low && !quality) {
+		if (average_quality < 1.0) {
+			// nothing here -- it's definitely covered by 'empty'
+		}
+		else if (average_quality < 1.75) {
+			msg_to_char(ch, "Suggestion: Team up with other players to defeat higher difficulty mobs for better gear.\r\n");
+		}
+		else if (average_quality < 2.75) {
+			msg_to_char(ch, "Suggestion: Get more group quality (or better) gear.\r\n");
+		}
+		else if (average_quality < 3.75) {
+			msg_to_char(ch, "Suggestion: Get more superior or boss quality gear.\r\n");
+		}
+		else if (average_quality < 4.5) {
+			msg_to_char(ch, "Suggestion: Get more superior gear.\r\n");
+		}
+		else if (average_level + 75 < my_level) {
+			msg_to_char(ch, "Suggestion: Get more gear that's in your level range.\r\n");
+		}
+		else {
+			msg_to_char(ch, "Your equipment looks good.\r\n");
+		}
+	}
+}
+
 
 /**
 * Shows the character their current equipment.
@@ -2382,11 +2510,15 @@ static void drink_message(char_data *ch, obj_data *obj, byte type, int subcmd, i
 	switch (type) {
 		case drink_OBJ: {
 			// message to char
-			if (subcmd != SCMD_SIP && obj_has_custom_message(obj, OBJ_CUSTOM_CONSUME_TO_CHAR)) {
+			if (subcmd == SCMD_SIP) {
+				snprintf(buf, sizeof(buf), "You sip the %s liquid from $p.\r\n", get_generic_string_by_vnum(GET_DRINK_CONTAINER_TYPE(obj), GENERIC_LIQUID, GSTR_LIQUID_COLOR));
+				act(buf, FALSE, ch, obj, NULL, TO_CHAR);
+			}
+			if (obj_has_custom_message(obj, OBJ_CUSTOM_CONSUME_TO_CHAR)) {
 				act(obj_get_custom_message(obj, OBJ_CUSTOM_CONSUME_TO_CHAR), FALSE, ch, obj, get_generic_string_by_vnum(GET_DRINK_CONTAINER_TYPE(obj), GENERIC_LIQUID, GSTR_LIQUID_NAME), TO_CHAR);
 			}
 			else {
-				msg_to_char(ch, "You %s the %s.\r\n", subcmd == SCMD_SIP ? "sip" : "drink", get_generic_string_by_vnum(GET_DRINK_CONTAINER_TYPE(obj), GENERIC_LIQUID, GSTR_LIQUID_NAME));
+				msg_to_char(ch, "You drink the %s.\r\n", get_generic_string_by_vnum(GET_DRINK_CONTAINER_TYPE(obj), GENERIC_LIQUID, GSTR_LIQUID_NAME));
 			}
 			
 			// message to room
@@ -2943,7 +3075,7 @@ void deliver_shipment(empire_data *emp, struct shipping_data *shipd) {
 	if (dock) {
 		// unload the shipment at the destination
 		if (shipd->vnum != NOTHING && shipd->amount > 0 && obj_proto(shipd->vnum)) {
-			log_to_empire(emp, ELOG_SHIPPING, "%dx %s: shipped to %s%s", shipd->amount, get_obj_name_by_proto(shipd->vnum), get_island(shipd->to_island, TRUE)->name, coord_display(NULL, X_COORD(dock), Y_COORD(dock), FALSE));
+			log_to_empire(emp, ELOG_SHIPPING, "%dx %s: shipped to %s%s", shipd->amount, get_obj_name_by_proto(shipd->vnum), get_island_name_for_empire(shipd->to_island, emp), coord_display(NULL, X_COORD(dock), Y_COORD(dock), FALSE));
 			add_to_empire_storage(emp, shipd->to_island, shipd->vnum, shipd->amount);
 		}
 		if (have_ship) {
@@ -2956,7 +3088,7 @@ void deliver_shipment(empire_data *emp, struct shipping_data *shipd) {
 		
 		// no docks -- unload the shipment at home
 		if (shipd->vnum != NOTHING && shipd->amount > 0 && obj_proto(shipd->vnum)) {
-			log_to_empire(emp, ELOG_SHIPPING, "%dx %s: returned to %s%s", shipd->amount, get_obj_name_by_proto(shipd->vnum), get_island(shipd->from_island, TRUE)->name, coord_display(NULL, dock ? X_COORD(dock) : -1, dock ? Y_COORD(dock) : -1, FALSE));
+			log_to_empire(emp, ELOG_SHIPPING, "%dx %s: returned to %s%s", shipd->amount, get_obj_name_by_proto(shipd->vnum), get_island_name_for_empire(shipd->from_island, emp), coord_display(NULL, dock ? X_COORD(dock) : -1, dock ? Y_COORD(dock) : -1, FALSE));
 			add_to_empire_storage(emp, shipd->from_island, shipd->vnum, shipd->amount);
 		}
 		if (have_ship) {
@@ -3906,7 +4038,7 @@ void trade_identify(char_data *ch, char *argument) {
 		}
 		
 		// FOUND
-		identify_obj_to_char(tpd->obj, ch);
+		identify_obj_to_char(tpd->obj, ch, FALSE);
 		return;
 	}
 	
@@ -4190,7 +4322,7 @@ void warehouse_identify(char_data *ch, char *argument, int mode) {
 		}
 		
 		// FOUND:
-		identify_obj_to_char(iter->obj, ch);
+		identify_obj_to_char(iter->obj, ch, FALSE);
 		return;
 	}
 	
@@ -4358,7 +4490,9 @@ void warehouse_retrieve(char_data *ch, char *argument, int mode) {
 				obj_to_char(obj, ch);	// inventory size pre-checked
 				act("You retrieve $p.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
 				act("$n retrieves $p.", FALSE, ch, obj, NULL, TO_ROOM | TO_QUEUE);
-				load_otrigger(obj);
+				
+				// this should not be running load triggers
+				// load_otrigger(obj);
 			}
 		}
 		
@@ -4682,6 +4816,106 @@ ACMD(do_combine) {
 			act("You fail to combine $p.", FALSE, ch, obj, NULL, TO_CHAR);
 		}
 		command_lag(ch, WAIT_OTHER);
+	}
+}
+
+
+ACMD(do_compare) {
+	char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+	obj_data *obj, *to_obj = NULL;
+	bool extract_from = FALSE, extract_to = FALSE, inv_only = FALSE;
+	char_data *tmp_char;
+	vehicle_data *tmp_veh;
+	int iter, pos;
+	
+	// compare [inventory] <first obj> [second obj]
+	argument = two_arguments(argument, arg, arg2);
+	
+	// if first arg is 'inv', restrict to inventory
+	if (strlen(arg) >= 3 && is_abbrev(arg, "inventory")) {
+		inv_only = TRUE;
+		strcpy(arg, arg2);
+		argument = one_argument(argument, arg2);
+	}
+	
+	if (GET_POS(ch) == POS_FIGHTING) {
+		msg_to_char(ch, "You're too busy to do that now!\r\n");
+		return;
+	}
+	if (!*arg) {
+		msg_to_char(ch, "Identify what object%s?\r\n", inv_only ? " in your inventory" : "");
+		return;
+	}
+	if (!generic_find(arg, NULL, inv_only ? FIND_OBJ_INV : (FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP), ch, &tmp_char, &obj, &tmp_veh)) {
+		msg_to_char(ch, "You see nothing like that %s.\r\n", inv_only ? "in your inventory" : "here");
+		return;
+	}
+	
+	// ok we have the 1st obj; find the 2nd
+	if (*arg2 && !generic_find(arg2, NULL, inv_only ? FIND_OBJ_INV : (FIND_OBJ_INV | FIND_OBJ_ROOM | FIND_OBJ_EQUIP), ch, &tmp_char, &to_obj, &tmp_veh)) {
+		msg_to_char(ch, "You don't seem to have %s %s to compare it to.\r\n", AN(arg2), arg2);
+		return;
+	}
+	
+	// ok
+	charge_ability_cost(ch, NOTHING, 0, NOTHING, 0, WAIT_OTHER);
+	
+	// check identifies-to:
+	if (has_interaction(GET_OBJ_INTERACTIONS(obj), INTERACT_IDENTIFIES_TO) && (WORN_OR_CARRIED_BY(obj, ch) || can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY))) {
+		act("$n identifies $p.", TRUE, ch, obj, NULL, TO_ROOM);
+		run_identifies_to(ch, &obj, &extract_from);
+		if (ch->desc) {
+			send_stacked_msgs(ch->desc);	// flush the stacked id message before id'ing it
+		}
+	}
+	if (to_obj && has_interaction(GET_OBJ_INTERACTIONS(to_obj), INTERACT_IDENTIFIES_TO) && (WORN_OR_CARRIED_BY(to_obj, ch) || can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY))) {
+		act("$n identifies $p.", TRUE, ch, to_obj, NULL, TO_ROOM);
+		run_identifies_to(ch, &to_obj, &extract_to);
+		if (ch->desc) {
+			send_stacked_msgs(ch->desc);	// flush the stacked id message before id'ing it
+		}
+	}
+	
+	// ensure scaling
+	if (!IS_IMMORTAL(ch) && GET_OBJ_CURRENT_SCALE_LEVEL(obj) == 0) {
+		scale_item_to_level(obj, get_approximate_level(ch));
+	}
+	
+	identify_obj_to_char(obj, ch, TRUE);
+	
+	if (to_obj) {
+		msg_to_char(ch, "\r\n");
+		identify_obj_to_char(to_obj, ch, TRUE);
+		act("$n compares $p to $P.", TRUE, ch, obj, to_obj, TO_ROOM);
+	}
+	else {
+		// detect?
+		for (iter = 0; BIT(iter) < GET_OBJ_WEAR(obj); ++iter) {
+			if (BIT(iter) != ITEM_WEAR_TAKE && CAN_WEAR(obj, BIT(iter))) {
+				pos = get_wear_by_item_wear(BIT(iter));
+				if (GET_EQ(ch, pos)) {
+					msg_to_char(ch, "\r\n");
+					identify_obj_to_char(GET_EQ(ch, pos), ch, TRUE);
+					act("$n compares $p to $P.", TRUE, ch, obj, GET_EQ(ch, pos), TO_ROOM);
+				}
+				// cascade?
+				while ((pos = wear_data[pos].cascade_pos) != NO_WEAR) {
+					if (GET_EQ(ch, pos)) {
+						msg_to_char(ch, "\r\n");
+						identify_obj_to_char(GET_EQ(ch, pos), ch, TRUE);
+						act("$n compares $p to $P.", TRUE, ch, obj, GET_EQ(ch, pos), TO_ROOM);
+					}
+				}
+			}
+		}
+	}
+
+	// check requested extractions
+	if (extract_from) {
+		extract_obj(obj);
+	}
+	if (to_obj && extract_to) {
+		extract_obj(to_obj);
 	}
 }
 
@@ -5266,6 +5500,9 @@ ACMD(do_equipment) {
 	else if (IS_NPC(ch)) {
 		msg_to_char(ch, "NPCs cannot have equipment sets.\r\n");
 	}
+	else if (!str_cmp(arg, "ana") || !str_cmp(arg, "-ana") || !str_cmp(arg, "analyze") || !str_cmp(arg, "-analyze")) {
+		do_eq_analyze(ch, second);
+	}
 	else if (!str_cmp(arg, "del") || !str_cmp(arg, "-del") || !str_cmp(arg, "delete") || !str_cmp(arg, "-delete")) {
 		do_eq_delete(ch, second);
 	}
@@ -5746,7 +5983,7 @@ ACMD(do_identify) {
 			act("$n identifies $p.", TRUE, ch, obj, NULL, TO_ROOM);
 			
 			// check if it has identifies-to
-			if (obj->carried_by == ch || can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
+			if (WORN_OR_CARRIED_BY(obj, ch) || can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
 				run_identifies_to(ch, &obj, &extract);
 				if (ch->desc) {
 					// flush the stacked id message before id'ing it
@@ -5760,7 +5997,7 @@ ACMD(do_identify) {
 			}
 		
 			charge_ability_cost(ch, NOTHING, 0, NOTHING, 0, WAIT_OTHER);
-			identify_obj_to_char(obj, ch);
+			identify_obj_to_char(obj, ch, FALSE);
 		
 			if (extract) {
 				// ONLY if we need to extract it but didn't earlier
@@ -5845,7 +6082,7 @@ ACMD(do_keep) {
 				qt_keep_obj(ch, obj, FALSE);
 			}
 			sprintf(buf, "You %s $p.", sname);
-			act(buf, FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
+			act(buf, FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE | TO_SLEEP);
 			obj = next_obj;
 		}
 	}
@@ -5863,7 +6100,7 @@ ACMD(do_keep) {
 				qt_keep_obj(ch, obj, FALSE);
 			}
 			sprintf(buf, "You %s $p.", sname);
-			act(buf, FALSE, ch, obj, NULL, TO_CHAR);
+			act(buf, FALSE, ch, obj, NULL, TO_CHAR | TO_SLEEP);
 		}
 	}
 	
@@ -6076,7 +6313,7 @@ ACMD(do_list) {
 					snprintf(line, sizeof(line), "%s%s%s%s sells%s:\r\n", (*buf ? "\r\n" : ""), vstr, CAP(tmp), rep, matching);
 				}
 				else if (stl->from_veh) {
-					strcpy(tmp, VEH_SHORT_DESC(stl->from_veh));
+					strcpy(tmp, get_vehicle_short_desc(stl->from_veh, ch));
 					snprintf(line, sizeof(line), "%s%s%s%s sells%s:\r\n", (*buf ? "\r\n" : ""), vstr, CAP(tmp), rep, matching);
 				}
 				else {
@@ -6599,6 +6836,7 @@ ACMD(do_retrieve) {
 		return;
 	}
 	
+	skip_spaces(&argument);
 	strcpy(original, argument);
 	half_chop(argument, arg, buf);
 
@@ -6687,12 +6925,12 @@ ACMD(do_retrieve) {
 		}
 
 		if (!found) {
-			if (room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_WAREHOUSE | FNC_VAULT)) {
+			if (room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_WAREHOUSE | FNC_VAULT) && str_cmp(original, "all")) {
 				// pass control to warehouse func
 				sprintf(buf, "retrieve %s", original);
 				do_warehouse(ch, buf, 0, 0);
 			}
-			else if (ROOM_PRIVATE_OWNER(HOME_ROOM(IN_ROOM(ch))) == GET_IDNUM(ch)) {
+			else if (ROOM_PRIVATE_OWNER(HOME_ROOM(IN_ROOM(ch))) == GET_IDNUM(ch) && str_cmp(original, "all")) {
 				// pass control to home store func
 				sprintf(buf, "retrieve %s", original);
 				do_home(ch, buf, 0, 0);
@@ -7019,6 +7257,9 @@ ACMD(do_ship) {
 		
 		page_string(ch->desc, buf, TRUE);
 	}
+	else if (GET_POS(ch) < POS_RESTING) {
+		send_low_pos_msg(ch);
+	}
 	else if (GET_ISLAND_ID(IN_ROOM(ch)) == NO_ISLAND) {
 		msg_to_char(ch, "You can't ship anything from here.\r\n");
 	}
@@ -7173,6 +7414,7 @@ ACMD(do_store) {
 		return;
 	}
 
+	skip_spaces(&argument);
 	two_arguments(argument, arg1, arg2);
 
 	/* This goes first because I want it to move arg2 to arg1 */
@@ -7236,12 +7478,12 @@ ACMD(do_store) {
 			if (full) {
 				msg_to_char(ch, "It's full.\r\n");
 			}
-			else if (room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_WAREHOUSE | FNC_VAULT)) {
+			else if (room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_WAREHOUSE | FNC_VAULT) && str_cmp(argument, "all")) {
 				// pass control to warehouse func
 				sprintf(buf, "store %s", argument);
 				do_warehouse(ch, buf, 0, 0);
 			}
-			else if (ROOM_PRIVATE_OWNER(HOME_ROOM(IN_ROOM(ch))) == GET_IDNUM(ch)) {
+			else if (ROOM_PRIVATE_OWNER(HOME_ROOM(IN_ROOM(ch))) == GET_IDNUM(ch) && str_cmp(argument, "all")) {
 				// pass control to home store func
 				sprintf(buf, "store %s", argument);
 				do_home(ch, buf, 0, 0);

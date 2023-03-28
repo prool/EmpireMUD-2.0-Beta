@@ -58,6 +58,52 @@ void update_player_leaderboard(char_data *ch, struct event_running_data *re, str
 //// HELPERS /////////////////////////////////////////////////////////////////
 
 /**
+* Removes a player from any still-running events, but leaves then in any old
+* events that have ended (to preserve rank). This is intended for a player who
+* is being deleted, but can be used other times as well.
+*
+* @param char_data *ch The player being deleted from the event(s) (if any).
+*/
+void delete_player_from_running_events(char_data *ch) {
+	struct event_running_data *running;
+	struct event_leaderboard *lb, *next_lb;
+	struct player_event_data *ped;
+	
+	if (!ch || IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(running_events, running) {
+		if (!running->event) {
+			continue;
+		}
+		if (running->status != EVTS_RUNNING) {
+			continue;
+		}
+		
+		HASH_ITER(hh, running->player_leaderboard, lb, next_lb) {
+			if (lb->id == GET_IDNUM(ch)) {
+				// delete my own data for it, if any
+				if ((ped = get_event_data(ch, running->id))) {
+					HASH_DEL(GET_EVENT_DATA(ch), ped);
+					free(ped);
+				}
+				
+				// entry to remove
+				HASH_DEL(running->player_leaderboard, lb);
+				free(lb);
+				
+				events_need_save = TRUE;
+			}
+		}
+	}
+	
+	// in case they're not being deleted
+	queue_delayed_update(ch, CDU_SAVE);
+}
+
+
+/**
 * Gets a character's rank in an event. It returns NOTHING if ch is unranked.
 *
 * @param char_data *ch the player.
@@ -130,7 +176,7 @@ void end_event(struct event_running_data *re) {
 	}
 	
 	// announce
-	syslog(SYS_INFO, LVL_START_IMM, TRUE, "EVENT: [%d] %s (id %d) has ended", EVT_VNUM(event), EVT_NAME(event), re->id);
+	syslog(SYS_EVENT, LVL_START_IMM, TRUE, "EVENT: [%d] %s (id %d) has ended", EVT_VNUM(event), EVT_NAME(event), re->id);
 	log_to_slash_channel_by_name(EVENT_LOG_CHANNEL, NULL, "%s has ended!", EVT_NAME(event));
 	
 	qt_event_start_stop(EVT_VNUM(event));
@@ -317,7 +363,7 @@ void start_event(event_data *event) {
 	events_need_save = TRUE;
 	
 	// announce
-	syslog(SYS_INFO, LVL_START_IMM, TRUE, "EVENT: [%d] %s has started with event id %d", EVT_VNUM(event), EVT_NAME(event), re->id);
+	syslog(SYS_EVENT, LVL_START_IMM, TRUE, "EVENT: [%d] %s has started with event id %d", EVT_VNUM(event), EVT_NAME(event), re->id);
 	log_to_slash_channel_by_name(EVENT_LOG_CHANNEL, NULL, "%s has begun!", EVT_NAME(event));
 	
 	qt_event_start_stop(EVT_VNUM(event));
@@ -532,9 +578,11 @@ int gain_event_points(char_data *ch, any_vnum event_vnum, int points) {
 	
 	if (points > 0) {
 		msg_to_char(ch, "\tyYou gain %d point%s for '%s'! You now have %d%s point%s.\t0\r\n", real_gain, PLURAL(real_gain), running->event ? EVT_NAME(running->event) : "Unknown Event", ped->points, capstr, (ped->points != 1 || *capstr) ? "s" : "");
+		syslog(SYS_EVENT, 0, TRUE, "EVENT: %s gains %d point%s for %s (%d%s total)", GET_NAME(ch), real_gain, PLURAL(real_gain), running->event ? EVT_NAME(running->event) : "Unknown Event", ped->points, capstr);
 	}
 	else if (points < 0) {
 		msg_to_char(ch, "\tyYou lose %d point%s for '%s'! You now have %d%s point%s.\t0\r\n", ABSOLUTE(points), PLURAL(ABSOLUTE(points)), running->event ? EVT_NAME(running->event) : "Unknown Event", ped->points, capstr, (ped->points != 1 || *capstr) ? "s" : "");
+		syslog(SYS_EVENT, 0, TRUE, "EVENT: %s loses %d point%s for %s (%d%s total)", GET_NAME(ch), ABSOLUTE(points), PLURAL(ABSOLUTE(points)), running->event ? EVT_NAME(running->event) : "Unknown Event", ped->points, capstr);
 	}
 	
 	queue_delayed_update(ch, CDU_SAVE);
@@ -568,6 +616,8 @@ struct player_event_data *get_event_data(char_data *ch, int event_id) {
 * possible for quests/scripts to try to grant points without it.
 *
 * Players do not receive a message for this.
+*
+* WARNING: This function is unused and untested. It also does not syslog.
 *
 * @param char_data *ch The person whose points are changing.
 * @param any_vnum event_vnum Which event.
@@ -655,7 +705,7 @@ void cancel_running_event(struct event_running_data *re) {
 	
 	// announce
 	if (re->event) {
-		syslog(SYS_INFO, LVL_START_IMM, TRUE, "EVENT: [%d] %s (id %d) has canceled", EVT_VNUM(re->event), EVT_NAME(re->event), re->id);
+		syslog(SYS_EVENT, LVL_START_IMM, TRUE, "EVENT: [%d] %s (id %d) has canceled", EVT_VNUM(re->event), EVT_NAME(re->event), re->id);
 		log_to_slash_channel_by_name(EVENT_LOG_CHANNEL, NULL, "%s has been canceled", EVT_NAME(re->event));
 	}
 	
@@ -2016,12 +2066,15 @@ void olc_delete_event(char_data *ch, any_vnum vnum) {
 	descriptor_data *desc;
 	char_data *chiter;
 	event_data *event;
+	char name[256];
 	bool found;
 	
 	if (!(event = find_event_by_vnum(vnum))) {
 		msg_to_char(ch, "There is no such event %d.\r\n", vnum);
 		return;
 	}
+	
+	snprintf(name, sizeof(name), "%s", NULLSAFE(EVT_NAME(event)));
 	
 	// end the event, if running -- BEFORE removing from the hash table
 	while ((running = find_running_event_by_vnum(vnum))) {
@@ -2066,7 +2119,9 @@ void olc_delete_event(char_data *ch, any_vnum vnum) {
 		found |= delete_event_reward_from_list(&EVT_THRESHOLD_REWARDS(ev), QR_EVENT_POINTS, vnum);
 		
 		if (found) {
+			// we do NOT apply in-dev because it would cancel live event points
 			// SET_BIT(EVT_FLAGS(ev), EVTF_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Event %d %s had rewards for a deleted event (removed rewards but did not set IN-DEV)", EVT_VNUM(ev), EVT_NAME(ev));
 			save_library_file_for_vnum(DB_BOOT_EVT, EVT_VNUM(ev));
 		}
 	}
@@ -2079,6 +2134,7 @@ void olc_delete_event(char_data *ch, any_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Progress %d %s set IN-DEV due to deleted event", PRG_VNUM(prg), PRG_NAME(prg));
 			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
 			need_progress_refresh = TRUE;
 		}
@@ -2096,6 +2152,7 @@ void olc_delete_event(char_data *ch, any_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(QUEST_FLAGS(quest), QST_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Quest %d %s set IN-DEV due to deleted event", QUEST_VNUM(quest), QUEST_NAME(quest));
 			save_library_file_for_vnum(DB_BOOT_QST, QUEST_VNUM(quest));
 		}
 	}
@@ -2108,6 +2165,7 @@ void olc_delete_event(char_data *ch, any_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Social %d %s set IN-DEV due to deleted event", SOC_VNUM(soc), SOC_NAME(soc));
 			save_library_file_for_vnum(DB_BOOT_SOC, SOC_VNUM(soc));
 		}
 	}
@@ -2160,8 +2218,8 @@ void olc_delete_event(char_data *ch, any_vnum vnum) {
 		}
 	}
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted event %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Event %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted event %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Event %d (%s) deleted.\r\n", vnum, name);
 	
 	free_event(event);
 }

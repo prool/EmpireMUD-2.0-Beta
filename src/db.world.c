@@ -780,7 +780,7 @@ GLB_FUNCTION(run_global_mine_data) {
 	room_data *room = (data ? data->room : NULL);
 	
 	if (!data || !room) {
-		return;	// no work
+		return FALSE;	// no work
 	}
 	
 	set_room_extra_data(room, ROOM_EXTRA_MINE_GLB_VNUM, GET_GLOBAL_VNUM(glb));
@@ -796,6 +796,8 @@ GLB_FUNCTION(run_global_mine_data) {
 	if (ch && GET_GLOBAL_ABILITY(glb) != NO_ABIL) {
 		gain_ability_exp(ch, GET_GLOBAL_ABILITY(glb), 75);
 	}
+	
+	return TRUE;
 }
 
 
@@ -1323,13 +1325,7 @@ void annual_update_map_tile(struct map_data *tile) {
 * Runs an annual update (mainly, maintenance) on the vehicle.
 */
 void annual_update_vehicle(vehicle_data *veh) {
-	static struct resource_data *default_res = NULL;
 	char *msg;
-	
-	// resources if it doesn't have its own
-	if (!default_res) {
-		add_to_resource_list(&default_res, RES_COMPONENT, COMP_NAILS, 1, 0);
-	}
 	
 	// ensure a save
 	request_vehicle_save_in_world(veh);
@@ -1339,6 +1335,14 @@ void annual_update_vehicle(vehicle_data *veh) {
 	
 	// does not take annual damage (unless incomplete)
 	if (!VEH_YEARLY_MAINTENANCE(veh) && VEH_IS_COMPLETE(veh)) {
+		// check if it's abandoned furniture: no owner, unowned room, no instance id, not in an adventure, no players here
+		if (!VEH_OWNER(veh) && VEH_INSTANCE_ID(veh) != NOTHING && IN_ROOM(veh) && !ROOM_OWNER(IN_ROOM(veh)) && !IS_ADVENTURE_ROOM(IN_ROOM(veh)) && !any_players_in_room(IN_ROOM(veh))) {
+			// random chance of decay
+			if (!number(0, 51)) {
+				msg = veh_get_custom_message(veh, VEH_CUSTOM_RUINS_TO_ROOM);
+				ruin_vehicle(veh, msg ? msg : "$V is carted off!");
+			}
+		}
 		return;
 	}
 	

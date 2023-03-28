@@ -160,10 +160,14 @@ GLB_FUNCTION(run_global_hunt_for_map_spawns) {
 	struct hunt_global_bean *data = (struct hunt_global_bean*)other_data;
 	struct hunt_helper *hlp;
 	
-	if (data && data->helpers) {
+	if (data && data->helpers && GET_GLOBAL_SPAWNS(glb)) {
 		CREATE(hlp, struct hunt_helper, 1);
 		hlp->list = GET_GLOBAL_SPAWNS(glb);
 		DL_APPEND(*(data->helpers), hlp);
+		return TRUE;
+	}
+	else {
+		return FALSE;
 	}
 }
 
@@ -680,6 +684,10 @@ ACMD(do_hunt) {
 	
 	skip_spaces(&argument);
 	
+	if (IS_NPC(ch)) {
+		msg_to_char(ch, "You can't do that.\r\n");
+		return;
+	}
 	if (GET_ACTION(ch) == ACT_HUNTING && !*argument) {
 		msg_to_char(ch, "You stop hunting.\r\n");
 		cancel_action(ch);

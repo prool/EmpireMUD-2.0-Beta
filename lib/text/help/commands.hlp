@@ -208,7 +208,7 @@ Additional codes:
  &&Z Next letter will be capitalized (useful in scripts)
  &&z Next letter will be lowercase
 
-See also: BANNER, INFORMATIVE, POLITICAL, RECOLOR, TOGGLE
+See also: BANNER, INFORMATIVE, POLITICAL, RECOLOR, TOGGLE, LEVEL COLORS
 #
 APPROACH
 
@@ -496,6 +496,24 @@ log back in (but you will have to re-cast any buffs on it).
 
 See also: DISMISS, BODYGUARD, FAMILIAR
 #
+COMPARE "COMPARE ITEMS"
+
+Usage:  compare <item> [other item]
+        compare inventory <item> [other item]
+
+This command will use 'identify' compare two items. If you only specify one
+item, it will compare it to whatever you have equipped in the slot it goes in.
+
+This command targets items exactly the same way was 'identify', meaning it
+could target something you have equipped. To guarantee it hits an item in your
+inventory rather than equipment, try 'compare inv <item>'.
+
+Some items become something else (usually a more specific version of whatever
+they were) when you identify them. Using 'compare' will identify the item you
+target exactly as if you had used the 'identify' command.
+
+See also: IDENTIFY, EIDENTIFY
+#
 CONFIRM
 
 Usage:  confirm
@@ -519,8 +537,8 @@ There are also several possible modifier tags:
  - hard: will require two players in the right level range
  - group: will require three players in the right level range
  - boss: will require four players in the right level range
- 
-See also: DROP FLAGS, LEVELS
+
+See also: DROP FLAGS, LEVELS, LEVEL COLORS
 #
 CONTENTS
 
@@ -750,6 +768,7 @@ Usage:  equipment [-all]  -- see your current gear
         equipment delete <name>  -- delete an equipment set
         equipment list  -- list your equipment sets
         equipment <name>  -- change to an equipment set
+        equipment analyze  -- see help about your equipment
 
 Gives you a list of all the equipment you're wearing, holding, and wielding.
 Items do not take up inventory space when equipped (except containers and their
@@ -766,7 +785,10 @@ Saving an equipment set will automatically 'keep' all items in the set. When
 you change equipment sets, any items that are removed will be placed at the
 end of your inventory (instead of at the beginning like normal).
 
-See also: INVENTORY, REMOVE, WEAR, WIELD, HOLD, SHEATH, DRAW, SWAP, KEEP
+Use 'equipment analyze' (eq -ana) for some helpful information about your gear.
+
+See also: INVENTORY, REMOVE, WEAR, WIELD, HOLD, SHEATH, DRAW, SWAP, KEEP,
+   GEAR LEVELS, LEVEL COLORS
 #
 ESTATS ESTATISTICS
 
@@ -1104,7 +1126,7 @@ trying to figure out what to drop or give away, since the numbering (2.bag)
 will be the same for identify and drop (instead of also checking your equipment
 for the identify command).
 
-See also: EIDENTIFY
+See also: EIDENTIFY, COMPARE, LEVEL COLORS, EQUIPMENT
 #
 INFORMATIVE "TOGGLE INFORMATIVE"
 
@@ -1196,7 +1218,7 @@ not take up inventory space when equipped (except containers and their
 contents).
 
 See also: EQUIPMENT, GRAB, HOLD, REMOVE, WEAR, STORE, RETRIEVE, WIELD, SWAP,
-   TOGGLE
+   TOGGLE, LEVEL COLORS
 #
 INTERLINK INTERLINKING
 
@@ -1432,7 +1454,7 @@ The mark command allows you to set a start location and then measure your
 distance to it. This can help with city planning and measuring distances for
 Workforce.
 
-See also: WORKFORCE
+See also: DISTANCE, WORKFORCE
 #
 MESSAGES
 
@@ -1622,7 +1644,7 @@ POLITICAL "POLITICAL VIEW" "TOGGLE POLITICAL"
 Usage:  toggle political [on/off]
 
 This toggle changes your map colors from environmental to political. You will
-see each acre colored with the banner of the empire who owns it. Screenreader
+see each tile colored with the banner of the empire who owns it. Screenreader
 users will see empire names next to claimed tiles.
 
 Dimly lit tiles do not appear in 'informative' mode.
@@ -1992,8 +2014,8 @@ This command allows you to set your character moving in a given direction, or
 along a path you specify. Paths must be pairs of directions and distances which
 your character will move in order.
 
-If you specify coordinates to run to, there must be continous roads all the way
-there (tunnels, gatehouses, and similar buildings are okay as well).
+If you specify coordinates to run to, there must be continuous roads all the
+way there (tunnels, gatehouses, and similar buildings are okay as well).
 
 You will run faster if you have the 'faster walking' bonus trait.
 
@@ -2051,22 +2073,31 @@ This is not the type of game where you can re-load from past saves.
 SAY OOCSAY OSAY TELL ASK WHISPER ' ""
 
 Usage:  say <string>
+        say #<language> <string>
         oocsay <string>
         <tell | whisper | ask> <player> <string>
 
 If you consider communicating with other beings, you might be understood
 better if you start your sentences with either say, tell, whisper or shout.
 
+When you use say, you'll use whatever language your character is currently
+speaking. You can change this with the speak command, or you can start your
+say with #<language> to say one line in a specific language. For this, remove
+the spaces in the language name or use dashes. Ordered mobs (such as pets)
+cannot use the #language syntax.
+
 Examples:
 
   > say Hey, does anyone know how to get to Oz?
+  > say #low-goblish Hello!
   > tell catje hi, how are you?
 
 You can use ' as a shorthand for say, and " for oocsay, as in:
 
   > 'hello there.
 
-See also: CHANNELS, GSAY, IGNORE, NOREPEAT, NOTELL, REPLY, SLASH CHANNELS
+See also: CHANNELS, GSAY, IGNORE, NOREPEAT, NOTELL, REPLY, SLASH CHANNELS,
+   SPEAK
 #
 SAYHISTORY
 
@@ -2272,6 +2303,20 @@ The SOCIALS command generates a canonical listing of all available socials.
   > socials
 
 See also: EMOTE
+#
+SPEAK LANGUAGE LANGUAGES
+
+Usage:  speak [language]
+
+This command changes which language your character will speak for in-character
+communication such as 'say' or 'shout'. You can also specify a language for a
+single say/shout with #<language>. For example: say #low-goblish Hello!
+
+Typing 'speak' without an argument lists the languages you know and shows which
+one you're currently speaking. If a language is unlocked by your empire,
+usually from progress goals, it will be indicated here.
+
+See also: SAY, SHOUT
 #
 STEALTHABLE
 

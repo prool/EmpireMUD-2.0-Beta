@@ -76,6 +76,9 @@ struct {
 	{ ABILT_COMPANION, NULL, NULL },
 	{ ABILT_SUMMON_ANY, NULL, NULL },
 	{ ABILT_SUMMON_RANDOM, NULL, NULL },
+	{ ABILT_MORPH, NULL, NULL },
+	{ ABILT_AUGMENT, NULL, NULL },
+	{ ABILT_CUSTOM, NULL, NULL },
 	
 	{ NOBITS }	// this goes last
 };
@@ -480,9 +483,10 @@ ability_data *find_ability(char *argument) {
 * Look up an ability by multi-abbrev, preferring exact matches.
 *
 * @param char *name The ability name to look up.
+* @param bool allow_abbrev If true, allows abbreviations.
 * @return ability_data* The ability, or NULL if it doesn't exist.
 */
-ability_data *find_ability_by_name(char *name) {
+ability_data *find_ability_by_name_exact(char *name, bool allow_abbrev) {
 	ability_data *abil, *next_abil, *partial = NULL;
 	
 	if (!*name) {
@@ -495,7 +499,7 @@ ability_data *find_ability_by_name(char *name) {
 			// perfect match
 			return abil;
 		}
-		if (!partial && is_multiword_abbrev(name, ABIL_NAME(abil))) {
+		if (allow_abbrev && !partial && is_multiword_abbrev(name, ABIL_NAME(abil))) {
 			// probable match
 			partial = abil;
 		}
@@ -637,16 +641,23 @@ struct ability_exec_type *get_ability_type_data(struct ability_exec *data, bitve
 *
 * @param struct ability_type *list Pointer to the start of a list of types.
 * @param char *save_buffer A buffer to store the result to.
+* @param bool for_players If TRUE, shows the player version of the flags instead of the internal version.
 */
-void get_ability_type_display(struct ability_type *list, char *save_buffer) {
+void get_ability_type_display(struct ability_type *list, char *save_buffer, bool for_players) {
 	struct ability_type *at;
 	char lbuf[256];
 	int count = 0;
 	
 	*save_buffer = '\0';
 	LL_FOREACH(list, at) {
-		sprintbit(at->type, ability_type_flags, lbuf, TRUE);
-		sprintf(save_buffer + strlen(save_buffer), "%s%s(%d)", (count++ > 0) ? ", " : "", lbuf, at->weight);
+		if (for_players) {
+			prettier_sprintbit(at->type, ability_type_notes, lbuf);
+			sprintf(save_buffer + strlen(save_buffer), "%s%s", (count++ > 0) ? ", " : "", lbuf);
+		}
+		else {
+			sprintbit(at->type, ability_type_flags, lbuf, TRUE);
+			sprintf(save_buffer + strlen(save_buffer), "%s%s(%d)", (count++ > 0) ? ", " : "", lbuf, at->weight);
+		}
 	}
 	if (count == 0) {
 		strcat(save_buffer, "none");
@@ -1722,13 +1733,13 @@ DO_ABIL(do_buff_ability) {
 	struct affected_type *af;
 	struct apply_data *apply;
 	any_vnum affect_vnum;
-	double total_points, remaining_points, share, amt;
-	int dur, total_w;
+	double total_points = 1, remaining_points = 1, share, amt;
+	int dur, total_w = 1;
 	bool messaged, unscaled;
 	
 	affect_vnum = (ABIL_AFFECT_VNUM(abil) != NOTHING) ? ABIL_AFFECT_VNUM(abil) : ATYPE_BUFF;
 	
-	unscaled = ABILITY_FLAGGED(abil, ABILF_UNSCALED_BUFF);
+	unscaled = ABILITY_FLAGGED(abil, ABILF_UNSCALED_BUFF) ? TRUE : FALSE;
 	if (!unscaled) {
 		total_points = get_ability_type_data(data, ABILT_BUFF)->scale_points;
 		remaining_points = total_points;
@@ -1795,6 +1806,12 @@ DO_ABIL(do_buff_ability) {
 			affect_join(vict, af, messaged ? SILENT_AFF : NOBITS);
 			messaged = TRUE;
 		}
+	}
+	
+	// check if it kills them
+	if (GET_POS(vict) == POS_INCAP && ABILITY_FLAGGED(abil, ABILF_VIOLENT)) {
+		perform_execute(ch, vict, TYPE_UNDEFINED, DAM_PHYSICAL);
+		data->stop = TRUE;
 	}
 	
 	data->success = TRUE;
@@ -2027,6 +2044,10 @@ void perform_ability_command(char_data *ch, ability_data *abil, char *argument) 
 	
 	if (data->success) {
 		charge_ability_cost(ch, ABIL_COST_TYPE(abil), data->cost, ABIL_COOLDOWN(abil), ABIL_COOLDOWN_SECS(abil), ABIL_WAIT_TYPE(abil));
+		
+		if (ABILITY_FLAGGED(abil, ABILF_LIMIT_CROWD_CONTROL) && ABIL_AFFECT_VNUM(abil) != NOTHING) {
+			limit_crowd_control(targ, ABIL_AFFECT_VNUM(abil));
+		}
 	}
 	
 	// clean up data
@@ -2829,12 +2850,15 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 	class_data *cls, *next_cls;
 	descriptor_data *desc;
 	char_data *chiter;
+	char name[256];
 	bool found;
 	
 	if (!(abil = find_ability_by_vnum(vnum))) {
 		msg_to_char(ch, "There is no such ability %d.\r\n", vnum);
 		return;
 	}
+	
+	snprintf(name, sizeof(name), "%s", NULLSAFE(ABIL_NAME(abil)));
 		
 	// remove it from the hash table first
 	remove_ability_from_table(abil);
@@ -2843,6 +2867,7 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 	HASH_ITER(hh, ability_table, abiter, next_abiter) {
 		if (ABIL_MASTERY_ABIL(abiter) == vnum) {
 			ABIL_MASTERY_ABIL(abiter) = NOTHING;
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Ability %d %s lost deleted mastery ability", ABIL_VNUM(abiter), ABIL_NAME(abiter));
 			save_library_file_for_vnum(DB_BOOT_ABIL, ABIL_VNUM(abiter));
 		}
 	}
@@ -2852,6 +2877,7 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 		if (GET_AUG_ABILITY(aug) == vnum) {
 			GET_AUG_ABILITY(aug) = NOTHING;
 			SET_BIT(GET_AUG_FLAGS(aug), AUG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Augment %d %s set IN-DEV due to deleted ability", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
 			save_library_file_for_vnum(DB_BOOT_AUG, GET_AUG_VNUM(aug));
 		}
 	}
@@ -2860,6 +2886,7 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 	HASH_ITER(hh, class_table, cls, next_cls) {
 		found = remove_vnum_from_class_abilities(&CLASS_ABILITIES(cls), vnum);
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Class %d %s lost deleted ability", CLASS_VNUM(cls), CLASS_NAME(cls));
 			save_library_file_for_vnum(DB_BOOT_CLASS, CLASS_VNUM(cls));
 		}
 	}
@@ -2869,6 +2896,7 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 		if (GET_CRAFT_ABILITY(craft) == vnum) {
 			GET_CRAFT_ABILITY(craft) = NOTHING;
 			SET_BIT(GET_CRAFT_FLAGS(craft), CRAFT_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Craft %d %s set IN-DEV due to deleted ability", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
 			save_library_file_for_vnum(DB_BOOT_CRAFT, GET_CRAFT_VNUM(craft));
 		}
 	}
@@ -2878,6 +2906,7 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 		if (GET_GLOBAL_ABILITY(glb) == vnum) {
 			GET_GLOBAL_ABILITY(glb) = NOTHING;
 			SET_BIT(GET_GLOBAL_FLAGS(glb), GLB_FLAG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Global %d %s set IN-DEV due to deleted ability", GET_GLOBAL_VNUM(glb), GET_GLOBAL_NAME(glb));
 			save_library_file_for_vnum(DB_BOOT_GLB, GET_GLOBAL_VNUM(glb));
 		}
 	}
@@ -2887,6 +2916,7 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 		if (MORPH_ABILITY(morph) == vnum) {
 			MORPH_ABILITY(morph) = NOTHING;
 			SET_BIT(MORPH_FLAGS(morph), MORPHF_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Morph %d %s set IN-DEV due to deleted ability", MORPH_VNUM(morph), MORPH_SHORT_DESC(morph));
 			save_library_file_for_vnum(DB_BOOT_MORPH, MORPH_VNUM(morph));
 		}
 	}
@@ -2897,6 +2927,7 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Progress %d %s set IN-DEV due to deleted ability", PRG_VNUM(prg), PRG_NAME(prg));
 			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
 			need_progress_refresh = TRUE;
 		}
@@ -2909,6 +2940,7 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(QUEST_FLAGS(quest), QST_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Quest %d %s set IN-DEV due to deleted ability", QUEST_VNUM(quest), QUEST_NAME(quest));
 			save_library_file_for_vnum(DB_BOOT_QST, QUEST_VNUM(quest));
 		}
 	}
@@ -2918,6 +2950,7 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 		found = remove_vnum_from_skill_abilities(&SKILL_ABILITIES(skill), vnum);
 		found |= remove_ability_from_synergy_abilities(&SKILL_SYNERGIES(skill), vnum);
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Skill %d %s lost deleted ability", SKILL_VNUM(skill), SKILL_NAME(skill));
 			save_library_file_for_vnum(DB_BOOT_SKILL, SKILL_VNUM(skill));
 		}
 	}
@@ -2928,6 +2961,7 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Social %d %s set IN-DEV due to deleted ability", SOC_VNUM(soc), SOC_NAME(soc));
 			save_library_file_for_vnum(DB_BOOT_SOC, SOC_VNUM(soc));
 		}
 	}
@@ -3025,8 +3059,8 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 	save_index(DB_BOOT_ABIL);
 	save_library_file_for_vnum(DB_BOOT_ABIL, vnum);
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted ability %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Ability %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted ability %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Ability %d (%s) deleted.\r\n", vnum, name);
 	
 	free_ability(abil);
 }
@@ -3428,7 +3462,7 @@ void do_stat_ability(char_data *ch, ability_data *abil) {
 
 	size += snprintf(buf + size, sizeof(buf) - size, "Scale: [\ty%d%%\t0], Mastery ability: [\ty%d\t0] \ty%s\t0\r\n", (int)(ABIL_SCALE(abil) * 100), ABIL_MASTERY_ABIL(abil), ABIL_MASTERY_ABIL(abil) == NOTHING ? "none" : get_ability_name_by_vnum(ABIL_MASTERY_ABIL(abil)));
 	
-	get_ability_type_display(ABIL_TYPE_LIST(abil), part);
+	get_ability_type_display(ABIL_TYPE_LIST(abil), part, FALSE);
 	size += snprintf(buf + size, sizeof(buf) - size, "Types: \tc%s\t0\r\n", part);
 	
 	sprintbit(ABIL_FLAGS(abil), ability_flags, part, TRUE);
@@ -3539,7 +3573,7 @@ void olc_show_ability(char_data *ch) {
 	sprintf(buf + strlen(buf), "[%s%d\t0] %s%s\t0\r\n", OLC_LABEL_CHANGED, GET_OLC_VNUM(ch->desc), OLC_LABEL_UNCHANGED, !find_ability_by_vnum(ABIL_VNUM(abil)) ? "new ability" : get_ability_name_by_vnum(ABIL_VNUM(abil)));
 	sprintf(buf + strlen(buf), "<%sname\t0> %s\r\n", OLC_LABEL_STR(ABIL_NAME(abil), default_ability_name), NULLSAFE(ABIL_NAME(abil)));
 	
-	get_ability_type_display(ABIL_TYPE_LIST(abil), lbuf);
+	get_ability_type_display(ABIL_TYPE_LIST(abil), lbuf, FALSE);
 	sprintf(buf + strlen(buf), "<%stypes\t0> %s\r\n", OLC_LABEL_PTR(ABIL_TYPE_LIST(abil)), lbuf);
 	
 	sprintf(buf + strlen(buf), "<%smasteryability\t0> %d %s\r\n", OLC_LABEL_VAL(ABIL_MASTERY_ABIL(abil), NOTHING), ABIL_MASTERY_ABIL(abil), ABIL_MASTERY_ABIL(abil) == NOTHING ? "none" : get_ability_name_by_vnum(ABIL_MASTERY_ABIL(abil)));
@@ -4149,7 +4183,7 @@ OLC_MODULE(abiledit_types) {
 				if (at->type == BIT(typeid)) {
 					found = TRUE;
 					sprintbit(BIT(typeid), ability_type_flags, buf, TRUE);
-					msg_to_char(ch, "You remove %s.\r\n", buf);
+					msg_to_char(ch, "You remove %s(%d).\r\n", buf, at->weight);
 					LL_DELETE(ABIL_TYPE_LIST(abil), at);
 					free(at);
 				}

@@ -239,12 +239,15 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 	struct map_data *map;
 	room_data *room;
 	int count, x, y;
+	char name[256];
 	bool found;
 	
 	if (!(sect = sector_proto(vnum))) {
 		msg_to_char(ch, "There is no such sector %d.\r\n", vnum);
 		return;
 	}
+	
+	snprintf(name, sizeof(name), "%s", NULLSAFE(GET_SECT_NAME(sect)));
 	
 	if (HASH_COUNT(sector_table) <= 1) {
 		msg_to_char(ch, "You can't delete the last sector.\r\n");
@@ -303,6 +306,7 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 	// update sector evolutions
 	HASH_ITER(hh, sector_table, sect_iter, next_sect) {
 		if (delete_sector_from_evolutions(vnum, &GET_SECT_EVOS(sect_iter))) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Sector %d %s lost deleted evolution sector", GET_SECT_VNUM(sect_iter), GET_SECT_NAME(sect_iter));
 			save_library_file_for_vnum(DB_BOOT_SECTOR, GET_SECT_VNUM(sect_iter));
 		}
 	}
@@ -312,6 +316,7 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 		found = delete_link_rule_by_type_value(&GET_ADV_LINKING(adv), ADV_LINK_PORTAL_WORLD, vnum);
 		
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Adventure %d %s lost deleted linking sector", GET_ADV_VNUM(adv), GET_ADV_NAME(adv));
 			save_library_file_for_vnum(DB_BOOT_ADV, GET_ADV_VNUM(adv));
 		}
 	}
@@ -323,6 +328,7 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Progress %d %s set IN-DEV due to deleted sector", PRG_VNUM(prg), PRG_NAME(prg));
 			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
 			need_progress_refresh = TRUE;
 		}
@@ -337,6 +343,7 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(QUEST_FLAGS(quest), QST_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Quest %d %s set IN-DEV due to deleted sector", QUEST_VNUM(quest), QUEST_NAME(quest));
 			save_library_file_for_vnum(DB_BOOT_QST, QUEST_VNUM(quest));
 		}
 	}
@@ -348,6 +355,7 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Social %d %s set IN-DEV due to deleted sector", SOC_VNUM(soc), SOC_NAME(soc));
 			save_library_file_for_vnum(DB_BOOT_SOC, SOC_VNUM(soc));
 		}
 	}
@@ -399,8 +407,8 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 		}
 	}
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted sector %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Sector %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted sector %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Sector %d (%s) deleted.\r\n", vnum, name);
 	
 	if (count > 0) {
 		msg_to_char(ch, "%d live sectors changed.\r\n", count);
@@ -983,7 +991,11 @@ OLC_MODULE(sectedit_evolution) {
 					tmp = any_one_arg(tmp, buf);	// buf = sector vnum
 					sectarg = any_one_arg(tmp, arg3);
 					
-					if (!*buf || !isdigit(*buf) || !(vsect = sector_proto(atoi(buf)))) {
+					if (!*buf) {
+						msg_to_char(ch, "Usage: evolution add <evo_type> [value] <percent> <sector vnum>\r\n");
+						return;
+					}
+					else if (!isdigit(*buf) || !(vsect = sector_proto(atoi(buf)))) {
 						msg_to_char(ch, "Invalid sector type '%s'.\r\n", buf);
 						return;
 					}
@@ -1075,7 +1087,11 @@ OLC_MODULE(sectedit_evolution) {
 			// this is based on existing type
 			switch (evo_val_types[change->type]) {
 				case EVO_VAL_SECTOR: {
-					if (!*val_arg || !isdigit(*val_arg) || !(vsect = sector_proto(atoi(val_arg)))) {
+					if (!*val_arg) {
+						msg_to_char(ch, "Usage: evolution change <number> value <new sector>\r\n");
+						return;
+					}
+					else if (!isdigit(*val_arg) || !(vsect = sector_proto(atoi(val_arg)))) {
 						msg_to_char(ch, "Invalid sector type '%s'.\r\n", val_arg);
 						return;
 					}

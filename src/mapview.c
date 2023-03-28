@@ -546,7 +546,7 @@ void replace_color_codes(char *string, char *new_color) {
 	*temp = '\0';
 	
 	while (string[iter]) {
-		if (string[iter] == '&' && string[iter+1] != '?') {
+		if (string[iter] == COLOUR_CHAR && string[iter+1] != '?') {
 			// copy over new color and skip this part of string
 			strcpy(temp + iter, new_color);
 			++iter;
@@ -1174,7 +1174,7 @@ void look_at_room_by_loc(char_data *ch, room_data *room, bitvector_t options) {
 	bool ship_partial = IS_SET(options, LRR_SHIP_PARTIAL) ? TRUE : FALSE;
 	bool look_out = IS_SET(options, LRR_LOOK_OUT) ? TRUE : FALSE;
 	bool has_ship = (GET_ROOM_VEHICLE(IN_ROOM(ch)) && !VEH_FLAGGED(GET_ROOM_VEHICLE(IN_ROOM(ch)), VEH_BUILDING)) ? TRUE : FALSE;
-	bool show_on_ship = has_ship && ROOM_BLD_FLAGGED(IN_ROOM(ch), BLD_LOOK_OUT);
+	bool show_on_ship = has_ship && CAN_LOOK_OUT(IN_ROOM(ch));
 	bool show_title = !show_on_ship || ship_partial || look_out || IS_SET(options, LRR_LOOK_OUT_INSIDE);
 
 	// begin with the sanity check
@@ -2051,14 +2051,14 @@ static void show_map_to_char(char_data *ch, struct mappc_data_container *mappc, 
 			strcpy(show_icon, lbuf);
 		}
 		// need a leading color base color?
-		if (*show_icon != '&') {
+		if (*show_icon != COLOUR_CHAR) {
 			snprintf(lbuf, sizeof(lbuf), "%s%s", base_color, show_icon);
 			strcpy(show_icon, lbuf);
 		}
 	}
 	else {
 		// need a leading color base color?
-		if (*show_icon != '&') {
+		if (*show_icon != COLOUR_CHAR) {
 			snprintf(lbuf, sizeof(lbuf), "%s%s", base_color, show_icon);
 			strcpy(show_icon, lbuf);
 		}
@@ -2078,7 +2078,7 @@ static void show_map_to_char(char_data *ch, struct mappc_data_container *mappc, 
 		if (AFF_FLAGGED(ch, AFF_STONED)) {
 			// check all but the final char
 			for (iter = 0; show_icon[iter] != 0 && show_icon[iter+1] != 0; ++iter) {
-				if (show_icon[iter] == '&' || show_icon[iter] == '\t') {
+				if (show_icon[iter] == COLOUR_CHAR || show_icon[iter] == '\t') {
 					switch(show_icon[iter+1]) {
 						case 'r':	show_icon[iter+1] = 'b';	break;
 						case 'g':	show_icon[iter+1] = 'c';	break;
@@ -2483,8 +2483,8 @@ void show_screenreader_room(char_data *ch, room_data *room, bitvector_t options)
 //// WHERE FUNCTIONS /////////////////////////////////////////////////////////
 
 void perform_mortal_where(char_data *ch, char *arg) {
-	int closest, dir, dist, max_distance;
-	struct instance_data *ch_inst, *i_inst;
+	int closest, dist, max_distance;
+	char *dir_str;
 	descriptor_data *d;
 	char_data *i, *found = NULL;
 	
@@ -2504,26 +2504,11 @@ void perform_mortal_where(char_data *ch, char *arg) {
 				continue;
 			if (!CAN_SEE(ch, i) || !CAN_RECOGNIZE(ch, i) || !WIZHIDE_OK(ch, i) || AFF_FLAGGED(i, AFF_NO_WHERE))
 				continue;
-			if ((dist = compute_distance(IN_ROOM(ch), IN_ROOM(i))) > max_distance)
-				continue;
-			
-			if (NO_LOCATION(IN_ROOM(ch)) != NO_LOCATION(IN_ROOM(i))) {
-				// if one is no-location and the other isn't, they definitely can't see each other
+			if ((dist = compute_distance(IN_ROOM(ch), IN_ROOM(i))) > max_distance) {
 				continue;
 			}
-			
-			ch_inst = find_instance_by_room(IN_ROOM(ch), FALSE, FALSE);
-			i_inst = find_instance_by_room(IN_ROOM(i), FALSE, FALSE);
-			if (ch_inst != i_inst || IS_ADVENTURE_ROOM(IN_ROOM(i)) != !IS_ADVENTURE_ROOM(IN_ROOM(ch))) {
-				// not in same adventure...
-				if (NO_LOCATION(IN_ROOM(ch)) || NO_LOCATION(IN_ROOM(i))) {
-					// one or the other is set no-location
-					continue;
-				}
-				if (i_inst && ADVENTURE_FLAGGED(INST_ADVENTURE(i_inst), ADV_NO_NEARBY)) {
-					// target's adventure is !nearby
-					continue;
-				}
+			if (!same_subzone(IN_ROOM(ch), IN_ROOM(i))) {
+				continue;
 			}
 			if (has_player_tech(i, PTECH_NO_TRACK_WILD) && valid_no_trace(IN_ROOM(i))) {
 				gain_player_tech_exp(i, PTECH_NO_TRACK_WILD, 10);
@@ -2541,10 +2526,10 @@ void perform_mortal_where(char_data *ch, char *arg) {
 			}
 			else {
 				// not the same map location -- show distance/coords:
-				dir = get_direction_for_char(ch, get_direction_to(IN_ROOM(ch), IN_ROOM(i)));
+				dir_str = get_partial_direction_to(ch, IN_ROOM(ch), IN_ROOM(i), FALSE);
 				// dist already set for us
 			
-				msg_to_char(ch, "%-20s -%s %s, %d tile%s %s\r\n", PERS(i, ch, FALSE), coord_display_room(ch, IN_ROOM(i), TRUE), get_room_name(IN_ROOM(i), FALSE), dist, PLURAL(dist), (dir != NO_DIR ? dirs[dir] : "away"));
+				msg_to_char(ch, "%-20s -%s %s, %d tile%s %s\r\n", PERS(i, ch, FALSE), coord_display_room(ch, IN_ROOM(i), TRUE), get_room_name(IN_ROOM(i), FALSE), dist, PLURAL(dist), (*dir_str ? dir_str : "away"));
 			}
 			gain_player_tech_exp(ch, PTECH_WHERE_UPGRADE, 10);
 		}
@@ -2557,26 +2542,11 @@ void perform_mortal_where(char_data *ch, char *arg) {
 				continue;
 			if (!multi_isname(arg, GET_PC_NAME(i)))
 				continue;
-			if ((dist = compute_distance(IN_ROOM(ch), IN_ROOM(i))) > max_distance)
-				continue;
-			
-			if (NO_LOCATION(IN_ROOM(ch)) != NO_LOCATION(IN_ROOM(i))) {
-				// if one is no-location and the other isn't, they definitely can't see each other
+			if ((dist = compute_distance(IN_ROOM(ch), IN_ROOM(i))) > max_distance) {
 				continue;
 			}
-			
-			ch_inst = find_instance_by_room(IN_ROOM(ch), FALSE, FALSE);
-			i_inst = find_instance_by_room(IN_ROOM(i), FALSE, FALSE);
-			if (i_inst != ch_inst || find_instance_by_room(IN_ROOM(ch), FALSE, FALSE) != find_instance_by_room(IN_ROOM(i), FALSE, FALSE)) {
-				// not in same adventure...
-				if (NO_LOCATION(IN_ROOM(ch)) || NO_LOCATION(IN_ROOM(i))) {
-					// one or the other is set no-location
-					continue;
-				}
-				if (i_inst && ADVENTURE_FLAGGED(INST_ADVENTURE(i_inst), ADV_NO_NEARBY)) {
-					// target's adventure is !nearby
-					continue;
-				}
+			if (!same_subzone(IN_ROOM(ch), IN_ROOM(i))) {
+				continue;
 			}
 			if (has_player_tech(i, PTECH_NO_TRACK_WILD) && valid_no_trace(IN_ROOM(i))) {
 				gain_player_tech_exp(i, PTECH_NO_TRACK_WILD, 10);
@@ -2601,9 +2571,9 @@ void perform_mortal_where(char_data *ch, char *arg) {
 			}
 			else {
 				// not the same map location -- show distance/coords:
-				dir = get_direction_for_char(ch, get_direction_to(IN_ROOM(ch), IN_ROOM(found)));
+				dir_str = get_partial_direction_to(ch, IN_ROOM(ch), IN_ROOM(found), FALSE);
 				// distance is already set for us as 'closest'
-				msg_to_char(ch, "%-25s -%s %s, %d tile%s %s\r\n", PERS(found, ch, FALSE), coord_display_room(ch, IN_ROOM(found), TRUE), get_room_name(IN_ROOM(found), FALSE), closest, PLURAL(closest), (dir != NO_DIR ? dirs[dir] : "away"));
+				msg_to_char(ch, "%-25s -%s %s, %d tile%s %s\r\n", PERS(found, ch, FALSE), coord_display_room(ch, IN_ROOM(found), TRUE), get_room_name(IN_ROOM(found), FALSE), closest, PLURAL(closest), (*dir_str ? dir_str : "away"));
 			}
 			gain_player_tech_exp(ch, PTECH_WHERE_UPGRADE, 10);
 		}
@@ -2673,10 +2643,10 @@ void perform_immort_where(char_data *ch, char *arg) {
 				i = (d->original ? d->original : d->character);
 				if (i && CAN_SEE(ch, i) && IN_ROOM(i) && WIZHIDE_OK(ch, i)) {
 					if (d->original) {
-						msg_to_char(ch, "%-20s - [%d]%s %s (in %s)", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)), coord_display_room(ch, IN_ROOM(d->character), TRUE), get_room_name(IN_ROOM(d->character), FALSE), GET_NAME(d->character));
+						msg_to_char(ch, "%-20s - [%7d]%s %s (in %s)", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)), coord_display_room(ch, IN_ROOM(d->character), TRUE), get_room_name(IN_ROOM(d->character), FALSE), GET_NAME(d->character));
 					}
 					else {
-						msg_to_char(ch, "%-20s - [%d]%s %s", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)), coord_display_room(ch, IN_ROOM(i), TRUE), get_room_name(IN_ROOM(i), FALSE));
+						msg_to_char(ch, "%-20s - [%7d]%s %s", GET_NAME(i), GET_ROOM_VNUM(IN_ROOM(i)), coord_display_room(ch, IN_ROOM(i), TRUE), get_room_name(IN_ROOM(i), FALSE));
 					}
 					
 					if (ROOM_INSTANCE(IN_ROOM(d->character))) {
@@ -2693,14 +2663,14 @@ void perform_immort_where(char_data *ch, char *arg) {
 		DL_FOREACH(character_list, i) {
 			if (CAN_SEE(ch, i) && IN_ROOM(i) && WIZHIDE_OK(ch, i) && multi_isname(arg, GET_PC_NAME(i))) {
 				found = 1;
-				msg_to_char(ch, "M%3d. %-25s - %s[%d]%s %s\r\n", ++num, GET_NAME(i), (IS_NPC(i) && HAS_TRIGGERS(i)) ? "[TRIG] " : "", GET_ROOM_VNUM(IN_ROOM(i)), coord_display_room(ch, IN_ROOM(i), TRUE), get_room_name(IN_ROOM(i), FALSE));
+				msg_to_char(ch, "M%3d. %-25s - %s[%7d]%s %s\r\n", ++num, GET_NAME(i), (IS_NPC(i) && HAS_TRIGGERS(i)) ? "[TRIG] " : "", GET_ROOM_VNUM(IN_ROOM(i)), coord_display_room(ch, IN_ROOM(i), TRUE), get_room_name(IN_ROOM(i), FALSE));
 			}
 		}
 		num = 0;
 		DL_FOREACH(vehicle_list, veh) {
 			if (CAN_SEE_VEHICLE(ch, veh) && multi_isname(arg, VEH_KEYWORDS(veh))) {
 				found = 1;
-				msg_to_char(ch, "V%3d. %-25s - %s[%d]%s %s\r\n", ++num, VEH_SHORT_DESC(veh), (HAS_TRIGGERS(veh) ? "[TRIG] " : ""), GET_ROOM_VNUM(IN_ROOM(veh)), coord_display_room(ch, IN_ROOM(veh), TRUE), get_room_name(IN_ROOM(veh), FALSE));
+				msg_to_char(ch, "V%3d. %-25s - %s[%7d]%s %s\r\n", ++num, VEH_SHORT_DESC(veh), (HAS_TRIGGERS(veh) ? "[TRIG] " : ""), GET_ROOM_VNUM(IN_ROOM(veh)), coord_display_room(ch, IN_ROOM(veh), TRUE), get_room_name(IN_ROOM(veh), FALSE));
 			}
 		}
 		num = 0;
@@ -2827,7 +2797,7 @@ ACMD(do_mapscan) {
 	else if (!use_room || IS_ADVENTURE_ROOM(use_room) || ROOM_IS_CLOSED(use_room)) {	// check map room
 		msg_to_char(ch, "You can only use mapscan out on the map.\r\n");
 	}
-	else if ((!GET_ROOM_VEHICLE(IN_ROOM(ch)) || !ROOM_BLD_FLAGGED(IN_ROOM(ch), BLD_LOOK_OUT)) && (IS_ADVENTURE_ROOM(IN_ROOM(ch)) || ROOM_IS_CLOSED(IN_ROOM(ch)))) {
+	else if ((!GET_ROOM_VEHICLE(IN_ROOM(ch)) || !CAN_LOOK_OUT(IN_ROOM(ch))) && (IS_ADVENTURE_ROOM(IN_ROOM(ch)) || ROOM_IS_CLOSED(IN_ROOM(ch)))) {
 		msg_to_char(ch, "Scan only works out on the map.\r\n");
 	}
 	else if ((dir = parse_direction(ch, argument)) == NO_DIR) {
@@ -2891,7 +2861,7 @@ ACMD(do_scan) {
 	else if (!use_room || IS_ADVENTURE_ROOM(use_room) || ROOM_IS_CLOSED(use_room)) {	// check map room
 		msg_to_char(ch, "You can only use scan out on the map.\r\n");
 	}
-	else if ((!GET_ROOM_VEHICLE(IN_ROOM(ch)) || !ROOM_BLD_FLAGGED(IN_ROOM(ch), BLD_LOOK_OUT)) && (IS_ADVENTURE_ROOM(IN_ROOM(ch)) || ROOM_IS_CLOSED(IN_ROOM(ch)))) {
+	else if ((!GET_ROOM_VEHICLE(IN_ROOM(ch)) || !CAN_LOOK_OUT(IN_ROOM(ch))) && (IS_ADVENTURE_ROOM(IN_ROOM(ch)) || ROOM_IS_CLOSED(IN_ROOM(ch)))) {
 		msg_to_char(ch, "Scan only works out on the map.\r\n");
 	}
 	else if ((dir = parse_direction(ch, argument)) == NO_DIR) {

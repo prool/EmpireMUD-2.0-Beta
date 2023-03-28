@@ -285,7 +285,8 @@ extern ability_data *ability_table;
 extern ability_data *sorted_abilities;
 
 ability_data *find_ability(char *argument);
-ability_data *find_ability_by_name(char *name);
+ability_data *find_ability_by_name_exact(char *name, bool allow_abbrev);
+#define find_ability_by_name(name)  find_ability_by_name_exact(name, TRUE)
 ability_data *find_ability_by_vnum(any_vnum vnum);
 void free_ability(ability_data *abil);
 char *get_ability_name_by_vnum(any_vnum vnum);
@@ -533,6 +534,7 @@ extern generic_data *sorted_generics;
 void free_generic(generic_data *gen);
 generic_data *find_generic(any_vnum vnum, int type);
 generic_data *find_generic_by_name(int type, char *name, bool exact);
+generic_data *find_generic_no_spaces(int type, char *name);
 generic_data *real_generic(any_vnum vnum);
 const char *get_generic_name_by_vnum(any_vnum vnum);
 const char *get_generic_string_by_vnum(any_vnum vnum, int type, int pos);
@@ -581,7 +583,8 @@ void check_island_levels(room_data *location, int level);
 struct island_info *get_island(int island_id, bool create_if_missing);
 struct island_info *get_island_by_coords(char *coords);
 struct island_info *get_island_by_name(char_data *ch, char *name);
-char *get_island_name_for(int island_id, char_data *for_ch);
+char *get_island_name_for_empire(int island_id, empire_data *for_emp);
+#define get_island_name_for(island_id, for_ch)  get_island_name_for_empire((island_id), (for_ch ? GET_LOYALTY(for_ch) : NULL))
 bool island_has_default_name(struct island_info *island);
 void number_and_count_islands(bool reset);
 void save_island_table();
@@ -677,11 +680,17 @@ extern struct int_hash *inherent_ptech_hash;
 extern int max_inventory_size;
 extern bool pause_affect_total;
 
+void add_language(char_data *ch, any_vnum vnum, byte level);
+void add_language_empire(empire_data *emp, any_vnum vnum, byte level);
 void add_lastname(char_data *ch, char *name);
 bool add_player_to_table(player_index_data *plr);
 void check_autowiz(char_data *ch);
 bool check_bonus_trait_reset(char_data *ch);
 void check_delayed_load(char_data *ch);
+void check_languages(char_data *ch);
+void check_languages_all(void);
+void check_languages_all_empires(void);
+void check_languages_empire(empire_data *emp);
 void delete_player_character(char_data *ch);
 void enter_player_game(descriptor_data *d, int dolog, bool fresh);
 room_data *find_home(char_data *ch);
@@ -701,6 +710,8 @@ struct mail_data *parse_mail(FILE *fl, char *first_line);
 void remove_lastname(char_data *ch, char *name);
 void remove_player_from_table(player_index_data *plr);
 void save_all_players(bool delay);
+int speaks_language(char_data *ch, any_vnum vnum);
+int speaks_language_empire(empire_data *emp, any_vnum vnum);
 void start_new_character(char_data *ch);
 int *summarize_weekly_playtime(empire_data *emp);
 void write_mail_to_file(FILE *fl, char_data *ch);
@@ -796,7 +807,8 @@ extern skill_data *skill_table;
 extern skill_data *sorted_skills;
 
 skill_data *find_skill(char *argument);
-skill_data *find_skill_by_name(char *name);
+skill_data *find_skill_by_name_exact(char *name, bool allow_abbrev);
+#define find_skill_by_name(name)  find_skill_by_name_exact(name, TRUE)
 skill_data *find_skill_by_vnum(any_vnum vnum);
 void free_skill(skill_data *skill);
 char *get_skill_abbrev_by_vnum(any_vnum vnum);

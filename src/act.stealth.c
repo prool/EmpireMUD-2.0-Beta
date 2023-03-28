@@ -1318,7 +1318,7 @@ ACMD(do_sap) {
 	else if (AFF_FLAGGED(vict, AFF_IMMUNE_STUN | AFF_IMMUNE_PHYSICAL_DEBUFFS)) {
 		act("$E doesn't look like $E'd be affected by that.", FALSE, ch, NULL, vict, TO_CHAR);
 	}
-	else if (AFF_FLAGGED(vict, AFF_STUNNED)) {
+	else if (AFF_FLAGGED(vict, AFF_STUNNED) || GET_POS(vict) < POS_SLEEPING || GET_HEALTH(vict) <= 0) {
 		act("$E is already stunned!", FALSE, ch, NULL, vict, TO_CHAR);
 	}
 	else if (ABILITY_TRIGGERS(ch, vict, NULL, ABIL_SAP)) {
@@ -1590,8 +1590,12 @@ ACMD(do_sneak) {
 	if (!sneaking && !can_use_ability(ch, ABIL_SNEAK, NOTHING, 0, NOTHING)) {
 		return;
 	}
+	if (AFF_FLAGGED(ch, AFF_BLIND)) {
+		msg_to_char(ch, "You are blind! It would be hard to sneak around when you keep bumping into things.\r\n");
+		return;
+	}
 	if (AFF_FLAGGED(ch, AFF_IMMOBILIZED)) {
-		msg_to_char(ch, "You are immobilized and can't sneak.\r\n");
+		msg_to_char(ch, "You are immobilized and can't move, nevermind sneak.\r\n");
 		return;
 	}
 	if (GET_LEADING_MOB(ch) || GET_LEADING_VEHICLE(ch)) {

@@ -73,6 +73,108 @@ struct einv_type {
 //// HELPERS /////////////////////////////////////////////////////////////////
 
 /**
+* Determines if a player is allowed to reclaim (steal ownership of) a tile.
+*
+* @param char_data *ch The player trying to reclaim.
+* @param room_data *room The room they are trying to reclaim.
+* @return bool TRUE if it's ok (no message sent) or FALSE if they cannot (sends an error message).
+*/
+bool can_reclaim(char_data *ch, room_data *room) {
+	struct empire_city_data *city;
+	empire_data *emp, *enemy;
+	bool too_soon, my_city, their_city, is_ok;
+
+	if (!ch || !room || IS_NPC(ch)) {
+		if (ch) {
+			msg_to_char(ch, "Reclaim has failed.\r\n");
+		}
+		return FALSE;
+	}
+
+	emp = GET_LOYALTY(ch);
+	enemy = ROOM_OWNER(room);
+
+	if (!emp) {
+		msg_to_char(ch, "You can't reclaim because don't belong to an empire.\r\n");
+		return FALSE;
+	}
+	else if (!enemy) {
+		msg_to_char(ch, "This area isn't claimed.\r\n");
+		return FALSE;
+	}
+	else if (emp == enemy) {
+		msg_to_char(ch, "Your empire already owns the area.\r\n");
+		return FALSE;
+	}
+	else if (EMPIRE_IMM_ONLY(enemy)) {
+		msg_to_char(ch, "You cannot reclaim territory from immortal empires.\r\n");
+		return FALSE;
+	}
+	else if (EMPIRE_ADMIN_FLAGGED(emp, EADM_NO_WAR | EADM_NO_STEAL) || EMPIRE_ADMIN_FLAGGED(enemy, EADM_NO_WAR | EADM_NO_STEAL)) {
+		msg_to_char(ch, "You cannot reclaim territory from that empire.\r\n");
+		return FALSE;
+	}
+	else if (GET_RANK(ch) < EMPIRE_PRIV(emp, PRIV_CLAIM)) {
+		msg_to_char(ch, "You don't have permission to claim land for the empire.\r\n");
+		return FALSE;
+	}
+	else if (ROOM_AFF_FLAGGED(room, ROOM_AFF_UNCLAIMABLE)) {
+		msg_to_char(ch, "This area can't be claimed.\r\n");
+		return FALSE;
+	}
+	else if (IS_CITY_CENTER(room)) {
+		msg_to_char(ch, "You can't reclaim a city center.\r\n");
+		return FALSE;
+	}
+	else if (!can_claim(ch)) {
+		msg_to_char(ch, "You can't reclaim because claim any more land.\r\n");
+		return FALSE;
+	}
+	
+	if (!has_relationship(emp, enemy, DIPL_WAR)) {
+		// not at war?
+		is_ok = FALSE;
+		
+		// check city
+		if (get_territory_type_for_empire(room, emp, TRUE, &too_soon) == TER_CITY && get_territory_type_for_empire(room, enemy, TRUE, &too_soon) == TER_FRONTIER) {
+			// I have a city here and they don't even have an outskirts
+			is_ok = TRUE;
+		}
+		else {
+			// check cities on the island
+			my_city = their_city = FALSE;
+			LL_FOREACH(EMPIRE_CITY_LIST(emp), city) {
+				if (GET_ISLAND(city->location) == GET_ISLAND(room) && (get_room_extra_data(city->location, ROOM_EXTRA_FOUND_TIME) + (config_get_int("minutes_to_full_city") * SECS_PER_REAL_MIN) < time(0))) {
+					my_city = TRUE;
+				}
+			}
+			LL_FOREACH(EMPIRE_CITY_LIST(enemy), city) {
+				if (GET_ISLAND(city->location) == GET_ISLAND(room) && (get_room_extra_data(city->location, ROOM_EXTRA_FOUND_TIME) + (config_get_int("minutes_to_full_city") * SECS_PER_REAL_MIN) < time(0))) {
+					their_city = TRUE;
+				}
+			}
+			if (my_city && !their_city) {
+				is_ok = TRUE;
+			}
+		}
+		
+		// allow with diplomacy permission if not at war
+		if (is_ok && GET_RANK(ch) < EMPIRE_PRIV(emp, PRIV_DIPLOMACY)) {
+			msg_to_char(ch, "You need diplomacy permission to reclaim a tile while not at war.\r\n");
+			return FALSE;
+		}
+		else if (!is_ok) {
+			msg_to_char(ch, "You can't reclaim this territory unless you go to war with the owner.\r\n");
+			return FALSE;
+		}
+	}
+	
+	// if we got here: ok!
+	return TRUE;
+}
+
+
+/**
 * Updates all shipping ids (run before converting vehicle ownership) and moves
 * shipping data to the new empire. Call this during an empire merge.
 *
@@ -829,7 +931,7 @@ static void show_empire_identify_to_char(char_data *ch, empire_data *emp, char *
 		return;
 	}
 	
-	identify_obj_to_char(proto, ch);
+	identify_obj_to_char(proto, ch, FALSE);
 	
 	msg_to_char(ch, "Storage list: \r\n");
 	HASH_ITER(hh, eid_pi_list, eid_pi, eid_pi_next) {
@@ -1357,7 +1459,7 @@ void show_workforce_why(empire_data *emp, char_data *ch, char *argument) {
 				*rname = '\0';
 			}
 		
-			snprintf(line, sizeof(line), "%s %s%s: %s%s%s\r\n", coord_display(ch, MAP_X_COORD(wf_log->loc), MAP_Y_COORD(wf_log->loc), TRUE), rname, chore_data[wf_log->chore].name, wf_problem_types[wf_log->problem], mult, wf_log->delayed ? " (delayed)" : "");
+			snprintf(line, sizeof(line), "%s %s%s: %s%s%s\r\n", coord_display(ch, X_COORD(room), Y_COORD(room), TRUE), rname, chore_data[wf_log->chore].name, wf_problem_types[wf_log->problem], mult, wf_log->delayed ? " (delayed)" : "");
 			any = TRUE;
 		
 			if (strlen(line) + size + 16 < sizeof(buf)) {	// reserve space for overflow
@@ -2911,9 +3013,10 @@ struct find_territory_node *reduce_territory_node_list(struct find_territory_nod
 */
 void scan_for_tile(char_data *ch, char *argument) {
 	struct find_territory_node *node_list = NULL, *node, *next_node;
-	int dir, dist, mapsize, total, x, y, check_x, check_y, over_count, dark_distance;
+	int dist, mapsize, total, x, y, check_x, check_y, over_count, dark_distance;
 	int iter, top_height, r_height, view_height;
 	char output[MAX_STRING_LENGTH], line[128], info[256], veh_string[MAX_STRING_LENGTH], temp[MAX_STRING_LENGTH], paint_str[256];
+	char *dir_str;
 	vehicle_data *veh, *scanned_veh;
 	struct map_data *map_loc;
 	room_data *map, *room, *block_room;
@@ -3119,10 +3222,10 @@ void scan_for_tile(char_data *ch, char *argument) {
 				check_y = Y_COORD(node->loc);
 			
 				dist = compute_distance(IN_ROOM(ch), node->loc);
-				dir = get_direction_for_char(ch, get_direction_to(IN_ROOM(ch), node->loc));
+				dir_str = get_partial_direction_to(ch, IN_ROOM(ch), node->loc, PRF_FLAGGED(ch, PRF_SCREEN_READER) ? FALSE : TRUE);
 				
 				// distance and direction
-				lsize = snprintf(line, sizeof(line), "%2d %s: ", dist, (dir == NO_DIR ? "away" : (PRF_FLAGGED(ch, PRF_SCREEN_READER) ? dirs[dir] : alt_dirs[dir])));
+				lsize = snprintf(line, sizeof(line), "%2d %s: ", dist, (*dir_str ? dir_str : "away"));
 				
 				if (node->details) {
 					lsize += snprintf(line + lsize, sizeof(line) - lsize, "%s: %s", (GET_BUILDING(node->loc) ? GET_BLD_NAME(GET_BUILDING(node->loc)) : GET_SECT_NAME(SECT(node->loc))), node->details);
@@ -5817,7 +5920,7 @@ void do_manage_vehicle(char_data *ch, vehicle_data *veh, char *argument) {
 	}
 	
 	if (!*arg) {
-		msg_to_char(ch, "Management for %s:\r\n", VEH_SHORT_DESC(veh));
+		msg_to_char(ch, "Management for %s:\r\n", get_vehicle_short_desc(veh, ch));
 		
 		for (iter = 0; *manage_vehicle_data[iter].name != '\n'; ++iter) {
 			if (manage_vehicle_data[iter].access_level > GET_ACCESS_LEVEL(ch) && (manage_vehicle_data[iter].grant == NOBITS || !IS_GRANTED(ch, manage_vehicle_data[iter].grant))) {
@@ -5871,7 +5974,7 @@ void do_manage_vehicle(char_data *ch, vehicle_data *veh, char *argument) {
 			}
 		}
 		
-		msg_to_char(ch, "You turn the %s management option %s for %s.\r\n", manage_vehicle_data[type].name, on ? "on" : "off", VEH_SHORT_DESC(veh));
+		msg_to_char(ch, "You turn the %s management option %s for %s.\r\n", manage_vehicle_data[type].name, on ? "on" : "off", get_vehicle_short_desc(veh, ch));
 		snprintf(buf, sizeof(buf), "$n turns the %s management option %s for %s.", manage_vehicle_data[type].name, on ? "on" : "off", VEH_SHORT_DESC(veh));
 		act(buf, TRUE, ch, NULL, NULL, TO_ROOM | TO_NOT_IGNORING);
 		
@@ -6563,6 +6666,9 @@ ACMD(do_progress) {
 			}
 			msg_to_char(ch, "Completed %s.\r\n", buf);
 		}
+		else if (!get_current_goal(emp, PRG_VNUM(prg)) && !empire_has_completed_goal(emp, PRG_VNUM(prg))) {
+			msg_to_char(ch, "\trYour empire has not started this goal.\t0\r\n");
+		}
 		
 		// Show prereqs:
 		if (PRG_PREREQS(prg)) {
@@ -6576,7 +6682,7 @@ ACMD(do_progress) {
 		// Show descendents if any
 		any = FALSE;
 		HASH_ITER(hh, progress_table, prg_iter, next_prg) {
-			if (PRG_FLAGGED(prg_iter, PRG_IN_DEVELOPMENT | PRG_SCRIPT_ONLY | PRG_HIDDEN)) {
+			if (PRG_FLAGGED(prg_iter, PRG_IN_DEVELOPMENT | PRG_NO_AUTOSTART | PRG_HIDDEN)) {
 				continue;	// skip these types
 			}
 			
@@ -6738,96 +6844,116 @@ ACMD(do_publicize) {
 * @param char_data *ch
 */
 void process_reclaim(char_data *ch) {
-	struct empire_political_data *pol;
 	empire_data *emp = GET_LOYALTY(ch);
-	empire_data *enemy = ROOM_OWNER(IN_ROOM(ch));
+	empire_data *enemy;
+	room_data *target;
+	char from_str[256];
 	
-	if (real_empire(GET_ACTION_VNUM(ch, 0)) != ROOM_OWNER(IN_ROOM(ch))) {
+	target = real_room(GET_ACTION_VNUM(ch, 1));
+	enemy = ROOM_OWNER(target);
+	
+	// message prep
+	if (target != IN_ROOM(ch)) {
+		snprintf(from_str, sizeof(from_str), " from (%d, %d)", X_COORD(IN_ROOM(ch)), Y_COORD(IN_ROOM(ch)));
+	}
+	else {
+	    *from_str = '\0';
+	}
+	
+	// checks...
+	if (!target) {
+		msg_to_char(ch, "You stop reclaiming.\r\n");
+		cancel_action(ch);
+	}
+	else if (real_empire(GET_ACTION_VNUM(ch, 0)) != ROOM_OWNER(target)) {
 		msg_to_char(ch, "You stop reclaiming as ownership has changed.\r\n");
-		GET_ACTION(ch) = ACT_NONE;
+		cancel_action(ch);
 	}
-	else if (!emp || !enemy || !(pol = find_relation(emp, enemy)) || !IS_SET(pol->type, DIPL_WAR)) {
-		msg_to_char(ch, "You stop reclaiming as you are not at war with this empire.\r\n");
-		GET_ACTION(ch) = ACT_NONE;
+	else if (target != IN_ROOM(ch) && ROOM_IS_CLOSED(IN_ROOM(ch))) {
+		msg_to_char(ch, "You can't reclaim from here.\r\n");
+		cancel_action(ch);
 	}
-	else if (IS_CITY_CENTER(IN_ROOM(ch))) {
-		msg_to_char(ch, "You can't reclaim a city center.\r\n");
-		GET_ACTION(ch) = ACT_NONE;
-	}
-	else if (!can_claim(ch)) {
-		msg_to_char(ch, "You stop reclaiming because you can claim no more land.\r\n");
-		GET_ACTION(ch) = ACT_NONE;
+	else if (!can_reclaim(ch, target)) {
+		// sends its own error message
+		cancel_action(ch);
 	}
 	else if (--GET_ACTION_TIMER(ch) > 0 && (GET_ACTION_TIMER(ch) % 12) == 0) {
-		log_to_empire(enemy, ELOG_HOSTILITY, "An enemy is trying to reclaim (%d, %d)", X_COORD(IN_ROOM(ch)), Y_COORD(IN_ROOM(ch)));
-		msg_to_char(ch, "%d minutes remaining to reclaim this acre.\r\n", (GET_ACTION_TIMER(ch) / 12));
+		log_to_empire(enemy, ELOG_HOSTILITY, "Someone is trying to reclaim (%d, %d)%s", X_COORD(target), Y_COORD(target), from_str);
+		msg_to_char(ch, "%d minute%s remaining to reclaim the area.\r\n", (GET_ACTION_TIMER(ch) / 12), PLURAL(GET_ACTION_TIMER(ch) / 12));
 	}
 	else if (GET_ACTION_TIMER(ch) <= 0) {
-		log_to_empire(enemy, ELOG_HOSTILITY, "An enemy has reclaimed (%d, %d)!", X_COORD(IN_ROOM(ch)), Y_COORD(IN_ROOM(ch)));
-		msg_to_char(ch, "You have reclaimed this acre for your empire!");
-
-		abandon_room(IN_ROOM(ch));
-		claim_room(IN_ROOM(ch), emp);
+		log_to_empire(enemy, ELOG_HOSTILITY, "Someone from %s has reclaimed (%d, %d)%s!", EMPIRE_NAME(emp), X_COORD(target), Y_COORD(target), from_str);
+		msg_to_char(ch, "You have reclaimed the area for your empire!\r\n");
+		
+		add_offense(enemy, OFFENSE_RECLAIMED, ch, target, offense_was_seen(ch, enemy, NULL) ? OFF_SEEN : NOBITS);
+		
+		abandon_room(target);
+		claim_room(target, emp);
 		
 		GET_ACTION(ch) = ACT_NONE;
 	}
 }
 
 
-ACMD(do_reclaim) {	
-	struct empire_political_data *pol;
+ACMD(do_reclaim) {
 	empire_data *emp, *enemy;
-	int x, y, count;
-	room_data *to_room;
+	int x, y, count, dir;
+	room_data *target = IN_ROOM(ch), *to_room;
+	char from_str[256];
 
-	if (IS_NPC(ch))
+	if (IS_NPC(ch)) {
 		return;
+	}
+	
+	// optional arg
+	one_argument(argument, arg);
+	if (*arg && (dir = parse_direction(ch, arg)) != NO_DIR) {
+		if (!IS_OUTDOOR_TILE(IN_ROOM(ch)) || GET_ROOM_VNUM(IN_ROOM(ch)) >= MAP_SIZE) {
+			msg_to_char(ch, "You can't reclaim adjacent tiles unless you're outdoors.\r\n");
+			return;
+		}
+		else if (!(target = real_shift(IN_ROOM(ch), shift_dir[dir][0], shift_dir[dir][1]))) {
+			msg_to_char(ch, "You can't reclaim anything in that direction.\r\n");
+			return;
+		}
+		else {
+			// ok! target was set; continue
+		}
+	}
+	else if (*arg) {
+		msg_to_char(ch, "Usage: reclaim [direction]\r\n");
+		return;
+	}
+	else {
+		target = IN_ROOM(ch);
+	}
 
 	emp = GET_LOYALTY(ch);
-	enemy = ROOM_OWNER(IN_ROOM(ch));
+	enemy = ROOM_OWNER(target);
 
-	if (GET_ACTION(ch) == ACT_RECLAIMING) {
-		msg_to_char(ch, "You stop trying to reclaim this acre.\r\n");
-		act("$n stops trying to reclaim this acre.", FALSE, ch, NULL, NULL, TO_ROOM);
+	if (!*arg && GET_ACTION(ch) == ACT_RECLAIMING) {
+		msg_to_char(ch, "You stop trying to reclaim this area.\r\n");
+		act("$n stops trying to reclaim this area.", FALSE, ch, NULL, NULL, TO_ROOM);
 		GET_ACTION(ch) = ACT_NONE;
-	}
-	else if (!emp) {
-		msg_to_char(ch, "You don't belong to any empire.\r\n");
 	}
 	else if (GET_ACTION(ch) != ACT_NONE) {
 		msg_to_char(ch, "You're a little busy right now.\r\n");
 	}
-	else if (emp == enemy) {
-		msg_to_char(ch, "Your empire already owns this acre.\r\n");
+	else if (target != IN_ROOM(ch) && ROOM_OWNER(IN_ROOM(ch)) != GET_LOYALTY(ch)) {
+		msg_to_char(ch, "You must reclaim adjacent tiles from a tile you own.\r\n");
 	}
-	else if (GET_RANK(ch) < EMPIRE_PRIV(emp, PRIV_CLAIM)) {
-		// could probably now use has_permission
-		msg_to_char(ch, "You don't have permission to claim land for the empire.\r\n");
+	else if (!can_reclaim(ch, target)) {
+		// sends its own message
 	}
-	else if (ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_UNCLAIMABLE)) {
-		msg_to_char(ch, "This acre can't be claimed.\r\n");
-	}
-	else if (IS_CITY_CENTER(IN_ROOM(ch))) {
-		msg_to_char(ch, "You can't reclaim a city center.\r\n");
-	}
-	else if (!enemy) {
-		msg_to_char(ch, "This acre isn't claimed.\r\n");
-	}
-	else if (HOME_ROOM(IN_ROOM(ch)) != IN_ROOM(ch)) {
+	else if (HOME_ROOM(target) != target) {
 		msg_to_char(ch, "You must reclaim from the main room of the building.\r\n");
-	}
-	else if (!can_claim(ch)) {
-		msg_to_char(ch, "You can't claim any more land.\r\n");
-	}
-	else if (!(pol = find_relation(emp, enemy)) || !IS_SET(pol->type, DIPL_WAR)) {
-		msg_to_char(ch, "You can only reclaim territory from people you're at war with.\r\n");
 	}
 	else {
 		// secondary validation: Must have 4 claimed tiles adjacent
 		count = 0;
 		for (x = -1; x <= 1; ++x) {
 			for (y = -1; y <= 1; ++y) {
-				to_room = real_shift(IN_ROOM(ch), x, y);
+				to_room = real_shift(target, x, y);
 				
 				if (to_room && ROOM_OWNER(to_room) == emp) {
 					++count;
@@ -6836,14 +6962,22 @@ ACMD(do_reclaim) {
 		}
 		
 		if (count < 4) {
-			msg_to_char(ch, "You can only reclaim territory that is adjacent to at least 4 acres you own.\r\n");
+			msg_to_char(ch, "You can only reclaim territory that is adjacent to at least 4 tiles you own.\r\n");
 		}
 		else {
-			log_to_empire(enemy, ELOG_HOSTILITY, "An enemy is trying to reclaim (%d, %d)", X_COORD(IN_ROOM(ch)), Y_COORD(IN_ROOM(ch)));
-			msg_to_char(ch, "You start to reclaim this acre. It will take 5 minutes.\r\n");
-			act("$n starts to reclaim this acre for $s empire!", FALSE, ch, NULL, NULL, TO_ROOM);
+			if (target != IN_ROOM(ch)) {
+				snprintf(from_str, sizeof(from_str), " from (%d, %d)", X_COORD(IN_ROOM(ch)), Y_COORD(IN_ROOM(ch)));
+			}
+			else {
+				*from_str = '\0';
+			}
+			
+			log_to_empire(enemy, ELOG_HOSTILITY, "Someone is trying to reclaim (%d, %d)%s", X_COORD(target), Y_COORD(target), from_str);
+			msg_to_char(ch, "You start to reclaim the area. It will take 5 minutes.\r\n");
+			act("$n starts to reclaim the area for $s empire!", FALSE, ch, NULL, NULL, TO_ROOM);
 			start_action(ch, ACT_RECLAIMING, 12 * SECS_PER_REAL_UPDATE);
-			GET_ACTION_VNUM(ch, 0) = ROOM_OWNER(IN_ROOM(ch)) ? EMPIRE_VNUM(ROOM_OWNER(IN_ROOM(ch))) : NOTHING;
+			GET_ACTION_VNUM(ch, 0) = ROOM_OWNER(target) ? EMPIRE_VNUM(ROOM_OWNER(target)) : NOTHING;
+			GET_ACTION_VNUM(ch, 1) = GET_ROOM_VNUM(target);
 		}
 	}
 }
