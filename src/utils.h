@@ -482,6 +482,7 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 //// CROP UTILS //////////////////////////////////////////////////////////////
 
 #define GET_CROP_CLIMATE(crop)  ((crop)->climate)
+#define GET_CROP_EX_DESCS(crop)  ((crop)->ex_description)
 #define GET_CROP_FLAGS(crop)  ((crop)->flags)
 #define GET_CROP_ICONS(crop)  ((crop)->icons)
 #define GET_CROP_INTERACTIONS(crop)  ((crop)->interactions)
@@ -1484,6 +1485,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define GET_SECT_CLIMATE(sect)  ((sect)->climate)
 #define GET_SECT_COMMANDS(sect)  ((sect)->commands)
 #define GET_SECT_EVOS(sect)  ((sect)->evolution)
+#define GET_SECT_EX_DESCS(sect)  ((sect)->ex_description)
 #define GET_SECT_FLAGS(sect)  ((sect)->flags)
 #define GET_SECT_ICONS(sect)  ((sect)->icons)
 #define GET_SECT_INTERACTIONS(sect)  ((sect)->interactions)
@@ -1969,7 +1971,7 @@ void do_customize_island(char_data *ch, char *argument);
 int get_territory_type_for_empire(room_data *loc, empire_data *emp, bool check_wait, bool *city_too_soon);
 #define is_in_city_for_empire(loc, emp, check_wait, city_too_soon)  (get_territory_type_for_empire((loc), (emp), (check_wait), (city_too_soon)) == TER_CITY)	// backwards-compatibility
 void perform_abandon_city(empire_data *emp, struct empire_city_data *city, bool full_abandon);
-void scan_for_tile(char_data *ch, char *argument);
+void scan_for_tile(char_data *ch, char *argument, int max_dist, bitvector_t only_in_dirs);
 void set_workforce_limit(empire_data *emp, int island_id, int chore, int limit);
 void set_workforce_limit_all(empire_data *emp, int chore, int limit);
 void show_workforce_setup_to_char(empire_data *emp, char_data *ch);
@@ -2093,6 +2095,7 @@ void un_deathshroud(char_data *ch);
 void un_mummify(char_data *ch);
 void update_biting_char(char_data *ch);
 void update_vampire_sun(char_data *ch);
+bool vampire_kill_feeding_target(char_data *ch, char *argument);
 
 // act.vehicles.c
 void do_customize_vehicle(char_data *ch, char *argument);
@@ -2268,6 +2271,7 @@ void despawn_mob(char_data *ch);
 int determine_best_scale_level(char_data *ch, bool check_group);
 void end_pursuit(char_data *ch, char_data *target);
 struct generic_name_data *get_generic_name_list(int name_set, int sex);
+struct generic_name_data *get_best_name_list(int name_set, int sex);
 int mob_coins(char_data *mob);
 void random_encounter(char_data *ch);
 void run_mobile_activity(char_data *ch);

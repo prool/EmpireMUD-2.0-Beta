@@ -133,7 +133,7 @@ Basic buildings granted by the Build ability:
 
 All buildings give experience as you add materials to their construction.
 
-See also: BUILD COMMAND, BUILD INFO, ARCHITECT
+See also: BUILD COMMAND, BUILD INFO, ARCHITECT, CRAFTING ABILITIES
 #
 BURIALCAVERN "BURIAL CAVERN"
 
@@ -446,7 +446,8 @@ GATE
 .xx.  vxxv  Gate  (Build ability)
 
 A gate is an entrance for a fence. Since players are not blocked by fences,
-the gate is purely decorative.
+the gate is purely decorative. It counts as in-city territory even when built
+in the outskirts (4x radius).
 
 See also: FENCE
 #
@@ -628,7 +629,9 @@ Each lumber yard is a storage facility for the empire's wood. Like all of the
 storage buildings, all lumber yards on the same island are linked together and
 you can retrieve from any of them.
 
-See also: STORAGE
+You can saw lumber at the lumber yard without needing a tool.
+
+See also: SAW, STORAGE
 #
 MEGALITH
 

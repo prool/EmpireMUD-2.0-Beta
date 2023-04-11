@@ -276,7 +276,9 @@ void do_customize_road(char_data *ch, char *argument) {
 			msg_to_char(ch, "What would you like to name this road (or \"none\")?\r\n");
 		}
 		else if (!str_cmp(arg2, "none")) {
+			REMOVE_BIT(ROOM_BASE_FLAGS(IN_ROOM(ch)), ROOM_AFF_HIDE_REAL_NAME);
 			set_room_custom_name(IN_ROOM(ch), NULL);
+			affect_total_room(IN_ROOM(ch));
 			msg_to_char(ch, "This road no longer has a custom name.\r\n");
 			command_lag(ch, WAIT_ABILITY);
 		}
@@ -300,7 +302,9 @@ void do_customize_road(char_data *ch, char *argument) {
 				return;
 			}
 			
+			SET_BIT(ROOM_BASE_FLAGS(IN_ROOM(ch)), ROOM_AFF_HIDE_REAL_NAME);
 			set_room_custom_name(IN_ROOM(ch), arg2);
+			affect_total_room(IN_ROOM(ch));
 			msg_to_char(ch, "This road tile is now called \"%s\".\r\n", arg2);
 			command_lag(ch, WAIT_ABILITY);
 		}
@@ -2905,7 +2909,7 @@ ACMD(do_milk) {
 	else if (get_cooldown_time(mob, COOLDOWN_MILK) > 0)
 		act("$E can't be milked again for a while.", FALSE, ch, 0, mob, TO_CHAR);
 	else if (!(cont = get_obj_in_list_vis(ch, buf, NULL, ch->carrying)))
-		msg_to_char(ch, "You don't seem to have a %s.\r\n", buf);
+		msg_to_char(ch, "You don't seem to have %s %s.\r\n", AN(buf), buf);
 	else if (GET_OBJ_TYPE(cont) != ITEM_DRINKCON)
 		act("You can't milk $N into $p!", FALSE, ch, cont, mob, TO_CHAR);
 	else if (GET_DRINK_CONTAINER_CONTENTS(cont) > 0 && GET_DRINK_CONTAINER_TYPE(cont) != LIQ_MILK)
@@ -3062,7 +3066,7 @@ ACMD(do_morph) {
 	
 	skip_spaces(&argument);
 	fast = (subcmd == SCMD_FASTMORPH || FIGHTING(ch) || GET_POS(ch) == POS_FIGHTING);
-	normal = (!str_cmp(argument, "normal") | !str_cmp(argument, "norm"));
+	normal = (!str_cmp(argument, "normal") || !str_cmp(argument, "norm"));
 	
 	// safety first: mobs must use %morph%
 	if (IS_NPC(ch) && (!fast || !normal)) {

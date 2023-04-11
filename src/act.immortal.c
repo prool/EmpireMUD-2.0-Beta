@@ -50,7 +50,6 @@ struct instance_data *build_instance_loc(adv_data *adv, struct adventure_link_ru
 void Crash_listrent(char_data *ch, char *name);
 void do_stat_vehicle(char_data *ch, vehicle_data *veh);
 room_data *find_location_for_rule(adv_data *adv, struct adventure_link_rule *rule, int *which_dir);
-struct generic_name_data *get_best_name_list(int name_set, int sex);
 void update_account_stats();
 
 // locals
@@ -5691,7 +5690,7 @@ SHOW(show_storage) {
 	else {
 		// ok to show: init string/size
 		if (find_bld) {
-			size = snprintf(buf, sizeof(buf), "Objects that can be stored in a %s:\r\n", GET_BLD_NAME(find_bld));
+			size = snprintf(buf, sizeof(buf), "Objects that can be stored in %s %s:\r\n", AN(GET_BLD_NAME(find_bld)), GET_BLD_NAME(find_bld));
 		}
 		else if (find_veh) {
 			size = snprintf(buf, sizeof(buf), "Objects that can be stored in %s:\r\n", VEH_SHORT_DESC(find_veh));
@@ -6121,7 +6120,7 @@ void do_stat_building(char_data *ch, bld_data *bdg) {
 	if (GET_BLD_EX_DESCS(bdg)) {
 		struct extra_descr_data *desc;
 		sprintf(buf, "Extra descs:&c");
-		for (desc = GET_BLD_EX_DESCS(bdg); desc; desc = desc->next) {
+		LL_FOREACH(GET_BLD_EX_DESCS(bdg), desc) {
 			strcat(buf, " ");
 			strcat(buf, desc->keyword);
 		}
@@ -6536,6 +6535,16 @@ void do_stat_crop(char_data *ch, crop_data *cp) {
 	
 	msg_to_char(ch, "Location: X-Min: [&g%d&0], X-Max: [&g%d&0], Y-Min: [&g%d&0], Y-Max: [&g%d&0]\r\n", GET_CROP_X_MIN(cp), GET_CROP_X_MAX(cp), GET_CROP_Y_MIN(cp), GET_CROP_Y_MAX(cp));
 	
+	if (GET_CROP_EX_DESCS(cp)) {
+		struct extra_descr_data *desc;
+		sprintf(buf, "Extra descs:&c");
+		LL_FOREACH(GET_CROP_EX_DESCS(cp), desc) {
+			strcat(buf, " ");
+			strcat(buf, desc->keyword);
+		}
+		msg_to_char(ch, "%s&0\r\n", buf);
+	}
+	
 	if (GET_CROP_INTERACTIONS(cp)) {
 		send_to_char("Interactions:\r\n", ch);
 		get_interaction_display(GET_CROP_INTERACTIONS(cp), buf);
@@ -6748,7 +6757,7 @@ void do_stat_object(char_data *ch, obj_data *j) {
 	if (GET_OBJ_EX_DESCS(j)) {
 		struct extra_descr_data *desc;
 		sprintf(buf, "Extra descs:&c");
-		for (desc = GET_OBJ_EX_DESCS(j); desc; desc = desc->next) {
+		LL_FOREACH(GET_OBJ_EX_DESCS(j), desc) {
 			strcat(buf, " ");
 			strcat(buf, desc->keyword);
 		}
@@ -7397,7 +7406,7 @@ void do_stat_room_template(char_data *ch, room_template *rmt) {
 	if (GET_RMT_EX_DESCS(rmt)) {
 		struct extra_descr_data *desc;
 		sprintf(buf, "Extra descs:&c");
-		for (desc = GET_RMT_EX_DESCS(rmt); desc; desc = desc->next) {
+		LL_FOREACH(GET_RMT_EX_DESCS(rmt), desc) {
 			strcat(buf, " ");
 			strcat(buf, desc->keyword);
 		}
@@ -7459,6 +7468,16 @@ void do_stat_sector(char_data *ch, sector_data *st) {
 		msg_to_char(ch, "Evolution information:\r\n");
 		get_evolution_display(st->evolution, buf1);
 		send_to_char(buf1, ch);
+	}
+	
+	if (GET_SECT_EX_DESCS(st)) {
+		struct extra_descr_data *desc;
+		sprintf(buf, "Extra descs:&c");
+		LL_FOREACH(GET_SECT_EX_DESCS(st), desc) {
+			strcat(buf, " ");
+			strcat(buf, desc->keyword);
+		}
+		msg_to_char(ch, "%s&0\r\n", buf);
 	}
 
 	if (st->interactions) {
@@ -8370,24 +8389,22 @@ ACMD(do_dc) {
 
 // do_directions
 ACMD(do_distance) {
-	char arg[MAX_INPUT_LENGTH], *ptr, *dir_str;
+	char *dir_str;
 	room_data *target;
 	int dist;
 	
-	one_word(argument, arg);
-	ptr = arg;
-	skip_spaces(&ptr);
+	skip_spaces(&argument);
 	
 	if (!IS_IMMORTAL(ch) && !IS_NPC(ch) && !HAS_NAVIGATION(ch)) {
 		msg_to_char(ch, "You don't know how to navigate or determine distances.\r\n");
 	}
-	else if (!*ptr) {
+	else if (!*argument) {
 		msg_to_char(ch, "Get the direction and distance to where?\r\n");
 	}
-	else if (!IS_IMMORTAL(ch) && (!isdigit(*ptr) || !strchr(ptr, ','))) {
+	else if (!IS_IMMORTAL(ch) && (!isdigit(*argument) || !strchr(argument, ','))) {
 		msg_to_char(ch, "You can only find distances to coordinates.\r\n");
 	}
-	else if (!(target = find_target_room(ch, ptr))) {
+	else if (!(target = parse_room_from_coords(argument)) && !(target = find_target_room(ch, argument))) {
 		msg_to_char(ch, "Unknown target.\r\n");
 	}
 	else {	
@@ -9028,7 +9045,7 @@ ACMD(do_goto) {
 
 	one_word(argument, arg);
 	
-	if (!(location = find_target_room(ch, arg))) {
+	if (!(location = parse_room_from_coords(argument)) && !(location = find_target_room(ch, arg))) {
 		return;
 	}
 
@@ -10890,7 +10907,7 @@ ACMD(do_trans) {
 	one_word(argument, arg);
 
 	if (*arg) {
-		if (!(to_room = find_target_room(ch, arg))) {
+		if (!(to_room = parse_room_from_coords(argument)) && !(to_room = find_target_room(ch, arg))) {
 			// sent own error message
 			return;
 		}

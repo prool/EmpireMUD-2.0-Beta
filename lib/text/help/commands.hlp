@@ -360,7 +360,7 @@ to your empire won't be able to enter.
 For more information on building your first house, see HELP HOUSING GUIDE.
 
 See also: BUILD INFO, RESOURCES, KEEP, EMPIRE, DISMANTLE, DESIGNATE, RECIPES,
-  BUILD ABILITY
+  BUILD ABILITY, CRAFTING ABILITIES
 #
 BUY LIST SHOP SHOPS
 
@@ -724,10 +724,10 @@ See also: COINS, GET, JUNK, KEEP
 #
 EAT DRINK SIP TASTE
 
-Usage:  eat <item>
-        taste <item>
-        drink [from] <item>
-        sip [from] <item>
+Usage:  eat [item]
+        taste [item]
+        drink [from] [item]
+        sip [from] [item]
 
 If you're hungry or thirsty, these commands are for you! You can drink from
 wells, fountains, and the edge of nearby rivers, too.
@@ -869,11 +869,12 @@ EXECUTE
 Usage:  execute <victim>
 
 This command allows you to execute a person who has already been incapacitated,
-staked, or tied up.
+staked, or tied up. Vampires can also use this on someone they are feeding
+from.
 
 To automatically kill your victims in combat, "toggle autokill".
 
-See also: TOGGLE, STAKE, TIE
+See also: BITE, TOGGLE, STAKE, TIE
 #
 EXTRA-SPACING "EXTRA SPACING" "TOGGLE EXTRA-SPACING"
 
@@ -1267,7 +1268,10 @@ Usage:  kill <victim>
 
 A good way to start a fight.
 
-See also: ASSIST, FLEE
+Kill and murder can also be used by vampires to finish off someone they are
+feeding from.
+
+See also: ASSIST, BITE, FLEE
 #
 LAND
 
@@ -1383,7 +1387,7 @@ Usage:  make [number] <thing>
 Make is a crafting command. There are no basic recipes that use 'make', but
 perhaps you can find something that does.
 
-See also: MAKE INFO, RECIPES
+See also: MAKE INFO, RECIPES, CRAFTING ABILITIES
 #
 MAP "MAP COMMAND"
 
