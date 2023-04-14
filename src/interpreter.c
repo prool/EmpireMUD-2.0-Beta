@@ -1246,7 +1246,7 @@ void command_interpreter(char_data *ch, char *argument) {
 
 		if (!strcmp(arg,"prool"))
 			{
-			msg_to_char(ch,"&Yprool commands:&0\n\nprool, duhmada, пруль\n\nTest of ukr letters: Їжак і ґедзь");
+			msg_to_char(ch,"&Yprool commands:&0\nprool, duhmada, пруль\n\nTest of ukr letters: Їжак і ґедзь\nCompilation at: %s %s",__DATE__,__TIME__);
 			return;
 			}
 		else if (!strcmp(proolbuf,"пруль")) // prool: для кириллических команд нужно сравнивать не с arg как например в команде prool, а с proolbuf.  Потому что для кириллицы имя команды в массиве arg не формируется правильно. а proolbuf делаю я сам.
