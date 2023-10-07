@@ -320,6 +320,9 @@ void another_hour(void) {
 	// hour-based updates
 	switch (main_time_info.hours) {
 		case 0: {	// midnight
+			// tyt byl prool
+			printf("prool debug: midnight!\n"); // prool
+			log("prool debug: midnight!"); // prool
 			run_external_evolutions();
 			break;
 		}

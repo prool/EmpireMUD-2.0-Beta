@@ -2764,7 +2764,7 @@ void process_import_evolutions(void) {
 	}
 	
 	// log only if it was a requested evolve
-	if (manual_evolutions) {
+	if (1/*manual_evolutions*/) { // by prool
 		syslog(SYS_INFO, LVL_START_IMM, TRUE, "Imported %d/%d map evolutions", changed, total);
 		manual_evolutions = FALSE;
 	}
@@ -2780,6 +2780,10 @@ void process_import_evolutions(void) {
 */
 void run_external_evolutions(void) {
 	char buf[MAX_STRING_LENGTH];
+
+	// tyt byl prool
+	printf("prool debug: run external evolutions!\n"); // prool
+	log("prool debug: run external evolutions!"); // prool
 	
 	if (evolutions_pending) {
 		log("SYSERR: Unable to import map evolutions: bin/evolve program does not respond");
@@ -4869,7 +4873,7 @@ void load_one_room_from_wld_file(room_vnum vnum, char index_data) {
 		// load next line
 		if (!get_line(fl, line)) {
 			log("SYSERR: Unexpected end of file: %s", error);
-			exit(1);
+			//exit(1); // prool fool
 		}
 		
 		// tags by starting letter (for speed)

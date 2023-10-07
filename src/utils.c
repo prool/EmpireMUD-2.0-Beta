@@ -1279,6 +1279,7 @@ bool can_claim(char_data *ch) {
 		return FALSE;	// npcs never claim
 	}
 	if (GET_LOYALTY(ch) && GET_RANK(ch) < EMPIRE_PRIV(GET_LOYALTY(ch), PRIV_CLAIM)) {
+		msg_to_char(ch, "prool debug: yor rank too low"); // prool
 		return FALSE;	// rank too low
 	}
 	

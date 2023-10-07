@@ -298,12 +298,23 @@ void evolve_map(void) {
 }
 
 
+void prool_log(char *msg)
+{
+FILE *fp;
+fp=fopen("evolve-prool.log","a");
+if (fp==NULL) return;
+fprintf(fp,"%s\n",msg);
+fclose(fp);
+}
+
  //////////////////////////////////////////////////////////////////////////////
 //// MAIN ////////////////////////////////////////////////////////////////////
 
 int main(int argc, char **argv) {
 	struct map_t *tile;
 	int num, pid = 0;
+
+	prool_log("evolve start"); // prool
 	
 	if (argc < 3 || argc > 4) {
 		printf("Format: %s <nearby distance> <day of year> [pid to signal]\n", argv[0]);
@@ -516,6 +527,7 @@ void parse_sector(FILE *fl, sector_vnum vnum) {
 	HASH_FIND_INT(sector_table, &vnum, find);
 	if (find) {
 		printf("WARNING: Duplicate sector vnum #%d\n", vnum);
+		prool_log("WARNING: Duplicate sector vnum"); // prool
 		// but have to load it anyway to advance the file
 	}
 	else {
