@@ -164,6 +164,9 @@ Long strings use the full text editor. To edit, use: config <key> edit
 
 There is no undo button, but all changes are logged.
 
+Key names may be abbreviated when viewing a key's value, but not when changing
+the value.
+
 If you want to experiment with the system, you can change test_config in the
 "other" set.
 #b
@@ -605,6 +608,13 @@ Example:
 
 See also: GRANT, VNUM
 #d
+MISSINGHELP MISSINGHELPS "MISSING HELPS"
+
+Usage:  missinghelp
+
+This command lists any commands, skills, or abilities that do not have help
+files.
+#d
 MOVEEINV "MOVE EINV" "MOVE EMPIRE INVENTORY"
 
 Usage:  moveeinv "<empire>" <from island> <to island>
@@ -715,11 +725,12 @@ PEACE "PEACE COMMAND"
 
 Usage:  peace
 
-The peace command ends all combat in the room (but does not keep people from
-re-attacking). Input queues are also cleared, to avoid players accidentally
-restarting combat from queued attacks. This command is grantable.
+The peace command ends all combat in the room and clears all DOT effects (but
+does not keep people from re-attacking). Input queues are also cleared, to
+avoid players accidentally restarting combat from queued attacks. This command
+is grantable.
 
-See also: DIPLOMACY PEACE, GRANT
+See also: DIPLOMACY PEACE, DOTS, GRANT
 #d
 PLAYERDELETE "PLAYER DELETE" "DELETE PLAYER" DELETEPLAYER PLRDELETE
 
@@ -884,7 +895,7 @@ Valid files are:
   credits    (/mud_dir/lib/text/credits)
   intros     (/mud_dir/lib/text/intros/*)
   handbook   (/mud_dir/lib/text/handbook)
-  help       (/mud_dir/lib/text/help)
+  help       (/mud_dir/lib/text/help/screen and screen-screenreader)
   immlist    (/mud_dir/lib/text/immlist)
   imotd      (/mud_dir/lib/text/imotd)
   news       (/mud_dir/lib/text/news)

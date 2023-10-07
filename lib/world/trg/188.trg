@@ -75,16 +75,16 @@ end
 set arg %arg2%
 if normal /= %arg%
   %send% %actor% Setting difficulty to Normal...
-  set difficulty 1
+  set diff 1
 elseif hard /= %arg%
   %send% %actor% Setting difficulty to Hard...
-  set difficulty 2
+  set diff 2
 elseif group /= %arg%
   %send% %actor% Setting difficulty to Group...
-  set difficulty 3
+  set diff 3
 elseif boss /= %arg%
   %send% %actor% Setting difficulty to Boss...
-  set difficulty 4
+  set diff 4
 else
   %send% %actor% That is not a valid difficulty level for this adventure.
   halt
@@ -130,18 +130,20 @@ if %mob.vnum% != 18801
   halt
 end
 %echo% ~%mob% bursts out of the fog in front of you!
+remote diff %mob.id%
 nop %mob.remove_mob_flag(HARD)%
 nop %mob.remove_mob_flag(GROUP)%
-if %difficulty% == 1
+if %diff% == 1
   * Then we don't need to do anything
-elseif %difficulty% == 2
+elseif %diff% == 2
   nop %mob.add_mob_flag(HARD)%
-elseif %difficulty% == 3
+elseif %diff% == 3
   nop %mob.add_mob_flag(GROUP)%
-elseif %difficulty% == 4
+elseif %diff% == 4
   nop %mob.add_mob_flag(HARD)%
   nop %mob.add_mob_flag(GROUP)%
 end
+nop %mob.unscale_and_reset%
 %echo% @%self% bursts into blue flames and rapidly crumbles to ash.
 %purge% %self%
 ~
@@ -175,29 +177,64 @@ if %self.cooldown(18801)%
   halt
 end
 nop %self.set_cooldown(18801, 30)%
-set heroic_mode %self.mob_flagged(GROUP)%
-%echo% ~%self% rears up and prances!
-set verify_target %actor.id%
-wait 2 sec
-if %heroic_mode%
-  %echo% &&r~%self% slams ^%self% hooves down on the ground, creating a shockwave!
-  set person %self.room.people%
-  while %person%
-    if %person.is_enemy(%self%)%
-      dg_affect #18803 %person% HARD-STUNNED on 5
-      %damage% %person% 50
+set diff %self.var(diff,1)%
+scfight clear dodge
+if %diff% > 1
+  * heroic mode: AOE
+  %echo% &&o&&Z~%self% rears up and prances!&&0
+  wait 2 s
+  %echo% &&o**** &&Z~%self% slams ^%self% hooves down on the ground, creating a shockwave! ****&&0 (dodge)
+  scfight setup dodge all
+  wait 8 s
+  set hit 0
+  set ch %self.room.people%
+  while %ch%
+    set next_ch %ch.next_in_room%
+    if %self.is_enemy(%ch%)%
+      if %ch.var(did_scfdodge)%
+        * dodged
+      else
+        * hit
+        eval hit %hit% + 1
+        %echo% &&o... the shockwave knocks ~%ch% off ^%ch% feet!&&0
+        dg_affect #18803 %ch% STUNNED on 5
+        %damage% %ch% 100 physical
+      end
     end
-    set person %person.next_in_room%
+    set ch %next_ch%
   done
+  if %hit% < 1
+    %echo% &&o... |%self% shockwave misses!&&0
+  end
 else
-  if %actor.id% != %verify_target%
-    %echo% ~%self% shrugs and lands ^%self% hooves back on the ground.
+  * normal mode: single-target
+  set actor_id %actor.id%
+  %echo% &&o&&Z~%self% rears up and prances!&&0
+  wait 2 s
+  if %actor_id% != %actor.id%
+    * gone
     halt
   end
-  %send% %actor% &&r |%self% hooves crash down on you!
-  %echoaround% %actor% |%self% hooves crash down on ~%actor%!
-  %damage% %actor% 100
+  %send% %actor% &&o**** &&Z~%self% is prancing toward you! ****&&0 (dodge)
+  %echoaround% %actor% &&o&&Z~%self% is prancing toward ~%actor%!&&0
+  scfight setup dodge %actor%
+  wait 6 s
+  if %actor_id% != %actor.id%
+    * gone
+    %echo% &&o&&Z~%self% shrugs and lands ^%self% hooves back on the ground.&&0
+    halt
+  end
+  * made it?
+  if %actor.did_scfdodge%
+    %echo% &&o&&Z~%self% comes crashing down but narrowly misses ~%actor%!&&0
+    dg_affect #18802 %self% HARD-STUNNED on 8
+  else
+    %echo% &&o&&Z|%self% hooves crash down on ~%actor%!&&0
+    dg_affect #18803 %actor% STUNNED on 5
+    %damage% %actor% 100 physical
+  end
 end
+scfight clear dodge
 ~
 #18804
 Headless Centaur: Neck Chop~
@@ -207,24 +244,56 @@ if %self.cooldown(18801)%
   halt
 end
 nop %self.set_cooldown(18801, 30)%
-set heroic_mode %self.mob_flagged(GROUP)%
-if %heroic_mode%
-  %echo% &&r~%self% swings ^%self% sword in a wide arc at neck level, causing bleeding wounds!
-  %aoe% 100 physical
-  set person %self.room.people%
-  while %person%
-    if %person.is_enemy(%self%)%
-      %dot% #18804 %person% 100 30 physical
-      %damage% %person% 50 physical
+set diff %self.var(diff,1)%
+scfight clear dodge
+if %diff% > 1
+  * heroic mode: AOE
+  %echo% &&o**** &&Z~%self% swings ^%self% sword in a wide arc at neck level! ****&&0 (dodge)
+  scfight setup dodge all
+  wait 8 s
+  set hit 0
+  eval pain %diff% * 75
+  set ch %self.room.people%
+  while %ch%
+    set next_ch %ch.next_in_room%
+    if %self.is_enemy(%ch%)%
+      if %ch.var(did_scfdodge)%
+        * dodged
+      else
+        * hit
+        eval hit %hit% + 1
+        %echo% &&o... the sword slices through ~%ch%, causing bleeding wounds!&&0
+        %dot% #18804 %ch% 100 60 physical 10
+        %damage% %ch% %pain% physical
+      end
     end
-    set person %person.next_in_room%
+    set ch %next_ch%
   done
+  if %hit% < 1
+    %echo% &&o... |%self% neck chop misses!&&0
+  end
 else
-  %send% %actor% &&r~%self% swings ^%self% sword, slashing at your neck and opening a bleeding wound!
-  %echoaround% %actor% ~%self% swings ^%self% sword, slashing at |%actor% neck and opening a bleeding wound!
-  %damage% %actor% 150 physical
-  %dot% #18804 %actor% 75 30 physical
+  * normal mode: single-target
+  set actor_id %actor.id%
+  %send% %actor% &&o**** &&Z~%self% swings ^%self% sword, slashing toward your neck! ****&&0 (dodge)
+  %echoaround% %actor% &&o&&Z~%self% swings ^%self% sword toward |%actor% neck!&&0
+  scfight setup dodge %actor%
+  wait 6 s
+  if %actor_id% != %actor.id%
+    * gone
+    halt
+  end
+  * made it?
+  if %actor.did_scfdodge%
+    %echo% &&o&&Z~%self% spins *%self%self around, wildly missing ~%actor%!&&0
+    dg_affect #18802 %self% HARD-STUNNED on 8
+  else
+    %echo% &&o&&Z|%self% sword swings through |%actor% neck, opening a bleeding wound!&&0
+    %damage% %actor% 150 physical
+    %dot% #18804 %actor% 75 60 physical 10
+  end
 end
+scfight clear dodge
 ~
 #18805
 Headless Centaur: Attack-O-Lantern~
@@ -237,25 +306,20 @@ if !%self.mob_flagged(HARD)% && !%self.mob_flagged(GROUP)%
   halt
 end
 nop %self.set_cooldown(18801, 30)%
-set heroic_mode %self.mob_flagged(GROUP)%
+set diff %self.var(diff,1)%
 set room %self.room%
-set person %room.people%
-while %person%
-  if %person.vnum% == 18805
-    set lantern %person%
-  end
-  set person %person.next_in_room%
-done
+set lantern %self.room.people(18805)%
 if %lantern%
-  %echo% ~%self% urges ~%lantern% to attack faster!
+  %echo% &&o~%self% urges ~%lantern% to attack faster!&&0
   dg_affect %lantern% HASTE on 30
 else
   %load% mob 18805 ally
   set summon %room.people%
   if %summon.vnum% == 18805
-    %echo% ~%self% thrusts ^%self% sword into the sky!
-    %echo% ~%summon% appears in a flash of blue fire!
-    %force% %summon% %aggro% %actor%
+    remote diff %summon.id%
+    %echo% &&o~%self% thrusts ^%self% sword into the sky!&&0
+    %echo% &&o~%summon% appears in a flash of blue fire!&&0
+    %force% %summon% maggro %actor%
   end
 end
 ~
@@ -287,19 +351,36 @@ end
 attack-o-lantern aoe~
 0 k 100
 ~
-set person %self.room.people%
-while %person%
-  if %person.vnum% == 18801
-    set heroic_mode %person.mob_flagged(GROUP)%
-  end
-  set person %person.next_in_room%
-done
-%echo% &&rBeams of magical energy fly from |%self% eyes!
-if !%heroic_mode%
-  %aoe% 25 magical
-else
-  %aoe% 50 magical
+if %self.cooldown(18805)%
+  halt
 end
+scfight lockout 18805 30 30
+set diff %self.var(diff,1)%
+scfight clear interrupt
+%echo% &&o**** &&Z|%self% triangular eyes glow with infernal light... ****&&0 (interrupt)
+scfight setup interrupt all
+wait 8 s
+if %self.aff_flagged(STUNNED)% || %self.aff_flagged(HARD-STUNNED)%
+  %echo% &&o... the glow in |%self% eyes fades.&&0
+  halt
+elseif %diff% == 1
+  set needed 1
+else
+  set needed %self.room.players_present%
+end
+if %self.var(count_scfinterrupt,0)% >= %needed%
+  * miss
+  %echo% &&o... |%self% eyes sputter and go out.&&0
+  if %diff% == 1
+    dg_affect #18802 %self% HARD-STUNNED on 8
+  end
+else
+  * hit
+  %echo% &&oBeams of magical energy blast forth from |%self% eyes!&&0
+  eval pain %diff% * 75
+  %aoe% %pain% magical
+end
+scfight clear interrupt
 ~
 #18808
 put candy in pillowcase~
@@ -709,6 +790,9 @@ switch %questvnum%
   case 18832
     %load% obj 18853 %actor% inv
   break
+  case 18840
+    %load% obj 18864 %actor% inv
+  break
   case 18854
     %load% obj 18854 %actor% inv
   break
@@ -1089,17 +1173,20 @@ elseif %roll% <= 108
 elseif %roll% <= 118
   * 1% chance: zombie terrier whistle (2021)
   set vnum 18885
-elseif %roll% <= 208
-  * 9% chance: skeleton ghost whistle (2022)
+elseif %roll% <= 128
+  * 1% chance: skeleton ghost whistle (2022)
   set vnum 18859
-elseif %roll% <= 370
+elseif %roll% <= 218
+  * 9% chance: antique doll (2023)
+  set vnum 18863
+elseif %roll% <= 380
   * 16.2% chance: roll of pennies!
   set vnum 18886
-elseif %roll% <= 630
-  * 26% chance: marigold
+elseif %roll% <= 635
+  * 25.5% chance: marigold
   set vnum 18887
 elseif %roll% <= 890
-  * 26% chance: chrysanthemums
+  * 25.5% chance: chrysanthemums
   set vnum 18888
 else
   * Remaining 11%: black rose
@@ -1153,6 +1240,186 @@ else
   %scale% %target% 1
 end
 %purge% %self%
+~
+#18840
+Macabre Menagerie: Bind animal~
+1 c 2
+bind~
+set ban_list 222 223 9004 9010 9009 9011 9022 9024 9153 9154 9026 9033 9034 9035 9036 9037 9038 9039
+return 1
+set mob %actor.char_target(%arg%)%
+if %self.val0% && %self.val1% && %self.val2%
+  %send% %actor% @%self% can't bind any more spirits.
+  halt
+elseif %self.room.template% > 0 || !%actor.canuseroom_member(%self.room%)%
+  %send% %actor% @%self% doesn't seem to work here.
+  halt
+elseif %actor.position% != Standing
+  %send% %actor% You can't do that right now.
+  halt
+elseif !%arg%
+  %send% %actor% Bind which animal?
+  halt
+elseif !%mob%
+  %send% %actor% There's no '%arg.car%' here to bind.
+  halt
+elseif %ban_list% ~= %mob.vnum%
+  %send% %actor% You'll need to find something a lot scarrier than ~%mob%.
+  halt
+elseif %mob.mob_flagged(EMPIRE)% || %mob.vnum% <= 0
+  %send% %actor% You can't bind ~%mob% with @%self%.
+  halt
+elseif %mob.mob_flagged(HARD)% || %mob.mob_flagged(GROUP)% || %mob.level% >= 100 || %mob.mob_flagged(AGGR)% 
+  %send% %actor% ~%mob% is too strong to bind.
+  halt
+elseif !%mob.mob_flagged(ANIMAL)%
+  %send% %actor% You can only bind animals with @%self%.
+  halt
+elseif %mob.fighting%
+  %send% %actor% You can't get close enough to ~%mob% while &%mob%'s fighting.
+  halt
+end
+* looks ok.. store mob vnum
+if !%self.val0%
+  nop %self.val0(%mob.vnum%)%
+  set name0 %mob.pc_name%
+  remote name0 %self.id%
+  %mod% %self% append-lookdesc The first bone is incised with a crude drawing of %mob.name%.
+elseif !%self.val1%
+  nop %self.val1(%mob.vnum%)%
+  set name1 %mob.pc_name%
+  remote name1 %self.id%
+  %mod% %self% append-lookdesc The second bone is cut with a likeness of %mob.name%.
+elseif !%self.val2%
+  nop %self.val2(%mob.vnum%)%
+  set name2 %mob.pc_name%
+  remote name2 %self.id%
+  %mod% %self% append-lookdesc The third bone bears a carving of %mob.name%.
+end
+* and message
+%send% %actor% You hold out @%self% and watch as ~%mob% is sucked into it!
+%echoaround% %actor% ~%actor% holds out @%self%... you watch as ~%mob% is sucked into it!
+%purge% %mob%
+~
+#18841
+Macabre Menagerie: Unleash animal~
+1 c 2
+unleash~
+return 1
+* word list for adjectives
+set adj_list horrifying monstrous terrifying gargantuan dreadful nightmarish eldritch spectral otherworldly ghastly unearthly macabre sinister diabolical phantom hulking savage beastly grim cursed accursed demonic infernal
+set adj_size 23
+* basics
+if !%arg%
+  %send% %actor% Unleash what?
+  halt
+elseif %self.room.empire_id% != %actor.empire.vnum% 
+  %send% %actor% You need to do that at a city location you own.
+  halt  
+elseif !%self.room.in_city%
+  %send% %actor% You need to do that in one of your own cities.
+  halt
+end
+* targeting?
+if %self.val0% > 0 && %self.var(name0)% ~= %arg%
+  set vnum %self.val0%
+  nop %self.val0(-1)%
+elseif %self.val1% > 0 && %self.var(name1)% ~= %arg%
+  set vnum %self.val1%
+  nop %self.val1(-1)%
+elseif %self.val2% > 0 && %self.var(name2)% ~= %arg%
+  set vnum %self.val2%
+  nop %self.val2(-1)%
+elseif %actor.obj_target(%arg%)% == %self%
+  if %self.val0% > 0
+    set vnum %self.val0%
+    nop %self.val0(-1)%
+  elseif %self.val1% > 0
+    set vnum %self.val1%
+    nop %self.val1(-1)%
+  elseif %self.val2% > 0
+    set vnum %self.val2%
+    nop %self.val2(-1)%
+  else
+    %send% %actor% Nothing is bound to @%self%.
+    if %self.val0% == -1 && %self.val1% == -1 && %self.val2% == -1
+      %quest% %actor% finish 18840
+    end
+    halt
+  end
+else
+  * huh?
+  %send% %actor% There doesn't seem to be %arg.ana% %arg.car% bound in the bone cage.
+  halt
+end
+* prepare the mob
+%load% mob %vnum%
+set mob %self.room.people%
+if %mob.vnum% != %vnum%
+  %send% %actor% Something went wrong with @%self%.
+  halt
+end
+nop %mob.add_mob_flag(TANK)%
+nop %mob.remove_mob_flag(MOUNTABLE)%
+set spawn_time %timestamp%
+remote spawn_time %mob.id%
+set orig_name %mob.name%
+* name processing
+set word %orig_name.car%
+if %word% == a || %word% == an || %word% == the
+  set name %orig_name.cdr%
+else
+  set name %orig_name%
+end
+eval pos %%random.%adj_size%%%
+while %pos% > 0
+  set adj %adj_list.car%
+  set adj_list %adj_list.cdr%
+  eval pos %pos% - 1
+done
+set name %adj.ana% %adj% %name%
+%mod% %mob% keywords %mob.pc_name% %adj%
+%mod% %mob% shortdesc %name%
+switch %random.5%
+  case 1
+    %mod% %mob% longdesc %name.cap% towers over you!
+  break
+  case 2
+    %mod% %mob% longdesc %name.cap% is rampaging through the city!
+  break
+  case 3
+    %mod% %mob% longdesc %name.cap% is terrorizing the city!
+  break
+  case 4
+    %mod% %mob% longdesc %name.cap% is here!
+  break
+  case 5
+    %mod% %mob% longdesc %name.cap% looms over you!
+  break
+done
+%mod% %mob% append-lookdesc It has been transformed into a huge, terrifying creature!
+* new script to despawn-later
+nop %mob.remove_mob_flag(SPAWNED)%
+attach 18842 %mob.id%
+* announce
+nop %mob.unscale_and_reset%
+%send% %actor% You hold out @%self%...
+%echoaround% %actor% ~%actor% holds out @%self%...
+%echo% You shield your eyes from the bright light as ~%mob% emerges from the cage!
+if %self.val0% == -1 && %self.val1% == -1 && %self.val2% == -1
+  %quest% %actor% finish 18840
+end
+~
+#18842
+Macabre Menagerie: Despawn creature later~
+0 b 10
+~
+* allows a despawn after 3 days
+if %timestamp% - %self.var(spawn_time,0)% > 259200
+  %echo% ~%self% vanishes in a sparkle of twilight glitter.
+  %purge% %self%
+  halt
+end
 ~
 #18848
 make offering to the spirits~

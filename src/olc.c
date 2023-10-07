@@ -339,7 +339,6 @@ OLC_MODULE(oedit_affecttype);
 OLC_MODULE(oedit_apply);
 OLC_MODULE(oedit_armortype);
 OLC_MODULE(oedit_ammotype);
-OLC_MODULE(oedit_automint);
 OLC_MODULE(oedit_capacity);
 OLC_MODULE(oedit_cdtime);
 OLC_MODULE(oedit_charges);
@@ -357,12 +356,16 @@ OLC_MODULE(oedit_flags);
 OLC_MODULE(oedit_fullness);
 OLC_MODULE(oedit_interaction);
 OLC_MODULE(oedit_keywords);
+OLC_MODULE(oedit_lightflags);
+OLC_MODULE(oedit_lighthours);
+OLC_MODULE(oedit_lightislit);
 OLC_MODULE(oedit_liquid);
 OLC_MODULE(oedit_long_desc);
 OLC_MODULE(oedit_material);
 OLC_MODULE(oedit_maxlevel);
 OLC_MODULE(oedit_minipet);
 OLC_MODULE(oedit_minlevel);
+OLC_MODULE(oedit_mintflags);
 OLC_MODULE(oedit_paint);
 OLC_MODULE(oedit_plants);
 OLC_MODULE(oedit_quantity);
@@ -846,7 +849,6 @@ const struct olc_command_data olc_data[] = {
 	{ "apply", oedit_apply, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "armortype", oedit_armortype, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "ammotype", oedit_ammotype, OLC_OBJECT, OLC_CF_EDITOR },
-	{ "automint", oedit_automint, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "capacity", oedit_capacity, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "cdtime", oedit_cdtime, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "charges", oedit_charges, OLC_OBJECT, OLC_CF_EDITOR },
@@ -864,6 +866,9 @@ const struct olc_command_data olc_data[] = {
 	{ "fullness", oedit_fullness, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "interaction", oedit_interaction, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "keywords", oedit_keywords, OLC_OBJECT, OLC_CF_EDITOR },
+	{ "lighthours", oedit_lighthours, OLC_OBJECT, OLC_CF_EDITOR },
+	{ "lightflags", oedit_lightflags, OLC_OBJECT, OLC_CF_EDITOR },
+	{ "lightislit", oedit_lightislit, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "liquid", oedit_liquid, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "longdescription", oedit_long_desc, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "lookdescription", oedit_action_desc, OLC_OBJECT, OLC_CF_EDITOR },
@@ -871,6 +876,7 @@ const struct olc_command_data olc_data[] = {
 	{ "maxlevel", oedit_maxlevel, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "minlevel", oedit_minlevel, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "minipet", oedit_minipet, OLC_OBJECT, OLC_CF_EDITOR },
+	{ "mintflags", oedit_mintflags, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "paint", oedit_paint, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "plants", oedit_plants, OLC_OBJECT, OLC_CF_EDITOR },
 	{ "quantity", oedit_quantity, OLC_OBJECT, OLC_CF_EDITOR },
@@ -4858,16 +4864,16 @@ bool audit_interactions(any_vnum vnum, struct interaction_item *list, int attach
 	}
 	
 	HASH_ITER(hh, set, as, next_as) {
-		/* not currently checking this
 		HASH_ITER(hh, as->set, at, next_at) {
+			/* not currently checking this
 			if (at->percent > 100.001) {
 				olc_audit_msg(ch, vnum, "Interaction %s exclusion set '%c' totals %.2f%%", interact_types[as->type], (char)at->code, at->percent);
 				problem = TRUE;
 			}
+			*/
 			HASH_DEL(as->set, at);
 			free(at);
 		}
-		*/
 		HASH_DEL(set, as);
 		free(as);
 	}
@@ -6257,7 +6263,7 @@ void olc_process_requirements(char_data *ch, char *argument, struct req_data **l
 		skip_spaces(&argument);
 		
 		if (!*num_arg || !isdigit(*num_arg) || !*field_arg) {
-			msg_to_char(ch, "Usage: %s change <number> <amount | vnum> <value>\r\n", command);
+			msg_to_char(ch, "Usage: %s change <number> <amount | group | text | vnum> <value>\r\n", command);
 			return;
 		}
 		

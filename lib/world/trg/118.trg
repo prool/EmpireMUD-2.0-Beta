@@ -635,7 +635,7 @@ elseif %diff% == 4
   nop %mob.add_mob_flag(HARD)%
   nop %mob.add_mob_flag(GROUP)%
 end
-%restore% %mob%
+nop %mob.unscale_and_reset%
 * remove no-attack
 if %mob.aff_flagged(!ATTACK)%
   dg_affect %mob% !ATTACK off
@@ -4509,7 +4509,7 @@ if %move% == 1
 elseif %move% == 2
   * Arcane Tattoos
   skyfight clear interrupt
-  %echo% &&m**** ~%self% mutters an incantation... ****&&0 (interrupt)
+  %echo% &&m**** ~%self% mutters an incantation... ****&&0 (interrupt)
   if %diff% == 1
     nop %self.add_mob_flag(NO-ATTACK)%
   end
@@ -7088,6 +7088,7 @@ if %seconds% > %allow_time%
     if %self.mob_flagged(GROUP)%
       nop %mob.add_mob_flag(GROUP)%
     end
+    nop %mob.unscale_and_reset%
     %scale% %mob% %self.level%
     if %self.fighting%
       %force% %mob% %aggro% %self.fighting%
@@ -7130,7 +7131,10 @@ elseif diagnose /= %cmd% && %self.vnum% == 11866
   %send% %actor% ~%self% doesn't look very good.
 elseif (mount /= %cmd% || ride /= %cmd%) && %self.vnum% == 11852
   * flying throne
-  if %actor.completed_quest(11918)% || %actor.completed_quest(11919)% || %actor.completed_quest(11864)%
+  if !%arg% || %actor.char_target(%arg.car%)% != %self%
+    * pass through
+    return 0
+  elseif %actor.completed_quest(11918)% || %actor.completed_quest(11919)% || %actor.completed_quest(11864)%
     * allow
     return 0
   else
@@ -7372,6 +7376,7 @@ if %mez%
   if %spirit.diff4% >= 3
     nop %mez.add_mob_flag(GROUP)%
   end
+  nop %mez.unscale_and_reset%
 end
 * place a relocator
 %load% mob 11899
@@ -7537,6 +7542,7 @@ switch %line%
       if %spirit.diff4% >= 3
         nop %mob.add_mob_flag(GROUP)%
       end
+      nop %mob.unscale_and_reset%
       %restore% %mob%
     end
     %purge% %self%
@@ -9092,7 +9098,7 @@ end
 set spirit %instance.mob(11900)%
 set diff2 %diff%
 remote diff2 %spirit.id%
-set start2 %actor.name%
+set start2 %actor.real_name%
 remote start2 %spirit.id%
 * Load mobs
 %at% i11810 skygobpix %diff% g  * trash mob
@@ -9161,7 +9167,7 @@ end
 set spirit %instance.mob(11900)%
 set diff3 %diff%
 remote diff3 %spirit.id%
-set start3 %actor.name%
+set start3 %actor.real_name%
 remote start3 %spirit.id%
 * Load mobs
 %at% i11834 %load% mob 11830  * High Master Caius (phase A dummy)
@@ -9229,7 +9235,7 @@ end
 set spirit %instance.mob(11900)%
 set diff4 %diff%
 remote diff4 %spirit.id%
-set start4 %actor.name%
+set start4 %actor.real_name%
 remote start4 %spirit.id%
 * Load mobs
 %at% i11865 %load% mob 11859  * Page Sheila
@@ -9749,5 +9755,6 @@ elseif %diff% == 4
   nop %mob.add_mob_flag(HARD)%
   nop %mob.add_mob_flag(GROUP)%
 end
+nop %mob.unscale_and_reset%
 ~
 $

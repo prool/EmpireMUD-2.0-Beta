@@ -953,6 +953,37 @@ This just makes it impossible to maintain the nether portal.
 0 0 0
 0 0
 S
+#18863
+doll antique eerie~
+an antique doll~
+An eerie, antique doll stands in the corner.~
+   The doll's porcelain skin is cracked and its clothing tattered. Glassy,
+unblinking eyes seem to follow your every move, though it's probably just your
+imagination.
+   Type 'use doll' to add it as a minipet.
+~
+19 p a 0 8
+18863 0 0
+6 0
+S
+#18864
+cage bone~
+a bone cage~
+A bone cage is lying here.~
+   Although it resembles a cage, it's too small to fit any animals. It's made
+from bones and has an eerie orange glow. It looks like you need to 'bind' the
+spirits of three animals to it and then 'unleash <animal>' or 'unleash cage' to
+release one in your city.
+~
+3 p a 0 2
+0 0 0
+14 0
+C
+1 1
+Q 18840
+T 18840
+T 18841
+S
 #18866
 charm blooddrop~
 a blooddrop charm~
@@ -1356,18 +1387,17 @@ C
 50 50
 S
 #18895
-jack-o-lantern lantern jackolantern unlit~
-an unlit jack-o-lantern~
-An unlit jack-o-lantern is sitting here.~
-   This big orange pumpkin has been cut to look like a face, and an unlit
-candle has been placed inside.
+jack-o-lantern lantern jackolantern~
+a jack-o-lantern~
+A jack-o-lantern is sitting here.~
+   This big orange pumpkin has been cut to look like a face. Use 'light
+jack-o-lantern' and 'douse jack-o-lantern' to control the light.
 ~
-3 0 ao 0 4
-0 0 0
+29 0 ao 0 7
+36 0 6
 7 168
 C
 1 1
-I 11 18896 100.00 1  # LIGHT: lit jack-o-lantern
 R
 4 5121 0
 R
@@ -1376,15 +1406,15 @@ R
 4 5606 0
 S
 #18896
-jack-o-lantern lantern jackolantern lit~
-a lit jack-o-lantern~
-A lit jack-o-lantern is casting an eerie light.~
-   This big orange pumpkin has been carved to look like a face. A bright candle
-inside casts a spooky light all around you.
+jack-o-lantern lantern jackolantern~
+a jack-o-lantern~
+A jack-o-lantern is sitting here.~
+   This big orange pumpkin has been cut to look like a face. Use 'light
+jack-o-lantern' and 'douse jack-o-lantern' to control the light.
 ~
-3 c ao 0 4
-0 0 0
-7 36
+29 0 ao 0 7
+36 1 4
+7 168
 C
 1 1
 S

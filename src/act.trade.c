@@ -259,8 +259,8 @@ bool find_and_bind(char_data *ch, obj_vnum vnum) {
 
 /**
 * Looks for a craft the player knows, and falls back to ones they don't. It
-* always prefers an exact match over anything. Immortals can also hit in-dev
-* recipes.
+* always prefers an exact match over anything, and prefers crafts you have the
+* resources for. Immortals can also hit in-dev recipes.
 *
 * @param char_data *ch The person looking for a craft.
 * @param char *argument The typed-in name.
@@ -269,9 +269,11 @@ bool find_and_bind(char_data *ch, obj_vnum vnum) {
 */
 craft_data *find_best_craft_by_name(char_data *ch, char *argument, int craft_type) {
 	craft_data *unknown_abbrev = NULL;
-	craft_data *known_abbrev = NULL;
-	craft_data *known_multi = NULL, *unknown_multi = NULL;
+	craft_data *known_abbrev = NULL, *known_abbrev_no_res = NULL;
+	craft_data *unknown_multi = NULL;
+	craft_data *known_multi = NULL, *known_multi_no_res = NULL;
 	craft_data *craft, *next_craft;
+	bool use_room = can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED);
 	
 	skip_spaces(&argument);
 	
@@ -308,7 +310,12 @@ craft_data *find_best_craft_by_name(char_data *ch, char *argument, int craft_typ
 				}
 			}
 			else {	// they should have access to it
-				known_abbrev = craft;
+				if (has_resources(ch, GET_CRAFT_RESOURCES(craft), use_room, FALSE, NULL)) {
+					known_abbrev = craft;
+				}
+				else if (!known_abbrev_no_res) {
+					known_abbrev_no_res = craft;
+				}
 			}
 		}
 		else if (!known_multi && multi_isname(argument, GET_CRAFT_NAME(craft))) {
@@ -329,13 +336,39 @@ craft_data *find_best_craft_by_name(char_data *ch, char *argument, int craft_typ
 				}
 			}
 			else {	// they should have access to it
-				known_multi = craft;
+				if (has_resources(ch, GET_CRAFT_RESOURCES(craft), use_room, FALSE, NULL)) {
+					known_multi = craft;
+				}
+				else if (!known_multi_no_res) {
+					known_multi_no_res = craft;
+				}
 			}
 		}
 	}
 	
-	// if we got this far, it didn't return an exact match
-	return known_abbrev ? known_abbrev : (known_multi ? known_multi : (unknown_abbrev ? unknown_abbrev : unknown_multi));
+	// if we got this far, it didn't return an exact match with resources
+	if (known_abbrev) {
+		return known_abbrev;
+	}
+	else if (known_abbrev_no_res) {
+		return known_abbrev_no_res;
+	}
+	else if (known_multi) {
+		return known_multi;
+	}
+	else if (known_multi_no_res) {
+		return known_multi_no_res;
+	}
+	else if (unknown_abbrev) {
+		return unknown_abbrev;
+	}
+	else if (unknown_multi) {
+		return unknown_multi;
+	}
+	else {
+		// nooo
+		return NULL;
+	}
 }
 
 
@@ -464,7 +497,8 @@ int get_crafting_level(char_data *ch) {
 int get_craft_scale_level(char_data *ch, craft_data *craft) {
 	int level = 1, psr, craft_lev;
 	ability_data *abil;
-	obj_data *req;
+	obj_data *req, *obj;
+	vehicle_data *veh;
 	
 	if (IS_NPC(ch)) {
 		return 0;
@@ -513,6 +547,28 @@ int get_craft_scale_level(char_data *ch, craft_data *craft) {
 			
 			// always bound by the crafting level
 			level = MIN(level, craft_lev);
+		}
+		
+		// and level bounds
+		if (CRAFT_IS_VEHICLE(craft)) {
+			if ((veh = vehicle_proto(GET_CRAFT_OBJECT(craft)))) {
+				if (VEH_MIN_SCALE_LEVEL(veh) > 0) {
+					level = MAX(level, VEH_MIN_SCALE_LEVEL(veh));
+				}
+				if (VEH_MAX_SCALE_LEVEL(veh) > 0) {
+					level = MIN(level, VEH_MAX_SCALE_LEVEL(veh));
+				}
+			}
+		}
+		else if (!IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP)) {
+			if ((obj = obj_proto(GET_CRAFT_OBJECT(craft)))) {
+				if (GET_OBJ_MIN_SCALE_LEVEL(obj) > 0) {
+					level = MAX(level, GET_OBJ_MIN_SCALE_LEVEL(obj));
+				}
+				if (GET_OBJ_MAX_SCALE_LEVEL(obj) > 0) {
+					level = MIN(level, GET_OBJ_MAX_SCALE_LEVEL(obj));
+				}
+			}
 		}
 	}
 	else {
@@ -655,8 +711,8 @@ void resume_craft_building(char_data *ch, craft_data *craft) {
 		*the_buf = '\0';
 	}
 	
-	msg_to_char(ch, "You go back to work on %s%s!\r\n", the_buf, bld_name);
-	sprintf(buf, "$n goes back to work on %s%s!", the_buf, bld_name);
+	msg_to_char(ch, "You continue working on %s%s!\r\n", the_buf, bld_name);
+	sprintf(buf, "$n continues working on %s%s!", the_buf, bld_name);
 	act(buf, FALSE, ch, NULL, NULL, TO_ROOM);
 }
 
@@ -715,9 +771,10 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 	vehicle_data *veh;
 	obj_data *proto;
 	bld_data *bld;
+	int craft_level;
 	
 	// these flags show on craft info
-	bitvector_t show_flags = OBJ_UNIQUE | OBJ_LIGHT | OBJ_LARGE | OBJ_TWO_HANDED | OBJ_BIND_ON_EQUIP | OBJ_BIND_ON_PICKUP;
+	bitvector_t show_flags = OBJ_UNIQUE | OBJ_LARGE | OBJ_TWO_HANDED | OBJ_BIND_ON_EQUIP | OBJ_BIND_ON_PICKUP;
 	
 	if (!*argument) {
 		msg_to_char(ch, "Get %s info on what?\r\n", gen_craft_data[craft_type].command);
@@ -746,10 +803,14 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 		msg_to_char(ch, "Creates liquid: %d unit%s of %s\r\n", GET_CRAFT_QUANTITY(craft), PLURAL(GET_CRAFT_QUANTITY(craft)), get_generic_string_by_vnum(GET_CRAFT_OBJECT(craft), GENERIC_LIQUID, GSTR_LIQUID_NAME));
 	}
 	else if ((proto = obj_proto(GET_CRAFT_OBJECT(craft)))) {
+		craft_level = get_craft_scale_level(ch, craft);
 		// build info string
 		sprintf(buf, " (%s", item_types[(int) GET_OBJ_TYPE(proto)]);
 		if (GET_OBJ_MIN_SCALE_LEVEL(proto) > 0 || GET_OBJ_MAX_SCALE_LEVEL(proto) > 0) {
-			sprintf(buf + strlen(buf), ", level %s", level_range_string(GET_OBJ_MIN_SCALE_LEVEL(proto), GET_OBJ_MAX_SCALE_LEVEL(proto), 0));
+			sprintf(buf + strlen(buf), ", level %d (%s)", craft_level, level_range_string(GET_OBJ_MIN_SCALE_LEVEL(proto), GET_OBJ_MAX_SCALE_LEVEL(proto), 0));
+		}
+		else if (OBJ_FLAGGED(proto, OBJ_SCALABLE) && craft_level > 0) {
+			sprintf(buf + strlen(buf), ", level %d", craft_level);
 		}
 		if (GET_OBJ_WEAR(proto) & ~ITEM_WEAR_TAKE) {
 			prettier_sprintbit(GET_OBJ_WEAR(proto) & ~ITEM_WEAR_TAKE, wear_bits, part);
@@ -792,6 +853,19 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 				}
 				else {
 					sprintf(buf + strlen(buf), ", %d use%s\r\n", GET_LIGHTER_USES(proto), PLURAL(GET_LIGHTER_USES(proto)));
+				}
+				break;
+			}
+			case ITEM_LIGHT: {
+				if (GET_LIGHT_HOURS_REMAINING(proto) == UNLIMITED) {
+					strcat(buf, ", unlimited");
+				}
+				else {
+					sprintf(buf + strlen(buf), "%d hour%s of light", GET_LIGHT_HOURS_REMAINING(proto), PLURAL(GET_LIGHT_HOURS_REMAINING(proto)));
+				}
+				prettier_sprintbit(GET_LIGHT_FLAGS(proto), light_flags, part);
+				if (*part) {
+					sprintf(buf + strlen(buf), ", %s", part);
 				}
 				break;
 			}
@@ -895,7 +969,7 @@ INTERACTION_FUNC(tame_interact) {
 		}
 
 		prc = (double)GET_HEALTH(inter_mob) / MAX(1, GET_MAX_HEALTH(inter_mob));
-		GET_HEALTH(newmob) = (int)(prc * GET_MAX_HEALTH(newmob));
+		set_health(newmob, (int)(prc * GET_MAX_HEALTH(newmob)));
 		
 		// message before triggering
 		if (!any) {
@@ -1502,7 +1576,7 @@ ACMD(do_gen_augment) {
 	else if (!validate_augment_target(ch, obj, aug, TRUE)) {
 		// sends own message
 	}
-	else if (!has_resources(ch, GET_AUG_RESOURCES(aug), FALSE, TRUE)) {
+	else if (!has_resources(ch, GET_AUG_RESOURCES(aug), FALSE, TRUE, GET_AUG_NAME(aug))) {
 		// sends its own messages
 	}
 	else if (GET_AUG_ABILITY(aug) != NO_ABIL && ABILITY_TRIGGERS(ch, NULL, obj, GET_AUG_ABILITY(aug))) {
@@ -1684,7 +1758,7 @@ void do_gen_craft_building(char_data *ch, craft_data *type, int dir) {
 	if (!ROOM_OWNER(IN_ROOM(ch)) && can_claim(ch) && !ROOM_AFF_FLAGGED(IN_ROOM(ch), ROOM_AFF_UNCLAIMABLE)) {
 		empire_data *emp = get_or_create_empire(ch);
 		if (emp) {
-			ter_type = get_territory_type_for_empire(IN_ROOM(ch), emp, FALSE, &junk);
+			ter_type = get_territory_type_for_empire(IN_ROOM(ch), emp, FALSE, &junk, NULL);
 			if (EMPIRE_TERRITORY(emp, ter_type) < land_can_claim(emp, ter_type)) {
 				claim_room(IN_ROOM(ch), emp);
 			}
@@ -1764,7 +1838,7 @@ void do_gen_craft_vehicle(char_data *ch, craft_data *type, int dir) {
 			if (!ROOM_OWNER(HOME_ROOM(IN_ROOM(ch))) && can_claim(ch) && !ROOM_AFF_FLAGGED(HOME_ROOM(IN_ROOM(ch)), ROOM_AFF_UNCLAIMABLE)) {
 				empire_data *emp = get_or_create_empire(ch);
 				if (emp) {
-					int ter_type = get_territory_type_for_empire(HOME_ROOM(IN_ROOM(ch)), emp, FALSE, &junk);
+					int ter_type = get_territory_type_for_empire(HOME_ROOM(IN_ROOM(ch)), emp, FALSE, &junk, NULL);
 					if (EMPIRE_TERRITORY(emp, ter_type) < land_can_claim(emp, ter_type)) {
 						claim_room(HOME_ROOM(IN_ROOM(ch)), emp);
 					}
@@ -1814,9 +1888,9 @@ void do_gen_craft_vehicle(char_data *ch, craft_data *type, int dir) {
 ACMD(do_gen_craft) {
 	char short_arg[MAX_INPUT_LENGTH], last_arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH * 2], line[256];
 	int count, timer, num = 1, dir = NO_DIR;
-	craft_data *craft, *next_craft, *type = NULL, *find_type = NULL, *abbrev_match = NULL, *multi_match = NULL;
+	craft_data *craft, *next_craft, *type = NULL, *find_type = NULL, *abbrev_match = NULL, *abbrev_no_res = NULL, *multi_match = NULL, *multi_no_res = NULL;
 	vehicle_data *veh;
-	bool is_master, list_only = FALSE;
+	bool is_master, use_room, list_only = FALSE;
 	obj_data *found_obj = NULL, *drinkcon = NULL;
 	any_vnum missing_abil = NO_ABIL;
 	ability_data *cft_abil;
@@ -1877,6 +1951,8 @@ ACMD(do_gen_craft) {
 		strcpy(arg, argument);
 	}
 	
+	use_room = can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED);
+	
 	// if there was an arg, find a matching craft_table entry (type)
 	if (*arg && !list_only) {
 		// attempt to split out a direction in case the craft makes a building
@@ -1911,7 +1987,7 @@ ACMD(do_gen_craft) {
 					continue;	// missing ability
 				}
 				
-				// exact match!
+				// exact match! (don't care about resources)
 				type = craft;
 				break;
 			}
@@ -1923,7 +1999,12 @@ ACMD(do_gen_craft) {
 				}
 				
 				// found! maybe
-				abbrev_match = craft;
+				if (has_resources(ch, GET_CRAFT_RESOURCES(craft), use_room, FALSE, NULL)) {
+					abbrev_match = craft;
+				}
+				else if (!abbrev_no_res) {
+					abbrev_no_res = craft;
+				}
 			}
 			else if (!multi_match && (multi_isname(arg, GET_CRAFT_NAME(craft)) || (*short_arg && multi_isname(short_arg, GET_CRAFT_NAME(craft))))) {
 				// do this last because it records if they are just missing an ability
@@ -1933,13 +2014,22 @@ ACMD(do_gen_craft) {
 				}
 				
 				// found! maybe
-				multi_match = craft;
+				if (has_resources(ch, GET_CRAFT_RESOURCES(craft), use_room, FALSE, NULL)) {
+					multi_match = craft;
+				}
+				else if (!multi_no_res) {
+					multi_no_res = craft;
+				}
 			}
 		}
 		
 		// maybe we didn't find an exact match, but did find an abbrev/multi match
+		// this also tries to prefer things they have the resources for
 		if (!type) {
-			type = abbrev_match ? abbrev_match : multi_match;	// if any
+			type = abbrev_match ? abbrev_match : abbrev_no_res;	// if any
+		}
+		if (!type) {
+			type = multi_match ? multi_match : multi_no_res;	// again, if any
 		}
 	}	// end arg-processing
 	
@@ -2087,7 +2177,7 @@ ACMD(do_gen_craft) {
 	else if (IS_CARRYING_N(ch) > CAN_CARRY_N(ch)) {
 		msg_to_char(ch, "You can't %s anything while overburdened.\r\n", gen_craft_data[subcmd].command);
 	}
-	else if (!has_resources(ch, GET_CRAFT_RESOURCES(type), can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED), TRUE)) {
+	else if (!has_resources(ch, GET_CRAFT_RESOURCES(type), use_room, TRUE, GET_CRAFT_NAME(type))) {
 		// this sends its own message ("You need X more of ...")
 		//msg_to_char(ch, "You don't have the resources to %s that.\r\n", gen_craft_data[GET_CRAFT_TYPE(type)].command);
 	}
@@ -2133,7 +2223,7 @@ ACMD(do_gen_craft) {
 		}
 		
 		// must call this after start_action() because it stores resources
-		extract_resources(ch, GET_CRAFT_RESOURCES(type), can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED), &GET_ACTION_RESOURCES(ch));
+		extract_resources(ch, GET_CRAFT_RESOURCES(type), use_room, &GET_ACTION_RESOURCES(ch));
 		
 		if (GET_CRAFT_NAME(type)[strlen(GET_CRAFT_NAME(type))-1] == 's') {
 			msg_to_char(ch, "You start %s %s.\r\n", gen_craft_data[GET_CRAFT_TYPE(type)].verb, GET_CRAFT_NAME(type));
@@ -2523,7 +2613,7 @@ ACMD(do_reforge) {
 		if (!validate_item_rename(ch, obj, argument)) {
 			// sends own message
 		}
-		else if (!has_resources(ch, res, can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED), TRUE)) {
+		else if (!has_resources(ch, res, can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED), TRUE, NULL)) {
 			// sends own message
 		}
 		else {
@@ -2565,7 +2655,7 @@ ACMD(do_reforge) {
 		if (!proto) {
 			msg_to_char(ch, "You can't renew that.\r\n");
 		}
-		else if (!has_resources(ch, res, can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED), TRUE)) {
+		else if (!has_resources(ch, res, can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED), TRUE, NULL)) {
 			// sends own message
 		}
 		else {
@@ -2626,7 +2716,7 @@ ACMD(do_reforge) {
 		else if (!(cft_abil = find_ability_by_vnum(GET_CRAFT_ABILITY(ctype))) || ABIL_MASTERY_ABIL(cft_abil) == NOTHING || !has_ability(ch, ABIL_MASTERY_ABIL(cft_abil))) {
 			msg_to_char(ch, "You don't have the mastery to make that item superior.\r\n");
 		}
-		else if (!has_resources(ch, res, can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED), TRUE)) {
+		else if (!has_resources(ch, res, can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED), TRUE, NULL)) {
 			// sends own message
 		}
 		else {

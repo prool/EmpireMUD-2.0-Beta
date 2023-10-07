@@ -1415,6 +1415,9 @@ if race /= %cmd% && %actor.is_pc%
   elseif !%jar%
     %send% %actor% You don't seem to have %arg.ana% %arg%.
     halt
+  elseif %jar.vnum% == 18252
+    %send% %actor% You'd better not race Mischantsy; they'll catch on that you've pilfered her.
+    halt
   elseif %jar.vnum% != 11914
     %send% %actor% You can't race @%jar%.
     halt
@@ -1617,7 +1620,7 @@ elseif %mode% == fillin
       set list_size 8
     break
     case 2
-      set name_list Spite Sprite Spitfire Doom-Wing Doomer Faithbreaker Vyla Blaze
+      set name_list Spite Sprite Spitfire Doomwing Doomer Faithbreaker Vyla Blaze
       set list_size 8
     break
     case 3

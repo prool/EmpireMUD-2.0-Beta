@@ -1511,8 +1511,8 @@ a torch~
 A torch has been dropped here.~
 The torch is made from striped brown and black wood.
 ~
-1 ch ano 0 6
-0 2 12
+29 0 ao 0 7
+72 1 7
 0 72
 C
 50 50
@@ -1527,8 +1527,8 @@ green, small shell discs that might be earrings, and square jade tokens.
 utilitarian work, finding humans would pay for fine stitching even when they
 would not pay for figurines or jewelry.
 ~
-15 0 a 0 2
-1 0 0
+15 0 a 0 3
+1 2 0
 14 0
 C
 100 100

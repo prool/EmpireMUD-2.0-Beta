@@ -280,7 +280,7 @@ bool users_output(char_data *to, char_data *tch, descriptor_data *d, char *name_
 		strcpy(state, "Linkdead");
 
 	if (ch)
-		sprintf(idletime, "%3d", ch->char_specials.timer * SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN);
+		sprintf(idletime, "%3d", GET_IDLE_SECONDS(ch) / SECS_PER_REAL_MIN);
 	else
 		strcpy(idletime, "");
 
@@ -2079,19 +2079,19 @@ int perform_set(char_data *ch, char_data *vict, int mode, char *val_arg) {
 	}
 
 	else if SET_CASE("health") {
-		vict->points.current_pools[HEALTH] = RANGE(0, GET_MAX_HEALTH(vict));
+		set_health(vict, RANGE(0, GET_MAX_HEALTH(vict)));
 		affect_total(vict);
 	}
 	else if SET_CASE("move") {
-		vict->points.current_pools[MOVE] = RANGE(0, GET_MAX_MOVE(vict));
+		set_move(vict, RANGE(0, GET_MAX_MOVE(vict)));
 		affect_total(vict);
 	}
 	else if SET_CASE("mana") {
-		vict->points.current_pools[MANA] = RANGE(0, GET_MAX_MANA(vict));
+		set_mana(vict, RANGE(0, GET_MAX_MANA(vict)));
 		affect_total(vict);
 	}
 	else if SET_CASE("blood") {
-		vict->points.current_pools[BLOOD] = RANGE(0, GET_MAX_BLOOD(vict));
+		set_blood(vict, RANGE(0, GET_MAX_BLOOD(vict)));
 		affect_total(vict);
 	}
 
@@ -2195,7 +2195,7 @@ int perform_set(char_data *ch, char_data *vict, int mode, char *val_arg) {
 			sprintf(output, "%s's hunger set to %d.", GET_NAME(vict), value);
 		}
 		else {
-			send_to_char("Must be 'off' or a value from 0 to 24.\r\n", ch);
+			msg_to_char(ch, "Must be 'off' or a value from 0 to %d.\r\n", MAX_CONDITION);
 			return (0);
 		}
 	}
@@ -2211,7 +2211,7 @@ int perform_set(char_data *ch, char_data *vict, int mode, char *val_arg) {
 			sprintf(output, "%s's drunk set to %d.", GET_NAME(vict), value);
 		}
 		else {
-			send_to_char("Must be 'off' or a value from 0 to 24.\r\n", ch);
+			msg_to_char(ch, "Must be 'off' or a value from 0 to %d.\r\n", MAX_CONDITION);
 			return (0);
 		}
 	}
@@ -2227,7 +2227,7 @@ int perform_set(char_data *ch, char_data *vict, int mode, char *val_arg) {
 			sprintf(output, "%s's thirst set to %d.", GET_NAME(vict), value);
 		}
 		else {
-			send_to_char("Must be 'off' or a value from 0 to 24.\r\n", ch);
+			msg_to_char(ch, "Must be 'off' or a value from 0 to %d.\r\n", MAX_CONDITION);
 			return (0);
 		}
 	}
@@ -3988,10 +3988,11 @@ SHOW(show_buildings) {
 	size_t size, l_size;
 	sector_data *sect;
 	room_data *room;
-	bool any;
+	bool any, use_columns;
 	
 	// fresh numbers
 	update_world_count();
+	use_columns = !PRF_FLAGGED(ch, PRF_SCREEN_READER);
 	
 	if (!*argument) {	// no-arg: show summary
 		// output
@@ -4004,10 +4005,10 @@ SHOW(show_buildings) {
 			
 			this = stats_get_building_count(bld);
 			strcpy(buf, GET_BLD_NAME(bld));
-			msg_to_char(ch, " %6d %-20.20s %s", this, CAP(buf), !((++count)%2) ? "\r\n" : " ");
+			msg_to_char(ch, " %6d %-26.26s %s", this, CAP(buf), (!((++count)%2) || !use_columns) ? "\r\n" : " ");
 			total += this;
 		}
-		if (count % 2) {
+		if (count % 2 && use_columns) {
 			msg_to_char(ch, "\r\n");
 		}
 	
@@ -4176,10 +4177,11 @@ SHOW(show_crops) {
 	int count, total, this;
 	struct map_data *map;
 	size_t size, l_size;
-	bool any;
+	bool any, use_columns;
 	
 	// fresh numbers
 	update_world_count();
+	use_columns = !PRF_FLAGGED(ch, PRF_SCREEN_READER);
 	
 	if (!*argument) {	// no-arg: show summary
 		// output
@@ -4188,10 +4190,10 @@ SHOW(show_crops) {
 		HASH_ITER(hh, crop_table, crop, next_crop) {
 			this = stats_get_crop_count(crop);
 			strcpy(buf, GET_CROP_NAME(crop));
-			msg_to_char(ch, " %6d %-20.20s %s", this, CAP(buf), !((++count)%2) ? "\r\n" : " ");
+			msg_to_char(ch, " %6d %-26.26s %s", this, CAP(buf), (!((++count)%2) || !use_columns) ? "\r\n" : " ");
 			total += this;
 		}
-		if (count % 2) {
+		if (count % 2 && use_columns) {
 			msg_to_char(ch, "\r\n");
 		}
 	
@@ -4448,10 +4450,11 @@ SHOW(show_terrain) {
 	int count, total, this;
 	struct map_data *map;
 	size_t size, l_size;
-	bool any;
+	bool any, use_columns;
 	
 	// fresh numbers
 	update_world_count();
+	use_columns = !PRF_FLAGGED(ch, PRF_SCREEN_READER);
 	
 	if (!*argument) {	// no-arg: show summary
 		// output
@@ -4459,11 +4462,11 @@ SHOW(show_terrain) {
 	
 		HASH_ITER(hh, sector_table, sect, next_sect) {
 			this = stats_get_sector_count(sect);
-			msg_to_char(ch, " %6d %-20.20s %s", this, GET_SECT_NAME(sect), !((++count)%2) ? "\r\n" : " ");
+			msg_to_char(ch, " %6d %-26.26s %s", this, GET_SECT_NAME(sect), (!((++count)%2) || !use_columns) ? "\r\n" : " ");
 			total += this;
 		}
 	
-		if (count % 2) {
+		if (count % 2 && use_columns) {
 			msg_to_char(ch, "\r\n");
 		}
 	
@@ -4934,10 +4937,10 @@ SHOW(show_account) {
 			}
 		}
 		else if (ACCOUNT_FLAGGED(loaded, ACCT_MULTI_IP) || IS_SET(acc_ptr->flags, ACCT_MULTI_IP)) {
-			msg_to_char(ch, " &r[%d %s] %s  (separate account %d)&0\r\n", loaded_file ? GET_LAST_KNOWN_LEVEL(loaded) : GET_COMPUTED_LEVEL(loaded), skills, GET_PC_NAME(loaded), GET_ACCOUNT(loaded)->id);
+			msg_to_char(ch, " &r[%d %s] %s  (separate account %d)&0%s\r\n", loaded_file ? GET_LAST_KNOWN_LEVEL(loaded) : GET_COMPUTED_LEVEL(loaded), skills, GET_PC_NAME(loaded), GET_ACCOUNT(loaded)->id, !loaded_file ? " &c(online)&0" : "");
 		}
 		else {
-			msg_to_char(ch, " &r[%d %s] %s  (same IP, account %d)&0\r\n", loaded_file ? GET_LAST_KNOWN_LEVEL(loaded) : GET_COMPUTED_LEVEL(loaded), skills, GET_PC_NAME(loaded), GET_ACCOUNT(loaded)->id);
+			msg_to_char(ch, " &r[%d %s] %s  (same IP, account %d)&0%s\r\n", loaded_file ? GET_LAST_KNOWN_LEVEL(loaded) : GET_COMPUTED_LEVEL(loaded), skills, GET_PC_NAME(loaded), GET_ACCOUNT(loaded)->id, !loaded_file ? " &c(online)&0" : "");
 		}
 		
 		if (loaded_file) {
@@ -6150,7 +6153,7 @@ void do_stat_character(char_data *ch, char_data *k) {
 	char buf[MAX_STRING_LENGTH], lbuf[MAX_STRING_LENGTH], lbuf2[MAX_STRING_LENGTH], lbuf3[MAX_STRING_LENGTH];
 	struct script_memory *mem;
 	struct cooldown_data *cool;
-	int count, i, i2, iter, diff, found = 0, val;
+	int count, i, i2, iter, diff, duration, found = 0, val;
 	obj_data *j;
 	struct follow_type *fol;
 	struct over_time_effect_type *dot;
@@ -6286,7 +6289,7 @@ void do_stat_character(char_data *ch, char_data *k) {
 		msg_to_char(ch, "Nameset: \ty%s\t0, Language: [\tc%d\t0] \ty%s\t0\r\n", name_sets[MOB_NAME_SET(k)], MOB_LANGUAGE(k), get_generic_name_by_vnum(MOB_LANGUAGE(k)));
 	}
 	else {
-		msg_to_char(ch, "Idle Timer (in tics) [\tg%d\t0], View Height: [\tg%d\t0]\r\n", k->char_specials.timer, get_view_height(k, IN_ROOM(k)));
+		msg_to_char(ch, "Idle Timer (minutes) [\tg%.1f\t0], View Height: [\tg%d\t0]\r\n", GET_IDLE_SECONDS(k) / (double) SECS_PER_REAL_MIN, get_view_height(k, IN_ROOM(k)));
 		sprintbit(PLR_FLAGS(k), player_bits, buf2, TRUE);
 		msg_to_char(ch, "PLR: &c%s&0\r\n", buf2);
 		sprintbit(PRF_FLAGS(k), preference_bits, buf2, TRUE);
@@ -6385,11 +6388,18 @@ void do_stat_character(char_data *ch, char_data *k) {
 			*buf2 = '\0';
 			
 			// duration setup
-			if (aff->duration == UNLIMITED) {
+			if (aff->expire_time == UNLIMITED) {
 				strcpy(lbuf, "infinite");
 			}
 			else {
-				sprintf(lbuf, "%.1fmin", ((double)(aff->duration + 1) * SECS_PER_REAL_UPDATE / 60.0));
+				duration = aff->expire_time - time(0);
+				duration = MAX(duration, 0);
+				if (duration >= 60 * 60) {
+					sprintf(lbuf, "%d:%02d:%02d", (duration / 3600), ((duration % 3600) / 60), ((duration % 3600) % 60));
+				}
+				else {
+					sprintf(lbuf, "%d:%02d", (duration / 60), (duration % 60));
+				}
 			}
 
 			sprintf(buf, "TYPE: (%s) &c%s&0 ", lbuf, get_generic_name_by_vnum(aff->type));
@@ -6412,13 +6422,7 @@ void do_stat_character(char_data *ch, char_data *k) {
 	
 	// dots
 	for (dot = k->over_time_effects; dot; dot = dot->next) {
-		if (dot->duration == UNLIMITED) {
-			strcpy(lbuf, "unlimited");
-		}
-		else {
-			sprintf(lbuf, "%.1fmin", ((double)(dot->duration + 1) * SECS_PER_REAL_UPDATE / 60.0));
-		}
-		
+		sprintf(lbuf, "%d:%02d", dot->time_remaining / 60, dot->time_remaining % 60);
 		msg_to_char(ch, "TYPE: (%s) &r%s&0 %d %s damage (%d/%d)\r\n", lbuf, get_generic_name_by_vnum(dot->type), dot->damage * dot->stack, damage_types[dot->damage_type], dot->stack, dot->max_stack);
 	}
 
@@ -6778,7 +6782,7 @@ void do_stat_object(char_data *ch, obj_data *j) {
 	
 	if (GET_OBJ_TIMER(j) > 0) {
 		minutes = GET_OBJ_TIMER(j) * SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN;
-		snprintf(part, sizeof(part), "%d ticks (%d:%02d)", GET_OBJ_TIMER(j), minutes / 60, minutes % 60);
+		snprintf(part, sizeof(part), "%d tick%s (%d:%02d)", GET_OBJ_TIMER(j), PLURAL(GET_OBJ_TIMER(j)), minutes / 60, minutes % 60);
 	}
 	else {
 		strcpy(part, "none");
@@ -6937,8 +6941,8 @@ void do_stat_object(char_data *ch, obj_data *j) {
 			break;
 		}
 		case ITEM_WEALTH: {
-			msg_to_char(ch, "Wealth value: %d\r\n", GET_WEALTH_VALUE(j));
-			msg_to_char(ch, "Automatically minted by workforce: %s\r\n", GET_WEALTH_AUTOMINT(j) ? "yes" : "no");
+			sprintbit(GET_WEALTH_MINT_FLAGS(j), mint_flags, buf, TRUE);
+			msg_to_char(ch, "Wealth value: \ts%d\t0, flags: \tc%s\t0\r\n", GET_WEALTH_VALUE(j), buf);
 			break;
 		}
 		case ITEM_LIGHTER: {
@@ -6954,6 +6958,17 @@ void do_stat_object(char_data *ch, obj_data *j) {
 			msg_to_char(ch, "Minipet: [%d] %s\r\n", GET_MINIPET_VNUM(j), get_mob_name_by_proto(GET_MINIPET_VNUM(j), FALSE));
 			break;
 		}
+		case ITEM_LIGHT: {
+			if (GET_LIGHT_HOURS_REMAINING(j) == UNLIMITED) {
+				snprintf(part, sizeof(part), "unlimited light");
+			}
+			else {
+				snprintf(part, sizeof(part), "%d hour%s remaining", GET_LIGHT_HOURS_REMAINING(j), PLURAL(GET_LIGHT_HOURS_REMAINING(j)));
+			}
+			sprintbit(GET_LIGHT_FLAGS(j), light_flags, buf, TRUE);
+			msg_to_char(ch, "Light: \tc%s\t0 (\tc%s\t0), flags: \tc%s\t0\r\n", part, (GET_LIGHT_IS_LIT(j) ? "lit" : "unlit"), buf);
+			break;
+		}
 		default:
 			msg_to_char(ch, "Values 0-2: [&g%d&0] [&g%d&0] [&g%d&0]\r\n", GET_OBJ_VAL(j, 0), GET_OBJ_VAL(j, 1), GET_OBJ_VAL(j, 2));
 			break;
@@ -6962,7 +6977,7 @@ void do_stat_object(char_data *ch, obj_data *j) {
 	// data that isn't type-based:
 	if (OBJ_FLAGGED(j, OBJ_PLANTABLE) && (cp = crop_proto(GET_OBJ_VAL(j, VAL_FOOD_CROP_TYPE)))) {
 		ordered_sprintbit(GET_CROP_CLIMATE(cp), climate_flags, climate_flags_order, CROP_FLAGGED(cp, CROPF_ANY_LISTED_CLIMATE) ? TRUE : FALSE, buf);
-		msg_to_char(ch, "Plants %s (%s%s).\r\n", GET_CROP_NAME(cp), GET_CROP_CLIMATE(cp) ? buf : "any climate", (CROP_FLAGGED(cp, CROPF_REQUIRES_WATER) ? "; must be near water" : ""));
+		msg_to_char(ch, "Plants [%d] %s (%s%s).\r\n", GET_OBJ_VAL(j, VAL_FOOD_CROP_TYPE), GET_CROP_NAME(cp), GET_CROP_CLIMATE(cp) ? buf : "any climate", (CROP_FLAGGED(cp, CROPF_REQUIRES_WATER) ? "; must be near water" : ""));
 	}
 
 	/*
@@ -7338,7 +7353,7 @@ void do_stat_room(char_data *ch) {
 		for (aff = ROOM_AFFECTS(IN_ROOM(ch)); aff; aff = aff->next) {
 			*buf2 = '\0';
 
-			sprintf(buf, "Affect: (%3ldsec) &c%s&0 ", (aff->duration - time(0)), get_generic_name_by_vnum(aff->type));
+			sprintf(buf, "Affect: (%3ldsec) &c%s&0 ", (aff->expire_time - time(0)), get_generic_name_by_vnum(aff->type));
 
 			if (aff->modifier) {
 				sprintf(buf2, "%+d to %s", aff->modifier, apply_types[(int) aff->location]);
@@ -8401,7 +8416,7 @@ ACMD(do_distance) {
 	else if (!*argument) {
 		msg_to_char(ch, "Get the direction and distance to where?\r\n");
 	}
-	else if (!IS_IMMORTAL(ch) && (!isdigit(*argument) || !strchr(argument, ','))) {
+	else if (!IS_IMMORTAL(ch) && ((!isdigit(*argument) && *argument != '(') || !strchr(argument, ','))) {
 		msg_to_char(ch, "You can only find distances to coordinates.\r\n");
 	}
 	else if (!(target = parse_room_from_coords(argument)) && !(target = find_target_room(ch, argument))) {
@@ -9479,6 +9494,7 @@ ACMD(do_oset) {
 	char obj_arg[MAX_INPUT_LENGTH], field_arg[MAX_INPUT_LENGTH], *obj_arg_ptr = obj_arg;
 	obj_data *obj;
 	int number;
+	bool was_lit;
 	
 	argument = one_argument(argument, obj_arg);
 	argument = any_one_arg(argument, field_arg);
@@ -9492,7 +9508,19 @@ ACMD(do_oset) {
 		msg_to_char(ch, "You don't seem to have %s %s.\r\n", AN(obj_arg), obj_arg);
 	}
 	else if (is_abbrev(field_arg, "flags")) {
+		was_lit = LIGHT_IS_LIT(obj);
+		
 		GET_OBJ_EXTRA(obj) = olc_process_flag(ch, argument, "extra", "oset name flags", extra_bits, GET_OBJ_EXTRA(obj));
+							
+		// check lights
+		if (was_lit != LIGHT_IS_LIT(obj)) {
+			if (was_lit) {
+				apply_obj_light(obj, FALSE);
+			}
+			else {
+				apply_obj_light(obj, TRUE);
+			}
+		}
 		request_obj_save_in_world(obj);
 	}
 	else if (is_abbrev(field_arg, "keywords") || is_abbrev(field_arg, "aliases")) {
@@ -9546,6 +9574,7 @@ ACMD(do_oset) {
 		}
 		else {
 			GET_OBJ_TIMER(obj) = atoi(argument);
+			schedule_obj_timer_update(obj, TRUE);
 			request_obj_save_in_world(obj);
 			msg_to_char(ch, "You change its timer to %d.\r\n", GET_OBJ_TIMER(obj));
 		}
@@ -9561,16 +9590,23 @@ ACMD(do_peace) {
 	char_data *iter, *next_iter;
 	
 	DL_FOREACH_SAFE2(ROOM_PEOPLE(IN_ROOM(ch)), iter, next_iter, next_in_room) {
+		// stop fighting
 		if (FIGHTING(iter) || GET_POS(iter) == POS_FIGHTING) {
 			stop_fighting(iter);
 		}
 		
+		// clear input
 		if (iter != ch && iter->desc) {
 			LL_FOREACH_SAFE(iter->desc->input.head, inq, next_inq) {
 				LL_DELETE(iter->desc->input.head, inq);
 				free(inq->text);
 				free(inq);
 			}
+		}
+		
+		// clear DOTs (could restart a fight)
+		while (ch->over_time_effects) {
+			dot_remove(ch, ch->over_time_effects);
 		}
 	}
 	
@@ -9915,6 +9951,7 @@ ACMD(do_reload) {
 	}
 	else if (!str_cmp(arg, "help")) {
 		reload_text_string(TEXT_FILE_HELP_SCREEN);
+		reload_text_string(TEXT_FILE_HELP_SCREEN_SCREENREADER);
 	}
 	else if (!str_cmp(arg, "info")) {
 		reload_text_string(TEXT_FILE_INFO);
@@ -10145,7 +10182,7 @@ ACMD(do_restore) {
 	
 	// fill pools
 	if (all || health) {
-		GET_HEALTH(vict) = GET_MAX_HEALTH(vict);
+		set_health(vict, GET_MAX_HEALTH(vict));
 		
 		if (GET_POS(vict) < POS_SLEEPING) {
 			GET_POS(vict) = POS_STANDING;
@@ -10155,15 +10192,15 @@ ACMD(do_restore) {
 		sprintf(types + strlen(types), "%s health", *types ? "," : "");
 	}
 	if (all || mana) {
-		GET_MANA(vict) = GET_MAX_MANA(vict);
+		set_mana(vict, GET_MAX_MANA(vict));
 		sprintf(types + strlen(types), "%s mana", *types ? "," : "");
 	}
 	if (all || moves) {
-		GET_MOVE(vict) = GET_MAX_MOVE(vict);
+		set_move(vict, GET_MAX_MOVE(vict));
 		sprintf(types + strlen(types), "%s moves", *types ? "," : "");
 	}
 	if (all || blood) {
-		GET_BLOOD(vict) = GET_MAX_BLOOD(vict);
+		set_blood(vict, GET_MAX_BLOOD(vict));
 		sprintf(types + strlen(types), "%s blood", *types ? "," : "");
 	}
 	
@@ -10179,8 +10216,7 @@ ACMD(do_restore) {
 	// remove all cooldowns
 	if (all || cds) {
 		while ((cool = vict->cooldowns)) {
-			vict->cooldowns = cool->next;
-			free(cool);
+			remove_cooldown(vict, cool);
 		}
 		
 		sprintf(types + strlen(types), "%s cooldowns", *types ? "," : "");
@@ -10723,6 +10759,7 @@ ACMD(do_stat) {
 		}
 		else {
 			refresh_passive_buffs(victim);
+			convert_and_schedule_player_affects(victim);	// ensures the timers are right on affects
 			do_stat_character(ch, victim);
 		}
 		
@@ -11214,9 +11251,10 @@ ACMD(do_users) {
 	one_argument(argument, arg);
 
 	if (!*host_search) {
-		DL_FOREACH(character_list, tch) {
-			if (IS_NPC(tch) || tch->desc)
+		DL_FOREACH2(player_character_list, tch, next_plr) {
+			if (tch->desc) {
 				continue;
+			}
 			result = users_output(ch, tch, NULL, name_search, low, high, rp);
 			
 			if (result) {

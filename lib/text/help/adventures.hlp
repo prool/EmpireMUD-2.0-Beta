@@ -91,10 +91,12 @@ See also: ADVENTURE
 #
 "THE CURSED CHALICE OF MILL MANOR" "CURSED CHALICE OF MILL MANOR" "MILL MANOR"
 
-The Cursed Chalice of Mill Manor (level 100-150 adventure)
+The Cursed Chalice of Mill Manor (level 100-200 adventure)
 
 Mill Manor can be found deep in the swamp. Will you be the one to end the curse
 and restore the land?
+
+This adventure has normal, hard, group, and boss difficulties available.
 
 See also: ADVENTURE
 #
@@ -207,18 +209,17 @@ See also: ADVENTURE
 
 The Sewer: Goblin Outpost (level 50-150 adventure)
 
-   Strange sounds are coming from the sewer grate, and waste has been backing
+Strange sounds are coming from the sewer grate, and waste has been backing
 up into the streets. This can only mean one thing: Goblins! Will you buy the
 goblins' wares, or drive them from the city? This adventure sells 30 BoE items,
 the crafting patterns BoE for them all, and 4 unique buildings. You can also
 fight the goblins solo or in pairs (on normal, hard, or group difficulty) to
-earn their prized gear.
+earn their prized gear. You won't be able to fight each goblin until you pick
+a difficulty with the 'difficulty' command.
 
-   The gear sold in the shops is the same as the gear created by the crafting
-patterns and the loot dropped by the goblins except for the levels and flags:
-- Loot from defeating goblins: levels 50-150, normal/hard/group difficulty, BoP
-- Purchased items: levels 1-175, normal difficulty, BoE
-- Crafted items: levels 1-175, normal or superior, BoE
+The gear sold in the shops is the same as the gear created by the crafting
+patterns and the loot dropped by the goblins, but it will be BoE instead of BoP
+when crafted, can go as high as level 175, and may be crafted as superior.
 
 Healer crafts (Haxaw's mad sketches):
  Haxaw's poison ring  (finger, forged, Jewelry)
@@ -317,7 +318,7 @@ Grandmother Poplar's Poplar Goods sells for wooden nickels:
   Grove seeker stone - find more groves easier
   tiny wildling trap - minipet
   animal totem of the Grove - more morphs for the Animal Forms ability
-  wild fire - just like the ones you find in the Grove
+  wild fire - just like the ones you find in the Grove (a light that burns out)
   robes of the Grove druids - the local fashion
   wildling whistle - wildling mount
   wood henge stone - a henge building for your city
@@ -358,21 +359,33 @@ The tavern shop sells:
   a Guild of Adventurers charter - builds a guildhall (Venerated)
   an atlasian egg - your own atlasian tortoise (Venerated)
 
+  a Guild of Adventurers seeker stone - finds the tortoise (Liked)
+  a baby tortoise whistle - minipet (Esteemed)
+  a Tipsy Tortoise transport trinket - teleports you to the tortoise (Esteemed)
+  a ninja tortoise whistle - minipet (Venerated)
+  a dragon turtle whistle - minipet (Revered)
+  a Guild of Adventurers charter - builds another guildhall (Venerated)
+  an atlasian egg - your own atlasian tortoise (Venerated)
+  
 The umbramancer sells:
   the terrapin ring of acerbity - 100-200 caster ring (Esteemed)
-  an umbral whistle - land mount (Liked)
+  an umbral warg mount whistle - land mount (Liked)
+  an eclipse shadowraptor flying mount whistle - flying mount (Venerated)
 
 The vampire sells:
   the chelonian ring of extrication - 100-200 healer ring (Esteemed)
-  a sanguine whistle - land mount (Liked)
+  a sanguine monstrosity mount whistle - land mount (Liked)
+  a scarlet nebulavion flying mount whistle - flying mount (Venerated)
 
 The tinker sells:
   the testudinal ring of courage - 100-200 melee ring (Esteemed)
-  a clockwork apparatus - land mount (Liked)
+  a clockwork steed mount apparatus - land mount (Liked)
+  an aeroforge rotary flying mount assembler - flying mount (Venerated)
 
 The guildleader sells:
   the tortoiseshell ring of mettle - 100-200 tank ring (Esteemed)
-  an imperium-clad whistle - land mount (Liked)
+  an imperium-clad bear mount whistle - land mount (Liked)
+  a celestial warbalcon flying mount whistle - flying mount (Venerated)
 
 See also: ADVENTURE
 #
@@ -825,8 +838,9 @@ The Swamp Hag (level 100-150 adventure)
 This strange, raised hut towers over the swamp. What sort of person would be
 at home in the swamp?
 
-This adventure uses rat tails as currency. After you complete the adventure,
-you can spend rat tails to buy various items:
+This adventure uses rat tails as currency. Earn them by defeating the swamp hag
+on hard (1 tail), group (2 tails), or boss difficulty (4 tails). After you
+complete the adventure, you can spend rat tails to buy various items:
 
 Other:
   Minipet: swamp rat whistle

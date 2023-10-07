@@ -598,7 +598,7 @@ elseif group /= %arg%
   set difficulty 3
 elseif boss /= %arg%
   %echo% Setting difficulty to Boss...
-  set difficulty 3
+  set difficulty 4
 else
   %send% %actor% That is not a valid difficulty level for this adventure (Normal, Hard, Group, or Boss).
   halt
@@ -611,7 +611,7 @@ nop %instance.level(%level%)%
 set mob %room.people%
 remote difficulty %mob.id%
 set mob_diff %difficulty%
-dg_affect %mob% !ATTACK on 5
+dg_affect #10215 %mob% !ATTACK on 5
 nop %mob.remove_mob_flag(HARD)%
 nop %mob.remove_mob_flag(GROUP)%
 if %mob_diff% == 1

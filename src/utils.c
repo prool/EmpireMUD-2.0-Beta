@@ -24,6 +24,7 @@
 #include "interpreter.h"
 #include "skills.h"
 #include "vnums.h"
+#include "dg_event.h"
 #include "dg_scripts.h"
 #include "constants.h"
 
@@ -3024,6 +3025,41 @@ bool can_see_in_dark_room(char_data *ch, room_data *room, bool count_adjacent_li
 }
 
 
+// checks stuff right after movement
+EVENTFUNC(check_leading_event) {
+	struct char_event_data *data = (struct char_event_data*)event_obj;
+	char_data *ch = data->character;
+	
+	// will not be re-using this
+	delete_stored_event(&GET_STORED_EVENTS(ch), SEV_CHECK_LEADING);
+	free(data);
+	
+	if (!IN_ROOM(ch)) {
+		return 0;	// never re-enqueue
+	}
+	
+	// NOTE: if you add conditions here, check _QUALIFY_CHECK_LEADING(ch) too
+	if (GET_LEADING_VEHICLE(ch) && IN_ROOM(ch) != IN_ROOM(GET_LEADING_VEHICLE(ch))) {
+		act("You have lost $V and stop leading it.", FALSE, ch, NULL, GET_LEADING_VEHICLE(ch), TO_CHAR);
+		VEH_LED_BY(GET_LEADING_VEHICLE(ch)) = NULL;
+		GET_LEADING_VEHICLE(ch) = NULL;
+	}
+	if (GET_LEADING_MOB(ch) && IN_ROOM(ch) != IN_ROOM(GET_LEADING_MOB(ch))) {
+		act("You have lost $N and stop leading $M.", FALSE, ch, NULL, GET_LEADING_MOB(ch), TO_CHAR);
+		GET_LED_BY(GET_LEADING_MOB(ch)) = NULL;
+		GET_LEADING_MOB(ch) = NULL;
+	}
+	if (GET_SITTING_ON(ch)) {
+		// things that cancel sitting-on:
+		if (IN_ROOM(ch) != IN_ROOM(GET_SITTING_ON(ch)) || (GET_POS(ch) != POS_SITTING && GET_POS(ch) != POS_RESTING && GET_POS(ch) != POS_SLEEPING) || IS_RIDING(ch) || GET_LEADING_MOB(ch) || GET_LEADING_VEHICLE(ch)) {
+			do_unseat_from_vehicle(ch);
+		}
+	}
+	
+	return 0;	// never re-enqueue
+}
+
+
 /**
 * Gives a character the appropriate amount of command lag (wait time).
 *
@@ -3237,6 +3273,29 @@ int pick_level_from_range(int level, int min, int max) {
 		level = MIN(level, max);
 	}
 	return level;
+}
+
+
+/**
+* Schedules an event to check things a person is leading/sitting on after
+* moving, if needed.
+*
+* @param char_data *ch The person who moved.
+*/
+void schedule_check_leading_event(char_data *ch) {
+	struct char_event_data *data;
+	struct dg_event *ev;
+	
+	// things that need this function
+	#define _QUALIFY_CHECK_LEADING(ch)  (GET_LEADING_VEHICLE(ch) || GET_LEADING_MOB(ch) || GET_SITTING_ON(ch))
+	
+	if (ch && _QUALIFY_CHECK_LEADING(ch) && !find_stored_event(GET_STORED_EVENTS(ch), SEV_CHECK_LEADING)) {
+		CREATE(data, struct char_event_data, 1);
+		data->character = ch;
+		
+		ev = dg_event_create(check_leading_event, data, 1 RL_SEC);
+		add_stored_event(&GET_STORED_EVENTS(ch), SEV_CHECK_LEADING, ev);
+	}
 }
 
 
@@ -3499,8 +3558,10 @@ void apply_resource(char_data *ch, struct resource_data *res, struct resource_da
 				add_to_resource_list(build_used_list, RES_POOL, res->vnum, res->amount, 0);
 			}
 			
-			GET_CURRENT_POOL(ch, res->vnum) -= res->amount;
-			GET_CURRENT_POOL(ch, res->vnum) = MAX(0, GET_CURRENT_POOL(ch, res->vnum));
+			set_current_pool(ch, res->vnum, GET_CURRENT_POOL(ch, res->vnum) - res->amount);
+			if (GET_CURRENT_POOL(ch, res->vnum) < 0) {
+				set_current_pool(ch, res->vnum, 0);
+			}
 			
 			if (res->vnum == HEALTH) {
 				update_pos(ch);
@@ -3698,8 +3759,10 @@ void extract_resources(char_data *ch, struct resource_data *list, bool ground, s
 						add_to_resource_list(build_used_list, RES_POOL, res->vnum, res->amount, 0);
 					}
 				
-					GET_CURRENT_POOL(ch, res->vnum) -= res->amount;
-					GET_CURRENT_POOL(ch, res->vnum) = MAX(0, GET_CURRENT_POOL(ch, res->vnum));
+					set_current_pool(ch, res->vnum, GET_CURRENT_POOL(ch, res->vnum) - res->amount);
+					if (GET_CURRENT_POOL(ch, res->vnum) < 0) {
+						set_current_pool(ch, res->vnum, 0);
+					}
 					res->amount = 0;	// got full amount
 				
 					if (res->vnum == HEALTH) {
@@ -4013,8 +4076,7 @@ void give_resources(char_data *ch, struct resource_data *list, bool split) {
 				break;
 			}
 			case RES_POOL: {
-				GET_CURRENT_POOL(ch, res->vnum) += res->amount / (split ? 2 : 1);
-				GET_CURRENT_POOL(ch, res->vnum) = MIN(GET_MAX_POOL(ch, res->vnum), GET_CURRENT_POOL(ch, res->vnum));
+				set_current_pool(ch, res->vnum, GET_CURRENT_POOL(ch, res->vnum) + (res->amount / (split ? 2 : 1)));
 				if (GET_HEALTH(ch) > 0 && GET_POS(ch) <= POS_STUNNED) {
 					GET_POS(ch) = POS_RESTING;
 				}
@@ -4109,9 +4171,10 @@ void reduce_dismantle_resources(int damage, int max_health, struct resource_data
 * @param struct resource_data *list Any resource list.
 * @param bool ground If TRUE, will also count resources on the ground.
 * @param bool send_msgs If TRUE, will alert the character as to what they need. FALSE runs silently.
+* @param char *msg_prefix Optional: If provided AND send_msgs is TRUE, prepends this to any error message as "msg_prefix: You need..." (may be NULL)
 */
-bool has_resources(char_data *ch, struct resource_data *list, bool ground, bool send_msgs) {
-	char buf[MAX_STRING_LENGTH];
+bool has_resources(char_data *ch, struct resource_data *list, bool ground, bool send_msgs, char *msg_prefix) {
+	char buf[MAX_STRING_LENGTH], prefix[256];
 	int amt, liter, cycle;
 	struct resource_data *res, *list_copy;
 	bool ok = TRUE;
@@ -4240,37 +4303,46 @@ bool has_resources(char_data *ch, struct resource_data *list, bool ground, bool 
 		
 		// RES_x: messaging for types the player is missing
 		if (send_msgs) {
+			// prepare prefix, if any
+			if (msg_prefix && *msg_prefix) {
+				snprintf(prefix, sizeof(prefix), "%s: You need", msg_prefix);
+				CAP(prefix);
+			}
+			else {
+				snprintf(prefix, sizeof(prefix), "You need");
+			}
+			
 			switch (res->type) {
 				case RES_OBJECT: {
-					msg_to_char(ch, "%s %d more of %s", (ok ? "You need" : ","), res->amount, skip_filler(get_obj_name_by_proto(res->vnum)));
+					msg_to_char(ch, "%s %d more of %s", (ok ? prefix : ","), res->amount, skip_filler(get_obj_name_by_proto(res->vnum)));
 					break;
 				}
 				case RES_COMPONENT: {
-					msg_to_char(ch, "%s %d more (%s)", (ok ? "You need" : ","), res->amount, res->amount == 1 ? get_generic_name_by_vnum(res->vnum) : get_generic_string_by_vnum(res->vnum, GENERIC_COMPONENT, GSTR_COMPONENT_PLURAL));
+					msg_to_char(ch, "%s %d more (%s)", (ok ? prefix : ","), res->amount, res->amount == 1 ? get_generic_name_by_vnum(res->vnum) : get_generic_string_by_vnum(res->vnum, GENERIC_COMPONENT, GSTR_COMPONENT_PLURAL));
 					break;
 				}
 				case RES_LIQUID: {
-					msg_to_char(ch, "%s %d more unit%s of %s", (ok ? "You need" : ","), res->amount, PLURAL(res->amount), get_generic_string_by_vnum(res->vnum, GENERIC_LIQUID, GSTR_LIQUID_NAME));
+					msg_to_char(ch, "%s %d more unit%s of %s", (ok ? prefix : ","), res->amount, PLURAL(res->amount), get_generic_string_by_vnum(res->vnum, GENERIC_LIQUID, GSTR_LIQUID_NAME));
 					break;
 				}
 				case RES_TOOL: {
 					prettier_sprintbit(res->vnum, tool_flags, buf);
-					msg_to_char(ch, "%s %d more %s (tool%s)", (ok ? "You need" : ","), res->amount, buf, PLURAL(res->amount));
+					msg_to_char(ch, "%s %d more %s (tool%s)", (ok ? prefix : ","), res->amount, buf, PLURAL(res->amount));
 					break;
 				}
 				case RES_COINS: {
 					empire_data *coin_emp = real_empire(res->vnum);
-					msg_to_char(ch, "%s %s", (ok ? "You need" : ","), money_amount(coin_emp, res->amount));
+					msg_to_char(ch, "%s %s", (ok ? prefix : ","), money_amount(coin_emp, res->amount));
 					break;
 				}
 				case RES_CURRENCY: {
-					msg_to_char(ch, "%s %d more %s", (ok ? "You need" : ","), res->amount, get_generic_string_by_vnum(res->vnum, GENERIC_CURRENCY, WHICH_CURRENCY(res->amount)));
+					msg_to_char(ch, "%s %d more %s", (ok ? prefix : ","), res->amount, get_generic_string_by_vnum(res->vnum, GENERIC_CURRENCY, WHICH_CURRENCY(res->amount)));
 					break;
 				}
 				case RES_POOL: {
 					// special rule: require that blood or health costs not reduce player below 1
 					amt = res->amount + ((res->vnum == HEALTH || res->vnum == BLOOD) ? 1 : 0);
-					msg_to_char(ch, "%s %d more %s point%s", (ok ? "You need" : ","), amt, pool_types[res->vnum], PLURAL(amt));
+					msg_to_char(ch, "%s %d more %s point%s", (ok ? prefix : ","), amt, pool_types[res->vnum], PLURAL(amt));
 					break;
 				}
 			}
@@ -6267,11 +6339,44 @@ void lock_icon(room_data *room, struct icon_data *use_icon) {
 	if (!room || ROOM_CUSTOM_ICON(room)) {
 		return;
 	}
+	if (SHARED_DATA(room) == &ocean_shared_data) {
+		return;	// never on the ocean
+	}
 
 	if (!(icon = use_icon)) {
 		icon = get_icon_from_set(GET_SECT_ICONS(SECT(room)), GET_SEASON(room));
 	}
 	set_room_custom_icon(room, icon->icon);
+}
+
+
+/**
+* Variant of lock_icon when a room is not available. Only works if there isn't
+* a custom icon yet.
+*
+* @param struct map_data *loc The location to lock.
+* @param struct icon_data *use_icon Optional: Force it to use this icon (may be NULL).
+*/
+void lock_icon_map(struct map_data *loc, struct icon_data *use_icon) {
+	struct icon_data *icon;
+	
+	// safety first
+	if (!loc || loc->shared->icon) {
+		return;	// don't do it if a custom icon is set (or no location provided)
+	}
+	if (loc->shared == &ocean_shared_data) {
+		return;	// never on the ocean
+	}
+
+	if (!(icon = use_icon)) {
+		icon = get_icon_from_set(GET_SECT_ICONS(loc->sector_type), y_coord_to_season[MAP_Y_COORD(loc->vnum)]);
+	}
+	
+	if (loc->shared->icon) {
+		free(loc->shared->icon);
+	}
+	loc->shared->icon = icon ? str_dup(icon->icon) : NULL;
+	request_world_save(loc->vnum, WSAVE_ROOM);
 }
 
 
@@ -6369,7 +6474,7 @@ bool room_is_light(room_data *room, bool count_adjacent_light) {
 	if (!RMT_FLAGGED(room, RMT_DARK) && get_sun_status(room) != SUN_DARK) {
 		return TRUE;	// not dark: it isn't dark outside
 	}
-	if (ROOM_OWNER(room) && EMPIRE_HAS_TECH(ROOM_OWNER(room), TECH_CITY_LIGHTS) && get_territory_type_for_empire(room, ROOM_OWNER(room), FALSE, NULL) != TER_FRONTIER) {
+	if (ROOM_OWNER(room) && EMPIRE_HAS_TECH(ROOM_OWNER(room), TECH_CITY_LIGHTS) && get_territory_type_for_empire(room, ROOM_OWNER(room), FALSE, NULL, NULL) != TER_FRONTIER) {
 		return TRUE;	// not dark: city lights
 	}
 	if (count_adjacent_light && adjacent_room_is_light(room)) {
@@ -6863,7 +6968,7 @@ bool room_has_function_and_city_ok(empire_data *for_emp, room_data *room, bitvec
 		if (VEH_FLAGGED(veh, MOVABLE_VEH_FLAGS) && IS_SET(fnc_flag, IMMOBILE_FNCS)) {
 			continue;	// exclude certain functions on movable vehicles (functions that require room data)
 		}
-		if (IS_SET(VEH_FUNCTIONS(veh), FNC_IN_CITY_ONLY) && (!ROOM_OWNER(room) || get_territory_type_for_empire(room, ROOM_OWNER(room), TRUE, &junk) != TER_CITY)) {
+		if (IS_SET(VEH_FUNCTIONS(veh), FNC_IN_CITY_ONLY) && (!ROOM_OWNER(room) || get_territory_type_for_empire(room, ROOM_OWNER(room), TRUE, &junk, NULL) != TER_CITY)) {
 			continue;	// not in-city but needs it
 		}
 		
@@ -6921,7 +7026,7 @@ bool vehicle_has_function_and_city_ok(vehicle_data *veh, bitvector_t fnc_flag) {
 		if (ROOM_OWNER(room) && ROOM_OWNER(room) != emp) {
 			return FALSE;	// someone else's claim is not in our city
 		}
-		if (get_territory_type_for_empire(room, emp, TRUE, &junk) != TER_CITY) {
+		if (get_territory_type_for_empire(room, emp, TRUE, &junk, NULL) != TER_CITY) {
 			return FALSE;	// not in-city for us either
 		}
 	}
@@ -6964,8 +7069,8 @@ void update_all_players(char_data *to_message, PLAYER_UPDATE_FUNC(*func)) {
 	}
 	
 	// verify there are no disconnected players characters in-game, which might not be saved
-	DL_FOREACH(character_list, ch) {
-		if (!IS_NPC(ch) && !ch->desc) {
+	DL_FOREACH2(player_character_list, ch, next_plr) {
+		if (!ch->desc) {
 			sprintf(buf, "update_all_players: Unable to update because of linkdead player (%s). Try again later.", GET_NAME(ch));
 			if (to_message) {
 				msg_to_char(to_message, "%s\r\n", buf);

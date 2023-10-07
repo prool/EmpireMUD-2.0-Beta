@@ -1870,7 +1870,8 @@ const struct offense_info_type offense_info[NUM_OFFENSES] = {
 	{ "burned building", 5 },
 	{ "burned vehicle", 5 },
 	{ "pickpocketed", 5 },	// 10
-	{ "reclaimed a tile", 2 }
+	{ "reclaimed a tile", 2 },
+	{ "burned tile", 5 }
 };
 
 
@@ -2160,7 +2161,7 @@ const struct faction_reputation_type reputation_levels[] = {
 	{ REP_LIKED, "Liked", "\tc", 100 },
 	{ REP_ESTEEMED, "Esteemed", "\ta", 300 },
 	{ REP_VENERATED, "Venerated", "\tg", 750 },
-	{ REP_REVERED, "Revered", "\tg", 1000 },
+	{ REP_REVERED, "Revered", "\tG", 1000 },
 	
 	{ -1, "\n", "\t0", 0 },	// last
 };
@@ -2275,6 +2276,7 @@ const char *mob_custom_types[] = {
 	"script3",
 	"script4",
 	"script5",
+	"scavenge-corpse",
 	"\n"
 };
 
@@ -2469,6 +2471,7 @@ const char *item_types[] = {
 	"POISON",
 	"ARMOR",
 	"BOOK",
+	"LIGHT",
 	"\n"
 };
 
@@ -2583,7 +2586,7 @@ const char *extra_bits[] = {
 const char *extra_bits_inv_flags[] = {
 	"unique",	// unique
 	"",	// plantable
-	"light",
+	"",	// light (controlled separately)
 	"superior",
 	"large",
 	"",	// created
@@ -2709,6 +2712,44 @@ const char *fullness[] = {
 	"about half ",
 	"more than half ",
 	""
+};
+
+
+// LIGHT_FLAG_x (1/2): flags for ITEM_LIGHT, show to immortals
+const char *light_flags[] = {
+	"LIGHT-FIRE",	// 0
+	"CAN-DOUSE",
+	"JUNK-WHEN-EXPIRED",
+	"COOKING-FIRE",
+	"DESTROY-WHEN-DOUSED",
+	"\n"
+};
+
+
+// LIGHT_FLAG_x (2/2): flags for ITEM_LIGHT, shown on identify
+const char *light_flags_for_identify[] = {
+	"can be used as a lighter when lit",	// 0
+	"can be doused",
+	"",	// LIGHT_FLAG_JUNK_WHEN_EXPIRED
+	"can be used for cooking",
+	"lost when doused",
+	"\n"
+};
+
+
+// MINT_FLAG_x (1/2): flags for wealth items to control minting
+const char *mint_flags[] = {
+	"AUTOMINT",
+	"NO-MINT",
+	"\n"
+};
+
+
+// MINT_FLAG_x (2/2): flags as shown to players on identify
+const char *mint_flags_for_identify[] = {
+	"automatically minted by Workforce",
+	"cannot be minted into coins",
+	"\n"
 };
 
 
@@ -3343,6 +3384,7 @@ const char *evo_types[] = {
 	"TIMED",	// 20
 	"OWNED",
 	"UNOWNED",
+	"BURN-STUMPS",
 	"\n"
 };
 
@@ -3372,6 +3414,7 @@ const int evo_val_types[NUM_EVOS] = {
 	EVO_VAL_NUMBER,	// timed (minutes)
 	EVO_VAL_NONE,	// owned
 	EVO_VAL_NONE,	// unowned
+	EVO_VAL_NONE,	// burn-stumps
 };
 
 
@@ -3400,6 +3443,7 @@ const bool evo_is_over_time[] = {
 	TRUE,	// timed
 	TRUE,	// owned
 	TRUE,	// unowned
+	FALSE,	// burn-stumps
 };
 
 
@@ -3740,6 +3784,8 @@ const char *sector_flags[] = {
 	"SHALLOW-WATER",
 	"NEEDS-HEIGHT",
 	"KEEPS-HEIGHT",
+	"SEPARATE-NOT-ADJACENTS",	// 25
+	"SEPARATE-NOT-NEARS",
 	"\n"
 };
 
