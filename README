@@ -1,4 +1,4 @@
-Russification (UTF-8 codetable) by Prool
+Cyrillization (UTF-8 codetable) by Prool
 
 Compile under Android 6.0 (dirty instruction)
 ---------------------------------------------
@@ -21,8 +21,16 @@ cd ..
 
 bin/empire
 
+Prool works
+-----------
+
+My own branch is named 'prool-shard'
+
+This code is working in host mud.kharkov.org, port 7000
+
 ---
 Prool, proolix@gmail.com, mud.kharkov.org
+Kharkiv, Ukraine
 =========================================================================
 
 Warning: Always back up your EmpireMUD before updating your git checkout. Some
