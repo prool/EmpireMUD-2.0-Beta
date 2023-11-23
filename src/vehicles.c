@@ -501,7 +501,9 @@ void finish_dismantle_vehicle(char_data *ch, vehicle_data *veh) {
 			if (OBJ_FLAGGED(newobj, OBJ_BIND_FLAGS)) {
 				bind_obj_to_player(newobj, ch);
 			}
-			load_otrigger(newobj);
+			if (load_otrigger(newobj)) {
+				get_otrigger(newobj, ch, FALSE);
+			}
 		}
 	}
 			
@@ -1366,15 +1368,8 @@ bool vehicle_allows_climate(vehicle_data *veh, room_data *room, bool *allow_slow
 		return TRUE;	// junk in, junk out
 	}
 	
-	// determine which climate to use
-	if (IS_MAP_BUILDING(room) || IS_ROAD(room)) {
-		// open map buildings use base sect
-		climate = GET_SECT_CLIMATE(BASE_SECT(room));
-	}
-	else {
-		// all other tiles use regular sect
-		climate = GET_SECT_CLIMATE(SECT(room));
-	}
+	// climate is complex
+	climate = get_climate(room);
 	
 	// compare
 	if (VEH_REQUIRES_CLIMATE(veh) && !(VEH_REQUIRES_CLIMATE(veh) & climate)) {

@@ -541,6 +541,7 @@ void do_dg_quest(int go_type, void *go, char *argument) {
 	argument = any_one_arg(argument, vict_arg);
 	argument = any_one_arg(argument, cmd_arg);
 	argument = any_one_arg(argument, vnum_arg);
+	skip_spaces(&argument);
 	
 	if (!*vict_arg || !*cmd_arg || !*vnum_arg) {
 		script_log_by_type(go_type, go, "dg_quest: too few args");
@@ -642,10 +643,22 @@ void do_dg_quest(int go_type, void *go, char *argument) {
 		}
 	}
 	else if (is_abbrev(cmd_arg, "trigger")) {
-		qt_triggered_task(vict, QUEST_VNUM(quest));
+		// passing 0 here leads to adding 1 instead of setting to a specific value
+		qt_triggered_task(vict, QUEST_VNUM(quest), 0);
 	}
 	else if (is_abbrev(cmd_arg, "untrigger")) {
-		qt_untrigger_task(vict, QUEST_VNUM(quest));
+		qt_untrigger_task(vict, QUEST_VNUM(quest), FALSE);
+	}
+	else if (is_abbrev(cmd_arg, "resettrigger")) {
+		qt_untrigger_task(vict, QUEST_VNUM(quest), TRUE);
+	}
+	else if (is_abbrev(cmd_arg, "settrigger")) {
+		if (isdigit(*argument)) {
+			qt_triggered_task(vict, QUEST_VNUM(quest), atoi(argument));
+		}
+		else {
+			script_log_by_type(go_type, go, "dg_quest: invalid settrigger argument '%s'", argument);
+		}
 	}
 	else {
 		script_log_by_type(go_type, go, "dg_quest: invalid command '%s'", cmd_arg);
@@ -667,7 +680,7 @@ void do_dg_terracrop(room_data *target, crop_data *cp) {
 		return;
 	}
 	
-	if (!(sect = find_first_matching_sector(SECTF_CROP, NOBITS, GET_SECT_CLIMATE(SECT(target))))) {
+	if (!(sect = find_first_matching_sector(SECTF_CROP, NOBITS, get_climate(target)))) {
 		// no crop sects?
 		return;
 	}
@@ -775,12 +788,15 @@ void send_char_pos(char_data *ch, int dam) {
 			//act("$n is dead!  R.I.P.", FALSE, ch, 0, 0, TO_ROOM);
 			send_to_char("You are dead!  Sorry...\r\n", ch);
 			break;
-		default:                        /* >= POSITION SLEEPING */
-			if (dam > (GET_MAX_HEALTH(ch) / 4))
-				act("That really did HURT!", FALSE, ch, 0, 0, TO_CHAR);
-			if (GET_HEALTH(ch) < (GET_MAX_HEALTH(ch) / 4))
-				msg_to_char(ch, "&rYou wish that your wounds would stop BLEEDING so much!&0\r\n");
+		default: {                        /* >= POSITION SLEEPING */
+			if (dam > (GET_MAX_HEALTH(ch) / 4)) {
+				act("That really did HURT!", FALSE, ch, NULL, NULL, TO_CHAR | TO_COMBAT_HIT);
+			}
+			if (GET_HEALTH(ch) < (GET_MAX_HEALTH(ch) / 4)) {
+				act("&rYou wish that your wounds would stop BLEEDING so much!&0", FALSE, ch, NULL, NULL, TO_CHAR | TO_COMBAT_HIT);
+			}
 			break;
+		}
 	}
 }
 

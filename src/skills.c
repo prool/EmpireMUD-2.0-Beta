@@ -186,15 +186,6 @@ void check_skill_sell(char_data *ch, ability_data *abil) {
 					}
 					break;
 				}
-				case PTECH_TWO_HANDED_WEAPONS: {
-					if ((obj = GET_EQ(ch, WEAR_WIELD)) && OBJ_FLAGGED(obj, OBJ_TWO_HANDED)) {
-						act("You stop using $p.", FALSE, ch, obj, NULL, TO_CHAR);
-						unequip_char_to_inventory(ch, WEAR_WIELD);
-						determine_gear_level(ch);
-						need_affect_total = TRUE;
-					}
-					break;
-				}
 			}
 		}
 	}
@@ -601,6 +592,7 @@ bool can_gain_skill_from(char_data *ch, ability_data *abil) {
 * @return bool TRUE if ch can use ability; FALSE if not.
 */
 bool can_use_ability(char_data *ch, any_vnum ability, int cost_pool, int cost_amount, int cooldown_type) {
+	ability_data *abil = find_ability_by_vnum(ability);
 	char buf[MAX_STRING_LENGTH];
 	int time, needs_cost;
 	
@@ -629,6 +621,17 @@ bool can_use_ability(char_data *ch, any_vnum ability, int cost_pool, int cost_am
 		msg_to_char(ch, "You need %d %s point%s to do that.\r\n", cost_amount, pool_types[cost_pool], PLURAL(cost_amount));
 		return FALSE;
 	}
+	if (abil && ABIL_REQUIRES_TOOL(abil) && !has_all_tools(ch, ABIL_REQUIRES_TOOL(abil))) {
+		prettier_sprintbit(ABIL_REQUIRES_TOOL(abil), tool_flags, buf);
+		if (count_bits(ABIL_REQUIRES_TOOL(abil)) > 1) {
+			msg_to_char(ch, "You need tools to do that: %s\r\n", buf);
+		}
+		else {
+			msg_to_char(ch, "You need %s %s to do that.\r\n", AN(buf), buf);
+		}
+		return FALSE;
+	}
+
 	if (cooldown_type != NOTHING && (time = get_cooldown_time(ch, cooldown_type)) > 0) {
 		snprintf(buf, sizeof(buf), "Your %s cooldown still has %d second%s.\r\n", get_generic_name_by_vnum(cooldown_type), time, (time != 1 ? "s" : ""));
 		CAP(buf);
@@ -1004,26 +1007,33 @@ bool gain_skill(char_data *ch, skill_data *skill, int amount, ability_data *from
 		}
 		
 		// messaging
-		if (pos) {
-			msg_to_char(ch, "\tyYou improve your %s skill to %d%s.\t0\r\n", SKILL_NAME(skill), skdata->level, abil_buf);
-			
-			points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill));
-			if (points > 0) {
-				msg_to_char(ch, "\tyYou have %d ability point%s to spend. Type 'skill %s' to see %s.\t0\r\n", points, (points != 1 ? "s" : ""), SKILL_NAME(skill), (points != 1 ? "them" : "it"));
+		if (pos) {	// positive gain
+			// notify if desired
+			if (SHOW_STATUS_MESSAGES(ch, SM_SKILL_GAINS)) {
+				msg_to_char(ch, "\tyYou improve your %s skill to %d%s.\t0\r\n", SKILL_NAME(skill), skdata->level, abil_buf);
+				
+				points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill));
+				if (points > 0) {
+					msg_to_char(ch, "\tyYou have %d ability point%s to spend. Type 'skill %s' to see %s.\t0\r\n", points, (points != 1 ? "s" : ""), SKILL_NAME(skill), (points != 1 ? "them" : "it"));
+				}
 			}
-			
+				
 			// did we hit a cap? free reset!
 			if (IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill))) {
 				skdata->resets = MIN(skdata->resets + 1, MAX_SKILL_RESETS);
-				msg_to_char(ch, "\tyYou have earned a free skill reset in %s. Type 'skill reset %s' to use it.\t0\r\n", SKILL_NAME(skill), SKILL_NAME(skill));
+				if (SHOW_STATUS_MESSAGES(ch, SM_SKILL_GAINS)) {
+					msg_to_char(ch, "\tyYou have earned a free skill reset in %s. Type 'skill reset %s' to use it.\t0\r\n", SKILL_NAME(skill), SKILL_NAME(skill));
+				}
 			}
 			
 			if (!IS_IMMORTAL(ch) && skdata->level == SKILL_MAX_LEVEL(skill)) {
 				log_to_slash_channel_by_name(PLAYER_LOG_CHANNEL, ch, "%s has reached %s %d!", PERS(ch, ch, TRUE), SKILL_NAME(skill), SKILL_MAX_LEVEL(skill));
 			}
 		}
-		else {
-			msg_to_char(ch, "\tyYour %s skill drops to %d%s.\t0\r\n", SKILL_NAME(skill), skdata->level, abil_buf);
+		else {	// negative gain
+			if (SHOW_STATUS_MESSAGES(ch, SM_SKILL_GAINS)) {
+				msg_to_char(ch, "\tyYour %s skill drops to %d%s.\t0\r\n", SKILL_NAME(skill), skdata->level, abil_buf);
+			}
 		}
 		
 		// update class and progression
@@ -1422,7 +1432,7 @@ char *get_skill_gain_display(char_data *ch) {
 char *get_skill_row_display(char_data *ch, skill_data *skill) {
 	static char out[MAX_STRING_LENGTH];
 	struct player_skill_data *skdata;
-	char experience[256];
+	char experience[256], gain_part[256];
 	int points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill));
 	
 	skdata = get_skill_data(ch, SKILL_VNUM(skill), FALSE);
@@ -1434,7 +1444,17 @@ char *get_skill_row_display(char_data *ch, skill_data *skill) {
 		*experience = '\0';
 	}
 	
-	sprintf(out, "[%3d] %s%s\t0 (%s%s%s) - %s\r\n", (skdata ? skdata->level : 0), IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill)) ? "\tg" : "\ty", SKILL_NAME(skill), IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill)) ? "\tymax\t0" : ((skdata && skdata->noskill) ? "\trnoskill\t0" : "\tcgaining\t0"), experience, (points > 0 ? ", points available" : ""), SKILL_DESC(skill));
+	if (IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill))) {
+		snprintf(gain_part, sizeof(gain_part), "\tymax\t0%s", (skdata && skdata->noskill) ? ", \trnoskill\t0" : "");
+	}
+	else if (skdata && skdata->noskill) {
+		snprintf(gain_part, sizeof(gain_part), "\trnoskill\t0");
+	}
+	else {
+		snprintf(gain_part, sizeof(gain_part), "\tcgaining\t0");
+	}
+	
+	sprintf(out, "[%3d] %s%s\t0 (%s%s%s) - %s\r\n", (skdata ? skdata->level : 0), IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill)) ? "\tg" : "\ty", SKILL_NAME(skill), gain_part, experience, (points > 0 ? ", points available" : ""), SKILL_DESC(skill));
 	return out;
 }
 
@@ -2412,6 +2432,11 @@ ACMD(do_skills) {
 			size += snprintf(outbuf + size, sizeof(outbuf) - size, "Linked trait: %s (%d)\r\n", lbuf, get_attribute_by_apply(ch, ABIL_LINKED_TRAIT(abil)));
 		}
 		
+		if (ABIL_REQUIRES_TOOL(abil)) {
+			prettier_sprintbit(ABIL_REQUIRES_TOOL(abil), tool_flags, lbuf);
+			size += snprintf(outbuf + size, sizeof(outbuf) - size, "Requires tool%s: %s\r\n", (count_bits(ABIL_REQUIRES_TOOL(abil)) != 1) ? "s" : "", lbuf);
+		}
+		
 		// data, if parameterized
 		if (ABIL_DATA(abil)) {
 			// techs
@@ -2647,9 +2672,6 @@ bool can_wear_item(char_data *ch, obj_data *item, bool send_messages) {
 				break;
 			}
 		}
-	}
-	else if (OBJ_FLAGGED(item, OBJ_TWO_HANDED)) {
-		tech = PTECH_TWO_HANDED_WEAPONS;
 	}
 	else if (IS_MISSILE_WEAPON(item)) {
 		tech = PTECH_RANGED_COMBAT;
@@ -3001,8 +3023,10 @@ void perform_npc_tie(char_data *ch, char_data *victim, int subcmd) {
 		if (GET_ROPE_VNUM(victim) != NOTHING && (rope = read_object(GET_ROPE_VNUM(victim), TRUE))) {
 			obj_to_char(rope, ch);
 			scale_item_to_level(rope, 1);	// minimum scale
-			load_otrigger(rope);
-			act("You receive $p.", FALSE, ch, rope, NULL, TO_CHAR);
+			if (load_otrigger(rope)) {
+				act("You receive $p.", FALSE, ch, rope, NULL, TO_CHAR);
+				get_otrigger(rope, ch, FALSE);
+			}
 		}
 		GET_ROPE_VNUM(victim) = NOTHING;
 		request_char_save_in_world(victim);

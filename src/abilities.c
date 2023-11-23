@@ -136,9 +136,18 @@ char *ability_data_display(struct ability_data_list *adl) {
 */
 void ability_fail_message(char_data *ch, char_data *vict, ability_data *abil) {
 	bool invis;
+	bitvector_t act_flags = NOBITS;
 	
 	if (!ch || !abil) {
 		return;	// no work
+	}
+	
+	if (ABILITY_FLAGGED(abil, ABILF_VIOLENT) && vict) {
+		act_flags |= TO_COMBAT_MISS;
+	}
+	else if (IS_SET(ABIL_TYPES(abil), ABILT_BUFF)) {
+		// non-violent buff
+		act_flags |= TO_BUFF;
 	}
 	
 	invis = ABILITY_FLAGGED(abil, ABILF_INVISIBLE) ? TRUE : FALSE;
@@ -146,48 +155,48 @@ void ability_fail_message(char_data *ch, char_data *vict, ability_data *abil) {
 	if (ch == vict || !vict) {	// message: targeting self
 		// to-char
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_FAIL_SELF_TO_CHAR)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_FAIL_SELF_TO_CHAR), FALSE, ch, NULL, vict, TO_CHAR);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_FAIL_SELF_TO_CHAR), FALSE, ch, NULL, vict, TO_CHAR | act_flags);
 		}
 		else {
 			snprintf(buf, sizeof(buf), "You fail to use %s!", SAFE_ABIL_COMMAND(abil));
-			act(buf, FALSE, ch, NULL, vict, TO_CHAR);
+			act(buf, FALSE, ch, NULL, vict, TO_CHAR | act_flags);
 		}
 	
 		// to room
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_FAIL_SELF_TO_ROOM)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_FAIL_SELF_TO_ROOM), invis, ch, NULL, vict, TO_ROOM);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_FAIL_SELF_TO_ROOM), invis, ch, NULL, vict, TO_ROOM | act_flags);
 		}
 		else {
 			snprintf(buf, sizeof(buf), "$n fails to use %s!", SAFE_ABIL_COMMAND(abil));
-			act(buf, invis, ch, NULL, vict, TO_ROOM);
+			act(buf, invis, ch, NULL, vict, TO_ROOM | act_flags);
 		}
 	}
 	else {	// message: ch != vict
 		// to-char
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_FAIL_TARGETED_TO_CHAR)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_FAIL_TARGETED_TO_CHAR), FALSE, ch, NULL, vict, TO_CHAR);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_FAIL_TARGETED_TO_CHAR), FALSE, ch, NULL, vict, TO_CHAR | act_flags);
 		}
 		else {
 			snprintf(buf, sizeof(buf), "You try to use %s on $N, but fail!", SAFE_ABIL_COMMAND(abil));
-			act(buf, FALSE, ch, NULL, vict, TO_CHAR);
+			act(buf, FALSE, ch, NULL, vict, TO_CHAR | act_flags);
 		}
 	
 		// to vict
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_FAIL_TARGETED_TO_VICT)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_FAIL_TARGETED_TO_VICT), invis, ch, NULL, vict, TO_VICT);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_FAIL_TARGETED_TO_VICT), invis, ch, NULL, vict, TO_VICT | act_flags);
 		}
 		else {
 			snprintf(buf, sizeof(buf), "$n tries to use %s on you, but fails!", SAFE_ABIL_COMMAND(abil));
-			act(buf, invis, ch, NULL, vict, TO_VICT);
+			act(buf, invis, ch, NULL, vict, TO_VICT | act_flags);
 		}
 	
 		// to room
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_FAIL_TARGETED_TO_ROOM)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_FAIL_TARGETED_TO_ROOM), invis, ch, NULL, vict, TO_NOTVICT);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_FAIL_TARGETED_TO_ROOM), invis, ch, NULL, vict, TO_NOTVICT | act_flags);
 		}
 		else {
 			snprintf(buf, sizeof(buf), "$n tries to use %s on $N, but fails!", SAFE_ABIL_COMMAND(abil));
-			act(buf, invis, ch, NULL, vict, TO_NOTVICT);
+			act(buf, invis, ch, NULL, vict, TO_NOTVICT | act_flags);
 		}
 	}
 }
@@ -996,9 +1005,18 @@ char_data *load_companion_mob(char_data *leader, struct companion_data *cd) {
 */
 void pre_ability_message(char_data *ch, char_data *vict, ability_data *abil) {
 	bool invis;
+	bitvector_t act_flags = NOBITS;
 	
 	if (!ch || !abil) {
 		return;	// no work
+	}
+	
+	if (ABILITY_FLAGGED(abil, ABILF_VIOLENT) && vict) {
+		act_flags |= TO_COMBAT_HIT;
+	}
+	else if (IS_SET(ABIL_TYPES(abil), ABILT_BUFF)) {
+		// non-violent buff
+		act_flags |= TO_BUFF;
 	}
 	
 	invis = ABILITY_FLAGGED(abil, ABILF_INVISIBLE) ? TRUE : FALSE;
@@ -1006,28 +1024,28 @@ void pre_ability_message(char_data *ch, char_data *vict, ability_data *abil) {
 	if (ch == vict || !vict) {	// message: targeting self
 		// to-char
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_PRE_SELF_TO_CHAR)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_PRE_SELF_TO_CHAR), FALSE, ch, NULL, vict, TO_CHAR);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_PRE_SELF_TO_CHAR), FALSE, ch, NULL, vict, TO_CHAR | act_flags);
 		}
 	
 		// to room
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_PRE_SELF_TO_ROOM)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_PRE_SELF_TO_ROOM), invis, ch, NULL, vict, TO_ROOM);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_PRE_SELF_TO_ROOM), invis, ch, NULL, vict, TO_ROOM | act_flags);
 		}
 	}
 	else {	// message: ch != vict
 		// to-char
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_PRE_TARGETED_TO_CHAR)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_PRE_TARGETED_TO_CHAR), FALSE, ch, NULL, vict, TO_CHAR);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_PRE_TARGETED_TO_CHAR), FALSE, ch, NULL, vict, TO_CHAR | act_flags);
 		}
 	
 		// to vict
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_PRE_TARGETED_TO_VICT)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_PRE_TARGETED_TO_VICT), invis, ch, NULL, vict, TO_VICT);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_PRE_TARGETED_TO_VICT), invis, ch, NULL, vict, TO_VICT | act_flags);
 		}
 	
 		// to room
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_PRE_TARGETED_TO_ROOM)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_PRE_TARGETED_TO_ROOM), invis, ch, NULL, vict, TO_NOTVICT);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_PRE_TARGETED_TO_ROOM), invis, ch, NULL, vict, TO_NOTVICT | act_flags);
 		}
 	}
 }
@@ -1412,7 +1430,7 @@ bool check_ability(char_data *ch, char *string, bool exact) {
 	}
 	
 	// ok check if we can perform it
-	if (!char_can_act(ch, ABIL_MIN_POS(abil), !ABILITY_FLAGGED(abil, ABILF_NO_ANIMAL), !ABILITY_FLAGGED(abil, ABILF_NO_INVULNERABLE | ABILF_VIOLENT))) {
+	if (!char_can_act(ch, ABIL_MIN_POS(abil), !ABILITY_FLAGGED(abil, ABILF_NO_ANIMAL), !ABILITY_FLAGGED(abil, ABILF_NO_INVULNERABLE | ABILF_VIOLENT), FALSE)) {
 		return TRUE;	// sent its own error message
 	}
 	
@@ -1445,6 +1463,7 @@ void call_ability(char_data *ch, ability_data *abil, char *argument, char_data *
 	char buf[MAX_STRING_LENGTH];
 	bool violent, invis;
 	int iter;
+	bitvector_t act_flags = NOBITS;
 	
 	if (!ch || !abil) {
 		return;
@@ -1452,6 +1471,14 @@ void call_ability(char_data *ch, ability_data *abil, char *argument, char_data *
 	
 	violent = (ABILITY_FLAGGED(abil, ABILF_VIOLENT) || IS_SET(ABIL_TYPES(abil), ABILT_DAMAGE | ABILT_DOT));
 	invis = ABILITY_FLAGGED(abil, ABILF_INVISIBLE) ? TRUE : FALSE;
+	
+	if (violent && cvict) {
+		act_flags |= TO_COMBAT_HIT;
+	}
+	else if (IS_SET(ABIL_TYPES(abil), ABILT_BUFF)) {
+		// non-violent buff
+		act_flags |= TO_BUFF;
+	}
 	
 	if (RMT_FLAGGED(IN_ROOM(ch), RMT_PEACEFUL) && violent) {
 		msg_to_char(ch, "You can't %s here.\r\n", SAFE_ABIL_COMMAND(abil));
@@ -1529,29 +1556,29 @@ void call_ability(char_data *ch, ability_data *abil, char *argument, char_data *
 	if (ABILITY_FLAGGED(abil, ABILF_COUNTERSPELLABLE) && violent && cvict && cvict != ch && trigger_counterspell(cvict)) {
 		// to-char
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_COUNTERSPELL_TO_CHAR)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_COUNTERSPELL_TO_CHAR), FALSE, ch, NULL, cvict, TO_CHAR);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_COUNTERSPELL_TO_CHAR), FALSE, ch, NULL, cvict, TO_CHAR | TO_COMBAT_MISS);
 		}
 		else {
 			snprintf(buf, sizeof(buf), "You %s $N, but $E counterspells it!", SAFE_ABIL_COMMAND(abil));
-			act(buf, FALSE, ch, NULL, cvict, TO_CHAR);
+			act(buf, FALSE, ch, NULL, cvict, TO_CHAR | TO_COMBAT_MISS);
 		}
 		
 		// to vict
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_COUNTERSPELL_TO_VICT)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_COUNTERSPELL_TO_VICT), FALSE, ch, NULL, cvict, TO_VICT);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_COUNTERSPELL_TO_VICT), FALSE, ch, NULL, cvict, TO_VICT | TO_COMBAT_MISS);
 		}
 		else {
 			snprintf(buf, sizeof(buf), "$n tries to %s you, but you counterspell it!", SAFE_ABIL_COMMAND(abil));
-			act(buf, FALSE, ch, NULL, cvict, TO_VICT);
+			act(buf, FALSE, ch, NULL, cvict, TO_VICT | TO_COMBAT_MISS);
 		}
 		
 		// to room
 		if (abil_has_custom_message(abil, ABIL_CUSTOM_COUNTERSPELL_TO_ROOM)) {
-			act(abil_get_custom_message(abil, ABIL_CUSTOM_COUNTERSPELL_TO_ROOM), FALSE, ch, NULL, cvict, TO_NOTVICT);
+			act(abil_get_custom_message(abil, ABIL_CUSTOM_COUNTERSPELL_TO_ROOM), FALSE, ch, NULL, cvict, TO_NOTVICT | TO_COMBAT_MISS);
 		}
 		else {
 			snprintf(buf, sizeof(buf), "$n tries to %s $N, but $E counterspells it!", SAFE_ABIL_COMMAND(abil));
-			act(buf, FALSE, ch, NULL, cvict, TO_NOTVICT);
+			act(buf, FALSE, ch, NULL, cvict, TO_NOTVICT | TO_COMBAT_MISS);
 		}
 		
 		data->stop = TRUE;	// prevent routines from firing
@@ -1573,53 +1600,53 @@ void call_ability(char_data *ch, ability_data *abil, char *argument, char_data *
 		if (ch == cvict) {	// message: targeting self
 			// to-char
 			if (abil_has_custom_message(abil, ABIL_CUSTOM_SELF_TO_CHAR)) {
-				act(abil_get_custom_message(abil, ABIL_CUSTOM_SELF_TO_CHAR), FALSE, ch, NULL, cvict, TO_CHAR);
+				act(abil_get_custom_message(abil, ABIL_CUSTOM_SELF_TO_CHAR), FALSE, ch, NULL, cvict, TO_CHAR | act_flags);
 			}
 			else if (!IS_SET(ABIL_TYPES(abil), ABILT_DAMAGE) || ABIL_ATTACK_TYPE(abil) <= 0) {
 				// don't message if it's damage + there's an attack type
 				snprintf(buf, sizeof(buf), "You use %s!", SAFE_ABIL_COMMAND(abil));
-				act(buf, FALSE, ch, NULL, cvict, TO_CHAR);
+				act(buf, FALSE, ch, NULL, cvict, TO_CHAR | act_flags);
 			}
 		
 			// to room
 			if (abil_has_custom_message(abil, ABIL_CUSTOM_SELF_TO_ROOM)) {
-				act(abil_get_custom_message(abil, ABIL_CUSTOM_SELF_TO_ROOM), invis, ch, NULL, cvict, TO_ROOM);
+				act(abil_get_custom_message(abil, ABIL_CUSTOM_SELF_TO_ROOM), invis, ch, NULL, cvict, TO_ROOM | act_flags);
 			}
 			else if (!IS_SET(ABIL_TYPES(abil), ABILT_DAMAGE) || ABIL_ATTACK_TYPE(abil) <= 0) {
 				// don't message if it's damage + there's an attack type
 				snprintf(buf, sizeof(buf), "$n uses %s!", SAFE_ABIL_COMMAND(abil));
-				act(buf, invis, ch, NULL, cvict, TO_ROOM);
+				act(buf, invis, ch, NULL, cvict, TO_ROOM | act_flags);
 			}
 		}
 		else {	// message: ch != cvict
 			// to-char
 			if (abil_has_custom_message(abil, ABIL_CUSTOM_TARGETED_TO_CHAR)) {
-				act(abil_get_custom_message(abil, ABIL_CUSTOM_TARGETED_TO_CHAR), FALSE, ch, NULL, cvict, TO_CHAR);
+				act(abil_get_custom_message(abil, ABIL_CUSTOM_TARGETED_TO_CHAR), FALSE, ch, NULL, cvict, TO_CHAR | act_flags);
 			}
 			else if (!IS_SET(ABIL_TYPES(abil), ABILT_DAMAGE) || ABIL_ATTACK_TYPE(abil) <= 0) {
 				// don't message if it's damage + there's an attack type
 				snprintf(buf, sizeof(buf), "You use %s on $N!", SAFE_ABIL_COMMAND(abil));
-				act(buf, FALSE, ch, NULL, cvict, TO_CHAR);
+				act(buf, FALSE, ch, NULL, cvict, TO_CHAR | act_flags);
 			}
 		
 			// to cvict
 			if (abil_has_custom_message(abil, ABIL_CUSTOM_TARGETED_TO_VICT)) {
-				act(abil_get_custom_message(abil, ABIL_CUSTOM_TARGETED_TO_VICT), invis, ch, NULL, cvict, TO_VICT);
+				act(abil_get_custom_message(abil, ABIL_CUSTOM_TARGETED_TO_VICT), invis, ch, NULL, cvict, TO_VICT | act_flags);
 			}
 			else if (!IS_SET(ABIL_TYPES(abil), ABILT_DAMAGE) || ABIL_ATTACK_TYPE(abil) <= 0) {
 				// don't message if it's damage + there's an attack type
 				snprintf(buf, sizeof(buf), "$n uses %s on you!", SAFE_ABIL_COMMAND(abil));
-				act(buf, invis, ch, NULL, cvict, TO_VICT);
+				act(buf, invis, ch, NULL, cvict, TO_VICT | act_flags);
 			}
 		
 			// to room
 			if (abil_has_custom_message(abil, ABIL_CUSTOM_TARGETED_TO_ROOM)) {
-				act(abil_get_custom_message(abil, ABIL_CUSTOM_TARGETED_TO_ROOM), invis, ch, NULL, cvict, TO_NOTVICT);
+				act(abil_get_custom_message(abil, ABIL_CUSTOM_TARGETED_TO_ROOM), invis, ch, NULL, cvict, TO_NOTVICT | act_flags);
 			}
 			else if (!IS_SET(ABIL_TYPES(abil), ABILT_DAMAGE) || ABIL_ATTACK_TYPE(abil) <= 0) {
 				// don't message if it's damage + there's an attack type
 				snprintf(buf, sizeof(buf), "$n uses %s on $N!", SAFE_ABIL_COMMAND(abil));
-				act(buf, invis, ch, NULL, cvict, TO_NOTVICT);
+				act(buf, invis, ch, NULL, cvict, TO_NOTVICT | act_flags);
 			}
 		}
 	}
@@ -1846,7 +1873,7 @@ DO_ABIL(do_damage_ability) {
 	}
 	
 	// msg_to_char(ch, "Damage: %d\r\n", dmg);
-	result = damage(ch, vict, dmg, ABIL_ATTACK_TYPE(abil), ABIL_DAMAGE_TYPE(abil));
+	result = damage(ch, vict, dmg, ABIL_ATTACK_TYPE(abil), ABIL_DAMAGE_TYPE(abil), NULL);
 	data->success = TRUE;
 	
 	if (result < 0) {	// dedz
@@ -2466,7 +2493,7 @@ void free_ability(ability_data *abil) {
 * @param any_vnum vnum The ability vnum
 */
 void parse_ability(FILE *fl, any_vnum vnum) {
-	char line[256], error[256], str_in[256], str_in2[256], str_in3[256];
+	char line[256], error[256], str_in[256], str_in2[256], str_in3[256], str_in4[256];
 	struct ability_data_list *adl;
 	ability_data *abil, *find;
 	bitvector_t type;
@@ -2497,14 +2524,17 @@ void parse_ability(FILE *fl, any_vnum vnum) {
 	}
 	
 	// line 2 is backwards-compatible with previous versions
-	if (sscanf(line, "%s %d %lf %s %s", str_in, &int_in[0], &dbl_in, str_in2, str_in3) != 5) {
-		strcpy(str_in3, "0");	// default gain hooks
-		if (sscanf(line, "%s %d %lf %s", str_in, &int_in[0], &dbl_in, str_in2) != 4) {
-			dbl_in = 1.0;	// default scale
-			strcpy(str_in2, "0");	// default immunities
-			if (sscanf(line, "%s %d", str_in, &int_in[0]) != 2) {
-				log("SYSERR: Format error in line 2 of %s", error);
-				exit(1);
+	if (sscanf(line, "%s %d %lf %s %s %s", str_in, &int_in[0], &dbl_in, str_in2, str_in3, str_in4) != 6) {
+		strcpy(str_in4, "0");	// default requires-tool
+		if (sscanf(line, "%s %d %lf %s %s", str_in, &int_in[0], &dbl_in, str_in2, str_in3) != 5) {
+			strcpy(str_in3, "0");	// default gain hooks
+			if (sscanf(line, "%s %d %lf %s", str_in, &int_in[0], &dbl_in, str_in2) != 4) {
+				dbl_in = 1.0;	// default scale
+				strcpy(str_in2, "0");	// default immunities
+				if (sscanf(line, "%s %d", str_in, &int_in[0]) != 2) {
+					log("SYSERR: Format error in line 2 of %s", error);
+					exit(1);
+				}
 			}
 		}
 	}
@@ -2514,6 +2544,7 @@ void parse_ability(FILE *fl, any_vnum vnum) {
 	ABIL_SCALE(abil) = dbl_in;
 	ABIL_IMMUNITIES(abil) = asciiflag_conv(str_in2);
 	ABIL_GAIN_HOOKS(abil) = asciiflag_conv(str_in3);
+	ABIL_REQUIRES_TOOL(abil) = asciiflag_conv(str_in4);
 	
 	// optionals
 	for (;;) {
@@ -2747,7 +2778,7 @@ void write_ability_index(FILE *fl) {
 * @param ability_data *abil The thing to save.
 */
 void write_ability_to_file(FILE *fl, ability_data *abil) {
-	char temp[256], temp2[256], temp3[256];
+	char temp[256], temp2[256], temp3[256], temp4[256];
 	struct ability_data_list *adl;
 	struct ability_type *at;
 	
@@ -2765,7 +2796,8 @@ void write_ability_to_file(FILE *fl, ability_data *abil) {
 	strcpy(temp, bitv_to_alpha(ABIL_FLAGS(abil)));
 	strcpy(temp2, bitv_to_alpha(ABIL_IMMUNITIES(abil)));
 	strcpy(temp3, bitv_to_alpha(ABIL_GAIN_HOOKS(abil)));
-	fprintf(fl, "%s %d %.2f %s %s\n", temp, ABIL_MASTERY_ABIL(abil), ABIL_SCALE(abil), temp2, temp3);
+	strcpy(temp4, bitv_to_alpha(ABIL_REQUIRES_TOOL(abil)));
+	fprintf(fl, "%s %d %.2f %s %s %s\n", temp, ABIL_MASTERY_ABIL(abil), ABIL_SCALE(abil), temp2, temp3, temp4);
 	
 	// 'A': applies
 	write_applies_to_file(fl, ABIL_APPLIES(abil));
@@ -3087,7 +3119,7 @@ void olc_fullsearch_abil(char_data *ch, char *argument) {
 	
 	char buf[MAX_STRING_LENGTH * 2], line[MAX_STRING_LENGTH], type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], find_keywords[MAX_INPUT_LENGTH];
 	bitvector_t find_applies = NOBITS, found_applies, not_flagged = NOBITS, only_flags = NOBITS;
-	bitvector_t only_affs = NOBITS, only_immunities = NOBITS, only_gains = NOBITS, only_targets = NOBITS, find_custom = NOBITS, found_custom;
+	bitvector_t only_affs = NOBITS, only_immunities = NOBITS, only_gains = NOBITS, only_targets = NOBITS, find_custom = NOBITS, found_custom, only_tools = NOBITS;
 	int count, only_cost_type = NOTHING, only_type = NOTHING, only_scale = NOTHING, scale_over = NOTHING, scale_under = NOTHING, min_pos = POS_DEAD, max_pos = POS_STANDING;
 	int min_cost = NOTHING, max_cost = NOTHING, min_cost_per = NOTHING, max_cost_per = NOTHING, min_cd = NOTHING, max_cd = NOTHING, min_dur = FAKE_DUR, max_dur = FAKE_DUR;
 	int only_wait = NOTHING, only_linked = NOTHING, only_diff = NOTHING, only_attack = NOTHING, only_damage = NOTHING, only_ptech = NOTHING;
@@ -3143,6 +3175,7 @@ void olc_fullsearch_abil(char_data *ch, char *argument) {
 		FULLSEARCH_INT("scaleover", scale_over, 0, INT_MAX)
 		FULLSEARCH_INT("scaleunder", scale_under, 0, INT_MAX)
 		FULLSEARCH_FLAGS("targets", only_targets, ability_target_flags)
+		FULLSEARCH_FLAGS("tools", only_tools, tool_flags)
 		FULLSEARCH_LIST("type", only_type, ability_type_flags)
 		FULLSEARCH_FLAGS("unflagged", not_flagged, ability_flags)
 		FULLSEARCH_LIST("waittype", only_wait, wait_types)
@@ -3260,6 +3293,9 @@ void olc_fullsearch_abil(char_data *ch, char *argument) {
 			continue;
 		}
 		if (only_targets != NOBITS && (ABIL_TARGETS(abil) & only_targets) != only_targets) {
+			continue;
+		}
+		if (only_tools != NOBITS && (ABIL_REQUIRES_TOOL(abil) & only_tools) != only_tools) {
 			continue;
 		}
 		if (find_applies) {	// look up its applies
@@ -3494,6 +3530,10 @@ void do_stat_ability(char_data *ch, ability_data *abil) {
 	}
 	size += snprintf(buf + size, sizeof(buf) - size, "Cost: [\tc%d %s (+%d/scale)\t0], Cooldown: [\tc%d %s\t0], Cooldown time: [\tc%d second%s\t0]\r\n", ABIL_COST(abil), pool_types[ABIL_COST_TYPE(abil)], ABIL_COST_PER_SCALE_POINT(abil), ABIL_COOLDOWN(abil), get_generic_name_by_vnum(ABIL_COOLDOWN(abil)),  ABIL_COOLDOWN_SECS(abil), PLURAL(ABIL_COOLDOWN_SECS(abil)));
 	size += snprintf(buf + size, sizeof(buf) - size, "Min position: [\tc%s\t0], Linked trait: [\ty%s\t0]\r\n", position_types[ABIL_MIN_POS(abil)], apply_types[ABIL_LINKED_TRAIT(abil)]);
+	
+	prettier_sprintbit(ABIL_REQUIRES_TOOL(abil), tool_flags, part);
+	size += snprintf(buf + size, sizeof(buf) - size, "Requires tool: &g%s&0\r\n", part);
+	
 	size += snprintf(buf + size, sizeof(buf) - size, "Difficulty: \ty%s\t0, Wait type: [\ty%s\t0]\r\n", skill_check_difficulty[ABIL_DIFFICULTY(abil)], wait_types[ABIL_WAIT_TYPE(abil)]);
 	
 	// type-specific data
@@ -3609,6 +3649,10 @@ void olc_show_ability(char_data *ch) {
 	sprintf(buf + strlen(buf), "<%scost\t0> %d, <%scostperscalepoint\t0> %d, <%scosttype\t0> %s\r\n", OLC_LABEL_VAL(ABIL_COST(abil), 0), ABIL_COST(abil), OLC_LABEL_VAL(ABIL_COST_PER_SCALE_POINT(abil), 0), ABIL_COST_PER_SCALE_POINT(abil), OLC_LABEL_VAL(ABIL_COST_TYPE(abil), 0), pool_types[ABIL_COST_TYPE(abil)]);
 	sprintf(buf + strlen(buf), "<%scooldown\t0> [%d] %s, <%scdtime\t0> %d second%s\r\n", OLC_LABEL_VAL(ABIL_COOLDOWN(abil), NOTHING), ABIL_COOLDOWN(abil), get_generic_name_by_vnum(ABIL_COOLDOWN(abil)), OLC_LABEL_VAL(ABIL_COOLDOWN_SECS(abil), 0), ABIL_COOLDOWN_SECS(abil), PLURAL(ABIL_COOLDOWN_SECS(abil)));
 	sprintf(buf + strlen(buf), "<%sminposition\t0> %s (minimum), <%slinkedtrait\t0> %s\r\n", OLC_LABEL_VAL(ABIL_MIN_POS(abil), POS_STANDING), position_types[ABIL_MIN_POS(abil)], OLC_LABEL_VAL(ABIL_LINKED_TRAIT(abil), APPLY_NONE), apply_types[ABIL_LINKED_TRAIT(abil)]);
+	
+	sprintbit(ABIL_REQUIRES_TOOL(abil), tool_flags, lbuf, TRUE);
+	sprintf(buf + strlen(buf), "<%stools\t0> %s\r\n", OLC_LABEL_VAL(ABIL_REQUIRES_TOOL(abil), NOBITS), lbuf);
+	
 	sprintf(buf + strlen(buf), "<%sdifficulty\t0> %s, <%swaittype\t0> %s\r\n", OLC_LABEL_VAL(ABIL_DIFFICULTY(abil), 0), skill_check_difficulty[ABIL_DIFFICULTY(abil)], OLC_LABEL_VAL(ABIL_WAIT_TYPE(abil), WAIT_NONE), wait_types[ABIL_WAIT_TYPE(abil)]);
 	
 	// type-specific data
@@ -4160,6 +4204,12 @@ OLC_MODULE(abiledit_targets) {
 	else {
 		ABIL_TARGETS(abil) = olc_process_flag(ch, argument, "target", "targets", ability_target_flags, ABIL_TARGETS(abil));
 	}
+}
+
+
+OLC_MODULE(abiledit_tools) {
+	ability_data *abil = GET_OLC_ABILITY(ch->desc);
+	ABIL_REQUIRES_TOOL(abil) = olc_process_flag(ch, argument, "tool", "tools", tool_flags, ABIL_REQUIRES_TOOL(abil));
 }
 
 

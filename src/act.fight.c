@@ -458,6 +458,8 @@ ACMD(do_meters) {
 
 
 ACMD(do_respawn) {
+	struct affected_type *af;
+	
 	if (!IS_DEAD(ch) && !IS_INJURED(ch, INJ_STAKED)) {
 		msg_to_char(ch, "You aren't even dead yet!\r\n");
 	}
@@ -487,6 +489,12 @@ ACMD(do_respawn) {
 		greet_mtrigger(ch, NO_DIR, "respawn");
 		greet_memory_mtrigger(ch);
 		greet_vtrigger(ch, NO_DIR, "respawn");
+		
+		// temporary safety effect after a respawn
+		af = create_flag_aff(ATYPE_BRIEF_RESPITE, 30, AFF_IMMUNE_TEMPERATURE, ch);
+		affect_join(ch, af, NOBITS);
+		RESET_LAST_MESSAGED_TEMPERATURE(ch);
+		
 		msdp_update_room(ch);
 	}
 }
@@ -579,7 +587,9 @@ ACMD(do_stake) {
 		REMOVE_BIT(INJURY_FLAGS(victim), INJ_STAKED);
 		obj_to_char((stake = read_object(o_STAKE, TRUE)), ch);
 		scale_item_to_level(stake, 1);	// min scale
-		load_otrigger(stake);
+		if (load_otrigger(stake)) {
+			get_otrigger(stake, ch, FALSE);
+		}
 	}
 	else if (!can_fight(ch, victim))
 		act("You can't stake $M!", FALSE, ch, 0, victim, TO_CHAR);
@@ -737,8 +747,11 @@ ACMD(do_tie) {
 		if (GET_ROPE_VNUM(victim) != NOTHING && (rope = read_object(GET_ROPE_VNUM(victim), TRUE))) {
 			obj_to_char(rope, ch);
 			scale_item_to_level(rope, 1);	// minimum
-			load_otrigger(rope);
-			act("You receive $p.", FALSE, ch, rope, NULL, TO_CHAR);
+			if (load_otrigger(rope)) {
+				// conditional on not purging itself
+				act("You receive $p.", FALSE, ch, rope, NULL, TO_CHAR);
+				get_otrigger(rope, ch, FALSE);
+			}
 		}
 		GET_ROPE_VNUM(victim) = NOTHING;
 		request_char_save_in_world(victim);

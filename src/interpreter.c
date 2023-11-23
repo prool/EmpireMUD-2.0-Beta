@@ -14,12 +14,11 @@
 #include "sysdep.h"
 
 #include "structs.h"
+#include "utils.h"
 #include "comm.h"
 #include "interpreter.h"
 #include "db.h"
-#include "utils.h"
 #include "handler.h"
-#include "utils.h"
 #include "olc.h"
 #include "skills.h"
 #include "vnums.h"
@@ -180,6 +179,7 @@ ACMD(do_fightmessages);
 ACMD(do_file);
 ACMD(do_fillin);
 ACMD(do_findmaintenance);
+ACMD(do_finish);
 ACMD(do_fire);
 ACMD(do_firstaid);
 ACMD(do_fish);
@@ -392,6 +392,7 @@ ACMD(do_specialize);
 ACMD(do_split);
 ACMD(do_stake);
 ACMD(do_stand);
+ACMD(do_start);
 ACMD(do_stat);
 ACMD(do_steal);
 ACMD(do_stop);
@@ -411,6 +412,7 @@ ACMD(do_tan);
 ACMD(do_tavern);
 ACMD(do_tedit);
 ACMD(do_tell);
+ACMD(do_temperature);
 ACMD(do_territory);
 ACMD(do_throw);
 ACMD(do_tie);
@@ -727,10 +729,11 @@ cpp_extern const struct command_info cmd_info[] = {
 	SIMPLE_CMD( "factions", POS_DEAD, do_factions, NO_MIN, CTYPE_UTIL ),
 	SCMD_CMD( "fastmorph", POS_RESTING, do_morph, NO_MIN, CTYPE_MOVE, SCMD_FASTMORPH ),
 	SIMPLE_CMD( "feed", POS_STANDING, do_feed, NO_MIN, CTYPE_UTIL ),
-	SIMPLE_CMD( "fightmessages", POS_DEAD, do_fightmessages, NO_MIN, CTYPE_UTIL ),
-	SIMPLE_CMD( "fmessages", POS_DEAD, do_fightmessages, NO_MIN, CTYPE_UTIL ),
+	SCMD_CMD( "fightmessages", POS_DEAD, do_fightmessages, NO_MIN, CTYPE_UTIL, SCMD_FIGHT ),
+	SCMD_CMD( "fmessages", POS_DEAD, do_fightmessages, NO_MIN, CTYPE_UTIL, SCMD_FIGHT ),
 	SIMPLE_CMD( "file", POS_DEAD, do_file, LVL_START_IMM, CTYPE_IMMORTAL ),
 	STANDARD_CMD( "fillin", POS_STANDING, do_fillin, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_BUILD, CMD_NO_ANIMALS, NO_ABIL ),
+	SIMPLE_CMD( "finish", POS_DEAD, do_finish, NO_MIN, CTYPE_UTIL ),
 	SIMPLE_CMD( "findmaintenance", POS_DEAD, do_findmaintenance, NO_MIN, CTYPE_EMPIRE ),
 	STANDARD_CMD( "fire", POS_SITTING, do_fire, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_COMBAT, CMD_NO_ANIMALS, NO_ABIL ),
 	ABILITY_CMD( "firstaid", POS_STANDING, do_firstaid, NO_MIN, CTYPE_SKILL, ABIL_FIRSTAID ),
@@ -996,7 +999,10 @@ cpp_extern const struct command_info cmd_info[] = {
 	SIMPLE_CMD( "split", POS_RESTING, do_split, NO_MIN, CTYPE_UTIL ),
 	SIMPLE_CMD( "stand", POS_RESTING, do_stand, NO_MIN, CTYPE_MOVE ),
 	SCMD_CMD( "stake", POS_FIGHTING, do_stake, NO_MIN, CTYPE_COMBAT, FALSE ),
+	SIMPLE_CMD( "start", POS_DEAD, do_start, NO_MIN, CTYPE_UTIL ),
 	SIMPLE_CMD( "stat", POS_DEAD, do_stat, LVL_START_IMM, CTYPE_IMMORTAL ),
+	SCMD_CMD( "statusmessages", POS_DEAD, do_fightmessages, NO_MIN, CTYPE_UTIL, SCMD_STATUS ),
+	SCMD_CMD( "smessages", POS_DEAD, do_fightmessages, NO_MIN, CTYPE_UTIL, SCMD_STATUS ),
 	ABILITY_CMD( "steal", POS_STANDING, do_steal, NO_MIN, CTYPE_COMBAT, ABIL_STEAL ),
 	SIMPLE_CMD( "store", POS_STANDING, do_store, NO_MIN, CTYPE_MOVE ),
 	SIMPLE_CMD( "stop", POS_DEAD, do_stop, NO_MIN, CTYPE_UTIL ),
@@ -1020,6 +1026,7 @@ cpp_extern const struct command_info cmd_info[] = {
 	GRANT_CMD( "tedit", POS_DEAD, do_tedit, LVL_CIMPL, CTYPE_IMMORTAL, GRANT_TEDIT ),
 	SCMD_CMD( "teleport", POS_STANDING, do_goto, LVL_GOD, CTYPE_IMMORTAL, SCMD_TELEPORT ),
 	SCMD_CMD( "tellhistory", POS_DEAD, do_history, NO_MIN, CTYPE_COMM, SCMD_TELL_HISTORY ),
+	SIMPLE_CMD( "temperature", POS_DEAD, do_temperature, NO_MIN, CTYPE_UTIL ),
 	SIMPLE_CMD( "territory", POS_DEAD, do_territory, NO_MIN, CTYPE_EMPIRE ),
 	STANDARD_CMD( "throw", POS_FIGHTING, do_throw, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_COMBAT, CMD_NO_ANIMALS, NO_ABIL ),
 	STANDARD_CMD( "thaw", POS_DEAD, do_wizutil, LVL_CIMPL, GRANT_FREEZE, SCMD_THAW, CTYPE_IMMORTAL, CMD_NO_ANIMALS, NO_ABIL ),
@@ -1289,7 +1296,7 @@ void command_interpreter(char_data *ch, char *argument) {
 		send_config_msg(ch, "huh_string");
 	}
 	
-	else if (!char_can_act(ch, cmd_info[cmd].minimum_position, !IS_SET(cmd_info[cmd].flags, CMD_NO_ANIMALS), (cmd_info[cmd].ctype != CTYPE_COMBAT && cmd_info[cmd].ctype != CTYPE_SKILL && cmd_info[cmd].ctype != CTYPE_BUILD))) {
+	else if (!char_can_act(ch, cmd_info[cmd].minimum_position, !IS_SET(cmd_info[cmd].flags, CMD_NO_ANIMALS), (cmd_info[cmd].ctype != CTYPE_COMBAT && cmd_info[cmd].ctype != CTYPE_SKILL && cmd_info[cmd].ctype != CTYPE_BUILD), IS_SET(cmd_info[cmd].flags, CMD_WHILE_FEEDING))) {
 		// sent own error message
 	}
 	else if (GET_FEEDING_FROM(ch) && cmd_info[cmd].minimum_position >= POS_SLEEPING && !IS_SET(cmd_info[cmd].flags, CMD_WHILE_FEEDING)) {
@@ -1563,9 +1570,10 @@ ACMD(do_alias) {
 * @param int min_pos The minimum allowed POS_ const.
 * @param bool allow_animal If FALSE, players can't do this in an animal morph.
 * @param bool allow_invulnerable If FALSE, players can't do this while un-attackable.
+* @param bool override_feeding If TRUE, ignores position for feeding vampires.
 * @return bool TRUE if the character can act, FALSE (with error msg) if not
 */
-bool char_can_act(char_data *ch, int min_pos, bool allow_animal, bool allow_invulnerable) {
+bool char_can_act(char_data *ch, int min_pos, bool allow_animal, bool allow_invulnerable, bool override_feeding) {
 	if (!IS_NPC(ch) && ACCOUNT_FLAGGED(ch, ACCT_FROZEN)) {
 		send_to_char("You try, but the mind-numbing cold prevents you...\r\n", ch);
 	}
@@ -1587,7 +1595,7 @@ bool char_can_act(char_data *ch, int min_pos, bool allow_animal, bool allow_invu
 	else if (AFF_FLAGGED(ch, AFF_DEATHSHROUD) && min_pos >= POS_SLEEPING) {
 		msg_to_char(ch, "You can't do that while in deathshroud!\r\n");
 	}
-	else if (GET_FEEDING_FROM(ch) && min_pos >= POS_SLEEPING) {
+	else if (GET_FEEDING_FROM(ch) && min_pos >= POS_SLEEPING && !override_feeding) {
 		msg_to_char(ch, "You can't do that right now!\r\n");
 	}
 	else if (GET_FED_ON_BY(ch) && min_pos >= POS_SLEEPING) {
@@ -2959,7 +2967,8 @@ void nanny(descriptor_data *d, char *arg) {
 				SEND_TO_Q("This game does not allow existing 'approved' characters to log in from public\r\n", d);
 				SEND_TO_Q("hosts (such as Mudconnector) that do not provide your IP address. You can only\r\n", d);
 				SEND_TO_Q("log in from this host using a character that is not 'approved', or a new\r\n", d);
-				SEND_TO_Q("character (which will not be approved.\r\n", d);
+				SEND_TO_Q("character (which will not be approved). To install a MUD client on your own\r\n", d);
+				SEND_TO_Q("computer, visit https://empiremud.net/play-now.html\r\n", d);
 				syslog(SYS_LOGIN, 0, TRUE, "Login denied: Approved character %s connecting from anonymous host [%s]", GET_NAME(d->character), d->host);
 				
 				STATE(d) = CON_GOODBYE;
@@ -3001,17 +3010,25 @@ void nanny(descriptor_data *d, char *arg) {
 			
 			display_automessages_on_login(d->character);
 			
-			display_tip_to_char(d->character);
+			if (!PRF_FLAGGED(d->character, PRF_NO_TUTORIALS)) {
+				display_tip_to_char(d->character);
+			}
 			
 			if (GET_MAIL_PENDING(d->character)) {
-				send_to_char("&rYou have mail waiting.&0\r\n", d->character);
+				send_to_char("\trYou have mail waiting.\t0\r\n", d->character);
+			}
+			if (has_uncollected_event_rewards(d->character)) {
+				msg_to_char(d->character, "\ttYou have uncollected event rewards. Type 'event collect' when you're in your own territory.\t0\r\n");
 			}
 			
+			// reset daily cycle now
+			check_daily_cycle_reset(d->character);
+			
 			if (!IS_APPROVED(d->character) && (msg = config_get_string("unapproved_greeting")) && *msg) {
-				msg_to_char(d->character, "\r\n&o%s&0", msg);
+				msg_to_char(d->character, "\r\n\to%s\t0", msg);
 			}
 			if (show_start && (msg = config_get_string("start_message")) && *msg) {
-				msg_to_char(d->character, "\r\n&Y%s&0", msg);
+				msg_to_char(d->character, "\r\n\tY%s\t0", msg);
 			}
 			
 			if (!IS_APPROVED(d->character) && !IS_IMMORTAL(d->character) && has_anonymous_host(d)) {

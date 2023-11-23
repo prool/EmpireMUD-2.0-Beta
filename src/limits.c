@@ -40,6 +40,7 @@
 */
 
 // external vars
+extern int char_extractions_pending;
 
 // external funcs
 ACMD(do_dismount);
@@ -122,6 +123,38 @@ void check_attribute_gear(char_data *ch) {
 	
 	if (found) {
 		determine_gear_level(ch);
+	}
+}
+
+
+/**
+* Checks if the player needs their daily cycle reset, and resets it if so (with
+* a message).
+*
+* @param char_data *ch The player.
+*/
+void check_daily_cycle_reset(char_data *ch) {
+	int gain;
+	
+	if (!IS_NPC(ch) && GET_DAILY_CYCLE(ch) < data_get_long(DATA_DAILY_CYCLE)) {
+		// other stuff that resets daily
+		gain = compute_bonus_exp_per_day(ch);
+		if (GET_DAILY_BONUS_EXPERIENCE(ch) < gain) {
+			GET_DAILY_BONUS_EXPERIENCE(ch) = gain;
+			update_MSDP_bonus_exp(ch, UPDATE_SOON);
+		}
+		GET_DAILY_QUESTS(ch) = 0;
+		GET_EVENT_DAILY_QUESTS(ch) = 0;
+	
+		msg_to_char(ch, "\tjYour daily quests and bonus experience have reset!\t0\r\n");
+		
+		if (fail_daily_quests(ch, TRUE) | fail_daily_quests(ch, FALSE)) {
+			msg_to_char(ch, "\tjYour daily quests expire.\t0\r\n");
+		}
+	
+		// update to this cycle so it only happens once a day
+		GET_DAILY_CYCLE(ch) = data_get_long(DATA_DAILY_CYCLE);
+		queue_delayed_update(ch, CDU_SAVE);
 	}
 }
 
@@ -309,7 +342,9 @@ INTERACTION_FUNC(consumes_or_decays_interact) {
 		}
 		
 		if (!fail) {
-			load_otrigger(new_obj);
+			if (load_otrigger(new_obj) && new_obj->carried_by) {
+				get_otrigger(new_obj, new_obj->carried_by, FALSE);
+			}
 		}
 	}
 	
@@ -390,7 +425,7 @@ bool point_update_player(char_data *ch) {
 		}
 	}
 	
-	if (IS_BLOOD_STARVED(ch)) {
+	if (IS_BLOOD_STARVED(ch) && SHOW_STATUS_MESSAGES(ch, SM_LOW_BLOOD)) {
 		msg_to_char(ch, "You are starving!\r\n");
 	}
 	
@@ -458,6 +493,12 @@ void real_update_player(char_data *ch) {
 	bool found, msg;
 	
 	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	if (EXTRACTED(ch) && char_extractions_pending == 0) {
+		log("SYSERR: Player %s is EXTRACED while no extractions are pending.\r\n", GET_NAME(ch));
+		++char_extractions_pending;
 		return;
 	}
 	
@@ -541,33 +582,18 @@ void real_update_player(char_data *ch) {
 	}
 
 	// periodic exp and skill gain
-	if (GET_DAILY_CYCLE(ch) < data_get_long(DATA_DAILY_CYCLE)) {
-		// other stuff that resets daily
-		gain = compute_bonus_exp_per_day(ch);
-		if (GET_DAILY_BONUS_EXPERIENCE(ch) < gain) {
-			GET_DAILY_BONUS_EXPERIENCE(ch) = gain;
-			update_MSDP_bonus_exp(ch, UPDATE_SOON);
-		}
-		GET_DAILY_QUESTS(ch) = 0;
-		GET_EVENT_DAILY_QUESTS(ch) = 0;
-	
-		msg_to_char(ch, "&yYour daily quests and bonus experience have reset!&0\r\n");
-		
-		if (fail_daily_quests(ch, TRUE) | fail_daily_quests(ch, FALSE)) {
-			msg_to_char(ch, "Your daily quests expire.\r\n");
-		}
-	
-		// update to this cycle so it only happens once a day
-		GET_DAILY_CYCLE(ch) = data_get_long(DATA_DAILY_CYCLE);
-		queue_delayed_update(ch, CDU_SAVE);
-	}
+	check_daily_cycle_reset(ch);
 
 	/* Update conditions */
 	if (HAS_BONUS_TRAIT(ch, BONUS_NO_HUNGER) || has_player_tech(ch, PTECH_NO_HUNGER)) {			
 		gain_condition(ch, FULL, -1);
 	}
 	else {
-		if (!number(0, 1)) {
+		if (AFF_FLAGGED(ch, AFF_HUNGRIER)) {
+			gain_condition(ch, FULL, number(1, 2));
+		}
+		else if (!number(0, 1)) {
+			// random chance of hunger
 			gain_condition(ch, FULL, 1);
 		}
 	}
@@ -579,7 +605,10 @@ void real_update_player(char_data *ch) {
 		gain_condition(ch, THIRST, -1);
 	}
 	else {
-		if (!number(0, 1)) {
+		if (AFF_FLAGGED(ch, AFF_THIRSTIER)) {
+			gain_condition(ch, THIRST, number(1, 2));
+		}
+		else if (!number(0, 1)) {
 			gain_condition(ch, THIRST, 1);
 		}
 	}
@@ -673,6 +702,10 @@ void real_update_player(char_data *ch) {
 		}
 		msg_to_char(ch, "You revert to normal!\r\n");
 	}
+	
+	// temperature check
+	update_player_temperature(ch);
+	check_temperature_penalties(ch);
 
 	/* Blood check */
 	if (GET_BLOOD(ch) <= 0 && !GET_FED_ON_BY(ch) && !GET_FEEDING_FROM(ch)) {
@@ -2161,14 +2194,14 @@ void gain_condition(char_data *ch, int condition, int value) {
 
 	switch (condition) {
 		case FULL: {
-			if (IS_HUNGRY(ch) && value > 0) {
+			if (SHOW_STATUS_MESSAGES(ch, SM_HUNGER) && IS_HUNGRY(ch) && value > 0) {
 				msg_to_char(ch, "You are hungry.\r\n");
 				GET_LAST_COND_MESSAGE_TIME(ch, condition) = time(0);
 			}
 			return;
 		}
 		case THIRST: {
-			if (IS_THIRSTY(ch) && value > 0) {
+			if (SHOW_STATUS_MESSAGES(ch, SM_THIRST) && IS_THIRSTY(ch) && value > 0) {
 				msg_to_char(ch, "You are thirsty.\r\n");
 				GET_LAST_COND_MESSAGE_TIME(ch, condition) = time(0);
 			}
@@ -2253,7 +2286,7 @@ int health_gain(char_data *ch, bool info_only) {
 		}
 		
 		// put this last
-		if (IS_HUNGRY(ch) || IS_THIRSTY(ch) || IS_BLOOD_STARVED(ch)) {
+		if (AFF_FLAGGED(ch, AFF_POOR_REGENS) || IS_HUNGRY(ch) || IS_THIRSTY(ch) || IS_BLOOD_STARVED(ch)) {
 			gain /= 4;
 		}
 	}
@@ -2307,7 +2340,7 @@ int mana_gain(char_data *ch, bool info_only) {
 		}
 		
 		// this goes last
-		if (IS_HUNGRY(ch) || IS_THIRSTY(ch) || IS_BLOOD_STARVED(ch)) {
+		if (AFF_FLAGGED(ch, AFF_POOR_REGENS) || IS_HUNGRY(ch) || IS_THIRSTY(ch) || IS_BLOOD_STARVED(ch)) {
 			gain /= 4;
 		}
 	}
@@ -2353,7 +2386,7 @@ int move_gain(char_data *ch, bool info_only) {
 			gain = MAX(gain, min);
 		}
 
-		if (IS_HUNGRY(ch) || IS_THIRSTY(ch) || IS_BLOOD_STARVED(ch)) {
+		if (AFF_FLAGGED(ch, AFF_POOR_REGENS) || IS_HUNGRY(ch) || IS_THIRSTY(ch) || IS_BLOOD_STARVED(ch)) {
 			gain /= 4;
 		}
 	}

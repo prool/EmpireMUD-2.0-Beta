@@ -404,8 +404,12 @@ the mob and set off its load triggers.
 Buildings call their load triggers when first constructed, even before they
 are complete.
 
+If an object, mob, or vehicle will purge itself in its own load trigger, you
+should consider doing a "wait 1" (or longer) before purging it.
+
 Only the FIRST load trigger on a mob or room will run unless it also has the
-Allow-Multiple type. This is not implemented for objects or vehicles.
+Allow-Multiple type. On objects or vehicles, only the first trigger will run
+and there is currently no way to override this.
 
 See also: RTRIG COMPLETE, ALLOW-MULTIPLE
 #d
@@ -656,12 +660,14 @@ Special Variables When using field - The variable returns:
 &cspeech&0 - This variable is set to the complete phrase spoken by an actor 
    that triggers a speech trigger.
 &cstartloc&0 - A random starting location.
+&ctemperature.<number>&0 - Converts a temperature number to a string like "hot".
 &ctime.<field>&0 - Field may be hour, day, month, year, or day_of_year. The
    returned value will be the current hour in the mud (0-23), day of the month
    (1-35), month (1-12), year, or day_of_year (1-360). Use &c%room.time(field)%&0
    instead to get local time.
 &ctimestamp&0 - Current unix timestamp.
 &cweather&0 - One of: sunny, cloudy, raining, lightning
+   Note that in cold weather, raining and lightning represent snow instead.
 
 Names and pronouns:
 &c~%var%&0 - name, someone, you

@@ -141,10 +141,13 @@ INTERACTION_FUNC(combine_obj_interact) {
 	else {
 		obj_to_room(new_obj, IN_ROOM(ch));
 	}
-	load_otrigger(new_obj);
 	
 	act(to_char, FALSE, ch, new_obj, NULL, TO_CHAR);
 	act(to_room, TRUE, ch, new_obj, NULL, TO_ROOM);
+	
+	if (load_otrigger(new_obj) && new_obj->carried_by) {
+		get_otrigger(new_obj, new_obj->carried_by, FALSE);
+	}
 	
 	free_resource_list(res);
 	return TRUE;
@@ -441,7 +444,9 @@ INTERACTION_FUNC(identifies_to_interact) {
 		else {
 			obj_to_room(new_obj, IN_ROOM(ch));
 		}
-		load_otrigger(new_obj);
+		if (load_otrigger(new_obj) && new_obj->carried_by) {
+			get_otrigger(new_obj, new_obj->carried_by, FALSE);
+		}
 	}
 	
 	return TRUE;
@@ -691,6 +696,10 @@ void identify_obj_to_char(obj_data *obj, char_data *ch, bool simple) {
 		prettier_sprintbit(GET_OBJ_TOOL_FLAGS(obj), tool_flags, buf);
 		msg_to_char(ch, "Tool type: %s\r\n", buf);
 	}
+	if (GET_OBJ_REQUIRES_TOOL(obj)) {
+		prettier_sprintbit(GET_OBJ_REQUIRES_TOOL(obj), tool_flags, buf);
+		msg_to_char(ch, "Requires tool to use when crafting: %s\r\n", buf);
+	}
 	
 	if (GET_OBJ_AFF_FLAGS(obj)) {
 		prettier_sprintbit(GET_OBJ_AFF_FLAGS(obj), affected_bits, buf);
@@ -731,7 +740,20 @@ void identify_obj_to_char(obj_data *obj, char_data *ch, bool simple) {
 			break;
 		case ITEM_DRINKCON:
 			if (GET_DRINK_CONTAINER_CONTENTS(obj) > 0) {
-				msg_to_char(ch, "Contains %d units of %s.\r\n", GET_DRINK_CONTAINER_CONTENTS(obj), get_generic_string_by_vnum(GET_DRINK_CONTAINER_TYPE(obj), GENERIC_LIQUID, GSTR_LIQUID_NAME));
+				if (liquid_flagged(GET_DRINK_CONTAINER_TYPE(obj), LIQF_WATER) && !str_str(get_generic_string_by_vnum(GET_DRINK_CONTAINER_TYPE(obj), GENERIC_LIQUID, GSTR_LIQUID_NAME), "water")) {
+					snprintf(part, sizeof(part), " (water)");
+				}
+				else {
+					*part = '\0';
+				}
+				msg_to_char(ch, "Contains %d units of %s%s.\r\n", GET_DRINK_CONTAINER_CONTENTS(obj), get_generic_string_by_vnum(GET_DRINK_CONTAINER_TYPE(obj), GENERIC_LIQUID, GSTR_LIQUID_NAME), part);
+				
+				if (liquid_flagged(GET_DRINK_CONTAINER_TYPE(obj), LIQF_COOLING)) {
+					msg_to_char(ch, "It will cool you down if you're warm.\r\n");
+				}
+				if (liquid_flagged(GET_DRINK_CONTAINER_TYPE(obj), LIQF_WARMING)) {
+					msg_to_char(ch, "It will warm you up if you're cold.\r\n");
+				}
 			}
 			else {
 				msg_to_char(ch, "It is empty.\r\n");
@@ -1021,7 +1043,7 @@ void identify_vehicle_to_char(vehicle_data *veh, char_data *ch) {
 INTERACTION_FUNC(light_obj_interact) {	
 	obj_vnum vnum = interaction->vnum;
 	obj_data *new = NULL;
-	int num;
+	int num, obj_ok = 0;
 	
 	for (num = 0; num < interaction->quantity; ++num) {
 		// load
@@ -1039,7 +1061,10 @@ INTERACTION_FUNC(light_obj_interact) {
 		else {
 			obj_to_room(new, IN_ROOM(ch));
 		}
-		load_otrigger(new);
+		obj_ok = load_otrigger(new);
+		if (obj_ok && new->carried_by) {
+			get_otrigger(new, new->carried_by, FALSE);
+		}
 	}
 	
 	// mark gained
@@ -1054,11 +1079,11 @@ INTERACTION_FUNC(light_obj_interact) {
 		strcpy(buf1, "It is now $p.");
 	}
 		
-	if (new) {
+	if (obj_ok && new) {
 		act(buf1, FALSE, ch, new, NULL, TO_CHAR | TO_ROOM);
 	}
 	
-	if (inter_item && IS_AMMO(inter_item) && IS_AMMO(new)) {
+	if (obj_ok && new && inter_item && IS_AMMO(inter_item) && IS_AMMO(new)) {
 		set_obj_val(new, VAL_AMMO_QUANTITY, GET_AMMO_QUANTITY(inter_item));
 	}
 	
@@ -1405,7 +1430,9 @@ INTERACTION_FUNC(seed_obj_interact) {
 		else {
 			obj_to_room(new_obj, IN_ROOM(ch));
 		}
-		load_otrigger(new_obj);
+		if (load_otrigger(new_obj) && new_obj->carried_by) {
+			get_otrigger(new_obj, new_obj->carried_by, FALSE);
+		}
 	}
 	
 	return TRUE;
@@ -1455,7 +1482,9 @@ INTERACTION_FUNC(separate_obj_interact) {
 		else {
 			obj_to_room(new_obj, IN_ROOM(ch));
 		}
-		load_otrigger(new_obj);
+		if (load_otrigger(new_obj) && new_obj->carried_by) {
+			get_otrigger(new_obj, new_obj->carried_by, FALSE);
+		}
 	}
 	
 	return TRUE;
@@ -2277,7 +2306,7 @@ static bool perform_get_from_container(char_data *ch, obj_data *obj, obj_data *c
 		return FALSE;
 	}
 	if (mode == FIND_OBJ_INV || can_take_obj(ch, obj)) {
-		if (get_otrigger(obj, ch)) {
+		if (get_otrigger(obj, ch, TRUE)) {
 			// last-minute scaling: scale to its minimum (adventures will override this on their own)
 			if (GET_OBJ_CURRENT_SCALE_LEVEL(obj) < 1) {
 				scale_item_to_level(obj, GET_OBJ_MIN_SCALE_LEVEL(obj));
@@ -2413,7 +2442,7 @@ static bool perform_get_from_room(char_data *ch, obj_data *obj) {
 		act("$p: you can't hold any more items.", FALSE, ch, obj, 0, TO_CHAR | TO_QUEUE);
 		return FALSE;
 	}
-	if (can_take_obj(ch, obj) && get_otrigger(obj, ch)) {
+	if (can_take_obj(ch, obj) && get_otrigger(obj, ch, TRUE)) {
 		// last-minute scaling: scale to its minimum (adventures will override this on their own)
 		if (GET_OBJ_CURRENT_SCALE_LEVEL(obj) < 1) {
 			scale_item_to_level(obj, GET_OBJ_MIN_SCALE_LEVEL(obj));
@@ -2879,6 +2908,11 @@ void scale_item_to_level(obj_data *obj, int level) {
 	
 	// hard lower limit -- the stats are the same at 0 or 1, but 0 shows as "unscalable" because unscalable items have 0 scale level
 	level = MAX(1, level);
+	
+	// rounding?
+	if (round_level_scaling_to_nearest > 1 && level > 1 && (level % round_level_scaling_to_nearest) > 0) {
+		level += (round_level_scaling_to_nearest - (level % round_level_scaling_to_nearest));
+	}
 	
 	// if it's not scalable, we can still set its scale level if the prototype is not scalable
 	// (if the prototype IS scalable, but this instance isn't, we can't rescale it this way)
@@ -4025,6 +4059,7 @@ void trade_buy(char_data *ch, char *argument) {
 		// obj
 		add_to_object_list(tpd->obj);
 		obj_to_char(tpd->obj, ch);
+		get_otrigger(tpd->obj, ch, FALSE);
 		tpd->obj = NULL;
 		
 		// cleanup
@@ -4150,6 +4185,7 @@ void trade_collect(char_data *ch, char *argument) {
 				obj_to_char(tpd->obj, ch);
 				
 				act("You collect $p from an expired auction.", FALSE, ch, tpd->obj, NULL, TO_CHAR);
+				get_otrigger(tpd->obj, ch, FALSE);
 				tpd->obj = NULL;
 				any = TRUE;
 			}
@@ -4686,6 +4722,8 @@ void warehouse_retrieve(char_data *ch, char *argument, int mode) {
 				
 				// this should not be running load triggers
 				// load_otrigger(obj);
+				
+				get_otrigger(obj, ch, FALSE);
 			}
 		}
 		
@@ -4973,8 +5011,8 @@ ACMD(do_buy) {
 			act(buf, FALSE, ch, obj, NULL, TO_CHAR);
 			act("$n buys $p.", FALSE, ch, obj, NULL, TO_ROOM);
 			
-			if (!get_check_money(ch, obj)) {
-				load_otrigger(obj);
+			if (load_otrigger(obj)) {
+				get_check_money(ch, obj);
 			}
 			
 			free_shop_temp_list(shop_list);
@@ -5184,7 +5222,7 @@ ACMD(do_drink) {
 	obj_data *obj = NULL, *check_list[2];
 	int amount, i, liquid;
 	double thirst_amt, hunger_amt;
-	int type = drink_OBJ, number, iter;
+	int type = drink_OBJ, number, iter, warmed;
 	room_data *to_room;
 	char *argptr = arg;
 	size_t size;
@@ -5357,7 +5395,7 @@ ACMD(do_drink) {
 		amount = MAX((int)thirst_amt, (int)hunger_amt);
 	
 		// if it causes drunkenness, minimum of 1
-		if (get_generic_value_by_vnum(liquid, GENERIC_LIQUID, DRUNK) > 0) {
+		if (get_generic_value_by_vnum(liquid, GENERIC_LIQUID, GVAL_LIQUID_DRUNK) > 0) {
 			amount = MAX(1, amount);
 		}
 	}
@@ -5375,19 +5413,28 @@ ACMD(do_drink) {
 	}
 	
 	// -1 to remove condition, amount = number of gulps
-	gain_condition(ch, THIRST, -1 * get_generic_value_by_vnum(liquid, GENERIC_LIQUID, THIRST) * REAL_UPDATES_PER_MUD_HOUR * amount);
-	gain_condition(ch, FULL, -1 * get_generic_value_by_vnum(liquid, GENERIC_LIQUID, FULL) * REAL_UPDATES_PER_MUD_HOUR * amount);
+	gain_condition(ch, THIRST, -1 * get_generic_value_by_vnum(liquid, GENERIC_LIQUID, GVAL_LIQUID_THIRST) * REAL_UPDATES_PER_MUD_HOUR * amount);
+	gain_condition(ch, FULL, -1 * get_generic_value_by_vnum(liquid, GENERIC_LIQUID, GVAL_LIQUID_FULL) * REAL_UPDATES_PER_MUD_HOUR * amount);
 	// drunk goes positive instead of negative
-	gain_condition(ch, DRUNK, 1 * get_generic_value_by_vnum(liquid, GENERIC_LIQUID, DRUNK) * REAL_UPDATES_PER_MUD_HOUR * amount);
-
+	gain_condition(ch, DRUNK, 1 * get_generic_value_by_vnum(liquid, GENERIC_LIQUID, GVAL_LIQUID_DRUNK) * REAL_UPDATES_PER_MUD_HOUR * amount);
+	
+	// check warming
+	warmed = warm_player_from_liquid(ch, amount, liquid);
+	if (warmed > 0) {
+		msg_to_char(ch, "It warms you up%s\r\n", (get_relative_temperature(ch) >= config_get_int("temperature_discomfort") ? " -- you're getting too hot!" : "."));
+	}
+	else if (warmed < 0) {
+		msg_to_char(ch, "It cools you down%s\r\n", (get_relative_temperature(ch) <= (-1 * config_get_int("temperature_discomfort")) ? " -- you're getting too cold!" : "."));
+	}
+	
 	// messages based on what changed
-	if (GET_COND(ch, DRUNK) > 150 && get_generic_value_by_vnum(liquid, GENERIC_LIQUID, DRUNK) != 0) {
+	if (GET_COND(ch, DRUNK) > 150 && get_generic_value_by_vnum(liquid, GENERIC_LIQUID, GVAL_LIQUID_DRUNK) != 0) {
 		send_to_char("You feel drunk.\r\n", ch);
 	}
-	if (GET_COND(ch, THIRST) < 75 && get_generic_value_by_vnum(liquid, GENERIC_LIQUID, THIRST) != 0) {
+	if (GET_COND(ch, THIRST) < 75 && get_generic_value_by_vnum(liquid, GENERIC_LIQUID, GVAL_LIQUID_THIRST) != 0) {
 		send_to_char("You don't feel thirsty any more.\r\n", ch);
 	}
-	if (GET_COND(ch, FULL) < 75 && get_generic_value_by_vnum(liquid, GENERIC_LIQUID, FULL) != 0) {
+	if (GET_COND(ch, FULL) < 75 && get_generic_value_by_vnum(liquid, GENERIC_LIQUID, GVAL_LIQUID_FULL) != 0) {
 		send_to_char("You are full.\r\n", ch);
 	}
 
@@ -6820,7 +6867,7 @@ ACMD(do_pour) {
 			}
 			
 			// shortcut through do_douse_room if it's water and burning
-			if (IS_ANY_BUILDING(IN_ROOM(ch)) && IS_BURNING(HOME_ROOM(IN_ROOM(ch))) && GET_DRINK_CONTAINER_TYPE(from_obj) == LIQ_WATER) {
+			if (IS_ANY_BUILDING(IN_ROOM(ch)) && IS_BURNING(HOME_ROOM(IN_ROOM(ch))) && liquid_flagged(GET_DRINK_CONTAINER_TYPE(from_obj), LIQF_WATER)) {
 				do_douse_room(ch, IN_ROOM(ch), from_obj);
 				return;
 			}
@@ -6829,7 +6876,7 @@ ACMD(do_pour) {
 			act("You empty $p.", FALSE, ch, from_obj, 0, TO_CHAR);
 
 			/* If it's a trench, fill her up */
-			if (GET_DRINK_CONTAINER_TYPE(from_obj) == LIQ_WATER && ROOM_SECT_FLAGGED(IN_ROOM(ch), SECTF_IS_TRENCH) && get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_TRENCH_PROGRESS) >= 0) {
+			if (liquid_flagged(GET_DRINK_CONTAINER_TYPE(from_obj), LIQF_WATER) && ROOM_SECT_FLAGGED(IN_ROOM(ch), SECTF_IS_TRENCH) && get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_TRENCH_PROGRESS) >= 0) {
 				add_to_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_TRENCH_FILL_TIME, -25 * GET_DRINK_CONTAINER_CONTENTS(from_obj));
 				if (find_stored_event(SHARED_DATA(IN_ROOM(ch))->events, SEV_TRENCH_FILL)) {
 					cancel_stored_event(&SHARED_DATA(IN_ROOM(ch))->events, SEV_TRENCH_FILL);

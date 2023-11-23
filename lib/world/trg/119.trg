@@ -3826,7 +3826,7 @@ switch %cycle%
     dg_affect #11891 %person% off
     %force% %person% look
     %send% %person% &&0
-    %send% %person% Slowly, inch by inch, time resumes again, and for the first time in ages, you almost feel like you can breathe again.
+    %send% %person% Slowly, inch by inch, time resumes again, and for the first time in ages, you almost feel like you can breathe.
     %echoaround% %person% ~%person% emerges from the putrid sap.
     * Teleport followers
     set ch %self.room.people%
@@ -4431,7 +4431,7 @@ end
 #11961
 Smol Nes-Pik: Drink dew of Tagra Nes~
 1 c 2
-drink use~
+drink sip use~
 * Causes a teleport if the players sleeps in their home after drinking this
 if !%arg% || %actor.obj_target(%arg%)% != %self%
   return 0
@@ -4797,6 +4797,14 @@ Skycleave: Shared get trigger (diary replacement, struggle)~
 1 g 100
 ~
 if %self.vnum% == 11890
+  * struggle
+  if %self.carried_by%
+    if %self.carried_by.affect(11822)%
+      * likely called during load trigger
+      return 1
+      halt
+    end
+  end
   * the struggle-- just purge
   %send% %actor% # You can't get that.
   return 0
@@ -7003,7 +7011,7 @@ elseif %move% == 2 && !%self.aff_flagged(BLIND)%
     set bug %targ.inventory(11890)%
     if %bug%
       set strug_char You try to wiggle out of the thorny whip...
-      set strug_room You hear ~%%actor%% tries to wiggle free of the thorny whip...
+      set strug_room You hear ~%%actor%% try to wiggle free of the thorny whip...
       remote strug_char %bug.id%
       remote strug_room %bug.id%
       set free_char You wiggle out of the thorny whip!

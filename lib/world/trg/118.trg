@@ -389,7 +389,7 @@ if (%self.vnum% >= 11815 && %self.vnum% <= 11818) || %self.vnum% == 11821
       say Goblin doesn't want %object.shortdesc%, stupid human!
     end
   elseif %self.vnum% == 11821 && %actor.on_quest(11821)% && %object.vnum% == 11976
-    %send% %actor% Use 'quest finish Need It For A Friend' instead.
+    %send% %actor% Use 'finish Need It For A Friend' instead.
   else
     * actor has given a goblin object
     %send% %actor% You give ~%self% @%object%...
@@ -3186,7 +3186,7 @@ if break /= %cmd% || smash /= %cmd%
   if !%arg%
     %send% %actor% Break what?
     halt
-  elseif %arg% /= chains || %arg% /= shackles || %arg% /= gems
+  elseif chains /= %arg% || shackles /= %arg% || gems /= %arg%
     * ok
   else
     %send% %actor% You can't break that.
@@ -4834,7 +4834,7 @@ elseif %move% == 4
     dg_affect #11845 %self% HARD-STUNNED on 20
   end
   %send% %targ% &&m~%self% throws the shadow dagger at you, but it passes through you and strikes your shadow!&&0
-  %echoaround% %targ% &&m~%self% throws the shadow dagger at ~%actor%, but it passes through *%actor% and strikes ^%actor% shadow!&&0
+  %echoaround% %targ% &&m~%self% throws the shadow dagger at ~%targ%, but it passes through *%targ% and strikes ^%targ% shadow!&&0
   if %diff% <= 2 || (%self.level% + 100) <= %targ.level%
     %send% %targ% &&m**** The dagger has you stuck fast... You can't move! ****&&0 (struggle)
     %echoaround% %targ% &&m~%targ% suddenly freezes!&&0
@@ -8737,7 +8737,7 @@ taste eat drink sip lick~
 * This teleports players between templates 11887 and 11891
 * Note: See below for adding requirements to use it
 * 1. Basic checks
-if %actor.obj_target(%arg%)% != %self%
+if %actor.obj_target(%arg%)% != %self% && %arg% != sap && %arg% != putrid
   return 0
   halt
 elseif %actor.position% != Standing
@@ -8812,7 +8812,7 @@ if !%actor.affect(11822)%
   end
   %purge% %self%
   halt
-elseif !(%cmd% /= struggle)
+elseif !(struggle /= %cmd%)
   return 0
   halt
 end

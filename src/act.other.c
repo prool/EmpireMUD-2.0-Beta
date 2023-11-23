@@ -601,24 +601,40 @@ void perform_alternate(char_data *old, char_data *new) {
 		look_at_room(new);
 	}
 	
-	msg_to_char(new, "\r\n");	// leading \r\n between the look and the tip
-	display_tip_to_char(new);
+	// leading \r\n between the look and the tip/info section
+	msg_to_char(new, "\r\n");
 	
-	if (GET_MAIL_PENDING(new)) {
-		send_to_char("&rYou have mail waiting.&0\r\n", new);
+	display_automessages_on_login(new);
+	
+	if (!PRF_FLAGGED(new, PRF_NO_TUTORIALS)) {
+		display_tip_to_char(new);
 	}
+	if (GET_MAIL_PENDING(new)) {
+		send_to_char("\trYou have mail waiting.\t0\r\n", new);
+	}
+	if (has_uncollected_event_rewards(new)) {
+		msg_to_char(new, "\ttYou have uncollected event rewards. Type 'event collect' when you're in your own territory.\t0\r\n");
+	}
+	
+	// reset daily cycle now
+	check_daily_cycle_reset(new);
 	
 	if (!IS_APPROVED(new) && (msg = config_get_string("unapproved_greeting")) && *msg) {
-		msg_to_char(new, "\r\n&o%s&0", msg);
+		msg_to_char(new, "\r\n\to%s\t0", msg);
 	}
 	if (show_start && (msg = config_get_string("start_message")) && *msg) {
-		msg_to_char(new, "\r\n&Y%s&0", msg);
+		msg_to_char(new, "\r\n\tY%s\t0", msg);
 	}
 	
 	if (!IS_IMMORTAL(new)) {
 		add_cooldown(new, COOLDOWN_ALTERNATE, SECS_PER_REAL_MIN);
 	}
 	GET_LAST_TELL(new) = last_tell;
+	
+	// send fresh MSDP
+	if (new->desc) {
+		send_initial_MSDP(new->desc);
+	}
 }
 
 
@@ -712,7 +728,7 @@ bool perform_summon(char_data *ch, ability_data *abil, any_vnum vnum, bool check
 		msg_to_char(ch, "You must be level %d to summon that.\r\n", GET_MIN_SCALE_LEVEL(proto));
 		return FALSE;
 	}
-	if (checks && !char_can_act(ch, ABIL_MIN_POS(abil), !ABILITY_FLAGGED(abil, ABILF_NO_ANIMAL), !ABILITY_FLAGGED(abil, ABILF_NO_INVULNERABLE | ABILF_VIOLENT))) {
+	if (checks && !char_can_act(ch, ABIL_MIN_POS(abil), !ABILITY_FLAGGED(abil, ABILF_NO_ANIMAL), !ABILITY_FLAGGED(abil, ABILF_NO_INVULNERABLE | ABILF_VIOLENT), FALSE)) {
 		return FALSE;
 	}
 	if (checks && ABIL_IS_SYNERGY(abil) && !check_solo_role(ch)) {
@@ -844,7 +860,7 @@ static void print_group(char_data *ch) {
 
 INTERACTION_FUNC(shear_interact) {
 	char buf[MAX_STRING_LENGTH];
-	int iter, amt;
+	int iter, amt, obj_ok = 0;
 	obj_data *obj = NULL;
 	
 	add_cooldown(inter_mob, COOLDOWN_SHEAR, config_get_int("shear_growth_time") * SECS_PER_REAL_HOUR);
@@ -858,7 +874,10 @@ INTERACTION_FUNC(shear_interact) {
 	for (iter = 0; iter < amt; ++iter) {
 		obj = read_object(interaction->vnum, TRUE);
 		obj_to_char(obj, ch);
-		load_otrigger(obj);
+		obj_ok = load_otrigger(obj);
+		if (obj_ok) {
+			get_otrigger(obj, ch, FALSE);
+		}
 	}
 	
 	// mark gained
@@ -867,7 +886,12 @@ INTERACTION_FUNC(shear_interact) {
 	}
 	
 	// only show loot to the skinner
-	if (amt == 1) {
+	if (!obj_ok || !obj) {
+		act("You skillfully shear $N.", FALSE, ch, NULL, inter_mob, TO_CHAR);
+		act("$n skillfully shears you.", FALSE, ch, NULL, inter_mob, TO_VICT);
+		act("$n skillfully shears $N.", FALSE, ch, NULL, inter_mob, TO_NOTVICT);
+	}
+	else if (amt == 1) {
 		act("You skillfully shear $N and get $p.", FALSE, ch, obj, inter_mob, TO_CHAR);
 		act("$n skillfully shears you and gets $p.", FALSE, ch, obj, inter_mob, TO_VICT);
 		act("$n skillfully shears $N and gets $p.", FALSE, ch, obj, inter_mob, TO_NOTVICT);
@@ -888,7 +912,7 @@ INTERACTION_FUNC(shear_interact) {
 INTERACTION_FUNC(skin_interact) {
 	char buf[MAX_STRING_LENGTH];
 	obj_data *obj = NULL;
-	int num;
+	int num, obj_ok = 0;
 	
 	if (!has_player_tech(ch, PTECH_SKINNING_UPGRADE) && number(1, 100) > 60) {
 		return FALSE;	// 60% failure unskilled
@@ -898,7 +922,10 @@ INTERACTION_FUNC(skin_interact) {
 		obj = read_object(interaction->vnum, TRUE);
 		scale_item_to_level(obj, 1);	// min scale
 		obj_to_char(obj, ch);
-		load_otrigger(obj);
+		obj_ok = load_otrigger(obj);
+		if (obj_ok) {
+			get_otrigger(obj, ch, FALSE);
+		}
 	}
 	
 	// mark gained
@@ -907,7 +934,11 @@ INTERACTION_FUNC(skin_interact) {
 	}
 	
 	// only show loot to the skinner
-	if (interaction->quantity > 1) {
+	if (!obj_ok) {
+		act("You carefully skin $P.", FALSE, ch, NULL, inter_item, TO_CHAR);
+		act("$n carefully skins $P.", FALSE, ch, NULL, inter_item, TO_ROOM);
+	}
+	else if (interaction->quantity > 1) {
 		sprintf(buf, "You carefully skin $P and get $p (x%d).", interaction->quantity);
 		act(buf, FALSE, ch, obj, inter_item, TO_CHAR);
 		sprintf(buf, "$n carefully skins $P and gets $p (x%d).", interaction->quantity);
@@ -1319,12 +1350,12 @@ void alt_import_preferences(char_data *ch, char_data *alt) {
 	bitvector_t set;
 	
 	// prf flags to import
-	bitvector_t prfs = PRF_COMPACT | PRF_DEAF | PRF_NOTELL | PRF_MORTLOG | 
-					PRF_NOREPEAT | PRF_NOMAPCOL | PRF_NO_CHANNEL_JOINS | 
+	bitvector_t prfs = PRF_COMPACT | PRF_DEAF | PRF_NOTELL | 
+					PRF_NOREPEAT | PRF_NOMAPCOL | 
 					PRF_SCROLLING | PRF_NO_ROOM_DESCS | PRF_AUTORECALL | PRF_NOSPAM | 
 					PRF_SCREEN_READER | PRF_AUTOKILL | PRF_AUTODISMOUNT | 
 					PRF_NOEMPIRE | PRF_CLEARMETERS | PRF_NO_PAINT | 
-					PRF_EXTRA_SPACING | PRF_TRAVEL_LOOK | PRF_AUTOCLIMB | 
+					PRF_EXTRA_SPACING | PRF_AUTOCLIMB | 
 					PRF_AUTOSWIM | PRF_ITEM_QUALITY | PRF_ITEM_DETAILS | 
 					PRF_NO_EXITS | PRF_SHORT_EXITS;
 	
@@ -1415,6 +1446,16 @@ void alt_import_slash_channels(char_data *ch, char_data *alt) {
 
 
 /**
+* @param char_data *ch Player to import to.
+* @param char_data *alt Player to import from.
+*/
+void alt_import_smessages(char_data *ch, char_data *alt) {
+	GET_STATUS_MESSAGES(ch) = GET_STATUS_MESSAGES(alt);
+	msg_to_char(ch, "Imported status message settings.\r\n");
+}
+
+
+/**
 * Sub-processor for "alt import".
 *
 * @param char_data *ch The player.
@@ -1462,6 +1503,9 @@ void do_alt_import(char_data *ch, char *argument) {
 	else if (is_abbrev(arg2, "slash-channels")) {
 		alt_import_slash_channels(ch, alt);
 	}
+	else if (is_abbrev(arg2, "smessages") || is_abbrev(arg2, "statusmessages")) {
+		alt_import_smessages(ch, alt);
+	}
 	else if (is_abbrev(arg2, "ignores")) {
 		alt_import_ignores(ch, alt);
 	}
@@ -1476,6 +1520,7 @@ void do_alt_import(char_data *ch, char *argument) {
 		alt_import_recolors(ch, alt);
 		alt_import_ignores(ch, alt);
 		alt_import_slash_channels(ch, alt);
+		alt_import_smessages(ch, alt);
 	}
 	else {
 		msg_to_char(ch, "Unknown field '%s'.\r\n%s", arg2, valid_fields);
@@ -2118,7 +2163,7 @@ ACMD(do_companions) {
 		msg_to_char(ch, "You must be alone to summon that companion in the solo role.\r\n");
 		return;
 	}
-	if (abil && !char_can_act(ch, ABIL_MIN_POS(abil), !ABILITY_FLAGGED(abil, ABILF_NO_ANIMAL), !ABILITY_FLAGGED(abil, ABILF_NO_INVULNERABLE | ABILF_VIOLENT))) {
+	if (abil && !char_can_act(ch, ABIL_MIN_POS(abil), !ABILITY_FLAGGED(abil, ABILF_NO_ANIMAL), !ABILITY_FLAGGED(abil, ABILF_NO_INVULNERABLE | ABILF_VIOLENT), FALSE)) {
 		return;
 	}
 	if (!abil && GET_POS(ch) < POS_STANDING) {
@@ -2282,7 +2327,7 @@ ACMD(do_douse) {
 	if (!use_room) {
 		// this loop finds a water container and sets obj
 		DL_FOREACH2(ch->carrying, iter, next_content) {
-			if (GET_DRINK_CONTAINER_TYPE(iter) == LIQ_WATER && GET_DRINK_CONTAINER_CONTENTS(iter) > 0) {
+			if (liquid_flagged(GET_DRINK_CONTAINER_TYPE(iter), LIQF_WATER) && GET_DRINK_CONTAINER_CONTENTS(iter) > 0) {
 				obj = iter;
 				break;
 			}
@@ -2320,16 +2365,52 @@ ACMD(do_douse) {
 }
 
 
+// this now also controls status messages using SCMD_FIGHT or SCMD_STATUS
+// search hints: do_fmessages, do_smessages, do_statusmessages
 ACMD(do_fightmessages) {
 	bool screenreader = PRF_FLAGGED(ch, PRF_SCREEN_READER);
+	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	int iter, type = NOTHING, count;
-	bool on;
+	bool on = FALSE, off = FALSE, mode;
 	
-	// detect possible type
+	// SCMD_FIGHT, SCMD_STATUS
+	const char *message_type[] = { "fight", "status" };
+	const char **type_strings = NULL;
+	bitvector_t *flagset = NULL;
+	
+	// verify type
+	if (subcmd == SCMD_FIGHT) {
+		flagset = &GET_FIGHT_MESSAGES(ch);
+		type_strings = combat_message_types;
+	}
+	else if (subcmd == SCMD_STATUS) {
+		flagset = &GET_STATUS_MESSAGES(ch);
+		type_strings = status_message_types;
+	}
+	else {
+		msg_to_char(ch, "Command not implemented.\r\n");
+		return;
+	}
+	
+	// argument processing
 	skip_spaces(&argument);
+	chop_last_arg(argument, arg1, arg2);
+	
+	// detect optional on/off
+	if (!str_cmp(arg2, "on")) {
+		on = TRUE;
+		argument = arg1;	// use only arg1
+	}
+	else if (!str_cmp(arg2, "off")) {
+		off = TRUE;
+		argument = arg1;	// use only arg1
+	}
+	// otherwise did not provide on/off arg
+	
+	// detect possible type from remaining arg
 	if (*argument) {
-		for (iter = 0; *combat_message_types[iter] != '\n'; ++iter) {
-			if (is_multiword_abbrev(argument, combat_message_types[iter])) {
+		for (iter = 0; *type_strings[iter] != '\n'; ++iter) {
+			if (is_multiword_abbrev(argument, type_strings[iter])) {
 				type = iter;
 				break;
 			}
@@ -2337,19 +2418,20 @@ ACMD(do_fightmessages) {
 	}
 	
 	if (IS_NPC(ch)) {
-		msg_to_char(ch, "NPCs do not have fight message toggles.\r\n");
+		msg_to_char(ch, "NPCs do not have %s message toggles.\r\n", message_type[subcmd]);
 	}
 	else if (!*argument) {
-		msg_to_char(ch, "Fight message toggles:\r\n");
+		snprintf(buf, sizeof(buf), "%s message toggles:\r\n", message_type[subcmd]);
+		send_to_char(CAP(buf), ch);
 		
 		count = 0;
-		for (iter = 0; *combat_message_types[iter] != '\n'; ++iter) {
-			on = SHOW_FIGHT_MESSAGES(ch, BIT(iter));
+		for (iter = 0; *type_strings[iter] != '\n'; ++iter) {
+			on = (IS_SET(*flagset, BIT(iter)) ? TRUE : FALSE);
 			if (screenreader) {
-				msg_to_char(ch, "%s: %s\r\n", combat_message_types[iter], on ? "on" : "off");
+				msg_to_char(ch, "%s: %s\r\n", type_strings[iter], on ? "on" : "off");
 			}
 			else {
-				msg_to_char(ch, " [%s%3.3s\t0] %-25.25s%s", on ? "\tg" : "\tr", on ? "on" : "off", combat_message_types[iter], (!(++count % 2) ? "\r\n" : ""));
+				msg_to_char(ch, " [%s%3.3s\t0] %-25.25s%s", on ? "\tg" : "\tr", on ? "on" : "off", type_strings[iter], (!(++count % 2) ? "\r\n" : ""));
 			}
 		}
 		
@@ -2357,33 +2439,35 @@ ACMD(do_fightmessages) {
 			send_to_char("\r\n", ch);
 		}
 	}
-	else if (!str_cmp(argument, "all on")) {
-		// turn ON all bits that have names
-		for (iter = 0; *combat_message_types[iter] != '\n'; ++iter) {
-			SET_BIT(GET_FIGHT_MESSAGES(ch), BIT(iter));
+	else if (!str_cmp(argument, "all")) {
+		if (!on && !off) {
+			msg_to_char(ch, "Did you want to turn them all on or off?\r\n");
+			return;
 		}
-		msg_to_char(ch, "You toggle all fight messages \tgon\t0.\r\n");
-	}
-	else if (!str_cmp(argument, "all off")) {
-		// turn ON all bits that have names
-		for (iter = 0; *combat_message_types[iter] != '\n'; ++iter) {
-			REMOVE_BIT(GET_FIGHT_MESSAGES(ch), BIT(iter));
+		// turn ON/OFF all bits that have names
+		for (iter = 0; *type_strings[iter] != '\n'; ++iter) {
+			if (on) {
+				SET_BIT(*flagset, BIT(iter));
+			}
+			else {
+				REMOVE_BIT(*flagset, BIT(iter));
+			}
 		}
-		msg_to_char(ch, "You toggle all fight messages \troff\t0.\r\n");
+		msg_to_char(ch, "You toggle all %s messages %s\t0.\r\n", message_type[subcmd], on ? "\tgon" : "\troff");
 	}
 	else if (type == NOTHING) {
-		msg_to_char(ch, "Unknown fight message type '%s'.\r\n", argument);
+		msg_to_char(ch, "Unknown %s message type '%s'.\r\n", message_type[subcmd], argument);
 	}
 	else {
-		on = !SHOW_FIGHT_MESSAGES(ch, BIT(type));
-		if (on) {
-			SET_BIT(GET_FIGHT_MESSAGES(ch), BIT(type));
+		mode = (on ? TRUE : (off ? FALSE : (IS_SET(*flagset, BIT(type)) ? FALSE : TRUE)));
+		if (mode) {
+			SET_BIT(*flagset, BIT(type));
 		}
 		else {
-			REMOVE_BIT(GET_FIGHT_MESSAGES(ch), BIT(type));
+			REMOVE_BIT(*flagset, BIT(type));
 		}
 		
-		msg_to_char(ch, "You toggle '%s' %s\t0.\r\n", combat_message_types[type], on ? "\tgon" : "\troff");
+		msg_to_char(ch, "You toggle '%s' %s\t0.\r\n", type_strings[type], mode ? "\tgon" : "\troff");
 	}
 }
 

@@ -1834,7 +1834,7 @@ void mortlog(const char *str, ...) {
 	vsprintf(output, str, tArgList);
 
 	for (i = descriptor_list; i; i = i->next) {
-		if (STATE(i) == CON_PLAYING && i->character && PRF_FLAGGED(i->character, PRF_MORTLOG)) {
+		if (STATE(i) == CON_PLAYING && i->character && SHOW_STATUS_MESSAGES(i->character, SM_MORTLOG)) {
 			stack_msg_to_desc(i, "&c[ %s ]&0\r\n", output);
 		}
 	}
@@ -2782,6 +2782,18 @@ int get_attribute_by_apply(char_data *ch, int apply_type) {
 		case APPLY_NIGHT_VISION: {
 			return GET_EXTRA_ATT(ch, ATT_NIGHT_VISION);
 		}
+		case APPLY_NEARBY_RANGE: {
+			return GET_EXTRA_ATT(ch, ATT_NEARBY_RANGE);
+		}
+		case APPLY_WHERE_RANGE: {
+			return GET_EXTRA_ATT(ch, ATT_WHERE_RANGE);
+		}
+		case APPLY_WARMTH: {
+			return GET_EXTRA_ATT(ch, ATT_WARMTH);
+		}
+		case APPLY_COOLING: {
+			return GET_EXTRA_ATT(ch, ATT_COOLING);
+		}
 	}
 	return 0;	// if we got this far
 }
@@ -3090,7 +3102,7 @@ void command_lag(char_data *ch, int wait_type) {
 			break;
 		}
 		case WAIT_MOVEMENT: {	// normal movement (special handling)
-			if (AFF_FLAGGED(ch, AFF_SLOW)) {
+			if (IS_SLOWED(ch)) {
 				wait = 1 RL_SEC;
 			}
 			else if (IS_RIDING(ch) || IS_ROAD(IN_ROOM(ch))) {
@@ -4033,7 +4045,9 @@ void give_resources(char_data *ch, struct resource_data *list, bool split) {
 						obj_to_room(obj, IN_ROOM(ch));
 					}
 					
-					load_otrigger(obj);
+					if (load_otrigger(obj) && obj->carried_by) {
+						get_otrigger(obj, obj->carried_by, FALSE);
+					}
 				}
 				break;
 			}
@@ -5412,12 +5426,12 @@ int strn_cmp(const char *arg1, const char *arg2, int n) {
 /*
 * Version of str_str from dg_scripts -- better than the base CircleMUD version.
 *
-* @param char *cs The string to search.
-* @param char *ct The string to search for...
+* @param const char *cs The string to search.
+* @param const char *ct The string to search for...
 * @return char* A pointer to the substring within cs, or NULL if not found.
 */
-char *str_str(char *cs, char *ct) {
-	char *s, *t;
+char *str_str(const char *cs, const char *ct) {
+	const char *s, *t;
 
 	if (!cs || !ct || !*ct)
 		return NULL;
@@ -5436,7 +5450,7 @@ char *str_str(char *cs, char *ct) {
 		}
 
 		if (!*t)
-			return s;
+			return (char*)s;
 	}
 
 	return NULL;
@@ -5764,6 +5778,38 @@ int distance_to_nearest_player(room_data *room) {
 	}
 	
 	return best;
+}
+
+
+/**
+* Determines the full climate type of a given room. This should be used instead
+* of GET_SECT_CLIMATE() in most cases because it checks additional fields.
+*
+* @param room_data *room The room to check climate for.
+* @return bitvector_t The full set of CLIM_ flags for the room.
+*/
+bitvector_t get_climate(room_data *room) {
+	bitvector_t flags = GET_SECT_CLIMATE(SECT(room));
+	room_data *home = HOME_ROOM(room);
+	
+	// base sect?
+	if (ROOM_SECT_FLAGGED(room, SECTF_INHERIT_BASE_CLIMATE)) {
+		flags |= GET_SECT_CLIMATE(BASE_SECT(room));
+		
+		// home room -- only if checking base sect
+		if (home != room) {
+			flags |= GET_SECT_CLIMATE(SECT(home));
+			
+			// and base of the home room?
+			if (ROOM_SECT_FLAGGED(home, SECTF_INHERIT_BASE_CLIMATE)) {
+				flags |= GET_SECT_CLIMATE(BASE_SECT(home));
+			}
+		}
+	}
+	
+	// should this check for TEMPERATURE_USE_LOCAL too? I think "maybe not" -pc
+	
+	return flags;
 }
 
 
@@ -6334,6 +6380,8 @@ bool is_deep_mine(room_data *room) {
 */
 void lock_icon(room_data *room, struct icon_data *use_icon) {
 	struct icon_data *icon;
+	char buffer[256];
+	char *temp;
 
 	// don't do it if a custom icon is set (or no room provided)
 	if (!room || ROOM_CUSTOM_ICON(room)) {
@@ -6346,7 +6394,23 @@ void lock_icon(room_data *room, struct icon_data *use_icon) {
 	if (!(icon = use_icon)) {
 		icon = get_icon_from_set(GET_SECT_ICONS(SECT(room)), GET_SEASON(room));
 	}
-	set_room_custom_icon(room, icon->icon);
+	
+	// did we find one
+	if (icon) {
+		// prepend color (it's not automatically there)
+		snprintf(buffer, sizeof(buffer), "%s%s", icon->color, icon->icon);
+	
+		// check for variable colors that must be stored
+		if (strstr(buffer, "&?")) {
+			temp = str_replace("&?", icon->color, buffer);
+			set_room_custom_icon(room, temp);
+			free(temp);
+		}
+		else {
+			set_room_custom_icon(room, buffer);
+		}
+	}
+	// else nothing to do
 }
 
 
@@ -6359,6 +6423,7 @@ void lock_icon(room_data *room, struct icon_data *use_icon) {
 */
 void lock_icon_map(struct map_data *loc, struct icon_data *use_icon) {
 	struct icon_data *icon;
+	char buffer[256];
 	
 	// safety first
 	if (!loc || loc->shared->icon) {
@@ -6372,11 +6437,27 @@ void lock_icon_map(struct map_data *loc, struct icon_data *use_icon) {
 		icon = get_icon_from_set(GET_SECT_ICONS(loc->sector_type), y_coord_to_season[MAP_Y_COORD(loc->vnum)]);
 	}
 	
-	if (loc->shared->icon) {
-		free(loc->shared->icon);
+	// did we find one
+	if (icon) {
+		if (loc->shared->icon) {
+			free(loc->shared->icon);
+		}
+		
+		// prepend color code
+		snprintf(buffer, sizeof(buffer), "%s%s", icon->color, icon->icon);
+	
+		// finally, check for variable colors that must be stored
+		if (strstr(buffer, "&?")) {
+			// str_replace allocates a new string
+			loc->shared->icon = str_replace("&?", icon->color, buffer);
+		}
+		else {
+			loc->shared->icon = str_dup(buffer);
+		}
+		
+		request_world_save(loc->vnum, WSAVE_ROOM);
 	}
-	loc->shared->icon = icon ? str_dup(icon->icon) : NULL;
-	request_world_save(loc->vnum, WSAVE_ROOM);
+	// if no icon, no work
 }
 
 

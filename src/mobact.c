@@ -1757,7 +1757,7 @@ static void spawn_one_room(room_data *room, bool only_artisans) {
 				data->x_coord = X_COORD(room);
 				data->y_coord = Y_COORD(room);
 				data->in_city = (ROOM_OWNER(home) && is_in_city_for_empire(room, ROOM_OWNER(home), TRUE, &junk)) ? TRUE : FALSE;
-				run_globals(GLOBAL_MAP_SPAWNS, run_global_map_spawns, TRUE, GET_SECT_CLIMATE(BASE_SECT(room)), NULL, NULL, 0, validate_global_map_spawns, data);
+				run_globals(GLOBAL_MAP_SPAWNS, run_global_map_spawns, TRUE, get_climate(room), NULL, NULL, 0, validate_global_map_spawns, data);
 				free(data);
 			}
 		}
@@ -1926,6 +1926,9 @@ bool check_reset_mob(char_data *ch, bool force) {
 	if (!IS_NPC(ch)) {
 		return FALSE;	// oops
 	}
+	if (AFF_FLAGGED(ch, AFF_POOR_REGENS)) {
+		return FALSE;	// delay due to poor-regen affect
+	}
 	
 	// things to check first (if not forced)
 	if (!force) {
@@ -2026,9 +2029,11 @@ int determine_best_scale_level(char_data *ch, bool check_group) {
 	// level caps for sub-100 scaling -- TODO this is very similar to what's done in can_wear_item()
 	int level_ranges[] = { BASIC_SKILL_CAP, SPECIALTY_SKILL_CAP, CLASS_SKILL_CAP, -1 };	// terminate with -1
 	
-	// determine who we're really scaling to
-	while (IS_NPC(scale_to) && GET_LEADER(scale_to)) {
-		scale_to = GET_LEADER(scale_to);
+	// determine who we're really scaling to (ONLY if check_group)
+	if (check_group) {
+		while (IS_NPC(scale_to) && GET_LEADER(scale_to)) {
+			scale_to = GET_LEADER(scale_to);
+		}
 	}
 	
 	// now determine the ideal level based on scale_to
@@ -2147,6 +2152,11 @@ void scale_mob_to_level(char_data *mob, int level) {
 	}
 	else if (room_max > 0 && !GET_MIN_SCALE_LEVEL(mob)) {
 		level = MIN(room_max, level);
+	}
+	
+	// rounding?
+	if (round_level_scaling_to_nearest > 1 && level > 1 && (level % round_level_scaling_to_nearest) > 0) {
+		level += (round_level_scaling_to_nearest - (level % round_level_scaling_to_nearest));
 	}
 	
 	// insanity!

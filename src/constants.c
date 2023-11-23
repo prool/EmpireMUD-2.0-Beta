@@ -62,7 +62,7 @@ void tog_pvp(char_data *ch);
 //// EMPIREMUD CONSTANTS /////////////////////////////////////////////////////
 
 // Shown on the "version" command and sent over MSSP
-const char *version = "EmpireMUD 2.0 beta 5";
+const char *version = "EmpireMUD 2.0 beta 5.162";
 
 
 // data for the built-in game levels -- this adapts itself if you reduce the number of immortal levels
@@ -515,7 +515,7 @@ const char *account_flags[] = {
 };
 
 
-// BONUS_x
+// BONUS_x (1/2): bonus traits
 const char *bonus_bits[] = {
 	"STRENGTH",		// 0
 	"DEXTERITY",
@@ -538,13 +538,13 @@ const char *bonus_bits[] = {
 	"NO-THIRST",
 	"NO-HUNGER",
 	"VIEW-HEIGHT",	// 20
-	"HEAT-RESIST",
+	"WARM-RESIST",
 	"COLD-RESIST",
 	"\n"
 };
 
 
-// BONUS_x
+// BONUS_x (2/2): bonus traits as shown to players
 const char *bonus_bit_descriptions[] = {
 	"Big boned (+1 Strength)",	// 0
 	"Double-jointed (+1 Dexterity)",
@@ -567,8 +567,8 @@ const char *bonus_bit_descriptions[] = {
 	"Salt blooded (never thirsty)",
 	"Tenacious waif (never hungry)",
 	"Surveyor (+1 view height)",	// 20
-	"Fire born (tolerates hot climates)",
-	"Frost born (tolerates cold climates)",
+	"Fireborn (tolerates warm climates)",
+	"Frostborn (tolerates cold climates)",
 	"\n"
 };
 
@@ -584,14 +584,17 @@ const char *condition_types[] = {
 
 // CUSTOM_COLOR_x
 const char *custom_color_types[] = {
-	"emote",
+	"emote",	// 0
 	"esay",
 	"gsay",
 	"oocsay",
 	"say",
-	"slash-channels",
+	"slash-channels",	// 5
 	"tell",
 	"status",
+	"sun",
+	"temperature",
+	"weather",	// 10
 	"\n"
 };
 
@@ -613,6 +616,10 @@ const char *extra_attribute_types[] = {
 	"Blood-Upkeep",
 	"Age",
 	"Night-Vision",
+	"Nearby-Range",	// 15
+	"Where-Range",
+	"Warmth",
+	"Cooling",
 	"\n"
 };
 
@@ -634,6 +641,10 @@ const char *combat_message_types[] = {
 	"other hits",
 	"other misses",
 	"autodiagnose",
+	"my buffs in combat",	// 15
+	"ally buffs in combat",
+	"other buffs in combat",
+	"damage numbers",
 	"\n"
 };
 
@@ -746,7 +757,7 @@ const char *preference_bits[] = {
 	"!TELL",
 	"POLIT",
 	"RP",
-	"MORTLOG",
+		"*",	// formerly MORTLOG
 	"!REP",
 	"LIGHT",
 	"INCOGNITO",
@@ -755,7 +766,7 @@ const char *preference_bits[] = {
 	"!HASSLE",
 	"!IDLE-OUT",
 	"ROOMFLAGS",
-	"!CHANNEL-JOINS",
+	"	*",	// formerly !CHANNEL-JOINS
 	"AUTOKILL",
 	"SCRL",
 	"NO-ROOM-DESCS",
@@ -775,7 +786,7 @@ const char *preference_bits[] = {
 	"!TUTORIALS",
 	"!PAINT",
 	"EXTRA-SPACING",
-	"TRAVEL-LOOK",
+		"*",	// formerly TRAVEL-LOOK
 	"AUTOCLIMB",
 	"AUTOSWIM",
 	"ITEM-QUALITY",
@@ -837,10 +848,6 @@ const struct toggle_data_type toggle_data[] = {
 	{ "compact", TOG_ONOFF, PRF_COMPACT, 0, NULL },
 	{ "pvp", TOG_ONOFF, PRF_ALLOW_PVP, 0, tog_pvp },
 	
-	{ "no-empire", TOG_ONOFF, PRF_NOEMPIRE, 0, NULL },
-	{ "travel-look", TOG_ONOFF, PRF_TRAVEL_LOOK, 0, NULL },
-	{ "mortlog", TOG_ONOFF, PRF_MORTLOG, 0, NULL },
-	
 	{ "tutorials",	TOG_OFFON, PRF_NO_TUTORIALS, 0, NULL },
 	{ "extra-spacing",	TOG_ONOFF, PRF_EXTRA_SPACING, 0, NULL },
 	{ "stealthable", TOG_ONOFF, PRF_STEALTHABLE, 0, NULL },
@@ -857,7 +864,7 @@ const struct toggle_data_type toggle_data[] = {
 	{ "item-details", TOG_ONOFF, PRF_ITEM_DETAILS, 0, NULL },
 	{ "item-quality", TOG_ONOFF, PRF_ITEM_QUALITY, 0, NULL },
 	
-	{ "channel-joins", TOG_OFFON, PRF_NO_CHANNEL_JOINS, 0, NULL },
+	{ "no-empire", TOG_ONOFF, PRF_NOEMPIRE, 0, NULL },
 	{ "exits", TOG_OFFON, PRF_NO_EXITS, 0, NULL },
 	{ "short-exits", TOG_ONOFF, PRF_SHORT_EXITS, 0, NULL },
 	
@@ -963,7 +970,7 @@ const char *player_tech_types[] = {
 	"Steal-Upgrade",
 	"Swimming",
 	"Teleport-City",
-	"Two-Handed-Weapons",	// 50
+	"Two-Handed-Mastery",	// 50
 	"Where-Upgrade",
 	"Dodge-Cap",
 	"Skinning-Upgrade",
@@ -997,6 +1004,28 @@ const char *player_tech_types[] = {
 	"Saw-Command",
 	"Scrape-Command",
 	"Map-Memory",
+	"\n"
+};
+
+
+// SM_x: status messages
+const char *status_message_types[] = {
+	"animal movement",	// 0
+	"channel joins",
+	"cooldowns",
+	"hunger",
+	"thirst",
+	"low blood",	// 5
+	"mortlog",
+	"prompt",
+	"skill gains",
+	"sun",
+	"sun auto look",	// 10
+	"temperature",
+	"extreme temperature",
+	"travel auto look",
+	"vehicle movement",
+	"weather",	// 15
 	"\n"
 };
 
@@ -1318,6 +1347,11 @@ const char *affected_bits[] = {
 	"!WHERE",
 	"WATERWALK",
 	"LIGHT",
+	"POOR-REGENS",
+	"SLOWER-ACTIONS",	// 40
+	"HUNGRIER",
+	"THIRSTIER",
+	"IMMUNE-TEMPERATURE",
 	"\n"
 };
 
@@ -1362,6 +1396,11 @@ const char *affected_bits_consider[] = {
 	"",	// !where
 	"",	// waterwalk
 	"",	// light
+	"",	// poor-regens
+	"",	// 40 - slower-actions
+	"",	// hungrier
+	"",	// thirstier
+	"",	// immune-temperature
 	"\n"
 };
 
@@ -1405,6 +1444,11 @@ const bool aff_is_bad[] = {
 	FALSE,	// 35 - immune-damage
 	FALSE,
 	FALSE,
+	FALSE,
+	TRUE,
+	TRUE,	// 40 - slower-actions
+	TRUE,
+	TRUE,
 	FALSE,
 };
 
@@ -1553,34 +1597,38 @@ const char *apply_type_names[] = {
 
 /* APPLY_x (1/4) */
 const char *apply_types[] = {
-	"NONE",
+	"NONE",	// 0
 	"STRENGTH",
 	"DEXTERITY",
 	"HEALTH-REGEN",
 	"CHARISMA",
-	"GREATNESS",
+	"GREATNESS",	// 5
 	"MOVE-REGEN",
 	"MANA-REGEN",
 	"INTELLIGENCE",
 	"WITS",
-	"AGE",
+	"AGE",	// 10
 	"MAX-MOVE",
 	"RESIST-PHYSICAL",
 	"BLOCK",
 	"HEAL-OVER-TIME",
-	"MAX-HEALTH",
+	"MAX-HEALTH",	// 15
 	"MAX-MANA",
 	"TO-HIT",
 	"DODGE",
 	"INVENTORY",
-	"MAX-BLOOD",
+	"MAX-BLOOD",	// 20
 	"BONUS-PHYSICAL",
 	"BONUS-MAGICAL",
 	"BONUS-HEALING",
 	"RESIST-MAGICAL",
-	"CRAFTING",
+	"CRAFTING",	// 25
 	"BLOOD-UPKEEP",
 	"NIGHT-VISION",
+	"NEARBY-RANGE",
+	"WHERE-RANGE",
+	"WARMTH",	// 30
+	"COOLING",
 	"\n"
 };
 
@@ -1614,7 +1662,11 @@ const double apply_values[] = {
 	0.5,	// RESIST-MAGICAL
 	0.01,	// CRAFTING
 	1,	// BLOOD-UPKEEP
-	1,	// NIGTH-VISION
+	1,	// NIGHT-VISION
+	1,	// NEARBY-RANGE
+	1,	// WHERE-RANGE
+	1,	// WARMTH
+	1,	// COOLING
 };
 
 
@@ -1648,6 +1700,10 @@ const int apply_attribute[] = {
 	NOTHING,	// crafting
 	NOTHING,	// blood-upkeep
 	NOTHING,	// night-vision
+	NOTHING,	// nearby-range
+	NOTHING,	// where-range
+	NOTHING,	// warmth
+	NOTHING,	// cooling
 };
 
 
@@ -1681,6 +1737,10 @@ const bool apply_never_scales[] = {
 	TRUE,	// CRAFTING
 	TRUE,	// BLOOD-UPKEEP
 	TRUE,	// NIGHT-VISION
+	TRUE,	// NEARBY-RANGE
+	TRUE,	// WHERE-RANGE
+	TRUE,	// WARMTH
+	TRUE,	// COOLING
 };
 
 
@@ -1753,22 +1813,22 @@ const struct character_size_data size_data[] = {
 
 // CRAFT_x (1/2): flag names
 const char *craft_flags[] = {
-	"POTTERY",
+	"POTTERY",	// 0
 	"BUILDING",
 	"SKILLED-LABOR",
 	"SKIP-CONSUMES-TO",
 	"*",	// formerly carpenter (now uses a function)
-	"*",	// formerly alchemy (identical to FIRE)
+	"*",	// 5: formerly alchemy (identical to FIRE)
 	"*",	// formerly sharp-tool
 	"FIRE",
 	"SOUP",
 	"IN-DEVELOPMENT",
-	"UPGRADE",
+	"UPGRADE",	// 10
 	"DISMANTLE-ONLY",
 	"IN-CITY-ONLY",
 	"VEHICLE",
 	"*",	// formerly shipyard (now uses a function)
-	"*",	// formerly bld-upgraded (now uses a function)
+	"*",	// 15: formerly bld-upgraded (now uses a function)
 	"LEARNED",
 	"BY-RIVER",
 	"REMOVE-PRODUCTION",
@@ -1779,27 +1839,26 @@ const char *craft_flags[] = {
 
 // CRAFT_x (2/2): how flags that show up on "craft info"
 const char *craft_flag_for_info[] = {
-	"pottery",
+	"pottery",	// 0
 	"",	// building
 	"",	// skilled labor
 	"",	// skip-consumes-to
 	"",
-	"",
+	"",	// 5
 	"",
 	"requires fire",
 	"",	// soup
 	"",	// in-dev
-	"is an upgrade",	// upgrade
+	"is an upgrade",	// 10: upgrade
 	"",	// dismantle-only
 	"in-city only",
 	"",	// vehicle
 	"",
-	"requires upgraded building",
+	"",	// 15
 	"",	// learned
 	"must be by a river",
 	"",	// remove-production
 	"",	// take-required-obj
-	"",
 	"\n"
 };
 
@@ -2123,6 +2182,7 @@ const char *faction_flags[] = {
 	"IN-DEVELOPMENT",
 	"REP-FROM-KILLS",
 	"HIDE-IN-LIST",
+	"HIDE-ON-MOB",
 	"\n"
 };
 
@@ -2212,6 +2272,15 @@ const char *language_types[] = {
 	"unknown",	// 0
 	"recognizes",
 	"speaks",
+	"\n"
+};
+
+
+// LIQF_x: liquid flags for generics
+const char *liquid_flags[] = {
+	"WATER",	// 0
+	"COOLING",
+	"WARMING",
 	"\n"
 };
 
@@ -2630,7 +2699,7 @@ const double obj_flag_scaling_bonus[] = {
 	0.5,	// OBJ_JUNK
 	1.0,	// OBJ_CREATABLE
 	1.0,	// OBJ_SCALABLE
-	1.5,	// OBJ_TWO_HANDED
+	1.8,	// OBJ_TWO_HANDED
 	1.3,	// OBJ_BIND_ON_EQUIP
 	1.4,	// OBJ_BIND_ON_PICKUP
 	1.0,	// unused
@@ -3002,12 +3071,13 @@ const char *progress_types[] = {
 
 // PRG_x: progress flags
 const char *progress_flags[] = {
-	"IN-DEVELOPMENT",
+	"IN-DEVELOPMENT",	// 0
 	"PURCHASABLE",
 	"NO-AUTOSTART",
 	"HIDDEN",
 	"NO-ANNOUNCE",
-	"NO-PREVIEW",
+	"NO-PREVIEW",	// 5
+	"NO-TRACKER",
 	"\n"
 };
 
@@ -3228,7 +3298,7 @@ const int bld_relationship_vnum_types[] = {
 };
 
 
-// CLIM_x (1/3): climate flags
+// CLIM_x (1/4): climate flags
 const char *climate_flags[] = {
 	"*",	// 0
 	"*",
@@ -3252,19 +3322,55 @@ const char *climate_flags[] = {
 	"ocean",
 	"lake",	// 20
 	"waterside",
+	"mild",
+	"harsh",
+	"frozen water",
 	"\n"
 };
 
 
-// CLIM_x (2/3): order to display climate flags
+// CLIM_x (2/4): modifiers for temperature (see also: season_temperature, sun_temperature)
+const struct climate_temperature_t climate_temperature[] = {
+	// { base-add, sun-weight (1.0 or NO_TEMP_MOD), season-weight (1.0 or NO_TEMP_MOD), cold-mod (1.0), heat-mod (1.0) }
+	{ 0, NO_TEMP_MOD, NO_TEMP_MOD, 1.0, 1.0 },	// 0
+	{ 0, NO_TEMP_MOD, NO_TEMP_MOD, 1.0, 1.0 },	// unused climates
+	{ 0, NO_TEMP_MOD, NO_TEMP_MOD, 1.0, 1.0 },
+	{ 0, NO_TEMP_MOD, NO_TEMP_MOD, 1.0, 1.0 },
+	
+	{ 15, NO_TEMP_MOD, NO_TEMP_MOD, 1.0, 1.0 },	// CLIM_HOT
+	{ -15, NO_TEMP_MOD, NO_TEMP_MOD, 1.0, 1.0 },	// 5: CLIM_COLD
+	{ -7, 0.5, 0.5, 1.0, 1.0 },	// CLIM_HIGH
+	{ 7, 0.5, 0.5, 1.0, 1.0 },	// CLIM_LOW
+	{ 0, NO_TEMP_MOD, NO_TEMP_MOD, 1.0, 1.0 },	// CLIM_MAGICAL
+	{ -8, 0.4, 3.0, 1.0, 1.0 },	// CLIM_TEMPERATE
+	{ 13, 1.75, 3.25, 1.0, 1.0 },	// 10: CLIM_ARID
+	{ 15, 0.25, 0.5, 1.0, 1.0 },	// CLIM_TROPICAL
+	{ -5, 1.25, NO_TEMP_MOD, 1.0, 1.0 },	// CLIM_MOUNTAIN
+	{ 0, NO_TEMP_MOD, NO_TEMP_MOD, 1.0, 1.0 },	// CLIM_RIVER
+	{ 0, NO_TEMP_MOD, NO_TEMP_MOD, 1.0, 1.0 },	// CLIM_FRESH_WATER
+	{ 0, NO_TEMP_MOD, NO_TEMP_MOD, 1.0, 1.0 },	// 15: CLIM_SALT_WATER
+	{ 0, 0.25, 1.5, 1.0, 1.0 },	// CLIM_FOREST
+	{ 0, 0.75, 1.0, 1.0, 1.0 },	// CLIM_GRASSLAND
+	{ 0, 0.5, 0.75, 1.0, 1.0 },	// CLIM_COASTAL
+	{ 0, 0.5, 0.5, 1.0, 1.0 },	// CLIM_OCEAN
+	{ 0, 0.75, NO_TEMP_MOD, 1.0, 1.0 },	// 20: CLIM_LAKE
+	{ 0, 0.75, NO_TEMP_MOD, 1.0, 1.0 },	// CLIM_WATERSIDE
+	{ 0, NO_TEMP_MOD, NO_TEMP_MOD, 0.5, 0.5 },	// CLIM_MILD
+	{ 0, NO_TEMP_MOD, NO_TEMP_MOD, 1.5, 1.5 },	// CLIM_HARSH
+	{ -12, NO_TEMP_MOD, NO_TEMP_MOD, 1.25, 1.0 },	// CLIM_FROZEN_WATER
+};
+
+
+// CLIM_x (3/4): order to display climate flags
 const bitvector_t climate_flags_order[] = {
+	CLIM_MILD, CLIM_HARSH,	// modifiers
 	CLIM_HOT, CLIM_COLD,	// temperatures first
 	CLIM_HIGH, CLIM_LOW,	// relative elevation
 	CLIM_MAGICAL,			// special attribute
 	
 	CLIM_TEMPERATE, CLIM_ARID, CLIM_TROPICAL,	// latitude adjustments
 	
-	CLIM_COASTAL, CLIM_FRESH_WATER, CLIM_SALT_WATER,	// water prefixes
+	CLIM_COASTAL, CLIM_FRESH_WATER, CLIM_SALT_WATER, CLIM_FROZEN_WATER,	// water prefixes
 	CLIM_RIVER, CLIM_OCEAN, CLIM_LAKE,	// water types
 	
 	CLIM_WATERSIDE,	// before land types
@@ -3277,7 +3383,7 @@ const bitvector_t climate_flags_order[] = {
 };
 
 
-// CLIM_x (3/3): whether or not vehicles can ruin slowly over time when they have an invalid climate
+// CLIM_x (4/4): whether or not vehicles can ruin slowly over time when they have an invalid climate
 const bool climate_ruins_vehicle_slowly[][2] = {
 	// { when gaining climate, when losing climate }
 	{ FALSE, FALSE },	// *
@@ -3301,7 +3407,10 @@ const bool climate_ruins_vehicle_slowly[][2] = {
 	{ TRUE, TRUE },	// coastal
 	{ FALSE, TRUE },	// ocean
 	{ FALSE, TRUE },	// lake
-	{ TRUE, TRUE }	// waterside
+	{ TRUE, TRUE },	// waterside
+	{ TRUE, TRUE },	// mild
+	{ TRUE, TRUE },	// harsh
+	{ FALSE, TRUE },	// frozen water
 };
 
 
@@ -3385,6 +3494,10 @@ const char *evo_types[] = {
 	"OWNED",
 	"UNOWNED",
 	"BURN-STUMPS",
+	"ADJACENT-SECTOR-FLAG",
+	"NOT-ADJACENT-SECTOR-FLAG",	// 25
+	"NEAR-SECTOR-FLAG",
+	"NOT-NEAR-SECTOR-FLAG",
 	"\n"
 };
 
@@ -3415,6 +3528,10 @@ const int evo_val_types[NUM_EVOS] = {
 	EVO_VAL_NONE,	// owned
 	EVO_VAL_NONE,	// unowned
 	EVO_VAL_NONE,	// burn-stumps
+	EVO_VAL_SECTOR_FLAG,	// "ADJACENT-SECTOR-FLAG"
+	EVO_VAL_SECTOR_FLAG,	// "NOT-ADJACENT-SECTOR-FLAG"
+	EVO_VAL_SECTOR_FLAG,	// "NEAR-SECTOR-FLAG"
+	EVO_VAL_SECTOR_FLAG		// "NOT-NEAR-SECTOR-FLAG"
 };
 
 
@@ -3444,6 +3561,10 @@ const bool evo_is_over_time[] = {
 	TRUE,	// owned
 	TRUE,	// unowned
 	FALSE,	// burn-stumps
+	TRUE,	// "ADJACENT-SECTOR-FLAG"
+	TRUE,	// "NOT-ADJACENT-SECTOR-FLAG"
+	TRUE,	// "NEAR-SECTOR-FLAG"
+	TRUE,	// "NOT-NEAR-SECTOR-FLAG"
 };
 
 
@@ -3545,6 +3666,7 @@ const char *island_bits[] = {
 	"CONTINENT",
 	"*",	// has-custom-desc (internal use only)
 	"!CHART",	// 5
+	"!TEMPERATURE-PENALTIES",
 	"\n"
 };
 
@@ -3786,6 +3908,8 @@ const char *sector_flags[] = {
 	"KEEPS-HEIGHT",
 	"SEPARATE-NOT-ADJACENTS",	// 25
 	"SEPARATE-NOT-NEARS",
+	"INHERIT-BASE-CLIMATE",
+	"IRRIGATES-AREA",
 	"\n"
 };
 
@@ -3834,18 +3958,18 @@ const char *spawn_flags_short[] = {
 };
 
 
-// TILESET_x
+// TILESET_x (1/3): season names
 const char *seasons[] = {
-	"Season data not found.",	// TILESET_ANY (should never hit this case)
-	"It is spring and everything is flowering.",
-	"It's summer time and you're quite warm.",
-	"It is autumn and leaves are falling from the trees.",
-	"It's winter and you're a little bit cold.",
+	"UNKNOWN",	// TILESET_ANY (should never hit this case)
+	"springtime",
+	"summertime",
+	"autumn",
+	"wintertime",
 	"\n"
 };
 
 
-// TILESET_x
+// TILESET_x (2/3): icon type / season name
 const char *icon_types[] = {
 	"Any",
 	"Spring",
@@ -3856,7 +3980,17 @@ const char *icon_types[] = {
 };
 
 
-// SUN_x: sun states (anything other than 'dark' is light)
+// TILESET_x (3/3): seasonal temperature base (see also: climate_temperature, sun_temperature)
+const int season_temperature[] = {
+	0,	// TILESET_ANY
+	-5,	// spring
+	8,	// summer
+	0,	// autumn
+	-10,	// winter
+};
+
+
+// SUN_x (1/2): sun states (anything other than 'dark' is light)
 const char *sun_types[] = {
 	"dark",
 	"rising",
@@ -3866,7 +4000,39 @@ const char *sun_types[] = {
 };
 
 
+// SUN_x (2/2): temperature modifiers for sun (see also: climate_temperature, season_temperature)
+const int sun_temperature[] = {
+	-10,	// SUN_DARK
+	0,	// SUN_RISE
+	8,	// SUN_LIGHT
+	0,	// SUN_SET
+};
+
+
+// TEMPERATURE_x: Temperature flags for adventures, buildings, and room templates
+const char *temperature_types[] = {
+	"use local",	// 0
+	"always comfortable",
+	"milder",
+	"harsher",
+	"freezing",
+	"cold",	// 5
+	"cool",
+	"cooler",
+	"cooler when hot",
+	"neutral",
+	"warm",	// 10
+	"warmer",
+	"warmer when cold",
+	"hot",
+	"sweltering",
+	"\n"
+};
+
+
 // SKY_x -- mainly used by scripting
+// TODO replace these with a new weather system because raining/lightning are
+// displayed to the player as "snowing" in cold rooms as of b5.162
 const char *weather_types[] = {
 	"sunny",
 	"cloudy",
@@ -3889,14 +4055,24 @@ const char *shop_flags[] = {
  //////////////////////////////////////////////////////////////////////////////
 //// SKILL CONSTANTS /////////////////////////////////////////////////////////
 
-// DAM_x damage types
+// DAM_x (1/2): damage types
 const char *damage_types[] = {
-	"physical",
+	"physical",	// 0
 	"magical",
 	"fire",
 	"poison",
 	"direct",
 	"\n"
+};
+
+
+// DAM_x (2/2): damage type to DoT attack type
+const int damage_type_to_dot_attack[] = {
+	ATTACK_PHYSICAL_DOT,	// 0
+	ATTACK_MAGICAL_DOT,
+	ATTACK_FIRE_DOT,
+	ATTACK_POISON_DOT,
+	ATTACK_PHYSICAL_DOT,	// DAM_DIRECT uses physical dot
 };
 
 
@@ -4565,7 +4741,7 @@ const bool requirement_amt_type[] = {
 	REQ_AMT_NUMBER,	// own vehicle
 	REQ_AMT_THRESHOLD,	// skill over
 	REQ_AMT_THRESHOLD,	// skill under
-	REQ_AMT_NONE,	// triggered
+	REQ_AMT_NUMBER,	// triggered
 	REQ_AMT_NONE,	// visit building
 	REQ_AMT_NONE,	// visit rmt
 	REQ_AMT_NONE,	// visit sect

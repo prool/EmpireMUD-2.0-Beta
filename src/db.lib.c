@@ -254,6 +254,32 @@ void parse_adventure(FILE *fl, adv_vnum vnum) {
 				break;
 			}
 			
+			case 'Z': {	// Z: misc data
+				if (line[1] && isdigit(line[1])) {
+					switch (atoi(line + 1)) {
+						case 1: {	// Z1: temperature type
+							if (sscanf(line, "Z1 %d", &int_in[0]) == 1) {
+								GET_ADV_TEMPERATURE_TYPE(adv) = int_in[0];
+							}
+							else {
+								log("SYSERR: Format error in Z1 section of %s: %s", buf2, line);
+								exit(1);
+							}
+							break;
+						}
+						default: {
+							log("SYSERR: Format error in Z section of %s, bad Z number %d", buf2, atoi(line+1));
+							exit(1);
+						}
+					}
+				}
+				else {
+					log("SYSERR: Format error in Z section of %s", buf2);
+					exit(1);
+				}
+				break;
+			}
+			
 			default: {
 				log("SYSERR: Format error in %s, expecting alphabetic flags", buf2);
 				exit(1);
@@ -295,6 +321,11 @@ void write_adventure_to_file(FILE *fl, adv_data *adv) {
 	
 	// T: triggers
 	write_trig_protos_to_file(fl, 'T', GET_ADV_SCRIPTS(adv));
+	
+	// Z: misc data
+	if (GET_ADV_TEMPERATURE_TYPE(adv)) {
+		fprintf(fl, "Z1 %d\n", GET_ADV_TEMPERATURE_TYPE(adv));
+	}
 	
 	// end
 	fprintf(fl, "S\n");
@@ -394,7 +425,7 @@ void display_automessages(void) {
 */
 void display_automessages_on_login(char_data *ch) {
 	struct automessage *msg, *next_msg;
-	bool any = FALSE;
+	// bool any = FALSE;
 	
 	HASH_ITER(hh, automessages_table, msg, next_msg) {
 		if (msg->timing != AUTOMSG_ON_LOGIN) {
@@ -402,13 +433,14 @@ void display_automessages_on_login(char_data *ch) {
 		}
 		
 		show_automessage_to_char(ch, msg);
-		any = TRUE;
+		// any = TRUE;
 	}
 		
-	// trailing crlf
+	/* trailing crlf -- currently NOT sending this
 	if (any) {
 		msg_to_char(ch, "\r\n");
 	}
+	*/
 }
 
 
@@ -814,6 +846,31 @@ void parse_building(FILE *fl, bld_vnum vnum) {
 				LL_APPEND(GET_BLD_RELATIONS(bld), relat);
 				break;
 			}
+			case 'Z': {	// Z: misc data
+				if (line[1] && isdigit(line[1])) {
+					switch (atoi(line + 1)) {
+						case 1: {	// Z1: temperature type
+							if (sscanf(line, "Z1 %d", &int_in[0]) == 1) {
+								GET_BLD_TEMPERATURE_TYPE(bld) = int_in[0];
+							}
+							else {
+								log("SYSERR: Format error in Z1 section of %s: %s", buf2, line);
+								exit(1);
+							}
+							break;
+						}
+						default: {
+							log("SYSERR: Format error in Z section of %s, bad Z number %d", buf2, atoi(line+1));
+							exit(1);
+						}
+					}
+				}
+				else {
+					log("SYSERR: Format error in Z section of %s", buf2);
+					exit(1);
+				}
+				break;
+			}
 
 			// end
 			case 'S': {
@@ -909,6 +966,11 @@ void write_building_to_file(FILE *fl, bld_data *bld) {
 	// U: relations (formerly upgrades_to)
 	LL_FOREACH(GET_BLD_RELATIONS(bld), relat) {
 		fprintf(fl, "U\n%d %d\n", relat->type, relat->vnum);
+	}
+	
+	// Z: misc data
+	if (GET_BLD_TEMPERATURE_TYPE(bld)) {
+		fprintf(fl, "Z1 %d\n", GET_BLD_TEMPERATURE_TYPE(bld));
 	}
 	
 	// end
@@ -5377,7 +5439,7 @@ void parse_object(FILE *obj_f, int nr) {
 	static char line[256];
 	int t[10], retval;
 	char *tmpptr;
-	char f1[256], f2[256], f3[256];
+	char f1[256], f2[256], f3[256], f4[256];
 	struct obj_storage_type *store;
 	struct obj_apply *apply;
 	obj_data *obj, *find;
@@ -5419,14 +5481,17 @@ void parse_object(FILE *obj_f, int nr) {
 		exit(1);
 	}
 	// type extra-flags wear-flags tool-flags version
-	if ((retval = sscanf(line, " %d %s %s %s %d", &t[0], f1, f2, f3, &t[1])) != 5) {
-		strcpy(f3, "0");	// backwards-compatible version has no tool flags
-		if ((retval = sscanf(line, " %d %s %s %d", &t[0], f1, f2, &t[1])) != 4) {
-			// older version of the file: missing version into
-			t[1] = 1;
-			if ((retval = sscanf(line, " %d %s %s", t, f1, f2)) != 3) {
-				log("SYSERR: Format error in first numeric line (expecting 3 args, got %d), %s", retval, buf2);
-				exit(1);
+	if ((retval = sscanf(line, " %d %s %s %s %s %d", &t[0], f1, f2, f3, f4, &t[1])) != 6) {
+		strcpy(f4, "0");	// backwards-compatible version has no requires-tool flags
+		if ((retval = sscanf(line, " %d %s %s %s %d", &t[0], f1, f2, f3, &t[1])) != 5) {
+			strcpy(f3, "0");	// backwards-compatible version has no tool flags
+			if ((retval = sscanf(line, " %d %s %s %d", &t[0], f1, f2, &t[1])) != 4) {
+				// older version of the file: missing version into
+				t[1] = 1;
+				if ((retval = sscanf(line, " %d %s %s", t, f1, f2)) != 3) {
+					log("SYSERR: Format error in first numeric line (expecting 3 args, got %d), %s", retval, buf2);
+					exit(1);
+				}
 			}
 		}
 	}
@@ -5434,6 +5499,7 @@ void parse_object(FILE *obj_f, int nr) {
 	obj->obj_flags.extra_flags = asciiflag_conv(f1);
 	obj->obj_flags.wear_flags = asciiflag_conv(f2);
 	obj->proto_data->tool_flags = asciiflag_conv(f3);
+	obj->proto_data->requires_tool = asciiflag_conv(f4);
 	OBJ_VERSION(obj) = t[1];
 
 	if (!get_line(obj_f, line)) {
@@ -5613,7 +5679,7 @@ void parse_object(FILE *obj_f, int nr) {
 * @param obj_data *obj The object to save.
 */
 void write_obj_to_file(FILE *fl, obj_data *obj) {
-	char temp[MAX_STRING_LENGTH], temp2[MAX_STRING_LENGTH], temp3[MAX_STRING_LENGTH];
+	char temp[MAX_STRING_LENGTH], temp2[MAX_STRING_LENGTH], temp3[MAX_STRING_LENGTH], temp4[MAX_STRING_LENGTH];
 	struct obj_storage_type *store;
 	struct obj_apply *apply;
 	
@@ -5635,7 +5701,8 @@ void write_obj_to_file(FILE *fl, obj_data *obj) {
 	strcpy(temp, bitv_to_alpha(GET_OBJ_EXTRA(obj)));
 	strcpy(temp2, bitv_to_alpha(GET_OBJ_WEAR(obj)));
 	strcpy(temp3, bitv_to_alpha(GET_OBJ_TOOL_FLAGS(obj)));
-	fprintf(fl, "%d %s %s %s %d\n", GET_OBJ_TYPE(obj), temp, temp2, temp3, OBJ_VERSION(obj));
+	strcpy(temp4, bitv_to_alpha(GET_OBJ_REQUIRES_TOOL(obj)));
+	fprintf(fl, "%d %s %s %s %s %d\n", GET_OBJ_TYPE(obj), temp, temp2, temp3, temp4, OBJ_VERSION(obj));
 
 	fprintf(fl, "%d %d %d\n", GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1), GET_OBJ_VAL(obj, 2));
 	
@@ -6079,6 +6146,31 @@ void parse_room_template(FILE *fl, rmt_vnum vnum) {
 				parse_trig_proto(line, &GET_RMT_SCRIPTS(rmt), buf2);
 				break;
 			}
+			case 'Z': {	// Z: misc data
+				if (line[1] && isdigit(line[1])) {
+					switch (atoi(line + 1)) {
+						case 1: {	// Z1: temperature type
+							if (sscanf(line, "Z1 %d", &int_in[0]) == 1) {
+								GET_RMT_TEMPERATURE_TYPE(rmt) = int_in[0];
+							}
+							else {
+								log("SYSERR: Format error in Z1 section of %s: %s", buf2, line);
+								exit(1);
+							}
+							break;
+						}
+						default: {
+							log("SYSERR: Format error in Z section of %s, bad Z number %d", buf2, atoi(line+1));
+							exit(1);
+						}
+					}
+				}
+				else {
+					log("SYSERR: Format error in Z section of %s", buf2);
+					exit(1);
+				}
+				break;
+			}
 
 			// end
 			case 'S': {
@@ -6144,6 +6236,11 @@ void write_room_template_to_file(FILE *fl, room_template *rmt) {
 	
 	// T: triggers
 	write_trig_protos_to_file(fl, 'T', GET_RMT_SCRIPTS(rmt));
+	
+	// Z: misc data
+	if (GET_RMT_TEMPERATURE_TYPE(rmt)) {
+		fprintf(fl, "Z1 %d\n", GET_RMT_TEMPERATURE_TYPE(rmt));
+	}
 	
 	// end
 	fprintf(fl, "S\n");
@@ -6262,7 +6359,8 @@ void parse_sector(FILE *fl, sector_vnum vnum) {
 	sector_data *sect, *find;
 	double dbl_in;
 	int int_in[4];
-		
+	bitvector_t bit_in;
+	
 	// for error messages
 	sprintf(buf2, "sector vnum %d", vnum);
 	
@@ -6316,14 +6414,14 @@ void parse_sector(FILE *fl, sector_vnum vnum) {
 			
 			// evolution
 			case 'E': {
-				if (!get_line(fl, line) || sscanf(line, "%d %d %lf %d", &int_in[0], &int_in[1], &dbl_in, &int_in[2]) != 4) {
+				if (!get_line(fl, line) || sscanf(line, "%d %lld %lf %d", &int_in[0], &bit_in, &dbl_in, &int_in[2]) != 4) {
 					log("SYSERR: Bad data in E line of %s", buf2);
 					exit(1);
 				}
 				
 				CREATE(evo, struct evolution_data, 1);
 				evo->type = int_in[0];
-				evo->value = int_in[1];
+				evo->value = bit_in;
 				evo->percent = dbl_in;
 				evo->becomes = int_in[2];
 				LL_APPEND(GET_SECT_EVOS(sect), evo);
@@ -6413,7 +6511,7 @@ void write_sector_to_file(FILE *fl, sector_data *st) {
 	// E: evolution
 	for (evo = GET_SECT_EVOS(st); evo; evo = evo->next) {
 		fprintf(fl, "E\n");
-		fprintf(fl, "%d %d %.2f %d\n", evo->type, evo->value, evo->percent, evo->becomes);
+		fprintf(fl, "%d %lld %.2f %d\n", evo->type, evo->value, evo->percent, evo->becomes);
 	}
 	
 	// I: interactions
@@ -8182,6 +8280,7 @@ void free_whole_library(void) {
 	struct global_data *glb, *next_glb;
 	struct int_hash *int_iter, *next_int_iter;
 	struct island_info *island, *next_island;
+	struct message_list *msg_set, *next_msg_set;
 	morph_data *morph, *next_morph;
 	obj_data *obj, *next_obj;
 	player_index_data *pid, *next_pid;
@@ -8385,6 +8484,10 @@ void free_whole_library(void) {
 		free_quest_lookups(MOB_QUEST_LOOKUPS(mob));
 		free_shop_lookups(MOB_SHOP_LOOKUPS(mob));
 		free_char(mob);
+	}
+	HASH_ITER(hh, fight_messages, msg_set, next_msg_set) {
+		HASH_DEL(fight_messages, msg_set);
+		free_message_list(msg_set);
 	}
 	HASH_ITER(hh, morph_table, morph, next_morph) {
 		remove_morph_from_table(morph);

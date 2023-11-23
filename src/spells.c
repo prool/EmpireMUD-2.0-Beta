@@ -210,7 +210,7 @@ ACMD(do_damage_spell) {
 	// check counterspell and then damage
 	if (!trigger_counterspell(vict)) {
 		//msg_to_char(ch, "Damage: %d\r\n", dmg);
-		result = damage(ch, vict, dmg, damage_spell[type].attack_type, DAM_MAGICAL);
+		result = damage(ch, vict, dmg, damage_spell[type].attack_type, DAM_MAGICAL, NULL);
 		
 		// damage returns -1 on death
 		if (result > 0 && !IS_DEAD(vict) && !EXTRACTED(vict) && (damage_spell[type].aff_immunity == NOBITS || !AFF_FLAGGED(vict, damage_spell[type].aff_immunity))) {
@@ -225,7 +225,7 @@ ACMD(do_damage_spell) {
 	}
 	else {
 		// counterspell
-		damage(ch, vict, 0, damage_spell[type].attack_type, DAM_MAGICAL);
+		damage(ch, vict, 0, damage_spell[type].attack_type, DAM_MAGICAL, NULL);
 	}
 	
 	if (can_gain_exp_from(ch, vict)) {
@@ -336,7 +336,7 @@ ACMD(do_ready) {
 		msg_to_char(ch, "You don't know how to ready that.\r\n");
 		return;
 	}
-	if (!char_can_act(ch, ABIL_MIN_POS(found_abil), !ABILITY_FLAGGED(found_abil, ABILF_NO_ANIMAL), !ABILITY_FLAGGED(found_abil, ABILF_NO_INVULNERABLE | ABILF_VIOLENT))) {
+	if (!char_can_act(ch, ABIL_MIN_POS(found_abil), !ABILITY_FLAGGED(found_abil, ABILF_NO_ANIMAL), !ABILITY_FLAGGED(found_abil, ABILF_NO_INVULNERABLE | ABILF_VIOLENT), FALSE)) {
 		return;
 	}
 	if (!can_use_ability(ch, ABIL_VNUM(found_abil), ABIL_COST_TYPE(found_abil), ABIL_COST(found_abil), ABIL_COOLDOWN(found_abil))) {
@@ -448,4 +448,5 @@ ACMD(do_ready) {
 	gain_ability_exp(ch, ABIL_VNUM(found_abil), 15);
 	
 	load_otrigger(obj);
+	// this goes directly to equipment so a GET trigger does not fire
 }

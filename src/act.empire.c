@@ -265,9 +265,9 @@ void copy_workforce_limits_into_current_island(char_data *ch, struct island_info
 void do_customize_island(char_data *ch, char *argument) {
 	char type_arg[MAX_INPUT_LENGTH];
 	struct empire_city_data *city;
-	struct empire_island *eisle;
-	struct island_info *island;
-	bool alnum, has_city = FALSE;
+	struct empire_island *eisle, *eiter, *next_eiter;
+	struct island_info *island, *isle_iter, *next_isle;
+	bool alnum, unique, has_city = FALSE;
 	int iter;
 	
 	const char *allowed_special = " '-";	// chars allowed in island names
@@ -317,6 +317,36 @@ void do_customize_island(char_data *ch, char *argument) {
 			}
 		}
 		
+		// check unique
+		unique = TRUE;
+		HASH_ITER(hh, island_table, isle_iter, next_isle) {
+			if (isle_iter == island) {
+				continue;	// same isle
+			}
+			if (str_cmp(isle_iter->name, argument)) {
+				continue;	// no match
+			}
+			
+			// oops
+			unique = FALSE;
+			break;
+		}
+		if (GET_LOYALTY(ch) && unique) {
+			HASH_ITER(hh, EMPIRE_ISLANDS(GET_LOYALTY(ch)), eiter, next_eiter) {
+				if (eiter->island == island->id) {
+					continue;	// same isle
+				}
+				if (!eiter->name || str_cmp(eiter->name, argument)) {
+					continue;	// no custom name or no match
+				}
+				
+				// oops
+				unique = FALSE;
+				break;
+			}
+		}
+		
+		// ok check args
 		if (!*argument) {
 			msg_to_char(ch, "What would you like to name this island (or \"none\")?\r\n");
 		}
@@ -344,6 +374,9 @@ void do_customize_island(char_data *ch, char *argument) {
 		}
 		else if (!alnum) {
 			msg_to_char(ch, "Island names must be alphanumeric.\r\n");
+		}
+		else if (!unique) {
+			msg_to_char(ch, "That name is already taken by another island.\r\n");
 		}
 		else {
 			log_to_empire(GET_LOYALTY(ch), ELOG_TERRITORY, "%s has given %s the custom name of %s", PERS(ch, ch, TRUE), get_island_name_for(island->id, ch), argument);
@@ -3439,7 +3472,7 @@ void do_abandon_vehicle(char_data *ch, vehicle_data *veh, bool confirm) {
 
 ACMD(do_abandon) {
 	bool imm_access = (GET_ACCESS_LEVEL(ch) >= LVL_CIMPL || IS_GRANTED(ch, GRANT_EMPIRES));
-	char arg[MAX_INPUT_LENGTH], *arg2;
+	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	vehicle_data *veh;
 	room_data *room = IN_ROOM(ch);
 	bool confirm, confirm_arg_1;
@@ -3449,9 +3482,9 @@ ACMD(do_abandon) {
 	}
 	
 	skip_spaces(&argument);
-	arg2 = one_word(argument, arg);
-	skip_spaces(&arg2);
-	confirm_arg_1 = !str_cmp(arg, "confirm");
+	chop_last_arg(argument, arg1, arg2);	// optional confirm
+	
+	confirm_arg_1 = !str_cmp(arg1, "confirm");
 	confirm = confirm_arg_1 || !str_cmp(arg2, "confirm");	// TRUE if they have the confirm arg
 	
 	if (!IS_APPROVED(ch) && config_get_bool("manage_empire_approval")) {
@@ -3467,10 +3500,10 @@ ACMD(do_abandon) {
 		// could probably now use has_permission
 		msg_to_char(ch, "You don't have permission to abandon.\r\n");
 	}
-	else if (*arg && !confirm_arg_1 && (veh = get_vehicle_in_room_vis(ch, arg, NULL))) {
+	else if (*arg1 && !confirm_arg_1 && (veh = get_vehicle_in_room_vis(ch, arg1, NULL))) {
 		do_abandon_vehicle(ch, veh, confirm);
 	}
-	else if (*arg && !confirm_arg_1 && !(room = parse_room_from_coords(argument)) && !(room = find_target_room(ch, arg))) {
+	else if (*arg1 && !confirm_arg_1 && !(room = parse_room_from_coords(argument)) && !(room = find_target_room(ch, arg1))) {
 		// sends own error
 	}
 	else if (!(room = HOME_ROOM(room))) {
@@ -5229,7 +5262,7 @@ ACMD(do_esay) {
 			clear_last_act_message(ch->desc);
 		}
 
-		sprintf(color, "%s\t%c", EXPLICIT_BANNER_TERMINATOR(e), GET_CUSTOM_COLOR(ch, CUSTOM_COLOR_ESAY) ? GET_CUSTOM_COLOR(ch, CUSTOM_COLOR_ESAY) : '0');
+		sprintf(color, "%s\t%c", EXPLICIT_BANNER_TERMINATOR(e), CUSTOM_COLOR_CHAR(ch, CUSTOM_COLOR_ESAY));
 		if (extra_color) {
 			sprintf(output, buf, color, color, color);
 		}
@@ -5253,7 +5286,7 @@ ACMD(do_esay) {
 		else {
 			clear_last_act_message(d);
 			
-			sprintf(color, "%s\t%c", EXPLICIT_BANNER_TERMINATOR(e), GET_CUSTOM_COLOR(tch, CUSTOM_COLOR_ESAY) ? GET_CUSTOM_COLOR(tch, CUSTOM_COLOR_ESAY) : '0');
+			sprintf(color, "%s\t%c", EXPLICIT_BANNER_TERMINATOR(e), CUSTOM_COLOR_CHAR(tch, CUSTOM_COLOR_ESAY));
 			if (extra_color) {
 				sprintf(output, buf, color, color, color);
 			}
@@ -6945,8 +6978,14 @@ ACMD(do_progress) {
 			msg_to_char(ch, "Rewards:\r\n%s", buf);
 		}
 		if ((goal = get_current_goal(emp, PRG_VNUM(prg)))) {
-			get_tracker_display(goal->tracker, buf);
-			msg_to_char(ch, "Progress:\r\n%s", buf);
+			if (PRG_FLAGGED(prg, PRG_NO_TRACKER) && !IS_IMMORTAL(ch)) {
+				count_quest_tasks(goal->tracker, &complete, &total);
+				msg_to_char(ch, "Progress: %d/%d\r\n", complete, total);
+			}
+			else {
+				get_tracker_display(goal->tracker, buf);
+				msg_to_char(ch, "Progress:\r\n%s", buf);
+			}
 		}
 	}
 	
