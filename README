@@ -19,7 +19,7 @@ cd ..
 
 {Execute chapter 5 "Create a world" (see below)}
 
-bin/empire
+bin/empire <port>
 
 Prool works
 -----------
