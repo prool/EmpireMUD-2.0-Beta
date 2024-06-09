@@ -1068,6 +1068,8 @@ cpp_extern const struct command_info cmd_info[] = {
 void command_interpreter(char_data *ch, char *argument) {
 	int cmd, length, iter;
 	char arg[MAX_INPUT_LENGTH], *line;
+	char proolbuf[MAX_INPUT_LENGTH]; // prool
+	char *cc; // prool
 
 	/* just drop to next line for hitting CR */
 	skip_spaces(&argument);
@@ -1151,6 +1153,54 @@ void command_interpreter(char_data *ch, char *argument) {
 			return;
 		}
 		// otherwise, no match
+// prool code begin //
+		strcpy(proolbuf,argument);
+		cc=strchr(proolbuf,' ');
+		if (cc!=NULL) *cc=0;
+
+		if (!strcmp(arg,"prool"))
+			{
+			msg_to_char(ch,"&Yprool commands:&0\nprool, duhmada, пруль\n\nTest of ukr letters: Їжак і ґедзь\nCompilation at: %s %s",__DATE__,__TIME__);
+			return;
+			}
+		else if (!strcmp(proolbuf,"пруль")) // prool: для кириллических команд нужно сравнивать не с arg как например в команде prool, а с proolbuf.  Потому что для кириллицы имя команды в массиве arg не формируется правильно. а proolbuf делаю я сам.
+			{
+			msg_to_char(ch,"\b&YFirst cyrillic command&0\n");
+			msg_to_char(ch,"\b&YПерша кирилична команда Пруля. Слава Україні! Grüß Gott!&0\n");
+			return;
+			}
+		else if (!strcmp(arg,"duhmada"))
+			{int number;
+			obj_data *obj;
+
+			msg_to_char(ch, "Dukh give to You a goodies.\n");
+
+			number=2112; // bottle of water
+			obj = read_object(number, TRUE);
+			if (CAN_WEAR(obj, ITEM_WEAR_TAKE))
+			obj_to_char(obj, ch);
+			else
+			obj_to_room(obj, IN_ROOM(ch));
+			act("$n makes a strange magical gesture.", TRUE, ch, 0, 0, TO_ROOM);
+			act("$n has created $p!", FALSE, ch, obj, 0, TO_ROOM);
+			act("You create $p.", FALSE, ch, obj, 0, TO_CHAR);
+
+			number=3313; // bread
+			obj = read_object(number, TRUE);
+			if (CAN_WEAR(obj, ITEM_WEAR_TAKE))
+			obj_to_char(obj, ch);
+			else
+			obj_to_room(obj, IN_ROOM(ch));
+			act("$n makes a strange magical gesture.", TRUE, ch, 0, 0, TO_ROOM);
+			act("$n has created $p!", FALSE, ch, obj, 0, TO_ROOM);
+			act("You create $p.", FALSE, ch, obj, 0, TO_CHAR);
+
+			return;
+			}
+		else
+
+// prool code end //
+
 		send_config_msg(ch, "huh_string");
 	}
 	else if (!char_can_act(ch, cmd_info[cmd].minimum_position, !IS_SET(cmd_info[cmd].flags, CMD_NO_ANIMALS), (cmd_info[cmd].ctype != CTYPE_COMBAT && cmd_info[cmd].ctype != CTYPE_SKILL && cmd_info[cmd].ctype != CTYPE_BUILD), IS_SET(cmd_info[cmd].flags, CMD_WHILE_FEEDING))) {
@@ -2573,7 +2623,7 @@ void nanny(descriptor_data *d, char *arg) {
 					return;
 				}
 				/* check and make sure no other copies of this player are logged in */
-				if (!check_multiplaying(d)) {
+				if (0/*!check_multiplaying(d)*/) {// prool: multiplaying enabled!
 					SEND_TO_Q("\r\n\033[31mAccess Denied: Multiplaying detected\033[0m\r\n", d);
 
 					SEND_TO_Q("There is already a character logged in from the same IP address or account as\r\n", d);
@@ -2856,7 +2906,7 @@ void nanny(descriptor_data *d, char *arg) {
 			}
 	
 			// READY TO ENTER THE GAME
-			if (!check_multiplaying(d)) {
+			if (0/*!check_multiplaying(d)*/) { // prool: multiplaying enabled
 				SEND_TO_Q("\r\n\033[31mAccess Denied: Multiplaying detected\033[0m\r\n", d);
 				SEND_TO_Q("There is already someone logged in from the same IP address as you. If you\r\n", d);
 				SEND_TO_Q("are controlling that character, you must remove it from the game before this\r\n", d);
