@@ -1,9 +1,9 @@
 #0
 Plains~
 The Open Plains~
-'.' 10 1 2 l b
+'.' 10 jr 2 l bp
 C
-dig, pick~
+dig, gather, pick~
 D1
 ....~
 &g~
@@ -17,155 +17,60 @@ D4
 ....~
 &0~
 E
-2 10565 0.04 10562
+2 55 0.60 65
 E
-2 604 0.04 602
+2 54 0.60 39
 E
-2 28 0.80 27
+2 45 0.60 39
 E
-2 29 0.80 27
+2 28 0.60 65
 E
-2 4 0.80 1
+2 29 0.60 65
+E
+2 4 0.60 39
+E
+2 53 5.00 56
+E
+2 57 10.00 50
+E
+2 5 10.00 40
 E
 3 29 0.80 29
 E
-3 10565 2.00 10562
+3 28 2.00 65
 E
-3 28 2.00 27
-E
-3 4 2.00 1
+3 4 2.00 39
 E
 5 0 100.00 17
 E
 8 0 100.00 13
 E
-9 0 50.00 1
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 101 15.00 1 X  # DIG: a pile of clay
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3013 100.00 1  # FORAGE: a handful of nuts
-I 7 1201 100.00 1  # FIND-HERB: some fiveleaf
-M
-237 5.00 ce
-M
-201 5.00 bce
-M
-200 5.00 bce
-M
-222 5.00 bce
-M
-223 5.00 bce
-M
-251 15.00 ce
-M
-252 10.00 cf
-M
-240 6.00 bc
-M
-9153 10.00 bc
-M
-9154 10.00 bc
-M
-9004 5.00 bd
-M
-9010 5.00 bd
-M
-9012 10.00 bd
-M
-9009 10.00 bd
-M
-9152 5.00 bd
-M
-9154 5.00 bd
-M
-9020 5.00 bd
-M
-9021 5.00 bd
-M
-9011 5.00 bd
-M
-9025 5.00 bd
-M
-9029 1.00 bd
-M
-9030 1.00 bd
-M
-9031 1.00 bd
-M
-9032 1.00 bd
-M
-9022 5.00 ad
-M
-9116 5.00 ad
-M
-9133 5.00 ad
-M
-9023 5.00 d
-M
-9024 5.00 d
-M
-246 0.30 ad
-M
-247 0.10 d
-M
-248 1.00 bd
-M
-250 0.10 ad
-M
-9013 5.00 bdg
-M
-9002 5.00 adg
-M
-9120 15.00 adg
-M
-9007 5.00 dg
-M
-9132 5.00 dg
-M
-9121 5.00 dg
-M
-9128 5.00 dg
-M
-9137 5.00 dg
-M
-9141 5.00 dg
-M
-9006 5.00 dg
-M
-9134 5.00 bdh
-M
-9135 5.00 adh
-M
-9138 5.00 dh
-M
-9139 5.00 dh
-M
-9140 1.00 dh
-M
-9058 0.01 d
-M
-9040 0.01 d
-M
-9034 5.00 0
-M
-9036 5.00 h
-M
-9037 5.00 h
-M
-9038 5.00 h
-M
-9033 5.00 g
-M
-9035 5.00 g
-M
-9039 5.00 g
-M
-9064 0.90 ad
+9 0 33.33 39
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3013 33.00 25  # FORAGE: handful of nuts
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 140 100.00 50  # GATHER: bundle of long grass
+U
+0
+The grassy plains seem to come to life!~
+X
+plains field grass ground around~
+   You stand in the middle of an expansive, flat open plain. The grasses
+beneath your feet stretch out in all directions, swaying gently in the breeze.
+The occasional bird flits past, calling out to its companions, but otherwise,
+there is nothing but a peaceful silence. The openness of the terrain makes you
+feel exposed and vulnerable, with nowhere to hide.
+~
 S
 #1
 Light Forest~
 A Light Forest~
-'.' 14 1 2 dl n
+'.' 14 jqr 2 dl np
 C
 chop, dig, gather, pick~
 D1
@@ -178,138 +83,51 @@ D3
 &g.&?^&g..~
 &y~
 D4
-.Y..~
+.&W^&?..~
 &0~
 E
-0 1 100.00 0
+0 1 100.00 36
+E
+2 53 5.00 56
+E
+2 57 10.00 50
+E
+2 5 10.00 44
 E
 3 29 0.80 29
 E
 4 0 0.80 2
 E
 9 0 50.00 2
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 101 15.00 1 X  # DIG: a pile of clay
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3015 100.00 1  # FORAGE: some red berries
-I 7 1201 100.00 1  # FIND-HERB: some fiveleaf
-I 9 121 100.00 1  # GATHER: a stick
-I 20 120 100.00 1  # CHOP: a large tree
-M
-9140 1.00 dh
-M
-9139 5.00 dh
-M
-9138 5.00 dh
-M
-9135 5.00 adh
-M
-9134 5.00 bdh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9006 5.00 dg
-M
-9141 5.00 dg
-M
-9137 5.00 dg
-M
-9128 5.00 dg
-M
-9121 5.00 dg
-M
-9132 5.00 dg
-M
-9007 5.00 dg
-M
-9120 15.00 adg
-M
-9002 5.00 adg
-M
-9013 5.00 bdg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9024 5.00 d
-M
-9023 5.00 d
-M
-9034 5.00 d
-M
-9133 5.00 ad
-M
-9116 5.00 ad
-M
-9022 5.00 ad
-M
-9032 1.00 bd
-M
-9031 1.00 bd
-M
-9030 1.00 bd
-M
-9029 1.00 bd
-M
-9025 5.00 bd
-M
-9011 5.00 bd
-M
-9021 5.00 bd
-M
-9020 5.00 bd
-M
-9009 10.00 bd
-M
-9012 10.00 bd
-M
-9010 5.00 bd
-M
-9004 5.00 bd
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9154 10.00 bc
-M
-9153 10.00 bc
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9064 0.90 ad
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3015 33.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 85.00 50 g  # GATHER: sticks and leaves
+I 9 131 15.00 50 g  # GATHER: green sapling
+I 20 120 100.00 1  # CHOP: large tree
+U
+0
+A tree shoots up and spreads its canopy wide above you!~
+X
+forest trees leaves around~
+   You find yourself standing at the edge of a light forest. The trees here are
+young and slender, and the foliage overhead allows dappled sunlight to filter
+through, creating a tranquil, mottled effect on the ground. You can hear the
+soft rustling of leaves as a gentle breeze passes through the trees, and the
+occasional bird chirping overhead. The forest floor is covered in a soft carpet
+of moss and fallen leaves, and the air is cool and refreshing. It's a peaceful
+and serene place.
+~
 S
 #2
 Forest~
 A Forest~
-'^' 14 1 3 dl n
+'^' 14 jq 3 dl np
 C
 chop, dig, gather, pick~
 D1
@@ -322,110 +140,50 @@ D3
 ^&g.&?^&g.~
 &y~
 D4
-Y.Y.~
-&0~
+^&0.&?^&0.~
+&W~
 E
 0 1 100.00 1
+E
+2 53 5.00 56
+E
+2 57 10.00 50
+E
+2 5 10.00 45
 E
 3 29 0.80 29
 E
 4 0 0.80 3
 E
 9 0 50.00 3
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 101 15.00 1 X  # DIG: a pile of clay
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3015 100.00 1  # FORAGE: some red berries
-I 7 1201 100.00 1  # FIND-HERB: some fiveleaf
-I 9 121 100.00 1  # GATHER: a stick
-I 20 120 100.00 1  # CHOP: a large tree
-M
-9109 10.00 dh
-M
-9145 5.00 adh
-M
-9147 5.00 bdh
-M
-9007 5.00 dg
-M
-9006 5.00 dg
-M
-9141 5.00 dg
-M
-9146 5.00 adg
-M
-9144 5.00 adg
-M
-9002 5.00 adg
-M
-9003 5.00 dg
-M
-9136 5.00 bdg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9150 5.00 d
-M
-9149 5.00 d
-M
-9148 5.00 d
-M
-9023 5.00 d
-M
-9008 5.00 d
-M
-9133 5.00 ad
-M
-9116 5.00 ad
-M
-9022 5.00 ad
-M
-9032 5.00 bd
-M
-9031 5.00 bd
-M
-9030 5.00 bd
-M
-9029 5.00 bd
-M
-9025 5.00 bd
-M
-9020 5.00 bd
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9154 10.00 bc
-M
-9153 10.00 bc
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9064 0.90 ad
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3015 33.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 85.00 50 g  # GATHER: sticks and leaves
+I 9 131 15.00 50 g  # GATHER: green sapling
+I 20 120 100.00 1  # CHOP: large tree
+U
+0
+A second tree sprouts and reaches for the sky!~
+X
+forest trees leaves around~
+   The forest air is cool and fresh, scented with earth and greenery. You can
+hear the rustling of leaves and the occasional bird call, but otherwise,
+animals are sparse. The forest floor is covered with a layer of leaves, twigs,
+and other organic debris, muffling your footsteps as you move. It's a peaceful
+and secluded place, offering a respite from the hustle and bustle of the
+outside world.
+~
 S
 #3
 Shady Forest~
 A Shady Forest~
-'^' 14 1 4 dl n
+'^' 14 jq 4 dl np
 C
 chop, dig, gather, pick~
 D1
@@ -438,98 +196,49 @@ D3
 ^^&g.&?^~
 &y~
 D4
-YY.Y~
-&0~
+^^&0.&?^~
+&W~
 E
 0 1 100.00 2
+E
+2 53 5.00 56
+E
+2 57 10.00 50
+E
+2 5 10.00 45
 E
 3 29 0.20 29
 E
 4 0 0.20 4
 E
 9 0 50.00 4
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 101 15.00 1 X  # DIG: a pile of clay
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3015 100.00 1  # FORAGE: some red berries
-I 7 1201 100.00 1  # FIND-HERB: some fiveleaf
-I 9 121 100.00 1  # GATHER: a stick
-I 20 120 100.00 1  # CHOP: a large tree
-M
-9109 10.00 dh
-M
-9145 5.00 adh
-M
-9147 5.00 bdh
-M
-9007 5.00 dg
-M
-9006 5.00 dg
-M
-9141 5.00 dg
-M
-9146 5.00 adg
-M
-9144 5.00 adg
-M
-9002 5.00 adg
-M
-9001 10.00 dg
-M
-9136 5.00 bdg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9017 5.00 d
-M
-9150 5.00 d
-M
-9149 5.00 d
-M
-9148 5.00 d
-M
-9008 5.00 d
-M
-9133 5.00 ad
-M
-9116 5.00 ad
-M
-9025 5.00 bd
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9154 10.00 bc
-M
-9153 10.00 bc
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9064 0.90 ad
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3015 33.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 85.00 50 g  # GATHER: sticks and leaves
+I 9 131 15.00 50 g  # GATHER: green sapling
+I 20 120 100.00 1  # CHOP: large tree
+U
+0
+Another tree shoots up toward the sky and joins the growing canopy!~
+X
+forest shade shady trees leaves around~
+   You are standing in a shady forest, where the trees grow close together and
+the canopy overhead blocks out much of the sky. The air is cool and damp, and
+the ground beneath your feet is covered in a thick layer of fallen leaves and
+branches. You can hear the occasional rustling of leaves and the soft chirping
+of birds hidden among the foliage.
+~
 S
 #4
 Overgrown Forest~
 An Overgrown Forest~
-'^' 14 1 5 dl dn
+'^' 14 jq 5 dl dnp
 C
 chop, dig, gather, pick~
 D1
@@ -566,102 +275,49 @@ D3
 ^^&r^&R^~
 &y~
 D4
-YYYY~
-&0~
+^^^^~
+&W~
 E
 0 1 100.00 3
 E
-2 10565 0.01 10565
+2 53 5.00 56
 E
-3 10565 0.04 10565
+2 57 10.00 50
+E
+2 5 10.00 45
 E
 3 29 0.80 29
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 101 15.00 1 X  # DIG: a pile of clay
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3015 100.00 1  # FORAGE: some red berries
-I 7 1201 100.00 1  # FIND-HERB: some fiveleaf
-I 9 121 100.00 1  # GATHER: a stick
-I 20 120 100.00 1  # CHOP: a large tree
-M
-9040 0.01 d
-M
-9056 0.01 d
-M
-9109 10.00 dh
-M
-9145 5.00 adh
-M
-9147 5.00 bdh
-M
-9007 5.00 dg
-M
-9006 5.00 dg
-M
-9141 5.00 dg
-M
-9146 5.00 adg
-M
-9144 5.00 adg
-M
-9002 5.00 adg
-M
-9001 10.00 dg
-M
-9136 5.00 bdg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9017 5.00 d
-M
-9150 5.00 d
-M
-9149 5.00 d
-M
-9148 5.00 d
-M
-9008 5.00 d
-M
-9133 5.00 ad
-M
-9116 5.00 ad
-M
-9025 5.00 bd
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9154 10.00 bc
-M
-9153 10.00 bc
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9064 0.90 ad
+E
+20 40320 0.01 90
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3015 33.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 85.00 50 g  # GATHER: sticks and leaves
+I 9 131 15.00 50 g  # GATHER: green sapling
+I 20 120 100.00 1  # CHOP: large tree
+U
+0
+The canopy closes as another tree stretches upward and unfolds!~
+X
+forest trees leaves around~
+   You are standing in an overgrown forest, where the underbrush is so thick
+that it's difficult to make out the trunks of the massive trees surrounding
+you. The air is humid and heavy, and the scent of rich soil and decaying leaves
+is almost overwhelming. The forest is alive with the sounds of insects buzzing
+and birds calling out to each other. The forest floor is a chaotic jumble of
+tangled roots, ferns, and thorns, making movement difficult. It's a wild and
+untamed place, where nature reigns supreme.
+~
 S
 #5
 River~
 A River~
-'~' 17 0 10 gi af
+'~' 17 no 10 gix af
 D1
 ~~~~~
 &c~
@@ -674,26 +330,33 @@ D3
 D4
 ~~~~~
 &c~
-I 21 1300 20.00 1 f  # FISH: a glowing green seashell
-I 21 1305 0.25 1 f  # FISH: a worn old statuette
-I 21 256 0.25 1 f  # FISH: a hestian trinket
-I 21 262 0.25 1 f  # FISH: a trinket of conveyance
-I 21 1304 5.00 1 f  # FISH: some sea junk
-I 21 1311 25.00 1 f  # FISH: a spotted eel
-I 21 1313 25.00 1 f  # FISH: a bright red leaping fish
-I 21 1312 100.00 1 f  # FISH: a speckled trout
-I 22 174 5.00 1  # PAN: a small flake of gold
-M
-9025 5.00 d
-M
-9164 1.00 h
-M
-9163 1.00 g
+E
+7 57 1.00 53
+I 21 1300 20.00 125 f  # FISH: glowing green seashell
+I 21 1305 0.25 125 f  # FISH: worn old statuette
+I 21 256 0.25 125 f  # FISH: hestian trinket
+I 21 262 0.25 125 f  # FISH: trinket of conveyance
+I 21 1304 5.00 125 f  # FISH: sea junk
+I 21 1311 25.00 125 f  # FISH: spotted eel
+I 21 1313 25.00 125 f  # FISH: bright red leaping fish
+I 21 1312 100.00 125 f  # FISH: speckled trout
+I 22 174 5.00 25  # PAN: small flake of gold
+U
+0
+The river starts to burble and flow.~
+X
+river water around~
+   The water of the river flows steadily downstream, its surface shimmering in
+the light. You listen to the murmur of the water as it flows over rocks and
+around bends in the river, and the occasional splash as a fish jumps to catch
+an insect. The river is a calming presence, inviting you to sit and watch the
+world go by for a while.
+~
 S
 #6
 Ocean~
 The Ocean~
-'~' 19 0 10 ceho ai
+'~' 19 pt 10 ceho ai
 D0
 ~~~~~
 &B~
@@ -769,102 +432,58 @@ D0
 D0
 ~~~~~
 &B~
-I 10 9019 5.00 1  # ENCOUNTER: a shark
-I 21 1300 20.00 1 f  # FISH: a glowing green seashell
-I 21 1305 0.25 1 f  # FISH: a worn old statuette
-I 21 256 0.25 1 f  # FISH: a hestian trinket
-I 21 262 0.25 1 f  # FISH: a trinket of conveyance
-I 21 1304 5.00 1 f  # FISH: some sea junk
-I 21 1302 25.00 1 f  # FISH: a giant linefish
-I 21 1303 25.00 1 f  # FISH: a magenta arrowfish
-I 21 1301 100.00 1 f  # FISH: a striped barbfish
-M
-9063 0.08 d
-M
-9062 0.01 d
-M
-9168 1.00 dh
-M
-9166 1.00 dh
-M
-9164 1.00 dh
-M
-9169 1.00 dg
-M
-9167 1.00 dg
-M
-9163 0.50 dg
-M
-9171 1.00 d
-M
-9165 0.50 d
-M
-249 0.08 d
-M
-9170 1.00 d
+I 10 9019 5.00 1  # ENCOUNTER: shark
+I 10 9232 0.05 1  # ENCOUNTER: box jellyfish
+I 21 1300 20.00 125 f  # FISH: glowing green seashell
+I 21 1305 0.25 125 f  # FISH: worn old statuette
+I 21 256 0.25 125 f  # FISH: hestian trinket
+I 21 262 0.25 125 f  # FISH: trinket of conveyance
+I 21 1304 5.00 125 f  # FISH: sea junk
+I 21 1302 25.00 125 f  # FISH: giant linefish
+I 21 1303 25.00 125 f  # FISH: magenta arrowfish
+I 21 1301 100.00 125 f  # FISH: striped barbfish
+X
+ocean water horizon around~
+   You are surrounded by a seemingly endless expanse of open ocean, the horizon
+stretching out as far as you can see. The water is a deep blue-green, clear and
+inviting. You can feel the salty spray of the sea on your skin and the sound of
+waves crashing against each other fills your ears. Seabirds circle overhead,
+their calls carried on the wind, and schools of fish dart just beneath the
+surface. The ocean is a vast and mysterious place, both beautiful and
+intimidating, and the possibilities it holds are limitless.
+~
 S
 #7
 Crop~
 A Crop~
-'.' 10 1 3 djk k
-C
-dig, harvest~
+'.' 10 j 3 djk kp
 D1
 ????~
-&y~
+&g~
 D2
 ????~
-&y~
+&g~
 D3
 ????~
-&y~
+&g~
 D4
 ????~
-&y~
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 101 15.00 1 X  # DIG: a pile of clay
-I 5 100 100.00 1 X  # DIG: a rock
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9154 10.00 bc
-M
-9153 10.00 bc
-M
-240 6.00 bc
-M
-252 10.00 cf
-M
-251 15.00 ce
-M
-223 5.00 bce
-M
-222 5.00 bce
-M
-200 5.00 bce
-M
-201 5.00 bce
-M
-237 5.00 ce
-M
-9064 0.90 ad
+&0~
+E
+16 0 100.00 0
+E
+19 0 100.00 0
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+U
+0
+The crop grows with astounding speed!~
 S
 #8
 Mountain~
 On a Mountain~
-'^' 25 0 75 lnsv c
+'^' 25 m 75 dnsvx c
 C
 dig, pick~
 D1
@@ -879,36 +498,37 @@ D3
 D4
 /\/\~
 &y~
-I 5 104 8.00 1 X  # DIG: a red bloodstone
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3015 100.00 1  # FORAGE: some red berries
-I 7 1202 100.00 1  # FIND-HERB: a twig of redthorn
-M
-9060 0.01 d
-M
-9057 0.03 d
-M
-9143 10.00 dh
-M
-9142 10.00 dh
-M
-9017 5.00 dg
-M
-9118 10.00 adg
-M
-9008 10.00 bd
-M
-9025 10.00 d
-M
-9005 10.00 bd
-M
-9018 10.00 d
+E
+2 32 10.00 58
+E
+2 57 10.00 52
+I 5 106 4.00 125 X  # DIG: rough piece of obsidian
+I 5 104 8.00 125 X  # DIG: red bloodstone
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3015 100.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1202 100.00 125 p  # PICK: twig of redthorn
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+U
+0
+The area seems to settle as plants start to grow.~
+X
+mountains peaks cliffs crags rocks around~
+   You are standing amongst towering mountains, their jagged peaks reaching
+towards the sky. The air is cool and crisp, with a hint of pine and other
+alpine flora. The mountains are covered in a patchwork of crags and rocky
+outcroppings, with streams cascading down their sides. Above, the sky is a
+crystal clear, and you can see birds soaring in the distance. The sheer size
+and beauty of the mountains is both awe-inspiring and humbling.
+~
+Z1 7
 S
 #9
 Road~
 On a Road~
-'-' 26 0 1 mr o
+'-' 26 0 1 mryB opx
 D1
 ----~
 &0~
@@ -921,71 +541,21 @@ D3
 D4
 ----~
 &0~
-M
-246 0.30 ad
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-9032 5.00 d
-M
-9031 5.00 d
-M
-9030 5.00 d
-M
-9029 5.00 d
-M
-9034 5.00 d
-M
-9022 10.00 d
-M
-9012 10.00 d
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-240 6.00 bc
-M
-252 10.00 cf
-M
-251 15.00 ce
-M
-223 5.00 bce
-M
-222 5.00 bce
-M
-200 5.00 bce
-M
-201 5.00 bce
-M
-237 5.00 ce
-M
-9064 0.90 ad
+X
+road ground rocks path around~
+   You are standing on a well-worn road, its surface made of packed dirt,
+stones, and occasional patches of gravel. The road winds its way through the
+landscape, marking a path that has been traveled by many before you. The edges
+of the road are marked by small rocks and cleared paths, with occasional signs
+or markers pointing the way to your destination. The road is a symbol of
+civilization, a link between far-flung places, and a testament to the human
+desire to explore and discover.
+~
 S
 #10
 Building~
 A Building~
-'?' 27 0 1 dop 0
+'?' 27 0 1 dopuyB 0
 D1
 [..]~
 &0~
@@ -1002,7 +572,7 @@ S
 #11
 Inside~
 Inside~
-'?' 0 0 1 dq 0
+'?' 0 0 1 dqB 0
 D1
 (..)~
 &0~
@@ -1019,175 +589,65 @@ S
 #12
 Desert Crop~
 A Desert Crop~
-'.' 21 2 3 djk k
-C
-dig, harvest~
+'.' 21 k 3 djk kp
 D1
 ????~
-&y~
+&Y~
 D2
 ????~
 &y~
 D3
 ????~
-&y~
+&Y~
 D4
 ????~
 &y~
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 103 8.00 1 X  # DIG: a yellow lightning stone
-I 5 100 100.00 1 X  # DIG: a rock
-M
-9040 0.01 d
-M
-9059 0.01 ad
-M
-9055 0.01 bd
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9131 5.00 d
-M
-9128 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9118 15.00 ad
-M
-9130 15.00 ad
-M
-9129 15.00 ad
-M
-9116 15.00 ad
-M
-9122 5.00 bd
-M
-9117 5.00 bd
-M
-9126 5.00 bd
-M
-9125 5.00 bd
-M
-9124 5.00 bd
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9153 10.00 bc
-M
-240 6.00 bc
-M
-252 10.00 cf
-M
-251 15.00 ce
-M
-223 5.00 bce
-M
-222 5.00 bce
-M
-200 5.00 bce
-M
-201 5.00 bce
-M
-237 5.00 ce
-M
-9064 0.90 ad
+E
+16 0 100.00 20
+E
+19 0 100.00 20
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 100 100.00 125 X  # DIG: rock
+U
+0
+The crop grows with astounding speed!~
 S
 #13
 Seeded Field~
 A Seeded Field~
-',' 10 1 3 j k
+',' 10 j 3 j kp
 C
 dig~
 D0
 ,,,,~
-&y~
+&t~
 E
 1 0 100.00 7
 E
-9 0 50.00 7
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3003 100.00 1  # FORAGE: a handful of grain
-I 7 1201 100.00 1  # FIND-HERB: some fiveleaf
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-9032 5.00 d
-M
-9031 5.00 d
-M
-9030 5.00 d
-M
-9029 5.00 d
-M
-9153 10.00 d
-M
-9021 20.00 d
-M
-9024 20.00 d
-M
-9034 5.00 d
-M
-9022 20.00 d
-M
-9012 20.00 d
-M
-9011 20.00 d
-M
-9010 20.00 d
-M
-9154 5.00 bd
-M
-9152 5.00 bd
-M
-9009 20.00 d
-M
-9004 20.00 d
+9 0 20.00 7
+E
+16 0 100.00 0
+E
+19 0 100.00 0
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3003 100.00 25  # FORAGE: handful of grain
+X
+field seeded seeds plants crop around~
+   You find yourself standing in a vast field of dirt, recently turned over in
+preparation for planting. Here and there, you see the first signs of life
+emerging from the soil - tiny sprouts, their tender green leaves barely visible
+against the brown earth. The air is cool and fresh, with the scent of damp soil
+and new growth all around you. Though the crops have only just begun to emerge,
+it's clear that the field has been carefully tended by skilled farmers, who
+have taken great care to ensure that each seed is planted just so.
+~
 S
 #14
 Sandy Field~
 A Sandy Field~
-',' 21 2 3 j k
+',' 21 k 3 j kp
 C
 dig~
 D0
@@ -1196,101 +656,32 @@ D0
 E
 1 0 100.00 12
 E
-9 0 50.00 12
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 5 103 8.00 1 X  # DIG: a yellow lightning stone
-I 6 3014 100.00 1  # FORAGE: some dry beans
-I 7 1204 100.00 1  # FIND-HERB: a daggerbite frond
-M
-9040 0.01 d
-M
-9059 0.01 ad
-M
-9055 0.01 bd
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9131 5.00 d
-M
-9128 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9118 15.00 ad
-M
-9130 15.00 ad
-M
-9129 15.00 ad
-M
-9116 15.00 ad
-M
-9122 5.00 bd
-M
-9117 5.00 bd
-M
-9126 5.00 bd
-M
-9125 5.00 bd
-M
-9124 5.00 bd
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9153 10.00 bc
-M
-240 6.00 bc
-M
-252 10.00 cf
-M
-251 15.00 ce
-M
-223 5.00 bce
-M
-222 5.00 bce
-M
-200 5.00 bce
-M
-201 5.00 bce
-M
-237 5.00 ce
-M
-9064 0.90 ad
+9 0 20.00 12
+E
+16 0 100.00 20
+E
+19 0 100.00 20
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 6 3014 100.00 25  # FORAGE: dry beans
+X
+field seeded seeds plants crop desert around~
+   You are standing in a parched desert landscape, but amidst the sandy
+terrain, you see the beginnings of life. Rows of small, fragile plants poke
+through the dry earth, their leaves a vibrant green against the muted tones of
+the desert. The tiny sprouts are an oasis in this barren environment, their
+delicate shoots reaching up towards the sky. It's too early to tell what kind
+of crop is being grown here, but the signs of growth are a hopeful sign in a
+place where survival is a constant struggle. As you look around, you can't help
+but wonder what this small plot of land will yield in the weeks and months to
+come.
+~
 S
 #15
 Jungle Field~
 A Jungle Field~
-',' 12 3 3 j k
+',' 12 l 3 j kp
 C
 gather~
 D0
@@ -1299,165 +690,56 @@ D0
 E
 1 0 100.00 16
 E
-9 0 50.00 16
-I 6 3017 100.00 1  # FORAGE: a plump fig
-I 9 121 100.00 1  # GATHER: a stick
-M
-9061 0.01 d
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9151 10.00 dh
-M
-9109 10.00 dh
-M
-9106 10.00 dh
-M
-9111 10.00 bdh
-M
-9105 5.00 bdh
-M
-9104 5.00 bdh
-M
-9103 5.00 adh
-M
-9113 5.00 adh
-M
-9102 5.00 adh
-M
-9107 10.00 dg
-M
-9101 1.00 dg
-M
-9112 5.00 bdg
-M
-9110 5.00 bdg
-M
-9114 5.00 bdg
-M
-9108 5.00 bdg
-M
-9115 10.00 adg
-M
-9100 5.00 adg
-M
-9016 5.00 adg
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9153 10.00 bc
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
+9 0 20.00 16
+E
+16 0 100.00 0
+E
+19 0 100.00 27
+I 6 3017 100.00 25  # FORAGE: plump fig
+I 9 133 100.00 50  # GATHER: tangle of vines
+X
+field seeded seeds plants crop jungle around~
+   You have come upon a small clearing, where you can see that the verdant
+jungle has been cleared to make way for a new crop. The freshly turned earth is
+dark and fertile, and tiny green shoots have just begun to emerge from the
+soil. You can't quite make out what the crop is yet, as the plants are still
+too small to identify. But you can see that the farmers who planted them have
+taken great care to ensure that they are planted in neat rows, with plenty of
+space between them to grow. Beyond the clearing, the jungle looms tall and
+green, a stark contrast to the orderly rows of the new crop. It's a scene of
+life and growth in the midst of a wild and untamed environment, and you can't
+help but feel a sense of awe at the tenacity of these farmers in the face of
+such daunting surroundings.
+~
 S
 #16
 Jungle Crop~
 A Jungle Crop~
-'.' 12 3 3 djk k
-C
-harvest~
+'.' 12 l 3 djk kp
 D1
 ????~
-&y~
+&g~
 D2
 ????~
-&y~
+&g~
 D3
 ????~
-&y~
+&g~
 D4
 ????~
-&y~
-M
-9061 0.01 d
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9151 10.00 dh
-M
-9109 10.00 dh
-M
-9106 10.00 dh
-M
-9111 10.00 bdh
-M
-9105 5.00 bdh
-M
-9104 5.00 bdh
-M
-9103 5.00 adh
-M
-9113 5.00 adh
-M
-9102 5.00 adh
-M
-9107 10.00 dg
-M
-9101 1.00 dg
-M
-9112 5.00 bdg
-M
-9110 5.00 bdg
-M
-9114 5.00 bdg
-M
-9108 5.00 bdg
-M
-9115 10.00 adg
-M
-9100 5.00 adg
-M
-9016 5.00 adg
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9153 10.00 bc
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
+&g~
+E
+16 0 100.00 0
+E
+19 0 100.00 27
+U
+0
+The crop grows with astounding speed!~
 S
 #17
 Trench~
 A Trench~
-'_' 24 1 4 t 0
+'.' 24 hj 4 t 0
 C
 dig, excavate, fillin, pour~
 D1
@@ -1473,10 +755,23 @@ D4
 \__/~
 &0~
 E
-6 0 100.00 5
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 101 15.00 1 X  # DIG: a pile of clay
-I 5 100 100.00 1 X  # DIG: a rock
+6 0 100.00 19
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+X
+trench canal moat ground around~
+   You find yourself standing on the edge of a trench that has been
+painstakingly dug by hand with a great deal of effort and skill. The walls of
+the trench are steep and slick with moisture, and you can hear the distant
+sound of water trickling somewhere within. It's evident that this trench was
+not dug for mere aesthetics - it has a clear function. Perhaps it was dug to
+create a moat or canal, to channel water or to protect a structure. Whatever
+its purpose, you can't help but admire the work that went into its creation.
+It's a reminder of the industriousness and ingenuity of those who live in this
+world, and a testament to what can be accomplished with hard work and
+determination.
+~
 S
 #18
 Tower of Souls~
@@ -1496,13 +791,44 @@ D3
 D4
 */\*~
 &y~
+X
+tower souls around~
+   The Tower of Souls looms over you, stretching from its stone foundation to
+the heavens above. The constant whir and whoosh of souls ascending and
+descending the tower's scaffolding drowns out the sound of the world around
+you. From time to time, the tower captures a soul and restores it to life, in
+the flesh.
+(Players with no 'tomb' set will respawn at a Tower of Souls.)
+~
+S
+#19
+Canal~
+A Canal~
+'~' 17 o 8 giC af
+D0
+@w&?~~@e~
+&c~
+U
+0
+The canal's waters begin to flow.~
+X
+canal water trench around~
+   You are standing next to a wide, gently flowing canal. The water here is
+calm and clear, and you can see the faint ripples caused by the current. The
+canal is deep enough that it would be difficult to wade across, and its edges
+are lined with tall, sturdy banks of earth. You can see that the canal has been
+artificially constructed, as its edges are perfectly straight and symmetrical.
+Whether they're being used as a moat to protect a nearby fortress or maybe a
+vital waterway for trade and transportation, these canals always fill you with
+a sense of awe as impressive feats of human engineering.
+~
 S
 #20
 Desert~
 An Arid Desert~
-'.' 21 2 2 l e
+'.' 21 k 2 l ep
 C
-dig~
+dig, gather~
 D1
 ....~
 &Y~
@@ -1516,227 +842,85 @@ D4
 ....~
 &y~
 E
-2 21 2.00 26
+2 57 10.00 51
 E
-3 20 0.28 26
-E
-3 20 0.28 12
+3 20 0.28 25
 E
 5 0 100.00 22
 E
-7 5 4.00 70
-E
 8 0 100.00 14
 E
-9 0 50.00 26
-I 5 103 8.00 1 X  # DIG: a yellow lightning stone
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3014 100.00 1  # FORAGE: some dry beans
-I 7 1204 100.00 1  # FIND-HERB: a daggerbite frond
-M
-9040 0.01 d
-M
-9059 0.01 ad
-M
-9055 0.01 bd
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9131 5.00 d
-M
-9128 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9118 15.00 ad
-M
-9130 15.00 ad
-M
-9129 15.00 ad
-M
-9116 15.00 ad
-M
-9122 5.00 bd
-M
-9117 5.00 bd
-M
-9126 5.00 bd
-M
-9125 5.00 bd
-M
-9124 5.00 bd
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9153 10.00 bc
-M
-240 6.00 bc
-M
-252 10.00 cf
-M
-251 15.00 ce
-M
-223 5.00 bce
-M
-222 5.00 bce
-M
-200 5.00 bce
-M
-201 5.00 bce
-M
-237 5.00 ce
-M
-9064 0.90 ad
+9 0 50.00 25
+E
+26 268435456 4.00 70
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3014 50.00 25  # FORAGE: dry beans
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 139 92.00 50 g  # GATHER: bundle of long leaves
+I 9 134 8.00 50 g  # GATHER: thorny sapling
+U
+0
+The desert seems to come to life!~
+X
+desert ground plants cactus cacti around~
+   You stand in the midst of a vast, sandy desert, interrupted only by
+occasional outcroppings of rock and hardy, low-growing vegetation. The
+landscape is rugged and unforgiving, but all around you are signs of life. The
+scorching heat beats down on you, and the only sound is the gentle rustling of
+the wind as it sweeps across the barren terrain. You feel a sense of isolation
+and vulnerability in this harsh, unforgiving landscape.
+~
 S
 #21
 Oasis~
 A Sparkling Oasis~
-'~' 18 2 6 iw jo
+'.' 18 kovw 6 iw jp
 C
 dig, drink, fill, gather, pick~
-D1
+D0
 .&C~~&?.~
-&Y~
-D2
-.&c~~&?.~
-&y~
-D3
-.&C~~&?.~
-&Y~
-D4
-.&c~~&?.~
 &y~
 E
-2 6 4.00 5
+4 0 2.00 80
 E
-2 5 4.00 5
-I 5 103 8.00 1 X  # DIG: a yellow lightning stone
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3014 100.00 1  # FORAGE: some dry beans
-I 7 1203 100.00 1  # FIND-HERB: some magewhisper sepals
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9040 0.01 d
-M
-9059 0.01 ad
-M
-9055 0.01 bd
-M
-9121 10.00 d
-M
-9127 10.00 d
-M
-9119 10.00 d
-M
-9131 10.00 d
-M
-9128 10.00 d
-M
-9026 50.00 d
-M
-9123 10.00 d
-M
-9018 10.00 d
-M
-9120 15.00 ad
-M
-9118 15.00 ad
-M
-9130 15.00 ad
-M
-9129 15.00 ad
-M
-9116 15.00 ad
-M
-9122 10.00 bd
-M
-9117 10.00 bd
-M
-9126 10.00 bd
-M
-9125 10.00 bd
-M
-9124 10.00 bd
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9154 10.00 bc
-M
-9153 10.00 bc
-M
-240 6.00 bc
-M
-252 10.00 cf
-M
-251 15.00 ce
-M
-223 5.00 bce
-M
-222 5.00 bce
-M
-200 5.00 bce
-M
-201 5.00 bce
-M
-237 5.00 ce
-M
-9064 0.90 ad
+8 0 100.00 83
+E
+9 0 75.00 80
+E
+17 20 2.00 25
+E
+26 268435456 4.00 88
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3014 25.00 25  # FORAGE: dry beans
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 134 8.00 50 g  # GATHER: thorny sapling
+I 9 139 92.00 50 g  # GATHER: bundle of long leaves
+U
+0
+Water springs from the ground and bushes begin to grow in an instant!~
+X
+oasis plants water vegetation desert around~
+   As you approach the oasis, you can feel the air around you become cooler and
+moister. A small pool of crystal-clear water sparkles in the center of the
+verdant grove of plants, inviting you to quench your thirst. The shade provided
+by the vegetation offers a welcome respite. You can hear the soothing sound of
+a gentle breeze rustling through the leaves.
+~
 S
 #22
 Sandy Trench~
 A Sandy Trench~
-'_' 24 2 4 t 0
+'.' 24 hk 4 t 0
 C
 dig, excavate, fillin, pour~
 D1
@@ -1752,15 +936,202 @@ D4
 \__/~
 &y~
 E
-6 0 100.00 21
-I 5 103 8.00 1 X  # DIG: a yellow lightning stone
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 100 100.00 1 X  # DIG: a rock
+6 0 100.00 85
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 107 100.00 125 X  # DIG: bag of sand
+X
+trench sandy down around~
+   A trench has been dug into the desert, its edges rough and uneven. It
+stretches out before you, seeming to disappear into the distance. The loose
+sand and rocks thrown up alongside the trench suggest that it was recently
+excavated, perhaps with the intention of creating an irrigation canal or some
+other similar project. Despite the harshness of the desert landscape, the
+trench seems to offer a promise of fertility and life.
+~
+S
+#23
+Desert Stumps~
+A Group of Stumps in the Desert~
+'.' 21 k 2 dl ep
+C
+burn stumps, dig, gather, pick~
+D1
+.&t.&?..~
+&Y~
+D1
+..&t.&?.~
+&Y~
+D2
+.&t.&?..~
+&y~
+D2
+..&t.&?.~
+&y~
+D3
+.&t.&?..~
+&Y~
+D3
+..&t.&?.~
+&Y~
+D4
+.&t.&?..~
+&y~
+D4
+..&t.&?.~
+&y~
+E
+2 57 10.00 51
+E
+4 0 2.50 24
+E
+9 0 50.00 24
+E
+16 0 100.00 20
+E
+23 0 100.00 20
+E
+26 268435456 4.00 73
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3014 50.00 25  # FORAGE: dry beans
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 134 8.00 50 g  # GATHER: thorny sapling
+I 9 139 46.00 50 g  # GATHER: bundle of long leaves
+I 9 132 46.00 50 g  # GATHER: thorny branches
+X
+stumps trees grove around~
+   The harsh desert terrain is marred by a series of stumps where a small grove
+once stood. The area is now barren, save for a few scattered rocks and the
+stumps of the former trees. The heat beats down mercilessly, and the sand is
+blown about by the dry desert winds. It's clear that someone has gone to great
+effort to cut down the trees, but it's not clear why they would choose to do so
+in such a barren place.
+~
+X
+desert sand~
+   Small dunes of fine, pale sand rise and fall in gentle curves, creating a
+rippled landscape that seems to go on forever. Heat shimmers above the sand,
+making it hard to see too far ahead. The only relief from the monotonous
+scenery are occasional clumps of scraggly, hardy desert plants clinging to life
+in the harsh environment.
+~
+S
+#24
+Desert Copse~
+A Gnarled Desert Copse~
+'w' 11 k 6 adl p
+C
+chop, dig, gather, pick~
+D0
+&y..&?ww~
+&g~
+D0
+&y.&?ww&y.~
+&g~
+D0
+ww&y..~
+&g~
+E
+0 0 33.33 23
+E
+0 0 100.00 24
+E
+2 57 10.00 51
+E
+4 0 0.40 26
+E
+9 0 50.00 26
+E
+26 268435456 4.00 74
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3016 50.00 25  # FORAGE: handful of dates
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 134 8.00 50 g  # GATHER: thorny sapling
+I 9 139 46.00 50 g  # GATHER: bundle of long leaves
+I 9 132 46.00 50 g  # GATHER: thorny branches
+I 20 134 100.00 1  # CHOP: thorny sapling
+U
+0
+Thorny saplings shoot up from the edges of the stumps!~
+X
+copse gnarled desert trees grove around~
+   You come across a small copse of trees growing in the midst of the arid
+desert. Despite the harsh conditions, the trees seem to be thriving, their
+roots digging deep into the sandy soil. The trunks are thin, and the branches
+are short, but you can see some of them are beginning to produce new leaves.
+It's a stark contrast to the desolate surroundings, and the copse provides a
+small oasis of greenery in an otherwise barren landscape.
+~
+S
+#25
+Desert Shrub~
+A Large Shrub in the Desert~
+'.' 11 k 5 adl p
+C
+chop, dig, gather, pick~
+D0
+&gw&?...~
+&y~
+D0
+.&gw&?..~
+&y~
+D0
+..&gw&?.~
+&y~
+D0
+...&gw~
+&y~
+E
+0 0 75.00 23
+E
+0 0 100.00 25
+E
+2 57 10.00 51
+E
+4 0 0.40 26
+E
+9 0 50.00 26
+E
+26 268435456 4.00 74
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3016 50.00 25  # FORAGE: handful of dates
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 134 8.00 50 g  # GATHER: thorny sapling
+I 9 139 46.00 50 g  # GATHER: bundle of long leaves
+I 9 132 46.00 50 g  # GATHER: thorny branches
+I 20 134 100.00 1  # CHOP: thorny sapling
+U
+0
+A new shrub unfolds itself as it rises from the dirt!~
+X
+shrub large plant tree sapling desert around~
+   You are standing in a barren desert terrain, dotted sparsely with small
+shrubs. Amidst the dry sand, a young sapling is beginning to sprout, its tiny
+green leaves a hopeful contrast against the desolate landscape. The shrubbery
+around it provide a stark reminder of the harshness of the desert, but this
+little plant perseveres, reaching for the sun as it establishes itself in this
+unforgiving terrain.
+~
 S
 #26
 Grove~
 A Shady Desert Grove~
-'^' 10 2 6 adl l
+'.' 10 kq 6 adl lp
 C
 chop, dig, gather, pick~
 D0
@@ -1773,94 +1144,39 @@ D0
 &g^^&?..~
 &y~
 E
-0 1 100.00 20
+0 1 100.00 23
 E
-7 5 0.80 71
-I 5 103 8.00 1 X  # DIG: a yellow lightning stone
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3016 100.00 1  # FORAGE: a handful of dates
-I 7 1204 100.00 1  # FIND-HERB: a daggerbite frond
-I 9 121 100.00 1  # GATHER: a stick
-I 20 122 5.00 4 c  # CHOP: some rough wood
-I 20 122 10.00 3 c  # CHOP: some rough wood
-I 20 122 50.00 2 c  # CHOP: some rough wood
-I 20 122 35.00 1 c  # CHOP: some rough wood
-M
-9040 0.01 d
-M
-9059 0.01 ad
-M
-9055 0.01 bd
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9131 5.00 d
-M
-9128 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9118 15.00 ad
-M
-9130 15.00 ad
-M
-9129 15.00 ad
-M
-9116 15.00 ad
-M
-9117 15.00 bd
-M
-9126 5.00 bd
-M
-9122 5.00 bd
-M
-9125 5.00 bd
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9153 10.00 bc
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9064 0.90 ad
+2 57 10.00 51
+E
+26 268435456 4.00 71
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3016 50.00 25  # FORAGE: handful of dates
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 132 85.00 50 g  # GATHER: thorny branches
+I 9 134 15.00 50 g  # GATHER: thorny sapling
+I 20 122 100.00 2 c  # CHOP: rough wood
+U
+0
+The scraggly trees unfold leaf after leaf as they grow larger and larger!~
+X
+grove desert shady trees woods around~
+   You are standing in a small grove of trees in the middle of the desert. The
+trees are short and scrappy, with gnarled trunks and twisted branches that seem
+to defy the harsh desert conditions. The ground beneath them is covered in dry,
+cracked earth and tufts of sparse grass. The grove provides a bit of welcome
+shade from the blazing sun, but it is clear that these trees are struggling to
+survive in this unforgiving environment.
+~
 S
 #27
 Partial Jungle~
 The Jungle, Partially Cleared~
-'^' 12 3 6 d g
+'^' 12 lqr 6 d g
 C
 chop, gather~
 D1
@@ -1876,9 +1192,13 @@ D4
 ^&g.&?^&g.~
 &G~
 E
-0 1 50.00 0
+0 1 50.00 61
 E
 0 1 100.00 27
+E
+2 32 2.00 35
+E
+2 57 10.00 50
 E
 4 0 0.80 28
 E
@@ -1887,82 +1207,30 @@ E
 8 0 100.00 15
 E
 9 0 50.00 28
-I 6 3017 100.00 1  # FORAGE: a plump fig
-I 9 121 100.00 1  # GATHER: a stick
-I 20 128 100.00 1  # CHOP: a massive jungle tree
-M
-9061 0.01 d
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9151 10.00 dh
-M
-9109 10.00 dh
-M
-9106 10.00 dh
-M
-9111 10.00 bdh
-M
-9105 5.00 bdh
-M
-9104 5.00 bdh
-M
-9103 5.00 adh
-M
-9113 5.00 adh
-M
-9102 5.00 adh
-M
-9107 10.00 dg
-M
-9101 1.00 dg
-M
-9109 10.00 dg
-M
-9112 5.00 bdg
-M
-9110 5.00 bdg
-M
-9114 5.00 bdg
-M
-9108 5.00 bdg
-M
-9115 10.00 adg
-M
-9100 5.00 adg
-M
-9016 5.00 adg
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9153 10.00 bc
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
+E
+15 0 1.00 34
+I 6 3017 33.00 25  # FORAGE: plump fig
+I 9 133 100.00 50  # GATHER: tangle of vines
+I 20 128 100.00 1  # CHOP: massive jungle tree
+U
+0
+New trees shoot up toward the sky from the soil, soaking up water and threatening to block the sun with fresh leaves!~
+X
+jungle clearing cleared trees forest around~
+   The trees here have been selectively cut down to make way for small paths,
+but there is still an abundance of vegetation surrounding you. You can hear the
+sound of birds and insects, and the air is thick with humidity. Sunlight
+filters through the leaves of the remaining trees, casting dappled patterns on
+the ground. You can see small bushes and shrubs growing alongside the path,
+their leaves and branches reaching out in all directions. The ground is covered
+with a layer of decaying leaves and other organic matter, providing a fertile
+bed for the growth of new plants.
+~
 S
 #28
 Jungle~
 The Jungle~
-'^' 12 3 8 d g
+'^' 12 lq 8 d g
 C
 chop, gather~
 D1
@@ -1982,203 +1250,112 @@ E
 E
 0 1 100.00 28
 E
+2 32 2.00 35
+E
+2 57 10.00 50
+E
 7 5 2.00 29
-I 6 3017 100.00 1  # FORAGE: a plump fig
-I 9 121 100.00 1  # GATHER: a stick
-I 20 128 100.00 1  # CHOP: a massive jungle tree
-M
-9061 0.01 d
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9151 10.00 dh
-M
-9109 15.00 dh
-M
-9106 15.00 dh
-M
-9111 15.00 bdh
-M
-9105 15.00 bdh
-M
-9104 15.00 bdh
-M
-9103 15.00 adh
-M
-9113 15.00 adh
-M
-9102 15.00 adh
-M
-9107 15.00 dg
-M
-9101 5.00 dg
-M
-9109 15.00 dg
-M
-9114 10.00 bdg
-M
-9112 15.00 bdg
-M
-9110 15.00 bdg
-M
-9108 15.00 bdg
-M
-9115 10.00 adg
-M
-9100 15.00 adg
-M
-9016 15.00 adg
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9153 10.00 bc
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
+E
+15 0 1.00 34
+E
+17 59 0.60 63
+E
+17 60 0.60 64
+E
+17 54 0.60 55
+E
+17 4 0.50 27
+E
+17 90 0.70 27
+I 6 3017 33.00 25  # FORAGE: plump fig
+I 9 133 100.00 50  # GATHER: tangle of vines
+I 20 128 100.00 1  # CHOP: massive jungle tree
+U
+0
+Vines overtake the world as they grow down from the rising trees!~
+X
+jungle trees forest around~
+   You are standing in a tropical jungle, surrounded by an impenetrable wall of
+vegetation. The humid air is thick with the scent of plant life, and the ground
+beneath you is soft and damp. The towering trees rise up around you, their
+trunks wrapped in vines and their branches draped with epiphytes. Sunlight
+struggles to penetrate the canopy above, casting everything in a greenish hue.
+The air is alive with the sounds of chirping birds, chattering monkeys, and the
+rustling of leaves as unseen creatures move through the underbrush.
+~
 S
 #29
 Swamp~
 A Murky Swamp~
-'~' 13 3 10 aw m
+'~' 13 lov 10 aw m
 D0
-~~~&g^~
+~~~&G^~
 &c~
 D0
-~~&g^&?~~
+~~&G^&?~~
 &c~
 D0
-~&g^&?~~~
+~&G^&?~~~
 &c~
 D0
-&g^&?~~~~
+&G^&?~~~~
 &c~
 E
 9 0 25.00 27
 E
 11 5 4.00 27
-I 6 3310 100.00 1  # FORAGE: a wood ear mushroom
-I 10 9114 1.00 1  # ENCOUNTER: a massive crocodile
-I 21 1300 20.00 1 f  # FISH: a glowing green seashell
-I 21 1305 0.25 1 f  # FISH: a worn old statuette
-I 21 256 0.25 1 f  # FISH: a hestian trinket
-I 21 262 0.25 1 f  # FISH: a trinket of conveyance
-I 21 1304 5.00 1 f  # FISH: some sea junk
-I 21 1311 25.00 1 f  # FISH: a spotted eel
-I 21 1316 25.00 1 f  # FISH: a small gator
-I 21 1314 100.00 1 f  # FISH: a fat catfish
-M
-9061 0.01 d
-M
-9162 0.50 d
-M
-9161 0.50 d
-M
-9160 0.50 ad
-M
-9017 5.00 dh
-M
-9156 15.00 dh
-M
-9151 10.00 dh
-M
-9109 15.00 dh
-M
-9106 15.00 dh
-M
-9105 15.00 bdh
-M
-9104 15.00 bdh
-M
-9006 5.00 dg
-M
-9155 15.00 dg
-M
-9107 15.00 dg
-M
-9109 15.00 dg
-M
-9114 10.00 bdg
-M
-9108 15.00 bdg
-M
-9115 10.00 adg
-M
-9159 15.00 d
-M
-9158 10.00 d
-M
-9157 10.00 d
+E
+15 0 5.00 34
+I 6 3310 50.00 25  # FORAGE: wood ear mushroom
+I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
+I 21 1300 20.00 125 f  # FISH: glowing green seashell
+I 21 1305 0.25 125 f  # FISH: worn old statuette
+I 21 256 0.25 125 f  # FISH: hestian trinket
+I 21 262 0.25 125 f  # FISH: trinket of conveyance
+I 21 1304 5.00 125 f  # FISH: sea junk
+I 21 1311 25.00 125 f  # FISH: spotted eel
+I 21 1316 25.00 125 f  # FISH: small gator
+I 21 1314 100.00 125 f  # FISH: fat catfish
 M
 264 10.00 ace
-M
-252 10.00 c
-M
-253 10.00 cf
-M
-9153 10.00 bc
+X
+swamp murky river water trees forest jungle around~
+   The air in the swamp is thick with moisture, and the ground is soft and
+muddy beneath your feet. Strange noises emanate from the murky water, where you
+can barely make out the shapes of twisted roots and submerged logs. Insects
+buzz all around, and a faint smell of decay hangs in the air. Mangroves and
+other trees with gnarled roots rise up from the water, creating a tangled
+canopy overhead that blocks out much of the sunlight. The river flows lazily
+by, its surface dotted with lily pads and occasional waterfowl.
+~
 S
 #30
 Tundra~
 The Arctic Tundra~
-',' 16 1 50 cev 0
+',' 16 fsx 50 cev 0
 D0
 ,,,,~
 &W~
-I 6 3000 100.00 1  # FORAGE: a handful of lichen
-M
-9172 5.00 g
-M
-9173 5.00 ag
-M
-9174 5.00 g
-M
-9175 5.00 g
-M
-9177 5.00 g
+I 6 3000 100.00 25  # FORAGE: handful of lichen
 M
 9178 0.03 g
 M
-9179 15.00 g
-M
-9180 5.00 g
-M
-9181 5.00 g
-M
-9182 5.00 g
-M
 9186 5.00 0
-M
-9171 5.00 0
-M
-9183 10.00 h
-M
-9184 5.00 h
-M
-9185 5.00 h
+X
+tundra arctic snow ice around~
+   The frozen tundra stretches endlessly before you, a barren and frigid
+wasteland of ice and snow. The ground crunches underfoot, the only sound in the
+otherwise silent landscape. The air is icy cold, biting at any exposed skin,
+and the sky overhead is a perpetual gray, offering no warmth or comfort. In the
+distance, jagged peaks rise up like teeth, a foreboding reminder of the
+harshness of this unforgiving land.
+~
+Z1 7
 S
 #31
 Adventure~
 An Adventure~
-'?' 0 1 2 b 0
+'?' 0 0 2 bB 0
 D0
 ....~
 &0~
@@ -2186,25 +1363,793 @@ S
 #32
 Lake~
 A Lake~
-'~' 17 0 10 gi a
+'~' 17 ou 10 gix au
 D0
 ~~~~~
 &c~
-I 21 1300 20.00 1 f  # FISH: a glowing green seashell
-I 21 1305 0.25 1 f  # FISH: a worn old statuette
-I 21 256 0.25 1 f  # FISH: a hestian trinket
-I 21 262 0.25 1 f  # FISH: a trinket of conveyance
-I 21 1304 5.00 1 f  # FISH: some sea junk
-I 21 1314 25.00 1 f  # FISH: a fat catfish
-I 21 1315 25.00 1 f  # FISH: a yellow perch
-I 21 1312 100.00 1 f  # FISH: a speckled trout
-M
-9025 5.00 d
+E
+15 0 25.00 33
+I 21 1300 20.00 125 f  # FISH: glowing green seashell
+I 21 1305 0.25 125 f  # FISH: worn old statuette
+I 21 256 0.25 125 f  # FISH: hestian trinket
+I 21 262 0.25 125 f  # FISH: trinket of conveyance
+I 21 1304 5.00 125 f  # FISH: sea junk
+I 21 1314 25.00 125 f  # FISH: fat catfish
+I 21 1315 25.00 125 f  # FISH: yellow perch
+I 21 1312 100.00 125 f  # FISH: speckled trout
+U
+0
+The sparkling waters of the lake start to shimmer.~
+X
+lake water down around~
+   You find yourself on a calm, serene lake. The water is still and glassy,
+reflecting the sky above like a mirror. Small waves lap gently at the shore,
+and you can see fish darting just below the surface.
+~
 S
-#70
-Irrigated Plains~
-An Irrigated Plain~
-'.' 10 1 2 l b
+#33
+Frozen Lake~
+A Frozen Lake~
+'~' 2 fy 10 x a
+D0
+~~~~~
+&W~
+E
+12 0 20.00 32
+E
+13 0 100.00 32
+E
+14 0 100.00 32
+X
+lake frozen ice down around~
+   The frozen lake stretches out before you, its glassy surface reflecting the
+clear winter sky. The chill in the air is palpable, and you can hear the
+muffled crunch of snow underfoot as you take a step forward. The ice looks
+thick and solid, but you can't help feeling a sense of trepidation as you
+venture further out onto its frozen expanse.
+~
+S
+#34
+Damaged Jungle~
+A Frost-Damaged Jungle~
+'^' 12 l 6 d 0
+C
+chop, gather~
+D0
+^.^.~
+&0~
+D0
+^.^.~
+&0~
+E
+0 1 100.00 36
+E
+4 0 1.20 2
+E
+9 0 50.00 27
+I 9 133 100.00 50  # GATHER: tangle of vines
+I 20 128 100.00 1  # CHOP: massive jungle tree
+X
+jungle damaged frost-damaged dead trees forest around~
+   The jungle is eerily silent, as if the forest itself is mourning the loss of
+its fallen kin. The canopy is sparse, with many trees standing tall but
+lifeless, stripped of their vibrant foliage by a harsh frost. The ground is
+littered with dry, dead leaves and twigs that snap underfoot. The occasional
+bird or monkey call can be heard in the distance, but they seem to avoid this
+desolate area. Despite the devastation, new growth can be seen pushing its way
+through the wreckage, determined to reclaim what was lost.
+~
+S
+#35
+Marsh~
+A Marshy Lakeshore~
+'~' 13 louv 10 aw m
+D0
+~~~&G^~
+&c~
+D0
+~~&G^&?~~
+&c~
+D0
+~&G^&?~~~
+&c~
+D0
+&G^&?~~~~
+&c~
+E
+9 0 25.00 27
+E
+10 32 4.00 27
+E
+17 0 0.60 65
+I 6 3310 50.00 25  # FORAGE: wood ear mushroom
+I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
+I 21 1300 20.00 125 f  # FISH: glowing green seashell
+I 21 1305 0.25 125 f  # FISH: worn old statuette
+I 21 256 0.25 125 f  # FISH: hestian trinket
+I 21 262 0.25 125 f  # FISH: trinket of conveyance
+I 21 1304 5.00 125 f  # FISH: sea junk
+I 21 1311 25.00 125 f  # FISH: spotted eel
+I 21 1316 25.00 125 f  # FISH: small gator
+I 21 1314 100.00 125 f  # FISH: fat catfish
+M
+264 10.00 ace
+X
+marshy lakeshore swamp jungle forest trees water around~
+   The marsh around the lake in the jungle is a dense and tangled web of life.
+The murky water is alive with the croaks and chirps of unseen creatures. Mossy
+logs, partially submerged, stretch like skeletal fingers toward the sky. Lush
+greenery thrives in the nutrient-rich soil, their leaves reaching out like
+eager hands to soak up the sun's rays. Despite the fecundity, there's an eerie
+stillness to this place, and a faint smell of decay hangs in the air.
+~
+S
+#36
+Stumps~
+A Field of Stumps~
+'.' 10 jr 2 dl bp
+C
+burn stumps, dig~
+D1
+.&t.&?..~
+&g~
+D1
+..&t.&?.~
+&g~
+D2
+.&t.&?..~
+&g~
+D2
+..&t.&?.~
+&g~
+D3
+.&t.&?..~
+&g~
+D3
+..&t.&?.~
+&g~
+D4
+.&t.&?..~
+&0~
+D4
+..&t.&?.~
+&0~
+E
+2 29 0.80 61
+E
+2 53 5.00 56
+E
+2 5 10.00 46
+E
+2 57 10.00 59
+E
+4 0 2.50 37
+E
+9 0 50.00 37
+E
+16 0 100.00 0
+E
+23 0 100.00 0
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3013 33.00 25  # FORAGE: handful of nuts
+X
+stumps field forest trees around~
+   The plain is littered with stumps where the trees have been cut down. The
+landscape looks barren and devoid of life, with only scattered rocks and
+patches of grass. The stumps are of varying sizes, some freshly cut with sharp
+edges while others are more weathered and decayed. It's clear that this area
+was once teeming with tall trees, but now only the remnants remain.
+~
+S
+#37
+Small Copse~
+A Small Copse~
+'.' 13 jr 2 dl p
+C
+chop, dig~
+D1
+.w..~
+&g~
+D2
+.w..~
+&g~
+D3
+.&yw&?..~
+&g~
+D4
+.w..~
+&W~
+E
+0 1 50.00 36
+E
+0 0 100.00 37
+E
+2 53 5.00 56
+E
+2 57 10.00 60
+E
+2 5 10.00 47
+E
+3 29 0.80 29
+E
+4 0 0.80 38
+E
+9 0 50.00 38
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3015 33.00 25  # FORAGE: red berries
+I 20 131 100.00 1  # CHOP: green sapling
+U
+0
+Saplings spring forth from the edges of the stumps!~
+X
+copse small trees stumps wood forest around~
+   As you approach the copse, you see small trees sprouting up from old stumps.
+These young saplings are strong and healthy, reaching for the sky with tender,
+green shoots. The air around the copse is fresh, filled with the sweet
+fragrance of new growth. It's a hopeful sight, a reminder that life goes on and
+the forest will thrive again. Birds flit between the trees, their joyful songs
+a testament to the beauty of nature's resilience.
+~
+S
+#38
+Copse~
+A Copse of Young Trees~
+'w' 13 jr 3 dl p
+C
+chop, dig~
+D1
+w.w.~
+&g~
+D2
+w.w.~
+&g~
+D3
+w&g.&?w&g.~
+&y~
+D4
+w.w.~
+&W~
+E
+0 1 33.33 37
+E
+0 0 100.00 38
+E
+2 53 5.00 56
+E
+2 57 10.00 60
+E
+2 5 10.00 47
+E
+3 29 0.80 29
+E
+4 0 0.40 2
+E
+9 0 50.00 2
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3015 33.00 25  # FORAGE: red berries
+I 20 131 100.00 1  # CHOP: green sapling
+U
+0
+The horizon begins to vanish as more and more bushy saplings burst from the stumps!~
+X
+copse young trees wood forest stumps around~
+   As you approach the copse, you see small trees sprouting up from old stumps.
+These young saplings are strong and healthy, reaching for the sky with tender,
+green shoots. The air around the copse is fresh, filled with the sweet
+fragrance of new growth. It's a hopeful sight, a reminder that life goes on and
+the forest will thrive again. Birds flit between the trees, their joyful songs
+a testament to the beauty of nature's resilience.
+~
+S
+#39
+Forest Edge~
+The Edge of the Forest~
+'w' 13 jr 2 dl np
+C
+chop, dig~
+D1
+.w..~
+&g~
+D2
+.w..~
+&g~
+D3
+&g.&?w&g..~
+&y~
+D4
+.w..~
+&W~
+E
+0 1 75.00 36
+E
+0 0 100.00 39
+E
+2 53 5.00 56
+E
+2 57 10.00 60
+E
+2 5 10.00 47
+E
+3 29 0.80 29
+E
+4 0 0.80 1
+E
+9 0 50.00 1
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3015 33.00 25  # FORAGE: red berries
+I 20 131 100.00 1  # CHOP: green sapling
+U
+0
+Small trees spring up from the grass!~
+X
+edge forest trees around~
+   You find yourself standing at the edge of the forest, the last vestige of
+civilization before nature takes over. The forest looms before you, the trees
+reaching high into the sky, their branches forming a canopy overhead. The
+ground is covered in a thick layer of leaves and twigs, and the air is filled
+with the sound of chirping birds and rustling leaves. The scent of pine and
+earth fills your nostrils, inviting you to explore the vast wilderness that
+lies ahead.
+~
+S
+#40
+Riverbank~
+On the Plains, Above the Riverbank~
+'.' 10 jv 1 l bps
+C
+dig, gather, pick~
+D1
+@w&t..@e~
+&t~
+D2
+@w&t..@e~
+&t~
+D3
+@w&t..@e~
+&t~
+D4
+@w&?..@e~
+&0~
+E
+2 54 0.80 44
+E
+2 45 0.80 44
+E
+2 28 0.80 65
+E
+2 29 0.80 65
+E
+2 4 1.00 44
+E
+3 29 0.80 29
+E
+3 28 2.00 65
+E
+3 4 3.00 44
+E
+5 0 100.00 17
+E
+8 0 100.00 13
+E
+9 0 50.00 44
+E
+10 5 10.00 0
+E
+12 0 25.00 41
+I 5 102 9.00 125 x  # DIG: flint stone
+I 5 100 9.00 125 x  # DIG: rock
+I 5 101 100.00 125 x  # DIG: lump of clay
+I 6 3013 25.00 25  # FORAGE: handful of nuts
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1205 100.00 125 p  # PICK: bileberries
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 140 100.00 50  # GATHER: bundle of long grass
+X
+plains riverbank bank water around~
+   The riverbank is soft and muddy underfoot, with waterlogged earth and thick
+clumps of reeds and cattails sprouting up from the water's edge. The air is
+damp and heavy with the scent of wet earth and decaying vegetation, while the
+sound of the river rushing by is a constant background murmur. The occasional
+splash or rustle in the reeds hints at the presence of small animals or birds
+nearby.
+~
+S
+#41
+Floodplains~
+A Flooded Plain~
+'~' 17 jo 8 gi ps
+C
+fish, pick~
+D0
+@w&?~~@e~
+&c~
+E
+8 0 100.00 13
+E
+9 0 50.00 42
+E
+13 0 20.00 40
+E
+14 0 20.00 40
+E
+15 0 20.00 40
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1205 100.00 125 p  # PICK: bileberries
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 21 1300 20.00 125 f  # FISH: glowing green seashell
+I 21 1305 0.25 125 f  # FISH: worn old statuette
+I 21 256 0.25 125 f  # FISH: hestian trinket
+I 21 262 0.25 125 f  # FISH: trinket of conveyance
+I 21 1304 5.00 125 f  # FISH: sea junk
+I 21 1311 25.00 125 f  # FISH: spotted eel
+I 21 1313 25.00 125 f  # FISH: bright red leaping fish
+I 21 1312 100.00 125 f  # FISH: speckled trout
+I 22 174 5.00 25  # PAN: small flake of gold
+X
+plains flooding flooded water around river~
+   As you stand on the edge of the river, you see vast plains stretching out
+before you, their lush green grasses swaying gently in the breeze. However, the
+river seems to have overflowed its banks, causing the plains to flood. The
+water is murky and brown, and you can see small ripples forming as fish dart
+around beneath the surface. The air is filled with the sounds of birds chirping
+and insects buzzing, and you can smell the fresh, earthy scent of the wet soil.
+~
+S
+#42
+Flooded Woods~
+Some Flooded Woods~
+'~' 17 joq 3 dgi ps
+C
+chop, fish, pick~
+D0
+@w&g^&?~@e~
+&c~
+D0
+@w&?~&g^@e~
+&c~
+E
+0 0 100.00 41
+E
+4 0 1.00 43
+E
+9 0 50.00 43
+E
+13 0 20.00 44
+E
+14 0 20.00 44
+E
+15 0 20.00 44
+I 6 3015 75.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1205 100.00 125 p  # PICK: bileberries
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 20 120 100.00 1  # CHOP: large tree
+I 21 1300 20.00 125 f  # FISH: glowing green seashell
+I 21 1305 0.25 125 f  # FISH: worn old statuette
+I 21 256 0.25 125 f  # FISH: hestian trinket
+I 21 262 0.25 125 f  # FISH: trinket of conveyance
+I 21 1304 5.00 125 f  # FISH: sea junk
+I 21 1311 25.00 125 f  # FISH: spotted eel
+I 21 1313 25.00 125 f  # FISH: bright red leaping fish
+I 21 1312 100.00 125 f  # FISH: speckled trout
+I 22 174 5.00 25  # PAN: small flake of gold
+U
+0
+A tree rises from the water, toward the sky!~
+X
+woods flooded flooding trees forest around river water~
+   The river has overflowed and flooded the woods, submerging the lower
+branches of the trees. The forest floor is submerged and muddied, making it
+difficult to walk. Small ripples appear on the surface of the water as fish
+swim past, and the sound of frogs croaking fills the air. Some trees are bent
+or fallen, dragged by the current. A faint smell of decay lingers in the damp
+air.
+~
+S
+#43
+Flooded Forest~
+A Flooded Forest~
+'~' 17 joq 6 dgi ps
+C
+chop, fish, pick~
+D0
+@w&g^&?~@e~
+&c~
+D0
+@w&?~&g^@e~
+&c~
+E
+0 0 100.00 42
+E
+13 0 20.00 45
+E
+14 0 20.00 45
+E
+15 0 20.00 45
+I 6 3015 75.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1205 100.00 125 p  # PICK: bileberries
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 20 120 100.00 1  # CHOP: large tree
+I 21 1300 20.00 125 f  # FISH: glowing green seashell
+I 21 1305 0.25 125 f  # FISH: worn old statuette
+I 21 256 0.25 125 f  # FISH: hestian trinket
+I 21 262 0.25 125 f  # FISH: trinket of conveyance
+I 21 1304 5.00 125 f  # FISH: sea junk
+I 21 1311 25.00 125 f  # FISH: spotted eel
+I 21 1313 25.00 125 f  # FISH: bright red leaping fish
+I 21 1312 100.00 125 f  # FISH: speckled trout
+I 22 174 5.00 25  # PAN: small flake of gold
+U
+0
+A tree rises from the water and unfolds its canopy in the sky!~
+X
+forest flooded flooding woods trees around river water~
+   The river has overflowed and flooded the woods, submerging the lower
+branches of the trees. The forest floor is submerged and muddied, making it
+difficult to walk. Small ripples appear on the surface of the water as fish
+swim past, and the sound of frogs croaking fills the air. Some trees are bent
+or fallen, dragged by the current. A faint smell of decay lingers in the damp
+air.
+~
+S
+#44
+Light Riverbank Forest~
+Some Trees on the Riverbank~
+'.' 14 jqrv 2 dl nps
+C
+chop, dig, gather, pick~
+D1
+@w&g^&?.@e~
+&t~
+D1
+@w&?.&g^@e~
+&t~
+D2
+@w&g^&?.@e~
+&t~
+D2
+@w&?.&g^@e~
+&t~
+D3
+@w&y^&?.@e~
+&t~
+D3
+@w&?.&y^@e~
+&t~
+D4
+@w&W^&?.@e~
+&0~
+D4
+@w&?.&W^@e~
+&0~
+E
+0 0 100.00 46
+E
+2 29 0.80 29
+E
+4 0 1.00 45
+E
+9 0 50.00 45
+E
+10 5 10.00 1
+E
+12 0 25.00 42
+I 5 102 9.00 125 x  # DIG: flint stone
+I 5 100 9.00 125 x  # DIG: rock
+I 5 101 100.00 125 x  # DIG: lump of clay
+I 6 3015 25.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1205 100.00 125 p  # PICK: bileberries
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 85.00 50 g  # GATHER: sticks and leaves
+I 9 131 15.00 50 g  # GATHER: green sapling
+I 20 120 100.00 1  # CHOP: large tree
+U
+0
+New trees burst forth from the riverbank and wend their way toward the sky!~
+X
+trees forest riverbank bank water~
+   You are standing at the edge of the forest, with the sounds of rushing water
+nearby. The tall trees stretch high into the sky, their branches forming a
+canopy overhead. The air is cool and damp, filled with the fresh scent of earth
+and vegetation. The river runs alongside the forest, its gentle flow creating a
+soothing background noise.
+~
+S
+#45
+Forested Riverbank~
+A Forest, Above the Riverbank~
+'^' 14 jqv 3 dl nps
+C
+chop, dig, gather, pick~
+D1
+@w&?^&t.@e~
+&g~
+D1
+@w&t.&?^@e~
+&g~
+D2
+@w&?^&t.@e~
+&g~
+D2
+@w&t.&?^@e~
+&g~
+D3
+@w&?^&t.@e~
+&y~
+D3
+@w&t.&?^@e~
+&y~
+D4
+@w&?^&0.@e~
+&W~
+D4
+@w&0.&?^@e~
+&W~
+E
+0 0 100.00 44
+E
+2 29 0.80 29
+E
+10 5 10.00 2
+E
+12 0 25.00 43
+I 5 102 9.00 125 x  # DIG: flint stone
+I 5 100 9.00 125 x  # DIG: rock
+I 5 101 100.00 125 x  # DIG: lump of clay
+I 6 3015 25.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1205 100.00 125 p  # PICK: bileberries
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 85.00 50 g  # GATHER: sticks and leaves
+I 9 131 15.00 50 g  # GATHER: green sapling
+I 20 120 100.00 1  # CHOP: large tree
+U
+0
+The sky fills in with green as new trees streak toward the sky and unfurl their leaves!~
+X
+forest trees riverbank bank water river around~
+   You are standing at the edge of the forest, with the sounds of rushing water
+nearby. The tall trees stretch high into the sky, their branches forming a
+canopy overhead. The air is cool and damp, filled with the fresh scent of earth
+and vegetation. The river runs alongside the forest, its gentle flow creating a
+soothing background noise.
+~
+S
+#46
+Stumped Riverbank~
+Some Stumps on the Riverbank~
+'.' 10 jrv 1 dl bps
+C
+burn stumps, dig, pick~
+D1
+@w&t..@e~
+&t~
+D2
+@w&t..@e~
+&t~
+D3
+@w&t..@e~
+&t~
+D4
+@w&?..@e~
+&0~
+E
+4 0 2.50 47
+E
+9 0 50.00 47
+E
+10 5 10.00 36
+E
+12 0 25.00 41
+E
+16 0 100.00 40
+E
+23 0 100.00 40
+I 5 102 9.00 125 X  # DIG: flint stone
+I 5 100 9.00 125 X  # DIG: rock
+I 5 101 100.00 125 X  # DIG: lump of clay
+I 6 3013 25.00 25  # FORAGE: handful of nuts
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1205 100.00 125 p  # PICK: bileberries
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+X
+stumps riverbank bank water trees forest around~
+   You stand before a line of stumps on the riverbank, evidence of trees that
+once stood tall and proud. They now form a jagged line along the water's edge,
+their bark stripped and their branches removed. Some stumps are old and
+weathered, while others are fresher, with splintered wood still clinging to the
+sides. The scent of sawdust and fresh-cut wood hangs in the air, a reminder of
+the recent activity.
+~
+S
+#47
+Riverside Copse~
+A Copse on the Riverbank~
+'w' 13 jrv 3 dl p
+C
+chop, dig, pick~
+D1
+@w&?w&t.@e~
+&g~
+D1
+@w&t.&?w@e~
+&g~
+D2
+@w&?w&t.@e~
+&g~
+D2
+@w&t.&?w@e~
+&g~
+D3
+@w&?w&t.@e~
+&y~
+D3
+@w&t.&?w@e~
+&y~
+D4
+@w&?w&0.@e~
+&W~
+D4
+@w&0.&?w@e~
+&W~
+E
+0 1 50.00 46
+E
+0 0 100.00 47
+E
+2 29 0.80 29
+E
+4 0 0.40 44
+E
+9 0 50.00 44
+E
+10 5 10.00 37
+E
+12 0 25.00 42
+I 5 102 9.00 125 X  # DIG: flint stone
+I 5 100 9.00 125 X  # DIG: rock
+I 5 101 100.00 125 X  # DIG: lump of clay
+I 6 3015 25.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1205 100.00 125 p  # PICK: bileberries
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 20 131 100.00 1  # CHOP: green sapling
+U
+0
+Fresh saplings shoot forth from the edges of the stumps!~
+X
+copse riverside riverbank bank trees forest stumps around~
+   As you approach the river, a small copse comes into view, nestled on the
+bank. Some of the trees have been felled, leaving stumps of varying heights.
+But amidst the stumps, there are signs of new growth: tiny saplings and young
+trees are sprouting up, reaching for the light. The lush foliage of the
+surrounding forest provides a natural barrier, casting a dappled shade over the
+copse. The sound of the nearby river can be heard, its gentle current soothing
+and constant.
+~
+S
+#50
+Shore~
+Along the Shore~
+'.' 10 jrs 2 l bpr
 C
 dig, pick~
 D1
@@ -2220,6 +2165,756 @@ D4
 ....~
 &0~
 E
+2 55 0.80 55
+E
+2 54 0.80 54
+E
+2 28 0.80 55
+E
+2 4 0.80 54
+E
+3 29 0.80 29
+E
+5 0 100.00 17
+E
+8 0 100.00 13
+E
+9 0 50.00 54
+E
+10 57 5.00 0
+I 5 101 25.00 125 x  # DIG: lump of clay
+I 5 110 10.00 125 x  # DIG: sea salt crystals
+I 5 107 65.00 125 x  # DIG: bag of sand
+I 6 3051 50.00 25 x  # FORAGE: sea urchin
+I 6 3052 50.00 25 x  # FORAGE: clam
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+X
+shore ocean sea water plains around~
+   The ocean waves crash against the shore, churning up sand and shells. The
+water stretches out endlessly in one direction, while in the other, the shore
+meets the plains. Seabirds can be seen swooping and diving into the water,
+searching for food. The salty sea air is refreshing and invigorating.
+~
+S
+#51
+Beach~
+A Sandy Beach~
+'.' 21 ks 2 l epr
+C
+dig, pick~
+D1
+....~
+&Y~
+D2
+....~
+&y~
+D3
+....~
+&Y~
+D4
+....~
+&y~
+E
+5 0 100.00 22
+E
+8 0 100.00 14
+E
+10 57 5.00 20
+E
+26 268435456 4.00 70
+I 5 103 8.00 125 x  # DIG: yellow lightning stone
+I 5 101 21.00 125 x  # DIG: lump of clay
+I 5 110 8.00 125 x  # DIG: sea salt crystals
+I 5 107 63.00 125 x  # DIG: bag of sand
+I 6 3051 50.00 25 x  # FORAGE: sea urchin
+I 6 3052 50.00 25 x  # FORAGE: clam
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+U
+0
+The sandy beach springs to life!~
+X
+beach sandy shore water ocean sea desert around~
+   The hot sand stretches for miles ahead, bordered by the calm waters of the
+nearby sea. Gentle waves lap at the shoreline, leaving behind small bubbles
+that quickly pop under the scorching sun. The occasional gust of wind causes
+small whirlwinds of sand to dance across the beach, but otherwise the air is
+still and dry. Sparse tufts of grass and shrubs cling to the edges of the
+beach, their roots reaching deep into the sand in search of moisture. The beach
+seems endless, inviting you to explore its vast expanse.
+~
+S
+#52
+Cliffs~
+Along the Cliffs~
+'^' 25 ms 50 dnsvx c
+C
+dig, pick~
+D1
+/\/\~
+&y~
+D2
+/\/\~
+&y~
+D3
+/\/\~
+&y~
+D4
+/\/\~
+&y~
+E
+10 57 5.00 8
+I 5 106 4.00 125 X  # DIG: rough piece of obsidian
+I 5 104 8.00 125 X  # DIG: red bloodstone
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3015 100.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1202 100.00 125 p  # PICK: twig of redthorn
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+X
+cliffs mountains ocean sea water down around~
+   The sheer cliffs tower high above the churning ocean, their rocky faces
+weathered by wind and salt spray. Jagged edges jut out sharply, creating deep
+shadows that shift with the changing light. At the base of the cliffs, the
+waves crash relentlessly against the rocks, sending up plumes of white foam.
+Here and there, small caves and crevices can be seen, evidence of the ceaseless
+erosion that has shaped this coastline over countless years.
+~
+S
+#53
+Estuary~
+An Estuary~
+'~' 18 nos 10 gx afit
+D0
+~~~~~
+&a~
+E
+11 57 5.00 5
+I 21 3052 8.00 125 f  # FISH: clam
+I 21 3051 8.00 125 f  # FISH: sea urchin
+I 21 1300 20.00 125 f  # FISH: glowing green seashell
+I 21 1305 0.25 125 f  # FISH: worn old statuette
+I 21 256 0.25 125 f  # FISH: hestian trinket
+I 21 262 0.25 125 f  # FISH: trinket of conveyance
+I 21 1304 5.00 125 f  # FISH: sea junk
+I 21 1311 25.00 125 f  # FISH: spotted eel
+I 21 1313 25.00 125 f  # FISH: bright red leaping fish
+I 21 1312 100.00 125 f  # FISH: speckled trout
+I 22 174 5.00 25  # PAN: small flake of gold
+U
+0
+The waters start to flow.~
+X
+estuary river water ocean sea around~
+   The water is brackish and murky, reflecting the overcast sky above. Thick
+clumps of reeds and grasses grow on the banks of the wide, slow-moving river
+that flows into the sea. The current is gentle, but the water is still and
+almost lifeless. Mudflats stretch out from the banks, and the ground is soft
+and squishy underfoot. Gulls and other shorebirds wheel overhead, occasionally
+diving into the water to snag a fish or crab. The air smells of salt and wet
+earth, and the sounds of the waves and the birds mingle together in a soothing
+symphony.
+~
+S
+#54
+Shoreside Tree~
+A Tree by the Shore~
+'.' 14 jrs 2 dl npr
+C
+chop, dig, gather, pick~
+D1
+.^..~
+&g~
+D1
+..^.~
+&g~
+D2
+.^..~
+&g~
+D2
+..^.~
+&g~
+D3
+.&y^&?..~
+&g~
+D3
+..&y^&?.~
+&g~
+D4
+.&W^&?..~
+&0~
+D4
+..&W^&?.~
+&0~
+E
+0 1 100.00 59
+E
+10 57 5.00 1
+I 5 102 9.00 125 x  # DIG: flint stone
+I 5 107 9.00 125 x  # DIG: bag of sand
+I 5 110 9.00 125 x  # DIG: sea salt crystals
+I 5 101 73.00 125 x  # DIG: lump of clay
+I 6 3051 40.00 25 x  # FORAGE: sea urchin
+I 6 3052 40.00 25 x  # FORAGE: clam
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 85.00 50 g  # GATHER: sticks and leaves
+I 9 131 15.00 50 g  # GATHER: green sapling
+I 20 120 100.00 1  # CHOP: large tree
+U
+0
+A tree rises rapidly by the shore, quickly shading you with new leaves!~
+X
+tree shoreside water ocean around~
+   A lone tree stands on the edge of the ocean, its roots entwined in the sandy
+soil. The constant sea breeze has sculpted its branches, creating a unique
+shape that appears to be reaching towards the water. The trunk is rough and
+weathered, the bark hardened by years of exposure to the salty air. Despite the
+harsh environment, the tree appears healthy, with a crown of green leaves
+swaying in the wind.
+~
+S
+#55
+Seaside Jungle~
+The Edge of the Jungle, Overlooking the Sea~
+'^' 12 ls 5 d g
+C
+chop, gather, pick~
+D0
+^.^.~
+&G~
+D0
+.^.^~
+&G~
+E
+0 1 100.00 63
+E
+7 5 2.00 29
+E
+8 0 100.00 15
+E
+10 57 5.00 27
+I 6 3051 40.00 25 x  # FORAGE: sea urchin
+I 6 3052 40.00 25 x  # FORAGE: clam
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 133 85.00 50 g  # GATHER: tangle of vines
+I 9 135 15.00 50 g  # GATHER: reaching sapling
+I 20 128 100.00 1  # CHOP: massive jungle tree
+U
+0
+The jungle grows so fast that it rapidly overtakes the view of the sea!~
+X
+jungle edge sea seaside shore tree forest around~
+   A large, gnarled tree stands at the edge of the jungle, its roots twisting
+and intertwining with the sand and rocks of the shoreline. The tree's thick
+trunk is covered in vines and moss, and its branches stretch out in all
+directions, some reaching out over the water. The leaves of the tree are a
+vibrant green, rustling in the sea breeze, and the sound of the waves crashing
+against the shore can be heard in the distance. The tree provides a stark
+contrast to the dense jungle behind it, and seems to be holding its own against
+the relentless power of the ocean.
+~
+S
+#56
+Estuary Shore~
+The Shore of the Estuary~
+'.' 37 jrs 2 l bprs
+C
+dig, pick~
+D1
+@w&t..@e~
+&t~
+D2
+@w&t..@e~
+&t~
+D3
+@w&t..@e~
+&t~
+D4
+@w&?..@e~
+&0~
+E
+5 0 100.00 17
+E
+8 0 100.00 13
+E
+10 53 5.00 0
+I 5 102 9.00 125 x  # DIG: flint stone
+I 5 107 9.00 125 x  # DIG: bag of sand
+I 5 110 9.00 125 x  # DIG: sea salt crystals
+I 5 101 73.00 125 x  # DIG: lump of clay
+I 6 3051 50.00 25 x  # FORAGE: sea urchin
+I 6 3052 50.00 25 x  # FORAGE: clam
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+X
+shore exstuary river water ocean sea around~
+   The estuary shore is a mix of mud and sand, with the water slowly rising and
+falling with the tide. Small crabs scurry around, digging into the sand and mud
+for food. Seagulls and other shorebirds swoop down to grab small fish and other
+creatures that have been stranded on the shore by the receding water. In the
+distance, the sound of waves crashing against the rocky cliffs can be heard.
+The air is salty and fresh, with a slight breeze blowing in from the sea.
+~
+S
+#57
+Shallow Sea~
+The Shallow Sea, Near the Coast~
+'~' 18 pst 10 h aiq
+D0
+~~~~~
+&a~
+I 21 1300 20.00 125 f  # FISH: glowing green seashell
+I 21 1305 0.25 125 f  # FISH: worn old statuette
+I 21 256 0.25 125 f  # FISH: hestian trinket
+I 21 262 0.25 125 f  # FISH: trinket of conveyance
+I 21 1304 5.00 125 f  # FISH: sea junk
+I 21 1302 25.00 125 f  # FISH: giant linefish
+I 21 1303 25.00 125 f  # FISH: magenta arrowfish
+I 21 1301 100.00 125 f  # FISH: striped barbfish
+U
+0
+The water seems to come to life!~
+X
+sea shallow coast ocean water around~
+   You can see the waves gently lapping against the shoreline of the shallow
+sea. The water is crystal clear, revealing the vibrant colors of the coral and
+sea plants below. The seabed is covered in a layer of fine sand, with
+occasional rocks and shells scattered about. The water is shallow enough that
+you can wade in it for quite a distance before it starts to get deeper.
+~
+S
+#58
+Foothills~
+In the Foothills, By a Lake~
+'.' 10 gjr 4 l bp
+C
+dig, gather, pick~
+D1
+....~
+&g~
+D2
+....~
+&g~
+D3
+....~
+&g~
+D4
+....~
+&0~
+E
+8 0 100.00 13
+I 5 102 9.00 125 x  # DIG: flint stone
+I 5 100 9.00 125 x  # DIG: rock
+I 5 109 9.00 125 x  # DIG: chunk of rock salt
+I 5 101 73.00 125 x  # DIG: lump of clay
+I 6 3013 33.00 25  # FORAGE: handful of nuts
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1205 100.00 125 p  # PICK: bileberries
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 140 100.00 50  # GATHER: bundle of long grass
+U
+0
+The grassy hills seem to come to life!~
+X
+foothills hills lake mountain around~
+   The foothills rise up gently between the lake and the mountains, forming a
+rolling terrain that's scattered with patches of grass and low shrubs. The soil
+here is loose and rocky, with occasional outcroppings of weathered stone that
+jut out from the hillsides. Small streams trickle down from the higher
+elevations, cutting through the soil and rock as they make their way towards
+the lake. The foothills are quiet and peaceful, with only the sound of birdsong
+and the rustle of leaves to break the stillness.
+~
+S
+#59
+Seaside Stumps~
+Some Stumps Along the Shore~
+'.' 10 jrs 2 dl bpr
+C
+burn stumps, dig, pick~
+D1
+.&t.&?..~
+&g~
+D1
+..&t.&?.~
+&g~
+D2
+.&t.&?..~
+&g~
+D2
+..&t.&?.~
+&g~
+D3
+.&t.&?..~
+&g~
+D3
+..&t.&?.~
+&g~
+D4
+.&t.&?..~
+&0~
+D4
+..&t.&?.~
+&0~
+E
+3 29 0.80 29
+E
+4 0 2.50 60
+E
+9 0 50.00 60
+E
+10 57 5.00 36
+E
+16 0 100.00 50
+E
+23 0 100.00 50
+I 5 102 9.00 125 x  # DIG: flint stone
+I 5 107 9.00 125 x  # DIG: bag of sand
+I 5 110 9.00 125 x  # DIG: sea salt crystals
+I 5 101 73.00 125 x  # DIG: lump of clay
+I 6 3051 50.00 25 x  # FORAGE: sea urchin
+I 6 3052 50.00 25 x  # FORAGE: clam
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+X
+stumps shore seaside ocean trees forest around~
+   You stand on the shore, looking at a row of stumps jutting out of the sand.
+It's clear that a forest once stood here, but all that remains now are these
+remnants of what was. Some of the stumps are larger, indicating that the trees
+were older and more mature when they were cut down. Others are smaller, likely
+the result of newer growth that was taken down before it could reach full
+height. The area feels barren and desolate, a stark contrast to what it may
+have looked like in the past.
+~
+S
+#60
+Seaside Copse~
+A Small Copse by the Sea~
+'w' 13 jrs 2 dl pr
+C
+chop, dig, pick~
+D1
+.w..~
+&g~
+D1
+..w.~
+&g~
+D2
+.w..~
+&g~
+D2
+..w.~
+&g~
+D3
+&g.&?w&g..~
+&y~
+D3
+&g..&?w&g.~
+&y~
+D4
+.w..~
+&0~
+D4
+..w.~
+&W~
+E
+0 0 50.00 59
+E
+0 0 100.00 60
+E
+4 0 0.40 54
+E
+9 0 50.00 54
+E
+10 57 5.00 37
+I 5 102 9.00 125 x  # DIG: flint stone
+I 5 107 9.00 125 x  # DIG: bag of sand
+I 5 110 9.00 125 x  # DIG: sea salt crystals
+I 5 101 73.00 125 x  # DIG: lump of clay
+I 6 3051 50.00 25 x  # FORAGE: sea urchin
+I 6 3052 50.00 25 x  # FORAGE: clam
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 20 131 100.00 1  # CHOP: green sapling
+U
+0
+New saplings squeak out of the edges of the stumps and grow up toward the sky!~
+X
+copse stumps seaside sea ocean water around forest trees~
+   You stand before a seaside copse, the sound of the waves crashing against
+the shore nearby. Among the tall trees, you notice several stumps, evidence of
+past logging. But there is also a glimmer of hope - small saplings and young
+trees are emerging from the stumps, signifying that regrowth has begun. The
+salty sea air fills your lungs as you take in the scene, marveling at the
+resilience of nature.
+~
+S
+#61
+Jungle Stumps~
+A Densely Vined Field of Stumps~
+'.' 10 lr 3 dl p
+C
+burn stumps~
+D1
+.&t.&?..~
+&g~
+D1
+..&t.&?.~
+&g~
+D2
+.&t.&?..~
+&g~
+D2
+..&t.&?.~
+&g~
+D3
+.&t.&?..~
+&g~
+D3
+..&t.&?.~
+&g~
+D4
+.&t.&?..~
+&0~
+D4
+..&t.&?.~
+&0~
+E
+2 32 2.00 35
+E
+2 57 10.00 63
+E
+4 0 2.50 62
+E
+7 5 2.00 29
+E
+8 0 100.00 15
+E
+9 0 50.00 62
+E
+15 0 1.00 0
+E
+16 0 100.00 0
+E
+23 0 100.00 0
+I 6 3017 33.00 25  # FORAGE: plump fig
+X
+vined densely field stumps jungle trees forest around~
+   You step into a clearing amidst the dense jungle, only to find it marred by
+a cluster of stumps. It's evident that the trees that once stood here have been
+cut down, leaving behind a stark reminder of the human impact on the natural
+world. The ground is littered with fallen branches and leaves, while a faint
+scent of sawdust still lingers in the air. Despite the absence of trees, the
+clearing is not entirely barren. New sprouts and shrubs are beginning to
+emerge, perhaps signaling the start of a new chapter in this patch of land's
+story.
+~
+S
+#62
+Jungle Copse~
+A Copse of Young Jungle Trees~
+'w' 13 l 6 d 0
+C
+chop~
+D1
+w&g.&?w&g.~
+&G~
+D2
+w&g.&?w&g.~
+&G~
+D3
+w&g.&?w&g.~
+&G~
+D4
+w&g.&?w&g.~
+&G~
+E
+0 1 50.00 61
+E
+0 0 100.00 62
+E
+2 32 2.00 35
+E
+2 57 10.00 64
+E
+4 0 0.80 27
+E
+7 5 2.00 29
+E
+8 0 100.00 15
+E
+9 0 50.00 27
+E
+15 0 1.00 34
+I 6 3017 33.00 25  # FORAGE: plump fig
+I 20 135 100.00 1  # CHOP: reaching sapling
+U
+0
+A tangle of new saplings spring up from the stumps!~
+X
+copse young jungle trees forest stumps around~
+   You find yourself in a lush jungle copse, surrounded by tall trees and thick
+vegetation. Stumps of previously felled trees dot the area, and new growth has
+emerged from them in the form of saplings and young trees. The air is thick
+with the scent of damp earth and the sounds of wildlife can be heard in the
+distance.
+~
+S
+#63
+Seaside Jungle Stumps~
+Amidst Tropical Stumps on the Seaside~
+'.' 10 lrs 3 dl pr
+C
+burn stumps, pick~
+D0
+.&t.&?..~
+&g~
+D0
+..&t.&?.~
+&g~
+E
+4 0 2.50 64
+E
+7 5 2.00 29
+E
+9 0 50.00 64
+E
+10 57 5.00 61
+E
+16 0 100.00 50
+E
+23 0 100.00 50
+I 6 3051 50.00 25 x  # FORAGE: sea urchin
+I 6 3052 50.00 25 x  # FORAGE: clam
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+X
+stumps tropical seaside ocean forest trees around~
+   As you make your way along the jungle's edge, you come across a section
+where the dense foliage abruptly stops, replaced by a stretch of barren ground.
+Here, several tree stumps, their tops cut clean off, jut up from the earth.
+Looking out past the stumps, you can see the shimmering expanse of the ocean,
+its waves crashing against the rocky shore.
+~
+S
+#64
+Seaside Jungle Copse~
+A Copse in the Jungle by the Sea~
+'w' 13 lrs 6 d pr
+C
+chop, pick~
+D0
+&g.&?w&g..~
+&G~
+D0
+&g..&?w&g.~
+&G~
+E
+0 0 50.00 63
+E
+0 0 100.00 64
+E
+4 0 0.40 55
+E
+7 5 2.00 29
+E
+9 0 50.00 55
+E
+10 57 5.00 62
+I 6 3051 50.00 25 x  # FORAGE: sea urchin
+I 6 3052 50.00 25 x  # FORAGE: clam
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 20 135 100.00 1  # CHOP: reaching sapling
+U
+0
+New saplings burst forth from the edges of the stumps!~
+X
+copse jungle seaside ocean trees forest around~
+   You find yourself standing at the edge of a jungle copse that reaches down
+to the shore. The area appears to have been disturbed, with stumps of trees
+visible around you. However, new life is emerging from the stumps, with small
+trees and saplings beginning to take root and grow. The sound of the waves
+lapping against the shore can be heard in the distance, and the moist air is
+thick with the scent of the jungle. As you step forward into the copse, you
+can't help but feel a sense of awe at the power of nature to regenerate itself.
+~
+S
+#65
+Jungle Edge~
+The Edge of the Jungle~
+'w' 13 lr 5 d 0
+C
+chop~
+D0
+&g.&?w&g..~
+&G~
+E
+0 1 75.00 61
+E
+0 0 100.00 65
+E
+2 32 2.00 35
+E
+2 57 10.00 64
+E
+4 0 0.80 27
+E
+7 5 2.00 29
+E
+8 0 100.00 15
+E
+9 0 50.00 27
+E
+15 0 1.00 34
+I 6 3017 33.00 25  # FORAGE: plump fig
+I 20 135 100.00 1  # CHOP: reaching sapling
+X
+jungle edge trees forest grassland plains around~
+   As you approach the edge of the jungle, you can feel the air becoming
+slightly cooler and more humid. The sounds of the forest creatures give way to
+the rustling of tall grasses in the open plains beyond. You can see the thick
+foliage of the jungle ahead, with tall trees reaching high into the sky. The
+transition from the grassland to the jungle is marked by a line of trees, their
+trunks thick and gnarled, their branches heavy with vines and moss. The dense
+undergrowth of the jungle begins here, the plant life spilling out from the
+shaded canopy to carpet the ground with vibrant greenery.
+~
+S
+#70
+Irrigated Field~
+An Irrigated Field~
+'.' 10 jklrvw 2 il bp
+C
+dig, gather, pick~
+D0
+....~
+&G~
+E
 2 4 0.80 71
 E
 2 29 0.80 72
@@ -2230,381 +2925,942 @@ E
 E
 3 28 2.00 72
 E
-5 0 100.00 17
+5 0 100.00 22
 E
-8 0 100.00 13
+8 0 100.00 77
 E
 9 0 50.00 71
 E
-11 5 4.00 20
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 103 8.00 1 X  # DIG: a yellow lightning stone
-I 5 101 15.00 1 X  # DIG: a pile of clay
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3014 100.00 1  # FORAGE: some dry beans
-I 7 1201 50.00 1 a  # FIND-HERB: some fiveleaf
-I 7 1204 50.00 1 a  # FIND-HERB: a daggerbite frond
-M
-9040 0.01 d
-M
-9059 0.01 ad
-M
-9055 0.01 bd
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9131 5.00 d
-M
-9128 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9118 15.00 ad
-M
-9130 15.00 ad
-M
-9129 15.00 ad
-M
-9116 15.00 ad
-M
-9122 5.00 bd
-M
-9117 5.00 bd
-M
-9126 5.00 bd
-M
-9125 5.00 bd
-M
-9124 5.00 bd
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9153 10.00 bc
-M
-240 6.00 bc
-M
-252 10.00 cf
-M
-251 15.00 ce
-M
-223 5.00 bce
-M
-222 5.00 bce
-M
-200 5.00 bce
-M
-201 5.00 bce
-M
-237 5.00 ce
-M
-9064 0.90 ad
+27 268435456 4.00 20
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 134 8.00 50 g  # GATHER: thorny sapling
+I 9 139 92.00 50 g  # GATHER: bundle of long leaves
+U
+0
+The irrigated field seems to come to life!~
+X
+field irrigation irrigation desert canal around~
+   You find yourself standing in a vast expanse of freshly irrigated desert.
+The land is soft and moist beneath your feet, a marked contrast to the dry sand
+that stretches out as far as the eye can see. In the distance, you can see the
+canal that brought life-giving water to this barren place, its gentle flow
+providing the promise of hope and renewal to the surrounding area.
+~
 S
 #71
 Irrigated Forest~
-A Marshy Forest~
-'^' 14 1 3 dl n
+An Irrigated Forest~
+'.' 14 jkqvw 3 adil np
 C
 chop, dig, gather, pick~
-D1
-^.^.~
-&g~
-D1
-.^.^~
-&g~
-D2
-^.^.~
-&g~
-D2
-.^.^~
-&g~
-D3
-^&g.&?^&g.~
-&y~
-D3
-&g.&?^&g.&?^~
-&y~
-D4
-Y.Y.~
-&0~
-D4
-.Y.Y~
-&0~
+D0
+...&g^~
+&G~
+D0
+..&g^&?.~
+&G~
+D0
+.&g^&?..~
+&G~
+D0
+&g^&?...~
+&G~
 E
-0 1 100.00 70
+0 1 50.00 73
 E
-11 5 4.00 26
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 101 15.00 1 X  # DIG: a pile of clay
-I 5 103 8.00 1 X  # DIG: a yellow lightning stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3014 100.00 1  # FORAGE: some dry beans
-I 7 1201 50.00 1 a  # FIND-HERB: some fiveleaf
-I 7 1204 50.00 1 a  # FIND-HERB: a daggerbite frond
-I 9 121 100.00 1  # GATHER: a stick
-I 20 120 50.00 2 c  # CHOP: a large tree
-I 20 120 50.00 1 c  # CHOP: a large tree
-M
-9040 0.01 d
-M
-9059 0.01 ad
-M
-9055 0.01 bd
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9131 5.00 d
-M
-9128 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9118 15.00 ad
-M
-9130 15.00 ad
-M
-9129 15.00 ad
-M
-9116 15.00 ad
-M
-9122 5.00 bd
-M
-9117 5.00 bd
-M
-9126 5.00 bd
-M
-9125 5.00 bd
-M
-9124 5.00 bd
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9153 10.00 bc
-M
-240 6.00 bc
-M
-252 10.00 cf
-M
-251 15.00 ce
-M
-223 5.00 bce
-M
-222 5.00 bce
-M
-200 5.00 bce
-M
-201 5.00 bce
-M
-237 5.00 ce
-M
-9064 0.90 ad
+0 0 100.00 71
+E
+4 0 1.00 79
+E
+9 0 50.00 79
+E
+17 0 0.60 39
+E
+17 70 1.00 71
+E
+27 268435456 4.00 26
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 85.00 50 g  # GATHER: sticks and leaves
+I 9 131 15.00 50 g  # GATHER: green sapling
+I 20 120 100.00 1 c  # CHOP: large tree
+U
+0
+New trees rise at record pace from the irrigated soil!~
+X
+forest trees irrigated irrigation canal around~
+   You are standing in a lush forest that has grown on the irrigated soil
+around the canal. The trees around you are tall and sturdy, with their leaves
+rustling in the breeze. The ground beneath your feet is covered in a thick
+layer of leaves and other debris, making it soft and spongy to walk on. As you
+look up, you can see glimpses of the sky through the canopy of leaves above
+you. The air around you is fresh and cool, and you can hear the chirping of
+birds and the rustling of leaves as the wind blows through the trees.
+~
 S
 #72
 Irrigated Jungle~
-A Marshy Jungle~
-'^' 14 3 3 d n
+An Irrigated Jungle~
+'^' 14 klqvw 3 adi g
 C
 chop, dig, gather, pick~
 D0
-^&g.&?^&g.~
+..^^~
 &G~
 D0
-&g.&?^&g.&?^~
+.^^.~
+&G~
+D0
+^^..~
+&G~
+D0
+.^.^~
+&G~
+D0
+^.^.~
+&G~
+D0
+^..^~
 &G~
 E
-0 2 50.00 70
+0 1 50.00 75
 E
-0 1 100.00 70
+0 0 100.00 72
 E
-11 5 4.00 26
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 101 15.00 1 X  # DIG: a pile of clay
-I 5 103 8.00 1 X  # DIG: a yellow lightning stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 3014 100.00 1  # FORAGE: some dry beans
-I 7 1201 50.00 1 a  # FIND-HERB: some fiveleaf
-I 7 1204 50.00 1 a  # FIND-HERB: a daggerbite frond
-I 9 121 100.00 1  # GATHER: a stick
-M
-9040 0.01 d
-M
-9059 0.01 ad
-M
-9055 0.01 bd
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9131 5.00 d
-M
-9128 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9118 15.00 ad
-M
-9130 15.00 ad
-M
-9129 15.00 ad
-M
-9116 15.00 ad
-M
-9122 5.00 bd
-M
-9117 5.00 bd
-M
-9126 5.00 bd
-M
-9125 5.00 bd
-M
-9124 5.00 bd
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9153 10.00 bc
-M
-240 6.00 bc
-M
-252 10.00 cf
-M
-251 15.00 ce
-M
-223 5.00 bce
-M
-222 5.00 bce
-M
-200 5.00 bce
-M
-201 5.00 bce
-M
-237 5.00 ce
-M
-9061 0.01 d
-M
-9151 10.00 dh
-M
-9109 10.00 dh
-M
-9106 10.00 dh
-M
-9111 10.00 bdh
-M
-9105 5.00 bdh
-M
-9104 5.00 bdh
-M
-9103 5.00 adh
-M
-9113 5.00 adh
-M
-9102 5.00 adh
-M
-9107 10.00 dg
-M
-9101 1.00 dg
-M
-9112 5.00 bdg
-M
-9110 5.00 bdg
-M
-9114 5.00 bdg
-M
-9108 5.00 bdg
-M
-9115 10.00 adg
-M
-9100 5.00 adg
-M
-9016 5.00 adg
-M
-253 10.00 cf
+17 70 1.00 72
+E
+17 0 0.60 65
+E
+27 268435456 4.00 26
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 123 85.00 50 g  # GATHER: small flower
+I 9 135 15.00 50 g  # GATHER: reaching sapling
+I 20 128 100.00 1 c  # CHOP: massive jungle tree
+U
+0
+Whole trees curl up from the soil, fully-grown in seconds!~
+X
+jungle forest trees irrigated irrigation canal around~
+   As you walk along the irrigation canal in the desert, you notice a lush and
+dense jungle growing on the fertile soil around it. The thick canopy of trees
+provides shade and coolness, while the sound of birds and monkeys echoes
+through the air. The ground is covered in a thick layer of leaves and fallen
+branches, and you can see vines and creepers hanging from the branches of the
+trees. The air is humid and filled with the scent of rich soil and vegetation.
+As you continue to explore, you can hear the faint sound of running water, as
+the irrigation canal continues to bring life to this once barren land.
+~
+S
+#73
+Irrigated Stumps~
+An Irrigated Field of Stumps~
+'.' 10 jkrvw 2 adil bp
+C
+burn stumps, dig, gather, pick~
+D0
+..&t.&?.~
+&G~
+D0
+.&t.&?..~
+&G~
+E
+4 0 2.50 74
+E
+9 0 50.00 74
+E
+16 0 100.00 70
+E
+23 0 100.00 70
+E
+27 268435456 4.00 23
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 134 8.00 50 g  # GATHER: thorny sapling
+I 9 139 92.00 50 g  # GATHER: bundle of long leaves
+X
+stumps field trees forest irrigated irrigation canal around~
+   You walk through an irrigated field where stumps of trees lie scattered
+around. The trees have been cut down, leaving behind the stumps as the only
+remnants of their presence. The field has been made fertile by the nearby
+irrigation canal, allowing the growth of crops and vegetation to take place.
+However, the absence of the trees is noticeable and adds a certain emptiness to
+the area.
+~
+S
+#74
+Irrigated Copse~
+An Irrigated Copse~
+'.' 13 jkrvw 3 adi p
+C
+chop, dig, pick~
+D0
+&gw&?...~
+&G~
+D0
+.&gw&?..~
+&G~
+D0
+..&gw&?.~
+&G~
+D0
+...&gw~
+&G~
+E
+0 0 50.00 73
+E
+0 0 100.00 74
+E
+4 0 0.40 71
+E
+9 0 50.00 71
+E
+27 268435456 4.00 24
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 20 131 100.00 1  # CHOP: green sapling
+U
+0
+Fresh saplings burst up out of the stumps!~
+X
+copse irrigated irrigation trees forest stumps around canal~
+   As you walk through the irrigated field, you come across a small copse where
+the trees have started to regrow. It's a vibrant and green area with young
+saplings and tall trees reaching towards the sky. The lush foliage provides
+ample shade and creates a cool, peaceful atmosphere. The sound of leaves
+rustling in the breeze and birds chirping overhead adds to the tranquil
+ambiance of this growing forest. The scent of fresh soil and vegetation fills
+the air, making it easy to forget you are in the middle of a desert.
+~
+S
+#75
+Irrigated Jungle Stumps~
+An Irrigated Field of Stumps~
+'.' 10 klrvw 3 adil p
+C
+chop, dig, pick~
+D0
+..&t.&?.~
+&G~
+D0
+.&t.&?..~
+&G~
+E
+4 0 2.50 76
+E
+9 0 50.00 76
+E
+16 0 100.00 70
+E
+23 0 100.00 70
+E
+27 268435456 4.00 23
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+X
+stumps jungle forest trees canal irrigated irrigation around~
+   You walk through an irrigated field where stumps of trees lie scattered
+around. The trees have been cut down, leaving behind the stumps as the only
+remnants of their presence. The field has been made fertile by the nearby
+irrigation canal, allowing the growth of crops and vegetation to take place.
+However, the absence of the trees is noticeable and adds a certain emptiness to
+the area.
+~
+S
+#76
+Irrigated Jungle Copse~
+An Irrigated Jungle Copse~
+'w' 13 klvw 6 adi p
+C
+chop, dig, pick~
+D0
+..ww~
+&G~
+D0
+.ww.~
+&G~
+D0
+ww..~
+&G~
+D0
+.w.w~
+&G~
+D0
+w.w.~
+&G~
+D0
+w..w~
+&G~
+E
+0 0 50.00 75
+E
+0 0 100.00 76
+E
+4 0 0.40 72
+E
+9 0 50.00 72
+E
+27 268435456 4.00 24
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 20 135 100.00 1  # CHOP: reaching sapling
+U
+0
+New saplings twist and curl as they rise out of the stumps!~
+X
+copse jungle forest trees stumps irrigated irrigation canal around~
+   As you walk through the irrigated field, you come across a small copse where
+the trees have started to regrow. It's a vibrant and green area with young
+saplings and tall trees reaching towards the sky. The lush foliage provides
+ample shade and creates a cool, peaceful atmosphere. The sound of leaves
+rustling in the breeze and birds chirping overhead adds to the tranquil
+ambiance of this growing forest. The scent of fresh soil and vegetation fills
+the air, making it easy to forget you are in the middle of a desert.
+~
+S
+#77
+Planted Irrigated Field~
+A Planted Irrigated Field~
+',' 10 jklw 3 ij kp
+C
+dig~
+D0
+,,,,~
+&G~
+E
+1 0 100.00 78
+E
+9 0 20.00 78
+E
+16 0 100.00 70
+E
+19 0 100.00 70
+E
+27 268435456 4.00 20
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+X
+field planted plants seeds irrigated irrigation around~
+   You stand in a vast field, surrounded by the endless expanse of desert. But
+here, where the ground is dark and rich, a vibrant green has emerged. You can
+see the lines of a canal running through the center of the field, and small
+shoots of plants pushing up through the damp soil. You can smell the fresh
+scent of water and earth mixing together, a refreshing change from the dry air
+of the desert. Looking closer, you can see the small seeds that have been
+carefully planted, each one waiting to burst forth with new life.
+~
+S
+#78
+Irrigated Crop~
+An Irrigated Crop~
+'.' 10 jklw 3 dijk kp
+D0
+????~
+&G~
+E
+16 0 100.00 70
+E
+19 0 100.00 70
+E
+27 268435456 4.00 20
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+U
+0
+The crop grows with astounding speed!~
+S
+#79
+Shady Irrigated Forest~
+A Shady Irrigated Forest~
+'^' 14 jkqvw 3 adil np
+C
+chop, dig, gather, pick~
+D0
+&G.&?^^^~
+&g~
+D0
+^^^&G.~
+&g~
+D0
+^&G.&?^^~
+&g~
+D0
+^^&G.&?^~
+&g~
+D0
+&G.&?^^&G.~
+&g~
+D0
+&G..&?^^~
+&g~
+D0
+^^&G..~
+&g~
+D0
+^&G..&?^~
+&g~
+E
+0 1 50.00 71
+E
+0 0 100.00 79
+E
+27 268435456 4.00 26
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 85.00 50 g  # GATHER: sticks and leaves
+I 9 131 15.00 50 g  # GATHER: green sapling
+I 20 120 100.00 1 c  # CHOP: large tree
+U
+0
+The canopy begins to close as more trees creak up from the irrigated soil!~
+X
+forest trees irrigated irrigation canal around~
+   You are standing in a lush forest that has grown on the irrigated soil
+around the canal. The trees around you are tall and sturdy, with their leaves
+rustling in the breeze. The ground beneath your feet is covered in a thick
+layer of leaves and other debris, making it soft and spongy to walk on. As you
+look up, you can see glimpses of the sky through the canopy of leaves above
+you. The air around you is fresh and cool, and you can hear the chirping of
+birds and the rustling of leaves as the wind blows through the trees.
+~
+S
+#80
+Lush Oasis~
+A Lush Oasis~
+'.' 18 koqvw 6 adiw jp
+C
+chop, dig, drink, fill, gather, pick~
+D0
+.&C~~&g^~
+&y~
+D0
+&g^&C~~&?.~
+&y~
+E
+0 0 100.00 21
+E
+4 0 2.00 81
+E
+9 0 75.00 81
+E
+17 20 2.00 25
+E
+26 268435456 4.00 89
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3014 25.00 25  # FORAGE: dry beans
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 134 15.00 50 g  # GATHER: thorny sapling
+I 9 139 50.00 50 g  # GATHER: bundle of long leaves
+I 9 132 35.00 50 g  # GATHER: thorny branches
+I 20 122 100.00 2 c  # CHOP: rough wood
+U
+0
+Thirsty trees rise from the rich soil around the oasis!~
+X
+oasis plants water vegetation desert around~
+   As you approach the oasis, you can feel the air around you become cooler and
+moister. A small pool of crystal-clear water sparkles in the center of the
+verdant grove of plants, inviting you to quench your thirst. The shade provided
+by the vegetation offers a welcome respite. You can hear the soothing sound of
+a gentle breeze rustling through the leaves.
+~
+S
+#81
+Shady Oasis~
+A Shady Oasis~
+'.' 18 koqvw 6 diw jp
+C
+chop, dig, drink, fill, gather, pick~
+D0
+&g^&C~~&g^~
+&y~
+E
+0 0 100.00 80
+E
+17 20 2.00 25
+E
+26 268435456 4.00 89
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3014 25.00 25  # FORAGE: dry beans
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 132 35.00 50 g  # GATHER: thorny branches
+I 9 134 15.00 50 g  # GATHER: thorny sapling
+I 9 139 50.00 50 g  # GATHER: bundle of long leaves
+I 20 122 100.00 3 c  # CHOP: rough wood
+U
+0
+Bushy trees grow around the oasis and encircle it!~
+X
+oasis plants water vegetation trees desert around~
+   As you approach the oasis, you can feel the air around you become cooler and
+moister. A small pool of crystal-clear water sparkles in the center of the
+verdant grove of plants, inviting you to quench your thirst. The shade provided
+by the trees offers a welcome respite. You can hear the soothing sound of a
+gentle breeze rustling through the leaves.
+~
+S
+#82
+Dry Oasis~
+A Dry Oasis~
+'.' 21 kw 6 l ep
+C
+dig, gather, pick~
+D1
+.&T..&?.~
+&Y~
+D2
+.&t..&?.~
+&y~
+D3
+.&T..&?.~
+&Y~
+D4
+.&t..&?.~
+&y~
+E
+5 0 100.00 86
+E
+8 0 100.00 91
+E
+9 0 50.00 21
+E
+22 0 0.50 21
+E
+26 268435456 4.00 88
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3014 50.00 25  # FORAGE: dry beans
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 139 92.00 50 g  # GATHER: bundle of long leaves
+I 9 134 8.00 50 g  # GATHER: thorny sapling
+U
+0
+The desert seems to come to life!~
+X
+oasis dry desert plants around~
+   Ahead of you, you see what appears to be an oasis, but as you draw closer,
+you realize that it is completely dry. The ground is cracked and parched, and
+the plants that once grew here have withered and died. The air is still and
+hot, and you feel the intense heat of the sun beating down upon you. The
+silence is broken only by the sound of your footsteps as you move across the
+dry, barren landscape.
+~
+_
+Drained by players to create a non-water tile they can build on.
+~
+S
+#83
+Planted Oasis~
+A Planted Oasis~
+'.' 18 kovw 6 ijw kp
+C
+dig, drink, fill~
+D0
+&G,&C~~&G,~
+&y~
+E
+1 0 100.00 84
+E
+9 0 75.00 84
+E
+16 0 100.00 21
+E
+19 0 100.00 21
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+X
+oasis planted crops water around~
+   You stand on the edge of an oasis in the desert, surrounded by
+freshly-planted crops. Small sprouts peek out of the fertile soil, promising a
+bountiful harvest in the coming weeks. The air is dry and hot, but the gentle
+breeze provides some relief. The only sounds are the rustling of leaves and the
+occasional chirping of a bird. As you take in the scene, you can't help but
+feel a sense of hope for the future.
+~
+S
+#84
+Oasis Crop~
+An Oasis Crop~
+'.' 18 kovw 6 dijkw kp
+D0
+????~
+&y~
+E
+16 0 100.00 21
+E
+19 0 100.00 21
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 100 100.00 125 X  # DIG: rock
+U
+0
+The crop grows with astounding speed!~
+S
+#85
+Irrigation Canal~
+An Irrigation Canal~
+'~' 17 kow 8 giC af
+D0
+@w&?~~@e~
+&C~
+U
+0
+The canal water starts to flow.~
+X
+canal irrigation water desert around~
+   You are standing next to an irrigation canal in the middle of a vast and
+arid desert. The canal is filled with crystal-clear water, which flows steadily
+through the parched landscape. On either side of the canal, the land is lush
+and green. The air is humid and heavy, filled with the scent of damp earth and
+growing plants. Despite the harsh conditions of the desert, the canal and the
+irrigated fields around it seem like an oasis of life and abundance.
+~
+S
+#86
+Damp Trench~
+A Damp Trench~
+'.' 24 hk 4 t 0
+C
+dig, excavate, fillin, pour~
+D1
+\__/~
+&y~
+D2
+\__/~
+&y~
+D3
+\__/~
+&y~
+D4
+\__/~
+&y~
+E
+6 0 100.00 87
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 107 100.00 125 X  # DIG: bag of sand
+X
+trench damp dirt soil down around desert~
+   You find yourself standing next to a damp trench. The trench has been dug in
+the middle of the desert, and you can see small plants growing nearby. The
+trench is part of an irrigation system used to water the crops in the nearby
+fields. The air is hot and dry, but the dampness of the trench is a refreshing
+change, and you take a moment to appreciate the sight of new life sprouting up
+in the desert.
+~
+S
+#87
+Verdant Canal~
+A Verdant Canal~
+'~' 17 ko 8 giC af
+D0
+@w&?~~@e~
+&C~
+U
+0
+The canal waters start to flow.~
+X
+canal verdant water irrigation irrigated around~
+   In the midst of the arid desert, you are struck by the vibrant greenery
+lining the waterway of this verdant canal. The canal is flanked along its
+length by clumps of lush vegetation. The air is thick with the fragrance of
+blooming flowers, and birds dart among the branches, chirping merrily. The
+sound of running water is a welcome respite from the otherwise silent desert,
+and you can't help but feel a sense of wonder at this unexpected oasis.
+~
+_
+Variant of the canal for natural Oasis tiles.
+~
+S
+#88
+Irrigated Oasis~
+An Oasis on the Irrigated Field~
+'.' 18 jklovw 6 iw jp
+C
+dig, drink, fill, gather, pick~
+D0
+.&C~~&?.~
+&G~
+E
+4 0 2.00 89
+E
+8 0 100.00 83
+E
+9 0 75.00 89
+E
+17 20 2.00 25
+E
+17 70 2.00 74
+E
+27 268435456 4.00 80
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 134 8.00 50 g  # GATHER: thorny sapling
+I 9 139 92.00 50 g  # GATHER: bundle of long leaves
+U
+0
+Water springs from the ground and bushes begin to grow in an instant!~
+X
+oasis irrigated field irrigation desert around water~
+   In the heart of the desert lies an oasis, surrounded by lush green fields
+that have been carefully irrigated. The oasis is teeming with life, with tall
+plants providing shade and coolness, and a sparkling pool of water at the
+center of it all. Birds flit from tree to tree, and small animals scamper along
+the ground.
+~
+S
+#89
+Shady Irrigated Oasis~
+A Shady Oasis on the Irrigated Field~
+'.' 18 jkloqvw 6 diw jp
+C
+dig, drink, fill, gather, pick~
+D0
+&g^&C~~&g^~
+&G~
+E
+0 0 100.00 88
+E
+17 20 2.00 25
+E
+17 70 2.00 74
+E
+27 268435456 4.00 81
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3048 100.00 25 f  # FORAGE: tasty weeds
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 134 8.00 50 g  # GATHER: thorny sapling
+I 9 139 92.00 50 g  # GATHER: bundle of long leaves
+I 20 122 100.00 3 c  # CHOP: rough wood
+U
+0
+Whole trees grow around the oasis and begin to cover the sky as their leaves unfurl!~
+X
+oasis shady irrigated field irrigation around water~
+   In the heart of the desert lies an oasis, surrounded by lush green fields
+that have been carefully irrigated. The oasis is teeming with life, with tall
+palm trees providing shade and coolness, and a sparkling pool of water at the
+center of it all. Birds flit from tree to tree, and small animals scamper along
+the ground. It's a haven of life in an otherwise barren landscape.
+~
+S
+#90
+Old-Growth Forest~
+An Old-Growth Forest~
+'^' 40 jq 5 dl dnp
+C
+chop, gather, pick~
+D1
+^^^^~
+&g~
+D2
+^^^^~
+&g~
+D3
+^^^^~
+&y~
+D3
+^^^^~
+&y~
+D3
+^^^^~
+&y~
+D3
+^^^^~
+&y~
+D3
+^^^^~
+&y~
+D3
+^^^^~
+&y~
+D3
+&r^&R^&?^^~
+&y~
+D3
+^&r^&R^&?^~
+&y~
+D3
+^^&r^&R^~
+&y~
+D4
+^^^^~
+&W~
+E
+0 0 75.00 4
+E
+0 0 100.00 90
+E
+2 57 5.00 50
+E
+2 5 10.00 45
+E
+2 53 16.66 56
+E
+3 29 0.80 29
+E
+3 90 5.00 4
+E
+17 50 0.40 54
+E
+17 40 0.40 44
+E
+17 70 0.60 71
+E
+17 0 0.60 39
+I 6 3015 25.00 25  # FORAGE: red berries
+I 7 1206 16.66 125 p  # PICK: iridescent blue iris
+I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 85.00 50 g  # GATHER: sticks and leaves
+I 9 131 15.00 50 g  # GATHER: green sapling
+I 20 137 100.00 1  # CHOP: ancient tree
+X
+forest trees old-growth oldgrowth growth plants around up~
+   As you stand amidst the towering giants, you can't help but feel small.
+These trees have stood for centuries, reaching heights that seem to scrape the
+sky. The ground is blanketed in a thick layer of fallen needles and leaves,
+muffling your footsteps. You can see the occasional small clearing where
+sunlight streams through the canopy above. This is a forest that has never been
+touched by human hands, and it's full of the most sought-after lumber for
+shipbuilding and construction.
+~
+S
+#91
+Planted Field~
+A Planted Field~
+',' 18 k 6 j kp
+C
+dig~
+D0
+,,,,~
+&T~
+E
+1 0 100.00 84
+E
+9 0 75.00 84
+E
+16 0 100.00 82
+E
+19 0 100.00 82
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 5 103 8.00 125 X  # DIG: yellow lightning stone
+I 6 3014 100.00 25  # FORAGE: dry beans
+X
+field seeded seeds plants crop desert around~
+   You are standing in a parched desert landscape, but amidst the sandy
+terrain, you see the beginnings of life. Rows of small, fragile plants poke
+through the dry earth, their leaves a vibrant green against the muted tones of
+the desert. The tiny sprouts are an oasis in this barren environment, their
+delicate shoots reaching up towards the sky. It's too early to tell what kind
+of crop is being grown here, but the signs of growth are a hopeful sign in a
+place where survival is a constant struggle. As you look around, you can't help
+but wonder what this small plot of land will yield in the weeks and months to
+come.
+~
 S
 $

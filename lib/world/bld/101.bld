@@ -1,5 +1,5 @@
 #10100
-Hag Swamp Hut~
+Swamp Hag Hut~
 A Crude Ladder~
 &c~&0()&c~~
 128 0 R 0
@@ -19,8 +19,11 @@ A Strange Rift~
 0 0 0 -1
 A
 j
-C
-enter rift~
+E
+rift monsoon strange~
+   Strong winds and huge droplets of rain come whipping out of the rift, making
+it hard to approach. It's difficult to see what's on the other side.
+~
 S
 #10190
 Volcano Caldera~

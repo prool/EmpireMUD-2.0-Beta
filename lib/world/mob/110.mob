@@ -3,11 +3,16 @@ roc giant~
 a giant roc~
 A giant roc raises her wings in a threatening pose.
 ~
-100 125 bcdjyA cmE
-2 0 2 26
-I 0 3200 100.00 8  # BUTCHER: a cut of poultry
-I 0 11002 25.00 1 b  # BUTCHER: a giant lobster
-I 0 11003 25.00 1 b  # BUTCHER: a dolphin carcass
+100 125 bcdjyA cmE 5
+2 0 2 26 -1
+D
+   The enormous gray and brown bird has a wingspan longer than a manor house
+and a beak that could snap a bull in half! And that's to say nothing of its
+talons.
+~
+I 0 3200 100.00 8  # BUTCHER: cut of poultry
+I 0 11002 25.00 1 b  # BUTCHER: giant lobster
+I 0 11003 25.00 1 b  # BUTCHER: dolphin carcass
 T 11024
 T 11002
 S
@@ -16,10 +21,14 @@ adventurer late~
 the late adventurer~
 A late adventurer is standing here (list).
 ~
-100 125 bdov nD
-1 0 0 15
-T 11016
-T 11023
+100 125 bdovI nD 3
+1 0 0 15 -1
+D
+   He's dressed for travel, with a large pack and a heavy cloak. He's panting a
+bit, presumably from rushing to get here.
+   Use 'list' and 'list id' to see what's available here, and 'buy' to purchase
+items with the talons you've collected.
+~
 T 11025
 S
 #11002
@@ -27,11 +36,16 @@ roc giant~
 a giant roc~
 A giant roc swoops low toward you!
 ~
-100 125 cdjuyA cmE
-2 0 2 26
-I 0 3200 100.00 8  # BUTCHER: a cut of poultry
-I 0 11002 25.00 1 b  # BUTCHER: a giant lobster
-I 0 11003 25.00 1 b  # BUTCHER: a dolphin carcass
+100 125 cdjuyA cmE 5
+2 0 2 26 -1
+D
+   The enormous gray and brown bird has a wingspan longer than a manor house
+and a beak that could snap a bull in half! And that's to say nothing of its
+talons.
+~
+I 0 3200 100.00 8  # BUTCHER: cut of poultry
+I 0 11002 25.00 1 b  # BUTCHER: giant lobster
+I 0 11003 25.00 1 b  # BUTCHER: dolphin carcass
 T 11002
 T 11020
 S
@@ -40,10 +54,13 @@ thief shady~
 a shady thief~
 A shady thief is hiding in the shadows (list).
 ~
-100 125 bdov nD
-1 0 0 15
-T 11016
-T 11023
+100 125 bdovI nD 3
+1 0 0 15 -1
+D
+He's dressed all in black, with a hood that covers most of his face.
+   Use 'list' and 'list id' to see what's available here, and 'buy' to purchase
+items with the talons you've collected.
+~
 T 11026
 S
 #11004
@@ -51,18 +68,26 @@ roc giant~
 a giant roc~
 A giant roc is perched on the nest (list).
 ~
-100 125 bdjyA cmnE
-2 0 2 26
-T 11014
-T 11015
+100 125 bdjyA cmnE 5
+2 0 2 26 -1
+D
+   The enormous gray and brown bird has a wingspan longer than a manor house
+and a beak that could snap a bull in half! And that's to say nothing of its
+talons.
+   Use 'list' and 'list id' to see what's available here, and 'buy' to purchase
+items with the talons you've collected.
+~
 S
 #11005
 roc giant hatchling~
 a giant roc hatchling~
 The hatchling roc is pecking around at the trees.
 ~
-100 125 bdj cnE
-2 0 0 26
+100 125 bdj cnE 2
+2 0 0 26 -1
+D
+The huge chick is covered in fluffy gray down feathers.
+~
 T 11012
 S
 #11007
@@ -70,17 +95,11 @@ poacher~
 a poacher~
 A poacher is creeping through the brush.
 ~
-100 125 bdov c
-1 0 9 2
-T 11007
-S
-#11008
-poacher roc~
-a roc poacher~
-A roc poacher is standing here.
+100 125 bdovI c 3
+1 0 9 2 -1
+D
+This guy is dressed for trouble!
 ~
-50 75 bdov c
-0 0 0 1
 T 11007
 S
 #11010
@@ -88,8 +107,12 @@ spawner~
 the invisible carcass spawner~
 The invisible carcass spawner exists here.
 ~
-0 0 dhk cdln
-0 0 29 15
+0 0 dhkM cdln 3
+0 0 29 15 -1
+D
+   Only immortals should see this. It loads the carcasses, which are hints for
+the players that a roc nest is nearby.
+~
 T 11010
 T 11011
 S
@@ -98,8 +121,12 @@ ostrich baby~
 a baby ostrich~
 A baby ostrich is running in circles.
 ~
-1 1 bdoD n
-0 0 0 9
+1 1 bdoD n 2
+0 0 0 9 -1
+D
+   This fluffy little brown chick has stripes and spots on its long, adorable
+neck, and a red patch on top of its cute little head.
+~
 T 9901
 T 9902
 T 11017
@@ -109,23 +136,36 @@ roc tawny~
 a tawny roc~
 A tawny roc is perched over you.
 ~
-100 125 de m
-0 0 2 26
+100 125 dej m 5
+0 0 2 26 -1
+D
+   The gray and brown roc stretches its wings and screeches. It's enormous --
+easily large enough to carry an armored knight in flight.
+~
 S
 #11019
 ostrich lithe~
 a lithe ostrich~
 A lithe ostrich prances circles around you.
 ~
-100 125 dej 0
-0 0 11 11
+100 125 dej 0 3
+0 0 11 11 -1
+D
+   The ostrich is taller than you are, with a long pink neck, matching legs,
+and a fluffy black body. White feathers trim the edge of its wings, which is
+stretches to make itself look twice as large.
+~
 S
 #11020
 swan huge trumpeter~
 a huge trumpeter swan~
 A huge trumpeter swan glides past you with grace.
 ~
-100 125 del 0
-0 0 6 9
+100 125 dejl 0 3
+0 0 6 9 -1
+D
+   The white swan is enormous! You've never seen one so big. It looks like you
+might be able to ride on it.
+~
 S
 $

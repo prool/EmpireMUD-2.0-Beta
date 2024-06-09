@@ -1,0 +1,36 @@
+#12687
+cotton candy~
+A Cotton Candy Bush~
+36 j c
+0 100 0 100
+D1
+&g.&?%%&g.~
+&P~
+D2
+&g.&?%%&g.~
+&P~
+D3
+&g.&?%%&g.~
+&P~
+D4
+&0.&?%%&0.~
+&P~
+I 6 12686 100.00 25  # FORAGE: sugar cubes
+I 8 12687 20.00 2 H  # HARVEST: bunch of cotton candy
+I 8 12687 20.00 3 H  # HARVEST: bunch of cotton candy
+I 8 12687 20.00 4 H  # HARVEST: bunch of cotton candy
+I 8 12687 20.00 5 H  # HARVEST: bunch of cotton candy
+I 8 12687 20.00 6 H  # HARVEST: bunch of cotton candy
+U
+0
+Bits of sweet fluff take to the wind as the field bursts open with pink cotton!~
+X
+bush cotton candy plants bushes crop~
+   Your eyes widen at the sight of the fluffy pink clouds of cotton candy
+growing on this singular, enormous bush. You have seen few sights in this life
+that compare to this plant; surely it cannot be natural. The sweet smell that
+floats on the wind is enough to make you drool in anticipation -- you can
+almost taste the candy.
+~
+S
+$

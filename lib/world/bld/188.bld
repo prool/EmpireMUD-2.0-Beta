@@ -1,0 +1,345 @@
+#18828
+Unearthly Manor~
+An Unearthly Manor~
+&0|==|~
+48 1 fR ademn
+9 1 0 -1
+D
+   You find yourself in a parlor covered in cobwebs, though the velvet
+furniture looks well-groomed. The hardwood floors are well worn in clear paths
+across the room. The air is a little too cold, and as you watch your breath
+condense, you think you catch the reflection of someone moving out of the
+corner of your eye.
+~
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
+R
+18828 2 5 0
+R
+18829 1 5 0
+R
+18830 1 5 0
+R
+18831 1 5 0
+T 18828
+S
+#18829
+Great Room~
+A Faded Great Room~
+&0[  ]~
+1 0 a 0
+0 0 0 -1
+D
+   The candles in the chandelier are mere wax drippings, serving as little more
+than a place to attach a cobweb in this aged and unused great room. Though the
+ceilings are high, dust in the air catches every stray beam of light and you
+can rarely see more than a few feet in front of your face. When you hold
+perfectly still, you can feel the floorboards twitch and tremble beneath you.
+But perhaps it's just the old house settling.
+~
+M
+18828 20.00 0
+M
+18829 20.00 0
+M
+18830 5.00 0
+S
+#18830
+Earthen Cellar~
+An Earthen Cellar~
+&0[  ]~
+1 0 a 0
+0 0 0 -1
+C
+tomb~
+D
+   The ceiling is low and you must duck to avoid the beams that hold up the
+great room above, and duck further still to avoid the spiders who stalk the
+many webs that cover those beams. But the spiders above you are of little
+concern compared to the earthen floor beneath you. The ground is lumped in the
+shape of graves, too numerous to count. The light flickers for a moment, and
+you swear you hear a groan from below.
+~
+F
+B
+S
+#18844
+Mausoleum~
+A Grand Mausoleum~
+&0[OO]~
+128 10 e adegimn
+8 0 0 -1
+C
+tomb~
+D
+   This grand mausoleum looks as if it has been carved from a single mountain
+of marble, from floor to pillar to ceiling. Even your heartbeat echoes through
+the polished halls as no sound goes unheard in the realm of the dead. Crypts
+line both sides of the mausoleum, so well-maintained that not even a speck of
+dust is visible on their gleaming lids.
+~
+F
+B
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
+R
+1002 1 5 0
+S
+#18861
+Deep Nether~
+The Deep Nether~
+&0[  ]~
+1 0 aj 0
+0 0 0 -1
+A
+bqu
+D
+   The sky twists away from you with dark, violet clouds rising into an
+infinite darkness. The stench of bone ash fills your nostrils as swirls of gray
+dust whip past you. The only landscape in this unnatural place is made from
+gobbets of flesh and crusted blood, and you soon find your own flesh fleeing to
+join it.
+~
+T 18863
+T 18861
+T 18864
+S
+#18862
+Deep Nether~
+The Deep Nether~
+&0[  ]~
+1 0 aj 0
+0 0 0 -1
+A
+bqu
+D
+You have ventured further into the Deep Nether than any mortal ever has.
+~
+T 18863
+S
+#18873
+Medical Tent~
+Inside the Medical Tent~
+&0[  ]~
+1 0 aj 0
+0 0 0 -1
+D
+   The tent isn't built to last very long; it's more a solid shroud, to keep
+the headless centaur from being able to watch a victim finish shuffling off the
+mortal coil.
+~
+S
+#18876
+Slaughterhouse~
+The Slaughterhouse~
+&0[  ]~
+1 0 ag 0
+0 0 0 18877
+C
+retrieve, store~
+D
+   The inside of the slaughterhouse has a faintly nauseating smell. The walls
+have been striped with red until they nearly look plaid, and every instrument
+and work surface has taken on a deep reddish hue.
+~
+I 29 5007 100.00 1  # RUINS-TO-BLD: Ruins
+I 31 3201 6.00 420 p  # PRODUCTION: slab of pork
+I 31 3203 6.00 420 p  # PRODUCTION: side of raw mutton
+M
+18876 100.00 0
+U
+1 5119
+S
+#18892
+Ossuary~
+An Underground Ossuary~
+&0[  ]~
+1 0 aq 0
+0 0 0 -1
+C
+tomb, sleep~
+D
+   The staircase descends into an ossuary filled with the bones of the dead.
+One wall is lined with skulls, another with ribcages. The domed ceiling is made
+from interlocked femurs, and looking up at it is enough to send a chill down
+your spine. There's a hidden door under the stairs.
+~
+E
+door hidden~
+It appears to lead outside.
+~
+E
+skulls~
+The skulls seem to be staring at you.
+~
+F
+dB
+M
+18892 100.00 0
+S
+#18893
+Attic Bedroom~
+The Attic Bedroom~
+&0[  ]~
+1 0 aR 0
+0 0 0 -1
+C
+sleep~
+D
+   The attic's low, sloping ceilings force you to stoop. It's musty, but nicely
+appointed with velvet curtains and antique furniture. A small, dusty window
+lets you look out over the surroundings, but only if you get close enough to
+see through the haze.
+~
+E
+trunk corner~
+There's an old trunk in the corner but you can't get it open.
+~
+F
+d
+M
+18893 100.00 0
+S
+#18894
+Grand Staircase~
+The Grand Staircase~
+&0[  ]~
+1 0 a 0
+0 0 0 -1
+D
+   The center of the mansion is devoted to a grand staircase wide enough to
+march a full legion. At the top and bottom it links to smaller staircases
+leading to the attic and the basement.
+~
+M
+18894 100.00 0
+S
+#18895
+Library~
+The Library~
+&0[  ]~
+1 0 a 0
+0 0 0 -1
+C
+browse, checkout, shelve, library, bookedit~
+D
+   The east wing of the mansion is a rather impressive library, filled to the
+ceiling with books. However, each time you pick up a book, you find it written
+in a different language that you cannot read. The shelves are covered in an
+inch of dust, but each time you blow the dust away, it settles back onto the
+same spot.
+~
+E
+books~
+None of the books seem to be in a language you can read.
+~
+E
+desk~
+   There's a note on the desk, but it's not in a language you can read. It is,
+however, written in blood.
+~
+E
+note~
+You can't read the note but it seems to be written in blood.
+~
+F
+l
+M
+18895 100.00 0
+T 5149
+S
+#18896
+Gallery~
+The Gallery~
+&0[  ]~
+1 0 a 0
+0 0 0 -1
+D
+   The west wing of the mansion is devoted to the gallery, filled with
+paintings, busts, and statues of long-dead residents. Opposite these works of
+art, the windows have been permanently covered with velvet drapes so that no
+sunlight enters the candle-lit room.
+~
+E
+paintings~
+The eyes of the paintings seem to follow you as you move about the room.
+~
+E
+busts~
+   The eyes of the busts seem to follow you as you move about the room. When
+you turn your back, you swear for a moment that you can hear one singing.
+~
+E
+statues~
+One of the statues looks like an angel with its face in its hands, weeping.
+~
+E
+windows drapes~
+The velvet drapes are closed, and you cannot seem to open them.
+~
+M
+18896 100.00 0
+S
+#18897
+Pumpkin Coach~
+In the Pumpkin Coach~
+&0[  ]~
+1 0 aq 0
+0 0 0 -1
+D
+   This elegant coach, being made from an enchanted pumpkin, has a rounded roof
+ending in a green stem at the top. The interior is surprisingly well-appointed
+and clean, although it retains the faint smell of pumpkin.
+~
+S
+#18898
+Pumpkin Coach~
+In the Pumpkin Coach~
+&0[  ]~
+1 0 aq 0
+0 0 0 -1
+D
+   This elegant coach, being made from an enchanted pumpkin, has a rounded roof
+ending in a green stem at the top. The interior is surprisingly well-appointed
+and clean, although it retains the faint smell of pumpkin. Although you can
+feel the coach tilt a little as it flies, the ride is surprisingly pleasant.
+~
+S
+#18899
+Stretching Room~
+The Stretching Room~
+&0[  ]~
+1 0 a 0
+0 1 0 -1
+D
+   This cobwebbed parlour might be called the stretching room because it's a
+place to stretch, put your feet up on a footstool, and chat about the ghastly
+state of the kingdom. Or perhaps it's because of the walls, which seem to
+stretch upward forever toward a ceiling that seems ever more distant. A coat
+rack stands near the door.
+~
+E
+ceiling up~
+It gives you vertigo to watch the ceiling recede.
+~
+E
+walls~
+   The vertically-striped wallpaper only makes the ceiling look that much
+further away. Well, it also makes the interior designer look tacky.
+~
+E
+cobwebs~
+You would think someone would have dusted before you got here.
+~
+E
+coatrack rack~
+   On further inspection, this isn't a coat rack at all. It's the other kind of
+rack.
+~
+E
+paintings~
+The paintings seem to watch you move.
+~
+M
+18899 100.00 0
+T 18899
+S
+$

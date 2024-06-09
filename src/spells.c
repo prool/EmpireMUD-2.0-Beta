@@ -2,15 +2,13 @@
 *   File: spells.c                                        EmpireMUD 2.0b5 *
 *  Usage: implementation for spells                                       *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
 *  CircleMUD (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#include <math.h>
 
 #include "conf.h"
 #include "sysdep.h"
@@ -24,36 +22,556 @@
 #include "skills.h"
 #include "vnums.h"
 #include "dg_scripts.h"
+#include "constants.h"
 
 /**
 * Contents:
+*   Summon Functions
 *   Utilities
-*   Damage Spells
-*   Chants
-*   Readies
+*   Commands
 */
 
-// external vars
+ //////////////////////////////////////////////////////////////////////////////
+//// SUMMON FUNCTIONS ////////////////////////////////////////////////////////
 
-// external funcs
-void check_combat_start(char_data *ch);
+/**
+* Sends a player back to where they came from, if they were adventure-summoned
+* and they left the adventure.
+*
+* @param char_data *ch The person to return back where they came from.
+*/
+void adventure_unsummon(char_data *ch) {
+	room_data *room, *map, *was_in;
+	struct follow_type *fol, *next_fol;
+	bool reloc = FALSE;
+	
+	// safety first
+	if (!ch || IS_NPC(ch) || !PLR_FLAGGED(ch, PLR_ADVENTURE_SUMMONED)) {
+		return;
+	}
+	
+	REMOVE_BIT(PLR_FLAGS(ch), PLR_ADVENTURE_SUMMONED);
+	
+	was_in = IN_ROOM(ch);
+	room = real_room(GET_ADVENTURE_SUMMON_RETURN_LOCATION(ch));
+	map = real_room(GET_ADVENTURE_SUMMON_RETURN_MAP(ch));
+	
+	act("$n vanishes in a wisp of smoke!", TRUE, ch, NULL, NULL, TO_ROOM);
+	
+	/*
+	*/
+	
+	if (room && map && GET_ROOM_VNUM(map) == (GET_MAP_LOC(room) ? GET_MAP_LOC(room)->vnum : NOTHING)) {
+		char_to_room(ch, room);
+	}
+	else {
+		// nowhere safe to send back to
+		char_to_room(ch, find_load_room(ch));
+		reloc = TRUE;
+	}
+	
+	act("$n appears in a burst of smoke!", TRUE, ch, NULL, NULL, TO_ROOM);
+	GET_LAST_DIR(ch) = NO_DIR;
+	qt_visit_room(ch, IN_ROOM(ch));
+	pre_greet_mtrigger(ch, IN_ROOM(ch), NO_DIR, "summon");	// cannot pre-greet for summon
+	enter_triggers(ch, NO_DIR, "summon", FALSE);
+	
+	look_at_room(ch);
+	if (reloc) {
+		msg_to_char(ch, "\r\nYour original location could not be located. You have been returned to a safe location after leaving the adventure.\r\n");
+	}
+	else {
+		msg_to_char(ch, "\r\nYou have been returned to your original location after leaving the adventure.\r\n");
+	}
+	
+	greet_triggers(ch, NO_DIR, "summon", FALSE);
+	msdp_update_room(ch);
+	
+	// followers?
+	LL_FOREACH_SAFE(ch->followers, fol, next_fol) {
+		if (IS_NPC(fol->follower) && AFF_FLAGGED(fol->follower, AFF_CHARM) && IN_ROOM(fol->follower) == was_in && !FIGHTING(fol->follower)) {
+			act("$n vanishes in a wisp of smoke!", TRUE, fol->follower, NULL, NULL, TO_ROOM);
+			char_to_room(fol->follower, IN_ROOM(ch));
+			GET_LAST_DIR(fol->follower) = NO_DIR;
+			pre_greet_mtrigger(fol->follower, IN_ROOM(fol->follower), NO_DIR, "summon");	// cannot pre-greet for summon
+			enter_triggers(fol->follower, NO_DIR, "summon", FALSE);
+			look_at_room(fol->follower);
+			act("$n appears in a burst of smoke!", TRUE, fol->follower, NULL, NULL, TO_ROOM);
+			
+			greet_triggers(fol->follower, NO_DIR, "summon", FALSE);
+		}
+	}
+}
+
+
+/**
+* Ensures a character won't be returned home by adventure_unsummon()
+*
+* @param char_data *ch The person to cancel the return-summon data for.
+*/
+void cancel_adventure_summon(char_data *ch) {
+	if (!IS_NPC(ch)) {
+		REMOVE_BIT(PLR_FLAGS(ch), PLR_ADVENTURE_SUMMONED);
+		GET_ADVENTURE_SUMMON_RETURN_LOCATION(ch) = NOWHERE;
+		GET_ADVENTURE_SUMMON_RETURN_MAP(ch) = NOWHERE;
+		GET_ADVENTURE_SUMMON_INSTANCE_ID(ch) = NOTHING;
+	}
+}
+
+
+/**
+* Skips past the word 'summon ' or 'summons ' (case-insensitive).
+*
+* @param char *input The string to strip of 'summon(s) ', if present.
+* @return char* A pointer to the position in the string after the word 'summon(s) '.
+*/
+char *format_summon_name(char *input) {
+	char *start = input;
+	
+	skip_spaces(&start);
+	if (!strn_cmp(start, "summon ", 7)) {
+		start += 7;
+	}
+	else if (!strn_cmp(start, "summons ", 7)) {
+		start += 8;
+	}
+	
+	return start;
+}
+
+
+/**
+* Gets the line display for one summonable thing.
+*
+* @param char_data *ch The player.
+* @param const char *name The ability or mob name to show.
+* @param int min_level The required level, if any.
+* @param ability_data *from_abil The ability that grants the summon, if any.
+* @return char* The text for the summon list.
+*/
+char *one_summon_entry(char_data *ch, const char *name, int min_level, ability_data *from_abil) {
+	static char output[256];
+	size_t size;
+	
+	size = snprintf(output, sizeof(output), "%s", name);
+	
+	if (from_abil && ABIL_COST(from_abil) > 0) {
+		size += snprintf(output + size, sizeof(output) - size, " (%d %s)", ABIL_COST(from_abil), pool_types[ABIL_COST_TYPE(from_abil)]);
+	}
+	if (min_level > 0 && (from_abil ? get_player_level_for_ability(ch, ABIL_VNUM(from_abil)) : get_approximate_level(ch)) < min_level) {
+		size += snprintf(output + size, sizeof(output) - size, " \trrequires level %d\t0", min_level);
+	}
+	
+	return output;
+}
+
+
+/**
+* For the "adventure summon <player>" command.
+*
+* @param char_data *ch The player doing the summoning.
+* @param char *argument The typed argument.
+*/
+void do_adventure_summon(char_data *ch, char *argument) {
+	char arg[MAX_INPUT_LENGTH];
+	struct instance_data *inst;
+	char_data *vict;
+	
+	one_argument(argument, arg);
+	
+	if (GET_POS(ch) < POS_STANDING) {
+		send_low_pos_msg(ch);
+	}
+	else if (!(inst = find_instance_by_room(IN_ROOM(ch), FALSE, FALSE))) {
+		msg_to_char(ch, "You can only use the adventure summon command inside an adventure.\r\n");
+	}
+	else if (!can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED)) {
+		msg_to_char(ch, "You don't have permission to summon players here.\r\n");
+	}
+	else if (!*arg) {
+		msg_to_char(ch, "Summon whom to the adventure?\r\n");
+	}
+	else if (!(vict = get_player_vis(ch, arg, FIND_CHAR_WORLD | FIND_NO_DARK))) {
+		send_config_msg(ch, "no_person");
+	}
+	else if (vict == ch) {
+		msg_to_char(ch, "You summon yourself! Look, you're already here.\r\n");
+	}
+	else if (!GROUP(ch) || GROUP(ch) != GROUP(vict)) {
+		msg_to_char(ch, "You can only summon members of your own group.\r\n");
+	}
+	else if (IN_ROOM(vict) == IN_ROOM(ch)) {
+		msg_to_char(ch, "Your target is already here.\r\n");
+	}
+	else if (IS_ADVENTURE_ROOM(IN_ROOM(vict))) {
+		msg_to_char(ch, "You cannot summon someone who is already in an adventure.\r\n");
+	}
+	else if (!vict->desc) {
+		msg_to_char(ch, "You can't summon someone who is linkdead.\r\n");
+	}
+	else if (GET_ACCOUNT(ch) == GET_ACCOUNT(vict)) {
+		msg_to_char(ch, "You can't summon your own alts.\r\n");
+	}
+	else if (IS_DEAD(vict)) {
+		msg_to_char(ch, "You cannot summon the dead like that.\r\n");
+	}
+	else if (!can_enter_instance(vict, inst)) {
+		msg_to_char(ch, "Your target can't enter this instance.\r\n");
+	}
+	else if (!can_teleport_to(vict, IN_ROOM(vict), TRUE)) {
+		msg_to_char(ch, "Your target can't be summoned from %s current location.\r\n", REAL_HSHR(vict));
+	}
+	else if (!can_teleport_to(vict, IN_ROOM(ch), FALSE)) {
+		msg_to_char(ch, "Your target can't be summoned here.\r\n");
+	}
+	else if (PLR_FLAGGED(vict, PLR_ADVENTURE_SUMMONED)) {
+		msg_to_char(ch, "You can't summon someone who is already adventure-summoned.\r\n");
+	}
+	else {
+		act("You start summoning $N...", FALSE, ch, NULL, vict, TO_CHAR);
+		act("$n starts summoning $N...", FALSE, ch, NULL, vict, TO_ROOM);
+		msg_to_char(vict, "%s is trying to summon you to %s (%s) -- use 'accept/reject summon'.\r\n", PERS(ch, ch, TRUE), GET_ADV_NAME(INST_ADVENTURE(inst)), get_room_name(IN_ROOM(ch), FALSE));
+		add_offer(vict, ch, OFFER_SUMMON, SUMMON_ADVENTURE);
+		command_lag(ch, WAIT_OTHER);
+	}
+}
+
+
+/**
+* Command processing for the "summon materials" ptech, called via the
+* central do_summon command.
+*
+* @param char_data *ch The person using the command.
+* @param char *argument The typed arg.
+*/
+void do_summon_materials(char_data *ch, char *argument) {
+	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], *objname;
+	struct empire_storage_data *store, *next_store;
+	int count = 0, total = 1, number, pos, carry;
+	struct empire_island *isle;
+	ability_data *abil;
+	empire_data *emp;
+	int cost = 2;	// * number of things to summon
+	obj_data *proto;
+	bool one, found = FALSE, full = FALSE;
+
+	half_chop(argument, arg1, arg2);
+	
+	if (!has_player_tech(ch, PTECH_SUMMON_MATERIALS)) {
+		msg_to_char(ch, "You don't have the right ability to summon materials.\r\n");
+		return;
+	}
+	if (!(emp = GET_LOYALTY(ch))) {
+		msg_to_char(ch, "You can't summon empire materials if you're not in an empire.\r\n");
+		return;
+	}
+	if (GET_RANK(ch) < EMPIRE_PRIV(emp, PRIV_STORAGE)) {
+		msg_to_char(ch, "You aren't high enough rank to retrieve from the empire inventory.\r\n");
+		return;
+	}
+	if (GET_POS(ch) < POS_RESTING) {
+		send_low_pos_msg(ch);
+		return;
+	}
+	if (AFF_FLAGGED(ch, AFF_STUNNED | AFF_HARD_STUNNED)) {
+		msg_to_char(ch, "You can't do that... you're stunned!\r\n");
+		return;
+	}
+	
+	if (!GET_ISLAND(IN_ROOM(ch)) || !(isle = get_empire_island(emp, GET_ISLAND_ID(IN_ROOM(ch))))) {
+		msg_to_char(ch, "You can't summon materials here.\r\n");
+		return;
+	}
+	
+	if (run_ability_triggers_by_player_tech(ch, PTECH_SUMMON_MATERIALS, NULL, NULL, NULL)) {
+		return;
+	}
+	
+	// pull out a number if the first arg is a number
+	if (*arg1 && is_number(arg1)) {
+		total = atoi(arg1);
+		if (total < 1) {
+			msg_to_char(ch, "You have to summon at least 1.\r\n");
+			return;
+		}
+		strcpy(arg1, arg2);
+	}
+	else if (*arg1 && *arg2) {
+		// re-combine if it wasn't a number
+		sprintf(arg1 + strlen(arg1), " %s", arg2);
+	}
+	
+	// arg1 now holds the desired name
+	objname = arg1;
+	number = get_number(&objname);
+
+	// multiply cost for total, but don't store it
+	if (!can_use_ability(ch, NO_ABIL, MANA, cost * total, NOTHING)) {
+		return;
+	}
+
+	if (!*objname) {
+		msg_to_char(ch, "What material would you like to summon (use einventory to see what you have)?\r\n");
+		return;
+	}
+	
+	// messaging (allow custom messages)
+	abil = find_player_ability_by_tech(ch, PTECH_SUMMON_MATERIALS);
+	if (abil && abil_has_custom_message(abil, ABIL_CUSTOM_SELF_TO_CHAR)) {
+		act(abil_get_custom_message(abil, ABIL_CUSTOM_SELF_TO_CHAR), FALSE, ch, NULL, NULL, TO_CHAR);
+	}
+	else {
+		act("You open a tiny portal to summon materials...", FALSE, ch, NULL, NULL, TO_CHAR);
+	}
+	if (abil && abil_has_custom_message(abil, ABIL_CUSTOM_SELF_TO_ROOM)) {
+		act(abil_get_custom_message(abil, ABIL_CUSTOM_SELF_TO_ROOM), ABILITY_FLAGGED(abil, ABILF_INVISIBLE) ? TRUE : FALSE, ch, NULL, NULL, TO_CHAR);
+	}
+	else {
+		act("$n opens a tiny portal to summon materials...", (abil && ABILITY_FLAGGED(abil, ABILF_INVISIBLE)) ? TRUE : FALSE, ch, NULL, NULL, TO_ROOM);
+	}
+	
+	pos = 0;
+	HASH_ITER(hh, isle->store, store, next_store) {
+		if (found) {
+			break;
+		}
+		if (store->amount < 1) {
+			continue;	// none of this
+		}
+		
+		proto = store->proto;
+		if (proto && multi_isname(objname, GET_OBJ_KEYWORDS(proto)) && (++pos == number)) {
+			found = TRUE;
+			
+			if (!CAN_WEAR(proto, ITEM_WEAR_TAKE)) {
+				msg_to_char(ch, "You can't summon %s.\r\n", GET_OBJ_SHORT_DESC(proto));
+				return;
+			}
+			if (stored_item_requires_withdraw(proto)) {
+				msg_to_char(ch, "You can't summon materials out of the vault.\r\n");
+				return;
+			}
+			
+			while (count < total && store->amount > 0) {
+				carry = IS_CARRYING_N(ch);
+				one = retrieve_resource(ch, emp, store, FALSE);
+				if (IS_CARRYING_N(ch) > carry) {
+					++count;	// got one
+				}
+				if (!one) {
+					full = TRUE;	// probably
+					break;	// done with this loop
+				}
+			}
+		}
+	}
+	
+	if (found && count < total && count > 0) {
+		if (IS_CARRYING_N(ch) >= CAN_CARRY_N(ch) || full) {
+			if (ch->desc) {
+				stack_msg_to_desc(ch->desc, "You managed to summon %d.\r\n", count);
+			}
+		}
+		else if (ch->desc) {
+			stack_msg_to_desc(ch->desc, "There weren't enough, but you managed to summon %d.\r\n", count);
+		}
+	}
+	
+	// result messages
+	if (!found) {
+		if (IS_CARRYING_N(ch) >= CAN_CARRY_N(ch) || full) {
+			msg_to_char(ch, "Your arms are full.\r\n");
+		}
+		else {
+			msg_to_char(ch, "Nothing like that is stored around here.\r\n");
+		}
+	}
+	else if (count == 0) {
+		// they must have gotten an error message
+	}
+	else {
+		// save the empire
+		if (found) {
+			set_mana(ch, GET_MANA(ch) - (cost * count));	// charge only the amount retrieved
+			read_vault(emp);
+			gain_player_tech_exp(ch, PTECH_SUMMON_MATERIALS, 1);
+			run_ability_hooks_by_player_tech(ch, PTECH_SUMMON_MATERIALS, NULL, NULL, NULL, NULL);
+		}
+	}
+	
+	command_lag(ch, WAIT_OTHER);
+}
+
+
+/**
+* Begins a summon for a player -- see do_summon.
+*
+* @param char_data *ch The summoner.
+* @param char *argument The typed-in arg.
+*/
+void do_summon_player(char_data *ch, char *argument) {
+	char arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
+	char_data *vict, *ch_iter;
+	bool found;
+	
+	one_argument(argument, arg);
+	
+	if (!room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_SUMMON_PLAYER)) {
+		msg_to_char(ch, "You can't summon players here.\r\n");
+	}
+	else if (!IS_COMPLETE(IN_ROOM(ch))) {
+		msg_to_char(ch, "You must complete the building first.\r\n");
+	}
+	else if (!can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED)) {
+		msg_to_char(ch, "You don't have permission to summon players here.\r\n");
+	}
+	else if (!*arg) {
+		msg_to_char(ch, "Summon whom?\r\n");
+	}
+	else if (!(vict = get_player_vis(ch, arg, FIND_CHAR_WORLD | FIND_NO_DARK))) {
+		send_config_msg(ch, "no_person");
+	}
+	else if (vict == ch) {
+		msg_to_char(ch, "You summon yourself! Look, you're already here.\r\n");
+	}
+	else if (!GROUP(ch) || GROUP(ch) != GROUP(vict)) {
+		msg_to_char(ch, "You can only summon members of your own group.\r\n");
+	}
+	else if (IN_ROOM(vict) == IN_ROOM(ch)) {
+		msg_to_char(ch, "Your target is already here.\r\n");
+	}
+	else if (IS_DEAD(vict)) {
+		msg_to_char(ch, "You cannot summon the dead like that.\r\n");
+	}
+	else if (!can_teleport_to(vict, IN_ROOM(vict), TRUE)) {
+		msg_to_char(ch, "Your target can't be summoned from %s current location.\r\n", REAL_HSHR(vict));
+	}
+	else if (!can_teleport_to(vict, IN_ROOM(ch), FALSE)) {
+		msg_to_char(ch, "Your target can't be summoned here.\r\n");
+	}
+	else {
+		// mostly-valid by now... just a little bit more to check
+		// requires a 2nd group member present IF the target is from a different empire
+		if (GET_LOYALTY(vict) != GET_LOYALTY(ch) || !GET_LOYALTY(ch)) {
+			found = FALSE;
+			DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), ch_iter, next_in_room) {
+				if (IS_DEAD(ch_iter) || !ch_iter->desc) {
+					continue;
+				}
+			
+				if (ch_iter != ch && GROUP(ch_iter) == GROUP(ch)) {
+					found = TRUE;
+					break;
+				}
+			}
+		
+			if (!found) {
+				msg_to_char(ch, "You need a second group member present to help summon.\r\n");
+				return;
+			}
+		}
+		
+		act("You start summoning $N...", FALSE, ch, NULL, vict, TO_CHAR);
+		safe_snprintf(buf, sizeof(buf), "$o is trying to summon you to %s%s -- use 'accept/reject summon'.", get_room_name(IN_ROOM(ch), FALSE), coord_display_room(ch, IN_ROOM(ch), FALSE));
+		act(buf, FALSE, ch, NULL, vict, TO_VICT | TO_SLEEP);
+		add_offer(vict, ch, OFFER_SUMMON, SUMMON_PLAYER);
+		command_lag(ch, WAIT_OTHER);
+	}
+}
 
 
  //////////////////////////////////////////////////////////////////////////////
 //// UTILITIES ///////////////////////////////////////////////////////////////
 
 /**
+* Determines if a character is protected by the MAJESTY affect, which makes it
+* harder to attack them.
+*
+* @param char_data *ch The person with majesty.
+* @param char_data *attacker Optional: Who is trying to hit them; will allow it if they're 50 levels above. (NULL to ignore)
+* @return bool TRUE if the character is protected by MAJESTY, FALSE if not.
+*/
+bool has_majesty_immunity(char_data *ch, char_data *attacker) {
+	ability_data *abil;
+	struct player_ability_data *plab, *next_plab;
+	int one_trait, best_trait = 0;
+	
+	const int over_level_ignore = 50;	// attacker this far above the char ignroes majesty
+	
+	// basic checks
+	if (!AFF_FLAGGED(ch, AFF_MAJESTY)) {
+		return FALSE;	// not affected
+	}
+	if (attacker && get_approximate_level(attacker) >= get_approximate_level(ch) + over_level_ignore) {
+		return FALSE;	// over-level
+	}
+	
+	// ok: try to find the majesty ability
+	if (!IS_NPC(ch)) {
+		HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
+			if (!plab->purchased[GET_CURRENT_SKILL_SET(ch)]) {
+				continue;	// wrong skill set
+			}
+			if (!(abil = plab->ptr) || !IS_SET(ABIL_TYPES(abil), ABILT_BUFF | ABILT_PASSIVE_BUFF)) {
+				continue;	// not a buff; not likely to be the source of Majesty
+			}
+			if (!IS_SET(ABIL_AFFECTS(abil), AFF_MAJESTY)) {
+				continue;	// not a majesty ability
+			}
+			if (IS_SET(ABIL_TARGETS(abil), ATAR_NOT_SELF)) {
+				continue;	// can't be one that doesn't target me
+			}
+		
+			// ok, this ability is a likely source of majesty, but is it the best one?
+			if (ABIL_LINKED_TRAIT(abil) != APPLY_NONE) {
+				one_trait = get_attribute_by_apply(ch, ABIL_LINKED_TRAIT(abil));
+				best_trait = MAX(best_trait, one_trait);
+			}
+		}
+	}
+	
+	// if we failed to detect a trait, we default to Charisma for historical reasons
+	// (NPCs also hit this block)
+	if (best_trait < 1) {
+		best_trait = GET_CHARISMA(ch);
+	}
+	
+	// now the trait roll:
+	return number(0, best_trait) ? TRUE : FALSE;
+}
+
+
+/**
 * This function checks if the character has a counterspell available and
 * pops it if so.
 *
-* @param char_data *ch
-* @return bool TRUE if a counterspell fired, FALSE if the spell can proceed
+* @param char_data *ch The player who might have a counterspell.
+* @param char_data *triggered_by Optional: the person who caused the counterspell, for ability hook targets (may be NULL).
+* @return bool TRUE if a counterspell fired, FALSE if the spell can proceed.
 */
-bool trigger_counterspell(char_data *ch) {
-	if (affected_by_spell(ch, ATYPE_COUNTERSPELL)) {
+bool trigger_counterspell(char_data *ch, char_data *triggered_by) {
+	ability_data *abil = NULL;
+	struct affected_type *aff;
+	
+	if (AFF_FLAGGED(ch, AFF_COUNTERSPELL)) {
 		msg_to_char(ch, "Your counterspell goes off!\r\n");
-		affect_from_char(ch, ATYPE_COUNTERSPELL, FALSE);
-		gain_ability_exp(ch, ABIL_COUNTERSPELL, 100);
+		
+		// find first counterspell aff for later
+		LL_FOREACH(ch->affected, aff) {
+			if (IS_SET(aff->bitvector, AFF_COUNTERSPELL)) {
+				abil = has_buff_ability_by_affect_and_affect_vnum(ch, AFF_COUNTERSPELL, aff->type);
+				break;
+			}
+		}
+		
+		// remove first one
+		remove_first_aff_flag_from_char(ch, AFF_COUNTERSPELL, FALSE);
+		
+		// did we find an ability that caused it?
+		if (abil) {
+			gain_ability_exp(ch, ABIL_VNUM(abil), 100);
+			run_ability_hooks(ch, AHOOK_ABILITY, ABIL_VNUM(abil), 0, triggered_by, NULL, NULL, NULL, NOBITS);
+		}
 		return TRUE;
 	}
 	
@@ -62,419 +580,419 @@ bool trigger_counterspell(char_data *ch) {
 
 
  //////////////////////////////////////////////////////////////////////////////
-//// DAMAGE SPELLS ///////////////////////////////////////////////////////////
+//// COMMANDS ////////////////////////////////////////////////////////////////
 
-struct damage_spell_type {
-	any_vnum ability;	// ABIL_ type
-	double cost_mod;	// mana cost as a % of normal spells (1.0 = normal)
-	int attack_type;	// ATTACK_
-	double damage_mod;	// 1.0 = normal damage, balance based on affects
-	bitvector_t aff_immunity;	// AFF_ flag making person immune
+// also do_chant, do_ritual: handles SCMD_CAST, SCMD_RITUAL, SCMD_CHANT
+ACMD(do_cast) {
+	bool found;
+	char *arg2;
+	ability_data *abil;
+	struct player_ability_data *plab, *next_plab;
 	
-	// affect group: all this only matters if aff_type != -1
-	int aff_type;	// ATYPE_, -1 for none
-	int duration;	// time for the affect
-	int apply;	// APPLY_, 0 for none
-	int modifier;	// +/- value, if apply != 0
-	bitvector_t aff_flag;	// AFF_, 0 for none
+	const char *cast_noun[] = { "spell", "ritual", "chant" };
+	const char *cast_command[] = { "cast", "ritual", "chant" };
 	
-	// dot affect
-	int dot_type;	// ATYPE_, -1 for none
-	int dot_duration;	// time for the dot
-	int dot_damage_type;	// DAM_ for the dot
-	double dot_dmg_mod;	// % of scaled dot damage (1.0 = normal)
-	int dot_max_stacks;	// how high the dot can stack
+	#define VALID_CAST_ABIL(ch, plab)  ((plab)->ptr && (plab)->purchased[GET_CURRENT_SKILL_SET(ch)] && ABIL_COMMAND(abil) && !str_cmp(ABIL_COMMAND(abil), cast_command[subcmd]))
 	
-	int cooldown_type;	// COOLDOWN_
-	int cooldown_time;	// seconds
-};
-
-// shortcuts
-#define NO_SPELL_AFFECT  -1, 0, 0, 0, NOBITS
-#define NO_DOT_AFFECT  -1, 0, 0, 0, 0
-
-const struct damage_spell_type damage_spell[] = {
-	// ABIL_, cost-mod, ATTACK_, damage-mod, immunity-aff,
-	// affect (optional): ATYPE_, duration, apply, modifier, adds-aff
-	// dot (optional): ATYPE_, duration, DAM_, damage, max-stacks
-	// COOLDOWN_, cooldown
+	arg2 = one_word(argument, arg);	// first arg: ritual/chant type
+	skip_spaces(&arg2);	// remaining arg
 	
-	// Lightningbolt
-	{ ABIL_LIGHTNINGBOLT, 1, ATTACK_LIGHTNINGBOLT, 0.8, AFF_IMMUNE_NATURAL_MAGIC,
-		NO_SPELL_AFFECT,
-		ATYPE_SHOCKED, 3, DAM_MAGICAL, 0.5, 1,
-		COOLDOWN_LIGHTNINGBOLT, 9
-	},
-	
-	// SUNSHOCK
-	{ ABIL_SUNSHOCK, 1.3, ATTACK_SUNSHOCK, 0.6, AFF_IMMUNE_HIGH_SORCERY,
-		ATYPE_SUNSHOCK, 1, APPLY_NONE, 0, AFF_BLIND,
-		NO_DOT_AFFECT,
-		COOLDOWN_SUNSHOCK, 9
-	},
-	
-	// ABLATE
-	{ ABIL_ABLATE, 1.33, ATTACK_ABLATE, 0.6, AFF_IMMUNE_HIGH_SORCERY,
-		ATYPE_ABLATE, 2, APPLY_RESIST_PHYSICAL, -10, NOBITS,
-		NO_DOT_AFFECT,
-		COOLDOWN_ABLATE, 9
-	},
-	
-	// SCOUR
-	{ ABIL_SCOUR, 1.1, ATTACK_SCOUR, 0.4, AFF_IMMUNE_HIGH_SORCERY,
-		NO_SPELL_AFFECT,
-		ATYPE_SCOUR, 2, DAM_MAGICAL, 1.5, 5,
-		COOLDOWN_SCOUR, 6
-	},
-	
-	// ARCLIGHT
-	{ ABIL_ARCLIGHT, 1, ATTACK_ARCLIGHT, 1.4, NOBITS,
-		NO_SPELL_AFFECT,
-		NO_DOT_AFFECT,
-		COOLDOWN_ARCLIGHT, 9
-	},
-	
-	// SHADOWLASH
-	{ ABIL_SHADOWLASH, 1.2, ATTACK_SHADOWLASH, 0.25, AFF_IMMUNE_HIGH_SORCERY,
-		ATYPE_SHADOWLASH_BLIND, 1, APPLY_NONE, 0, AFF_BLIND,
-		ATYPE_SHADOWLASH_DOT, 3, DAM_MAGICAL, 0.75, 3,
-		COOLDOWN_SHADOWLASH, 9
-	},
-	
-	// THORNLASH
-	{ ABIL_THORNLASH, 1, ATTACK_THORNLASH, 0.4, AFF_IMMUNE_HIGH_SORCERY,
-		NO_SPELL_AFFECT,
-		ATYPE_THORNLASH, 3, DAM_POISON, 1.0, 3,
-		COOLDOWN_THORNLASH, 9
-	},
-	
-	// CHRONOBLAST
-	{ ABIL_CHRONOBLAST, 1.15, ATTACK_CHRONOBLAST, 0.9, AFF_IMMUNE_HIGH_SORCERY,
-		ATYPE_CHRONOBLAST, 1, APPLY_NONE, 0, AFF_SLOW,
-		NO_DOT_AFFECT,
-		COOLDOWN_CHRONOBLAST, 6
-	},
-	
-	// SOULCHAIN
-	{ ABIL_SOULCHAIN, 1.1, ATTACK_SOULCHAIN, 0.9, AFF_IMMUNE_HIGH_SORCERY,
-		ATYPE_SOULCHAIN, 2, APPLY_INTELLIGENCE, -4, NOBITS,
-		NO_DOT_AFFECT,
-		COOLDOWN_SOULCHAIN, 9
-	},
-	
-	// ASTRALCLAW
-	{ ABIL_ASTRALCLAW, 1, ATTACK_ASTRALCLAW, 0.4, AFF_IMMUNE_NATURAL_MAGIC,
-		NO_SPELL_AFFECT,
-		ATYPE_ASTRALCLAW, 3, DAM_PHYSICAL, 1.0, 3,
-		COOLDOWN_ASTRALCLAW, 9
-	},
-	
-	// ERODE
-	{ ABIL_ERODE, 1, ATTACK_ERODE, 0.9, AFF_IMMUNE_NATURAL_MAGIC,
-		NO_SPELL_AFFECT,
-		ATYPE_ERODE, 3, DAM_MAGICAL, 0.75, 3,
-		COOLDOWN_ERODE, 9
-	},
-	
-	// DISPIRIT
-	{ ABIL_DISPIRIT, 1.1, ATTACK_DISPIRIT, 0.9, AFF_IMMUNE_NATURAL_MAGIC,
-		ATYPE_DISPIRIT, 2, APPLY_WITS, -4, NOBITS,
-		NO_DOT_AFFECT,
-		COOLDOWN_DISPIRIT, 9
-	},
-	
-	// STARSTRIKE
-	{ ABIL_STARSTRIKE, 1, ATTACK_STARSTRIKE, 1.5, AFF_IMMUNE_NATURAL_MAGIC,
-		NO_SPELL_AFFECT,
-		NO_DOT_AFFECT,
-		COOLDOWN_STARSTRIKE, 9
-	},
-	
-	// ACIDBLAST
-	{ ABIL_ACIDBLAST, 1.33, ATTACK_ACIDBLAST, 0.6, AFF_IMMUNE_NATURAL_MAGIC,
-		ATYPE_ACIDBLAST, 2, APPLY_RESIST_MAGICAL, -10, NOBITS,
-		NO_DOT_AFFECT,
-		COOLDOWN_ACIDBLAST, 9
-	},
-	
-	// DEATHTOUCH
-	{ ABIL_DEATHTOUCH, 1.05, ATTACK_DEATHTOUCH, 1.0, AFF_IMMUNE_NATURAL_MAGIC,
-		NO_SPELL_AFFECT,
-		NO_DOT_AFFECT,
-		COOLDOWN_DEATHTOUCH, 6
-	},
-	
-	{ NO_ABIL, 0, 1.0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0 }
-};
-	
-
-/**
-* @param int subcmd ABIL_x to match to the damage_spell[] struct
-*/
-ACMD(do_damage_spell) {
-	char_data *vict = NULL;
-	struct affected_type *af;
-	int iter, type = NOTHING, cost, dmg, dot_dmg, result;
-	
-	double cost_mod[] = { 1.5, 1.2, 0.9 };
-	
-	// find ability
-	for (iter = 0; damage_spell[iter].ability != NO_ABIL; ++iter) {
-		if (damage_spell[iter].ability == subcmd) {
-			type = iter;
-			break;
-		}
-	}
-	
-	// sanity check
-	if (type == NOTHING) {
-		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "do_damage_spell: unable to find ability %d", subcmd);
-		msg_to_char(ch, "There is a bug in this ability. Please try again later.\r\n");
+	if (IS_NPC(ch)) {
+		msg_to_char(ch, "NPCs cannot do that.\r\n");
 		return;
 	}
 	
-	// calculate damage in order to calculate cost
-	if ((IS_NPC(ch) || GET_CLASS_ROLE(ch) == ROLE_CASTER || GET_CLASS_ROLE(ch) == ROLE_SOLO) && check_solo_role(ch)) {
-		dmg = get_approximate_level(ch) / 8.0;
-		dmg += GET_BONUS_MAGICAL(ch);
-	}
-	else {	// not on a role
-		dmg = get_ability_level(ch, subcmd) / 8.0;
-	}
-	
-	dmg += GET_INTELLIGENCE(ch);	// both add this
-	dmg *= damage_spell[type].damage_mod;	// modify by the spell
-	
-	// calculate DoT damage if any
-	dot_dmg = 0;
-	if (damage_spell[type].dot_type > 0) {
-		dot_dmg = get_ability_level(ch, subcmd) / 24;	// skill level base
-		if ((IS_NPC(ch) || GET_CLASS_ROLE(ch) == ROLE_CASTER || GET_CLASS_ROLE(ch) == ROLE_SOLO) && check_solo_role(ch)) {
-			dot_dmg = MAX(dot_dmg, (get_approximate_level(ch) / 24));	// total level base
-			dot_dmg += GET_BONUS_MAGICAL(ch) / MAX(1, damage_spell[type].dot_duration);
+	// no-arg: show list
+	if (!*arg) {
+		// already doing this?
+		if (GET_ACTION(ch) == ACT_OVER_TIME_ABILITY && (abil = ability_proto(GET_ACTION_VNUM(ch, 0))) && (plab = get_ability_data(ch, ABIL_VNUM(abil), FALSE)) && VALID_CAST_ABIL(ch, plab)) {
+			msg_to_char(ch, "You stop the %s.\r\n", cast_noun[subcmd]);
+			cancel_action(ch);
+			return;
 		}
 		
-		dot_dmg += GET_INTELLIGENCE(ch) / MAX(1, damage_spell[type].dot_duration);	// always add int
+		build_page_display(ch, "You know the following %ss:", cast_noun[subcmd]);
 		
-		// finally:
-		dot_dmg = round(dot_dmg * damage_spell[type].dot_dmg_mod);
-		dot_dmg = MAX(1, dot_dmg);
-	}
-	
-	// cost calculations
-	cost = round((dmg + dot_dmg) * CHOOSE_BY_ABILITY_LEVEL(cost_mod, ch, ABIL_SKYBRAND) * damage_spell[type].cost_mod);
-	
-	// check ability and cost
-	if (!can_use_ability(ch, subcmd, MANA, cost, damage_spell[type].cooldown_type)) {
-		return;
-	}
-	
-	// find target
-	one_argument(argument, arg);
-	if (*arg && !(vict = get_char_vis(ch, arg, FIND_CHAR_ROOM))) {
-		send_config_msg(ch, "no_person");
-		return;
-	}
-	if (!*arg && !(vict = FIGHTING(ch))) {
-		msg_to_char(ch, "Who would you like to cast that at?\r\n");
-		return;
-	}
-	if (ch == vict) {
-		msg_to_char(ch, "You wouldn't want to cast that on yourself.\r\n");
-		return;
-	}
-	
-	// check validity
-	if (!can_fight(ch, vict)) {
-		act("You can't attack $M!", FALSE, ch, NULL, vict, TO_CHAR);
-		return;
-	}
-	
-	if (ABILITY_TRIGGERS(ch, vict, NULL, damage_spell[type].ability)) {
-		return;
-	}
-	
-	charge_ability_cost(ch, MANA, cost, damage_spell[type].cooldown_type, damage_spell[type].cooldown_time, WAIT_COMBAT_SPELL);
-	
-	if (SHOULD_APPEAR(ch)) {
-		appear(ch);
-	}
-	
-	// start meters now, to track direct damage()
-	check_combat_start(ch);
-	check_combat_start(vict);
-	
-	// special-casing damage (done AFTER cost); requires vict
-	if (damage_spell[type].ability == ABIL_SUNSHOCK && IS_VAMPIRE(vict)) {
-		dmg *= 1.5;
-	}
-	
-	// check counterspell and then damage
-	if (!trigger_counterspell(vict)) {
-		result = damage(ch, vict, dmg, damage_spell[type].attack_type, DAM_MAGICAL);
-		
-		// damage returns -1 on death
-		if (result > 0 && !IS_DEAD(vict) && !EXTRACTED(vict) && (damage_spell[type].aff_immunity == NOBITS || !AFF_FLAGGED(vict, damage_spell[type].aff_immunity))) {
-			if (damage_spell[type].aff_type > 0) {
-				af = create_aff(damage_spell[type].aff_type, damage_spell[type].duration, damage_spell[type].apply, damage_spell[type].modifier, damage_spell[type].aff_flag, ch);
-				affect_join(vict, af, 0);
+		found = FALSE;
+		HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
+			abil = plab->ptr;
+			if (!VALID_CAST_ABIL(ch, plab)) {
+				continue;
 			}
-			if (damage_spell[type].dot_type > 0 && dot_dmg > 0) {
-				apply_dot_effect(vict, damage_spell[type].dot_type, damage_spell[type].dot_duration, damage_spell[type].dot_damage_type, dot_dmg, damage_spell[type].dot_max_stacks, ch);
+			
+			// append
+			build_page_display_col(ch, 2, FALSE, " %s", ABIL_NAME(abil));
+			
+			// found 1
+			found = TRUE;
+		}
+		
+		if (!found) {
+			build_page_display_str(ch, " nothing");
+			if (subcmd == SCMD_CAST) {
+				build_page_display_str(ch, "(Most magical abilities have their own commands rather than 'cast'.)");
 			}
 		}
-	}
-	else {
-		// counterspell
-		damage(ch, vict, 0, damage_spell[type].attack_type, DAM_MAGICAL);
+		
+		send_page_display(ch);
+		return;
+	}	// end no-arg
+	
+	// with arg: determine what they typed
+	found = FALSE;
+	HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
+		abil = plab->ptr;
+		if (!VALID_CAST_ABIL(ch, plab)) {
+			continue;	// not a conjure ability
+		}
+		if (!multi_isname(arg, ABIL_NAME(abil))) {
+			continue;	// wrong name: not-targeted
+		}
+		
+		// match!
+		perform_ability_command(ch, abil, arg2);
+		found = TRUE;
+		break;
 	}
 	
-	if (can_gain_exp_from(ch, vict)) {
-		gain_ability_exp(ch, subcmd, 15);
+	if (!found) {
+		msg_to_char(ch, "You don't know that %s.\r\n", cast_noun[subcmd]);
 	}
 }
 
 
- //////////////////////////////////////////////////////////////////////////////
-//// READIES /////////////////////////////////////////////////////////////////
-
-// for do_ready
-struct ready_magic_weapon_type {
-	char *name;
-	int cost;
-	int cost_pool;	// MANA, etc
-	any_vnum ability;
-	obj_vnum vnum;
-} ready_magic_weapon[] = {
-	{ "bloodmace", 40, BLOOD, ABIL_READY_BLOOD_WEAPONS, o_BLOODMACE },
-	{ "bloodskean", 40, BLOOD, ABIL_READY_BLOOD_WEAPONS, o_BLOODSKEAN },
-	{ "bloodspear", 40, BLOOD, ABIL_READY_BLOOD_WEAPONS, o_BLOODSPEAR },
-	{ "bloodsword", 40, BLOOD, ABIL_READY_BLOOD_WEAPONS, o_BLOODSWORD },
-	{ "bloodstaff", 40, BLOOD, ABIL_READY_BLOOD_WEAPONS, o_BLOODSTAFF },
-	{ "fireball", 30, MANA, ABIL_READY_FIREBALL, o_FIREBALL },
+ACMD(do_conjure) {
+	bool found, needs_target;
+	char whole_arg[MAX_INPUT_LENGTH];
+	char *arg2;
+	const char *ptr;
+	ability_data *abil;
+	struct player_ability_data *plab, *next_plab;
 	
-	{ "\n", 0, NO_ABIL, NOTHING }
-};
+	bitvector_t my_types = ABILT_CONJURE_LIQUID | ABILT_CONJURE_OBJECT | ABILT_CONJURE_VEHICLE;
+	
+	#define VALID_CONJURE_ABIL(ch, plab)  ((plab)->ptr && (plab)->purchased[GET_CURRENT_SKILL_SET(ch)] && IS_SET(ABIL_TYPES((plab)->ptr), my_types) && ABIL_COMMAND(abil) && !str_cmp(ABIL_COMMAND(abil), "conjure"))
+	
+	quoted_arg_or_all(argument, whole_arg);	// keep whole arg
+	arg2 = one_word(argument, arg);	// also split first arg: conjure type
+	skip_spaces(&arg2);	// remaining args
+	
+	if (IS_NPC(ch)) {
+		msg_to_char(ch, "NPCs cannot conjure.\r\n");
+		return;
+	}
+	
+	// no-arg: show conjurable list
+	if (!*arg) {
+		// already doing this?
+		if (GET_ACTION(ch) == ACT_OVER_TIME_ABILITY && (abil = ability_proto(GET_ACTION_VNUM(ch, 0))) && (plab = get_ability_data(ch, ABIL_VNUM(abil), FALSE)) && VALID_CONJURE_ABIL(ch, plab)) {
+			msg_to_char(ch, "You stop conjuring.\r\n");
+			cancel_action(ch);
+			return;
+		}
+		
+		build_page_display(ch, "You can conjure the following things:");
+		
+		found = FALSE;
+		HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
+			abil = plab->ptr;
+			if (!VALID_CONJURE_ABIL(ch, plab)) {
+				continue;	// not a conjure ability
+			}
+			
+			// show it
+			if (IS_SET(ABIL_TYPES(abil), my_types)) {
+				ptr = skip_wordlist(ABIL_NAME(abil), conjure_words, FALSE);
+				if (!*ptr) {
+					ptr = ABIL_NAME(abil);
+				}
+				
+				// append
+				found = TRUE;
+				build_page_display_col_str(ch, 2, FALSE, ptr);
+			}
+		}
+		
+		if (!found) {
+			build_page_display(ch, " nothing");	// always room for this if !found
+		}
+		
+		send_page_display(ch);
+		return;
+	}	// end no-arg
+	
+	// with arg: determine what they typed
+	found = FALSE;
+	HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
+		abil = plab->ptr;
+		needs_target = (IS_SET(ABIL_TYPES(abil), ABILT_CONJURE_LIQUID) ? TRUE : FALSE);
+		if (!VALID_CONJURE_ABIL(ch, plab)) {
+			continue;	// not a conjure ability
+		}
+		if (needs_target && !multi_isname(arg, skip_wordlist(ABIL_NAME(abil), conjure_words, FALSE))) {
+			continue;	// wrong name: targeted
+		}
+		if (!needs_target && !multi_isname(whole_arg, skip_wordlist(ABIL_NAME(abil), conjure_words, FALSE))) {
+			continue;	// wrong name: not-targeted
+		}
+		
+		// run it? only if it matches
+		if (IS_SET(ABIL_TYPES(abil), my_types)) {
+			if (GET_POS(ch) < POS_RESTING || GET_POS(ch) < ABIL_MIN_POS(abil)) {
+				send_low_pos_msg(ch);	// not high enough pos for this conjure
+				return;
+			}
+			
+			perform_ability_command(ch, abil, needs_target ? arg2 : "");
+			found = TRUE;
+			break;
+		}
+	}
+	
+	if (!found) {
+		msg_to_char(ch, "You don't know how to conjure that.\r\n");
+	}
+}
 
 
 ACMD(do_ready) {
-	extern bool check_vampire_sun(char_data *ch, bool message);
-	void scale_item_to_level(obj_data *obj, int level);
+	bool found;
+	char line[MAX_STRING_LENGTH];
+	size_t lsize;
+	ability_data *abil, *found_abil;
+	obj_data *proto;
+	struct ability_data_list *adl;
+	struct player_ability_data *plab, *next_plab;
 	
-	ability_data *abil;
-	obj_data *obj;
-	int type, iter, scale_level, ch_level = 0;
-	bool found, later = TRUE;
-	
-	one_argument(argument, arg);
+	quoted_arg_or_all(argument, arg);
 	
 	if (IS_NPC(ch)) {
 		msg_to_char(ch, "NPCs can't use ready.\r\n");
 		return;
 	}
 	
+	#define VALID_READY_ABIL(ch, plab, abil)  ((abil) && (plab) && (plab)->purchased[GET_CURRENT_SKILL_SET(ch)] && IS_SET(ABIL_TYPES(abil), ABILT_READY_WEAPONS) && (!ABIL_COMMAND(abil) || !str_cmp(ABIL_COMMAND(abil), "ready")))
+	
 	if (!*arg) {
-		msg_to_char(ch, "You know how to ready the following weapons: ");
+		build_page_display(ch, "You know how to ready the following weapons:");
 		
 		found = FALSE;
-		for (iter = 0; *ready_magic_weapon[iter].name != '\n'; ++iter) {
-			if (ready_magic_weapon[iter].ability == NO_ABIL || has_ability(ch, ready_magic_weapon[iter].ability)) {
-				msg_to_char(ch, "%s%s", (found ? ", " : ""), ready_magic_weapon[iter].name);
-				found = TRUE;
+		HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
+			abil = plab->ptr;
+			if (!VALID_READY_ABIL(ch, plab, abil)) {
+				continue;
+			}
+			
+			LL_FOREACH(ABIL_DATA(abil), adl) {
+				if (adl->type == ADL_READY_WEAPON && obj_proto(adl->vnum)) {
+					// build display
+					lsize = snprintf(line, sizeof(line), " %s", skip_filler(get_obj_name_by_proto(adl->vnum)));
+					
+					if (ABIL_COST(abil) > 0) {
+						lsize += snprintf(line + lsize, sizeof(line) - lsize, " (%d %s)", ABIL_COST(abil), pool_types[ABIL_COST_TYPE(abil)]);
+					}
+					
+					build_page_display_col_str(ch, 2, FALSE, line);
+					found = TRUE;
+				}
 			}
 		}
 		
-		msg_to_char(ch, "%s\r\n", (found ? "" : "none"));
+		if (!found) {
+			build_page_display(ch, " none");
+		}
+		
+		send_page_display(ch);
 		return;
 	}
 	
 	// lookup
 	found = FALSE;
-	for (iter = 0; *ready_magic_weapon[iter].name != '\n' && !found; ++iter) {
-		if (is_abbrev(arg, ready_magic_weapon[iter].name) && (ready_magic_weapon[iter].ability == NO_ABIL || has_ability(ch, ready_magic_weapon[iter].ability))) {
-			type = iter;
-			found = TRUE;
+	found_abil = NULL;
+	HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
+		abil = plab->ptr;
+		if (!VALID_READY_ABIL(ch, plab, abil)) {
+			continue;
+		}
+		
+		LL_FOREACH(ABIL_DATA(abil), adl) {
+			if (adl->type == ADL_READY_WEAPON && (proto = obj_proto(adl->vnum))) {
+				if (multi_isname(arg, GET_OBJ_KEYWORDS(proto))) {
+					found = TRUE;
+					found_abil = abil;
+					break;
+				}
+			}
+		}
+		
+		if (found) {
+			break;
 		}
 	}
 	
 	// validate
-	if (!found) {
+	if (!found || !proto || !found_abil) {
 		msg_to_char(ch, "You don't know how to ready that.\r\n");
 		return;
 	}
-	if (!can_use_ability(ch, ready_magic_weapon[type].ability, ready_magic_weapon[type].cost_pool, ready_magic_weapon[type].cost, NOTHING)) {
-		return;
-	}
-	if (ready_magic_weapon[type].cost_pool == BLOOD && !check_vampire_sun(ch, TRUE)) {
-		return;
-	}
-	if (ABILITY_TRIGGERS(ch, NULL, NULL, ready_magic_weapon[type].ability)) {
+	
+	// pass through to ready-weapon ability
+	perform_ability_command(ch, found_abil, arg);
+}
+
+
+ACMD(do_summon) {
+	bool found;
+	char arg[MAX_INPUT_LENGTH], *arg2;
+	int count, fol_count;
+	ability_data *abil;
+	char_data *mob, *proto = NULL;
+	struct ability_data_list *adl;
+	struct player_ability_data *plab, *next_plab;
+	
+	// maximum npcs present when summoning
+	int max_npcs = config_get_int("summon_npc_limit");
+	int max_followers = config_get_int("npc_follower_limit");
+	
+	#define VALID_SUMMON_ABIL(ch, plab)  ((plab)->ptr && (plab)->purchased[GET_CURRENT_SKILL_SET(ch)] && IS_SET(ABIL_TYPES((plab)->ptr), ABILT_SUMMON_ANY | ABILT_SUMMON_RANDOM) && (!ABIL_COMMAND((plab)->ptr) || !str_cmp(ABIL_COMMAND((plab)->ptr), "summon")))
+	
+	if (IS_NPC(ch)) {
+		msg_to_char(ch, "NPCs can't use this command.\r\n");
 		return;
 	}
 	
-	// if they are using a NON-1-use item, determine level now
-	if (GET_EQ(ch, WEAR_WIELD) && !OBJ_FLAGGED(GET_EQ(ch, WEAR_WIELD), OBJ_SINGLE_USE)) {
-		ch_level = get_approximate_level(ch);
-		later = FALSE;
+	// special summons first
+	arg2 = one_argument(argument, arg);	// split out first word for certain special summons
+	if (!IS_NPC(ch) && *arg && is_abbrev(arg, "materials")) {
+		do_summon_materials(ch, arg2);
+		return;
+	}
+	if (!IS_NPC(ch) && *arg && is_abbrev(arg, "player")) {
+		do_summon_player(ch, arg2);
+		return;
 	}
 	
-	// attempt to remove existing wield
-	if (GET_EQ(ch, WEAR_WIELD)) {
-		perform_remove(ch, WEAR_WIELD);
-		
-		// did it work? if not, player got an error
-		if (GET_EQ(ch, WEAR_WIELD)) {
+	// not a special summon: use the whole arg; check for quotes
+	quoted_arg_or_all(argument, arg);
+	
+	// no-arg: show summonable list
+	if (!*arg) {
+		// already doing this?
+		if (GET_ACTION(ch) == ACT_OVER_TIME_ABILITY && (abil = ability_proto(GET_ACTION_VNUM(ch, 0))) && (plab = get_ability_data(ch, ABIL_VNUM(abil), FALSE)) && VALID_SUMMON_ABIL(ch, plab)) {
+			msg_to_char(ch, "You stop summoning.\r\n");
+			cancel_action(ch);
 			return;
 		}
-	}
 		
-	if (SHOULD_APPEAR(ch)) {
-		appear(ch);
+		build_page_display(ch, "You can summon the following things:");
+		
+		found = FALSE;
+		HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
+			abil = plab->ptr;
+			if (!VALID_SUMMON_ABIL(ch, plab)) {
+				continue;
+			}
+			
+			// show it
+			if (IS_SET(ABIL_TYPES(abil), ABILT_SUMMON_ANY)) {
+				// summon-any lists the mobs themselves
+				LL_FOREACH(ABIL_DATA(abil), adl) {
+					if (adl->type == ADL_SUMMON_MOB && (proto = mob_proto(adl->vnum))) {
+						build_page_display_col_str(ch, 2, FALSE, one_summon_entry(ch, skip_filler(GET_SHORT_DESC(proto)), GET_MIN_SCALE_LEVEL(proto), abil));
+					}
+				}
+			}
+			else if (IS_SET(ABIL_TYPES(abil), ABILT_SUMMON_RANDOM)) {
+				// summon-random just shows the ability name, minus the word 'summon'
+				build_page_display_col_str(ch, 2, FALSE, one_summon_entry(ch, format_summon_name(ABIL_NAME(abil)), 0, abil));
+			}
+			else {
+				continue;
+			}
+			
+			// if we got here, we did find one
+			found = TRUE;
+		}
+		
+		if (!found) {
+			build_page_display(ch, " nothing");
+		}
+		
+		send_page_display(ch);
+		return;
 	}
 	
-	// if they are using a 1-use item, determine level at the end here
-	if (later) {
-		ch_level = get_approximate_level(ch);
+	// things that alway block, unrelated to the mob/ability
+	if (ROOM_SECT_FLAGGED(IN_ROOM(ch), SECTF_FRESH_WATER | SECTF_OCEAN | SECTF_START_LOCATION) || ROOM_BLD_FLAGGED(IN_ROOM(ch), BLD_BARRIER)) {
+		msg_to_char(ch, "You can't summon anyone here.\r\n");
+		return;
 	}
 	
-	charge_ability_cost(ch, ready_magic_weapon[type].cost_pool, ready_magic_weapon[type].cost, NOTHING, 0, WAIT_SPELL);
-	
-	// load the object
-	obj = read_object(ready_magic_weapon[type].vnum, TRUE);
-	abil = find_ability_by_vnum(ready_magic_weapon[type].ability);
-	if (!abil || IS_CLASS_ABILITY(ch, ready_magic_weapon[type].ability) || ABIL_ASSIGNED_SKILL(abil) == NULL) {
-		scale_level = ch_level;	// class-level
+	// count mobs and check limit
+	count = 0;
+	fol_count = 0;
+	DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), mob, next_in_room) {
+		if (IS_NPC(mob)) {
+			++count;
+			
+			if (!GET_COMPANION(mob) && GET_LEADER(mob) == ch) {
+				++fol_count;
+			}
+		}
 	}
-	else {
-		scale_level = MIN(ch_level, get_skill_level(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))));
+	if (count >= max_npcs) {
+		msg_to_char(ch, "There are too many NPCs here to summon more.\r\n");
+		return;
 	}
-	scale_item_to_level(obj, scale_level);
+	if (fol_count >= max_followers) {
+		msg_to_char(ch, "You have too many npcs folowers already.\r\n");
+		return;
+	}
 	
-	switch (ready_magic_weapon[type].cost_pool) {
-		case MANA: {
-			act("Mana twists and swirls around your hand and becomes $p!", FALSE, ch, obj, NULL, TO_CHAR);
-			act("Mana twists and swirls around $n's hand and becomes $p!", TRUE, ch, obj, NULL, TO_ROOM);
+	// lookup
+	found = FALSE;
+	HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
+		abil = plab->ptr;
+		if (!VALID_SUMMON_ABIL(ch, plab)) {
+			continue;
+		}
+		
+		// try it
+		if (IS_SET(ABIL_TYPES(abil), ABILT_SUMMON_ANY)) {
+			// summon by mob name
+			LL_FOREACH(ABIL_DATA(abil), adl) {
+				if (adl->type != ADL_SUMMON_MOB || !(proto = mob_proto(adl->vnum))) {
+					continue;	// no match
+				}
+				if (!multi_isname(arg, GET_PC_NAME(proto))) {
+					continue;	// no string match
+				}
+				
+				// ok!
+				perform_ability_command(ch, abil, arg);
+				found = TRUE;
+				break;
+			}
+		}
+		else if (IS_SET(ABIL_TYPES(abil), ABILT_SUMMON_RANDOM)) {
+			// summon-random by ability name (minus the word summon)
+			if (!multi_isname(arg, format_summon_name(ABIL_NAME(abil)))) {
+				continue;	// no name match
+			}
+			
+			// ok!
+			perform_ability_command(ch, abil, arg);
+			found = TRUE;
 			break;
 		}
-		case BLOOD: {
-			act("You drain blood from your wrist and mold it into $p!", FALSE, ch, obj, NULL, TO_CHAR);
-			act("$n twists and molds $s own blood into $p!", TRUE, ch, obj, NULL, TO_ROOM);
-			break;
-		}
-		// HEALTH, MOVE (these could have their own messages if they were used)
-		default: {
-			act("You pull $p from the ether!", FALSE, ch, obj, NULL, TO_CHAR);
-			act("$n pulls $p from the ether!", TRUE, ch, obj, NULL, TO_ROOM);
-			break;
+		
+		if (found) {
+			break;	// only 1 successful match
 		}
 	}
 	
-	equip_char(ch, obj, WEAR_WIELD);
-	determine_gear_level(ch);
-	
-	if (ready_magic_weapon[type].ability != NO_ABIL) {
-		gain_ability_exp(ch, ready_magic_weapon[type].ability, 15);
+	if (!found) {
+		msg_to_char(ch, "You don't know how to summon %s '%s'.\r\n", AN(arg), arg);
+		return;
 	}
-	
-	load_otrigger(obj);
 }

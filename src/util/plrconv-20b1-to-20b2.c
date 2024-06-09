@@ -23,7 +23,7 @@
 *       It has been tossed around rigorously, if you are going to use     *
 *       it, heed the warning above.                                       *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -166,7 +166,7 @@ struct b1_player_special_data_saved {
 	bool can_get_bonus_skills;	// can buy extra 75's
 	sh_int skill_level;  // levels computed based on class skills
 	sh_int last_known_level;	// for getting level of offline characters
-	ubyte class_progression;	// % of the way from SPECIALTY_SKILL_CAP to CLASS_SKILL_CAP
+	ubyte class_progression;	// % of the way from SPECIALTY_SKILL_CAP to MAX_SKILL_CAP
 	ubyte class_role;	// ROLE_x chosen by the player
 	sh_int character_class;  // character's class as determined by top skills
 	
@@ -186,7 +186,7 @@ struct b1_player_special_data_saved {
 	byte spare1;
 	byte spare2;
 	byte spare3;
-	byte promo_id;	// entry in the promo_codes table -- TODO move up to an int in beta2, and remove int casts in various places
+	byte promo_id;
 	
 	ubyte spare5;
 	ubyte spare6;
@@ -202,7 +202,7 @@ struct b1_player_special_data_saved {
 	
 	int spare15;
 	int spare16;
-	int health_deficit;	// TODO in beta2, move these to an array with the pools
+	int health_deficit;
 	int move_deficit;
 	int mana_deficit;
 	
@@ -408,7 +408,7 @@ struct b2_player_special_data_saved {
 	bool can_get_bonus_skills;	// can buy extra 75's
 	sh_int skill_level;  // levels computed based on class skills
 	sh_int last_known_level;	// for getting level of offline characters
-	ubyte class_progression;	// % of the way from SPECIALTY_SKILL_CAP to CLASS_SKILL_CAP
+	ubyte class_progression;	// % of the way from SPECIALTY_SKILL_CAP to MAX_SKILL_CAP
 	ubyte class_role;	// ROLE_x chosen by the player
 	sh_int character_class;  // character's class as determined by top skills
 	
@@ -783,7 +783,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	while (!feof(ptOldHndl)) {
-		fread(&stOld, sizeof(struct b1_char_file_u), 1, ptOldHndl);
+		if (fread(&stOld, sizeof(struct b1_char_file_u), 1, ptOldHndl) < 1) {
+			printf("Failure reading file: %s\n", argv[1]);
+			exit(1);
+		}
 		
 		convert_char_file_u(&stNew, &stOld);
 

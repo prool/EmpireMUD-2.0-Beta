@@ -1,33 +1,53 @@
-"LIST OF ADVENTURES THAT DON'T HAVE HELP FILES"
-[   50] Tutorial: Royal Planning Office
-[   51] Tutorial: Museum of Early Man
-[   52] Tutorial Quests
-[  100] Magiterranean: The Grove
-[  101] Magiterranean: The Hidden Garden
-[  102] Magiterranean: Interdimensional Whirlwind
-[  103] Magiterranean: Monsoon Rift
-[  120] Mountain Cave: Red Dragon
-[  121] The Swamp Hag
-[  122] Ruins: Three Banditos
-[  123] Ruins: Thieves
-[  125] Ruins: The Goblin Challenge
-[  126] Mountain Cave: Flame Dragon
-[  127] Abandoned Dragon Nest
-[  128] Colossal Red Dragon
-[  129] A Gigantic Nest
-[  130] Volcano
-[  140] The Sewer: Ratskins
-[  141] The Sewer: Goblin Outpost
-[  160] The Tower Skycleave
-[  161] Portal to the Primeval
-[  170] Hamlet of the Undead
-[  180] Misplaced Mother Goose
-[  181] Goblin Mines
-[  190] Winter Wonderland
-[  200] Burrow Canyons
-[  201] The Cursed Chalice of Mill Manor
-[  281] Mountain Valley: Molten Fiend
-[  282] Goblin Logging Camp
+"BURROW CANYONS"
+
+Burrow Canyons (level 75-100 adventure)
+
+Look for Burrow Canyons, which appears on Mine tiles, and see what secrets
+await!
+
+You cannot dismantle a mine while Burrow Canyons is connected. However, if you
+enter and then leave Burrow Canyons, it will start a timer that will despawn it
+in about an hour.
+
+See also: ADVENTURE
+#
+COLOSSUS "CLOCKWORK COLOSSUS" "CLOCK WORK COLOSSUS"
+
+Clockwork Colossus (level 100-200 adventure)
+
+A towering clockwork man stomps across the landscape, paying little attention
+to what he might step on -- if it is a he -- as he marches inexorably toward an
+unseen goal. Few have ever beheld such a marvel as this colossus, and fewer
+still have managed to fell one and see what makes it tick.
+
+This adventure has 6 difficulty settings. To lower the difficulty of the
+colossus, you must 'board' it and sabotage its massive metal mechanisms. Each
+piece lowers the difficulty by one level, with the exception of the feet.
+Disabling the feet will return the colossus to its scaffolding, where you can
+summon fellow adventurers to aid in the fight.
+
+You can 'disembark' from the colossus at any time, but be careful not to let
+it throw you off from great height. The colossus shoots powerful laser beams
+from its eyes, so be prepared to type 'dodge'.
+
+The goblin junk dealer sells:
+ enchanted brass bolt - crafting item
+ little brass cannonballs schematic - craft ammunition for a special weapon
+ clockwork magpie whistle - minipet
+ clockwork elephant whistle - land mount
+ clockwork eagle whistle - flying mount
+ gear with a boot inscribed - build a unique vehicle
+ clockwork wristplate schematic - tank wrist
+ cogwheel bangles schematic - healer wrist
+ oil-soaked band schematic - caster wrist
+ black powder wristband schematic - melee wrist
+ clockwork shield schematic - tank shield
+ brass pendulum schematic - healer offhand
+ enchanted bedknob schematic - caster offhand
+ clockwork wristblade schematic - melee offhand weapon
+ colossal shield schematic - pvp/solo shield
+
+See also: ADVENTURE
 #
 "COLOSSAL RED DRAGON" "MYTHIC FORGE" "LEGENDARY STITCHING" "LORE CRAFTS" "FABLED HIDES" "DRAGON TOKENS"
 
@@ -36,7 +56,7 @@ Colossal Red Dragon (level 250-300 adventure)
 The Colossal Red Dragon adventure includes new crafting patterns for equipment
 that scales up to level 325. Complete any part of the adventure and the pattern
 vendor will appear. These patterns are for weapons, off-hand items, and belts
-for each class role.
+for each group role.
 
 Resources:
   red dragon hide (skinned)
@@ -45,11 +65,11 @@ Resources:
   tough dragon leather (tanned from hide)
   dragonsteel ingot (smelted from bone)
 
-Each type of pattern requires a tradesman from a specific class:
-  Mythic Forge (forge): Steelsmith, Guildsman
-  Legendary Stitching (sew): Artificer, Smuggler
-  Lore Crafts (craft): Artificer, Tinker
-  Fabled Hides (sew): Antiquarian, Alchemist
+Each type of pattern requires a tradesman with a specific skill synergy:
+  Mythic Forge (forge): 100 Trade / 75 Battle
+  Legendary Stitching (sew): 100 Trade / 75 Stealth
+  Lore Crafts (craft): 100 Trade / 75 High Sorcery
+  Fabled Hides (sew): 100 Trade / 75 Natural Magic
 
 Crafting patterns by role:
   Caster: flaming dragonbone staff, tome of dragonkind, burning dragoncloth
@@ -66,6 +86,66 @@ Dragon buildings:
   dragoncave (dragonstone hearth): A mountain home which can include a crypt.
   dragonstatue (dragonseye ruby): A new type of statue (Dragonslayer).
   dragonlibrary (dragonquill pen): A library with an alchemy lab inside.
+
+See also: ADVENTURE
+#
+"THE CURSED CHALICE OF MILL MANOR" "CURSED CHALICE OF MILL MANOR" "MILL MANOR"
+
+The Cursed Chalice of Mill Manor (level 100-200 adventure)
+
+Mill Manor can be found deep in the swamp. Will you be the one to end the curse
+and restore the land?
+
+This adventure has normal, hard, group, and boss difficulties available.
+
+See also: ADVENTURE
+#
+"ELEMENTAL ESCAPE" "SORCERER'S APPRENTICE"
+
+Elemental Escape (level 0-25 adventure)
+
+While the renowned sorcerer is away, he has left his trusty apprentice to
+watch this rift to the elemental plane. But it seems the apprentice wasn't
+strong enough to contain the elementals, and now four have escaped! Track down
+the elementals of earth, fire, wind, and water. Defeat them and return their
+essences to the apprentice for re-summoning.
+
+Start the apprentice's quests with 'start all'. There is one quest per
+elemental, and you can repeat these quests if you wait at least an hour after
+finishing them. You can purchase rewards from the apprentice with the 'list'
+and 'buy' commands. Hint: If you're a thief, try pickpocketing the apprentice.
+
+The sorcerer's apprentice sells:
+  a sorcerous biscuit - food
+  a stone breastplate - raises health
+  a fire opal necklace - raises to-hit
+  a gust of wind - raises dodge
+  a seashell bracelet - raises mana
+  a heartstone pendant - raises wits
+
+See also: ADVENTURE, BUY, LIST, QUEST
+#
+"FUR DRAGON"
+
+Fur Dragon (level 225-325 adventure)
+
+These dragons can be found roaming plains, forest, desert, and jungle.
+
+This adventure features a new 'study' mechanic. By studying the chewed-up,
+mangled, and downright tattered gear that the fur dragon has collected from
+other adventurers, you can create crafting patterns for those same items.
+Studying consumes at least one of the items, depending on the item's quality.
+
+See also: ADVENTURE
+#
+GIANT GIANT! "HILL GIANT" "RIVER GIANT" "DUNE GIANT"
+
+Giant! (level 100-175 adventure)
+
+A giant is on the loose! These giants roam along mountains, riverbanks, and
+deserts.
+
+See also: ADVENTURE
 #
 "GIGANTIC NEST" "A GIGANTIC NEST" "GOLDEN TALONS" "CORRUPTED TALONS"
 
@@ -92,6 +172,492 @@ Other:
   Minipet: baby ostrich
   Mounts: lithe ostrich, trumpeter swan, tawny roc
   Vehicle: Clockwork Roc (roc-stone gear)
+
+See also: ADVENTURE
+#
+"GOBLIN LOGGING CAMP" "GOBLIN LUMBER CAMP" "GOBLIN LUMBERJACKS" "LOGGING CAMP"
+
+Goblin Logging Camp (level 10-50 adventure)
+
+These camps spring up in forests all over the world. Look for the circle of
+stumps and the tiny, green lumberjacks.
+
+See also: ADVENTURE
+#
+"GOBLIN MINES"
+
+Goblin Mines (level 1-25 adventure)
+
+   The goblins have fled the mines and something tells you it's not good.
+Venture into the goblin mines and see what sends even goblins running for their
+lives! And maybe if you can find those goblins, they'll be willing to reward
+you for clearing out the mine.
+
+You can buy items from four goblins who have fled the mines. If you don't have
+any coins, try selling spider parts to Miner Nynar or spider meat to Miner
+Meena.
+
+Miner Nynar sells a bug potion (dexterity).
+Miner Meena sells a goblin pick (for mining).
+Miner Hanx sells a goblin raft (drag it to the shore and sit on it to sail).
+Blacklung, Goblin Foreman sells a goblin coffin (temporary, single-use tomb).
+
+See also: ADVENTURE
+#
+"GOBLIN OUTPOST" "SEWER: GOBLIN OUTPOST" "THE SEWER: GOBLIN OUTPOST" "GOBLIN SEWERS"
+
+The Sewer: Goblin Outpost (level 50-150 adventure)
+
+Strange sounds are coming from the sewer grate, and waste has been backing
+up into the streets. This can only mean one thing: Goblins! Will you buy the
+goblins' wares, or drive them from the city? This adventure sells 30 BoE items,
+the crafting patterns BoE for them all, and 4 unique buildings. You can also
+fight the goblins solo or in pairs (on normal, hard, or group difficulty) to
+earn their prized gear. You won't be able to fight each goblin until you pick
+a difficulty with the 'difficulty' command.
+
+The gear sold in the shops is the same as the gear created by the crafting
+patterns and the loot dropped by the goblins, but it will be BoE instead of BoP
+when crafted, can go as high as level 175, and may be crafted as superior.
+
+Healer crafts (Haxaw's mad sketches):
+ Haxaw's poison ring  (finger, forged, Jewelry)
+ goblin neck smile  (neck, crafted, Magical Vestments)
+ flail of many blessings  (wield, forged, Deadly Weapons)
+ goose-beak totem  (hold, crafted, Exquisite Woodworking)
+ goblin deathshroud  (about body, sewn, Magical Vestments)
+ doubleskin gloves  (hands, sewn, Magical Vestments)
+ 
+Caster crafts (Pimmin's roll of goblin crafts):
+ Pimmin's ring  (finger, forged, Jewelry)
+ bone charm necklace  (neck, crafted, Magical Vestments)
+ chicken-bone wand  (wield, crafted, Deadly Weapons)
+ goblinward tome  (hold, crafted, Deadly Weapons)
+ violet leopard shawl  (about body, sewn, Magical Vestments)
+ wildfire gloves  (hands, sewn, Magical Vestments)
+
+Melee crafts (perfectly legal goblincraft patterns):
+ Shivsper's poison ring  (finger, forged, Jewelry)
+ gaudy copper chain  (neck, forged, Jewelry)
+ someone else's axe  (wield, forged, Deadly Weapons)
+ giant dagger  (wield/hold, forged, Deadly Weapons)
+ rat-fur cloak  (about body, sewn, Dangerous Leathers)
+ wooden gauntlets  (hands, crafted, Dangerous Leathers)
+
+Tank crafts (Wargreyn's lead plates of goblincrafting):
+ Wargreyn's ring  (finger, forged, Jewelry)
+ blacksmith's charm  (neck, forged, Jewelry)
+ goblinsmith's hammer  (wield, forged, Deadly Weapons)
+ wargskull shield  (hold, forged, Imperial Armors)
+ mesh cloak  (about body, forged, Imperial Armors)
+ heavy goblin gauntlets  (hands, forged, Imperial Armors)
+
+Solo/PVP crafts (book of Dryleef's family goblincrafts):
+ Dryleef's pitfighting ring  (finger, forged, Jewelry)
+ zirconian amulet of goblin bravery  (neck, forged, Jewelry)
+ bog-iron pitfighter's sword  (wield, forged, Deadly Weapons)
+ Dryleef's pitfighting buckler  (hold, forged, Imperial Armors)
+ goblin pitfighter's cape  (about body, forged, Dangerous Leathers)
+ goblin punching bags  (hands, forged, Dangerous Leathers)
+
+NOTE: Using 'list id' in the shops labels the gear BoP. However, when purchased
+or crafted, these items are always BoE. They will be BoP if dropped as loot.
+
+See also: ADVENTURE
+#
+"GOLDEN GOBLIN" "THE GOLDEN GOBLIN" SMEEGLE "QUARTERMASTER SMEEGLE"
+
+The Golden Goblin (level 50-150 adventure)
+
+A group of greedy goblin pirates have become stuck in this little seaside
+cave, and need your help to repair their ship. Will you assist them with
+supplies? Or plunder their treasure for yourself?
+
+This adventure is for one or two players. Bring torches (or night sight),
+and be prepared to follow the instructions on some of the boss fights.
+
+The shops here sell:
+  old barrel of golden goblin grog - booze
+  enchanted goblin shaman dust - required for crafts
+  dread pirate garb - clothing
+  parrot whistle - minipet
+  black tricorne hat pattern - Charisma/Greatness hat
+  raging kraken shell - sea mount
+  albatross shell - flying mount
+  lucky goblin figurehead - improved cargo ship
+  dread goblin sails - improved pirate warship
+  cliffside dock plans - mountain docks
+  smuggler's wharf plans - chameleon docks
+  deep-sea feast recipe - improved seafood feast
+  imperium pirate hoop design - tank earring
+  nocturnium pirate hoop design - healer earring
+  golden pirate hoop design - caster earring
+  silver pirate hoop design - melee earring
+  bone hoop earring design - pvp/solo earring
+  heavy plated pantaloons pattern - tank pants
+  goblin scullery pantaloons pattern - healer pants
+  goblin sea-shaman pantaloons pattern - caster pants
+  pirate boarding pantaloons pattern - melee pants
+  goblin dress pantaloons pattern - pvp/solo pants
+
+See also: ADVENTURE
+#
+"GROVE OF THE MAGITERRANEAN" "MAGITERRANEAN: THE GROVE" "MAGITERRANEAN THE GROVE" "MAGITERRANEAN GROVE"
+
+Magiterranean: The Grove (level 1-75 adventure)
+
+   You have discovered a portal into a small grove deep in the Magiterranean,
+the plane of magic. This is a place where the forces of nature run deep, and
+interlopers are unwelcome. But what could the mages of the Magiterranean be
+planning? And is it too late to stop them?
+   Enter the portal, but be prepared for both unfriendly manaweavers and hidden
+predators as you explore the otherworldly forest of the Magiterranean.
+
+Grandmother Poplar's Poplar Goods sells for wooden nickels:
+  Grove seeker stone - find more groves easier
+  tiny wildling trap - minipet
+  animal totem of the Grove - more morphs for the Animal Forms ability
+  wild fire - just like the ones you find in the Grove (a light that burns out)
+  robes of the Grove weavers - the local fashion
+  wildling whistle - wildling mount
+  wood henge stone - a henge building for your city
+  oil of the snake shifter - use once each to improve the following items:
+  bark gauntlets - dodge gauntlets
+  leaf gloves - to-hit/wits gloves
+  petal gloves - mana/move regen gloves
+  ring of the turtle - dexterity/health ring
+  ring of the badger - to-hit/bonus-physical ring
+  ring of the crow - to-hit/bonus-magical ring
+  belt of the Grove - dexterity/dodge belt
+  girdle of the Forest - strength/to-hit belt
+  sash of the Magiterranean - intelligence/to-hit belt
+
+The belts, rings, and gloves can be upgraded (once each) using the oil of the
+snake shifter by typing 'oil <item>'. You must be at least level 50 to upgrade
+the gear with snake oil.
+
+You can find this adventure in most forests.
+
+See also: ADVENTURE
+#
+"GUILD OF ADVENTURERS" "ADVENTURERS GUILD" "THE GUILD OF ADVENTURERS"
+
+The Guild of Adventurers
+
+Seek out this guild, which makes its headquarters atop the giant atlasian
+tortoise. Build your own guildhall and explore quests that take you to many
+of the game's adventure zones. Rise through the ranks for power and prestige.
+(Hint: Use 'where atlasian' to find the tortoise.)
+
+The tavern shop sells:
+  a Guild of Adventurers seeker stone - finds the tortoise (Liked)
+  a baby tortoise whistle - minipet (Esteemed)
+  a Tipsy Tortoise transport trinket - teleports you to the tortoise (Esteemed)
+  a ninja tortoise whistle - minipet (Venerated)
+  a dragon turtle whistle - minipet (Revered)
+  a Guild of Adventurers charter - builds another guildhall (Venerated)
+  an atlasian egg - your own atlasian tortoise (Venerated)
+  
+The umbramancer sells:
+  the terrapin ring of acerbity - 100-200 caster ring (Esteemed)
+  an umbral warg mount whistle - land mount (Liked)
+  an eclipse shadowraptor flying mount whistle - flying mount (Venerated)
+
+The vampire sells:
+  the chelonian ring of extrication - 100-200 healer ring (Esteemed)
+  a sanguine monstrosity mount whistle - land mount (Liked)
+  a scarlet nebulavion flying mount whistle - flying mount (Venerated)
+
+The tinker sells:
+  the testudinal ring of courage - 100-200 melee ring (Esteemed)
+  a clockwork steed mount apparatus - land mount (Liked)
+  an aeroforge rotary flying mount assembler - flying mount (Venerated)
+
+The guildleader sells:
+  the tortoiseshell ring of mettle - 100-200 tank ring (Esteemed)
+  an imperium-clad bear mount whistle - land mount (Liked)
+  a celestial warbalcon flying mount whistle - flying mount (Venerated)
+
+See also: ADVENTURE
+#
+HALLOWEEN CANDY "HALLOWEEN CANDY" "HALLOWEEN OF THE DEAD"
+
+The Halloween of the Dead event is available during the month of October
+(ending November 2) and offers daily quests to earn fun rewards. Some quests
+are only available if you have the right skill.
+
+You can start all the quests from halloween candy items that you find by
+killing mobs anywhere in the world. 
+
+Some of the rewards include:
+ bunch of pumpkin seeds - try planting them
+ pumpkin coach spell - make a new vehicle from a pumpkin
+ costume kit - sew fun costumes
+ plague doctor mask - headgear with +Greatness
+ rib cage xylophone - play spooky music
+ oversized candy bag - a large pack
+ ghastly shackles - for people who are shackled to their work
+ haunted snowglobe - build the mansion that's depicted in the globe
+ flying pumpkin coach spell - make your pumpkin coach fly
+ vial of swirling ectoplasm - upgrade some of the reward items
+ vial of magi-genic ooze - upgrade one of your Halloween mounts to fly
+ reddened butcher's block - builds a slaughterhouse
+
+Game admins: You must enable global 18802 by removing its IN-DEV flag to turn
+on the Halloween candy drops, and disable that global when the holiday is over.
+Start event 18800 at the beginning of October 1; it runs 33 days (to end at the
+end of November 2).
+
+See also: ADVENTURE
+#
+"HAMLET OF THE UNDEAD" "BURNING HAMLET"
+
+Hamlet of the Undead (level 175-275 adventure)
+
+Smoke and fire in the distance have led you to a small hamlet, ablaze and beset
+by the undead. Most of the citizens have fled, but it looks as if those who
+remain could use your help. With no army to come to its rescue, you might be
+the hamlet's only hope!
+
+See also: ADVENTURE
+#
+"HIDDEN GARDEN" "THE HIDDEN GARDEN" "MAGITERRANEAN: THE HIDDEN GARDEN" "MAGITERRANEAN THE HIDDEN GARDEN" "HIDDEN GARDENS"
+
+Magiterranean: The Hidden Garden (level 15+ adventure)
+
+The Hidden Garden appears as a hole in an Oasis Garden or Shady Garden. You
+must complete some tasks for the gardener to get into the hidden garden, which
+has new crops.
+
+See also: ADVENTURE
+#
+"HOARFROST SERRAGON" SERRAGON
+
+Hoarfrost Serragon (level 100-200 adventure)
+
+   A hole to the frigid abyss has burst open in the heart of the desert,
+encasing the once-scalding sands in a glistening sheet of ice. A chilling hush
+pervades the air, and the ground beneath is now a carpet of feathery frost,
+marking the rise of the legendary hoarfrost serragon! These elusive behemoths,
+seldom seen beyond the confines of their icy lairs, wreak havoc on the land,
+devouring wildlife and freezing crops. Longer than a city street and with a maw
+wide enough to eat a camel -- or worse, an adventurer -- whole, an adult
+serragon is a threat that cannot stand. Can you thwart the serragon's frosty
+onslaught and save the empire from being entombed in an eternal winter?
+
+See also: ADVENTURE
+#
+"INTERDIMENSIONAL WHIRLWIND" WHIRLWIND "WHIRL WIND" "MAGITERRANEAN: INTERDIMENSIONAL WHIRLWIND" "MAGITERRANEAN INTERDIMENSIONAL WHIRLWIND"
+
+Magiterranean: Interdimensional Whirlwind
+
+The Interdimensional Whirlwind spreads new crops in a circle. A new one appears
+each month of the year. If you're lucky enough to come across this adventure,
+be sure to harvest some of the crops.
+
+See also: ADVENTURE
+#
+"INVASION OF: THE GOBLIN NECROMANCER" "INVASION OF THE GOBLIN NECROMANCER" "GOBLIN NECROMANCER" "THE GOBLIN NECROMANCER"
+
+Invasion of: The Goblin Necromancer (level 125-200 adventure)
+
+   A hole has been discovered leading into pitch black somewhere in the
+empire's land. Adventurers from the guild claim that a goblin necromancer has
+been seen about lately, performing experiments. Someone needs to put a stop to
+things. After all, who knows what his end goal is?
+
+See also: ADVENTURE
+#
+"LOST TEMPLE" "JUNGLE TEMPLE" "THE LOST TEMPLE"
+
+The Lost Temple (level 125-175 adventure)
+
+   You have discovered an ancient, overgrown temple deep in the jungle. Surely
+its depths must hold great undiscovered treasures of an ancient civilization,
+if you're brave enough to venture below...
+   This adventure features a difficulty selector so it can be completed solo,
+or in groups of up to four. All gear looted from this adventure will be higher
+quality on harder difficulties.
+   Beware! Dungeons such as this one often have traps. &cSEARCH&0 carefully before
+advancing, or be prepared to &cJUMP&0, &cDUCK&0 or &cRUN&0 very fast.
+
+The Professor sells:
+  a riding jaguar whistle - land mount
+  a sea serpent whistle - aquatic mount
+  the feathered serpent whistle - flying mount
+  a jaguar cub whistle - minipet
+  a jaguar totem - jaguar morph (requires Animal Forms)
+  a fearsome jaguar armor pattern - tank armor
+  a red coyote armor pattern - melee armor
+  a feathered serpent armor pattern - healer armor
+  an eagle warrior armor pattern - caster armor
+  a blue chameleon armor pattern - pvp/solo armor
+
+See also: ADVENTURE
+#
+"MISPLACED MOTHER GOOSE" "MOTHER GOOSE"
+
+Misplaced Mother Goose (level 1-25 adventure)
+
+Low-level mobs all over the world carry lost items from children's tales. When
+you find one of these items, start its quest ('start <name>'), 'use' the item
+to teleport back to a newbie island, then use the enchanted breadcrumbs you
+receive to return home.
+
+Be sure to set a home first! Use 'home set' in a house you built and own.
+
+See also: ADVENTURE, CLAIM, HOME, QUEST
+#
+"MONSOON RIFT" "MAGITERRANEAN: MONSOON RIFT" "MAGITERRANEAN MONSOON RIFT"
+
+Magiterranean: Monsoon Rift (level 75-100 adventure)
+
+This adventure spawns in deserts and your first hint that it's nearby might be
+the vicious cacti it unleashes. There are multiple ways to solve this adventure
+and seal the rift.
+
+See also: ADVENTURE
+#
+"MOUNTAIN CAVE: FLAME DRAGON" "MOUNTAIN CAVE FLAME DRAGON" "FLAME DRAGON" "SCORCHED LAND" "SCORCHED TERRAIN"
+
+Mountain Cave: Flame Dragon (level 100-150 adventure)
+
+A flame dragon is burning the countryside! The only way to stop it is to slay
+the dragon. The scorched land will regrow over time, though it may be possible
+to speed it up with magic.
+
+See also: ADVENTURE
+#
+"MOLTEN FIEND" "MOUNTAIN VALLEY: MOLTEN FIEND" "MOUNTAIN VALLEY MOLTEN FIEND"
+
+Molten Fiend (level 200-300 adventure)
+
+A powerful demon, buried beneath the earth in ages past, is trying to break
+free, and its struggles have opened this molten crevice in the mountains!
+Bring a capable party with you, for the demon's lengthy imprisonment has only
+fueled the fires of its rage!
+
+This adventure has a difficulty selector that lets you choose how hard it will
+be -- and how good the gear will be.
+
+If you don't get the items you want from the fiend, you can throw them off the
+precipice into the lava to convert them to molten essence, which can then be
+converted back into the gear item of your choice. You can then spend more
+molten essence to infuse it up to level 300 and raise its quality. However, you
+cannot raise it to a higher difficulty level than the highest molten fiend
+you've defeated.
+
+The 'list', 'buy', and 'infuse' commands only work at the Precarious Ledge in
+the fiend's fissure. Use 'list id' to check items before buying them.
+
+Gear sets:
+  Healer: hearthflame, molten heart, renewal, frozen flame, abyssal flames
+  Caster: emberweave, dark ember, cold lava, pyrespark, embercrest
+  Melee: Flametalon, igneous, pyroclastic, flame-wreathed
+  Tank: magma-forged, volcanic fortress, flowing lava, diabolic crown
+  Other: fiendhorn bladed bow (ranged), flame-embroidered pouch (magic),
+     basalt pouch (tank/pvp/solo), mantle of flames (misc)
+
+See also: ADVENTURE
+#
+NONVENTURE NON-VENTURE
+
+A "non-venture" is something that's part of the adventure system, but doesn't
+have anything to do. One example is the volcano, which can be seen raising
+mountains around the world but doesn't have any mobs or items.
+
+See also: ADVENTURE
+#
+"Oceanic Hydra" "OCEAN HYDRA" "HYDRA ADVENTURE"
+
+Oceanic Hydra (level 225-325 adventure)
+
+   A monstrous hydra has been terrorizing the coasts of islands and continents
+alike. A group of adventurers should hunt down this beast and put it down, for
+the good of the empire. The hydra has proven to be resistant to all forms of
+harm, except for a short period of time after one of its heads is destroyed.
+
+See also: ADVENTURE
+#
+"OLD GODS" "BINDING CIRCLE"
+
+{**}
+
+The Binding Circle adventures are a set of small 1-fight world spawns where
+you fight and defeat ancient, long-forgotten gods. These adventures spawn only
+on continents (not smaller islands) and you can find them with 'nearby'. Once
+you find the broken binding circle, the chains there will give you a hint as
+to which old god you're looking for. Use the 'where' command to find that god
+and hunt it down.
+
+Alternatively, you can build your own binding circle (using rewards from these
+adventures). Your binding circle has a chance to bind one of the old gods
+whenever the Binding Circle adventures spawn. The binding circle is not
+guaranteed to bind a god each time, but can be reused over and over again.
+
+All Old Gods adventures use the 'weight of the old gods' currency.
+
+The following old gods are available so far:
+  Anat, the warrior-goddess - HELP ANAT
+  Ba'al Hadad, the storm god - HELP HADAD
+
+See also: ADVENTURE
+#
+"BINDING CIRCLE: ANAT" "BINDING CIRCLE ANAT" ANAT
+
+Binding Circle: Anat (level 225-325 adventure)
+
+Anat, virgin warrior-goddess of old, is a fierce, battle-hardened maiden whose
+power can barely be contained by the binding chains. Anat has powerful
+necklaces for anyone who can defeat her.
+
+Anat's shop sells the following items:
+  Anat's bindings - used for the necklace crafts
+  the battle dress of the old god Anat - clothing
+  a hawk whistle - a minipet
+  Yatpan's whistle - a flying hawk mount
+  the vestiges of Anat - builds a large tomb building
+  a graven idol - builds a binding circle in your city
+
+The patterns and recipes in the store are:
+  golden chain of Anat - tank necklace
+  blood of Anat - healer necklace
+  idol of Anat - caster necklace
+  hawk pendant of Anat - melee necklace
+  stone of wrath of Anat - pvp/solo necklace
+  winnowed grain of Anat - empire necklace
+  feast of Anat recipe - resistance feast (requires Gourmet Chef)
+
+See also: ADVENTURE
+#
+"BINDING CIRCLE: BA'AL HADAD" "BINDING CIRCLE BA'AL HADAD" "BA'AL HADAD" "BAAL HADAD" HADAD
+
+Binding Circle: Ba'al Hadad (level 225-325 adventure)
+
+Ba'al Hadad, storm god of the ancient world, is a powerful deity with mastery
+over the weather. He is not easily bound by chains. Seek him out and defeat
+him to earn powerful rings.
+
+Ba'al Hadad's shop sells the following items:
+  Ba'al Hadad's bindings - used for the ring crafts
+  the Ugarit tunic of Ba'al Hadad - clothing
+  a bronze bull whistle - a minipet
+  a lightning whistle - a flying mount
+  the stormcaller of Ba'al Hadad - a wand that creates a miniature storm
+  a purse of date palm seeds - a new crop
+  a graven idol - builds a binding circle in your city
+  a jar of Ba'al Hadad's thunder - a flying vehicle
+
+The patterns and recipes in the store are:
+  bull ring of Ba'al Hadad - tank ring
+  clouded ring of Ba'al Hadad - healer ring
+  lightning ring of Ba'al Hadad - caster ring
+  thunderbolt ring of Ba'al Hadad - melee ring
+  hurricane ring of Ba'al Hadad - pvp/solo ring
+  stormwashed ring of Ba'al Hadad - empire ring
+  feast of Ba'al Hadad recipe - wits/regen feast
+
+See also: ADVENTURE
 #
 PERMAFROST "MAGITERRANEAN: PERMAFROST" "MAGITERRANEAN PERMAFROST"
 
@@ -111,5 +677,322 @@ Craft patterns sold by the vendor outside the portal:
   Melee weapon: frozen pykrete sword
   Healer weapon: icy star of winter
   Caster weapon: glacial staff of the Maelstrom pattern
+
+The vendor will only show up once you have at least 14 permafrost tokens and
+can afford his items.
+
+Hint: You can find multiple types of seeds when foraging outside the portal.
+
+See also: ADVENTURE
+#
+"PORTAL TO THE PRIMEVAL" "PRIMEVAL PORTAL" DRACOSAUR "PRIMEVAL TOKENS"
+
+Portal to the Primeval (level 75-175)
+
+The High Sorcerers in your tower have managed to open a chronoportal into
+the past! Follow Archsorcerer Malfernes through the portal and explore the
+Primeval Era, when the ancient ancestors of the dragons ruled endless jungles.
+But beware, because it's easy to get lost and you make a delicious snack for
+the dracosaurs.
+
+The time stream is unstable, so each time you visit you might have to track
+down a different final boss: Malfernes, the Terrosaur, or even the King of the
+Dracosaurs! Purchase patterns at the base camp to craft mighty primordial gear,
+or fight the dracosaurs on higher difficulties for a chance to find many of 
+those same items, which the dracosaurs have collected from less fortunate
+adventurers.
+
+The salesman will buy primeval crafting materials from you. Type 'sell <item>'
+or 'sell all' to exchange them for Primeval tokens. These tokens can be used to
+purchase other crafting materials in the shop.
+
+The salesman also sells:
+Book of primordial weapon schematics:
+  jeweled bone staff  (Healer, Craft, Powerful Staves)
+  dracosaur bone spear  (Tank/Solo/PVP, Jabbing, Forge, Deadly Weapons)
+  primordial axe  (2-Handed Melee, Slicing, Forge, Deadly Weapons)
+  edge of extinction  (1-Handed Melee, Stabbing, Forge, Deadly Weapons)
+  Tome of the Primordium  (Caster, Wield/Hold, Mana Blast, Craft, Powerful Staves)
+Book of dracosaur armor schematics:
+  dracosaur scale robe  (Healer, Sew, Magical Vestments)
+  dracoscale armor  (Tank, Forge, Imperial Armors)
+  dracosaur hide armor  (Melee, Sew, Dangerous Leathers)
+  dracosaur tooth robe  (Caster, Sew, Magical Vestments)
+  dracosaur fang armor  (PVP/Solo, Forge, Imperial Armors)
+Book of primordial footwear designs:
+  dracosaur scale sandals  (Healer, Sew, Magical Vestments)
+  primordial boots  (Tank, Forge, Imperial Armors)
+  dracosaur fang shoes  (Melee, Sew, Dangerous Leathers)
+  dracosaur tooth boots  (Caster, Sew, Magical Vestments)
+  dracosaur scale boots  (PVP/Solo, Forge, Imperial Armors)
+Book of dracosaur wristwear designs:
+  obsidian bracelet  (Healer, Craft, Magical Vestments)
+  dracoscale vambraces  (Tank, Forge, Imperial Armors)
+  dracosaur bone bracelet  (Melee, Sew, Dangerous Leathers)
+  dracosaur scale wristband  (Caster, Sew, Magical Vestments)
+  stunning dracosaur wristguard  (PVP/Solo, Forge, Imperial Armors)
+Book of dracosaur belt patterns:
+  dracosaur fang belt  (Melee or Caster DPS, Sew, Dangerous Leathers)
+  obsidian dracosaur waistband  (Caster or Healer, Sew, Magical Vestments)
+  mighty dracoscale belt  (Tank or PVP/Solo, Forge, Imperial Armors)
+Design for the bone crown of the primeval:
+  bone crown of the primeval  (Greatness/Charisma, Head, Craft, Jewelry)
+
+Hint: Try digging for resources in the base camp or the clearing.
+
+This adventure appears in sorcery towers. Build one in your city right away!
+
+See also: ADVENTURE
+#
+"PYRAMID: HIDDEN CHAMBER OF NEFERKARE" "PYRAMID HIDDEN CHAMBER OF NEFERKARE" "HIDDEN CHAMBER OF NEFERKARE" "NEFERKARE"
+
+Pyramid: Hidden Chamber of Neferkare (level 250-300 adventure)
+
+A recent earthquake has revealed a long-hidden passage in the pyramid, and
+who knows what treasures are in store? Make your way into the chamber and
+defeat the ancient evil that lurks within! This is a short combat adventure
+with three difficulties for 2 to 4 players.
+
+You can find this adventure in pyramids you build.
+
+See also: ADVENTURE, PYRAMID
+#
+RATSKINS "RAT SKINS" "The Sewer: Ratskins" "The Sewer Ratskins" "Sewer: Ratskins" "Sewer Ratskins"
+
+The Sewer: Ratskins (level 1-50 adventure)
+
+Many cities have simple sewer systems to prevent waste. This adventure appears
+in any player city. Be sure to bring a light.
+
+This adventure predates the quest system. It has activities that are similar to
+quests, but do not use the quest command.
+
+See also: ADVENTURE
+#
+"RENEGADE SPELLCASTER!" "ROGUE WIZARD" "TEENAGE WITCH" "ROGUE MANAWEAVER"
+
+Renegade Spellcaster! (level 100-175 adventure)
+
+This adventure comes in three varieties: the rogue wizard, the rogue
+manaweaver, and the teenage witches. You can often find them in the plains or
+desert.
+
+The enemies from this adventure have names and are separate from the randomly-
+spawned unnamed rogue wizards.
+
+See also: ADVENTURE
+#
+"RUINS: THE GOBLIN CHALLENGE" "RUINS THE GOBLIN CHALLENGE" "RUINS: GOBLIN CHALLENGE" "RUINS GOBLIN CHALLENGE" "GOBLIN CHALLENGE" "THE GOBLIN CHALLENGE"
+
+Ruins: The Goblin Challenge (level 50-150 adventure)
+
+Goblins often camp out in ruins. If you find the right ones, fight the goblins
+in order to win the Goblin Challenge.
+
+See also: ADVENTURE
+#
+"RUINS: THIEVES" "RUINS THIEVES" "THIEVES ADVENTURE"
+
+Ruins: Thieves (level 25-75 adventure)
+
+Thieves often camp out in ruined buildings that aren't patrolled (claimed) by
+any empires.
+
+See also: ADVENTURE
+#
+"RUINS: THREE BANDITS" "RUINS THREE BANDITS" "RUINS BANDITS" "THREE BANDITS" BANDITOS
+
+Ruins: Three Bandits (level 100-200 adventure)
+
+Bandits often hide out in ruined buildings that aren't patrolled (claimed) by
+any empires.
+
+This adventure was formerly called "Ruins: Three Banditos".
+
+See also: ADVENTURE
+#
+SKYCLEAVE "SKY CLEAVE" "TOWER SKYCLEAVE" "THE TOWER SKYCLEAVE" "ASHES OF HISTORY" "TOWER SKYCLEAVE: ASHES OF HISTORY" "THE TOWER SKYCLEAVE: ASHES OF HISTORY" "TOWER SKYCLEAVE ASHES OF HISTORY"
+
+The Tower Skycleave: Ashes of History (levels 150-250)
+
+Skycleave is a highly-detailed adventure with a lot to find -- and a lot to
+read. Many parts of this adventure have extra descriptions -- for example,
+'look portraits' on the walkway around floor 2 -- but you can also complete the
+adventure without any of this. It's up to you. See the 'adventure' command
+inside the tower for more information about what lies inside.
+
+Each instance of Skycleave can only be rescued once; if you find the tower in
+need of rescue, ask around and see if other players want to join you. But there
+is still a lot more to do in this adventure once the rescue is complete. Can
+you uncover all of Skycleave's secrets?
+
+The fights in Skycleave are interactive. Watch out for messages with these
+tags: (dodge), (interrupt), (interrupt and dodge), (struggle), (free <name>),
+and (fastmorph normal).
+
+Encounters in this adventure are designed for levels 150 to 250 and are
+available on Normal (solo), Hard (2-person), Group (3-person), and Boss (4-
+person) difficulty. Higher difficulty yields better rewards. Some of the gear
+found in this adventure can also be crafted using patterns from the shops. It
+has a level range of 150-275 when crafted, and will be bind-on-equip instead of
+bind-on-pickup.
+
+Collect skystones by aiding the tower and attune them on floor 3. Once attuned,
+skystones can be found on the 'coins' command and can be spent in the shops.
+
+Shops in the tower sell crafting patterns for the ear, wrist, waist, and leg
+slots. The following people may sell these patterns after their section of the
+tower has been rescued:
+  Grace: magitanium tank patterns
+  Knezz: thundersilk caster patterns
+  Niamh: shadowhide melee patterns
+  Weyonomon: soulcloth healer patterns
+  Wright: moxteel pvp/solo patterns
+
+There are other shops in the tower as well. Use 'list' to see what's available
+in each shop and 'buy' to purchase them. The 'list id' command will give more
+information about items in the shop.
+
+Credits: Paul Clarke (design, text, most components), Domino (scripting),
+Owen Morris (scripting), Baethyn (text), Aelix (text), Wox (testing), Lilmike
+(testing)
+
+See also: ADVENTURE, COINS, EXTRA DESCRIPTIONS, SHOPS
+#
+"SWAMP HAG" "THE SWAMP HAG"
+
+The Swamp Hag (level 100-150 adventure)
+
+This strange, raised hut towers over the swamp. What sort of person would be
+at home in the swamp?
+
+This adventure uses rat tails as currency. Earn them by defeating the swamp hag
+on hard (1 tail), group (2 tails), or boss difficulty (4 tails). After you
+complete the adventure, you can spend rat tails to buy various items:
+
+Other:
+  Minipet: swamp rat whistle
+  Land mount: R.O.U.S. whistle
+  Aquatic mount: manatee whistle
+  Flying mount: enchanted broom
+  Shoes: hag's walking shoes pattern
+  Building: walking hut (pair of wooden chicken legs)
+
+Weapons:
+  Tank: hag's pestle schematic
+  Melee: plague claws schematic (1-handed), hag's cauldron schematic (2-handed)
+  Healer: stinging swarm schematic
+  Caster: hag's broom schematic
+  Ranged: hag's hunting bow schematic
+
+Footwear:
+  Tank: hag's wading boots pattern
+  Melee: hag's sandals pattern
+  Healer: hag's slippers pattern
+  Caster: hag's pointe shoes pattern
+  PVP/Solo: hag's shearling boots pattern
+
+See also: ADVENTURE
+#
+"THAT DAMMED RIVER" "DAMMED RIVER" "BEAVER DAM"
+
+That Dammed River (level 25-75 non-venture)
+
+Beavers occasionally dam up a river as they build their home. If it's a
+nuissance, killing the dire beaver and burning its dam should shoo them off.
+
+(Drop torches on the dam or use burn to light it on fire.)
+
+See also: ADVENTURE, BURN
+#
+"TRADE TUTORIAL: MUSEUM OF EARLY MAN" "TRADE TUTORIAL" "MUSEUM OF EARLY MAN"
+
+Trade Tutorial: Museum of Early Man (level 1-50 adventure)
+
+Find this adventure in a cave on the newbie island using the 'nearby museum'
+command. In this adventure, you can learn to do quests, gather resources, and
+craft basic tools.
+
+See also: ADVENTURE, NEARBY, QUEST
+#
+"TREE OF KNOWLEDGE" "FRUIT OF KNOWLEDGE"
+
+Tree of Knowledge (non-venture)
+
+These trees pop up all over the world! Pick their fruit and expand your mind.
+#
+"TUTORIAL QUESTS" "SOULSTREAM" "ENTER THE SOULSTREAM"
+
+Tutorial Quests ("Soulstream", level 1-50 adventure)
+
+This adventure has a short tutorial quest for each of the skill trees.
+
+When you first enter the game at a Tower of Souls, use 'start Enter Soulstream'
+to start the "Enter the Soulstream" quest, then 'enter soulstream' to get
+inside. The spirits inside have one quest for each skill tree you've learned.
+You can come back when you learn new skills to complete their tutorials as
+well.
+
+See also: ADVENTURE, QUEST, TOWER OF SOULS
+#
+"UNINVITED GUEST" "AN UNINVITED GUEST"
+
+An Uninvited Guest (level 100-200 adventure)
+
+It seems someone has been sleeping in the back of a local artisan's shop!
+Perhaps you should investigate.
+
+See also: ADVENTURE
+#
+"UNSTABLE PORTAL"
+
+Unstable Portal (non-venture)
+
+The city's sorcerers have managed to open a portal to a strange land. What
+lies on the other side? Climb into the portal and find out. Many unusual places
+await. But be warned! The portal is unstable and you shouldn't venture too far
+from it.
+
+This adventure appears in sorcery towers. Build one in your city today!
+
+See also: ADVENTURE
+#
+"VISCOUS MUCK DRAGON" "MUCK DRAGON" "VICIOUS MUCK DRAGON"
+
+Viscous Muck Dragon (level 225-325 adventure)
+
+A muck dragon is roamings the swamps. These dragons are large, slimy, and
+particularly vicious. Fortunately, they never leave the water. Perhaps if you
+slay the dragon, you can take its riches for yourself.
+
+See also: ADVENTURE
+#
+VOLCANO
+
+Volcano (non-venture)
+
+Volcanos form in the mountains. It's best to stay away.
+
+Although they are spawned by the adventure system, volcanos have no NPCs or
+loot.
+#
+"WANDERING DRAGON" "WANDERING WYVERN" "BULL DRAGON" "EMERALD DRAGON" "DRAGON GUARDIAN"
+
+Wandering Dragon (level 125-175 adventure)
+
+These dragons -- including the wandering wyvern, bull dragon, emerald dragon,
+and dragon guardian -- wander far and wide.
+
+See also: ADVENTURE
+#
+"WINTER WONDERLAND"
+
+Winter Wonderland (event/adventure)
+
+This event runs from December 1 to January 6; type 'event' during that time to
+see more details. While it's running, you can find small adventure portals
+by typing 'nearby Winter Wonderland' to get quests for the event.
+
+See also: ADVENTURE, EVENT
 #
 $

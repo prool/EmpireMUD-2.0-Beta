@@ -1,390 +1,165 @@
 #0
 bugs~
 A Field of Bugs~
-25 1 c
+25 j c
 0 50 50 100
 D0
 ????~
 &y~
+X
+bugs crop~
+   The whole field just seems to be nothing but bugs. Maybe something is
+glitching.
+~
 S
 #1
 wheat~
 A Field of Wheat~
-20 1 0
+20 j 0
 75 25 0 50
 D0
 ;;;;~
 &Y~
-I 6 3003 100.00 1  # FORAGE: a handful of grain
-I 8 141 20.00 2 H  # HARVEST: a bundle of wheat
-I 8 141 20.00 3 H  # HARVEST: a bundle of wheat
-I 8 141 20.00 4 H  # HARVEST: a bundle of wheat
-I 8 141 20.00 5 H  # HARVEST: a bundle of wheat
-I 8 141 20.00 6 H  # HARVEST: a bundle of wheat
-M
-9134 5.00 bdh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9120 15.00 adg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9153 10.00 d
-M
-9024 5.00 d
-M
-9023 10.00 d
-M
-9034 5.00 d
-M
-9133 10.00 ad
-M
-9116 5.00 ad
-M
-9022 20.00 ad
-M
-9032 10.00 bd
-M
-9031 10.00 bd
-M
-9030 10.00 bd
-M
-9029 10.00 bd
-M
-9025 5.00 bd
-M
-9011 10.00 bd
-M
-9021 10.00 bd
-M
-9020 5.00 bd
-M
-9154 5.00 bd
-M
-9152 5.00 bd
-M
-9009 10.00 bd
-M
-9012 10.00 bd
-M
-9010 10.00 bd
-M
-9004 10.00 bd
+I 6 3058 100.00 25  # FORAGE: handful of grain
+I 8 3342 100.00 1  # HARVEST: bale of straw
+I 8 141 20.00 2 H  # HARVEST: bundle of wheat
+I 8 141 20.00 3 H  # HARVEST: bundle of wheat
+I 8 141 20.00 4 H  # HARVEST: bundle of wheat
+I 8 141 20.00 5 H  # HARVEST: bundle of wheat
+I 8 141 20.00 6 H  # HARVEST: bundle of wheat
+U
+0
+Tiny shoots explode into full-grown stalks of wheat!~
+X
+wheat field crop~
+   You find yourself standing amidst a vast expanse of wheat. The golden stalks
+rise up to your waist, swaying gently in the wind. The air is filled with the
+earthy scent of fresh soil and growing grain.
+~
 S
 #2
 corn~
 A Field of Corn~
-5 1 0
+5 j 0
 0 50 0 50
 D0
 iiii~
 &g~
-I 6 3003 100.00 1  # FORAGE: a handful of grain
-I 8 3005 20.00 2 H  # HARVEST: a bushel of corn
-I 8 3005 20.00 3 H  # HARVEST: a bushel of corn
-I 8 3005 20.00 4 H  # HARVEST: a bushel of corn
-I 8 3005 20.00 5 H  # HARVEST: a bushel of corn
-I 8 3005 20.00 6 H  # HARVEST: a bushel of corn
-M
-9134 5.00 bdh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9120 15.00 adg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9153 10.00 d
-M
-9024 5.00 d
-M
-9023 10.00 d
-M
-9034 5.00 d
-M
-9133 10.00 ad
-M
-9116 5.00 ad
-M
-9022 20.00 ad
-M
-9032 10.00 bd
-M
-9031 10.00 bd
-M
-9030 10.00 bd
-M
-9029 10.00 bd
-M
-9025 5.00 bd
-M
-9011 10.00 bd
-M
-9021 10.00 bd
-M
-9020 5.00 bd
-M
-9154 5.00 bd
-M
-9152 5.00 bd
-M
-9009 10.00 bd
-M
-9012 10.00 bd
-M
-9010 10.00 bd
-M
-9004 10.00 bd
+I 6 3059 100.00 25  # FORAGE: handful of kernels
+I 8 3342 100.00 1  # HARVEST: bale of straw
+I 8 3005 20.00 2 H  # HARVEST: bushel of corn
+I 8 3005 20.00 3 H  # HARVEST: bushel of corn
+I 8 3005 20.00 4 H  # HARVEST: bushel of corn
+I 8 3005 20.00 5 H  # HARVEST: bushel of corn
+I 8 3005 20.00 6 H  # HARVEST: bushel of corn
+U
+0
+A chorus of squeaking noises overwhelms you as stalk after stalk of corn bursts up from the ground!~
+X
+corn stalks ears field crop~
+   You find yourself surrounded by tall stalks of corn, reaching up to twice
+your height. The sturdy green plants stand in uniform rows, with only narrow
+paths for you to navigate through. The leaves rustle in the breeze, creating a
+soothing sound. You can see the ears of corn forming on the stalks, wrapped in
+protective layers of husks. The air is humid and filled with the sweet scent of
+growing corn.
+~
 S
 #3
 hops~
 A Field of Hops~
-15 1 0
+15 j 0
 25 75 50 100
 D0
 ::::~
 &G~
-I 6 3003 100.00 1  # FORAGE: a handful of grain
-I 8 143 20.00 2 H  # HARVEST: a bushel of hops
-I 8 143 20.00 3 H  # HARVEST: a bushel of hops
-I 8 143 20.00 4 H  # HARVEST: a bushel of hops
-I 8 143 20.00 5 H  # HARVEST: a bushel of hops
-I 8 143 20.00 6 H  # HARVEST: a bushel of hops
-M
-9134 5.00 bdh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9120 15.00 adg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9153 10.00 d
-M
-9024 5.00 d
-M
-9023 10.00 d
-M
-9034 5.00 d
-M
-9133 10.00 ad
-M
-9116 5.00 ad
-M
-9022 20.00 ad
-M
-9032 10.00 bd
-M
-9031 10.00 bd
-M
-9030 10.00 bd
-M
-9029 10.00 bd
-M
-9025 5.00 bd
-M
-9011 10.00 bd
-M
-9021 10.00 bd
-M
-9020 5.00 bd
-M
-9154 5.00 bd
-M
-9152 5.00 bd
-M
-9009 10.00 bd
-M
-9012 10.00 bd
-M
-9010 10.00 bd
-M
-9004 10.00 bd
+I 6 3060 100.00 25  # FORAGE: handful of seeds
+I 8 143 20.00 2 H  # HARVEST: bushel of hops
+I 8 143 20.00 3 H  # HARVEST: bushel of hops
+I 8 143 20.00 4 H  # HARVEST: bushel of hops
+I 8 143 20.00 5 H  # HARVEST: bushel of hops
+I 8 143 20.00 6 H  # HARVEST: bushel of hops
+U
+0
+You watch in wonder as the leafy hops climb from the soil!~
+X
+hops vines crop field~
+   You stand amidst a field of towering hop vines, their lush green leaves and
+delicate flowers reaching up towards the sky. The air is filled with the sweet
+aroma of ripening hops, a scent that can only be described as floral and
+earthy. As you take a closer look, you see the small, sticky yellow flowers
+clinging to the vines, each containing a potent dose of bitter oils and
+aromatic compounds. The vines stretch out in all directions, creating a dense
+canopy overhead that provides shade and shelter. The ground beneath your feet
+is soft and spongy, padded by layers of compost and straw. Looking out over the
+field, you see row after row of hop vines, a verdant landscape that seems to
+pulse with life and vitality.
+~
 S
 #4
 cotton~
 A Field of Cotton~
-2 2 0
-0 100 54 45
+2 jk f
+0 100 40 60
 D0
 ::::~
 &0~
-I 8 144 20.00 2 H  # HARVEST: a basket of cotton
-I 8 144 20.00 3 H  # HARVEST: a basket of cotton
-I 8 144 20.00 4 H  # HARVEST: a basket of cotton
-I 8 144 20.00 5 H  # HARVEST: a basket of cotton
-I 8 144 20.00 6 H  # HARVEST: a basket of cotton
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9130 15.00 ad
-M
-9116 15.00 ad
-M
-9153 10.00 d
-M
-9117 15.00 bd
-M
-9126 5.00 bd
-M
-9122 5.00 bd
-M
-9125 5.00 bd
+I 6 3061 100.00 25 f  # FORAGE: handful of seeds
+I 8 144 20.00 2 H  # HARVEST: basket of cotton
+I 8 144 20.00 3 H  # HARVEST: basket of cotton
+I 8 144 20.00 4 H  # HARVEST: basket of cotton
+I 8 144 20.00 5 H  # HARVEST: basket of cotton
+I 8 144 20.00 6 H  # HARVEST: basket of cotton
+U
+0
+Tufts of white pop with a BANG! from the fast-growing field!~
+X
+cotton field crop~
+   You find yourself standing in a vast field of cotton, the fluffy white bolls
+nestled in the branches of the plants. The air is filled with the sweet scent
+of blooming cotton, a fragrance that seems to permeate everything around you.
+The cotton plants stand in uniform rows, with only narrow paths for you to
+navigate through. The leaves of the plants are a deep green, providing a
+striking contrast to the white of the cotton bolls. As you look closer, you can
+see the delicate fibers of the cotton, soft and downy to the touch. The ground
+beneath your feet is soft and pliable, yielding gently as you walk.
+~
 S
 #5
 barley~
 A Field of Barley~
-20 1 0
+20 j 0
 25 75 0 50
 D0
 ::::~
 &Y~
-I 6 3003 100.00 1  # FORAGE: a handful of grain
-I 8 145 20.00 2 H  # HARVEST: a sack of barley
-I 8 145 20.00 3 H  # HARVEST: a sack of barley
-I 8 145 20.00 4 H  # HARVEST: a sack of barley
-I 8 145 20.00 5 H  # HARVEST: a sack of barley
-I 8 145 20.00 6 H  # HARVEST: a sack of barley
-M
-9134 5.00 bdh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9120 15.00 adg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9153 10.00 d
-M
-9024 5.00 d
-M
-9023 10.00 d
-M
-9034 5.00 d
-M
-9133 10.00 ad
-M
-9116 5.00 ad
-M
-9022 20.00 ad
-M
-9032 10.00 bd
-M
-9031 10.00 bd
-M
-9030 10.00 bd
-M
-9029 10.00 bd
-M
-9025 5.00 bd
-M
-9011 10.00 bd
-M
-9021 10.00 bd
-M
-9020 5.00 bd
-M
-9154 5.00 bd
-M
-9152 5.00 bd
-M
-9009 10.00 bd
-M
-9012 10.00 bd
-M
-9010 10.00 bd
-M
-9004 10.00 bd
+I 6 3062 100.00 25  # FORAGE: handful of seeds
+I 8 3342 100.00 1  # HARVEST: bale of straw
+I 8 145 20.00 2 H  # HARVEST: sack of barley
+I 8 145 20.00 3 H  # HARVEST: sack of barley
+I 8 145 20.00 4 H  # HARVEST: sack of barley
+I 8 145 20.00 5 H  # HARVEST: sack of barley
+I 8 145 20.00 6 H  # HARVEST: sack of barley
+U
+0
+Stalks of barley spring from the ground, fully-formed!~
+X
+barley field crop stalks~
+   You find yourself surrounded by a vast field of golden barley, its sturdy
+stalks standing tall and proud. The air is filled with the earthy scent of
+growing grain, a fragrance that seems to mingle with the freshness of the
+countryside. The barley plants are arranged in neat, orderly rows, with only
+narrow paths for you to navigate through. The leaves of the plants are a rich
+green, providing a striking contrast to the golden hue of the barley heads. As
+you take a closer look, you can see the tightly-packed clusters of grain at the
+tips of the stalks, each covered in a delicate, papery husk. The ground beneath
+your feet is firm and slightly elevated, as if you're walking on a small hill.
+~
 S
 #6
 peaches~
 A Peach Orchard~
-22 1 b
+22 j b
 50 100 50 100
 D0
 ^^^^~
@@ -416,91 +191,30 @@ D0
 D0
 o^^^~
 &Y~
-I 6 3006 100.00 1  # FORAGE: a plump peach
-I 8 3004 100.00 1  # HARVEST: a basket of peaches
-I 9 121 100.00 1  # GATHER: a stick
-I 20 120 100.00 1  # CHOP: a large tree
-M
-9145 5.00 adh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9141 5.00 dg
-M
-9144 5.00 adg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9153 10.00 d
-M
-9021 10.00 d
-M
-9024 5.00 d
-M
-9034 5.00 d
-M
-9011 10.00 d
-M
-9010 10.00 d
-M
-9154 5.00 bd
-M
-9152 5.00 bd
-M
-9009 10.00 d
-M
-9004 10.00 d
-M
-9012 10.00 d
-M
-9150 5.00 d
-M
-9149 5.00 d
-M
-9148 5.00 d
-M
-9023 5.00 d
-M
-9008 5.00 d
-M
-9133 5.00 ad
-M
-9116 5.00 ad
-M
-9022 5.00 ad
-M
-9032 5.00 bd
-M
-9031 5.00 bd
-M
-9030 5.00 bd
-M
-9029 5.00 bd
-M
-9025 5.00 bd
-M
-9020 5.00 bd
+I 6 3006 100.00 25  # FORAGE: plump peach
+I 7 3004 100.00 14  # PICK: basket of peaches
+I 9 121 100.00 50  # GATHER: sticks and leaves
+I 20 120 100.00 1  # CHOP: large tree
+U
+0
+Trees spring up all over the orchard, dangling their juicy fruits!~
+X
+peaches orchard trees crop~
+   You find yourself surrounded by the lush greenery of a peach orchard, its
+gnarled branches heavy with fruit. The air is filled with the sweet scent of
+ripening peaches, a fragrance that seems to permeate everything around you.
+The peach trees are arranged in rows, their leaves a vibrant green, providing
+welcome shade from the sun. As you walk along the narrow paths between the
+trees, you can see the fuzzy, velvety skin of the peaches, each one a brilliant
+orange-red hue. The fruit hangs heavy on the branches, ripe and juicy, waiting
+to be plucked. Looking closer, you can see the delicate pink and white blossoms
+that will become next year's harvest.
+~
 S
 #7
 cherries~
 A Cherry Orchard~
-9 1 b
+9 j b
 50 100 0 50
 D0
 ^^^^~
@@ -532,91 +246,30 @@ D0
 D0
 &Ro&?^^^~
 &Y~
-I 6 3007 100.00 1  # FORAGE: a couple red cherries
-I 8 3008 100.00 1  # HARVEST: a bag of cherries
-I 9 121 100.00 1  # GATHER: a stick
-I 20 120 100.00 1  # CHOP: a large tree
-M
-9145 5.00 adh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9141 5.00 dg
-M
-9144 5.00 adg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9153 10.00 d
-M
-9021 10.00 d
-M
-9024 5.00 d
-M
-9034 5.00 d
-M
-9011 10.00 d
-M
-9010 10.00 d
-M
-9154 5.00 bd
-M
-9152 5.00 bd
-M
-9009 10.00 d
-M
-9004 10.00 d
-M
-9012 10.00 d
-M
-9150 5.00 d
-M
-9149 5.00 d
-M
-9148 5.00 d
-M
-9023 5.00 d
-M
-9008 5.00 d
-M
-9133 5.00 ad
-M
-9116 5.00 ad
-M
-9022 5.00 ad
-M
-9032 5.00 bd
-M
-9031 5.00 bd
-M
-9030 5.00 bd
-M
-9029 5.00 bd
-M
-9025 5.00 bd
-M
-9020 5.00 bd
+I 6 3007 100.00 25  # FORAGE: couple red cherries
+I 7 3008 100.00 14  # PICK: bag of cherries
+I 9 121 100.00 50  # GATHER: sticks and leaves
+I 20 120 100.00 1  # CHOP: large tree
+U
+0
+Fully-formed cherry trees rise from the orchard, already dotted with sweet red fruit!~
+X
+cherries cherry orchard trees crop~
+   You stand amidst the lush greenery of a cherry orchard, the trees laden with
+plump, red fruit. The air is filled with the sweet scent of ripening cherries,
+a fragrance that seems to hang in the stillness of the air. The cherry trees
+are arranged in neat rows, their branches crisscrossing above you to form a
+leafy canopy. As you make your way between the trees, you can see the clusters
+of cherries hanging heavy on the branches, each one a brilliant shade of red.
+The fruit seems almost within reach, just waiting to be plucked and savored.
+Looking closer, you can see the delicate white blossoms that have already given
+way to the fruit, promising an even greater bounty next year.
+~
 S
 #8
 oranges~
 An Orange Grove~
-23 2 b
+23 k b
 0 100 0 54
 D0
 .&G^^&?.~
@@ -630,133 +283,63 @@ D0
 D0
 .&G^&?o.~
 &y~
-I 6 3009 100.00 1  # FORAGE: an orange
-I 8 3010 100.00 1  # HARVEST: a sack of oranges
-I 9 121 100.00 1  # GATHER: a stick
-I 20 122 50.00 1 c  # CHOP: some rough wood
-I 20 122 50.00 2 c  # CHOP: some rough wood
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9130 15.00 ad
-M
-9116 15.00 ad
-M
-9153 10.00 d
-M
-9117 15.00 bd
-M
-9126 5.00 bd
-M
-9122 5.00 bd
-M
-9125 5.00 bd
+I 6 3009 100.00 25  # FORAGE: orange
+I 7 3010 100.00 14  # PICK: sack of oranges
+I 9 132 100.00 50  # GATHER: thorny branches
+I 20 122 100.00 2 c  # CHOP: rough wood
+U
+0
+New trees burst forth across the grove, each dangling succulent orange fruits!~
+X
+oranges orchard grove trees crop~
+   You are surrounded by a small orange grove, standing amidst the hardy,
+twisted trees. The leaves are glossy and green, providing a pleasant contrast
+against the dry, arid landscape. The oranges hang heavy on the branches, each
+one a bright and juicy fruit that looks almost out of place in this desert
+environment. The grove is small, but the oranges are abundant, seeming to fill
+the space with a lively and vibrant energy. You can almost feel the zest and
+freshness in the air, as if the essence of the oranges themselves is seeping
+into everything around you. The grove seems to be a small yet bountiful oasis,
+thriving amidst the desert's harsh conditions.
+~
 S
 #9
 rice~
 A Rice Paddy~
-2 1 a
+2 j a
 50 100 63 36
 D0
 ,,,,~
 &g~
-I 6 3003 100.00 1  # FORAGE: a handful of grain
-I 8 3011 20.00 2 H  # HARVEST: a sack of dried rice
-I 8 3011 20.00 3 H  # HARVEST: a sack of dried rice
-I 8 3011 20.00 4 H  # HARVEST: a sack of dried rice
-I 8 3011 20.00 5 H  # HARVEST: a sack of dried rice
-I 8 3011 20.00 6 H  # HARVEST: a sack of dried rice
-M
-9134 5.00 bdh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9120 15.00 adg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9153 10.00 d
-M
-9024 5.00 d
-M
-9023 10.00 d
-M
-9034 5.00 d
-M
-9133 10.00 ad
-M
-9116 5.00 ad
-M
-9022 20.00 ad
-M
-9032 10.00 bd
-M
-9031 10.00 bd
-M
-9030 10.00 bd
-M
-9029 10.00 bd
-M
-9025 5.00 bd
-M
-9011 10.00 bd
-M
-9021 10.00 bd
-M
-9020 5.00 bd
-M
-9154 5.00 bd
-M
-9152 5.00 bd
-M
-9009 10.00 bd
-M
-9012 10.00 bd
-M
-9010 10.00 bd
-M
-9004 10.00 bd
+I 6 3063 100.00 25  # FORAGE: handful of rice
+I 8 3342 100.00 1  # HARVEST: bale of straw
+I 8 3011 20.00 2 H  # HARVEST: sack of dried rice
+I 8 3011 20.00 3 H  # HARVEST: sack of dried rice
+I 8 3011 20.00 4 H  # HARVEST: sack of dried rice
+I 8 3011 20.00 5 H  # HARVEST: sack of dried rice
+I 8 3011 20.00 6 H  # HARVEST: sack of dried rice
+U
+0
+Delicate stalks rise from the paddy, dangling ears of rice!~
+X
+rice paddy fields crop~
+   You stand in the midst of a vast rice paddy, the air thick with the scent of
+fresh soil and water. The paddies are a patchwork of small, rectangular fields,
+each one separated by narrow dirt walkways. The water in the paddies is still
+and shallow, just deep enough to allow the rice to grow. The rice itself is a
+bright green, the small plants swaying gently in the light breeze. You can see
+the occasional bird hopping around the fields, pecking at insects and seeds.
+The walkways between the paddies are soft and muddy, the earth having been
+turned over and moistened to allow for the growth of the rice. Looking out over
+the fields, you can see nothing but a sea of green, stretching out in every
+direction. The paddy fields seem to have a life of their own, with the water
+and the plants working together in a delicate and beautiful dance.
+~
 S
 #10
 olives~
 An Olive Grove~
-15 2 b
+15 k b
 0 100 45 100
 D0
 .&G^^&?.~
@@ -770,210 +353,93 @@ D0
 D0
 .&Go^&?.~
 &y~
-I 6 3018 100.00 1  # FORAGE: a couple of olives
-I 8 3019 100.00 1  # HARVEST: a basket of olives
-I 9 121 100.00 1  # GATHER: a stick
-I 20 122 50.00 1 c  # CHOP: some rough wood
-I 20 122 50.00 2 c  # CHOP: some rough wood
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9130 15.00 ad
-M
-9116 15.00 ad
-M
-9153 10.00 d
-M
-9117 15.00 bd
-M
-9126 5.00 bd
-M
-9122 5.00 bd
-M
-9125 5.00 bd
+I 6 3018 100.00 25  # FORAGE: couple of olives
+I 7 3019 100.00 14  # PICK: basket of olives
+I 9 132 100.00 50  # GATHER: thorny branches
+I 20 122 100.00 2 c  # CHOP: rough wood
+U
+0
+Fresh trees rise from the ground and sprout hundreds of fresh olives!~
+X
+olives trees grove crop~
+   You find yourself surrounded by a small grove of olive trees in the desert,
+their twisted trunks and branches providing a welcome respite from the
+scorching sun. The trees are small and hardy, with silver-green leaves that
+glimmer in the sunlight. The olives themselves are small and hard, still
+ripening on the branches, each one a pale green hue against the dark foliage.
+The air is dry and hot, but the scent is fresh and earthy, with a hint of salt
+from the nearby desert. The ground beneath your feet is soft and sandy, the
+soil light and airy, providing a good environment for the trees to grow. As you
+walk through the grove, you can hear the gentle rustling of the leaves in the
+breeze, and the occasional chirp of a bird perched on a branch. The grove seems
+to be a small yet vibrant oasis in the midst of the harsh and unforgiving
+desert, a symbol of hope and resilience against the odds.
+~
 S
 #11
 peas~
 A Field of Peas~
-4 1 0
+4 j 0
 75 25 50 100
 D0
-....~
+&u&G....&0~
 &G~
-I 6 3020 100.00 1  # FORAGE: a handful of peas
-I 8 3021 20.00 2 H  # HARVEST: a basket of peas
-I 8 3021 20.00 3 H  # HARVEST: a basket of peas
-I 8 3021 20.00 4 H  # HARVEST: a basket of peas
-I 8 3021 20.00 5 H  # HARVEST: a basket of peas
-I 8 3021 20.00 6 H  # HARVEST: a basket of peas
-M
-9134 5.00 bdh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9120 15.00 adg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9153 10.00 d
-M
-9024 5.00 d
-M
-9023 10.00 d
-M
-9034 5.00 d
-M
-9133 10.00 ad
-M
-9116 5.00 ad
-M
-9022 20.00 ad
-M
-9032 10.00 bd
-M
-9031 10.00 bd
-M
-9030 10.00 bd
-M
-9029 10.00 bd
-M
-9025 5.00 bd
-M
-9011 10.00 bd
-M
-9021 10.00 bd
-M
-9020 5.00 bd
-M
-9154 5.00 bd
-M
-9152 5.00 bd
-M
-9009 10.00 bd
-M
-9012 10.00 bd
-M
-9010 10.00 bd
-M
-9004 10.00 bd
+I 6 3020 100.00 25  # FORAGE: handful of peas
+I 8 3021 20.00 2 H  # HARVEST: basket of peas
+I 8 3021 20.00 3 H  # HARVEST: basket of peas
+I 8 3021 20.00 4 H  # HARVEST: basket of peas
+I 8 3021 20.00 5 H  # HARVEST: basket of peas
+I 8 3021 20.00 6 H  # HARVEST: basket of peas
+U
+0
+The field is ablaze with pink and purple flowers for an instant before they turn to fresh pea pods!~
+X
+peas crop field~
+   You come across a field of plump green peas, growing low to the ground on
+small, delicate stems. The plants are neatly arranged in rows, each one
+supported by a trellis or a simple wire mesh to keep them upright. The leaves
+are a rich shade of green, with tendrils curling out in all directions to grasp
+onto their supports. The peas themselves are nestled in the pods, their deep
+green color standing out against the pale green of the pod. As you walk through
+the field, you can hear the rustling of the leaves and the occasional snap of a
+pod opening to reveal the treasure inside. The scent in the air is fresh and
+earthy, with a hint of sweetness from the peas. The field seems to exude a
+sense of orderliness and neatness, with each plant standing tall and proud,
+ready to be harvested at just the right time.
+~
 S
 #12
-gourds~
-A Field of Gourds~
-23 1 a
+squash~
+A Field of Squash Vines~
+23 j a
 0 50 63 36
 D0
 oooo~
 &y~
-I 6 3022 100.00 1  # FORAGE: a yellow squash
-I 8 3023 100.00 2  # HARVEST: a basket of gourds
-M
-9134 5.00 bdh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9120 15.00 adg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9153 10.00 d
-M
-9024 5.00 d
-M
-9023 10.00 d
-M
-9034 5.00 d
-M
-9133 10.00 ad
-M
-9116 5.00 ad
-M
-9022 20.00 ad
-M
-9032 10.00 bd
-M
-9031 10.00 bd
-M
-9030 10.00 bd
-M
-9029 10.00 bd
-M
-9025 5.00 bd
-M
-9011 10.00 bd
-M
-9021 10.00 bd
-M
-9020 5.00 bd
-M
-9154 5.00 bd
-M
-9152 5.00 bd
-M
-9009 10.00 bd
-M
-9012 10.00 bd
-M
-9010 10.00 bd
-M
-9004 10.00 bd
+I 6 3022 100.00 25  # FORAGE: yellow squash
+I 8 3023 100.00 2  # HARVEST: basket of squash
+U
+0
+Leaves unfold across the field as fully-formed squashes plop out onto the ground!~
+X
+field squash vines crop~
+   You find yourself standing in the midst of a lush and sprawling squash crop.
+The plants are large and leafy, with broad green leaves and thick stems winding
+their way across the ground. The squash themselves are hidden amidst the
+foliage, with only their pale yellow color peeking through. As you walk through
+the crop, you can hear the soft rustling of the leaves and the occasional snap
+of a stem breaking underfoot. The scent in the air is slightly sweet and
+earthy, with a hint of spice from the growing fruits. The ground beneath your
+feet is soft and yielding, the soil rich and dark, providing the perfect
+environment for the squash to grow. The crop seems to be a perfect example of
+the bounty of the earth, with each plant reaching out to produce as much as
+possible, eager to share its abundance with all who come near.
+~
 S
 #13
 apples~
 An Apple Orchard~
-11 1 b
+11 j b
 0 50 50 100
 D0
 ^^^^~
@@ -1005,166 +471,51 @@ D0
 D0
 &Go&?^^^~
 &Y~
-I 6 3001 100.00 1  # FORAGE: a green apple
-I 8 3002 100.00 1  # HARVEST: a bunch of apples
-I 9 121 100.00 1  # GATHER: a stick
-I 20 120 100.00 1  # CHOP: a large tree
-M
-9145 5.00 adh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9141 5.00 dg
-M
-9144 5.00 adg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9153 10.00 d
-M
-9021 10.00 d
-M
-9024 5.00 d
-M
-9034 5.00 d
-M
-9011 10.00 d
-M
-9010 10.00 d
-M
-9154 5.00 bd
-M
-9152 5.00 bd
-M
-9009 10.00 d
-M
-9004 10.00 d
-M
-9012 10.00 d
-M
-9150 5.00 d
-M
-9149 5.00 d
-M
-9148 5.00 d
-M
-9023 5.00 d
-M
-9008 5.00 d
-M
-9133 5.00 ad
-M
-9116 5.00 ad
-M
-9022 5.00 ad
-M
-9032 5.00 bd
-M
-9031 5.00 bd
-M
-9030 5.00 bd
-M
-9029 5.00 bd
-M
-9025 5.00 bd
-M
-9020 5.00 bd
+I 6 3001 100.00 25  # FORAGE: green apple
+I 7 3002 100.00 14  # PICK: bunch of apples
+I 9 121 100.00 50  # GATHER: sticks and leaves
+I 20 120 100.00 1  # CHOP: large tree
+U
+0
+Trees burst from the ground all across the orchard as you start to hear apples hit the ground.~
+X
+apples orchard crop trees~
+   You find yourself surrounded by the beauty of an apple orchard. The trees
+stand tall and proud, with their leaves rustling in the breeze, their branches
+heavy with fruit. The crisp, cool air is filled with the sweet scent of
+ripening apples, a fragrance that is both refreshing and invigorating. As you
+walk through the orchard, you can hear the crunch of fallen leaves underfoot
+and the occasional plunk of a ripe apple falling from a tree. The ground
+beneath your feet is soft and slightly damp, the soil nourishing and rich. The
+orchard seems to be a place of abundance and vitality, with the trees reaching
+up towards the sky, their branches heavy with the weight of the fruit.
+~
 S
 #14
 plantains~
 A Group of Plantain Stems~
-21 3 0
+21 l 0
 0 50 50 100
 D0
 &Gd&?\/&Gb~
 &g~
-I 6 3024 100.00 1  # FORAGE: an unripe plantain
-I 8 3025 20.00 2 H  # HARVEST: a basket of plantains
-I 8 3025 20.00 3 H  # HARVEST: a basket of plantains
-I 8 3025 20.00 4 H  # HARVEST: a basket of plantains
-I 8 3025 20.00 5 H  # HARVEST: a basket of plantains
-I 8 3025 20.00 6 H  # HARVEST: a basket of plantains
-M
-9061 0.01 d
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9151 10.00 dh
-M
-9109 10.00 dh
-M
-9106 10.00 dh
-M
-9111 10.00 bdh
-M
-9105 5.00 bdh
-M
-9104 5.00 bdh
-M
-9103 5.00 adh
-M
-9113 5.00 adh
-M
-9102 5.00 adh
-M
-9107 10.00 dg
-M
-9101 1.00 dg
-M
-9112 5.00 bdg
-M
-9110 5.00 bdg
-M
-9114 5.00 bdg
-M
-9108 5.00 bdg
-M
-9115 10.00 adg
-M
-9100 5.00 adg
-M
-9016 5.00 adg
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9153 10.00 bc
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
+I 6 3024 100.00 25  # FORAGE: unripe plantain
+I 8 3025 20.00 2 H  # HARVEST: basket of plantains
+I 8 3025 20.00 3 H  # HARVEST: basket of plantains
+I 8 3025 20.00 4 H  # HARVEST: basket of plantains
+I 8 3025 20.00 5 H  # HARVEST: basket of plantains
+I 8 3025 20.00 6 H  # HARVEST: basket of plantains
+U
+0
+Tiny shoots erupt into stalks as you watch clusters of plantains form before your very eyes!~
+X
+plantains stems trees crop~
+   You find yourself standing amidst a grove of plantains. The plants are tall
+and majestic, with broad green leaves swaying in the breeze, and clusters of
+plump fruit hanging from the branches. The air is heavy with the sweet, heady
+scent of ripe plantains, a fragrance that is both exotic and alluring. As you
+walk through the crop, you can hear the rustling of the leaves and the
+occasional snap of a stem breaking underfoot.
+~
 S
 $

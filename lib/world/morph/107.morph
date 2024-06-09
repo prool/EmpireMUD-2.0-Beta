@@ -2,7 +2,7 @@
 deer reindeer~
 a reindeer~
 A reindeer raises its head from grazing.~
-cej 9 0 100 0
+cej 9 0 100 0 4
 2 25 215 10719
 A
 6 2
@@ -12,21 +12,31 @@ A
 1 -1
 A
 8 -1
+D
+The reindeer is a beautiful slate-gray color, with long, strong antlers.
+~
 S
 #10701
 snowman large~
 a large snowman~
 A large snowman stands nearby.~
-cijl 15 9 100 nrG
+cijl 15 9 100 nrG 3
 1 0 -1 10719
 A
 11 -5
+D
+   The frosty snowman stands as three oversized snowballs, stacked up with a
+black top hat, a button nose, and coal for eyes.
+~
 S
 #10702
 elf christmas~
 a Christmas elf~
 A Christmas elf is dancing about.~
-0 15 0 0 0
+0 15 0 0 0 2
 1 0 -1 10719
+D
+This jolly little elf is somersaulting around with reckless abandon.
+~
 S
 $

@@ -1,0 +1,59 @@
+#1357
+Leather Tutorial~
+Animal skins can be tanned to make leather. This is an easy one:
+ 1. Make sure you have the Basic Crafts ability: type 'skill buy Basic Crafts'.
+ 2. If you don't have one already, get a small skin or large skin by skinning
+    the corpse of an animal.
+ 3. Type 'tan skin'.
+    Tip: It will go faster if you build a tannery.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+   You can also learn to sew gear from leather, as well as rawhide gear from
+the raw skins. You'll need to buy the Sew skill ('skill buy Sew') as well as
+Rawhide Stitching ('skill buy Rawhide Stitching').
+~
+1 h 0 15 -1
+A
+2 1350
+A
+2 1351
+R
+0 0 1
+W
+2 1356 0 1
+W
+2 1357 0 1
+Z
+2 1356
+Z
+2 1357
+S
+#1359
+Weaving Tutorial~
+   You can learn to weave textiles such as cotton and wool cloth. Just follow
+these steps:
+ 1. You need to buy the Sew ability (skill buy Sew). If you don't have
+    5 Trade skill yet, try doing some other tutorials.
+ 2. You need to equip a loom or need to be in a tailor building.
+ 3. Type 'weave cloth' or 'weave wool cloth'.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+Cloth can be used to sew clothing and armor.
+~
+2 h 0 15 -1
+A
+2 144
+A
+2 1358
+R
+0 0 1
+W
+2 1359 0 1
+W
+2 1360 0 1
+Z
+2 1359
+Z
+2 1360
+S
+$

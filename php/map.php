@@ -93,11 +93,11 @@ $data = array(
 	'j' => imagecolorallocate($im, 30, 144, 255),	// oasis
 	'k' => imagecolorallocate($im, 79, 148, 205),	// ocean
 	'l' => imagecolorallocate($im, 238, 233, 191),	// wheat, barley
-	'm' => imagecolorallocate($im, 255, 236, 139),	// desert
+	'm' => imagecolorallocate($im, 255, 236, 139),	// pale yellow / desert
 	'n' => imagecolorallocate($im, 255, 165, 79),	// peaches
 	'o' => imagecolorallocate($im, 238, 154, 0),	// oranges, gourds
 	'p' => imagecolorallocate($im, 142, 142, 56),	// trench
-	'q' => imagecolorallocate($im, 139, 117, 0),	// mountain
+	'q' => imagecolorallocate($im, 139, 117, 0),	// brown / mountain
 	'r' => imagecolorallocate($im, 193, 193, 193),	// road
 	's' => imagecolorallocate($im, 81, 81, 81),	// building
 	't' => imagecolorallocate($im, 0, 0, 102),	// Dark Blue
@@ -112,6 +112,9 @@ $data = array(
 	'C' => imagecolorallocate($im, 210, 180, 140),	// Tan
 	'D' => imagecolorallocate($im, 127, 0, 255),	// Violet
 	'E' => imagecolorallocate($im, 76, 0, 153),	// Deep Violet
+	'F' => imagecolorallocate($im, 0, 50, 0),	// Dark Dark Green / old-growth forest
+	'G' => imagecolorallocate($im, 85, 69, 0),	// dark brown / mountain peak
+	'H' => imagecolorallocate($im, 255, 232, 114),	// Deep Yellow
 	
 	);
 

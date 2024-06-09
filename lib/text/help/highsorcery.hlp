@@ -1,4 +1,4 @@
-"HIGH SORCERY"
+"HIGH SORCERY" SOR
 
 High Sorcery (skill)
 
@@ -8,42 +8,40 @@ harnessing the powerful mana that flows through the world.
 To begin the path of High Sorcery, seek out one of its lofty towers and use
 the STUDY command on the top floor.
 
-See also: STUDY, SORCERY TOWER, RITUAL, STAFFMAKING, FORESIGHT, MANASHIELD,
-    SUMMON SWIFT, DISENCHANT, COLORBURST, RITUAL OF BURDENS, PHOENIX RITE,
-    VIGOR, RITUAL OF TELEPORTATION, CITY TELEPORTATION, RITUAL OF DEFENSE,
-    PORTAL MAGIC, PORTAL MASTER, RITUAL OF SENSE LIFE, RITUAL OF DETECTION,
-    DEVASTATION RITUAL, ENCHANT, ENERVATE, SIPHON, SLOW, SUNSHOCK, MIRRORIMAGE,
-    ARCANE POWER, DISPEL, COLLAPSE
+You get additional High Sorcery abilities when you reach level 100, depending
+on which other skills you have at high levels. Use the 'role' command to choose
+which set of skills to use.
+
+See also: ROLE, SKILL, SKILL SYNERGY, STUDY
 #
 ABLATE ABLATION
 
 Ablate
-Class ability:  Battlemage
+High Sorcery Synergy Ability: 100 Battle
 
 Usage:  ablate [victim]
 Cooldown:  9 seconds
 Cost:  based on damage
-Debuff type:  High Sorcery
+Debuff type:  magical
 
 Ablate deals damage to your victim and will cause bits of his armor to burn
 off, leaving him less resistant to physical damage.
-
-See also: BATTLEMAGE CLASS
 #
 "ARCANE POWER"
 
 Arcane Power (High Sorcery ability)
 
-Sorcerers who have mastered the arcane arts can channel 35% more mana than
-those without. Your total mana increases by this amount, including any bonuses
-from equipment and other abilities.
+Sorcerers who have mastered the arcane arts can channel more mana than those
+without. Your total mana increases based on your level and role.
 
 Gains experience passively over time.
+
+See also: GIFT OF NATURE, PASSIVES, ROLE
 #
 ARCLIGHT "ARC LIGHT"
 
 Arclight
-Class ability:  Archmage
+Natural Magic Synergy Ability: 100 High Sorcery
 
 Usage:  arclight [victim]
 Cooldown:  9 seconds
@@ -51,29 +49,25 @@ Cost:  based on damage
 
 Arclight is the Archmage's best magical attack. It deals direct damage to the
 target.
-
-See also: ARCHMAGE CLASS
 #
 CHRONOBLAST
 
 Chronoblast
-Class ability:  Artificer
+High Sorcery Synergy Ability: 100 Trade
 
 Usage:  chronoblast [victim]
 Cooldown:  6 seconds
 Cost:  based on damage
-Debuff type:  High Sorcery
+Debuff type:  magical
 
 Chronoblast uses the artificer's knowledge of clocks to slow down the enemy,
 and the transition into a slower time frame deals serious magical damage.
-
-See also: ARTIFICER CLASS
 #
 "CITY TELEPORTATION"
 
 City Teleportation (High Sorcery ability)
 
-Usage:  ritual teleport <city>
+Usage:  ritual "city teleport" <city>
 Cooldown:  15 minutes
 Cost:  15 mana
 
@@ -82,7 +76,21 @@ can use the city's name or number. Use "city list" to see available cities.
 
 This ability gains experience any time you use it to teleport to a city.
 
-See also: TELEPORTATION, CITY
+See also: RITUAL, CITY
+#
+COLLAPSE "COLLAPSE PORTAL"
+
+Collapse Portal (High Sorcery ability)
+
+Command:  collapse <portal>
+Cost:  15 mana
+
+This power can close portals opened by players. Collapsing one end also closes
+the other end of the portal.
+
+Gain skill whenever you collapse a portal.
+
+See also: PORTAL, PORTAL SICKNESS
 #
 COLORBURST
 
@@ -90,12 +98,12 @@ Colorburst (High Sorcery ability)
 
 Usage:  colorburst [victim]
 Cooldown:  30 seconds
-Cost:  15 / 30 / 45 mana
-Debuff type:  High Sorcery
+Cost:  14+ mana (based on level)
+Debuff type:  magical
 
 Shoot a disorienting burst of color at your foe and makes it harder for them
-to hit you. Colorburst causes a to-hit penalty of -5, -10, or -20 depending
-on your skill level, with a bonus based on your Intelligence.
+to hit anything in combat. The size of the penalty depends upon your skill
+level, with a bonus based on your Intelligence.
 
 In combat, colorburst will automatically target your current opponent if you
 do not provide a target.
@@ -115,6 +123,10 @@ This ritual allows a sorcerer to quickly clear a large area of land through
 ritual magic. It will bring down forests and crops within 3 tiles of the
 caster, one resource at a time, repeating until it completes (or until you run
 out of mana). These resources are transferred to the caster.
+
+On claimed land, you can only devastate forest tiles if you have chop
+permission and can only devastate crop tiles if you have harvest permission.
+These locations will be skipped if you don't have the right privileges.
 
 Gains experience each time you complete the ritual, devastating a tile.
 
@@ -184,10 +196,11 @@ Enchant Weapons:
   fury (offhand) - bonus magical, mana regen (5 lightning stone)
   venom (offhand) - bonus physical, move regen (5 bloodstone)
 
-Enchant Armor:
+Enchant Armor (armor, about, arms, hands, waist, legs):
   health - health  (5 bloodstones)
   mana - mana  (5 blue irises)
   stamina - move  (5 lightning stones)
+  bloodwell - blood  (5 bloodstones)
   regeneration - health regen  (5 blue irises)
   longrunning - move regen  (5 lightning stones)
   energy - mana regen  (5 blue irises)
@@ -198,7 +211,7 @@ Enchant Armor:
   spellwarding - resist-magical (5 blue irises)
   focus - to-hit (5 bloodstones)
   acrobatics - dexterity (5 lightning stones)
-  blocking (shield) - block  (5 lightning stones)
+  blocking (shield slot) - block  (5 lightning stones)
 
 Enchant Tools:
   embiggening (pack) - capacity  (1 of each of the 4 gems)
@@ -210,21 +223,23 @@ ENERVATE
 
 Enervate (High Sorcery ability)
 
-Usage:  enervate <victim>
+Usage:  enervate [victim]
 Cooldown:  75 seconds
 Duration:  75 seconds
+Linked trait:  intelligence
 Cost:  20 mana
-Debuff type:  High Sorcery
+Debuff type:  magical
 
-Your victim is enervated: he loses move regen. You are able to leech some
-of this for yourself, and your move regeneration receive a temporary boost.
+Your victim is enervated: he loses move regen and move points. You are able to
+leech some of this for yourself and your move regeneration receives a temporary
+boost.
 
-The amount of move regen your victim loses is based on your Intelligence, and
-the amount you gain is based on your High Sorcery level.
-
-In combat, enervate will automatically target your opponent.
+This ability is more effective in the caster role. In combat, enervate will
+automatically target your opponent.
 
 Gain experience by casting this spell.
+
+See also: CASTER ROLL
 #
 FORESIGHT
 
@@ -233,9 +248,9 @@ Foresight (High Sorcery ability)
 Usage:  foresight [person]
 Cost:  30 mana
 
-When granted the gift of foresight, a person gains +5, +10, or +15 Dodge
-(based on skill, modified by Intelligence) as she begins to see the arc of an
-opponent's weapon before it strikes.
+When granted the gift of foresight, a person gains extra Dodge (based on skill,
+modified by Intelligence) as she begins to see the arc of an opponent's weapon
+before it strikes.
 
 If your target is in combat, you will join the combat upon using this ability.
 
@@ -252,6 +267,19 @@ Gain experience when you apply any enchantment.
 
 See also: ENCHANT
 #
+MAGIVORE
+
+Magivore (High Sorcery ability)
+
+Usage:  magivore
+Cooldown:  6 minutes
+Duration:  30 seconds
+
+Consume mana from the air around you to greatly boost your mana regeneration
+for a short time. This effect is stronger in the caster or healer role.
+
+See also: MANA REGEN, CASTER ROLE, HEALER ROLE
+#
 MANASHIELD "MANA SHIELD"
 
 Manashield (High Sorcery ability)
@@ -260,12 +288,9 @@ Usage:  manashield
 Cost:  25 mana*
 
 By armoring herself with a manashield, a sorcerer sacrifices part of her mana
-pool for reduced combat damage.
+pool for increased resistance to damage.
 
-Mana Shield reduces your mana by 25 (this effect is modified by abilities which
-change your mana pool size, such as Gift of Nature).
-
-Gain skill by taking damage while manashielded, not by reapplying it.
+Gain skill by taking damage while manashielded.
 #
 MIRRORIMAGE "MIRROR IMAGE"
 
@@ -307,47 +332,6 @@ it saves you as well.
 
 See also: RITUAL
 #
-"PORTAL MAGIC" "PORTAL MAGE"
-
-Portal Magic (High Sorcery ability)
-
-Learning portal magic allows you to create portal nodes, craft nexus crystals,
-and allows members of your empire to use them. These portals can only connect
-two locations on the same island or continent, unless you have a Portal Master
-in the empire.
-
-A "portal mage" is a person with the Portal Magic ability. Without a portal
-mage in your empire, you cannot use portal buildings. Portal mages only get
-four minutes of portal sickness instead of five.
-
-You can gain Portal Magic skill whenever someone in your empire uses your
-portal magic to open a portal.
-
-See also: PORTAL, PORTAL MASTER
-#
-"PORTAL MASTER" COLLAPSE
-
-Portal Master (High Sorcery ability)
-
-Command:  collapse <portal>
-Cost:  15 mana
-
-Becoming a Portal Master removes the range limit on your empire's portals.
-It also allows you to collapse portals yourself.
-
-You can gain Portal Master skill whenever someone in your empire opens a
-portal, and whenever you collapse a portal.
-
-See also: PORTAL, PORTAL MAGIC, PORTAL SICKNESS
-#
-RITUAL RITE
-
-Usage:  ritual <type>
-
-This command allows a High Sorcerer to perform a variety of rituals, based on
-the different abilities they have learned. See the help file for individual
-rituals to learn more about them.
-#
 "RITUAL OF BURDENS" "BURDENS RITUAL" "BURDEN RITUAL"
 
 Ritual of Burdens (High Sorcery ability)
@@ -355,7 +339,7 @@ Ritual of Burdens (High Sorcery ability)
 Usage:  ritual burdens
 Cost:  5 mana
 
-This ritual allows you to carry 6, 12, or 18 more items (based on your level).
+This ritual allows you to carry more items (based on your level).
 
 You can gain experience by re-casting this ritual.
 
@@ -366,11 +350,10 @@ See also: RITUAL
 Ritual of Defense (High Sorcery ability)
 
 Usage:  ritual defense
-Cost:  15 mana; 1 imperium spike and 1 bloodstone per wall
+Cost:  50 mana; 1 imperium spike and 1 bloodstone per wall
 
 This ritual enchants a wall to be able to repel anyone flying. It will go away
-if you dismantle the wall. You will not get your resources back if you cancel
-the ritual; they are spent immediately.
+if you dismantle the wall.
 
 This ability gains experience each time the ritual is completed.
 
@@ -384,21 +367,24 @@ Usage:  ritual detection
 Cost:  15 mana
 
 This ability finds all players currently in your city, whether hidden, earth-
-melded, invisible, or any other condition. This ability only works inside of a
-city owned by your empire.
+melded, invisible, or any other condition. It can also find some adventures.
+This ability only works inside of a city owned by your empire.
+
+This can also detect players outside (but near) the city (up to your "where"
+range) and some adventures near the city (up to your base "nearby" range).
 
 Gains experience when you complete the ritual.
 
-See also: RITUAL
+See also: RITUAL, NEARBY, WHERE
 #
 "RITUAL OF SENSE LIFE" "SENSE LIFE RITUAL"
 
 Ritual of Sense Life (High Sorcery skill)
 
-Usage:  ritual senselife
+Usage:  ritual "sense life"
 Cost:  15 mana
 
-This spell works similar to the "search ability" and can find people hidden
+This spell works similar to the "search" ability and can find people hidden
 in the room with you, using simple magic. It also allows you to sense
 earthmelded people.
 
@@ -411,49 +397,46 @@ See also: RITUAL
 
 Ritual of Teleportation (High Sorcery skill)
 
-Usage:  ritual teleportation [target]
-Cooldown:  15 minutes (teleport home only)
+Usage:  ritual teleport [home]
+Cooldown:  10 minutes
 Cost:  25 mana
 
 With the basic teleportation ability, you can teleport at random (2 to 7 map
 tiles in any direction) or you can teleport to your home. You won't be able to
 teleport out of (or into) any room owned by a non-allied empire.
 
-This ability gains experience any time you teleport (using this ability or City
-Teleportation).
+This ability gains experience any time you use it to teleport.
 
 See also: CITY TELEPORTATION, RITUAL
-#
-SCOUR
-
-Scour
-Class ability:  Exarch
-
-Usage:  scour [victim]
-Cooldown:  6 seconds
-Cost:  based on damage
-Debuff type:  High Sorcery
-
-Scour will scrub away at your opponent, damaging them magically over time (in
-addition to damage with the initial hit). This DoT stacks up to 5 times.
-
-See also: DOT, EXARCH CLASS
 #
 SHADOWLASH "SHADOW LASH"
 
 Shadowlash
-Class ability:  Occultist
+High Sorcery Synergy Ability: 100 Stealth
 
 Usage:  shadowlash [victim]
 Cooldown:  9 seconds
 Cost:  based on damage
-Debuff type:  High Sorcery
+Debuff type:  magical
 
 Shadowlash calls forth a tentacle of pure shadow, which wraps itself around
 your victim's head for both instantaneous and lasting damage. It also blinds
 your victim briefly. The DoT effect stacks up to 3 times.
 
-See also: DOT, OCCULTIST CLASS
+See also: DOT
+#
+"SHIMMERING ANVIL" "CONJURE SHIMMERING ANVIL"
+
+Shimmering Anvil
+High Sorcery Synergy Ability: 75 Trade
+Trade Synergy Ability: 75 High Sorcery
+Cooldown:  1 hour
+Cost:  100 mana
+
+This allows you to conjure an anvil for one hour. Any player may forge using
+the shimmering anvil.
+
+See also: CONJURE
 #
 "SIEGE RITUAL"
 
@@ -480,7 +463,7 @@ Usage:  siphon [victim]
 Cooldown:  20 seconds
 Duration:  20 seconds
 Cost:  10 mana
-Debuff type:  High Sorcery
+Debuff type:  magical
 
 You can steal mana from other casters using the mana siphon ability. If you are
 in combat, it will automatically target your current opponent. This will boost
@@ -499,11 +482,11 @@ Usage:  slow [victim]
 Cooldown:  75 seconds
 Duration:  35 / 75 seconds
 Cost:  20 mana
-Debuff type:  High Sorcery
+Debuff type:  magical
 
 This ability hexes your victim with lethargy, causing them to attack more
 slowly in combat. If you're already fighting and do not specify a victim, it
-will target the person you are fighting. As a class ability, this spell's
+will target the person you are fighting. At High Sorcery 100, this spell's
 duration increases.
 
 Gain experience by casting this spell.
@@ -511,17 +494,15 @@ Gain experience by casting this spell.
 SOULCHAIN "SOUL CHAIN"
 
 Soulchain
-Class ability:  Lich
+High Sorcery Synergy Ability: 100 Vampire
 
 Usage:  soulchain [victim]
 Cooldown:  9 seconds
 Cost:  based on damage
-Debuff type:  High Sorcery
+Debuff type:  magical
 
 Soulchain wraps the victim in a painful spiritual binding, sapping his
 intelligence as well as dealing magical damage.
-
-See also: LICH CLASS
 #
 STAFFMAKING "STAFF MAKING" STAFF STAVES "POWERFUL STAVES"
 
@@ -601,10 +582,10 @@ Gains experience when you attempt to summon a swift mount.
 
 Types of swift mounts:
   stag - a magnificent white deer
-  deinonychus - a feathered reptile with fearsome talons (requires 51)
-  serpent - a long, gigantic snake (requires 51)
-  liger - a massive striped cat (requires 76)
-  bear - a huge bear with golden fur (requires 76)
+  deinonychus - a feathered reptile with fearsome talons (requires 75 Sorcery)
+  serpent - a long, gigantic snake (requires 75 High Sorcery)
+  liger - a massive striped cat (requires 100 High Sorcery)
+  bear - a huge bear with golden fur (requires 100 High Sorcery)
 #
 SUNSHOCK "SUN SHOCK"
 
@@ -613,7 +594,7 @@ Sunshock (High Sorcery ability)
 Usage:  sunshock [victim]
 Cooldown:  9 seconds
 Cost:  based on damage
-Debuff type:  High Sorcery
+Debuff type:  magical
 
 Sunshock blasts your target with the pure light of the sun. This deals a small
 amount of damage (scaled by your level, role, and traits), and causes a very
@@ -632,18 +613,18 @@ See also: BLIND
 THORNLASH "THORN LASH"
 
 Thornlash
-Class ability:  Theurge
+High Sorcery Synergy Ability: 100 Survival
 
 Usage:  thornlash [victim]
 Cooldown:  9 seconds
 Cost:  based on damage
-Debuff type:  High Sorcery
+Debuff type:  physical
 
 Thornlash wraps a coil of thorny vines around your victim. The vines cause
 immediate pain, while the thorns dig in and deal poison damage over time. This
 DoT effect stacks up to 3 times.
 
-See also: DOT, THEURGE CLASS
+See also: DOT
 #
 VIGOR
 

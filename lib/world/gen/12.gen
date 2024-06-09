@@ -1,0 +1,38 @@
+#1215
+bileberry juice~
+4 0
+0 0 0 0
+T0
+You start to feel better.~
+T2
+You don't feel so good...~
+S
+#1250
+healing potion~
+3 0
+0 0 0 0
+T0
+Your healing potion cooldown has ended.~
+S
+#1252
+stamina potion~
+3 0
+0 0 0 0
+T0
+Your stamina potion cooldown has ended.~
+S
+#1254
+mana potion~
+3 0
+0 0 0 0
+T0
+Your mana potion cooldown has ended.~
+S
+#1273
+pain poison~
+4 0
+0 0 0 0
+T0
+You no longer feel the pain poison in your system.~
+S
+$

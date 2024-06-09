@@ -1,7 +1,7 @@
 #10300
 firefruit~
 A Patch of Firefruit~
-3 2 c
+3 k c
 0 100 0 100
 D0
 .&RoO&?.~
@@ -21,53 +21,29 @@ D0
 D0
 .&Roo&?.~
 &y~
-I 6 10302 100.00 1  # FORAGE: some firefruit seeds
-I 8 10303 20.00 2 H  # HARVEST: a seething firefruit
-I 8 10303 20.00 3 H  # HARVEST: a seething firefruit
-I 8 10303 20.00 4 H  # HARVEST: a seething firefruit
-I 8 10303 20.00 5 H  # HARVEST: a seething firefruit
-I 8 10303 20.00 6 H  # HARVEST: a seething firefruit
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9130 15.00 ad
-M
-9116 15.00 ad
-M
-9153 10.00 d
-M
-9117 15.00 bd
-M
-9126 5.00 bd
-M
-9122 5.00 bd
-M
-9125 5.00 bd
+I 6 10302 100.00 25  # FORAGE: firefruit seeds
+I 8 10303 20.00 2 H  # HARVEST: seething firefruit
+I 8 10303 20.00 3 H  # HARVEST: seething firefruit
+I 8 10303 20.00 4 H  # HARVEST: seething firefruit
+I 8 10303 20.00 5 H  # HARVEST: seething firefruit
+I 8 10303 20.00 6 H  # HARVEST: seething firefruit
+U
+0
+The ground smokes as new bushes rage forth and glowing fruit springs to life from every branch!~
+X
+firefruit fruit patch field crop~
+   Firefruit is truly a wonder to behold: rows upon rows of vibrant red,
+orange, and yellow orbs, each one pulsing with an inner light! The tough outer
+skin on the fruit protects the tender, juicy flesh inside. The ripest fruits
+release the brightest glow, casting a warm light over the desert landscape. At
+midday, the sun feels ever more intense near the crop, as if drawn in by the
+fiery energy of the fruit.
+~
 S
 #10338
 dragonfruit~
 A Field of Cacti~
-4 2 c
+4 k c
 0 100 0 100
 D0
 uwuw~
@@ -99,47 +75,26 @@ D0
 D0
 &Ro&?u&Ro&?u~
 &G~
-I 6 10338 100.00 1  # FORAGE: a scaly dragonfruit
-I 8 10339 20.00 2 H  # HARVEST: a basket of dragonfruit
-I 8 10339 20.00 3 H  # HARVEST: a basket of dragonfruit
-I 8 10339 20.00 4 H  # HARVEST: a basket of dragonfruit
-I 8 10339 20.00 5 H  # HARVEST: a basket of dragonfruit
-I 8 10339 20.00 6 H  # HARVEST: a basket of dragonfruit
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9130 15.00 ad
-M
-9116 15.00 ad
-M
-9153 10.00 d
-M
-9117 15.00 bd
-M
-9126 5.00 bd
-M
-9122 5.00 bd
-M
-9125 5.00 bd
+I 6 10338 100.00 25  # FORAGE: scaly dragonfruit
+I 8 10339 20.00 2 H  # HARVEST: basket of dragonfruit
+I 8 10339 20.00 3 H  # HARVEST: basket of dragonfruit
+I 8 10339 20.00 4 H  # HARVEST: basket of dragonfruit
+I 8 10339 20.00 5 H  # HARVEST: basket of dragonfruit
+I 8 10339 20.00 6 H  # HARVEST: basket of dragonfruit
+U
+0
+Spiny cactus tendrils rise from the ground as scaly red fruits grow along them!~
+X
+dragonfruit fruit cacti cactus field crop~
+   As you approach the field, you are immediately struck by the vibrant colors
+of the dragonfruit. The cacti on which they grow are tall and spiky, reaching
+towards the sky. The dragonfruit themselves are a stunning shade of bright
+pink, with green, leaf-like protrusions sprouting from the top. The fruits seem
+to glow in the sunlight, their skin shining with a subtle iridescence. You can
+see the sweet, juicy flesh inside, dotted with tiny black seeds. The prickly
+cactus spines surrounding the dragonfruit add an extra layer of protection, but
+with a bit of caution, you can safely harvest these delicious and exotic
+fruits.
+~
 S
 $

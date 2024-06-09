@@ -1,24 +1,24 @@
 #200
 Burrow Canyons~
-JL Decker and Owen Morris~
+JL Decker with updates by EmpireMUD staff~
    Burrow Canyons is a chain of underground caverns which connect to hidden
 mountain vales. But be wary! There are treacherous paths to follow, and
 dangerous creatures within. It will take a valiant party to survive these
 realms. The spoils gained by those who do, however, are worth the trial!
 ~
-11100 11129 75-100
-10 1440 b 4
-L
-0 a
-5107 -1 -1
-9 0 0
+11100 11129 75-175
+10 1440 bk 4
 L
 5 0
-10080 -1 -1
+10080 -1 -1 -1
 -1 0 0
 L
 6 0
-100 -1 -1
+100 -1 -1 -1
+-1 0 0
+L
+3 a
+5107 11125 11126 -1
 -1 0 0
 S
 #201
@@ -30,42 +30,42 @@ cast it into decline. Today, although it is a wretched speck of its glorious
 past, yet tales still circle of how valuable those lands would be again, if
 only the curse were reversed.
 ~
-11130 11159 100-150
-5 0 c 4
+11130 11159 100-200
+5 0 ck 4
 L
 5 0
-4320 -1 -1
+4320 -1 -1 -1
 -1 0 0
 L
 6 0
-100 -1 -1
+100 -1 -1 -1
 -1 0 0
 L
 1 0
-11130 -1 -1
+11130 -1 -1 -1
 5 m m
 S
 #281
-Mountain Valley: Molten Fiend~
+Mountain Valley: Molten Fiend (moved to 18000)~
 Owen Morris~
    A powerful demon, buried beneath the earth in ages past, is trying to break
-free, and its struggles have opened this molten crevice in the mountains! 
+free, and its struggles have opened this molten crevice in the mountains!
 Bring a capable party with you, for the demon's lengthy imprisonment has only
-fueled the fires of its rage!  
+fueled the fires of its rage!
 ~
-18075 18099 200-250
-5 0 0 4
+0 0 200-250
+5 0 ak 4
 L
 6 0
-50 -1 -1
+50 -1 -1 -1
 -1 0 0
 L
 1 0
-18075 -1 -1
+18075 -1 -1 -1
 9 c c
 L
 5 0
-1440 -1 -1
+1440 -1 -1 -1
 -1 0 0
 S
 #282
@@ -75,21 +75,21 @@ Owen Morris~
 of war machine here! Judging by the smell, only two kinds of pest could have
 been responsible: goblins, or urchins. Judging by the warg bone tent poles,
 it's probably not urchins. Burning their camp to the ground or killing them
-should drive them from the region.  
+should drive them from the region.
 ~
 18100 18124 10-50
 10 0 d 0
 L
 6 0
-75 -1 -1
+75 -1 -1 -1
 -1 0 0
 L
 5 0
-10080 -1 -1
+10080 -1 -1 -1
 -1 0 0
 L
 1 0
-18100 -1 -1
+18100 -1 -1 -1
 14 d n
 T 18104
 S

@@ -2,7 +2,7 @@
 Goblin Challenge Must Fight~
 0 s 100
 ~
-%send% %actor% You have begun the Goblin Challenge and cannot leave without fighting %self.name%.
+%send% %actor% You have begun the Goblin Challenge and cannot leave without fighting ~%self%.
 return 0
 ~
 #10201
@@ -10,6 +10,26 @@ Goblin Challenge No Flee~
 0 c 0
 flee~
 %send% %actor% You cannot flee the Goblin Challenge!
+~
+#10202
+GC Start Progression~
+2 g 100
+~
+if %actor.is_pc% && %actor.empire%
+  nop %actor.empire.start_progress(10200)%
+end
+~
+#10203
+Goblin Challenge: Better error message when attacking early~
+0 B 0
+~
+if %self.aff_flagged(!ATTACK)%
+  %send% %actor% You'll have to wait a moment. ~%self% is still getting ready.
+  return 0
+else
+  detach 10203 %self.id%
+  return 1
+end
 ~
 #10204
 Zelkab Bruiser Combat~
@@ -22,7 +42,7 @@ switch %random.2%
   case 2
     * Stun
     %send% %actor% Zelkab bashes you in the head with his club!
-    %echoaround% %actor% Zelkab bashes %actor.name% in the head with his club!
+    %echoaround% %actor% Zelkab bashes ~%actor% in the head with his club!
     dg_affect %actor% STUNNED on 10
     %damage% %actor% 50 physical
   break
@@ -32,8 +52,36 @@ done
 Zelkab Death~
 0 f 100
 ~
-%echo% As Zelkab dies, Garlgarl steps into the nest!
+if !%self.varexists(difficulty)%
+  * This is probably a summoned copy.
+  halt
+end
+return 0
+set difficulty %self.difficulty%
 %load% mob 10201
+set mob %self.room.people%
+nop %mob.link_instance%
+remote difficulty %mob.id%
+set mob_diff %difficulty%
+dg_affect #10216 %mob% !ATTACK on 5
+nop %mob.remove_mob_flag(HARD)%
+nop %mob.remove_mob_flag(GROUP)%
+if %mob_diff% == 1
+  * Then we don't need to do anything
+elseif %mob_diff% == 2
+  nop %mob.add_mob_flag(HARD)%
+elseif %mob_diff% == 3
+  nop %mob.add_mob_flag(GROUP)%
+elseif %mob_diff% == 4
+  nop %mob.add_mob_flag(HARD)%
+  nop %mob.add_mob_flag(GROUP)%
+end
+%scale% %mob% %mob.level%
+set self_name %self.alias%
+set self_name %self_name.car%
+set mob_name %mob.alias%
+set mob_name %mob_name.car%
+%echo% As %self_name% dies, %mob_name% steps into the nest!
 ~
 #10206
 Garlgarl Shaman Combat~
@@ -51,7 +99,7 @@ switch %random.4%
   default
     * Goblinfire
     %send% %actor% Garlgarl splashes goblinfire at you, causing serious burns!
-    %echoaround% %actor% Garlgarl splashes goblinfire at %actor.name%, causing serious burns!
+    %echoaround% %actor% Garlgarl splashes goblinfire at ~%actor%, causing serious burns!
     %dot% %actor% 33 15 fire
     %damage% %actor% 50 fire
   break
@@ -61,16 +109,49 @@ done
 Garlgarl Death~
 0 f 100
 ~
-%echo% As Garlgarl dies, Filks and Walts step into the nest!
-%load% mob 10202
-%load% mob 10203
+if !%self.varexists(difficulty)%
+  * This is probably a summoned copy.
+  halt
+end
+return 0
+set difficulty %self.difficulty%
+eval mob_diff %difficulty% - 1
+set mob_num 10202
+while %mob_num% <= 10203
+  %load% mob %mob_num%
+  set mob %self.room.people%
+  nop %mob.link_instance%
+  remote difficulty %mob.id%
+  eval aff_id %mob_num% + 15
+  dg_affect #%aff_id% %mob% !ATTACK on 5
+  nop %mob.remove_mob_flag(HARD)%
+  nop %mob.remove_mob_flag(GROUP)%
+  if %mob_diff% == 0
+    %mob.remove_mob_flag(DPS)%
+    %mob.remove_mob_flag(TANK)%
+  elseif %mob_diff% == 1
+    * Then we don't need to do anything
+  elseif %mob_diff% == 2
+    nop %mob.add_mob_flag(HARD)%
+  elseif %mob_diff% == 3
+    nop %mob.add_mob_flag(GROUP)%
+  elseif %mob_diff% == 4
+    nop %mob.add_mob_flag(HARD)%
+    nop %mob.add_mob_flag(GROUP)%
+  end
+  %scale% %mob% %mob.level%
+  set self_name %self.alias%
+  set self_name %self_name.car%
+  eval mob_num %mob_num% + 1
+done
+%echo% As %self_name% dies, Filks and Walts step into the nest!
 ~
 #10208
 Filks Archer Combat~
 0 k 10
 ~
 %send% %actor% Filks dashes backwards, draws her bow, and shoots you with a poison arrow!
-%echoaround% %actor% Filks dashes backwards, draws her bow, and shoots %actor.name% with a poison arrow!
+%echoaround% %actor% Filks dashes backwards, draws her bow, and shoots ~%actor% with a poison arrow!
 %dot% %actor% 75 15 poison
 %damage% %actor% 50 physical
 ~
@@ -78,18 +159,45 @@ Filks Archer Combat~
 Filks Death~
 0 f 100
 ~
-eval room %self.room%
-eval ch %room.people%
-eval found 0
+if !%self.varexists(difficulty)%
+  * This is probably a summoned copy.
+  halt
+end
+set ch %self.room.people%
+set found 0
 while %ch% && !%found%
   if (%ch.vnum% == 10203)
-    eval found 1
+    set found 1
   end
-  eval ch %ch.next_in_room%
+  set ch %ch.next_in_room%
 done
 if !%found%
-  %echo% As Filks dies, Nilbog steps into the nest!
+  return 0
+  set difficulty %self.difficulty%
   %load% mob 10204
+  set mob %self.room.people%
+  nop %mob.link_instance%
+  remote difficulty %mob.id%
+  set mob_diff %difficulty%
+  dg_affect #10219 %mob% !ATTACK on 5
+  nop %mob.remove_mob_flag(HARD)%
+  nop %mob.remove_mob_flag(GROUP)%
+  if %mob_diff% == 1
+    * Then we don't need to do anything
+  elseif %mob_diff% == 2
+    nop %mob.add_mob_flag(HARD)%
+  elseif %mob_diff% == 3
+    nop %mob.add_mob_flag(GROUP)%
+  elseif %mob_diff% == 4
+    nop %mob.add_mob_flag(HARD)%
+    nop %mob.add_mob_flag(GROUP)%
+  end
+  set self_name %self.alias%
+  %scale% %mob% %mob.level%
+  set self_name %self_name.car%
+  set mob_name %mob.alias%
+  set mob_name %mob_name.car%
+  %echo% As %self_name% dies, %mob_name% steps into the nest!
 end
 ~
 #10210
@@ -103,18 +211,45 @@ Walts Sapper Combat~
 Walts Death~
 0 f 100
 ~
-eval room %self.room%
-eval ch %room.people%
-eval found 0
+if !%self.varexists(difficulty)%
+  * This is probably a summoned copy.
+  halt
+end
+set ch %self.room.people%
+set found 0
 while %ch% && !%found%
   if (%ch.vnum% == 10202)
-    eval found 1
+    set found 1
   end
-  eval ch %ch.next_in_room%
+  set ch %ch.next_in_room%
 done
 if !%found%
-  %echo% As Walts dies, Nilbog steps into the nest!
+  return 0
+  set difficulty %self.difficulty%
   %load% mob 10204
+  set mob %self.room.people%
+  nop %mob.link_instance%
+  remote difficulty %mob.id%
+  set mob_diff %difficulty%
+  dg_affect #10219 %mob% !ATTACK on 5
+  nop %mob.remove_mob_flag(HARD)%
+  nop %mob.remove_mob_flag(GROUP)%
+  if %mob_diff% == 1
+    * Then we don't need to do anything
+  elseif %mob_diff% == 2
+    nop %mob.add_mob_flag(HARD)%
+  elseif %mob_diff% == 3
+    nop %mob.add_mob_flag(GROUP)%
+  elseif %mob_diff% == 4
+    nop %mob.add_mob_flag(HARD)%
+    nop %mob.add_mob_flag(GROUP)%
+  end
+  %scale% %mob% %mob.level%
+  set self_name %self.alias%
+  set self_name %self_name.car%
+  set mob_name %mob.alias%
+  set mob_name %mob_name.car%
+  %echo% As %self_name% dies, %mob_name% steps into the nest!
 end
 ~
 #10212
@@ -141,8 +276,36 @@ done
 Nilbog Death~
 0 f 100
 ~
-%echo% As Nilbog dies, Furl steps into the nest!
+if !%self.varexists(difficulty)%
+  * This is probably a summoned copy.
+  halt
+end
+return 0
+set difficulty %self.difficulty%
 %load% mob 10205
+set mob %self.room.people%
+nop %mob.link_instance%
+remote difficulty %mob.id%
+set mob_diff %difficulty%
+dg_affect #10220 %mob% !ATTACK on 5
+nop %mob.remove_mob_flag(HARD)%
+nop %mob.remove_mob_flag(GROUP)%
+if %mob_diff% == 1
+  * Then we don't need to do anything
+elseif %mob_diff% == 2
+  nop %mob.add_mob_flag(HARD)%
+elseif %mob_diff% == 3
+  nop %mob.add_mob_flag(GROUP)%
+elseif %mob_diff% == 4
+  nop %mob.add_mob_flag(HARD)%
+  nop %mob.add_mob_flag(GROUP)%
+end
+%scale% %mob% %mob.level%
+set self_name %self.alias%
+set self_name %self_name.car%
+set mob_name %mob.alias%
+set mob_name %mob_name.car%
+%echo% As %self_name% dies, %mob_name% steps into the nest!
 ~
 #10214
 Furl War Shaman Combat~
@@ -163,65 +326,57 @@ switch %random.4%
   break
 done
 ~
-#10215
-Furl Death Rarespawn~
-0 f 5
-~
-%echo% As Furl dies, you notice his trusty mount enter the nest!
-%load% mob 10206
-%adventurecomplete%
-~
 #10216
-Filks Respawn~
+Filks Respawn - deprecated~
 0 b 100
 ~
 * Respawns Walts if needed
 if (%self.fighting% || %self.disabled%)
   halt
 end
-eval room_var %self.room%
-eval ch %room_var.people%
-eval found 0
+set ch %self.room.people%
+set found 0
 while %ch% && !%found%
   if (%ch.is_npc% && %ch.vnum% == 10203)
-    eval found 1
+    set found 1
   end
-  eval ch %ch.next_in_room%
+  set ch %ch.next_in_room%
 done
 if (!%found%)
   %load% mob 10203
   makeuid walts mob walts
   if %walts%
-    %echo% %walts.name% respawns.
+    %echo% ~%walts% respawns.
     nop %walts.add_mob_flag(!LOOT)%
+    nop %walts.add_mob_flag(NO-CORPSE)%
   end
 end
 ~
 #10217
-Walts Respawn~
+Walts Respawn - deprecated~
 0 b 100
 ~
 * Respawns Filks if needed
 if (%self.fighting% || %self.disabled%)
   halt
 end
-eval room %self.room%
-eval ch %room.people%
-eval found 0
+set ch %self.room.people%
+set found 0
 while (%ch% && !%found%)
   if (%ch.vnum% == 10202)
-    eval found 1
+    set found 1
   end
-  eval ch %ch.next_in_room%
+  set ch %ch.next_in_room%
 done
 if (!%found%)
   %load% mob 10202
   makeuid filks mob filks
   if %filks%
-    %echo% %filks.name% respawns.
+    %echo% ~%filks% respawns.
     nop %filks.add_mob_flag(!LOOT)%
+    nop %filks.add_mob_flag(NO-CORPSE)%
   end
-end/f
+end
 ~
 #10218
 Filks and Walts respawn~
@@ -230,56 +385,83 @@ Filks and Walts respawn~
 set filks_present 0
 set walts_present 0
 set fighting 0
-eval person %room.people%
+set person %room.people%
 while %person%
   if %person.vnum% == 10202
-    if %person.fighting%
+    if %person.fighting% || %person.disabled%
       set fighting 1
     end
+    set goblin %person%
     set filks_present 1
   elseif %person.vnum% == 10203
-    if %person.fighting%
+    if %person.fighting% || %person.disabled%
       set fighting 1
     end
     set walts_present 1
+    set goblin %person%
   end
-  eval person %person.next_in_room%
+  set person %person.next_in_room%
 done
 if %filks_present% && !%walts_present% && !%fighting%
   * Respawn Walts
   %load% mob 10203
-  eval new_mob %room.people%
+  set new_mob %room.people%
   if %new_mob.vnum% == 10203
-    %echo% %new_mob.name% respawns.
+    nop %new_mob.link_instance%
+    %echo% ~%new_mob% respawns.
     nop %new_mob.add_mob_flag(!LOOT)%
+    nop %new_mob.add_mob_flag(NO-CORPSE)%
   end
 elseif %walts_present% && !%filks_present% && !%fighting%
   * Respawn Filks
   %load% mob 10202
-  eval new_mob %room.people%
+  set new_mob %room.people%
   if %new_mob.vnum% == 10202
-    %echo% %new_mob.name% respawns.
+    nop %new_mob.link_instance%
+    %echo% ~%new_mob% respawns.
     nop %new_mob.add_mob_flag(!LOOT)%
+    nop %new_mob.add_mob_flag(NO-CORPSE)%
   end
+end
+if %new_mob%
+  set difficulty %goblin.difficulty%
+  remote difficulty %new_mob.id%
+  eval mob_diff %difficulty% - 1
+  nop %new_mob.remove_mob_flag(HARD)%
+  nop %new_mob.remove_mob_flag(GROUP)%
+  if %mob_diff% == 0
+    %mob.remove_mob_flag(DPS)%
+    %mob.remove_mob_flag(TANK)%
+  elseif %mob_diff% == 1
+    * Then we don't need to do anything
+  elseif %mob_diff% == 2
+    nop %new_mob.add_mob_flag(HARD)%
+  elseif %mob_diff% == 3
+    nop %new_mob.add_mob_flag(GROUP)%
+  elseif %mob_diff% == 4
+    nop %new_mob.add_mob_flag(HARD)%
+    nop %new_mob.add_mob_flag(GROUP)%
+  end
+  nop %new_mob.unscale_and_reset%
 end
 ~
 #10225
-Druid greeting~
+Gardener greeting~
 0 g 100
 ~
 wait 5
-%send% %actor% %self.name% greets you warmly.
+%send% %actor% ~%self% greets you warmly.
 * only if they don't have one
 if (%actor.has_item(10233)% || %actor.has_item(10234)% || %actor.has_item(10235)% || %actor.has_item(10236)% || %actor.has_item(10237)%)
   halt
 end
 wait 5
-%send% %actor% %self.name% tells you, 'Here, take this. I could use a hand here.'
-%send% %actor% %self.name% hands you a list.
+%send% %actor% ~%self% tells you, 'Here, take this. I could use a hand here.'
+%send% %actor% ~%self% hands you a list.
 %load% obj 10237 %actor% inv
 ~
 #10226
-Druid Offer~
+Gardener Offer~
 0 c 0
 offer~
 if (%actor.has_resources(3002,4)% && %actor.has_resources(3004,4)% && %actor.has_resources(3008,4)% && %actor.has_resources(3010,4)%)
@@ -289,11 +471,11 @@ if (%actor.has_resources(3002,4)% && %actor.has_resources(3004,4)% && %actor.has
   nop %actor.add_resources(3008,-4)%
   nop %actor.add_resources(3010,-4)%
   %load% obj 10233 %actor% inv
-  %send% %actor% You give %self.name% the fruits you have collected, and %self.heshe% gives you a wooden fruit token!
-  %echoaround% %actor% %actor.name% gives %self.name% several baskets of fruits, and receives a wooden fruit token.
+  %send% %actor% You give ~%self% the fruits you have collected, and &%self% gives you a wooden fruit token!
+  %echoaround% %actor% ~%actor% gives ~%self% several baskets of fruits, and receives a wooden fruit token.
   if !%actor.has_item(10238)%
     %load% obj 10238 %actor% inv
-    %send% %actor% %self.heshe% also gives you another list.
+    %send% %actor% &%self% also gives you another list.
   end
 elseif (%actor.has_resources(141,4)% && %actor.has_resources(3005,4)% && %actor.has_resources(3011,4)% && %actor.has_resources(145,4)%)
   * grains
@@ -302,11 +484,11 @@ elseif (%actor.has_resources(141,4)% && %actor.has_resources(3005,4)% && %actor.
   nop %actor.add_resources(3011,-4)%
   nop %actor.add_resources(145,-4)%
   %load% obj 10234 %actor% inv
-  %send% %actor% You give %self.name% the grains you have collected, and %self.heshe% gives you a copper grain token!
-  %echoaround% %actor% %actor.name% gives %self.name% several baskets of grains, and receives a copper grain token.
+  %send% %actor% You give ~%self% the grains you have collected, and &%self% gives you a copper grain token!
+  %echoaround% %actor% ~%actor% gives ~%self% several baskets of grains, and receives a copper grain token.
   if !%actor.has_item(10239)%
     %load% obj 10239 %actor% inv
-    %send% %actor% %self.heshe% also gives you another list.
+    %send% %actor% &%self% also gives you another list.
   end
 elseif (%actor.has_resources(143,4)% && %actor.has_resources(144,4)% && %actor.has_resources(3023,4)% && %actor.has_resources(3019,4)%)
   * tradegoods
@@ -315,23 +497,30 @@ elseif (%actor.has_resources(143,4)% && %actor.has_resources(144,4)% && %actor.h
   nop %actor.add_resources(3023,-4)%
   nop %actor.add_resources(3019,-4)%
   %load% obj 10235 %actor% inv
-  %send% %actor% You give %self.name% the goods you have collected, and %self.heshe% gives you a silver tradegoods token!
-  %echoaround% %actor% %actor.name% gives %self.name% several baskets of goods, and receives a silver tradegoods token.
+  %send% %actor% You give ~%self% the goods you have collected, and &%self% gives you a silver tradegoods token!
+  %echoaround% %actor% ~%actor% gives ~%self% several baskets of goods, and receives a silver tradegoods token.
 else
   %send% %actor% You have nothing to offer.
   wait 5
   if !%actor.has_item(10237)%
     %load% obj 10237 %actor% inv
-    %send% %actor% %self.name% hands you a list.
+    %send% %actor% ~%self% hands you a list.
   end
+end
+~
+#10227
+M:HG Start Progression~
+2 g 100
+~
+if %actor.is_pc% && %actor.empire%
+  nop %actor.empire.start_progress(10225)%
 end
 ~
 #10232
 Tumbleweed mount spawn~
 1 c 2
 use~
-eval test %%actor.obj_target(%arg%)%%
-if %test% != %self%
+if %actor.obj_target(%arg%)% != %self%
   return 0
   halt
 end
@@ -341,8 +530,7 @@ if (%actor.position% != Standing)
 end
 %load% m 10227
 %echo% The enchanted tumbleweed comes to life!
-eval room_var %self.room%
-eval mob %room_var.people%
+set mob %self.room.people%
 if (%mob% && %mob.vnum% == 10227)
   nop %mob.unlink_instance%
 end
@@ -353,27 +541,26 @@ Gardener passive~
 0 bw 15
 ~
 if %self.varexists(msg_pos)%
-  eval msg_pos %self.msg_pos%
+  eval msg_pos %self.msg_pos% + 1
 else
-  eval msg_pos 0
+  set msg_pos 1
 end
-eval msg_pos %msg_pos% + 1
 switch %msg_pos%
   case 1
-    %echo% %self.name% carefully waters the plants.
+    %echo% ~%self% carefully waters the plants.
   break
   case 2
-    %echo% %self.name% trims unwanted growth from the plants.
+    %echo% ~%self% trims unwanted growth from the plants.
   break
   case 3
-    %echo% %self.name% trims unwanted growth from the plants.
+    %echo% ~%self% trims unwanted growth from the plants.
   break
   case 4
-    %echo% %self.name% whistles a strange tune.
+    %echo% ~%self% whistles a strange tune.
   break
 done
 if %msg_pos% >= 4
-  eval msg_pos 0
+  set msg_pos 0
 end
 remote msg_pos %self.id%
 ~
@@ -389,12 +576,12 @@ if !(tokens /= %arg%)
   return 0
   halt
 end
-eval copper_token %actor.inventory(10234)%
+set copper_token %actor.inventory(10234)%
 if !%copper_token
   %send% %actor% You require a copper grain token to combine.
   halt
 end
-eval wooden_token %actor.inventory(10233)%
+set wooden_token %actor.inventory(10233)%
 if !%wooden_token%
   %send% %actor% You require a wooden fruit token to combine.
   halt
@@ -402,34 +589,43 @@ end
 %purge% %wooden_token%
 %purge% %copper_token%
 %send% %actor% You magically combine all three tokens into a gnarled wooden token!
-%echoaround% %actor% %actor.name% magically combines three strange tokens into a gnarled wooden token!
+%echoaround% %actor% ~%actor% magically combines three strange tokens into a gnarled wooden token!
 %load% obj 10236 %actor% inv
 %purge% %self%
 ~
 #10236
 Hidden Garden teleport chant~
-2 c 0
+1 c 2
 chant~
+set room %self.room%
 * Only know the 'gardens' chant if the have the token.
-if (!(gardens /= %arg%) || !(%actor.has_item(10236)%) || %actor.position% != Standing)
+if !(gardens /= %arg%)
   return 0
   halt
 end
+if %actor.position% != Standing
+  return 0
+  halt
+end
+if (%room.template% != 10225)
+  %send% %actor% You can only use that chant in the entrance room of the Hidden Garden adventure.
+  halt
+end
 %send% %actor% You begin the chant of gardens...
-%echoaround% %actor% %actor.name% begins the chant of gardens...
+%echoaround% %actor% ~%actor% begins the chant of gardens...
 wait 4 sec
-if !(%actor.has_item(10236)%)
+if !(%self.carried_by% == %actor%) || %room% != %self.room%
   halt
 end
 %send% %actor% You rhythmically speak the words to the chant of gardens...
-%echoaround% %actor% %actor.name% rhythmically speaks the words to the chant of gardens...
+%echoaround% %actor% ~%actor% rhythmically speaks the words to the chant of gardens...
 wait 4 sec
-if !(%actor.has_item(10236)%)
+if !(%self.carried_by% == %actor%) || %room% != %self.room%
   halt
 end
-%echoaround% %actor% %actor.name% vanishes in a swirl of dust!
+%echoaround% %actor% ~%actor% vanishes in a swirl of dust!
 %teleport% %actor% i10226
-%echoaround% %actor% %actor.name% appears in a swirl of dust!
+%echoaround% %actor% ~%actor% appears in a swirl of dust!
 %force% %actor% look
 ~
 #10250
@@ -462,8 +658,8 @@ return 1
 King of the Dracosaurs grievous bite~
 0 k 7
 ~
-%send% %actor% %self.name% takes a grievous bite out of you!
-%echoaround% %actor% %self.name% takes a grievous bite out of %actor.name%!
+%send% %actor% ~%self% takes a grievous bite out of you!
+%echoaround% %actor% ~%self% takes a grievous bite out of ~%actor%!
 %dot% %actor% 100 30 physical
 %damage% %actor% 60 physical
 ~
@@ -472,7 +668,7 @@ Terrosaur combat~
 0 k 5
 ~
 dg_affect %self% BONUS-PHYSICAL 5 120
-%echo% %self.name% seems to get angrier!
+%echo% ~%self% seems to get angrier!
 ~
 #10254
 Malfernes combat~
@@ -488,12 +684,20 @@ else
   sunshock
 end
 ~
+#10255
+Primeval Start Progression~
+2 g 100
+~
+if %actor.is_pc% && %actor.empire%
+  nop %actor.empire.start_progress(10250)%
+end
+~
 #10256
-Primeval adventure completer~
+Primeval: Start delayed despawn~
 0 f 100
 ~
 %buildingecho% %self.room% A bone-shattering roar echoes through the air!
-%adventurecomplete%
+%at% i10251 %load% mob 10276
 return 0
 ~
 #10257
@@ -514,6 +718,110 @@ switch %random.3%
   break
 done
 %purge% %self%
+~
+#10258
+Primeval difficulty selector~
+0 c 0
+difficulty~
+return 1
+* Configs
+set start_room 10250
+set end_room 10258
+set boss_mobs 10252 10253 10254
+set mini_mobs 10255 10258
+* NOTE: The miniboss that spawns in a pack is unlisted; it's always Normal.
+* Check args...
+if %self.varexists(scaled)%
+  %send% %actor% The difficulty has already been set.
+  halt
+end
+if !%arg%
+  %send% %actor% You must specify a level of difficulty (normal \| hard \| group \| boss).
+  halt
+end
+if normal /= %arg%
+  %echo% Setting difficulty to Normal...
+  set difficulty 1
+  set hard_mini 0
+elseif hard /= %arg%
+  %echo% Setting difficulty to Hard...
+  set difficulty 2
+  set hard_mini 0
+elseif group /= %arg%
+  %echo% Setting difficulty to Group...
+  set difficulty 3
+  set hard_mini 1
+elseif boss /= %arg%
+  %echo% Setting difficulty to Boss...
+  set difficulty 4
+  set hard_mini 1
+else
+  %send% %actor% That is not a valid difficulty level for this adventure (normal \| hard \| group \| boss).
+  halt
+end
+* Clear existing difficulty flags and set new ones.
+set vnum %start_room%
+while %vnum% <= %end_room%
+  set there %instance.nearest_rmt(%vnum%)%
+  if %there%
+    set mob %there.people%
+    set last 0
+    while %mob%
+      set next_mob %mob.next_in_room%
+      if %mob.is_npc%
+        if %mob.vnum% >= 10250 && %mob.vnum% <= 10299
+          * wipe difficulty flags
+          nop %mob.remove_mob_flag(HARD)%
+          nop %mob.remove_mob_flag(GROUP)%
+        end
+        if %boss_mobs% ~= %mob.vnum%
+          * scale as boss
+          if %difficulty% == 2
+            nop %mob.add_mob_flag(HARD)%
+          elseif %difficulty% == 3
+            nop %mob.add_mob_flag(GROUP)%
+          elseif %difficulty% == 4
+            nop %mob.add_mob_flag(HARD)%
+            nop %mob.add_mob_flag(GROUP)%
+          end
+        elseif %hard_mini% && %mini_mobs% ~= %mob.vnum%
+          * scale as miniboss
+          nop %mob.add_mob_flag(HARD)%
+        end
+        * on normal, remove duplicate mobs
+        if %difficulty% == 1
+          if %mob.vnum% == %last%
+            %purge% %mob%
+          else
+            set last %mob.vnum%
+          end
+        end
+      end
+      * and loop
+      set mob %next_mob%
+    done
+  end
+  * and repeat
+  eval vnum %vnum% + 1
+done
+* messaging:
+if %difficulty% > 2
+  say Be very careful... the scouts say it's dangerous.
+end
+say Ok, open the gate!
+* mark me as scaled
+set scaled 1
+remote scaled %self.id%
+~
+#10259
+Priveal block exit until selected~
+0 s 100
+~
+if %direction% != portal && !%actor.nohassle% && !%self.varexists(scaled)%
+  %send% %actor% The gate is shut. Choose a difficulty to proceed.
+  %send% %actor% Usage: difficulty <normal \| hard \| group \| boss>
+  return 0
+end
 ~
 #10260
 Dracosaur trash spawner~
@@ -542,24 +850,24 @@ if (%self.fighting% || %self.disabled% || %actor.nohassle%)
   halt
 end
 wait 5
-%echo% %self.name% cackles insanely!
+%echo% ~%self% cackles insanely!
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
-%echo% A strange violet glow encircles %self.name%, as if some arcane magic is controlling him.
+%echo% A strange violet glow encircles ~%self%, as if some arcane magic is controlling him.
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
 say How dare you follow me here!
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
 say Did the Academy send you? Are you here to take me back? I'm not going back there!
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
 %aggro% %actor%
@@ -571,15 +879,15 @@ Primeval must-fight~
 if (%actor.nohassle% || %direction% == south)
   halt
 end
-%send% %actor% You can't seem to get away from %self.name%!
+%send% %actor% You can't seem to get away from ~%self%!
 return 0
 ~
 #10263
-Mount whistle use~
+DEPRECATED: mount whistle use~
 1 c 2
 use~
-eval test %%actor.obj_target(%arg%)%%
-if %test% != %self%
+* DEPRECATED: Use 9910 instead
+if %actor.obj_target(%arg%)% != %self%
   return 0
   halt
 end
@@ -588,14 +896,14 @@ if (%actor.position% != Standing)
   halt
 end
 %load% m %self.val0%
-eval room_var %self.room%
-eval mob %room_var.people%
-%send% %actor% You use %self.shortdesc% and %mob.name% appears!
-%echoaround% %actor% %actor.name% uses %self.shortdesc% and %mob.name% appears!
+set mob %self.room.people%
+%send% %actor% You use @%self% and ~%mob% appears!
+%echoaround% %actor% ~%actor% uses @%self% and ~%mob% appears!
 if (%mob% && %mob.vnum% == %self.val0%)
   nop %mob.unlink_instance%
 end
 %purge% %self%
+* DEPRECATED: Use 9910 instead
 ~
 #10264
 Dracosaur boss spawner~
@@ -622,167 +930,123 @@ flee~
 return 1
 ~
 #10266
-Hint to 10252~
+Primeval track ability~
 2 c 0
 track~
-eval tofind 10252
-if (!%actor.ability(Track)% || !%actor.ability(Navigation)%)
+* check abils and arg
+if !%arg% || !%actor.ability(Track)% || !%actor.ability(Navigation)%
   * Fail through to ability message
   return 0
   halt
 end
-* It's never south -- that's always backtrack
-eval north %room.north(room)%
-eval east %room.east(room)%
-eval west %room.west(room)%
-eval northeast %room.northeast(room)%
-eval northwest %room.northwest(room)%
-eval southeast %room.southeast(room)%
-eval southwest %room.southwest(room)%
-if (%north% && %north.template% == %tofind%)
-  %send% %actor% You sense a trail to the north!
-  return 1
-elseif (%east% && %east.template% == %tofind%)
-  %send% %actor% You sense a trail to the east!
-  return 1
-elseif (%west% && %west.template% == %tofind%)
-  %send% %actor% You sense a trail to the west!
-  return 1
-elseif (%northeast% && %northeast.template% == %tofind%)
-  %send% %actor% You sense a trail to the northeast!
-  return 1
-elseif (%northwest% && %northwest.template% == %tofind%)
-  %send% %actor% You sense a trail to the northwest!
-  return 1
-elseif (%southeast% && %southeast.template% == %tofind%)
-  %send% %actor% You sense a trail to the southeast!
-  return 1
-elseif (%southwest% && %southwest.template% == %tofind%)
-  %send% %actor% You sense a trail to the southwest!
-  return 1
+* determine who they're tracking from available targets
+set target 0
+if dracosaur /= %arg%
+  set keyword dracosaur
+  * ambiguous keyword
+  if %instance.mob(10255)%
+    set target %instance.mob(10255)%
+  elseif %instance.mob(10256)%
+    set target %instance.mob(10256)%
+  elseif %instance.mob(10257)%
+    set target %instance.mob(10257)%
+  elseif %instance.mob(10252)%
+    * king last (he appears last in the adventure)
+    set target %instance.mob(10252)%
+  end
+elseif king /= %arg%
+  set keyword king
+  set target %instance.mob(10252)%
+elseif terrosaur /= %arg% || fearsome /= %arg%
+  set keyword terrosaur
+  set target %instance.mob(10253)%
+elseif archsorcerer /= %arg% || malfernes /= %arg%
+  set keyword malfernes
+  set target %instance.mob(10254)%
+  if !%target%
+    * guild version instead?
+    set target %instance.mob(18280)%
+  end
+elseif three-horned /= %arg% || horned /= %arg% || frilled /= %arg%
+  set keyword frilled
+  set target %instance.mob(10255)%
+elseif feathered /= %arg%
+  set keyword feathered
+  * ambiguous keyword
+  if %instance.mob(10256)%
+    set target %instance.mob(10256)%
+  elseif %instance.mob(10257)%
+    set target %instance.mob(10257)%
+  end
+elseif small /= %arg%
+  set keyword small
+  set target %instance.mob(10257)%
+elseif mage /= %arg%
+  set keyword mage
+  set target %instance.mob(10258)%
 end
+* see if that keyword was already tracked here
+eval found %%track_%keyword%%%
+if !%found%
+  if !%target%
+    * no target: fall through to normal track
+    return 0
+    halt
+  end
+  * ok find it
+  set my_id %room.template%
+  * It's never south -- that's always backtrack
+  set dir_list north east west northeast northwest southeast southwest
+  set found 0
+  set override 0
+  while %dir_list% && !%override%
+    set dir %dir_list.car%
+    set dir_list %dir_list.cdr%
+    eval to_room %%room.%dir%(room)%%
+    if %to_room% == %target.room%
+      * target is in that room
+      set override %dir%
+    elseif %to_room% && !%found% && %to_room.template% > %my_id%
+      * room has higher template id
+      set found %dir%
+    end
+  done
+  if %override%
+    set found %override%
+  end
+end
+if !%found%
+  * did not find any valid room: fall through to normal track command for error
+  return 0
+  halt
+end
+* ok: now we have found a direction
+%send% %actor% You find a trail to the %found%!
+* save for later
+set track_%keyword% %found%
+global track_%keyword%
+return 1
 ~
 #10267
-Hint to 10253~
+Primeval base camp track hint~
 2 c 0
 track~
-eval tofind 10253
-if (!%actor.ability(Track)% || !%actor.ability(Navigation)%)
-  * Fail through to ability message
-  return 0
-  halt
-end
-* It's never south -- that's always backtrack
-eval north %room.north(room)%
-eval east %room.east(room)%
-eval west %room.west(room)%
-eval northeast %room.northeast(room)%
-eval northwest %room.northwest(room)%
-eval southeast %room.southeast(room)%
-eval southwest %room.southwest(room)%
-if (%north% && %north.template% == %tofind%)
-  %send% %actor% You sense a trail to the north!
-  return 1
-elseif (%east% && %east.template% == %tofind%)
-  %send% %actor% You sense a trail to the east!
-  return 1
-elseif (%west% && %west.template% == %tofind%)
-  %send% %actor% You sense a trail to the west!
-  return 1
-elseif (%northeast% && %northeast.template% == %tofind%)
-  %send% %actor% You sense a trail to the northeast!
-  return 1
-elseif (%northwest% && %northwest.template% == %tofind%)
-  %send% %actor% You sense a trail to the northwest!
-  return 1
-elseif (%southeast% && %southeast.template% == %tofind%)
-  %send% %actor% You sense a trail to the southeast!
-  return 1
-elseif (%southwest% && %southwest.template% == %tofind%)
-  %send% %actor% You sense a trail to the southwest!
-  return 1
+* shows up after they fail to find tracks
+return 0
+wait 1
+if %actor.room% == %room% && %actor.ability(Track)% && %actor.ability(Navigation)%
+  %send% %actor% It might be easier to find tracks further from the base camp.
 end
 ~
 #10268
-Hint to 10254~
+Primeval backtracking track hint~
 2 c 0
 track~
-eval tofind 10254
-if (!%actor.ability(Track)% || !%actor.ability(Navigation)%)
-  * Fail through to ability message
-  return 0
-  halt
-end
-* It's never south -- that's always backtrack
-eval north %room.north(room)%
-eval east %room.east(room)%
-eval west %room.west(room)%
-eval northeast %room.northeast(room)%
-eval northwest %room.northwest(room)%
-eval southeast %room.southeast(room)%
-eval southwest %room.southwest(room)%
-if (%north% && %north.template% == %tofind%)
-  %send% %actor% You sense a trail to the north!
-  return 1
-elseif (%east% && %east.template% == %tofind%)
-  %send% %actor% You sense a trail to the east!
-  return 1
-elseif (%west% && %west.template% == %tofind%)
-  %send% %actor% You sense a trail to the west!
-  return 1
-elseif (%northeast% && %northeast.template% == %tofind%)
-  %send% %actor% You sense a trail to the northeast!
-  return 1
-elseif (%northwest% && %northwest.template% == %tofind%)
-  %send% %actor% You sense a trail to the northwest!
-  return 1
-elseif (%southeast% && %southeast.template% == %tofind%)
-  %send% %actor% You sense a trail to the southeast!
-  return 1
-elseif (%southwest% && %southwest.template% == %tofind%)
-  %send% %actor% You sense a trail to the southwest!
-  return 1
-end
-~
-#10269
-Hint to 10255~
-2 c 0
-track~
-eval tofind 10255
-if (!%actor.ability(Track)% || !%actor.ability(Navigation)%)
-  * Fail through to ability message
-  return 0
-  halt
-end
-* It's never south -- that's always backtrack
-eval north %room.north(room)%
-eval east %room.east(room)%
-eval west %room.west(room)%
-eval northeast %room.northeast(room)%
-eval northwest %room.northwest(room)%
-eval southeast %room.southeast(room)%
-eval southwest %room.southwest(room)%
-if (%north% && %north.template% == %tofind%)
-  %send% %actor% You sense a trail to the north!
-  return 1
-elseif (%east% && %east.template% == %tofind%)
-  %send% %actor% You sense a trail to the east!
-  return 1
-elseif (%west% && %west.template% == %tofind%)
-  %send% %actor% You sense a trail to the west!
-  return 1
-elseif (%northeast% && %northeast.template% == %tofind%)
-  %send% %actor% You sense a trail to the northeast!
-  return 1
-elseif (%northwest% && %northwest.template% == %tofind%)
-  %send% %actor% You sense a trail to the northwest!
-  return 1
-elseif (%southeast% && %southeast.template% == %tofind%)
-  %send% %actor% You sense a trail to the southeast!
-  return 1
-elseif (%southwest% && %southwest.template% == %tofind%)
-  %send% %actor% You sense a trail to the southwest!
-  return 1
+* when they try to track from the "backtracking" room
+return 0
+wait 1
+if %actor.room% == %room% && %actor.ability(Track)% && %actor.ability(Navigation)%
+  %send% %actor% You probably need to go back to the base camp to get your bearings before you can track anything around here.
 end
 ~
 #10270
@@ -793,25 +1057,25 @@ if (%self.fighting% || %self.disabled% || %actor.nohassle%)
   halt
 end
 wait 5
-%echo% The earth itself tremors in fear as %self.name% stomps toward you.
+%echo% The earth itself tremors in fear as ~%self% stomps toward you.
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
-%echo% %self.name% stops and lets out a terrifying roar!
+%echo% ~%self% stops and lets out a terrifying roar!
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
-%echo% %self.name% swipes %self.hisher% massive tail, and a tree goes flying!
+%echo% ~%self% swipes ^%self% massive tail, and a tree goes flying!
 %load% obj 120 room
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
-%echo% %self.name% looms close, and it's only as %self.heshe% bends down to bite you that you realize how big %self.heshe% is!
+%echo% ~%self% looms close, and it's only as &%self% bends down to bite you that you realize how big &%self% is!
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
 %aggro% %actor%
@@ -826,92 +1090,138 @@ end
 wait 5
 %echo% A wicked screech pierces the air!
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
-%echo% %self.name% drops the crocodile %self.heshe% was carrying in its talons, and swoops toward you!
+%echo% ~%self% drops the crocodile &%self% was carrying in its talons, and swoops toward you!
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
-%echo% %self.name% vanishes as %self.heshe% swoops too close to the trees for you to see exactly which way %self.heshe%'s coming from.
+%echo% ~%self% vanishes as &%self% swoops too close to the trees for you to see exactly which way &%self%'s coming from.
 %load% obj 120
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
-%echo% %self.name% reappears over the clearing, suddenly so close %self.heshe% blots out the sun!
+%echo% ~%self% reappears over the clearing, suddenly so close &%self% blots out the sun!
 wait 3 sec
-if (%self.fighting% || %self.disabled%)
+if (%self.fighting% || %self.disabled% || %actor.room% != %self.room%)
   halt
 end
 %aggro% %actor%
 ~
 #10272
-Primeval salesman list~
-0 c 0
-list~
-%send% %actor% %self.name% sells crafting patterns for 1000 coins each. Each
-%send% %actor% pattern is reusable, but you need the correct ability to use it.
-%send% %actor% To purchase a pattern, use '&cbuy <name>&0'.
-%send% %actor%  - &caxe&0: a primordial axe (Deadly Weapons, 2-hand melee weapon)
-%send% %actor%  - &cspear&0: the dracosaur bone spear (Deadly Weapons, tank weapon)
-%send% %actor%  - &cstaff&0: the jeweled bone staff (Powerful Staves, caster weapon)
-%send% %actor%  - &crobe&0: a dracosaur scale robe (Magical Vestments, healer armor)
-%send% %actor%  - &cscale boots&0: dracosaur scale boots (Imperial Armors, medium armor boots)
-%send% %actor%  - &cprimordial boots&0: a pair of primordial boots (Imperial Armors, heavy armor boots)
-%send% %actor%  - &cgauntlets&0: a pair of dracosaur scale gauntlets (Dangerous Leathers, leather armor gloves)
-%send% %actor%  - &ctome&0: the Tome of the Primordium (Master Craftsman, caster offhand)
-%send% %actor%  - &ccrown&0: the bone crown of the primeval (Jewelry, Greatness headgear)
+Primeval item BOE/BOP craft/loot twiddler~
+1 n 100
+~
+* items default to BOP but are set BOE if they come from a shop or craft
+set actor %self.carried_by%
+if !%actor%
+  set actor %self.worn_by%
+end
+if !%actor%
+  halt
+end
+if %actor% && %actor.is_pc%
+  * Item was crafted or bought
+  if %self.is_flagged(BOP)%
+    nop %self.flag(BOP)%
+  end
+  if !%self.is_flagged(BOE)%
+    nop %self.flag(BOE)%
+  end
+  * Probably need to unbind when BOE
+  nop %self.bind(nobody)%
+else
+  * Item was probably dropped as loot
+  if !%self.is_flagged(BOP)%
+    nop %self.flag(BOP)%
+  end
+  if %self.is_flagged(BOE)%
+    nop %self.flag(BOE)%
+  end
+end
+detach 10272 %self.id%
 ~
 #10273
-Primeval salesman buy~
+Primeval shop: sell resources to shop~
 0 c 0
-buy~
-eval vnum -1
-set named a thing
-if (!%arg%)
-  %send% %actor% Type 'list' to see what's available.
-  halt
-elseif axe /= %arg%
-  eval vnum 10269
-  set named the primordial axe pattern
-elseif spear /= %arg%
-  eval vnum 10271
-  set named the dracosaur bone spear pattern
-elseif staff /= %arg%
-  eval vnum 10273
-  set named the jeweled bone staff pattern
-elseif robe /= %arg%
-  eval vnum 10275
-  set named the dracosaur scale robe pattern
-elseif scale boots /= %arg%
-  eval vnum 10277
-  set named the dracosaur scale boots pattern
-elseif primordial boots /= %arg%
-  eval vnum 10279
-  set named the primordial boots pattern
-elseif gauntlets /= %arg%
-  eval vnum 10281
-  set named the dracosaur scale gauntlets pattern
-elseif tome /= %arg%
-  eval vnum 10283
-  set named the Tome of the Primordium schematic
-elseif crown /= %arg%
-  eval vnum 10285
-  set named the bone crown pattern
+sell~
+* Usage: sell <all | item>
+set valid_vnums 10252 10253 10254 10265 10267
+set premium_value 10252 10253 10254
+return 1
+if %arg% == all
+  set all 1
+  set targ 0
 else
-  %send% %actor% They don't seem to sell '%arg%' here.
-  halt
+  set all 0
+  set targ %actor.obj_target_inv(%arg.argument1%)%
+  if !%arg%
+    %send% %actor% Sell what? (or try 'sell all')
+    halt
+  end
 end
-if !%actor.can_afford(1000)%
-  %send% %actor% %self.name% tells you, 'You'll need 1000 coins to buy that.'
-  halt
+* ready to loop
+set found 0
+set item %actor.inventory%
+while %item% && (%all% || !%found%)
+  set next_item %item.next_in_list%
+  * use %ok% to control what we do in this loop
+  if %all%
+    set ok 1
+  else
+    * single-target: make sure this was the target
+    if %targ% == %item%
+      set ok 1
+    else
+      set ok 0
+    end
+  end
+  * next check the obj type if we got the ok
+  if %ok%
+    if !(%valid_vnums% ~= %item.vnum%)
+      if %all%
+        set ok 0
+      else
+        %send% %actor% You can't sell @%item% here.
+        * Break out of the loop early since it was a single-target fail
+        halt
+      end
+    end
+  end
+  * still ok? go ahead and sell it.
+  if %ok%
+    * determine value
+    if %premium_value% ~= %item.vnum%
+      set value 10
+    else
+      set value 1
+    end
+    * give token
+    %actor.give_currency(10250,%value%)%
+    * messaging
+    %send% %actor% # You sell @%item% for %value% %currency.10250(%value%)%.
+    %echoaround% %actor% # ~%actor% sells @%item%.
+    * increment counter
+    eval found %found% + 1
+    %purge% %item%
+  end
+  * and repeat the loop
+  set item %next_item%
+done
+if %found%
+  set amount %actor.currency(10250)%
+  %send% %actor% # You now have %amount% %currency.10250(%amount%)%.
+else
+  * didn't sell any?
+  if %all%
+    %send% %actor% You didn't have anything to sell.
+  else
+    %send% %actor% You don't seem to have %arg.ana% %arg%.
+  end
 end
-nop %actor.charge_coins(1000)%
-%load% obj %vnum% %actor% inv
-%send% %actor% You buy %named% for 1000 coins.
-%echoaround% %actor% %actor.name% buys %named%.
 ~
 #10274
 Primeval environment~
@@ -931,5 +1241,163 @@ switch %random.4%
     %echo% The ground rumbles beneath you.
   break
 done
+~
+#10275
+Primeval Portal: learn craft book~
+1 c 2
+learn~
+* Usage: learn <self>
+if %actor.obj_target(%arg%)% != %self%
+  return 0
+  halt
+end
+* all other cases will return 1
+* switch MUST set vnum_list, abil_list, and name_list
+switch %self.vnum%
+  case 10269
+    * book of primordial weapon schematics
+    set vnum_list 10268 10270 10272 10282 10266
+    set abil_list 196 196 170 170 196
+    set name_list primordial axe, dracosaur bone spear, jeweled bone staff, edge of extinction, and Tome of the Primordium
+  break
+  case 10273
+    * book of dracosaur armor schematics
+    set vnum_list 10274 10287 10288 10289 10290
+    set abil_list 199 197 182 199 197
+    set name_list dracosaur scale robe, dracoscale armor, dracosaur hide armor, dracosaur tooth robe, and dracosaur fang armor
+  break
+  case 10275
+    * book of primordial footwear designs
+    set vnum_list 10276 10278 10291 10292 10293
+    set abil_list 197 197 199 199 182
+    set name_list dracosaur scale boots, primordial boots, dracosaur scale sandals, dracosaur tooth boots, and dracosaur fang shoes
+  break
+  case 10277
+    * book of dracosaur wristwear designs
+    set vnum_list 10255 10280 10258 10294 10256
+    set abil_list 182 197 199 197 199
+    set name_list dracosaur bone bracelet, stunning dracosaur wristguard, obsidian bracelet, dracoscale vambraces, dracosaur scale wristband
+  break
+  case 10281
+    * book of dracosaur belt patterns
+    set vnum_list 10297 10298 10299
+    set abil_list 182 199 197
+    set name_list dracosaur fang belt, obsidian dracosaur waistband, and mighty dracoscale belt
+  break
+  default
+    %send% %actor% There's nothing you can learn from this.
+    halt
+  break
+done
+* check if the player needs any of them
+set any 0
+set error 0
+set vnum_copy %vnum_list%
+while %vnum_copy%
+  * pluck first numbers out
+  set vnum %vnum_copy.car%
+  set vnum_copy %vnum_copy.cdr%
+  set abil %abil_list.car%
+  set abil_list %abil_list.cdr%
+  if !%actor.learned(%vnum%)%
+    if %actor.ability(%abil%)%
+      set any 1
+    else
+      set error 1
+    end
+  end
+done
+* how'd we do?
+if %error% && !%any%
+  %send% %actor% You don't have the right ability to learn anything new from @%self%.
+  halt
+elseif !%any%
+  %send% %actor% There aren't any recipes you can learn from @%self%.
+  halt
+end
+* ok go ahead and teach them
+while %vnum_list%
+  * pluck first numbers out
+  set vnum %vnum_list.car%
+  set vnum_list %vnum_list.cdr%
+  if !%actor.learned(%vnum%)%
+    nop %actor.add_learned(%vnum%)%
+  end
+done
+* and report...
+%send% %actor% You study @%self% and learn: %name_list%
+%echoaround% %actor% ~%actor% studies @%self%.
+%purge% %self%
+~
+#10276
+Primeval: Initialize delayed despawner~
+0 n 100
+~
+set spawn_time %timestamp%
+remote spawn_time %self.id%
+~
+#10277
+Primeval: Delayed despawn~
+0 ab 10
+~
+if %self.var(spawn_time,0)% + 1800 < %timestamp%
+  %adventurecomplete%
+  %purge% %self%
+end
+~
+#10296
+Primeval Portal loot replacer~
+1 n 100
+~
+* list of vnums and size of the list: WARNING this line must not pass 255 characters
+set vnum_list 10268 10270 10272 10282 10266 10274 10287 10288 10289 10290 10276 10278 10291 10292 10293 10255 10280 10258 10294 10256 10297 10298 10299
+set list_size 23
+set mob %self.carried_by%
+* pick one at random
+eval pos %%random.%list_size%%%
+set vnum 0
+while %pos% > 0 && %vnum_list%
+  set vnum %vnum_list.car%
+  set vnum_list %vnum_list.cdr%
+  eval pos %pos% - 1
+done
+* ensure we found one
+if !%vnum%
+  %echo% [Portal to the Primeval] Error determining loot.
+  wait 1
+  %purge% %self%
+  halt
+end
+* load it
+if %mob%
+  %load% obj %vnum% %mob% inv
+  set loaded %mob.inventory%
+else
+  %load% obj %vnum% %self.room%
+  set loaded %self.room.contents%
+end
+* check it
+if !%loaded% || %loaded.vnum% != %vnum%
+  %echo% [Portal to the Primeval] Error loading loot.
+  wait 1
+  %purge% %self%
+  halt
+end
+* flags/binding
+if %loaded.is_flagged(BOP)%
+  nop %loaded.bind(%self%)%
+end
+if %mob% && %mob.is_npc%
+  * hard/group flags
+  if %mob.mob_flagged(HARD)% && !%loaded.is_flagged(HARD-DROP)%
+    nop %loaded.flag(HARD-DROP)%
+  end
+  if %mob.mob_flagged(GROUP)% && !%loaded.is_flagged(GROUP-DROP)%
+    nop %loaded.flag(GROUP-DROP)%
+  end
+  %scale% %loaded% %self.level%
+end
+wait 1
+%purge% %self%
 ~
 $

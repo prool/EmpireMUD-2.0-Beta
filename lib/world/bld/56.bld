@@ -60,8 +60,8 @@ M
 9195 5.00 c
 S
 #5603
-Forge~
-The Forge~
+Small Forge~
+A Small Forge~
 ~
 0 0 a c
 0 0 0 212
@@ -77,6 +77,11 @@ F
 hv
 M
 241 20.00 ce
+U
+1 5115
+U
+1 5108
+Z1 11
 S
 #5604
 Great Hall~
@@ -116,9 +121,9 @@ Kitchen~
 The Kitchen~
 ~
 0 0 aR m
-0 0 0 214
+0 0 0 -1
 C
-cook, retrieve, store~
+bake, cook, retrieve, store~
 D
    You are standing in the kitchen, a sweaty room where food is prepared and
 cooked. A large iron stove rests against the wall. It is the latest
@@ -126,7 +131,7 @@ innovation in cooking technology, replacing the open fire which has caused so
 many houses to burn to the ground.
 ~
 F
-G
+GL
 M
 9188 2.00 0
 M
@@ -204,9 +209,9 @@ A Magnificent Throne Room~
 0 0 0 -1
 D
    This is the castle throne room, the place where the rulers sit and address
-their subjects. The ceiling is high, so high that you wonder how it could
-even be built. The thrones themselves are set at the top of a small mountain
-of stairs, placing the king high over his subjects. The entire room is plated
+their subjects. The ceiling is high, so high that you wonder how it could even
+be built. The thrones themselves are set at the top of a small mountain of
+stairs, placing the monarch high over the subjects. The entire room is plated
 with magnificent armor and gold highlights.
 ~
 M
@@ -257,7 +262,7 @@ S
 Tunnel~
 A Winding Tunnel~
 ~
-0 0 ab d
+0 0 abgo d
 0 0 0 -1
 D
    The tunnel is earthen with tall logs supporting it, though not very well.
@@ -274,6 +279,7 @@ M
 9198 2.00 0
 M
 9199 2.00 0
+Z1 7
 S
 #5613
 Sky Bridge~
@@ -285,7 +291,7 @@ D
    A rope bridge is all that supports you as you pass from tree to tree.
 Despite your best efforts not to, you look down and are suddenly frightened by
 the great drop below. Fortunately, the superior construction prevails and
-you're saved the fall by the strong bridge.
+you're saved from the fall by the strong bridge.
 ~
 M
 9196 2.00 0
@@ -315,11 +321,13 @@ the water. This is a place of cleanliness, so attendants regularly add fresh
 water to the bathing pools.
 ~
 F
-c
+F
 M
 236 20.00 ce
 M
 236 20.00 ce
+T 5162
+T 9808
 S
 #5615
 Shield Racks~
@@ -381,9 +389,11 @@ strange aroma and color. There are shelves of multi-color potions along the
 walls, each one carefully labeled.
 ~
 F
-aG
+aGN
 M
 241 20.00 ce
+U
+1 5130
 S
 #5619
 Larder~
@@ -437,6 +447,7 @@ M
 9198 2.00 0
 M
 9199 2.00 0
+Z1 7
 S
 #5621
 Trophy Room~
@@ -455,5 +466,34 @@ M
 9190 2.00 0
 M
 9198 2.00 0
+U
+1 5193
+S
+#5622
+Root Cellar~
+The Root Cellar~
+~
+0 0 a m
+0 0 0 -1
+C
+inventory, retrieve, store~
+D
+   It's chilly down in the root cellar, which has been carved from the earth
+and lined with shelves and bins to store vegetables in all seasons. There's a
+faintly musty smell, but everything here seems to be in good condition.
+~
+M
+9188 2.00 0
+M
+9189 2.00 0
+M
+9190 2.00 0
+M
+9198 2.00 0
+M
+9199 2.00 0
+U
+1 5215
+Z1 2
 S
 $

@@ -2,7 +2,7 @@
 *   File: modify.c                                        EmpireMUD 2.0b5 *
 *  Usage: Run-time modification of game variables                         *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -22,10 +22,19 @@
 #include "boards.h"
 #include "olc.h"
 
+/**
+* Contents:
+*   Helpers
+*   Paginator
+*   Page Display System
+*   Editor
+*   Script Formatter
+*   Text Formatter
+*   String Replacer
+*   Commands
+*/
 
-/*
- * Action modes for parse_action().
- */
+// PARSE_x: Action modes for parse_action().
 #define PARSE_FORMAT		0
 #define PARSE_REPLACE		1
 #define PARSE_HELP			2
@@ -36,26 +45,22 @@
 #define PARSE_EDIT			7
 #define PARSE_LIST_COLOR	8
 
-/*
- * Defines for the action variable.
- */
+// STRINGADD_x: Defines for the action variable.
 #define STRINGADD_OK		0	/* Just keep adding text.				*/
 #define STRINGADD_SAVE		1	/* Save current text.					*/
 #define STRINGADD_ABORT		2	/* Abort edit, restore old text.		*/
 #define STRINGADD_ACTION	4	/* Editor action, don't append \r\n.	*/
 
-#define FORMAT_INDENT	BIT(0)
-
-
-extern char *show_color_codes(char *string);
-void show_string(descriptor_data *d, char *input);
 
 /* local functions */
-void smash_tilde(char *str);
-char *next_page(char *str, descriptor_data *desc);
-int count_pages(char *str, descriptor_data *desc);
-void paginate_string(char *str, descriptor_data *d);
+int format_script(descriptor_data *d);
+int improved_editor_execute(descriptor_data *d, char *str);
+void parse_action(int command, char *string, descriptor_data *d);
+int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size);
 
+
+ //////////////////////////////////////////////////////////////////////////////
+//// HELPERS /////////////////////////////////////////////////////////////////
 
 /* ************************************************************************
 *  modification of malloc'ed strings                                      *
@@ -126,9 +131,13 @@ void start_string_editor(descriptor_data *d, char *prompt, char **writeto, size_
 	d->straight_to_editor = TRUE;
 	d->mail_to = 0;
 	d->notes_id = 0;
+	d->island_desc_id = NOTHING;
+	d->save_room_id = NOWHERE;
+	d->save_room_pack_id = NOWHERE;
 	d->save_empire = NOTHING;
 	d->file_storage = NULL;
 	d->allow_null = allow_null;
+	d->save_config = NULL;
 	
 	if (STATE(d) == CON_PLAYING && !d->straight_to_editor) {
 		msg_to_desc(d, "&cEdit %s: (, to add; ,/s to save; ,/h for help)&0\r\n", prompt);
@@ -155,10 +164,7 @@ void start_string_editor(descriptor_data *d, char *prompt, char **writeto, size_
 
 /* Add user input to the 'current' string (as defined by d->str) */
 void string_add(descriptor_data *d, char *str) {
-	void check_delayed_load(char_data *ch);
-	extern char *stripcr(char *dest, const char *src);
-	extern int improved_editor_execute(descriptor_data *d, char *str);
-	
+	char *temp;
 	player_index_data *index;
 	struct mail_data *mail;
 	account_data *acct;
@@ -241,6 +247,14 @@ void string_add(descriptor_data *d, char *str) {
 	if (action) {
 		if (STATE(d) == CON_PLAYING && PLR_FLAGGED(d->character, PLR_MAILING)) {
 			if (action == STRINGADD_SAVE && *d->str) {
+				if (config_get_string("mail_send_message")) {
+					SEND_TO_Q(config_get_string("mail_send_message"), d);
+					SEND_TO_Q("\r\n", d);
+				}
+				else {	// default backup message
+					SEND_TO_Q("You finish your letter and post it.\r\n", d);
+				}
+				
 				if ((index = find_player_index_by_idnum(d->mail_to)) && (recip = find_or_load_player(index->name, &is_file))) {
 					check_delayed_load(recip);	// need to delay-load them to save mail
 					
@@ -251,15 +265,15 @@ void string_add(descriptor_data *d, char *str) {
 					mail->body = str_dup(*d->str);
 					
 					// put it on the pile
-					mail->next = GET_MAIL_PENDING(recip);
-					GET_MAIL_PENDING(recip) = mail;
+					LL_PREPEND(GET_MAIL_PENDING(recip), mail);
 					
 					if (is_file) {
 						store_loaded_char(recip);
 					}
+					else {
+						msg_to_char(recip, "\tr%s\t0\r\n", config_get_string("mail_available_message") ? config_get_string("mail_available_message") : "You have mail waiting for you.");
+					}
 				}
-				
-				SEND_TO_Q("You tie your message to a pigeon and it flies away!\r\n", d);
 			}
 			else {
 				SEND_TO_Q("Mail aborted.\r\n", d);
@@ -273,6 +287,13 @@ void string_add(descriptor_data *d, char *str) {
 			empire_data *emp = real_empire(d->save_empire);
 			if (emp) {
 				EMPIRE_NEEDS_SAVE(emp) = TRUE;
+				
+				if (d->str == &EMPIRE_MOTD(emp)) {
+					log_to_empire(emp, ELOG_ADMIN, "%s has changed the empire MOTD", PERS(d->character, d->character, TRUE));
+				}
+				else if (d->str == &EMPIRE_DESCRIPTION(emp)) {
+					log_to_empire(emp, ELOG_ADMIN, "%s has changed the empire description", PERS(d->character, d->character, TRUE));
+				}
 				
 				if (emp != GET_LOYALTY(d->character)) {
 					syslog(SYS_GC, GET_INVIS_LEV(d->character), TRUE, "ABUSE: %s has edited text for %s", GET_NAME(d->character), EMPIRE_NAME(emp));
@@ -304,14 +325,49 @@ void string_add(descriptor_data *d, char *str) {
 			
 			act("$n stops editing notes.", TRUE, d->character, FALSE, FALSE, TO_ROOM);
 		}
+		else if (d->island_desc_id != NOTHING) {
+			if (action != STRINGADD_ABORT) {
+				struct island_info *isle = get_island(d->island_desc_id, TRUE);
+				syslog(SYS_GC, GET_INVIS_LEV(d->character), TRUE, "GC: %s has edited the description for island [%d] %s", GET_NAME(d->character), isle->id, isle->name);
+				save_island_table();
+				SEND_TO_Q("Island description saved.\r\n", d);
+			}
+			else {
+				SEND_TO_Q("Edit aborted.\r\n", d);
+			}
+		}
+		else if (d->save_room_id != NOWHERE) {
+			if (action != STRINGADD_ABORT) {
+				request_world_save(d->save_room_id, WSAVE_ROOM);
+				SEND_TO_Q("Description saved.\r\n", d);
+				if (d->character && IN_ROOM(d->character)) {
+					act("$n updates the room.", FALSE, d->character, NULL, NULL, TO_ROOM);
+				}
+			}
+			else {
+				SEND_TO_Q("Edit aborted.\r\n", d);
+			}
+		}
+		else if (d->save_room_pack_id != NOWHERE) {
+			if (action != STRINGADD_ABORT) {
+				request_world_save(d->save_room_pack_id, WSAVE_OBJS_AND_VEHS);
+				SEND_TO_Q("Description saved.\r\n", d);
+			}
+			else {
+				SEND_TO_Q("Edit aborted.\r\n", d);
+			}
+		}
 		else if (d->file_storage) {
 			if (action != STRINGADD_ABORT) {
 				if ((fl = fopen((char *)d->file_storage, "w"))){
-					if (*d->str)
-						fputs(stripcr(buf1, *d->str), fl);
+					if (*d->str) {
+						CREATE(temp, char, strlen(*d->str) + 1);
+						fputs(stripcr(temp, *d->str), fl);
+						free(temp);
+					}
 					fclose(fl);
 
-					syslog(SYS_GC, GET_INVIS_LEV(d->character), TRUE, "GC: %s saves '%s'.", GET_NAME(d->character), d->file_storage);
+					syslog(SYS_GC, GET_INVIS_LEV(d->character), TRUE, "GC: %s saves '%s'", GET_NAME(d->character), d->file_storage);
 					SEND_TO_Q("Saved.\r\n", d);
 				}
 			}
@@ -325,6 +381,11 @@ void string_add(descriptor_data *d, char *str) {
 			}
 			d->file_storage = NULL;
 		}
+		else if (d->save_config) {
+			save_config_system();
+			syslog(SYS_CONFIG, GET_INVIS_LEV(d->character), TRUE, "CONFIG: %s edited the text for %s", GET_NAME(d->character), d->save_config->key);
+			msg_to_char(d->character, "Text for %s saved.\r\n", d->save_config->key);
+		}
 		else {
 			if (action != STRINGADD_ABORT) {
 				SEND_TO_Q("Text editor saved.\r\n", d);
@@ -337,6 +398,9 @@ void string_add(descriptor_data *d, char *str) {
 		d->str = NULL;
 		d->mail_to = 0;
 		d->notes_id = 0;
+		d->island_desc_id = NOTHING;
+		d->save_room_id = NOWHERE;
+		d->save_room_pack_id = NOWHERE;
 		d->max_str = 0;
 		d->save_empire = NOTHING;
 		if (d->file_storage) {
@@ -351,6 +415,9 @@ void string_add(descriptor_data *d, char *str) {
 		strcat(*d->str, "\r\n");
 }
 
+
+ //////////////////////////////////////////////////////////////////////////////
+//// PAGINATOR ///////////////////////////////////////////////////////////////
 
 /*********************************************************************
 * New Pagination Code
@@ -376,6 +443,14 @@ char *next_page(char *str, descriptor_data *desc) {
 	
 	length = (desc && desc->pProtocol->ScreenHeight > 0) ? (desc->pProtocol->ScreenHeight - 2) : PAGE_LENGTH;
 	width = (desc && desc->pProtocol->ScreenWidth > 0) ? desc->pProtocol->ScreenWidth : PAGE_WIDTH;
+	
+	// safety checking: this misbehaves badly if those numbers are negative
+	if (length < 1) {
+		length = PAGE_LENGTH;
+	}
+	if (width < 1) {
+		width = PAGE_WIDTH;
+	}
 
 	for (;; ++str) {
 		/* If end of string, return NULL. */
@@ -394,10 +469,10 @@ char *next_page(char *str, descriptor_data *desc) {
 		else if (*str == 'm' && spec_code)
 			spec_code = FALSE;
 		
-		// skip & colorcodes
-		else if (*str == '&') {
+		// skip & and \t colorcodes
+		else if (*str == COLOUR_CHAR || *str == '\t') {
 			++str;
-			if (*str == '&') {	// cause it to print a & in case of &&
+			if (*str == COLOUR_CHAR) {	// cause it to print a & in case of &&
 				--str;
 			}
 		}
@@ -491,7 +566,7 @@ void page_string(descriptor_data *d, char *str, int keep_internal) {
 
 /* The call that displays the next page. */
 void show_string(descriptor_data *d, char *input) {
-	char buffer[MAX_STRING_LENGTH];
+	char buffer[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
 	int diff;
 
 	any_one_arg(input, buf);
@@ -560,6 +635,579 @@ void show_string(descriptor_data *d, char *input) {
 /* End of code by Michael Buselli */
 
 
+ //////////////////////////////////////////////////////////////////////////////
+//// PAGE DISPLAY SYSTEM /////////////////////////////////////////////////////
+
+// Usage: Build the player's page_display with the various build_page_display*
+// functions and then finalize it and send it to the player by calling
+// send_page_display(ch), which may or may not use the paginator depending on
+// the text length and settings. NPCs and dc'd players are ignored
+// automatically.
+
+/**
+* Frees a page_display and any text inside.
+*
+* @param struct page_display *pd The thing to free.
+*/
+void free_page_display_one(struct page_display *pd) {
+	if (pd) {
+		if (pd->text) {
+			free(pd->text);
+		}
+		free(pd);
+	}
+}
+
+
+/**
+* Frees a whole page_display list.
+*
+* @param struct page_display **list The list of lines to free.
+*/
+void free_page_display(struct page_display **list) {
+	struct page_display *pd, *next;
+	
+	if (list) {
+		DL_FOREACH_SAFE(*list, pd, next) {
+			DL_DELETE(*list, pd);
+			free_page_display_one(pd);
+		}
+	}
+}
+
+
+/**
+* Clears a player's page_display without sending it.
+*
+* @param const char_data *ch The player.
+*/
+void clear_page_display(const char_data *ch) {
+	if (ch && ch->desc) {
+		free_page_display(&ch->desc->page_lines);
+	}
+}
+
+
+/**
+* Ensures nothing is left in the page_displays buffers on all connected
+* descriptors. These should have been flushed by either send_page_display() or
+* free_page_display() by the function that used them.
+*/
+void clear_leftover_page_displays(void) {
+	descriptor_data *desc;
+	
+	LL_FOREACH(descriptor_list, desc) {
+		if (desc && desc->page_lines) {
+			log("SYSERR: %s has leftover page_display lines starting with: %s", (desc->character ? GET_NAME(desc->character) : "Unknown player"), NULLSAFE(desc->page_lines->text));
+			free_page_display(&desc->page_lines);
+		}
+	}
+}
+
+
+/**
+* Determines how wide a column should be, based on character preferences and
+* number of columns requested.
+*
+* @param const char_data *ch The player.
+* @param int cols How many columns will be shown.
+* @return int The character width of each column.
+*/
+int page_display_column_width(const char_data *ch, int cols) {
+	int width;
+	
+	// detect screen width
+	if (!ch || !ch->desc || PRF_FLAGGED(ch, PRF_SCREEN_READER)) {
+		width = 80;	// default
+	}
+	else {
+		width = ch->desc->pProtocol->ScreenWidth;
+	}
+	
+	// constrain width
+	width = MIN(width, 101);
+	if (width < 1) {
+		// that can't be right; return to default
+		width = 80;
+	}
+	
+	// safety
+	cols = MAX(1, cols);
+	
+	// calculate width
+	return (width - 1) / cols;
+}
+
+
+/**
+* Adds a new line to the end of a player's page_display. Will trim trailing
+* \r\n (crlf).
+*
+* @param const char_data *ch The person to add the display line to.
+* @param const char *fmt, ... va_arg format for the line to add.
+* @return struct page_display* A pointer to the new line, if it was added. May return NULL if it failed to add.
+*/
+struct page_display *build_page_display(const char_data *ch, const char *fmt, ...) {
+	char text[MAX_STRING_LENGTH];
+	va_list tArgList;
+	struct page_display *pd;
+	
+	if (!ch || !ch->desc || !fmt) {
+		return NULL;
+	}
+	
+	CREATE(pd, struct page_display, 1);
+	
+	va_start(tArgList, fmt);
+	pd->length = vsprintf(text, fmt, tArgList);
+	va_end(tArgList);
+	
+	// check trailing crlf
+	while (pd->length > 0 && (text[pd->length-1] == '\r' || text[pd->length-1] == '\n')) {
+		text[--pd->length] = '\0';
+	}
+	
+	if (pd->length >= 0) {
+		pd->text = strdup(text);
+		DL_APPEND(ch->desc->page_lines, pd);
+	}
+	else {
+		// nevermind
+		free_page_display_one(pd);
+		pd = NULL;
+	}
+	
+	return pd;
+}
+
+
+/**
+* Adds a new line to the end of a player's page_display. Will trim trailing
+* \r\n (crlf).
+*
+* This is intended for displays that will have multiple columns. Any sequential
+* entries with the same column count will attempt to display in columns.
+*
+* @param const char_data *ch The person to add the display line to.
+* @param int cols The number of columns for the display (2, 3, etc).
+* @param bool strict_cols If TRUE, the string may be truncated.
+* @param const char *fmt, ... va_arg format for the line to add.
+* @return struct page_display* A pointer to the new line, if it was added. May return NULL if it failed to add.
+*/
+struct page_display *build_page_display_col(const char_data *ch, int cols, bool strict_cols, const char *fmt, ...) {
+	char text[MAX_STRING_LENGTH];
+	int max;
+	va_list tArgList;
+	struct page_display *pd;
+	
+	if (!ch || !ch->desc || !fmt) {
+		return NULL;
+	}
+	
+	CREATE(pd, struct page_display, 1);
+	
+	va_start(tArgList, fmt);
+	pd->length = vsprintf(text, fmt, tArgList);
+	va_end(tArgList);
+	
+	// check trailing crlf
+	while (pd->length > 0 && (text[pd->length-1] == '\r' || text[pd->length-1] == '\n')) {
+		text[--pd->length] = '\0';
+	}
+	
+	// enforce strict cols
+	if (strict_cols && pd->length > (max = page_display_column_width(ch, cols))) {
+		pd->length = max + color_code_length(text);
+		text[pd->length - 1] = '\0';
+	}
+	
+	if (pd->length >= 0) {
+		pd->cols = cols;
+		pd->text = strdup(text);
+		DL_APPEND(ch->desc->page_lines, pd);
+	}
+	else {
+		// nevermind
+		free_page_display_one(pd);
+		pd = NULL;
+	}
+	
+	return pd;
+}
+
+
+/**
+* Adds a new line to the end of a player's page_display. Will trim trailing
+* \r\n (crlf).
+*
+* @param const char_data *ch The person to add the display line to.
+* @param const char *str The string to add as the new line (will be copied).
+* @return struct page_display* A pointer to the new line, if it was added. May return NULL if it failed to add.
+*/
+struct page_display *build_page_display_str(const char_data *ch, const char *str) {
+	struct page_display *pd;
+	
+	if (!ch || !ch->desc || !str) {
+		return NULL;
+	}
+	
+	CREATE(pd, struct page_display, 1);
+	
+	pd->length = strlen(str);
+	pd->text = strdup(str);
+	DL_APPEND(ch->desc->page_lines, pd);
+	
+	// check trailing crlf
+	while (pd->length > 0 && (pd->text[pd->length-1] == '\r' || pd->text[pd->length-1] == '\n')) {
+		pd->text[--pd->length] = '\0';
+	}
+	
+	return pd;
+}
+
+
+/**
+* Adds a new line to the end of a player's page_display. Will trim trailing
+* \r\n (crlf).
+*
+* This is intended for displays that will have multiple columns. Any sequential
+* entries with the same column count will attempt to display in columns.
+*
+* @param const char_data *ch The person to add the display line to.
+* @param int cols The number of columns for the display (2, 3, etc).
+* @param bool strict_cols If TRUE, the string may be truncated.
+* @param const char *str The string to add as the new line (will be copied).
+* @return struct page_display* A pointer to the new line, if it was added. May return NULL if it failed to add.
+*/
+struct page_display *build_page_display_col_str(const char_data *ch, int cols, bool strict_cols, const char *str) {
+	int max;
+	struct page_display *pd;
+	
+	if (!ch || !ch->desc || !str) {
+		return NULL;
+	}
+	
+	CREATE(pd, struct page_display, 1);
+	
+	pd->length = strlen(str);
+	pd->text = strdup(str);
+	pd->cols = cols;
+	DL_APPEND(ch->desc->page_lines, pd);
+	
+	// check trailing crlf
+	while (pd->length > 0 && (pd->text[pd->length-1] == '\r' || pd->text[pd->length-1] == '\n')) {
+		pd->text[--pd->length] = '\0';
+	}
+	
+	// enforce strict cols
+	if (strict_cols && pd->length > (max = page_display_column_width(ch, cols))) {
+		pd->length = max + color_code_length(pd->text);
+		pd->text[pd->length - 1] = '\0';
+	}
+	
+	return pd;
+}
+
+
+/**
+* Adds a new line to a player's page_display -- at the BEGINNING.
+* Will trim trailing \r\n (crlf).
+*
+* @param const char_data *ch The person to add the display line to (at the beginning).
+* @param const char *str The string to add as the new line (will be copied).
+* @return struct page_display* A pointer to the new line, if it was added. May return NULL if it failed to add.
+*/
+struct page_display *build_page_display_prepend(const char_data *ch, const char *str) {
+	struct page_display *pd;
+	
+	if (!ch || !ch->desc || !str) {
+		return NULL;
+	}
+	
+	CREATE(pd, struct page_display, 1);
+	
+	pd->length = strlen(str);
+	pd->text = strdup(str);
+	DL_PREPEND(ch->desc->page_lines, pd);
+	
+	// check trailing crlf
+	while (pd->length > 0 && (pd->text[pd->length-1] == '\r' || pd->text[pd->length-1] == '\n')) {
+		pd->text[--pd->length] = '\0';
+	}
+	
+	return pd;
+}
+
+
+/**
+* Appends text to an existing page_display line.
+* Will trim trailing \r\n (crlf).
+*
+* Be cautious using this on lines that are part of column displays.
+*
+* @param struct page_display *line The line to append to.
+* @param const char *fmt, ... va_arg format for the text to add.
+*/
+void append_page_display_line(struct page_display *line, const char *fmt, ...) {
+	char text[MAX_STRING_LENGTH];
+	char *temp;
+	int len;
+	va_list tArgList;
+	
+	if (!line || !fmt) {
+		return;
+	}
+	
+	va_start(tArgList, fmt);
+	len = vsprintf(text, fmt, tArgList);
+	va_end(tArgList);
+	
+	CREATE(temp, char, line->length + len + 1);
+	strcpy(temp, NULLSAFE(line->text));
+	strcat(temp, text);
+	
+	line->length += len;
+	
+	if (line->text) {
+		free(line->text);
+	}
+	line->text = temp;
+	
+	// check trailing crlf
+	while (line->length > 0 && (line->text[line->length-1] == '\r' || line->text[line->length-1] == '\n')) {
+		line->text[--line->length] = '\0';
+	}
+}
+
+
+/**
+* Builds a page_display list into a string. This allocates memory for the
+* string so you must free it when you're done. The original list is left alone.
+*
+* @param const struct page_display *list The list of page_display lines to convert.
+* @param const char_data *ch Optional: The viewier. If NULL, default settings will be used for building the string.
+* @param bool add_crlfs If TRUE, adds line breaks between page_display lines. If FALSE, doesn't.
+* @return char* An allocated string representing the full page. (Must be free'd when done.)
+*/
+char *get_page_display_as_string(const struct page_display *list, const char_data *ch, bool add_crlfs) {
+	bool use_cols;
+	char *output, *ptr;
+	int clen, iter, needs_cols;
+	int last_col = 0, fixed_width = 0, col_count = 0;
+	size_t size, one;
+	const struct page_display *pd;
+	
+	if (!list) {
+		strdup("");	// shortcut
+	}
+	
+	use_cols = (ch && PRF_FLAGGED(ch, PRF_SCREEN_READER)) ? FALSE : TRUE;
+	
+	// compute size
+	size = 0;
+	DL_FOREACH(list, pd) {
+		if (pd->cols > 1 && use_cols) {
+			one = page_display_column_width(ch, pd->cols);
+			clen = color_code_length(pd->text);
+			if (one <= 0) {
+				one = pd->length + clen;
+			}
+			else if (pd->length - clen > one) {
+				// ensure room for wide columns
+				one *= ceil((double)(pd->length - clen) / (double) one);
+				one += clen;
+			}
+			else {
+				one = MAX(one, pd->length) + clen;
+			}
+		}
+		else {
+			one = pd->length;
+		}
+		
+		size += one + ((add_crlfs || pd->cols > 1) ? 2 : 0);
+	}
+	
+	// allocate
+	CREATE(output, char, size + 1);
+	*output = '\0';
+	
+	// build string
+	DL_FOREACH(list, pd) {
+		if (pd->cols <= 1 || !use_cols) {
+			// non-column display
+			if (last_col != 0 && col_count > 0) {
+				strcat(output, "\r\n");
+				col_count = 0;
+			}
+			last_col = 0;
+			strcat(output, NULLSAFE(pd->text));
+			if (add_crlfs) {
+				strcat(output, "\r\n");
+			}
+		}
+		else {
+			// columned display:
+			
+			// new size? column setup
+			if (pd->cols != last_col) {
+				if (col_count > 0) {
+					// flush previous columns
+					strcat(output, "\r\n");
+				}
+				
+				last_col = pd->cols;
+				fixed_width = page_display_column_width(ch, pd->cols);
+				col_count = 0;
+			}
+			
+			if (fixed_width > 0) {
+				// check how width this entry is
+				clen = color_code_length(pd->text);
+				needs_cols = ceil((double) (pd->length - clen) / fixed_width);
+				
+				// check fit
+				if (needs_cols + col_count > pd->cols) {
+					// doesn't fit; newline
+					strcat(output, "\r\n");
+					col_count = 0;
+				}
+				
+				// mark how many columns we used
+				col_count += needs_cols;
+				
+				// append and pad (only pad if it's not the last col
+				strcat(output, pd->text);
+				if (col_count < pd->cols) {
+					ptr = output + strlen(output);
+					for (iter = pd->length; iter < (fixed_width * needs_cols) + clen; ++iter) {
+						*(ptr++) = ' ';
+					}
+					*(ptr++) = '\0';
+				}
+				
+				// cap off columns if needed
+				if (col_count >= pd->cols) {
+					strcat(output, "\r\n");
+					col_count = 0;
+				}
+			}
+			else {
+				// don't bother
+				strcat(output, NULLSAFE(pd->text));
+				strcat(output, "\r\n");
+			}
+		}
+	}
+	
+	// check trailing columns?
+	if (last_col != 0 && col_count > 0) {
+		strcat(output, "\r\n");
+	}
+	
+	return output;
+}
+
+
+/**
+* Builds the final display for a pending player's page_display and sends it to
+* the player. By default, it sends the string, unformatted, to the paginator.
+*
+* Options:
+*  PD_FREE_DISPLAY_AFTER - will free the player's page_display after sending
+*  PD_NO_PAGINATION - skips the paginator
+*  PD_FORMAT_NORMAL - will format without indent
+*  PD_FORMAT_INDENT - will format with indent
+*  PD_FORMAT_WIDE - will use the wide formatter
+*
+* @param const char_data *ch The player to show it to.
+* @param bitvector_t options Any PD_ flags.
+*/
+void send_page_display_as(const char_data *ch, bitvector_t options) {
+	bitvector_t opts;
+	char *str;
+	
+	if (!ch || !ch->desc || !ch->desc->page_lines) {
+		return;	// nobody to page it to
+	}
+	
+	// build string version
+	str = get_page_display_as_string(ch->desc->page_lines, ch, IS_SET(options, PD_FORMAT_NORMAL | PD_FORMAT_INDENT) ? FALSE : TRUE);
+	
+	// optional formatting
+	if (IS_SET(options, PD_FORMAT_NORMAL | PD_FORMAT_INDENT | PD_FORMAT_WIDE)) {
+		opts = NOBITS;
+		opts |= (IS_SET(options, PD_FORMAT_INDENT) ? FORMAT_INDENT : NOBITS);
+		opts |= (IS_SET(options, PD_FORMAT_WIDE) ? FORMAT_WIDE : NOBITS);
+		format_text(&str, opts, ch->desc, MAX_STRING_LENGTH);
+	}
+	
+	// send (via the requested method)
+	if (IS_SET(options, PD_NO_PAGINATION)) {
+		send_to_char(str, ch);
+	}
+	else {
+		page_string(ch->desc, str, TRUE);
+	}
+	
+	// free string version
+	free(str);
+	
+	// free page_display lines (by request)
+	if (IS_SET(options, PD_FREE_DISPLAY_AFTER)) {
+		free_page_display(&ch->desc->page_lines);
+	}
+}
+
+
+/**
+* Trims blank lines from the start and end of ch's buffered page_display.
+*
+* @param const char_data *ch The person with the page_display to trim.
+* @return bool TRUE if anything is left in the page_display, FALSE if it's empty now.
+*/
+bool trim_page_display(const char_data *ch) {
+	struct page_display *pd, *next;
+	
+	if (ch && ch->desc) {
+		// trim start
+		DL_FOREACH_SAFE(ch->desc->page_lines, pd, next) {
+			if (!pd->text || !*pd->text || color_code_length(pd->text) == strlen(pd->text)) {
+				// contains nothing visible
+				DL_DELETE(ch->desc->page_lines, pd);
+				free_page_display_one(pd);
+			}
+			else {
+				// found a non-empty entry at start
+				break;
+			}
+		}
+		
+		// trim end (iterate backwards)
+		for (pd = ch->desc->page_lines ? ch->desc->page_lines->prev : NULL; pd; pd = next) {
+			next = (pd == ch->desc->page_lines ? NULL : pd->prev);
+			
+			if (!pd->text || !*pd->text || color_code_length(pd->text) == strlen(pd->text)) {
+				// contains nothing visible
+				DL_DELETE(ch->desc->page_lines, pd);
+				free_page_display_one(pd);
+			}
+			else {
+				// found a non-empty entry at end
+				break;
+			}
+		}
+		
+		return ch->desc->page_lines ? TRUE : FALSE;
+	}
+	
+	return FALSE;
+}
+
+
+ //////////////////////////////////////////////////////////////////////////////
+//// EDITOR //////////////////////////////////////////////////////////////////
+
 /************************************************************************
 * The following modify code was shipped with OasisOLC.  Here are the    *
 * credits from the patch I borrowed it from.                            *
@@ -571,7 +1219,6 @@ void show_string(descriptor_data *d, char *input) {
 
 
 int improved_editor_execute(descriptor_data *d, char *str) {
-	void parse_action(int command, char *string, descriptor_data *d);
 	char actions[MAX_INPUT_LENGTH];
 
 	if (*str != '/')
@@ -658,11 +1305,7 @@ int improved_editor_execute(descriptor_data *d, char *str) {
 
 
 void parse_action(int command, char *string, descriptor_data *d) {
-	void format_text(char **ptr_string, int mode, descriptor_data *d, unsigned int maxlen);
-	extern int format_script(descriptor_data *d);
-	extern int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size);
-	
-	char buf[MAX_STRING_LENGTH * 3];	// should be big enough
+	char buf[MAX_STRING_LENGTH * 3], buf2[MAX_STRING_LENGTH * 3];	// should be big enough
 	int indent = 0, rep_all = 0, flags = 0, replaced, i, line_low, line_high, j = 0;
 	unsigned int total_len;
 	char *s, *t, temp;
@@ -677,6 +1320,7 @@ void parse_action(int command, char *string, descriptor_data *d) {
 				"/e# <text> - changes line # to <text>\r\n"
 				"/f         - formats text\r\n"
 				"/fi        - formats text and indents\r\n"
+				"/fw        - formats wide (may combine with indent)\r\n"
 				"/i# <text> - inserts <text> before line #\r\n"
 				"/l         - lists the buffer\r\n"
 				"/m         - lists the buffer with color\r\n"
@@ -695,11 +1339,16 @@ void parse_action(int command, char *string, descriptor_data *d) {
 				msg_to_desc(d, "Script %sformatted.\r\n", format_script(d) ? "": "not ");
 				return;
 			}
-
+			
+			// check for /fw, /fi, or /fwi
 			while (isalpha(string[j]) && j < 2) {
-				if (string[j++] == 'i' && !indent) {
+				if (string[j++] == 'i') {
 					indent = TRUE;
 					flags |= FORMAT_INDENT;
+				}
+				else if (string[j] == 'w') {
+					indent = TRUE;
+					flags |= FORMAT_WIDE;
 				}
 			}
 			format_text(d->str, flags, d, d->max_str);
@@ -707,10 +1356,18 @@ void parse_action(int command, char *string, descriptor_data *d) {
 			SEND_TO_Q(buf, d);
 			break;
 		case PARSE_REPLACE:
-			while (isalpha(string[j]) && j < 2)
-				if (string[j++] == 'a' && !indent)
+			// check for /ra
+			while (isalpha(string[j]) && j < 2) {
+				if (string[j++] == 'a') {
 					rep_all = 1;
-			if ((s = strtok(string, "'")) == NULL) {
+				}
+			}
+			
+			if (!*d->str) {
+				SEND_TO_Q("Nothing to replace.\r\n", d);
+				return;
+			}
+			else if ((s = strtok(string, "'")) == NULL) {
 				SEND_TO_Q("Invalid format.\r\n", d);
 				return;
 			}
@@ -1038,15 +1695,104 @@ void parse_action(int command, char *string, descriptor_data *d) {
 }
 
 
+ //////////////////////////////////////////////////////////////////////////////
+//// SCRIPT FORMATTER ////////////////////////////////////////////////////////
+
+// SCR_FORM_IN_x: Used for formatting scripts
+#define SCR_FORM_IN_IF  0
+#define SCR_FORM_IN_SWITCH  1
+#define SCR_FORM_IN_WHILE  2
+#define SCR_FORM_IN_CASE  3
+
+// formatting helper: handles nested structures
+struct script_format_stack {
+	int type;
+	struct script_format_stack *next;
+};
+
+
+/**
+* Helper for format_script.
+*
+* @param struct script_format_stack **stack A pointer to the linked list to free.
+*/
+void free_script_format_stack(struct script_format_stack **stack) {
+	struct script_format_stack *entry;
+	
+	if (stack) {
+		while ((entry = *stack)) {
+			*stack = entry->next;
+			free(entry);
+		}
+	}
+}
+
+
+/**
+* Helper for format_script.
+*
+* @param struct script_format_stack **stack A pointer to the linked list.
+* @param int type The type to put on the top of the stack.
+*/
+void add_script_format_stack(struct script_format_stack **stack, int type) {
+	struct script_format_stack *entry;
+	
+	if (stack) {
+		CREATE(entry, struct script_format_stack, 1);
+		entry->type = type;
+		LL_PREPEND(*stack, entry);
+	}
+}
+
+
+/**
+* Helper for format_script.
+*
+* @param struct script_format_stack **stack A pointer to the linked list. The first element will be removed and freed.
+*/
+void pop_script_format_stack(struct script_format_stack **stack) {
+	struct script_format_stack *entry;
+	
+	if (stack && (entry = *stack)) {
+		*stack = entry->next;
+		free(entry);
+	}
+}
+
+
+/**
+* Helper for format_script.
+*
+* @param struct script_format_stack *stack The linked list.
+* @param int type The type look for in the list.
+* @return int Depth 'type' was found at (first entry is 1), or 0 if not found.
+*/
+int find_script_format_stack(struct script_format_stack *stack, int type) {
+	struct script_format_stack *entry;
+	int count = 0;
+	
+	LL_FOREACH(stack, entry) {
+		++count;
+		if (entry->type == type) {
+			return count;
+		}
+	}
+	
+	return 0;	// not found
+}
+
+
 int format_script(struct descriptor_data *d) {
 	char nsc[MAX_CMD_LENGTH], *t, line[READ_SIZE];
 	char *sc;
 	size_t len = 0, nlen = 0, llen = 0;
-	int indent = 0, indent_next = FALSE, found_case = FALSE, i, line_num = 0;
-
-	if (!d->str || !*d->str)
+	int indent = 0, indent_next = FALSE, iter, line_num = 0;
+	struct script_format_stack *stack = NULL;
+	
+	if (!d->str || !*d->str) {
 		return FALSE;
-
+	}
+	
 	sc = strdup(*d->str); /* we work on a copy, because of strtok() */
 	t = strtok(sc, "\n\r");
 	*nsc = '\0';
@@ -1054,59 +1800,95 @@ int format_script(struct descriptor_data *d) {
 	while (t) {
 		line_num++;
 		skip_spaces(&t);
-		if (!strncasecmp(t, "if ", 3) || !strncasecmp(t, "switch ", 7)) {
+		if (!strncasecmp(t, "if ", 3)) {
 			indent_next = TRUE;
+			add_script_format_stack(&stack, SCR_FORM_IN_IF);
+		}
+		else if (!strncasecmp(t, "switch ", 7)) {
+			indent_next = TRUE;
+			add_script_format_stack(&stack, SCR_FORM_IN_SWITCH);
 		}
 		else if (!strncasecmp(t, "while ", 6)) {
-			found_case = TRUE;  /* so you can 'break' a loop without complains */
 			indent_next = TRUE;
+			add_script_format_stack(&stack, SCR_FORM_IN_WHILE);
 		}
-		else if (!strncasecmp(t, "end", 3) || !strncasecmp(t, "done", 4)) {
-			if (!indent) {
-				msg_to_desc(d, "Unmatched 'end' or 'done' (line %d)!\r\n", line_num);
+		else if (!strncasecmp(t, "done", 4)) {
+			if (!indent || (stack->type != SCR_FORM_IN_SWITCH && stack->type != SCR_FORM_IN_WHILE)) {
+				msg_to_desc(d, "Unmatched 'done' (line %d)!\r\n", line_num);
 				free(sc);
+				free_script_format_stack(&stack);
 				return FALSE;
 			}
-			indent--;
-			indent_next = FALSE;
+			--indent;
+			pop_script_format_stack(&stack);	// remove switch or while
+		}
+		else if (!strncasecmp(t, "end", 3)) {
+			if (!indent || stack->type != SCR_FORM_IN_IF) {
+				msg_to_desc(d, "Unmatched 'end' (line %d)!\r\n", line_num);
+				free(sc);
+				free_script_format_stack(&stack);
+				return FALSE;
+			}
+			--indent;
+			pop_script_format_stack(&stack);	// remove if
 		}
 		else if (!strncasecmp(t, "else", 4)) {
-			if (!indent) {
+			if (!indent || stack->type != SCR_FORM_IN_IF) {
 				msg_to_desc(d, "Unmatched 'else' (line %d)!\r\n", line_num);
 				free(sc);
+				free_script_format_stack(&stack);
 				return FALSE;
 			}
-			indent--;
+			--indent;
 			indent_next = TRUE;
+			// no need to modify stack: we're going from IF to IF (ish)
 		}
 		else if (!strncasecmp(t, "case", 4) || !strncasecmp(t, "default", 7)) {
-			if (!indent) {
+			if (indent && stack->type == SCR_FORM_IN_SWITCH) {
+				// case in a switch (normal)
+				indent_next = TRUE;
+				add_script_format_stack(&stack, SCR_FORM_IN_CASE);
+			}
+			else if (indent && stack->type == SCR_FORM_IN_CASE) {
+				// chained cases
+				--indent;
+				indent_next = TRUE;
+				// don't modify stack because it's going CASE to CASE
+			}
+			else {
 				msg_to_desc(d, "Case/default outside switch (line %d)!\r\n", line_num);
 				free(sc);
+				free_script_format_stack(&stack);
 				return FALSE;
 			}
-			indent_next = TRUE;
-			found_case = TRUE;
 		}
 		else if (!strncasecmp(t, "break", 5)) {
-			if (!found_case || !indent ) {
+			if (indent && stack->type == SCR_FORM_IN_CASE) {
+				// breaks only cancel indent when directly in a case
+				--indent;
+				pop_script_format_stack(&stack);	// remove the case
+			}
+			else if (find_script_format_stack(stack, SCR_FORM_IN_WHILE) || find_script_format_stack(stack, SCR_FORM_IN_CASE)) {
+				// does not cancel indent in a while or something nested in a case
+			}
+			else {
 				msg_to_desc(d, "Break not in case (line %d)!\r\n", line_num);
 				free(sc);
+				free_script_format_stack(&stack);
 				return FALSE;
 			}
-			found_case = FALSE;
-			indent--;
 		}
 
 		*line = '\0';
-		for (nlen = 0, i = 0;i<indent;i++) {
-			strncat(line, "  ", sizeof(line)-1);
+		for (nlen = 0, iter = 0; iter < indent; ++iter) {
+			strncat(line, "  ", sizeof(line) - 1);
 			nlen += 2;
 		}
 		llen = snprintf(line + nlen, sizeof(line) - nlen, "%s\r\n", t);
 		if (llen + nlen + len > d->max_str - 1 ) {
 			msg_to_desc(d, "String too long, formatting aborted\r\n");
 			free(sc);
+			free_script_format_stack(&stack);
 			return FALSE;
 		}
 		len = len + nlen + llen;
@@ -1126,23 +1908,43 @@ int format_script(struct descriptor_data *d) {
 	*d->str = strdup(nsc);
 	free(sc);
 
+	free_script_format_stack(&stack);
 	return TRUE;
 }
 
 
-void format_text(char **ptr_string, int mode, descriptor_data *d, unsigned int maxlen) {
-	int line_chars, startlen, len, cap_next = TRUE, cap_next_next = FALSE;
+ //////////////////////////////////////////////////////////////////////////////
+//// TEXT FORMATTER //////////////////////////////////////////////////////////
+
+
+/**
+* Formats a string (which may be reallocated) to a standard width.
+*
+* Mode options:
+*   FORMAT_INDENT - will add leading spaces
+*   FORMAT_WIDE - will use the player's screen width instead of 79 chars.
+*
+* @param char **ptr_string Pointer to the string to format (which may be reallocated).
+* @param bitvector_t mode FORMAT_ flags
+* @param descriptor_data *desc Descriptor who will be viewing this text (Optional; may be NULL; used for wide format size only).
+* @param unsigned int maxlen Maximum length of storage for the string.
+*/
+void format_text(char **ptr_string, bitvector_t mode, descriptor_data *desc, unsigned int maxlen) {
+	bool  cap_next = TRUE, cap_next_next = FALSE;
+	int line_chars, startlen, len, max_width;
 	char *flow, *start = NULL, temp;
 	char formatted[MAX_STRING_LENGTH];
 
-	if (d->max_str > MAX_STRING_LENGTH) {
-		log("SYSERR: format_text: max_str is greater than buffer size.");
+	if (maxlen > MAX_STRING_LENGTH) {
+		log("SYSERR: format_text: maxlen is greater than buffer size.");
 		return;
 	}
 	
+	max_width = (IS_SET(mode, FORMAT_WIDE) && desc && desc->pProtocol->ScreenWidth > 1) ? (desc->pProtocol->ScreenWidth - 1) : 79;
+	
 	// ensure the original string ends with a \r\n -- the formatter requires it
 	if (*ptr_string && (*ptr_string)[strlen(*ptr_string) - 1] != '\n' && strlen(*ptr_string) < maxlen + 2) {
-		RECREATE(*ptr_string, char, strlen(*ptr_string) + 2);
+		RECREATE(*ptr_string, char, strlen(*ptr_string) + 3);
 		strcat(*ptr_string, "\r\n");
 	}
 
@@ -1178,7 +1980,7 @@ void format_text(char **ptr_string, int mode, descriptor_data *d, unsigned int m
 			*flow = '\0';
 
 			startlen = color_strlen(start);
-			if (line_chars + startlen + 1 > 79) {
+			if (line_chars + startlen + 1 > max_width) {
 				strcat(formatted, "\r\n");
 				line_chars = 0;
 			}
@@ -1197,7 +1999,7 @@ void format_text(char **ptr_string, int mode, descriptor_data *d, unsigned int m
 			*flow = temp;
 		}
 		if (cap_next_next) {
-			if (line_chars + 3 > 79) {
+			if (line_chars + 3 > max_width) {
 				strcat(formatted, "\r\n");
 				line_chars = 0;
 			}
@@ -1217,12 +2019,18 @@ void format_text(char **ptr_string, int mode, descriptor_data *d, unsigned int m
 	// re-add a crlf
 	strcat(formatted, "\r\n");
 
-	if (strlen(formatted) + 1 > maxlen)
+	if (strlen(formatted) + 1 > maxlen) {
 		formatted[maxlen-1] = '\0';
-	RECREATE(*ptr_string, char, MIN(maxlen, strlen(formatted) + 1));
+	}
+	len = strlen(formatted) + 1;
+	len = MIN(maxlen, len);
+	RECREATE(*ptr_string, char, len);
 	strcpy(*ptr_string, formatted);
 }
 
+
+ //////////////////////////////////////////////////////////////////////////////
+//// STRING REPLACER /////////////////////////////////////////////////////////
 
 int replace_str(char **string, char *pattern, char *replacement, int rep_all, unsigned int max_size) {
 	char *replace_buffer = NULL;
@@ -1276,6 +2084,9 @@ int replace_str(char **string, char *pattern, char *replacement, int rep_all, un
 	return i;
 }
 
+
+ //////////////////////////////////////////////////////////////////////////////
+//// COMMANDS ////////////////////////////////////////////////////////////////
 
 ACMD(do_string_editor) {
 	if (IS_NPC(ch) || !ch->desc) {

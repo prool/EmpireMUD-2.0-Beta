@@ -1,4 +1,4 @@
-"NATURAL MAGIC" "CHANT OF DRUIDS"
+"NATURAL MAGIC" NAT "CHANT OF MAGIC"
 
 Natural Magic (skill)
 
@@ -10,50 +10,43 @@ grass beneath us, and the seas beyond the horizon. By embracing your own
 connection to nature, you can tap into this mana and wield the mighty fury
 that is Natural Magic.
 
-The druids of old knew a secret chant that would bring your body in line
+The manaweavers of old knew a secret chant that would bring your body in line
 with the movement of the mana of the world. Some say that if you build a
-monument to the druids -- a great stone henge -- you can find the inspir-
-ation, chant the sacred words, and unlock your natural potential.
+monument to the old ways -- a great stone henge -- you can find the
+inspiration, chant the sacred words, and unlock your natural potential.
 
-See also: CHANT, CHANT OF NATURE, HEAL, CLEANSE, PURIFY, EARTHARMOR,
-    REJUVENATE, HEALING POTIONS, READY FIREBALL, ENTANGLE, FAMILIAR,
-    COUNTERSPELL, HASTEN, NATURE POTIONS, LIGHTNINGBOLT, SKYBRAND, SOULSIGHT,
-    SOLAR POWER, EARTHMELD, WORM, FLY, GIFT OF NATURE, SUMMON ANIMALS,
-    TOUCH OF FLAME, ANIMAL FORMS
+You get additional Natural Magic abilities when you reach level 100, depending
+on which other skills you have at high levels. Use the 'role' command to choose
+which set of skills to use.
+
+See also: ROLE, SKILL, SKILL SYNERGY, CHANT
 #
 ACIDBLAST "ACID BLAST"
 
 Acidblast
-Class ability:  Alchemist
+Natural Magic Synergy Ability: 100 Trade
 
 Usage:  acidblast [victim]
 Cooldown:  9 seconds
 Cost:  based on damage
-Debuff type:  Natural Magic
+Debuff type:  magical
 
 An alchemist can create a magical acid blast, injuring her victim as well as
 decreasing the victim's magical resistance.
-
-See also: ALCHEMIST CLASS
 #
 "ANCESTRAL HEALING"
 
-Ancestral Healing
-Class ability:  Luminary
+Ancestral Healing (Natural Magic ability)
 
-This passive ability channels the power of your ancestors to add your Greatness
-attribute to your Bonus-Healing trait, which affects all of your healing
-abilities. This Greatness effect gets more powerful as your level goes up.
+This passive ability channels the power of your ancestors to boost your healing
+power. The size of this boost is based on your Greatness trait, and is higher
+in the healer role.
 
-The amount of Bonus-Healing added is a proportion of your Greatness: your total
-Greatness is added per 150 player levels, with a proportion of your Greatness
-for any potion under 150 levels. For example, if you are level 75, you gain
-half your Greatness. At level 150, it's your full Greatness. At level 300, it's
-2x Greatness.
+This ability gains experience when you heal someone.
 
 Note: Bonus healing does not add to the cost of healing spells.
 
-See also: HEAL, REJUVENATE
+See also: HEAL, REJUVENATE, PASSIVES
 #
 "ANIMAL FORMS"
 
@@ -76,24 +69,25 @@ See also: MORPH
 ASTRALCLAW "ASTRAL CLAW"
 
 Astralclaw
-Class ability:  Werewolf
+Natural Magic Synergy Ability: 100 Battle
 
 Usage:  astralclaw [victim]
 Cooldown:  9 seconds
 Cost:  based on damage
-Debuff type:  Natural Magic
+Debuff type:  magical
 
 By striking out with astral claws, the werewolf deals magical damage at a
 distance. These claw strikes also rip open the victim's flesh, dealing physical
 damage over time. This DoT effect stacks up to 3 times.
 
-See also: DOT, WEREWOLF CLASS
+See also: DOT
 #
 "BANSHEE FAMILIAR"
 
 Banshee
-Class ability:  Necromancer (healer)
+Natural Magic Synergy Ability: 100 Vampire
 Familiar type:  debuff
+Command:  companion banshee
 
 The banshee familiar will use the following abilities in combat:
 - Soul-shattering wail: -(level/20) Resist-Physical/Magical on enemies (30 sec)
@@ -101,12 +95,27 @@ The banshee familiar will use the following abilities in combat:
 - Heart-wrenching wail: -(level/30) Bonus-Physical/Magical on enemies (30 sec)
 - Blood-curdling wail: Magical DoT on enemies (30 sec)
 
-See also: DEBUFF, FAMILIAR, NECROMANCER CLASS
+Check what ability the banshee is set to use in combat by typing 'order
+companion status' then 'order companion <ability>' to choose one.
+
+See also: DEBUFF, FAMILIAR, DEBUFF FAMILIARS, COMPANION, DISMISS,
+   SUPPORT FAMILIARS
+#
+"BY THE SUN AND STARS" "SUN AND STARS"
+
+By the Sun and Stars (Natural Magic ability)
+
+Nature mages can learn to draw mana from the bountiful light above. Your mana
+regeneration is always higher; moreso in the healer or caster roles.
+
+This ability gains experience passively over time.
+
+See also: CASTER ROLE, HEALER ROLE, PASSIVES
 #
 "ASTRAL WEREWOLF FORM"
 
 Astral Werewolf Form
-Class ability:  Werewolf, Shadow Wolf, Feral
+Natural Magic Synergy Ability: 100 Battle OR 100 Stealth OR 100 Survival
 
 Usage:  morph astral werewolf
 Cost:  50 move (150 in combat)
@@ -118,8 +127,9 @@ See also: CASTER, MORPH
 "BASILISK FAMILIAR"
 
 Basilisk
-Class ability:  Feral
+Natural Magic Synergy Ability: 100 Survival
 Familiar type:  debuff
+Command:  companion basilisk
 
 The basilisk familiar will use the following abilities in combat:
 - Marble gaze: +(15+level/50) Block on the tank (30 sec)
@@ -127,48 +137,39 @@ The basilisk familiar will use the following abilities in combat:
 - Basalt gaze: -(2+level/100) Wits on enemy (30 sec)
 - Granite gaze: -(15+level/25) To-Hit on enemy (30 sec)
 
-See also: DEBUFF, FAMILIAR, FERAL CLASS
+Check what ability the basilisk is set to use in combat by typing 'order
+companion status' then 'order companion <ability>' to choose one.
+
+See also: DEBUFF, FAMILIAR, DEBUFF FAMILIARS, COMPANION, DISMISS,
+   SUPPORT FAMILIARS
 #
 BREW
 
 Usage:  brew [number] <potion>
         brew info <potion>
+        brew list <keywords>
 
 This command allows you to brew potions of various types, if you have the
 correct potions abilities from Natural Magic.
 
 To brew potions you will require:
  - fire: a cooking fire, kitchen, baker, alchemist, or laboratory
- - glass: an alchemist shop, laboratory, or an empire that has glassblowing
- - herbs
+ - a flask: crafted at a glassblower
+ - magic herbs
 
 See also: CRAFTING LEVEL, RESOURCES, KEEP, HEALING POTIONS, NATURE POTIONS,
-RECIPES
-#
-CHANT
-
-Usage:  chant <type>
-
-There are several ancient chants whose power you can still wield today.
-Chants have no beginning or end, but you can stop chanting by typing the
-command again.
-
-Unlike most timed actions, chants are not running on a timer. Their effect,
-if any, happens at random as you chant.
-
-See also: help for individual chants, like HELP CHANT OF NATURE
+RECIPES, CRAFTING ABILITIES
 #
 "CHANT OF ILLUSIONS"
 
 Chant of Illusions
 
 Usage:  chant illusions
-Class ability:  Luminary
+Natural Magic Synergy Ability: 100 Stealth
 Cost:  1 nocturnium spike and 1 iridescent iris per road
 
 This chant allows you to hide a road tile behind an illusion, making it more
-difficult to see from a distance. You will not get your resources back if you
-cancel the chant; they are spent immediately.
+difficult to see from a distance.
 
 See also: CHANT, FORGE, LAY
 #
@@ -179,8 +180,8 @@ Chant of Nature (Natural Magic)
 Usage:  chant nature
 Locations:  plains, desert, forest, seeded field, swamp
 
-The ancient druidic chant of nature brings the earthly mana of a place into
-a single vertical stream, pulling it up through the ground and growing the
+The ancient and mysterious Chant of Nature brings the earthly mana of a place
+into a single vertical stream, pulling it up through the ground and growing the
 tiniest seed into a majestic tree in mere moments. It can also grow crops.
 
 Gains a small amount of experience each time you finish the chant, and much more
@@ -188,42 +189,46 @@ if you successfully grow something with it.
 
 See also: CHANT
 #
-"CLASS FAMILIARS"
+"CLASS FAMILIARS" "SYNERGY FAMILIARS"
 
-Each Natural Magic class has its own set of familiars. These are summoned with
-the 'familiar' command, but don't require the regular Familiar ability. Some
-class roles have different familiars than other roles in the same class. Like
-all class abilities, you must reach skill level 100 to use these.
+Each Natural Magic synergy has its own set of familiars. These are summoned
+with the 'companion' command, and don't require the regular Familiar ability.
+Some group roles have different familiars than other roles. Like all synergy
+abilities, you must reach maximum level in both skills to use these:
 
-Werewolf:
+Battle synergy:
   Spirit Wolf (tank) - Will debuff the enemy.
   Dire Wolf (melee) - Attacks the enemy.
   Moon Rabbit (healer) - Buffs the party.
 
-Luminary:
-  Manticore - Attacks the enemy.
-  Griffin - Tanks for the party.
-
-Archmage:
+High Sorcery synergy:
+  Griffin (caster) - Tanks for the party.
   Phoenix (healer) - Buffs the party.
-  Caster has no familiar of its own.
 
-Shadow Wolf:
+Stealth synergy:
+  Griffin (melee) - Tanks for the party.
+  Manticore (tank) - Attacks the enemy.
   Scorpion Shadow (melee) - Debuffs the enemy.
   Owl Shadow (healer) - Buffs the party.
 
-Feral:
+Survival synergy:
+  Griffin (caster/melee) - Tanks for the party.
   Basilisk - Debuffs the enemy.
 
-Alchemist:
+Trade synergy:
+  Griffin - Tanks for the party.
+  Manticore - Attacks the enemy.
   Salamander - Buffs the party.
 
-Necromancer:
+Vampire synergy:
   Skeletal Hulk (caster) - Attacks the enemy.
   Banshee (healer) - Debuffs the enemy.
 
+You can choose which ability will be used by support familiars in combat using
+'order companion status'. Not all familiars use abilities.
+
 See also: HELP <NAME> FAMILIAR
-See also: CLASSES, FAMILIAR, MIRROR IMAGE
+See also: COMPANION, SYNERGIES, FAMILIAR, MIRROR IMAGE, SUPPORT FAMILIARS
 #
 CLEANSE
 
@@ -248,7 +253,7 @@ See also: DISPEL
 CONFER
 
 Confer
-Class ability:  Werewolf
+Natural Magic Synergy Ability: 100 Battle
 Usage:  confer <trait> [person]
 Duration:  6 minutes
 Cost:  50 mana, 1 Strength
@@ -268,6 +273,18 @@ before it expires.
 You can confer: block, dodge, health, health-regen, mana, mana-regen,
   move, move-regen, resist-magical, resist-physical, to-hit
 #
+"CONJURE FRUIT"
+
+Conjure Fruit (Natural Magic ability)
+
+Usage:  conjure fruit
+Cooldown:  30 seconds
+Cost:  25 mana
+
+Turn mana into food with this simple spell.
+
+See also: CONJURE
+#
 COUNTERSPELL "COUNTER SPELL"
 
 Counterspell (Natural Magic ability)
@@ -285,59 +302,57 @@ This ability gains experience when your counterspell is triggered.
 DEATHTOUCH "DEATH TOUCH"
 
 Deathtouch
-Class ability:  Necromancer
+Natural Magic Synergy Ability: 100 Vampire
 
 Usage:  deathtouch [victim]
 Cooldown:  6 seconds
-Cost:  based on damage
+Cost:  mana, based on damage
 
 This fast spell deals instant damage to your victim, as the very essence of
 death seeps into him.
-
-See also: NECROMANCER CLASS
 #
 "DIRE WOLF FAMILIAR"
 
 Dire Wolf
-Class ability:  Werewolf
+Natural Magic Synergy Ability: 100 Battle
 Familiar type:  damage
+Command:  companion dire wolf
 
 The dire wolf will assist you in combat, adding to the damage against your
 enemy.
 
-See also: FAMILIAR, WEREWOLF CLASS
+See also: FAMILIAR, COMPANION, DISMISS
 #
 DISPIRIT DESPIRIT
 
 Dispirit
-Class ability:  Shadow Wolf
+Natural Magic Synergy Ability: 100 Stealth
 
 Usage:  dispirit [victim]
 Cooldown:  9 seconds
 Cost:  based on damage
-Debuff type:  Natural Magic
+Debuff type:  magical
 
 Dispirit drains the opponent's wits, causing him pain and anguish as it does.
-
-See also: SHADOW WOLF CLASS
 #
 EARTHARMOR "EARTH ARMOR"
 
 Eartharmor (Natural Magic ability)
 
 Usage:  eartharmor <target>
-Cost:  20 mana
+Linked trait: Intelligence
+Cost:  10+ mana, based on level
 
 This spell allows a nature mage to coat his or her allies in a powerful
-coating of earth, protecting them from some damage. It adds an amount of
-physical damage resistance equal to the caster's Natural Magic level divided by
-14, with a bonus based on Intelligence.
+coating of earth, protecting them from some damage. It adds damage resistances
+based on the caster's level and Intelligence.
 
-Gains experience when you cast this spell.
+Gains experience when you cast this spell or when you take damage while using
+it.
 
 See also: RESIST-PHYSICAL
 #
-EARTHMELD "EARTH MELD"
+EARTHMELD "EARTH MELD" EARTHMELDED
 
 Earthmeld (Natural Magic ability)
 
@@ -350,12 +365,27 @@ Natural Magic. You can do nothing while interred within the earth, but it is
 often the safest place to be.
 
 However, you will take damage from nature burn if someone is digging in the
-dirt while you're earthmelded. You stop taking nature burn damage as soon as
-you end your earthmeld.
+dirt while you're earthmelded. Being underneath a building or barrier can also
+cause nature burn. You stop taking nature burn damage as soon as you end your
+earthmeld.
+
+You cannot enter or leave earthmeld under map tiles that are enclosed buildings
+or barriers.
 
 Gains experience when you sink into the ground.
 
+The only way to move while earthmelded is the Worm ability.
+
 See also: WORM
+#
+EARTHPEEK "EARTH PEEK"
+
+Usage:  earthpeak
+
+The earthpeek command allows you to look around while earthmelded. This is
+only available with the Worm ability.
+
+See also: EARTHMELD, WORM
 #
 ENTANGLE
 
@@ -363,12 +393,12 @@ Entangle (Natural Magic ability)
 
 Usage:  entangle [target]
 Cooldown:  30 seconds
-Duration:  30 seconds
+Duration:  20 seconds
 Cost:  20 mana
-Debuff type:  Natural Magic
+Debuff type:  magical
 
-Nature mages have the power to entangle their foes in mana, preventing them
-from getting away.
+Nature mages have the power to entangle their foes in mana, immobilizing them
+and preventing them from getting away.
 
 If you cast this spell without a target, it will target the person you are
 fighting.
@@ -378,54 +408,47 @@ second person will release the first one.
 
 Gain experience when you cast this spell.
 #
-ERODE
-
-Erode
-Class ability:  Luminary
-
-Usage:  erode [victim]
-Cooldown:  9 seconds
-Cost:  based on damage
-Debuff type:  Natural Magic
-
-Erode causes the victim's skin to dry up and shed, like a cliffside in the
-wind. It causes great pain immediately, then continues to deal magical damage
-over time. This DoT effect stacks up to 3 times.
-
-See also: DOT, LUMINARY CLASS
-#
 FAMILIAR
 
-Familiar (Natural Magic ability)
+Usage:  companion [name]
 
-Usage:  familiar <type>
+A familiar is a type of companion summoned by a practicioner of Natural Magic.
+See help files for individual familiar abilities for more information.
+
+See also: COMPANION, DISMISS, ORDER
+#
+"FELINE FAMILIARS"
+
+Feline Familiars (Natural Magic ability)
+
+Usage:  companion <familiar type>
 Cost:  40 mana
 
 Natural Magic users are able to become friends with all sorts of animals, to
 the point where they can summon the aid of a familiar animal. When you call
-a familiar, it appears, follows you, and prepares to take orders.
+a familiar, it appears, follows you, and prepares to take orders. Familiars
+are a type of companion.
 
 The power and abilities of the familiar are based on your prowess in Natural
-Magic and your total level.
+Magic and your level.
 
-This ability gains experience when you summon these familiars.
+This ability gains experience when you summon these familiars or have one of
+them as your active companion.
 
 Available familiars:
-  cat - A low-level familiar for novice mages.
-  saber-toothed cat - A larger cat with a bigger bite. (requires 51)
-  sphinx - A familiar that will tank for you in combat. (requires 76)
-  giant tortoise - A stronger tank who deals no damage, but protects better.
-    (requires 100)
+  cat - A low-level familiar for novice mages (level 1-100).
+  saber-toothed cat - A larger cat with a bigger bite (level 50+).
+  sphinx - A familiar that will rescue you in combat (level 75+).
 
-Each natural magic class has its own familiars, too. Use "dismiss" to get rid
+Each natural magic synergy has its own familiars, too. Use "dismiss" to get rid
 of your familiar.
 
-See also: CLASS FAMILIARS, DISMISS, ORDER
+See also: COMPANION, GIANT TORTOISE FAMILIAR, SYNERGY FAMILIARS, DISMISS, ORDER
 #
 FASTCASTING "FAST CASTING"
 
 Fastcasting
-Class ability:  All healer classes
+Requires: Natural Magic 100, Healer role
 
 With Fastcasting, your Wits attribute no longer boosts your combat speed.
 Instead, it reduces the command lag after casting non-combat spells (including
@@ -435,9 +458,9 @@ alive.
 Base command lag is 1.25 seconds, and this ability reduces it by 0.1 per 3
 Wits, down to 0.75 seconds.
 
-See also: COMMAND LAG
+See also: COMMAND LAG, HEALER
 #
-FLY FLIGHT
+FLY FLIGHT FLYING
 
 Fly (Natural Magic ability)
 
@@ -450,33 +473,49 @@ ability, you can use flying mounts.
 
 Type "fly" again to land.
 
+Flying allows you to see over blocked terrain that's at the same elevation as
+you are.
+
 Gains experience as you fly around, as long as you're not mounted. Also gains
 experience when you take off.
 
 See also: RIDE
 #
+"GIANT TORTOISE FAMILIAR"
+
+Giant Tortoise Familiar (Natural Magic ability)
+
+Usage:  companion giant tortoise
+Cost:  50 mana
+
+The giant tortoise familiar is a powerful boon to Natural Magic users. It may
+not do any damage in combat, but it will rescue you and steal the attention of
+whoever is hitting you -- and it can take a serious beating.
+
+See also: COMPANION, SYNERGY FAMILIARS, DISMISS, ORDER
+#
 "GIFT OF NATURE"
 
 Gift of Nature (Natural Magic ability)
 
-Nature mages blessed with the Gift of Nature have 35% more mana than those
-without it. This modifies your total mana, so anything else that increases
-your mana pool will be modified by Gift of Nature.
+Nature mages blessed with the Gift of Nature have more mana than those without
+it. Your total mana increases based on your level and role.
 
 Gift of Nature gains experience passively over time.
 
-See also: ARCANE POWER
+See also: ARCANE POWER, PASSIVES, ROLE
 #
 "GRIFFIN FAMILIAR"
 
 Griffin
-Class ability:  Luminary
+Natural Magic Synergy Ability: 100 Trade, High Sorcery, Survival, or Stealth
 Familiar type:  tank
+Command:  companion griffin
 
 The griffin is a powerful familiar that will rescue party members in combat,
 and tank for them.
 
-See also: FAMILIAR, LUMINARY CLASS
+See also: FAMILIAR, COMPANION, DISMISS
 #
 HASTEN HASTE
 
@@ -509,11 +548,11 @@ entire party at once.
 If you cast this spell with no target, it will heal yourself. Self-heals cost
 25% less. Healing the whole party costs 50% more.
 
-The size of your heals, and their cost, with your Natural Magic level and with
-your Intelligence. The Bonus-Healing trait, shown as "Healing [+X]" on your
-score, adds directly to the amount healed, but does not increase the cost. The
-Healer class role allows your character's total level to increase the amount
-healed, and it also lowers the mana cost per point healed.
+The size of your heals, and their cost, scales with your Natural Magic level
+and with your Intelligence. The Bonus-Healing trait, shown as "Healing [+X]" on
+your score, adds directly to the amount healed, but does not increase the cost.
+The Healer group role allows your character's total level to increase the
+amount healed, and it also lowers the mana cost per point healed.
 
 If your target is in combat, you will join the combat upon using this ability.
 
@@ -521,17 +560,6 @@ Each ability will only gain experience when you heal the target it allows you
 to heal (self, ally or party).
 
 See also: HEALER
-#
-"HEALING BOOST"
-
-Healing Boost
-Class ability: various
-
-This ability increases the amount healed by abilities such as Heal and
-Rejuvenate, making the user more effective at healing. This ability is
-automatic.
-
-See also: HEAL, HEALER, REJUVENATE
 #
 "HEALING POTIONS" "HEALING ELIXIRS"
 
@@ -553,8 +581,8 @@ Healing Elixirs (Natural Magic ability)
   longrunning elixir - move regen
   mana elixir - mana
   energy elixir - mana regen
-  * If you also know Wrath of Nature Potions, elixirs will come out superior.
-  
+  (also makes DISTILLED HERBS)
+
 See also: BREW, WRATH OF NATURE POTIONS, QUAFF
 #
 LIGHTNINGBOLT "LIGHTNING BOLT"
@@ -565,7 +593,7 @@ Usage:  lightningbolt [target]
 Cooldown:  9 seconds
 DoT Duration:  15 seconds
 Cost:  based on damage
-Debuff type:  Natural Magic
+Debuff type:  magical
 
 A powerful nature mage can shoot bolts of lightning from her fingertips,
 causing massive trauma to the target, and leaving them shocked. Victims con-
@@ -580,32 +608,37 @@ Gains experience when you cast this spell.
 "MANTICORE FAMILIAR"
 
 Manticore
-Class ability:  Luminary
+Natural Magic Synergy Ability: 100 Trade or Stealth
 Familiar type:  melee
+Command:  companion manticore
 
 The manticore will assist you in combat, adding to the damage against your
 enemy.
 
-See also: FAMILIAR, LUMINARY CLASS
+See also: FAMILIAR, COMPANION, DISMISS
 #
 "MOON RABBIT FAMILIAR"
 
 Moon Rabbit
-Class ability:  Werewolf (healer)
+Natural Magic Synergy Ability: 100 Battle
 Familiar type:  buff
+Command:  companion moon rabbit
 
 The moon rabbit familiar will use the following abilities in combat:
-- Replenish: +(level*2/3) Mana to master (instant)
-- Re-energize: +(level/10) Mana-Regen to master (30 sec)
+- Replenish: +(scaled amount) Mana to the player (instant)
+- Re-energize: +(level/10) Mana-Regen to the player (30 sec)
 - Bright as the moon: +(level/20) Resist-Physical/Magical on party (30 sec)
 - Moon's protection: +(level/5) Resist-Physical/Magical on the tank (30 sec)
 
-See also: BUFF, FAMILIAR, WEREWOLF CLASS
+Check what ability the moon rabbit is set to use in combat by typing 'order
+companion status' then 'order companion <ability>' to choose one.
+
+See also: BUFF, FAMILIAR, BUFF FAMILIARS, COMPANION, DISMISS, SUPPORT FAMILIARS
 #
 MOONRISE
 
 Moonrise
-Class ability: Shadow Wolf
+Natural Magic Synergy Ability: 100 Stealth
 
 Usage:  moonrise <dead player>
 Cost:  200 mana
@@ -613,7 +646,8 @@ Cooldown:  20 minutes
 
 This powerful ability channels the healing magic of the moon to raise a player
 from the dead, even during combat. The player will return with half of his or
-her health, mana, and moves.
+her health, mana, and moves. The player will also be less hungry/thirsty than
+from a normal death or resurrection.
 
 You can target a dead player or the player's most recent corpse.
 
@@ -635,37 +669,46 @@ Wrath of Nature Potions (Natural Magic ability)
   armor potion - resistance
   haste potion - haste
   blocking potion - block chance
-  * If you also know Healing Elixirs, wrath potions will come out superior.
 
 See also: BREW, HEALING ELIXIRS, QUAFF
 #
 "OWL SHADOW FAMILIAR"
 
 Owl Shadow
-Class ability:  Shadow Wolf (healer)
+Natural Magic Synergy Ability: 100 Stealth
 Familiar type:  buff
+Command:  companion owl shadow
 
 The owl shadow familiar will use the following abilities in combat:
 - Dark Wings: +(15+level/25) Dodge on tank (30 sec)
-- Healing Darkness: +(level/20) Heal-Over-Time on party (30 sec)
+- Healing Darkness: +(scaled amount) Heal-Over-Time on party (30 sec)
 - Invigorating Darkness: +(level/5) Move points on party (instant)
 - Brilliant Darkness: +(1+level/100) Wits on party (30 sec)
 
-See also: BUFF, FAMILIAR, SHADOW WOLF CLASS
+Check what ability the owl shadow is set to use in combat by typing 'order
+companion status' then 'order companion <ability>' to choose one.
+
+When you hide, this familiar will hide too.
+
+See also: BUFF, FAMILIAR, BUFF FAMILIARS, COMPANION, DISMISS, SUPPORT FAMILIARS
 #
 "PHOENIX FAMILIAR"
 
 Phoenix
-Class ability:  Archmage (healer)
+Natural Magic Synergy Ability: 100 High Sorcery
 Familiar type:  buff
+Command:  companion phoenix
 
 The phoenix familiar will use the following abilities in combat:
-- Blaze with Power: +(level/20) bonus healing to master (30 sec)
+- Blaze with Power: +(level/20) bonus healing to the player (30 sec)
 - Healing Warmth: heals the tank (instant)
 - Healing Fire: smaller heal for the whole party (instant)
 - Burning Passion: +(level/30) bonus physical/magical damage to party (30 sec)
 
-See also: BUFF, FAMILIAR, ARCHMAGE CLASS
+Check what ability the phoenix is set to use in combat by typing 'order
+companion status' then 'order companion <ability>' to choose one.
+
+See also: BUFF, FAMILIAR, BUFF FAMILIARS, COMPANION, DISMISS, SUPPORT FAMILIARS
 #
 PURIFY
 
@@ -681,10 +724,9 @@ spell on those not affected by such curses, but it will have no effect.
 This spell cures vampirism and removes all vampiric abilities and skill.
 
 Because this power could be used to harass other players, they must enable
-the "bother" toggle before you can use it on them. 
+the "bother" toggle before you can use it on them.
 
 If your target is in combat, you will join the combat upon using this ability.
-
 Gains experience when successfully cast, even if it doesn't cure anything.
 
 See also: DAYWALKING, TOGGLE
@@ -705,7 +747,8 @@ Usage:  ready fireball
 
 While warriors fight with axes and thieves fight with daggers, most mages
 prefer to fight using magic. The Ready Fireball ability removes your main
-weapon and replaces your normal combat attacks with fireballs.
+weapon and replaces your normal combat attacks with fireballs, which you'll
+automatically conjure and throw as your attack.
 
 The strength of your fireball will be based on your Natural Magic skill level,
 unless you have a Natural Magic over 75, in which case it will be based on
@@ -716,6 +759,9 @@ If you wish to stop using fireballs, you can type "remove fireball" just like
 you would with a weapon.
 
 Gains experience when you ready fireballs, and when you attack with them.
+
+Your character only summons fireballs when throwing them in combat; this
+ability can't be used to light up an area or to light things on fire.
 #
 REJUVENATE
 
@@ -727,12 +773,13 @@ Cost:  (based on amount healed)
 
 By blessing a person with rejuvenation, a nature mage can cause that person's
 wounds to heal themselves over time. This spell heals the target every 5
-seconds until it expires. The amount rejuvenated depends on your your Natural
-Magic level and your Intelligence. The cost depends upon the amount healed.
+seconds until it expires. The amount rejuvenated depends on your Natural Magic
+level and your Intelligence. The cost depends upon the amount healed.
+
 The Bonus-Healing attribute will also add to the amount healed, but won't
 raise the cost.
 
-The Healer class role allows your character's total level to increase the
+The Healer group role allows your character's total level to increase the
 amount healed, and it also lowers the mana cost per point healed.
 
 If you cast this spell without a target, it will target yourself.
@@ -746,21 +793,25 @@ See also: HEALER
 RESURRECT RESURRECTION
 
 Resurrect
-Class ability: Alchemist, Archmage, Feral, Luminary, Necromancer, Werewolf
+Natural Magic Synergy Ability: 100 Trade OR 100 High Sorcery OR 100 Survival OR
+   100 Vampire OR 100 Battle
 
 Usage:  resurrect <dead person>
 Cost:  75 mana
 
 This ability can return a recently-deceased player to life. The player will
-return with 10% of his or her health, mana, and moves. You can target the dead
-player or the player's most recent corpse.
+return with 10% of his or her health, mana, and moves. Vampires who were very
+low on blood will gain up to 10% of their blood back.
+
+You can target the dead player or the player's most recent corpse -- though the
+corpse may not work if the player was adventure-summoned and already respawned.
 
 See also: ACCEPT, MOONRISE, RESPAWN
 #
 "SAGE WEREWOLF FORM"
 
 Sage Werewolf Form
-Class ability:  Werewolf, Shadow Wolf, Feral
+Natural Magic Synergy Ability: 100 Battle OR 100 Stealth OR 100 Survival
 
 Usage:  morph sage werewolf
 Cost:  50 move (150 in combat)
@@ -772,21 +823,25 @@ See also: MORPH
 "SALAMANDER FAMILIAR"
 
 Salamander
-Class ability:  Alchemist
+Natural Magic Synergy Ability: 100 Trade
 Familiar type:  buff
+Command:  companion salamander
 
 The salamander familiar will use the following abilities in combat:
-- Alchemist's Fire: +(level/4) Bonus-Healing on master (10 sec)
+- Alchemist's Fire: +(level/4) Bonus-Healing on the player (10 sec)
 - Soothing flames: +(level/4) Heal-Over-Time on tank (10 sec)
 - Guardian flames: +(15+level/25) Dodge on tank (10 sec)
 - Ember surge: +(level/30) Bonus-Physical/Magical on party (30 sec)
 
-See also: BUFF, FAMILIAR, ALCHEMIST CLASS
+Check what ability the salamander is set to use in combat by typing 'order
+companion status' then 'order companion <ability>' to choose one.
+
+See also: BUFF, FAMILIAR, BUFF FAMILIARS, COMPANION, DISMISS, SUPPORT FAMILIARS
 #
 "SAVAGE WEREWOLF FORM"
 
 Savage Werewolf Form
-Class ability:  Werewolf, Shadow Wolf
+Natural Magic Synergy Ability: 100 Battle OR 100 Stealth
 
 Usage:  morph savage werewolf
 Cost:  50 move (150 in combat)
@@ -798,8 +853,9 @@ See also: MORPH
 "SCORPION SHADOW FAMILIAR"
 
 Scorpion Shadow
-Class ability:  Shadow Wolf (melee)
+Natural Magic Synergy Ability: 100 Stealth
 Familiar type:  debuff
+Command:  companion scorpion shadow
 
 The scorpion shadow familiar will use the following abilities in combat:
 - Creeping Venom: slows an enemy (30 sec)
@@ -807,18 +863,25 @@ The scorpion shadow familiar will use the following abilities in combat:
 - Numbing Venom: -(2+level/100) Wits on enemy (30 sec)
 - Agonizing Venom: Poison DoT on enemy (30 sec)
 
-See also: DEBUFF, FAMILIAR, SHADOW WOLF CLASS
+Check what ability the scorpion shadow is set to use in combat by typing 'order
+companion status' then 'order companion <ability>' to choose one.
+
+When you hide, this familiar will hide too.
+
+See also: DEBUFF, FAMILIAR, DEBUFF FAMILIARS, COMPANION, DISMISS,
+   SUPPORT FAMILIARS
 #
 "SKELETAL HULK FAMILIAR"
 
 Skeletal Hulk
-Class ability:  Necromancer (caster)
+Natural Magic Synergy Ability: 100 Vampire
 Familiar type:  melee
+Command:  companion skeletal hulk
 
 The skeletal hulk will assist you in combat, adding to the damage against your
 enemy.
 
-See also: FAMILIAR, NECROMANCER CLASS
+See also: FAMILIAR, COMPANION, DISMISS
 #
 SKYBRAND
 
@@ -826,15 +889,14 @@ Skybrand (Natural Magic ability)
 
 Usage:  skybrand [target]
 Cooldown:  6 seconds
+Linked trait:  Intelligence
 Cost:  based on damage and skill level
-Debuff type:  Natural Magic
+Debuff type:  magical
 
 A nature mage can mark a target with the Skybrand, causing the victim to take
 damage for several seconds. This ability stacks up to 3 times.
 
-In caster or solo role, damage is based on total level, Intelligence, and
-Bonus-Magical damage. In all other roles, it is based on skill level and
-Intelligence only.
+Damage is higher in the caster role.
 
 If you cast this spell with no target, it will target the person you are
 fighting.
@@ -843,40 +905,23 @@ Gains experience when you cast this spell.
 
 See also: CASTER, SOLO
 #
-"SOLAR POWER"
-
-Solar Power (Natural Magic ability)
-
-Nature mages can learn to draw mana from the sunlight, as plants do. With this
-ability, mana regeneration doubles as long as it's sunny. This ability scales
-with your Natural Magic skill, and as a class skill it works even without the
-sun.
-
-Solar Power gains experience every time you benefit from its effect. The sun
-is up from 7am to 7pm each day (every other 15 minutes of gameplay).
-#
 SOULSIGHT "SOUL SIGHT"
 
 Soulsight (Natural Magic ability)
 
-Usage:  soulsight <target>
-Cost:  5 mana
+This ability allows you to see more details about the affects on enemies with
+the 'affects' command.
 
-By looking into a person's soul, a nature mage can learn more about them. This
-will reveal if the target has any spells affecting him.
+Gain experience when you view affects on others.
 
-Soulsight can be blocked by Soulmask. In this case, it will not show affects,
-or whether the target is a vampire.
-
-Gains experience when you use it on someone.
-
-See also: SOULMASK
+See also: AFFECTS, SOULMASK
 #
 "SPIRIT WOLF FAMILIAR"
 
 Spirit Wolf
-Class ability:  Werewolf (tank)
+Natural Magic Synergy Ability: 100 Battle
 Familiar type:  debuff
+Command:  companion spirit wolf
 
 The spirit wolf familiar will use the following abilities in combat:
 - Bolt of Lightning: -(level/100) Dexterity on enemy (30 sec)
@@ -884,7 +929,11 @@ The spirit wolf familiar will use the following abilities in combat:
 - Bark/Blurred Vision: -(15+level/25) To-Hit on enemy (30 sec)
 - Bite/Ghost Energy: Magical DoT on enemy (30 sec)
 
-See also: DEBUFF, FAMILIAR, WEREWOLF CLASS
+Check what ability the spirit wolf is set to use in combat by typing 'order
+companion status' then 'order companion <ability>' to choose one.
+
+See also: DEBUFF, FAMILIAR, DEBUFF FAMILIARS, COMPANION, DISMISS,
+   SUPPORT FAMILIARS
 #
 "SUMMON ANIMALS"
 
@@ -900,12 +949,34 @@ take simple orders.
 
 Summon Animals gains experience when you use it, even if no animals appear.
 
+This ability also allows you to tame some animals faster, without feeding or
+befriending them.
+
 See also: ORDER
+#
+"SUPPORT FAMILIARS" "BUFF FAMILIARS" "DEBUFF FAMILIARS" "CASTER FAMILIARS"
+
+Usage: order <familiar> [status | random]
+       order <familiar> <ability>
+
+Some high-level familiars, instead of directly attacking the enemy or defending
+your party, have a set of support spells on a shared cooldown, which they cast
+to support the party or impede the enemy. By default, these familiars will
+select a random ability to use each time the cooldown ends, but they can be
+ordered (with the 'order' command) to use only a specific ability. This will
+only tell the familiar to use this ability at every future opportunity; it will
+not use the ability immediately.
+
+You can also order a support familiar to show you its currently selected
+ability, and a short list of its abilities, by ordering it to 'status', or
+reset it to using abilities at random by ordering it to 'random'.
+
+Support familiars will not remember your ability selection between summons.
 #
 STARSTRIKE "STAR STRIKE"
 
 Starstrike
-Class ability:  Feral
+Natural Magic Synergy Ability: 100 Survival
 
 Usage:  starstrike [victim]
 Cooldown:  9 seconds
@@ -913,25 +984,25 @@ Cost:  based on damage
 
 Starstrike calls down meteors from the heavens, dealing incredible damage to
 your victim!
-
-See also: FERAL CLASS
 #
 "TOUCH OF FLAME"
 
 Touch of Flame (Natural Magic ability)
 
-This ability lets you light things without a flint set. It also allows you to
+This ability lets you light things without a fire source. It also allows you to
 brew potions, mix poisons, and cook foods without needing a fire or stove.
+However, you cannot bake with it.
 
-This ability gains experience when you use it to light things, but not when you
-cook things with it. It will be used in preference to a flint set.
+This ability gains experience when you use it to light or burn things, but not
+when you cook things with it. It will be used in preference to fire sticks or
+other lighters.
 
 See also: LIGHT
 #
 "TOWERING WEREWOLF FORM"
 
 Towering Werewolf Form
-Class ability:  Werewolf, Feral
+Natural Magic Synergy Ability: 100 Battle OR 100 Survival
 
 Usage:  morph towering werewolf
 Cost:  50 move (150 in combat)
@@ -943,7 +1014,7 @@ See also: MORPH
 "WEREWOLF FORM"
 
 Werewolf Form
-Class ability:  Werewolf, Shadow Wolf, Feral
+Natural Magic Synergy Ability: 100 Battle OR 100 Stealth OR 100 Survival
 
 Usage:  morph werewolf
 Cost:  50 move (150 in combat)
@@ -954,12 +1025,27 @@ bonuses are also lower).
 
 See also: MORPH
 #
+WILDERBLAZE "WILDER BLAZE" WILDBLAZE "WILD BLAZE"
+
+Wilderblaze (Natural Magic ability)
+
+Usage:  wilderblaze
+Linked trait:  intelligence
+Cost:  50 mana +25 per additional target
+Cooldown: 30 seconds
+Duration: 20 seconds
+
+This spell unleashes your mana as a wave of nigh-unstoppable fire that burns
+everyone in the area. It is stronger in the caster role.
+
+See also: CASTER ROLE
+#
 WORM
 
 Worm (Natural Magic ability)
 
 Usage:  worm <direction>
-        worm look
+        earthpeek
 
 Particularly powerful nature mages can move while earthmelded, worming their
 way through the ground. You cannot worm through water tiles, and you cannot
@@ -971,6 +1057,9 @@ taking nature burn damage as soon as you end your earthmeld.
 
 Gains experience as you move around underground.
 
-See also: EARTHMELD
+This also grants you the 'earthpeek' command, which can look around while
+earthmelded.
+
+See also: EARTHMELD, EARTHPEEK
 #
 $~

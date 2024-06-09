@@ -1,68 +1,72 @@
 #100
-Magiterranean: The Grove~
+OLD Magiterranean: The Grove~
 Paul Clarke~
    A small grove deep in the Magiterranean, the plane of nature magic. This is
 a place where the forces of nature run deep, and interlopers are unwelcome.
 The grove is but a small part of the greater realm, and can be found in deep
 forests.
+   Enter the portal, but be prepared for both unfriendly mages and hidden
+predators as you explore the otherworldly forest of the Magiterranean.
+
+This adventure is deprecated and replaced with 12650.
 ~
 10000 10005 1-75
-50 0 0 0
+50 0 ak 0
 L
 5 0
-4320 -1 -1
+4320 -1 -1 -1
 -1 0 0
 L
 4 0
-10000 10000 10000
+10000 10000 10000 -1
 -1 d dn
 S
 #101
 Magiterranean: The Hidden Garden~
 Paul Clarke~
    You find a hidden garden, nestled through a hole in the bushes of another
-garden. But this is no ordinary place. Help the druid gardener with a few
+garden. But this is no ordinary place. Help the mysterious gardener with a few
 simple requests, and be transported to the Magiterranean, the secret world of
-druids! You can do this quest alone or with friends, but there's no combat
-here. This adventure is for farmers and gardeners.
+natural magic! You can do this quest alone or with friends, but there's no
+combat here. This adventure is for farmers and gardeners.
 ~
 10225 10249 15-0
-5 0 0 0
+5 0 km 0
 L
 3 a
-5179 10225 10225
+5179 10225 10225 -1
 -1 0 0
 L
 3 a
-5181 10225 10225
+5181 10225 10225 -1
 -1 0 0
 L
 5 0
-2160 -1 -1
+2160 -1 -1 -1
 -1 0 0
 L
 6 0
-30 -1 -1
+30 -1 -1 -1
 -1 0 0
 S
 #102
 Magiterranean: Interdimensional Whirlwind~
 Paul Clarke and Owen Morris~
    The magical whirlwind seems to be a portal between this plane and the
-Magiterranean, the secret realm of druids. You can't seem to penetrate the
-whirlwind, but it looks like the druids have been using it to spread their
+Magiterranean, the secret realm of natural magic. You can't seem to penetrate
+the whirlwind, but it looks like the mages have been using it to spread their
 magi-netically modified crops into our world.
 (This adventure contains only the magical crops on the map.)
 ~
 10500 10549 5-0
-1 60 d 0
+1 60 dglm 0
 L
 1 0
-10500 -1 -1
+10500 -1 -1 -1
 14 bd bd
 L
 5 0
-43920 -1 -1
+43920 -1 -1 -1
 -1 0 0
 T 10507
 S
@@ -70,8 +74,9 @@ S
 Magiterranean: Monsoon Rift~
 Paul Clarke and Owen Morris~
    A rift has opened in the fabric between your world and the Magiterranean,
-the druidic plane of nature magic. A vicious monsoon storm is escaping through
-the rift, but it's not the only thing: animated cacti are attacking your world!
+the mysterious plane of nature magic. A vicious monsoon storm is escaping
+through the rift, but it's not the only thing: animated cacti are attacking
+your world!
    You can seal the rift using your Battle, High Sorcery, Natural Magic,
 Stealth, Trade, or Vampire skill. Each skill solution can only be completed
 once per day, even if you find another rift. The invading cacti will vanish as
@@ -81,15 +86,15 @@ soon as you close the rift.
 5 30 g 0
 L
 4 0
-10140 10140 10141
+10140 10140 10141 -1
 -1 el 0
 L
 5 0
-4320 -1 -1
+4320 -1 -1 -1
 -1 0 0
 L
 6 0
-100 -1 -1
+100 -1 -1 -1
 -1 0 0
 S
 #104
@@ -104,22 +109,22 @@ or in groups of up to four. All gear looted from this adventure will be higher
 quality on harder difficulties.
 ~
 10550 10599 75-125
-25 0 cg 4
+25 0 cgk 4
 L
 4 0
-10550 10550 10550
+10550 10550 10550 -1
 -1 f 0
 L
 5 0
-10080 -1 -1
+10080 -1 -1 -1
 -1 0 0
 L
 6 0
-50 -1 -1
+50 -1 -1 -1
 -1 0 0
 S
 #120
-Mountain Cave: Red Dragon~
+OLD Mountain Cave: Red Dragon~
 Paul Clarke~
    Enter a cavernous mountain cave and find yourself face-to-claw with a giant
 red dragon! Bring a healer and a tank, and see how you fare against the most
@@ -131,51 +136,53 @@ This adventure is deprecated. A newer version exists as adv 128.
 5 1440 ac 4
 L
 5 0
-2880 -1 -1
+2880 -1 -1 -1
 -1 0 0
 L
 1 0
-10006 -1 -1
+10006 -1 -1 -1
 14 c c
 S
 #121
-The Swamp Hag~
+OLD The Swamp Hag~
 Paul Clarke~
    You have stumbled upon a strange, raised house in the swamp. It's old,
 dilapidated, and surrounded by unfriendly swamp creatures. What sort of person
 would live like this?
+
+This adventure has been replaced by an updated version, vnum 19000.
 ~
 10100 10104 75-150
-15 0 0 0
+15 0 ak 0
 L
 1 0
-10100 -1 -1
+10100 -1 -1 -1
 8 m m
 L
 6 0
-100 -1 -1
+100 -1 -1 -1
 -1 0 0
 S
 #122
-Ruins: Three Banditos~
+Ruins: Three Banditos (moved to 10105)~
 Paul Clarke~
    It looks like someone has been camping out in these ruins. You've found the
 hideout of infamous bandits Berk, Jorr, and Tranc! These three are not renowned
 for fighting fair, but if you're lucky, maybe only one of them is home.
 ~
-10105 10109 100-200
-20 0 cd 0
+0 0 100-200
+20 0 acdk 0
 L
 0 ac
-5007 -1 -1
+5007 -1 -1 -1
 14 0 0
 L
 5 0
-2880 -1 -1
+2880 -1 -1 -1
 -1 0 0
 L
 6 0
-50 -1 -1
+50 -1 -1 -1
 -1 0 0
 S
 #123
@@ -187,43 +194,42 @@ quite valuable, so it's safe to assume the person camping here is not the legal
 owner of any of these things.
 ~
 10110 10129 25-75
-20 0 c 0
+20 0 ck 0
 L
 5 0
-2880 -1 -1
+2880 -1 -1 -1
 -1 0 0
 L
 0 ac
-5007 -1 -1
+5007 -1 -1 -1
 14 0 0
 L
 6 0
-50 -1 -1
+50 -1 -1 -1
 -1 0 0
 S
 #125
 Ruins: The Goblin Challenge~
-Paul Clarke~
+Paul Clarke and Owen Morris~
    The ruins have attracted a nest of goblins, and you'll have to clear them
 out before the ruins can be removed. That might not be easy, as you have
 stumbled upon the Goblin Challenge. Goblins might be small, but they aren't
-known to fight fair. Play this encounter in phases, increasing in difficulty.
-This adventure locks its level when you start combat, so check if it's already
-locked before you start.
+known to fight fair. The goblins come in 5 phases. Choose your difficulty at
+the start; with greater challenge comes greater reward.
 ~
 10200 10224 50-150
-50 0 c 4
+50 0 k 4
 L
 0 ac
-5007 -1 -1
+5007 -1 -1 -1
 9 0 0
 L
 5 0
-10080 -1 -1
+10080 -1 -1 -1
 -1 0 0
 L
 6 0
-50 -1 -1
+50 -1 -1 -1
 -1 0 0
 S
 #126
@@ -234,40 +240,40 @@ countryside! Can you hunt it down and kill it? Just follow the swath of
 scorched earth. The dragon is tough -- you might want to bring a partner.
 ~
 10300 10329 100-150
-5 0 d 0
+5 0 n 0
 L
 5 0
-43200 -1 -1
+43200 -1 -1 -1
 -1 0 0
 L
 6 0
-75 -1 -1
+75 -1 -1 -1
 -1 0 0
 L
 1 0
-10300 -1 -1
+10300 -1 -1 -1
 14 c bdegkln
 S
 #127
-Abandoned Dragon Nest~
+Wandering Dragon~
 Paul Clarke~
    The dragon nest appears abandoned, which means a dragon is on the loose
 nearby. Can you find and defeat it? Be careful, it might take a pair of stout
 adventurers -- but the rewards will be worth it.
 ~
 10330 10359 125-175
-10 0 0 0
+10 0 n 0
 L
 1 0
-10330 -1 -1
+10330 -1 -1 -1
 9 c bcdel
 L
 5 0
-43200 -1 -1
+43200 -1 -1 -1
 -1 0 0
 L
 6 0
-100 -1 -1
+100 -1 -1 -1
 -1 0 0
 S
 #128
@@ -285,12 +291,16 @@ appears when you finish any of the quests.
 5 0 0 4
 L
 5 0
-1440 -1 -1
+1440 -1 -1 -1
 -1 0 0
 L
 1 0
-10900 -1 -1
+10900 -1 -1 -1
 14 c c
+L
+6 0
+50 -1 -1 -1
+-1 0 0
 S
 #129
 A Gigantic Nest~
@@ -302,29 +312,30 @@ egg could hatch any time.
    There are several quests to choose from each time you find one of these
 nests, but you can only do one per nest. Save up your rewards and buy new
 crafting patterns and items at the end of the quest.
-   This is a solo adventure. Only one player can enter the nest at a time.
+   Type 'enter nest' to climb inside. This is a solo adventure. Only one player
+can enter the nest at a time.
 ~
 11000 11074 100-125
-50 0 dg 1
+50 0 dgp 1
 L
 5 0
-1440 -1 -1
+1440 -1 -1 -1
 -1 0 0
 L
 6 0
-50 -1 -1
+50 -1 -1 -1
 -1 0 0
 L
 4 0
-11000 11000 11000
+11000 11000 11000 -1
 -1 b bcn
 L
 4 0
-11003 11000 11000
+11003 11000 11000 -1
 -1 el cejl
 L
 4 0
-11002 11000 11000
+11002 11000 11000 -1
 -1 c beln
 S
 #130
@@ -333,14 +344,14 @@ Paul Clarke~
 The mountain has opened up and lava is flowing forth at the surface!
 ~
 10190 10199 0-0
-1 0 dg 0
+1 0 dgl 0
 L
 4 0
-10190 10190 10190
+10190 10190 10190 -1
 -1 c 0
 L
 5 0
-30240 -1 -1
+30240 -1 -1 -1
 -1 0 0
 T 10195
 S
@@ -351,76 +362,69 @@ Paul Clarke~
 closely together. Sewers squirrel away the dirtiest parts of society, keeping
 the foul stench of mankind's unmentionable waste out of sight, and out of mind.
 But the sewer attracts two more of society's unwanted: the poor, and the rats.
+   Enter the sewer and see if you can help out the people who dwell within. If
+not, perhaps you can at least clear out the rats.
 ~
 10011 10027 1-50
-30 30 be 0
+30 30 bek 0
 L
 2 ab
-9 10011 10012
+9 10011 10012 -1
 -1 0 0
 L
 5 0
-7200 -1 -1
+7200 -1 -1 -1
 -1 0 0
 L
 3 ab
-5009 10011 10012
+5009 10011 10012 -1
 -1 0 0
 L
 6 0
-30 -1 -1
+30 -1 -1 -1
 -1 0 0
 S
 #141
-The Sewer: Goblin Outpost~
+The Sewer: Goblin Outpost (replaced by 10450)~
 Paul Clarke~
    Strange sounds are coming from the sewer grate, and waste has been backing
 up into the streets. This can only mean one thing: Goblins! Will you buy the
 goblins' wares, or drive them from the city? This adventure sells 6 crafting
 patterns and 4 unique buildings. You can also fight the goblins solo or in
 pairs, to earn their prized gear.
+NOTE: This is the old version of Goblin Outpost. It is replaced by vnum
+10450.
 ~
-10450 10499 50-100
-30 120 0 2
-L
-2 ab
-9 10450 10451
--1 0 0
-L
-3 ab
-5009 10450 10451
--1 0 0
-L
-6 0
-30 -1 -1
--1 0 0
+0 0 50-100
+30 120 ak 2
 L
 5 0
-1440 -1 -1
+1440 -1 -1 -1
 -1 0 0
 S
 #160
-The Tower Skycleave~
+OLD The Tower Skycleave~
 Paul Clarke~
    The Tower Skycleave is renowned throughout the land for its powerful
 sorcerers and unconventional research. It funds its discoveries through patents
 and tourism, and a sign out front eagerly encourages you to visit. Parts of the
 tower are designed for different level ranges, so use the 'consider' command
 judiciously before you attack things.
+   This adventure has been replaced by 11800.
 ~
 10030 10099 30-200
-1 240 0 0
+1 240 akl 0
 L
 1 0
-10030 -1 -1
+10030 -1 -1 -1
 0 bdel bdelo
 L
 5 0
-1440 -1 -1
+1440 -1 -1 -1
 -1 0 0
 S
 #161
-Portal to the Primeval~
+Portal to the Primeval (replaced by 10250)~
 Paul Clarke~
    The High Sorcerers in your tower have managed to open a chronoportal into
 the past! Follow Archsorcerer Malfernes through the portal and explore the
@@ -428,23 +432,15 @@ Primeval Era, when the ancient ancestors of the dragons ruled endless jungles.
 But beware, because it's easy to get lost and you make a delicious snack for
 the dracosaurs.
 ~
-10250 10299 75-100
-10 0 f 4
+0 0 75-100
+10 0 afk 4
 L
 5 0
-1440 -1 -1
--1 0 0
-L
-3 a
-5511 10250 10251
--1 0 0
-L
-6 0
-30 -1 -1
+1440 -1 -1 -1
 -1 0 0
 S
 #170
-Hamlet of the Undead~
+Hamlet of the Undead (replaced by 10400)~
 Paul Clarke~
    You've come across a small hamlet, ablaze and beset by the undead. Most of
 the citizens have fled, but it looks as if the city needs help. With no army to
@@ -453,16 +449,18 @@ This adventure has three wings:
  Market Street: Solo players
  Main Street: Two players
  Temple Street: Groups
+NOTE: This is the old version of Hamlet of the Undead. It is replaced by
+vnum 10400
 ~
-10400 10449 175-225
-10 360 0 4
+0 0 175-225
+10 360 ak 4
 L
 5 0
-1440 -1 -1
+1440 -1 -1 -1
 -1 0 0
 L
 1 a
-10400 -1 -1
+10400 -1 -1 -1
 0 de de
 S
 #180
@@ -483,14 +481,14 @@ Notes for implementors:
   the notes.
 ~
 10730 10749 0-25
-1 0 a 0
+1 0 al 0
 L
 5 0
-10080 -1 -1
+10080 -1 -1 -1
 -1 0 0
 L
 0 0
-10730 -1 -1
+10730 -1 -1 -1
 14 0 0
 S
 #181
@@ -498,8 +496,8 @@ Goblin Mines~
 Paul Clarke~
    The goblins have fled the mines and something tells you it's not good.
 Venture into the goblin mines and see what sends even goblins running for their
-lives! And maybe if you can find those goblins, they'll be willing to reward
-you for clearing out the mine.
+lives! And maybe if you can find those goblins running around outside, they'll
+be willing to reward you for clearing out the mine.
 
 Directions for implementors:
 - Increase the instance limit to the number of newbie islands in your game.
@@ -507,42 +505,18 @@ Directions for implementors:
 - Make sure your newbie islands have mountains.
 ~
 10750 10774 0-25
-1 10 ehj 0
+1 10 ehjl 0
 L
 5 0
-10080 -1 -1
+10080 -1 -1 -1
 -1 0 0
 L
 1 0
-10750 -1 -1
+10750 -1 -1 -1
 9 c bdeln
 L
 6 0
-80 -1 -1
+80 -1 -1 -1
 -1 0 0
-S
-#190
-Winter Wonderland~
-Paul Clarke and Owen Morris~
-Venture to the top of a snowy mountain in search of holiday gifts.
-
-EmpireMUD Administrators: You should remove the IN-DEV flag
-from this adventure during the Christmas season, and re-add
-the flag when you're ready to shut the adventure off again.
-~
-10700 10729 0-300
-3 0 ace 0
-L
-5 0
-60 -1 -1
--1 0 0
-L
-4 0
-10700 10700 10701
--1 n 0
-L
-4 0
-10701 10700 10701
--1 el 0
 S
 $

@@ -1,38 +1,3 @@
-Cyrillization (UTF-8 codetable) by Prool
-
-Compile under Android 6.0 (dirty instruction)
----------------------------------------------
-
-cp configure.android configure
-
-./configure
-
-cd src
-
-add flag '-DANDROID' to Makefile to end of line 'MYFLAGS=...'
-in Makefile: replace 'all: .accepted' to 'all:'
-in Makefile: replace 'utils: .accepted' to 'utils:'
-
-make
-
-cd ..
-
-{Execute chapter 5 "Create a world" (see below)}
-
-bin/empire <port>
-
-Prool works
------------
-
-My own branch is named 'prool-shard'
-
-This code is working in host mud.kharkov.org, port 7000
-
----
-Prool, proolix@gmail.com, mud.kharkov.org
-Kharkiv, Ukraine
-=========================================================================
-
 Warning: Always back up your EmpireMUD before updating your git checkout. Some
 patches may require playerfile conversions or may have other unexpected side-
 effects.
@@ -249,6 +214,9 @@ Futher steps once you are logged into EmpireMUD:
   the correct paths for the game and backup directories. You should set these
   on a cron, to get hourly backups:
    0 * * * * php /path/to/backups/make-backup.php
+- If you end up with a large number of former players and your MUD's startup
+  time is long, remove the -q flag from your autorun to enable auto-deletes.
+  See HELP AUTO-DELETE in-game for more information on configuring it.
 
 
 Other Documentation

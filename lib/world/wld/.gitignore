@@ -1,3 +1,7 @@
 *.wld
+*/*.wld
+*/*.pack
 map.txt
 map
+read_map
+*.yml

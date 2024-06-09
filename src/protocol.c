@@ -2,7 +2,7 @@
 *   File: protocol.c                                      EmpireMUD 2.0b5 *
 *  Usage: KaVir's protocol snippet                                        *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -33,6 +33,7 @@
 #include "db.h"
 #include "skills.h"
 #include "dg_scripts.h"
+#include "constants.h"
 
 #ifdef HAVE_ARPA_TELNET_H
 #include <arpa/telnet.h>
@@ -52,7 +53,7 @@ static void Write(descriptor_t *apDescriptor, const char *apData) {
 }
 
 static void ReportBug(const char *apText) {
-	log(apText);
+	log("%s", apText);
 }
 
 static void InfoMessage(descriptor_t *apDescriptor, const char *apData) {
@@ -118,7 +119,7 @@ static const char s_Gauge5[] = "\005\002Opponent\002darkred\002OPPONENT_HEALTH\0
 #define NUMBER_IN_THE_RANGE(x,y)   false, true,  false, false,  x,  y,  0, NULL
 #define BOOLEAN_SET_TO(x)          false, true,  false, false,  0,  1,  x, NULL
 #define STRING_WITH_LENGTH_OF(x,y) true,  true,  false, false,  x,  y,  0, NULL
-#define STRING_WRITE_ONCE(x,y)     true,  true,  true,  false, -1, -1,  0, NULL
+#define STRING_WRITE_ONCE(x,y)     true,  true,  true,  false,  x,  y,  0, NULL
 #define STRING_GUI(x)              true,  false, false, true,  -1, -1,  0, x
 
 static variable_name_t VariableNameTable[eMSDP_MAX+1] = {
@@ -129,6 +130,7 @@ static variable_name_t VariableNameTable[eMSDP_MAX+1] = {
 	{ eMSDP_SNIPPET_VERSION, "SNIPPET_VERSION", NUMBER_READ_ONLY_SET_TO(SNIPPET_VERSION) },
 	
 	/* Character */
+	{ eMSDP_GENDER, "GENDER", STRING_READ_ONLY },
 	{ eMSDP_HEALTH, "HEALTH", NUMBER_READ_ONLY },
 	{ eMSDP_HEALTH_MAX, "HEALTH_MAX", NUMBER_READ_ONLY },
 	{ eMSDP_HEALTH_REGEN, "HEALTH_REGEN", NUMBER_READ_ONLY },
@@ -155,6 +157,8 @@ static variable_name_t VariableNameTable[eMSDP_MAX+1] = {
 	{ eMSDP_BONUS_EXP, "BONUS_EXP", NUMBER_READ_ONLY },
 	{ eMSDP_INVENTORY, "INVENTORY", NUMBER_READ_ONLY },
 	{ eMSDP_INVENTORY_MAX, "INVENTORY_MAX", NUMBER_READ_ONLY },
+	{ eMSDP_TEMPERATURE, "TEMPERATURE", NUMBER_READ_ONLY },
+	{ eMSDP_TEMPERATURE_LABEL, "TEMPERATURE_LABEL", STRING_READ_ONLY },
 	
 	{ eMSDP_STR, "STR", NUMBER_READ_ONLY },
 	{ eMSDP_DEX, "DEX", NUMBER_READ_ONLY },
@@ -187,6 +191,8 @@ static variable_name_t VariableNameTable[eMSDP_MAX+1] = {
 	{ eMSDP_EMPIRE_TERRITORY_MAX, "EMPIRE_TERRITORY_MAX", NUMBER_READ_ONLY },
 	{ eMSDP_EMPIRE_TERRITORY_OUTSIDE, "EMPIRE_TERRITORY_OUTSIDE", NUMBER_READ_ONLY },
 	{ eMSDP_EMPIRE_TERRITORY_OUTSIDE_MAX, "EMPIRE_TERRITORY_OUTSIDE_MAX", NUMBER_READ_ONLY },
+	{ eMSDP_EMPIRE_TERRITORY_FRONTIER, "EMPIRE_TERRITORY_FRONTIER", NUMBER_READ_ONLY },
+	{ eMSDP_EMPIRE_TERRITORY_FRONTIER_MAX, "EMPIRE_TERRITORY_FRONTIER_MAX", NUMBER_READ_ONLY },
 	{ eMSDP_EMPIRE_WEALTH, "EMPIRE_WEALTH", NUMBER_READ_ONLY },
 	{ eMSDP_EMPIRE_SCORE, "EMPIRE_SCORE", NUMBER_READ_ONLY },
 	
@@ -206,7 +212,12 @@ static variable_name_t VariableNameTable[eMSDP_MAX+1] = {
 	{ eMSDP_ROOM_NAME, "ROOM_NAME", STRING_READ_ONLY },
 	{ eMSDP_ROOM_VNUM, "ROOM_VNUM", NUMBER_READ_ONLY },
 	{ eMSDP_WORLD_TIME, "WORLD_TIME", NUMBER_READ_ONLY },
+	{ eMSDP_WORLD_DAY_OF_MONTH, "WORLD_DAY_OF_MONTH", NUMBER_READ_ONLY },
+	{ eMSDP_WORLD_MONTH, "WORLD_MONTH", STRING_READ_ONLY },
+	{ eMSDP_WORLD_YEAR, "WORLD_YEAR", NUMBER_READ_ONLY },
 	{ eMSDP_WORLD_SEASON, "WORLD_SEASON", STRING_READ_ONLY },
+	{ eMSDP_AMBIENT_TEMPERATURE, "AMBIENT_TEMPERATURE", NUMBER_READ_ONLY },
+	{ eMSDP_AMBIENT_TEMPERATURE_LABEL, "AMBIENT_TEMPERATURE_LABEL", STRING_READ_ONLY },
 	
 	/* Configurable variables */
 	{ eMSDP_CLIENT_ID, "CLIENT_ID", STRING_WRITE_ONCE(1,40) },
@@ -339,7 +350,7 @@ static void want_reduced_color_codes(descriptor_data *desc, const char *fg, cons
 		}
 		// this happens even if the last one triggered
 		if (strcmp(fg, desc->color.want_fg) && (*desc->color.want_fg || strcmp(fg, desc->color.last_fg) || desc->color.want_clean)) {
-			snprintf(desc->color.want_fg, COLREDUC_SIZE, "%s", fg);
+			safe_snprintf(desc->color.want_fg, COLREDUC_SIZE, "%s", fg);
 		}
 	}
 	if (bg && *bg) {
@@ -350,7 +361,7 @@ static void want_reduced_color_codes(descriptor_data *desc, const char *fg, cons
 		}
 		// this happens even if the last one triggered
 		if (strcmp(bg, desc->color.want_bg) && (*desc->color.want_bg || strcmp(bg, desc->color.last_bg) || desc->color.want_clean || (*desc->color.want_fg && strstr(desc->color.want_fg, "[0;")))) {
-			snprintf(desc->color.want_bg, COLREDUC_SIZE, "%s", bg);
+			safe_snprintf(desc->color.want_bg, COLREDUC_SIZE, "%s", bg);
 		}
 	}
 }
@@ -678,7 +689,7 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 		const char ColourChar[] = { COLOUR_CHAR, '\0' };
 		bool_t bColourOn = true;	// always default to true, or many parts of the code won't work correctly -- TODO change all instances of & in the code to \t so this can be a config
 	#endif /* COLOUR_CHAR */
-	bool_t bTerminate = false, bUseMXP = false, bUseMSP = false;
+	bool_t bTerminate = false, bUseMXP = false, bUseMSP = false, want_cap = FALSE, want_lower = FALSE;
 	int i = 0, j = 0; /* Index values */
 
 	protocol_t *pProtocol = apDescriptor ? apDescriptor->pProtocol : NULL;
@@ -799,7 +810,7 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 						pCopyFrom = LinkStop;
 					pProtocol->bBlockMXP = false;
 					break;
-				case '<':
+				case '<': {
 					if (!pProtocol->bBlockMXP && pProtocol->pVariables[eMSDP_MXP]->ValueInt) {
 						pCopyFrom = MXPStart;
 						bUseMXP = true;
@@ -811,7 +822,8 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 					}
 					pProtocol->bBlockMXP = false;
 					break;
-				case '[':
+				}
+				case '[': {
 					if (tolower(apData[++j]) == 'u') {
 						char Buffer[8] = {'\0'}, BugString[256];
 						int Index = 0;
@@ -842,7 +854,7 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 							ReportBug(BugString);
 						}
 						else if (!bValid) {
-							sprintf(BugString, "BUG: Unicode substitute '%s' truncated.  Missing ']'?\n", Buffer);
+							sprintf(BugString, "BUG: Unicode substitute '%s' truncated. Missing ']'?\n", Buffer);
 							ReportBug(BugString);
 						}
 						else if (pProtocol->pVariables[eMSDP_UTF_8]->ValueInt) {
@@ -912,7 +924,7 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 							ReportBug(BugString);
 						}
 						else if (!bValid) {
-							sprintf(BugString, "BUG: Required MXP version '%s' too long.  Missing ']'?\n", Buffer);
+							sprintf(BugString, "BUG: Required MXP version '%s' too long. Missing ']'?\n", Buffer);
 							ReportBug(BugString);
 						}
 						else if (!strcmp(pProtocol->pMXPVersion, "Unknown") || strcmp(pProtocol->pMXPVersion, Buffer) < 0) {
@@ -927,6 +939,7 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 						bTerminate = !bDone;
 					}
 					break;
+				}
 				case '!': /* Used for in-band MSP sound triggers */
 					pCopyFrom = MSP;
 					break;
@@ -938,6 +951,14 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 				case '-':
 					bColourOn = false;
 					break;
+				case 'Z': {
+					want_cap = TRUE;
+					break;
+				}
+				case 'z': {
+					want_lower = TRUE;
+					break;
+				}
 				case COLOUR_CHAR: {	// allows \t& to guarantee a printed & whether COLOUR_CHAR is on or off, unlike && which displays both & if COLOUR_CHAR is undefined
 					pCopyFrom = ColourChar;
 					break;
@@ -961,7 +982,16 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 				
 				// requested output
 				while (*pCopyFrom != '\0' && i < MAX_OUTPUT_BUFFER) {
-					Result[i++] = *pCopyFrom++;
+					if (want_cap) {
+						Result[i++] = UPPER(*pCopyFrom++);
+					}
+					else if (want_lower) {
+						Result[i++] = LOWER(*pCopyFrom++);
+					}
+					else {
+						Result[i++] = *pCopyFrom++;
+					}
+					want_cap = want_lower = FALSE;
 				}
 			}
 		}
@@ -1112,6 +1142,15 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 					}
 					break;
 				}
+				
+				case 'Z': {
+					want_cap = TRUE;
+					break;
+				}
+				case 'z': {
+					want_lower = TRUE;
+					break;
+				}
 
 				default:
 					#ifdef DISPLAY_INVALID_COLOUR_CODES
@@ -1131,7 +1170,16 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 				
 				// show requested output
 				while (*pCopyFrom != '\0' && i < MAX_OUTPUT_BUFFER) {
-					Result[i++] = *pCopyFrom++;
+					if (want_cap) {
+						Result[i++] = UPPER(*pCopyFrom++);
+					}
+					else if (want_lower) {
+						Result[i++] = LOWER(*pCopyFrom++);
+					}
+					else {
+						Result[i++] = *pCopyFrom++;
+					}
+					want_cap = want_lower = FALSE;
 				}
 			}
 		}
@@ -1139,8 +1187,18 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 
 		else if (bUseMXP && apData[j] == '>') {
 			const char *pCopyFrom = MXPStop;
-			while (*pCopyFrom != '\0' && i < MAX_OUTPUT_BUFFER)
-				Result[i++] = *pCopyFrom++;
+			while (*pCopyFrom != '\0' && i < MAX_OUTPUT_BUFFER) {
+				if (want_cap) {
+					Result[i++] = UPPER(*pCopyFrom++);
+				}
+				else if (want_lower) {
+					Result[i++] = LOWER(*pCopyFrom++);
+				}
+				else {
+					Result[i++] = *pCopyFrom++;
+				}
+				want_cap = want_lower = FALSE;
+			}
 			bUseMXP = false;
 		}
 		else if (bUseMSP && j > 0 && apData[j-1] == '!' && apData[j] == '!' && PrefixString("SOUND(", &apData[j+1])) {
@@ -1155,7 +1213,16 @@ const char *ProtocolOutput(descriptor_t *apDescriptor, const char *apData, int *
 			}
 			
 			// copy the character
-			Result[i++] = apData[j];
+			if (want_cap) {
+				Result[i++] = UPPER(apData[j]);
+			}
+			else if (want_lower) {
+				Result[i++] = LOWER(apData[j]);
+			}
+			else {
+				Result[i++] = apData[j];
+			}
+			want_cap = want_lower = FALSE;
 		}
 	}
 
@@ -1191,6 +1258,8 @@ void ProtocolNegotiate(descriptor_t *apDescriptor) {
 /* Tells the client to switch echo on or off. */
 void ProtocolNoEcho(descriptor_t *apDescriptor, bool_t abOn) {
 	ConfirmNegotiation(apDescriptor, eNEGOTIATED_ECHO, abOn, true);
+	// induce wait to prevent out-of-order echo messages
+	apDescriptor->wait = 0.4 RL_SEC;
 }
 
 
@@ -2553,18 +2622,17 @@ static const char *GetMSSP_Areas() {
 	// map areas:
 	count += HASH_COUNT(island_table);
 	
-	snprintf(buf, sizeof(buf), "%d", count);
+	safe_snprintf(buf, sizeof(buf), "%d", count);
 	return buf;
 }
 
 static const char *GetMSSP_Classes() {
 	static char buf[256];
-	snprintf(buf, sizeof(buf), "%d", NUM_CLASSES);
+	strcpy(buf, "1");
 	return buf;
 }
 
 static const char *GetMSSP_Codebase() {
-	extern const char *version;	// constants.c
 	return version;
 }
 
@@ -2583,18 +2651,36 @@ static const char *GetMSSP_DB_Size() {
 	// we're not 100% sure what counts toward DB Size, but here is a rough guess
 	size += HASH_CNT(idnum_hh, player_table_by_idnum);
 	size += HASH_COUNT(empire_table);
-	size += HASH_COUNT(mobile_table);
-	size += HASH_COUNT(object_table);
+	
+	size += HASH_COUNT(ability_table);
 	size += HASH_COUNT(adventure_table);
-	size += HASH_COUNT(world_table);
+	size += HASH_COUNT(archetype_table);
+	size += HASH_COUNT(augment_table);
 	size += HASH_COUNT(building_table);
+	size += HASH_COUNT(class_table);
+	size += HASH_COUNT(craft_table);
+	size += HASH_COUNT(crop_table);
+	size += HASH_COUNT(event_table);
+	size += HASH_COUNT(faction_table);
+	size += HASH_COUNT(generic_table);
+	size += HASH_COUNT(globals_table);
+	size += HASH_COUNT(mobile_table);
+	size += HASH_COUNT(morph_table);
+	size += HASH_COUNT(object_table);
+	size += HASH_COUNT(progress_table);
+	size += HASH_COUNT(quest_table);
 	size += HASH_COUNT(room_template_table);
 	size += HASH_COUNT(sector_table);
-	size += HASH_COUNT(crop_table);
+	size += HASH_COUNT(shop_table);
+	size += HASH_COUNT(skill_table);
+	size += HASH_COUNT(social_table);
 	size += HASH_COUNT(trigger_table);
-	size += HASH_COUNT(craft_table);
+	size += HASH_COUNT(vehicle_table);
+	size += HASH_COUNT(island_table);
 	
-	snprintf(buf, sizeof(buf), "%d", size);
+	// size += HASH_COUNT(world_table);
+	
+	safe_snprintf(buf, sizeof(buf), "%d", size);
 	return buf;
 }
 
@@ -2604,47 +2690,66 @@ static const char *GetMSSP_Extra_Descs() {
 	struct extra_descr_data *ex;
 	obj_data *obj, *next_obj;
 	bld_data *bld, *next_bld;
+	crop_data *crop, *next_crop;
+	sector_data *sect, *next_sect;
 	int count = 0;
 	
 	HASH_ITER(hh, object_table, obj, next_obj) {
 		if (GET_OBJ_ACTION_DESC(obj) && *GET_OBJ_ACTION_DESC(obj)) {
 			++count;
 		}
-		for (ex = obj->ex_description; ex; ex = ex->next) {
+		LL_FOREACH(GET_OBJ_EX_DESCS(obj), ex) {
 			++count;
 		}
 	}
 	HASH_ITER(hh, room_template_table, rmt, next_rmt) {
-		for (ex = GET_RMT_EX_DESCS(rmt); ex; ex = ex->next) {
+		LL_FOREACH(GET_RMT_EX_DESCS(rmt), ex) {
 			++count;
 		}
 	}
 	HASH_ITER(hh, building_table, bld, next_bld) {
-		for (ex = GET_BLD_EX_DESCS(bld); ex; ex = ex->next) {
+		LL_FOREACH(GET_BLD_EX_DESCS(bld), ex) {
+			++count;
+		}
+	}
+	HASH_ITER(hh, crop_table, crop, next_crop) {
+		LL_FOREACH(GET_CROP_EX_DESCS(crop), ex) {
+			++count;
+		}
+	}
+	HASH_ITER(hh, sector_table, sect, next_sect) {
+		LL_FOREACH(GET_SECT_EX_DESCS(sect), ex) {
 			++count;
 		}
 	}
 	
-	snprintf(buf, sizeof(buf), "%d", count);
+	safe_snprintf(buf, sizeof(buf), "%d", count);
 	return buf;
 }
 
 static const char *GetMSSP_Helpfiles() {
-	extern int top_of_helpt;	// db.c
-	static char buf[256];	
-	snprintf(buf, sizeof(buf), "%d", top_of_helpt + 1);
+	static char buf[256];
+	int iter, count = 0;
+	
+	for (iter = 0; iter <= top_of_helpt; ++iter) {
+		if (!help_table[iter].duplicate) {
+			++count;
+		}
+	}
+	
+	safe_snprintf(buf, sizeof(buf), "%d", count);
 	return buf;
 }
 
 static const char *GetMSSP_Hiring_Builders() {
 	static char buf[256];	
-	snprintf(buf, sizeof(buf), "%d", config_get_bool("hiring_builders") ? 1 : 0);
+	safe_snprintf(buf, sizeof(buf), "%d", config_get_bool("hiring_builders") ? 1 : 0);
 	return buf;
 }
 
 static const char *GetMSSP_Hiring_Coders() {
 	static char buf[256];	
-	snprintf(buf, sizeof(buf), "%d", config_get_bool("hiring_coders") ? 1 : 0);
+	safe_snprintf(buf, sizeof(buf), "%d", config_get_bool("hiring_coders") ? 1 : 0);
 	return buf;
 }
 
@@ -2663,7 +2768,7 @@ static const char *GetMSSP_IP() {
 static const char *GetMSSP_Levels() {
 	adv_data *iter, *next_iter;
 	static char buf[256];
-	int max = CLASS_SKILL_CAP;	// to start
+	int max = MAX_SKILL_CAP;	// to start
 	
 	// find highest level adventure zone:
 	HASH_ITER(hh, adventure_table, iter, next_iter) {
@@ -2672,7 +2777,7 @@ static const char *GetMSSP_Levels() {
 		}
 	}
 	
-	snprintf(buf, sizeof(buf), "%d", max);
+	safe_snprintf(buf, sizeof(buf), "%d", max);
 	return buf;
 }
 
@@ -2686,7 +2791,7 @@ static const char *GetMSSP_Minimum_Age() {
 
 static const char *GetMSSP_Mobiles() {
 	static char buf[256];
-	snprintf(buf, sizeof(buf), "%d", HASH_COUNT(mobile_table));
+	safe_snprintf(buf, sizeof(buf), "%d", HASH_COUNT(mobile_table));
 	return buf;
 }
 
@@ -2696,7 +2801,7 @@ static const char *GetMSSP_MudName() {
 
 static const char *GetMSSP_Objects() {
 	static char buf[256];
-	snprintf(buf, sizeof(buf), "%d", HASH_COUNT(object_table));
+	safe_snprintf(buf, sizeof(buf), "%d", HASH_COUNT(object_table));
 	return buf;
 }
 
@@ -2709,13 +2814,13 @@ static const char *GetMSSP_Players() {
 static const char *GetMSSP_Port() {
 	extern ush_int port;	// comm.c
 	static char buf[32];
-	snprintf(buf, sizeof(buf), "%d", port);
+	safe_snprintf(buf, sizeof(buf), "%d", port);
 	return buf;
 }
 
 static const char *GetMSSP_Rooms() {
 	static char buf[256];
-	snprintf(buf, sizeof(buf), "%d", HASH_COUNT(world_table));
+	safe_snprintf(buf, sizeof(buf), "%d", HASH_COUNT(world_table));
 	return buf;
 }
 
@@ -2723,7 +2828,7 @@ static const char *GetMSSP_Skills() {
 	static char buf[256];
 	
 	// we think this refers more to our concept of "abilities" than "skills"
-	snprintf(buf, sizeof(buf), "%d", HASH_COUNT(ability_table));
+	safe_snprintf(buf, sizeof(buf), "%d", HASH_COUNT(ability_table));
 	return buf;
 }
 
@@ -2733,7 +2838,7 @@ static const char *GetMSSP_Status() {
 
 static const char *GetMSSP_Triggers() {
 	static char buf[256];
-	snprintf(buf, sizeof(buf), "%d", HASH_COUNT(trigger_table));
+	safe_snprintf(buf, sizeof(buf), "%d", HASH_COUNT(trigger_table));
 	return buf;
 }
 
@@ -2852,8 +2957,8 @@ static void SendMSSP(descriptor_t *apDescriptor) {
 		{ "EQUIPMENT SYSTEM", "Level and Skill" },
 		{ "MULTIPLAYING", "No" },
 		{ "PLAYERKILLING", "Restricted" },
-		{ "QUEST SYSTEM", "0" },
-		{ "ROLEPLAYING", "" },
+		{ "QUEST SYSTEM", "Integrated" },
+		{ "ROLEPLAYING", "Encouraged" },
 		{ "TRAINING SYSTEM", "Skill" },
 		{ "WORLD ORIGINALITY", "All Original" },
 		
@@ -3024,4 +3129,435 @@ static char *AllocString(const char *apString) {
 	}
 
 	return pResult;
+}
+
+
+ //////////////////////////////////////////////////////////////////////////////
+//// MSDP SETTERS ////////////////////////////////////////////////////////////
+
+/**
+* Sends a large update of MSDP information, to be called when a player enters
+* the game, reconnects, or before/after an immortal switches (any time lots
+* of player info changes or is initially set).
+*
+* @param descriptor_data *desc The descriptor of the player.
+*/
+void send_initial_MSDP(descriptor_data *desc) {
+	char_data *ch;
+	
+	if (!desc || !(ch = desc->character)) {
+		return;
+	}
+	
+	// strings
+	update_MSDP_name(ch, NO_UPDATE);
+	update_MSDP_gender(ch, NO_UPDATE);
+	
+	// numeric data
+	update_MSDP_bonus_exp(ch, NO_UPDATE);
+	update_MSDP_inventory(ch, NO_UPDATE);
+	update_MSDP_level(ch, NO_UPDATE);
+	update_MSDP_money(ch, NO_UPDATE);
+	update_MSDP_temperature(ch, FALSE, NO_UPDATE);
+	
+	// lists
+	update_MSDP_affects(ch, NO_UPDATE);
+	update_MSDP_attributes(ch, NO_UPDATE);
+	update_MSDP_cooldowns(ch, NO_UPDATE);
+	update_MSDP_dots(ch, NO_UPDATE);
+	update_MSDP_empire_data(ch, NO_UPDATE);
+	update_MSDP_skills(ch, NO_UPDATE);
+	
+	// send it
+	MSDPUpdate(desc);
+}
+
+
+/**
+* Sends the update based on the update type (or not at all if NO_UPDATE).
+*
+* @param char_data *ch The player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+inline void check_send_msdp_update(char_data *ch, int send_update) {
+	if (ch->desc && send_update == UPDATE_NOW) {
+		MSDPUpdate(ch->desc);
+	}
+	else if (send_update == UPDATE_SOON) {
+		queue_delayed_update(ch, CDU_MSDP_SEND_UPDATES);
+	}
+}
+
+
+/**
+* Updates all affects for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_affects(char_data *ch, int send_update) {
+	char buf[MAX_STRING_LENGTH];
+	struct affected_type *aff;
+	size_t buf_size;
+	
+	if (ch->desc) {
+		// affects
+		*buf = '\0';
+		buf_size = 0;
+		LL_FOREACH(ch->affected, aff) {
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%c%s%c%ld", (char)MSDP_VAR, get_generic_name_by_vnum(aff->type), (char)MSDP_VAL, (aff->expire_time == UNLIMITED ? -1 : (aff->expire_time - time(0))));
+			if (buf_size >= sizeof(buf)) {
+				break;
+			}
+		}
+		MSDPSetTable(ch->desc, eMSDP_AFFECTS, buf);
+		
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates all attributes for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_attributes(char_data *ch, int send_update) {
+	char buf[MAX_STRING_LENGTH];
+	
+	if (ch->desc) {
+		// base
+		MSDPSetNumber(ch->desc, eMSDP_STR_PERM, GET_REAL_ATT(ch, STRENGTH));
+		MSDPSetNumber(ch->desc, eMSDP_DEX_PERM, GET_REAL_ATT(ch, DEXTERITY));
+		MSDPSetNumber(ch->desc, eMSDP_CHA_PERM, GET_REAL_ATT(ch, CHARISMA));
+		MSDPSetNumber(ch->desc, eMSDP_GRT_PERM, GET_REAL_ATT(ch, GREATNESS));
+		MSDPSetNumber(ch->desc, eMSDP_INT_PERM, GET_REAL_ATT(ch, INTELLIGENCE));
+		MSDPSetNumber(ch->desc, eMSDP_WIT_PERM, GET_REAL_ATT(ch, WITS));
+		
+		// core
+		MSDPSetNumber(ch->desc, eMSDP_STR, GET_STRENGTH(ch));
+		MSDPSetNumber(ch->desc, eMSDP_DEX, GET_DEXTERITY(ch));
+		MSDPSetNumber(ch->desc, eMSDP_CHA, GET_CHARISMA(ch));
+		MSDPSetNumber(ch->desc, eMSDP_GRT, GET_GREATNESS(ch));
+		MSDPSetNumber(ch->desc, eMSDP_INT, GET_INTELLIGENCE(ch));
+		MSDPSetNumber(ch->desc, eMSDP_WIT, GET_WITS(ch));
+		
+		// extra
+		MSDPSetNumber(ch->desc, eMSDP_BLOCK, get_block_rating(ch, FALSE));
+		MSDPSetNumber(ch->desc, eMSDP_DODGE, get_dodge_modifier(ch, NULL, FALSE) - (hit_per_dex * GET_DEXTERITY(ch)));	// same change made to it in score
+		MSDPSetNumber(ch->desc, eMSDP_TO_HIT, get_to_hit(ch, NULL, FALSE, FALSE) - (hit_per_dex * GET_DEXTERITY(ch)));	// same change as in score
+		safe_snprintf(buf, sizeof(buf), "%.2f", get_combat_speed(ch, WEAR_WIELD));
+		MSDPSetString(ch->desc, eMSDP_SPEED, buf);
+		MSDPSetNumber(ch->desc, eMSDP_RESIST_PHYSICAL, GET_RESIST_PHYSICAL(ch));
+		MSDPSetNumber(ch->desc, eMSDP_RESIST_MAGICAL, GET_RESIST_MAGICAL(ch));
+		MSDPSetNumber(ch->desc, eMSDP_BONUS_PHYSICAL, GET_BONUS_PHYSICAL(ch));
+		MSDPSetNumber(ch->desc, eMSDP_BONUS_MAGICAL, GET_BONUS_MAGICAL(ch));
+		MSDPSetNumber(ch->desc, eMSDP_BONUS_HEALING, GET_BONUS_HEALING(ch));
+		MSDPSetNumber(ch->desc, eMSDP_CRAFTING_LEVEL, get_crafting_level(ch));
+		MSDPSetNumber(ch->desc, eMSDP_INVENTORY_MAX, CAN_CARRY_N(ch));
+		
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates bonus experience info for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_bonus_exp(char_data *ch, int send_update) {
+	if (ch->desc && !IS_NPC(ch)) {
+		MSDPSetNumber(ch->desc, eMSDP_BONUS_EXP, GET_DAILY_BONUS_EXPERIENCE(ch));
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates all cooldowns for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_cooldowns(char_data *ch, int send_update) {
+	char buf[MAX_STRING_LENGTH];
+	struct cooldown_data *cool;
+	size_t buf_size;
+	
+	if (ch->desc) {
+		// cooldowns
+		*buf = '\0';
+		buf_size = 0;
+		LL_FOREACH(ch->cooldowns, cool) {
+			if (cool->expire_time > time(0)) {
+				buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%c%s%c%ld", (char)MSDP_VAR, get_generic_name_by_vnum(cool->type), (char)MSDP_VAL, cool->expire_time - time(0));
+			}
+		}
+		MSDPSetTable(ch->desc, eMSDP_COOLDOWNS, buf);
+		
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates all DoTs for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_dots(char_data *ch, int send_update) {
+	char buf[MAX_STRING_LENGTH];
+	struct over_time_effect_type *dot;
+	size_t buf_size;
+	
+	if (ch->desc) {
+		// dots
+		*buf = '\0';
+		buf_size = 0;
+		LL_FOREACH(ch->over_time_effects, dot) {
+			// each dot has a sub-table
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%c%s%c%c", (char)MSDP_VAR, get_generic_name_by_vnum(dot->type), (char)MSDP_VAL, (char)MSDP_TABLE_OPEN);
+			
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%cDURATION%c%d", (char)MSDP_VAR, (char)MSDP_VAL, dot->time_remaining);
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%cTYPE%c%s", (char)MSDP_VAR, (char)MSDP_VAL, damage_types[dot->damage_type]);
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%cDAMAGE%c%d", (char)MSDP_VAR, (char)MSDP_VAL, dot->damage * dot->stack);
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%cSTACKS%c%d", (char)MSDP_VAR, (char)MSDP_VAL, dot->stack);
+			
+			// end table
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%c", (char)MSDP_TABLE_CLOSE);
+		}
+		MSDPSetTable(ch->desc, eMSDP_DOTS, buf);
+		
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates all empire claim/territory data for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_empire_claims(char_data *ch, int send_update) {
+	if (ch->desc) {
+		// empire
+		if (GET_LOYALTY(ch) && !IS_NPC(ch)) {
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY, EMPIRE_TERRITORY(GET_LOYALTY(ch), TER_TOTAL));
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY_MAX, land_can_claim(GET_LOYALTY(ch), TER_TOTAL));
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY_OUTSIDE, EMPIRE_TERRITORY(GET_LOYALTY(ch), TER_OUTSKIRTS));
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY_OUTSIDE_MAX, land_can_claim(GET_LOYALTY(ch), TER_OUTSKIRTS));
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY_FRONTIER, EMPIRE_TERRITORY(GET_LOYALTY(ch), TER_FRONTIER));
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY_FRONTIER_MAX, land_can_claim(GET_LOYALTY(ch), TER_FRONTIER));
+		}
+		else {
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY, 0);
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY_MAX, 0);
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY_OUTSIDE, 0);
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY_OUTSIDE_MAX, 0);
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY_FRONTIER, 0);
+			MSDPSetNumber(ch->desc, eMSDP_EMPIRE_TERRITORY_FRONTIER_MAX, 0);
+		}
+		
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates all empire data for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_empire_data(char_data *ch, int send_update) {
+	if (ch->desc) {
+		// empire
+		update_MSDP_empire_claims(ch, NO_UPDATE);
+		if (GET_LOYALTY(ch) && !IS_NPC(ch)) {
+			MSDPSetString(ch->desc, eMSDP_EMPIRE_NAME, EMPIRE_NAME(GET_LOYALTY(ch)));
+			MSDPSetString(ch->desc, eMSDP_EMPIRE_ADJECTIVE, EMPIRE_ADJECTIVE(GET_LOYALTY(ch)));
+			MSDPSetString(ch->desc, eMSDP_EMPIRE_RANK, strip_color(EMPIRE_RANK(GET_LOYALTY(ch), GET_RANK(ch)-1)));
+			// wealth/score are updated every second in msdp_update()
+		}
+		else {
+			MSDPSetString(ch->desc, eMSDP_EMPIRE_NAME, "");
+			MSDPSetString(ch->desc, eMSDP_EMPIRE_ADJECTIVE, "");
+			MSDPSetString(ch->desc, eMSDP_EMPIRE_RANK, "");
+		}
+		
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Runs MSDP empire-data update for all online players for an empire.
+*
+* @param empire_data *emp The empire to update (or NULL for all empires).
+* @param int claims_only If TRUE, only updates claim data (not name/rank).
+* @param int delay If TRUE, will queue a delayed update rather than updating right away.
+*/
+void update_MSDP_empire_data_all(empire_data *emp, int claims_only, int delay) {
+	descriptor_data *desc;
+	
+	LL_FOREACH(descriptor_list, desc) {
+		if (STATE(desc) == CON_PLAYING && desc->character && (!emp || GET_LOYALTY(desc->character) == emp)) {
+			if (delay) {
+				queue_delayed_update(desc->character, claims_only ? CDU_MSDP_EMPIRE_CLAIMS : CDU_MSDP_EMPIRE_ALL);
+			}
+			else {	// not delay
+				if (claims_only) {
+					update_MSDP_empire_claims(desc->character, UPDATE_SOON);
+				}
+				else {
+					update_MSDP_empire_data(desc->character, UPDATE_SOON);
+				}
+			}
+		}
+	}
+}
+
+
+/**
+* Updates sex/gender info for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_gender(char_data *ch, int send_update) {
+	if (ch->desc) {
+		MSDPSetString(ch->desc, eMSDP_GENDER, genders[GET_SEX(ch)]);
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates inventory info for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_inventory(char_data *ch, int send_update) {
+	if (ch->desc) {
+		MSDPSetNumber(ch->desc, eMSDP_INVENTORY, IS_CARRYING_N(ch));
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates level info for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_level(char_data *ch, int send_update) {
+	if (ch->desc) {
+		MSDPSetNumber(ch->desc, eMSDP_LEVEL, get_approximate_level(ch));
+		MSDPSetNumber(ch->desc, eMSDP_GEAR_LEVEL, IS_NPC(ch) ? 0 : GET_GEAR_LEVEL(ch));
+		MSDPSetNumber(ch->desc, eMSDP_SKILL_LEVEL, IS_NPC(ch) ? 0 : GET_SKILL_LEVEL(ch));
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates coinage info for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_money(char_data *ch, int send_update) {
+	if (ch->desc) {
+		MSDPSetNumber(ch->desc, eMSDP_MONEY, total_coins(ch));
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates name info for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_name(char_data *ch, int send_update) {
+	if (ch->desc) {
+		MSDPSetString(ch->desc, eMSDP_ACCOUNT_NAME, GET_REAL_NAME(ch));
+		MSDPSetString(ch->desc, eMSDP_CHARACTER_NAME, PERS(ch, ch, FALSE));
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates all skill info for MSDP.
+*
+* @param char_data *ch A player.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_skills(char_data *ch, int send_update) {
+	struct player_skill_data *skill, *next_skill;
+	char buf[MAX_STRING_LENGTH];
+	size_t buf_size;
+	
+	if (ch->desc && !IS_NPC(ch)) {
+		get_player_skill_string(ch, buf, FALSE);
+		MSDPSetString(ch->desc, eMSDP_CLASS, buf);
+	
+		// skills
+		*buf = '\0';
+		buf_size = 0;
+		HASH_ITER(hh, GET_SKILL_HASH(ch), skill, next_skill) {
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%c%s%c%c", (char)MSDP_VAR, SKILL_NAME(skill->ptr), (char)MSDP_VAL, (char)MSDP_TABLE_OPEN);
+		
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%cLEVEL%c%d", (char)MSDP_VAR, (char)MSDP_VAL, skill->level);
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%cEXP%c%.2f", (char)MSDP_VAR, (char)MSDP_VAL, skill->exp);
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%cRESETS%c%d", (char)MSDP_VAR, (char)MSDP_VAL, skill->resets);
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%cNOSKILL%c%d", (char)MSDP_VAR, (char)MSDP_VAL, skill->noskill ? 1 : 0);
+		
+			// end table
+			buf_size += snprintf(buf + buf_size, sizeof(buf) - buf_size, "%c", (char)MSDP_TABLE_CLOSE);
+		}
+		MSDPSetTable(ch->desc, eMSDP_SKILLS, buf);
+	
+		check_send_msdp_update(ch, send_update);
+	}
+}
+
+
+/**
+* Updates temperature for MSDP.
+*
+* @param char_data *ch A player.
+* @param bool room_only If TRUE, skips the player's temperature.
+* @param int send_update NO_UPDATE, UPDATE_NOW (immediately send MSDP update), or UPDATE_SOON (send MSDP update within 1 second).
+*/
+void update_MSDP_temperature(char_data *ch, bool room_only, int send_update) {
+	char buf[256];
+	int temp, ambient;
+	
+	if (ch->desc) {
+		if (!room_only) {
+			// mine
+			temp = get_relative_temperature(ch);
+			MSDPSetNumber(ch->desc, eMSDP_TEMPERATURE, temp);
+			strcpy(buf, temperature_to_string(temp));
+			MSDPSetString(ch->desc, eMSDP_TEMPERATURE_LABEL, buf);
+		}
+		
+		// room (always)
+		ambient = get_room_temperature(IN_ROOM(ch));
+		MSDPSetNumber(ch->desc, eMSDP_AMBIENT_TEMPERATURE, ambient);
+		strcpy(buf, temperature_to_string(ambient));
+		MSDPSetString(ch->desc, eMSDP_AMBIENT_TEMPERATURE_LABEL, buf);
+		
+		check_send_msdp_update(ch, send_update);
+	}
 }

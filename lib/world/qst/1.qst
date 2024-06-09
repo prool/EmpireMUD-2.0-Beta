@@ -1,0 +1,380 @@
+#100
+Flint Tutorial~
+   You found a flint stone! You can dig up rocks and flints all over. Both
+types can be used to lay roads, but you can also make tools from flints. Flint
+is generally found 15% of the time when digging.
+Instructions:
+ 1. You need a rock and a flint stone.
+ 2. 'Use' the rock.
+ 3. Chip the flint.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+   Chipped flints aren't very useful on their own, but you can make them into
+other tools. Chip it again to make one.
+~
+8 h 0 15 -1
+A
+2 102
+R
+0 0 1
+R
+6 180 1
+W
+2 180 0 1 -
+Z
+2 180
+S
+#102
+Fire Sticks Tutorial~
+   After gathering some sticks, you can select the best ones to make a
+fire-starting tool. Here are the steps:
+ 1. Gather a couple sticks in the forest (gather).
+ 2. Check what you need to make the fire sticks (craft info fire sticks).
+ 3. Make the fire sticks (craft fire sticks).
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+   Congratulations! You can now light sticks, trees, and other items. Now get
+out there and set the world on fire!
+~
+7 h 0 15 -1
+A
+2 121
+R
+0 0 1
+R
+6 183 1
+W
+2 940 0 1 -
+Z
+2 940
+S
+#121
+Handle Tutorial~
+   You can turn a sapling into a handle that could then be made into a tool or
+weapon. Here are the instructions:
+ 1. 'Gather' a sapling in a forest (12% chance) or 'chop' one down in a copse.
+ 2. 'Use' some kind of knife, such as a spear head (chip flints to make one).
+ 3. Type 'craft handle'.
+ Tip: You can type 'craft info handle' to see more info about the craft.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+This handle can be used for lots of other crafts.
+~
+6 h 0 15 -1
+A
+2 131
+R
+0 0 1
+R
+6 919 1
+T 121
+W
+2 919 0 1 -
+Z
+2 919
+S
+#124
+Scrape Tutorial~
+   Now that you have a tree, there's a couple of things you can do with it.
+One of them is scrape it to make a log (a type of pillar component). Here's
+how:
+ 1. 'Use' a knife tool (such as a handaxe).
+ 2. Type 'scrape tree'.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+You seem to have mastered the scrape command.
+~
+4 h 0 15 -1
+A
+2 120
+R
+0 0 1
+R
+6 5107 1
+W
+2 124 0 1 -
+Z
+2 124
+S
+#125
+Saw Tutorial~
+   Now that you know how to get trees, it's time to learn to saw them into
+lumber. Here's what to do:
+ 1. Find a lumberyard (or type 'build lumberyard' to make one).
+ 2. With your large tree, type 'saw tree' at the lumberyard.
+ Tip: You can also 'store' your trees and lumber there.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+Lumber can be used for all kinds of buildings and crafts.
+~
+1 h 0 15 -1
+A
+2 120
+R
+0 0 1
+W
+2 125 0 1 -
+Z
+2 125
+S
+#126
+Rough Wood Tutorial~
+   You have found some rough wood, which comes from the desert. It is just as
+versatile as other types of wood, but requires some additional work. For
+starters, you can saw it into boards. Here's how:
+ 1. Find a lumberyard (or type 'build lumberyard' to make one).
+ 2. With your rough wood, type 'saw wood' at the lumberyard.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+Rough boards can be used as lumber or for crafting.
+~
+2 h 0 15 -1
+A
+2 122
+R
+0 0 1
+R
+6 127 1
+W
+2 126 0 1 -
+Z
+2 126
+S
+#127
+Bound Wooden Column Tutorial~
+   In order to make pillars out of desert resources, you'll need to craft bound
+wooden columns. Here's how:
+ 1. Gather 3 saplings (of any kind).
+ 2. Gather 5 items made of soft plant fiber, such as bundles of long leaves or
+    cotton.
+ 3. Make a rope (craft rope).
+ 4. Make a bound wooden column (craft bound wooden column).
+ Tip: Type 'craft info bound wooden column' to see more information about it.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+You can use the column to build all kinds of things.
+~
+6 h 0 15 -1
+A
+2 134
+A
+2 139
+R
+0 0 1
+R
+6 5107 1
+W
+2 127 0 1 -
+Z
+2 127
+S
+#128
+Pole Tutorial~
+   You've found a sapling -- a narrow, straight tree. You can scrape the
+sapling to make a pole, which can then be used to make buildings or crafts. 
+Here's how:
+ 1. 'Use' a knife tool (such as a handaxe).
+ 2. Type 'scrape sapling' (or 'scrape shoot', if you have that instead).
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+You've mastered scraping saplings to make poles.
+~
+6 h 0 15 -1
+A
+2 131
+A
+2 134
+A
+2 135
+A
+2 136
+R
+0 0 1
+W
+1 6035 0 1 -
+Z
+2 142
+Z
+2 146
+S
+#130
+Water Tutorial~
+   When you get thirsty, you can type 'drink bottle' to drink from your gourd
+water bottle. But when the bottle is empty, you'll need to refill it. Here's
+how:
+ 1. Find the edge of a lake or river using 'scan lake' or 'scan river'. They
+    can usually be found on the newbie island, but you may have to move around
+    to find them. You don't need to enter the lake or river tile, just stand
+    next to it.
+ 2. You could also build a well. Type 'build info well' to see what you need
+    to make one. If you're using a well, stand on the same tile as the well.
+ 3. Type 'fill bottle' to fill it from the river, lake, or well.
+ 4. If you're having trouble completing this quest, it might be because your
+    bottle was already full. Try using 'pour bottle out' first.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+   It looks like you've figured out how to get water. In addition to filling
+your bottle or drinking directly from the edge of any river, lake, or oasis
+(but not ocean), you can also build a well or fountain. Just be sure to drink
+when you get thirsty; otherwise, your regeneration and actions slow down.
+~
+6 h 0 15 -1
+A
+2 2112
+R
+0 0 1
+W+
+11 0 0 1 x
+Fill the gourd bottle~
+Z
+2 2112
+Z
+2 2136
+S
+#160
+Mining Tutorial~
+Now that you have a mine, it's time to learn to get some ore.
+ 1. If you don't have a pick, try digging up a rock and a flint, and chipping a
+    handaxe for yourself. Then wield it.
+ 2. Type 'mine' and wait until you find some ore.
+Note: You must find a copper, tin, or iron mine to complete this.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+   You can get a lot of ore out of each mine, but be sure to dismantle it when
+you're done. Mountains are refreshed over time (type "mudstats time" to see
+when the next reset will be), but only if the mines have been dismantled.
+~
+4 h 0 15 -1
+A
+0 5107
+R
+0 0 1
+W
+2 160 0 1 -
+W
+2 165 0 1 -
+W
+2 166 0 1 -
+Z
+2 160
+Z
+2 165
+Z
+2 166
+S
+#175
+Iron Tutorial~
+   You found some iron ore! You're well on your way to arming an empire. But
+one step at a time. First, you need to learn to smelt it.
+ 1. Build a forge or a foundry.
+ 2. Type 'smelt iron ingot'.
+ 3. Tip: Give a number like 'smelt 10 iron ingot' to make more than 1.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+Iron ingots can also be stored in the foundry.
+~
+1 h 0 15 -1
+A
+2 160
+R
+0 0 1
+W
+2 175 0 1 -
+Z
+2 175
+S
+#179
+Wealth Tutorial~
+   It looks like you found some copper. It isn't as common as iron and can be
+used to make some handy items. But you can also smelt it into bars to gain
+wealth. Here's how:
+ 1. Build a forge or a foundry.
+ 2. Type 'smelt 2 copper ingot' (you'll need 4 ore).
+ 3. Then type 'smelt copper bar'.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+   You can store the copper bar in a vault (or foundry) to add wealth to your
+empire.
+~
+1 h 0 15 -1
+A
+2 165
+R
+0 0 1
+W
+2 179 0 1 -
+Z
+2 179
+S
+#180
+Chipped Flint Tutorial~
+   You've chipped some pieces off the flint! Chip the flint again to turn it
+into a better tool. Don't forget to 'use' a rock to chip it with.
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+Chipping flints is a good way to make primitive tools.
+~
+6 h 0 15 -1
+A
+2 180
+R
+0 0 1
+R
+6 919 919
+W
+2 181 0 1 -
+Z
+2 181
+S
+#183
+Torch Tutorial~
+   Now that you have some fire sticks, it's time to use them. Here's how to
+make a torch:
+ 1. Find a stick (gather).
+ 2. Light it on fire (light stick).
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+   Now that you have a torch, you'll be able to find your way around in the
+dark! Torches don't last long, though, so keep some fire sticks handy.
+~
+7 h 0 15 -1
+A
+2 940
+P
+5 184 0 1 a
+P
+6 184 0 1 a
+R
+0 0 1
+W
+2 184 0 1 -
+Z
+2 184
+S
+#184
+Torch Tutorial~
+   You've found a good, strong sapling. This would make a perfect torch!
+Here's how to make it into one:
+ 1. Gather some sticks and leaves (gather).
+ 2. Put together some fire sticks (craft fire sticks).
+ 3. Light the sapling with the fire sticks (light sapling).
+(You can type 'toggle tutorials' to stop seeing new tutorial quests.)
+~
+   Now that you have a torch, you'll be able to find your way around in the
+dark! Keep some sticks or saplings handy for when it burns out, though.
+~
+5 h 0 15 -1
+A
+2 131
+P
+5 183 0 1 a
+P
+6 183 0 1 a
+R
+0 0 1
+W
+2 184 0 1 -
+Z
+2 184
+S
+$

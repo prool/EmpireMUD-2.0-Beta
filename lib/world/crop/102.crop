@@ -1,235 +1,109 @@
 #10225
 pineapples~
 A Pineapple Field~
-13 3 c
+13 l c
 0 100 0 100
 D0
 wwww~
 &g~
-I 6 3015 100.00 1  # FORAGE: some red berries
-I 8 10226 20.00 2 H  # HARVEST: a pineapple
-I 8 10226 20.00 3 H  # HARVEST: a pineapple
-I 8 10226 20.00 4 H  # HARVEST: a pineapple
-I 8 10226 20.00 5 H  # HARVEST: a pineapple
-I 8 10226 20.00 6 H  # HARVEST: a pineapple
-M
-9061 0.01 d
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9151 10.00 dh
-M
-9109 10.00 dh
-M
-9106 10.00 dh
-M
-9111 10.00 bdh
-M
-9105 5.00 bdh
-M
-9104 5.00 bdh
-M
-9103 5.00 adh
-M
-9113 5.00 adh
-M
-9102 5.00 adh
-M
-9107 10.00 dg
-M
-9101 1.00 dg
-M
-9112 5.00 bdg
-M
-9110 5.00 bdg
-M
-9114 5.00 bdg
-M
-9108 5.00 bdg
-M
-9115 10.00 adg
-M
-9100 5.00 adg
-M
-9016 5.00 adg
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9153 10.00 bc
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
+I 6 3015 100.00 25  # FORAGE: red berries
+I 8 10226 20.00 2 H  # HARVEST: pineapple
+I 8 10226 20.00 3 H  # HARVEST: pineapple
+I 8 10226 20.00 4 H  # HARVEST: pineapple
+I 8 10226 20.00 5 H  # HARVEST: pineapple
+I 8 10226 20.00 6 H  # HARVEST: pineapple
+U
+0
+Stalks burst from the ground, each topped with a ripe yellow pineapple!~
+X
+pineapples field fruit crop~
+   A lush field of pineapple plants extends out before you, the spiky green
+leaves contrasting with the golden, spiny fruits that hang heavily from their
+stalks. The sweet scent of ripe pineapple wafts through the air, and you can
+almost taste the juicy sweetness on your tongue.
+~
 S
 #10226
 agave~
 A Field of Agave~
-10 2 c
+10 k c
 0 100 0 100
 D0
 vvvv~
 &G~
-I 6 10231 100.00 1  # FORAGE: some desert dandelions
-I 8 10227 20.00 2 H  # HARVEST: an agave heart
-I 8 10227 20.00 3 H  # HARVEST: an agave heart
-I 8 10227 20.00 4 H  # HARVEST: an agave heart
-I 8 10227 20.00 5 H  # HARVEST: an agave heart
-I 8 10227 20.00 6 H  # HARVEST: an agave heart
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9130 15.00 ad
-M
-9116 15.00 ad
-M
-9153 10.00 d
-M
-9117 15.00 bd
-M
-9126 5.00 bd
-M
-9122 5.00 bd
-M
-9125 5.00 bd
+I 6 10231 100.00 25  # FORAGE: desert dandelions
+I 8 10227 20.00 2 H  # HARVEST: agave heart
+I 8 10227 20.00 3 H  # HARVEST: agave heart
+I 8 10227 20.00 4 H  # HARVEST: agave heart
+I 8 10227 20.00 5 H  # HARVEST: agave heart
+I 8 10227 20.00 6 H  # HARVEST: agave heart
+U
+0
+Sharp agave spikes rise from the rocky dirt and unfold their spiny leaves!~
+X
+agaves plants crop field~
+   The agave field stretches out before you, row upon row of sturdy plants with
+thick, spiky leaves. Each plant stands tall and proud, reaching towards the sky
+with its impressive stature. The leaves are a deep green, their edges lined
+with sharp spines that glint in the light. As you approach, you can smell the
+sweet fragrance emanating from the center of each agave.
+~
 S
 #10227
 prickly pears~
 A Field of Prickly Pears~
-4 2 c
+4 k c
 0 100 0 100
 D0
 o88o~
 &G~
-I 6 10229 100.00 1  # FORAGE: a cactus fruit
-I 8 10228 20.00 2 H  # HARVEST: a stack of cactus pads
-I 8 10228 20.00 3 H  # HARVEST: a stack of cactus pads
-I 8 10228 20.00 4 H  # HARVEST: a stack of cactus pads
-I 8 10228 20.00 5 H  # HARVEST: a stack of cactus pads
-I 8 10228 20.00 6 H  # HARVEST: a stack of cactus pads
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9130 15.00 ad
-M
-9116 15.00 ad
-M
-9153 10.00 d
-M
-9117 15.00 bd
-M
-9126 5.00 bd
-M
-9122 5.00 bd
-M
-9125 5.00 bd
+I 6 10229 100.00 25  # FORAGE: cactus fruit
+I 8 10228 20.00 2 H  # HARVEST: stack of cactus pads
+I 8 10228 20.00 3 H  # HARVEST: stack of cactus pads
+I 8 10228 20.00 4 H  # HARVEST: stack of cactus pads
+I 8 10228 20.00 5 H  # HARVEST: stack of cactus pads
+I 8 10228 20.00 6 H  # HARVEST: stack of cactus pads
+U
+0
+Spiny new plants grow, pad by pad, forming purple fruits across their margins!~
+X
+cacti cactus prickly pears fruit crop pads paddles plants crop~
+   The field is filled with prickly pear cacti, their green paddles covered in
+sharp spines that gleam in the sunlight. The cacti are adorned with delicate,
+brightly colored blooms in shades of pink, red, and yellow, which provide a
+stunning contrast to the rugged desert landscape. Despite their formidable
+appearance, these cacti produce sweet and juicy fruit that are highly sought
+after by travelers passing through the harsh terrain. The prickly pear fruit
+comes in vibrant shades of magenta and orange, adding a splash of color to the
+otherwise dull environment.
+~
 S
 #10228
 aloe~
 A Field of Aloe~
-14 2 c
+14 k c
 0 100 0 100
 D0
 xxxx~
 &g~
-I 6 10231 100.00 1  # FORAGE: some desert dandelions
-I 8 10230 20.00 2 H  # HARVEST: some thick aloe leaves
-I 8 10230 20.00 3 H  # HARVEST: some thick aloe leaves
-I 8 10230 20.00 4 H  # HARVEST: some thick aloe leaves
-I 8 10230 20.00 5 H  # HARVEST: some thick aloe leaves
-I 8 10230 20.00 6 H  # HARVEST: some thick aloe leaves
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9121 5.00 d
-M
-9127 5.00 d
-M
-9119 5.00 d
-M
-9026 15.00 d
-M
-9123 5.00 d
-M
-9018 5.00 d
-M
-9120 15.00 ad
-M
-9130 15.00 ad
-M
-9116 15.00 ad
-M
-9153 10.00 d
-M
-9117 15.00 bd
-M
-9126 5.00 bd
-M
-9122 5.00 bd
-M
-9125 5.00 bd
+I 6 10231 100.00 25  # FORAGE: desert dandelions
+I 8 10230 20.00 2 H  # HARVEST: thick aloe leaves
+I 8 10230 20.00 3 H  # HARVEST: thick aloe leaves
+I 8 10230 20.00 4 H  # HARVEST: thick aloe leaves
+I 8 10230 20.00 5 H  # HARVEST: thick aloe leaves
+I 8 10230 20.00 6 H  # HARVEST: thick aloe leaves
+U
+0
+Clusters of aloe claw their way out of the dirt!~
+X
+aloe field plants crop~
+   The aloe plants stand tall in the dry desert soil, their thick leaves
+fanning out in a rosette pattern. The succulent leaves are green and spiky,
+with serrated edges that are almost white. The aloe crop is a soothing sight in
+the harsh desert, and the plants are known for their healing properties. The
+air around the crop is filled with a fresh, clean scent, and the leaves feel
+cool and refreshing to the touch. The aloe crop is a valuable resource for
+those who know how to harvest and use it.
+~
 S
 $

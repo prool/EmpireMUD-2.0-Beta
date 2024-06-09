@@ -3,7 +3,7 @@
 *  Usage: contains the command_interpreter for rooms, room commands.      *
 *                                                                         *
 *  DG Scripts code by galion, 1996/08/05 03:27:07, revision 3.12          *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -24,46 +24,17 @@
 #include "db.h"
 #include "skills.h"
 #include "vnums.h"
+#include "constants.h"
 
-// external vars
-extern const char *damage_types[];
-extern const char *alt_dirs[];
-extern const char *dirs[];
-extern struct instance_data *quest_instance_global;
+/**
+* Contents:
+*   Helpers
+*   World Commands
+*   World Command Interpreter
+*/
 
-// external functions
-void send_char_pos(char_data *ch, int dam);
-void die(char_data *ch, char_data *killer);
-void sub_write(char *arg, char_data *ch, byte find_invis, int targets);
-extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom);
-char_data *get_char_by_room(room_data *room, char *name);
-room_data *get_room(room_data *ref, char *name);
-obj_data *get_obj_by_room(room_data *room, char *name);
-char_data *get_char_in_room(room_data *room, char *name);
-obj_data *get_obj_in_room(room_data *room, char *name);
-extern vehicle_data *get_vehicle(char *name);
-void instance_obj_setup(struct instance_data *inst, obj_data *obj);
-extern room_data *obj_room(obj_data *obj);
-void scale_item_to_level(obj_data *obj, int level);
-void scale_mob_to_level(char_data *mob, int level);
-void scale_vehicle_to_level(vehicle_data *veh, int level);
-void wld_command_interpreter(room_data *room, char *argument);
-
-// locals
-#define WCMD(name)  void (name)(room_data *room, char *argument, int cmd, int subcmd)
-
-
-struct wld_command_info {
-	char *command;
-	void (*command_pointer) (room_data *room, char *argument, int cmd, int subcmd);
-	int subcmd;
-};
-
-
-/* do_wsend */
-#define SCMD_WSEND        0
-#define SCMD_WECHOAROUND  1
-
+ //////////////////////////////////////////////////////////////////////////////
+//// HELPERS /////////////////////////////////////////////////////////////////
 
 /**
 * Determines the scale level for a room, with a character target as a backup
@@ -75,25 +46,38 @@ struct wld_command_info {
 */
 int get_room_scale_level(room_data *room, char_data *targ) {
 	struct instance_data *inst;
-	int level = 1;
+	vehicle_data *veh;
+	int level = 0;
 	
-	if (COMPLEX_DATA(room) && (inst = COMPLEX_DATA(room)->instance)) {
-		if (inst->level) {
-			level = inst->level;
+	if ((inst = find_instance_by_room(room, FALSE, TRUE))) {
+		if (INST_LEVEL(inst)) {
+			level = INST_LEVEL(inst);
 		}
-		else if (GET_ADV_MIN_LEVEL(inst->adventure) > 0) {
-			level = GET_ADV_MIN_LEVEL(inst->adventure);
+		else if (GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst)) > 0) {
+			level = GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst));
 		}
-		else if (GET_ADV_MAX_LEVEL(inst->adventure) > 0) {
-			level = GET_ADV_MAX_LEVEL(inst->adventure) / 2; // average?
+		else if (GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) > 0) {
+			level = GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) / 2; // average?
 		}
 	}
-	// backup
+	else if ((veh = GET_ROOM_VEHICLE(room))) {
+		if (VEH_SCALE_LEVEL(veh) > 0) {
+			level = VEH_SCALE_LEVEL(veh);
+		}
+		else if (VEH_MIN_SCALE_LEVEL(veh) > 0) {
+			level = VEH_MIN_SCALE_LEVEL(veh);
+		}
+		else if (VEH_MAX_SCALE_LEVEL(veh) > 0) {
+			level = VEH_MAX_SCALE_LEVEL(veh) / 2;	// average
+		}
+	}
+	
+	// backup (if something above got a 0)
 	if (!level && targ) {
 		level = get_approximate_level(targ);
 	}
 	
-	return level;
+	return MAX(1, level);
 }
 
 
@@ -102,38 +86,40 @@ void wld_log(room_data *room, const char *format, ...) {
 	va_list args;
 	char output[MAX_STRING_LENGTH];
 
-	snprintf(output, sizeof(output), "Room %d :: %s", GET_ROOM_VNUM(room), format);
+	safe_snprintf(output, sizeof(output), "Room %d :: %s", GET_ROOM_VNUM(room), format);
 
 	va_start(args, format);
 	script_vlog(output, args);
 	va_end(args);
 }
 
-/* sends str to room */
-void act_to_room(char *str, room_data *room) {
-	/* no one is in the room */
-	if (!room->people)
-		return;
 
-	/*
-	* since you can't use act(..., TO_ROOM) for an room, send it
-	* TO_ROOM and TO_CHAR for some char in the room.
-	* (just dont use $n or you might get strange results)
-	*/
-	act(str, FALSE, room->people, 0, 0, TO_CHAR | TO_ROOM);
+/**
+* Sends a script message to everyone in the room (formerly act_to_room) using
+* sub_write.
+*
+* @param char *str The message.
+* @param room_data *room The room to send to.
+* @param bool use_queue If TRUE, stacks the message to the queue instead of sending immediately.
+*/
+void sub_write_to_room(char *str, room_data *room, bool use_queue) {
+	char_data *iter;
+	
+	DL_FOREACH2(ROOM_PEOPLE(room), iter, next_in_room) {
+		sub_write(str, iter, TRUE, TO_CHAR | (use_queue ? TO_QUEUE : 0));
+	}
 }
 
 
-/* World commands */
+ //////////////////////////////////////////////////////////////////////////////
+//// WORLD COMMANDS //////////////////////////////////////////////////////////
 
 WCMD(do_wadventurecomplete) {
-	void mark_instance_completed(struct instance_data *inst);
-	
 	struct instance_data *inst;
 	
 	inst = quest_instance_global;
 	if (!inst) {
-		inst = find_instance_by_room(room, FALSE);
+		inst = find_instance_by_room(room, FALSE, TRUE);
 	}
 	
 	if (inst) {
@@ -144,12 +130,12 @@ WCMD(do_wadventurecomplete) {
 
 /* prints the argument to all the rooms aroud the room */
 WCMD(do_wasound) {
-	struct room_direction_data *newexit;
-	int dir;
+	bool use_queue, map_echo = FALSE;
+	struct room_direction_data *ex;
 	room_data *to_room;
-	bool map_echo = FALSE;
+	int dir;
 
-	skip_spaces(&argument);
+	use_queue = script_message_should_queue(&argument);
 
 	if (!*argument) {
 		wld_log(room, "wasound called with no argument");
@@ -159,18 +145,18 @@ WCMD(do_wasound) {
 	if (GET_ROOM_VNUM(room) < MAP_SIZE) {
 		for (dir = 0; dir < NUM_2D_DIRS; ++dir) {
 			if ((to_room = SHIFT_DIR(room, dir))) {
-				act_to_room(argument, to_room);
+				sub_write_to_room(argument, to_room, use_queue);
 			}
 		}
 		map_echo = TRUE;
 	}
 
 	if (COMPLEX_DATA(room)) {
-		for (newexit = COMPLEX_DATA(room)->exits; newexit; newexit = newexit->next) {
-			if ((to_room = newexit->room_ptr) && room != to_room) {
+		LL_FOREACH(COMPLEX_DATA(room)->exits, ex) {
+			if ((to_room = ex->room_ptr) && room != to_room) {
 				// this skips rooms already hit by the direction shift
-				if (!map_echo || GET_ROOM_VNUM(to_room) > MAP_SIZE) {
-					act_to_room(argument, to_room);
+				if (!map_echo || GET_ROOM_VNUM(to_room) >= MAP_SIZE) {
+					sub_write_to_room(argument, to_room, use_queue);
 				}
 			}
 		}
@@ -179,8 +165,6 @@ WCMD(do_wasound) {
 
 
 WCMD(do_wbuild) {
-	void do_dg_build(room_data *target, char *argument);
-
 	char loc_arg[MAX_INPUT_LENGTH], bld_arg[MAX_INPUT_LENGTH], *tmp;
 	room_data *target;
 	
@@ -220,12 +204,14 @@ WCMD(do_wbuild) {
 
 
 WCMD(do_wecho) {
-	skip_spaces(&argument);
+	bool use_queue = script_message_should_queue(&argument);
 
-	if (!*argument) 
+	if (!*argument) {
 		wld_log(room, "wecho called with no args");
-	else 
-		act_to_room(argument, room);
+	}
+	else {
+		sub_write_to_room(argument, room, use_queue);
+	}
 }
 
 
@@ -233,10 +219,11 @@ WCMD(do_wecho) {
 WCMD(do_wechoneither) {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	char_data *vict1, *vict2, *iter;
+	bool use_queue;
 	char *p;
 
 	p = two_arguments(argument, arg1, arg2);
-	skip_spaces(&p);
+	use_queue = script_message_should_queue(&p);
 
 	if (!*arg1 || !*arg2 || !*p) {
 		wld_log(room, "oechoneither called with missing arguments");
@@ -252,9 +239,9 @@ WCMD(do_wechoneither) {
 		return;
 	}
 	
-	for (iter = ROOM_PEOPLE(room); iter; iter = iter->next_in_room) {
+	DL_FOREACH2(ROOM_PEOPLE(room), iter, next_in_room) {
 		if (iter->desc && iter != vict1 && iter != vict2) {
-			sub_write(p, iter, TRUE, TO_CHAR);
+			sub_write(p, iter, TRUE, TO_CHAR | (use_queue ? TO_QUEUE : 0));
 		}
 	}
 }
@@ -262,6 +249,7 @@ WCMD(do_wechoneither) {
 
 WCMD(do_wsend) {
 	char buf[MAX_INPUT_LENGTH], *msg;
+	bool use_queue;
 	char_data *ch;
 
 	msg = any_one_arg(argument, buf);
@@ -271,7 +259,7 @@ WCMD(do_wsend) {
 		return;
 	}
 
-	skip_spaces(&msg);
+	use_queue = script_message_should_queue(&msg);
 
 	if (!*msg) {
 		wld_log(room, "wsend called without a message");
@@ -280,9 +268,9 @@ WCMD(do_wsend) {
 
 	if ((ch = get_char_by_room(room, buf))) {
 		if (subcmd == SCMD_WSEND)
-			sub_write(msg, ch, TRUE, TO_CHAR);
+			sub_write(msg, ch, TRUE, TO_CHAR | TO_SLEEP | (use_queue ? TO_QUEUE : 0));
 		else if (subcmd == SCMD_WECHOAROUND)
-			sub_write(msg, ch, TRUE, TO_ROOM);
+			sub_write(msg, ch, TRUE, TO_ROOM | (use_queue ? TO_QUEUE : 0));
 	}
 	else
 		wld_log(room, "no target found for wsend");
@@ -290,11 +278,13 @@ WCMD(do_wsend) {
 
 
 WCMD(do_wbuildingecho) {
-	room_data *froom, *iter, *home;
-	char room_num[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
+	room_data *froom, *home_room;
+	char room_num[MAX_INPUT_LENGTH], *msg;
+	char_data *iter;
+	bool use_queue;
 
 	msg = any_one_word(argument, room_num);
-	skip_spaces(&msg);
+	use_queue = script_message_should_queue(&msg);
 
 	if (!*room_num || !*msg)
 		wld_log(room, "wbuildingecho called with too few args");
@@ -302,13 +292,11 @@ WCMD(do_wbuildingecho) {
 		wld_log(room, "wbuildingecho called with bad target");
 	}
 	else {
-		home = HOME_ROOM(froom);
-		sprintf(buf, "%s\r\n", msg);
+		home_room = HOME_ROOM(froom);
 		
-		send_to_room(buf, home);
-		for (iter = interior_room_list; iter; iter = iter->next_interior) {
-			if (HOME_ROOM(iter) == home && iter != home && ROOM_PEOPLE(iter)) {
-				send_to_room(buf, iter);
+		DL_FOREACH(character_list, iter) {
+			if (HOME_ROOM(IN_ROOM(iter)) == home_room) {
+				sub_write(msg, iter, TRUE, TO_CHAR | (use_queue ? TO_QUEUE : 0));
 			}
 		}
 	}
@@ -317,15 +305,14 @@ WCMD(do_wbuildingecho) {
 
 WCMD(do_wregionecho) {
 	char room_number[MAX_INPUT_LENGTH], radius_arg[MAX_INPUT_LENGTH], *msg;
-	descriptor_data *desc;
+	bool use_queue, outdoor_only = FALSE;
 	room_data *center;
 	char_data *targ;
 	int radius;
-	bool indoor_only = FALSE;
 
 	argument = any_one_word(argument, room_number);
 	msg = one_argument(argument, radius_arg);
-	skip_spaces(&msg);
+	use_queue = script_message_should_queue(&msg);
 
 	if (!*room_number || !*radius_arg || !*msg) {
 		wld_log(room, "wregionecho called with too few args");
@@ -337,29 +324,62 @@ WCMD(do_wregionecho) {
 		wld_log(room, "wregionecho called with invalid target");
 	}
 	else {
-		center = get_map_location_for(center);
+		center = GET_MAP_LOC(center) ? real_room(GET_MAP_LOC(center)->vnum) : NULL;
 		radius = atoi(radius_arg);
 		if (radius < 0) {
 			radius = -radius;
-			indoor_only = TRUE;
+			outdoor_only = TRUE;
 		}
 		
-		if (center) {			
-			for (desc = descriptor_list; desc; desc = desc->next) {
-				if (STATE(desc) != CON_PLAYING || !(targ = desc->character)) {
-					continue;
-				}
-				if (RMT_FLAGGED(IN_ROOM(targ), RMT_NO_LOCATION)) {
+		if (center) {
+			DL_FOREACH(character_list, targ) {
+				if (!same_subzone(center, IN_ROOM(targ))) {
 					continue;
 				}
 				if (compute_distance(center, IN_ROOM(targ)) > radius) {
 					continue;
 				}
-				
-				if (!indoor_only || IS_OUTDOORS(targ)) {
-					msg_to_desc(desc, "%s\r\n", CAP(msg));
+				if (outdoor_only && !IS_OUTDOORS(targ)) {
+					continue;
 				}
+				
+				// send
+				sub_write(msg, targ, TRUE, TO_CHAR | (use_queue ? TO_QUEUE : 0));
 			}
+		}
+	}
+}
+
+
+WCMD(do_wsubecho) {
+	char room_number[MAX_INPUT_LENGTH], *msg;
+	bool use_queue;
+	room_data *where;
+	char_data *targ;
+	
+	msg = any_one_word(argument, room_number);
+	use_queue = script_message_should_queue(&msg);
+
+	if (!*room_number || !*msg) {
+		wld_log(room, "wsubecho called with too few args");
+	}
+	else if (!(where = get_room(room, room_number))) {
+		wld_log(room, "wsubecho called with invalid target");
+	}
+	else if (!ROOM_INSTANCE(where)) {
+		wld_log(room, "wsubecho called outside an adventure");
+	}
+	else {
+		DL_FOREACH(character_list, targ) {
+			if (ROOM_INSTANCE(where) != ROOM_INSTANCE(IN_ROOM(targ))) {
+				continue;	// wrong instance
+			}
+			if (!same_subzone(where, IN_ROOM(targ))) {
+				continue;	// wrong subzone
+			}
+			
+			// send
+			sub_write(msg, targ, TRUE, TO_CHAR | (use_queue ? TO_QUEUE : 0));
 		}
 	}
 }
@@ -368,17 +388,23 @@ WCMD(do_wregionecho) {
 WCMD(do_wvehicleecho) {
 	char targ[MAX_INPUT_LENGTH], *msg;
 	vehicle_data *veh;
+	char_data *iter;
+	bool use_queue;
 
 	msg = any_one_word(argument, targ);
-	skip_spaces(&msg);
+	use_queue = script_message_should_queue(&msg);
 
 	if (!*targ || !*msg)
 		wld_log(room, "wvehicleecho called with too few args");
-	else if (!(*targ == UID_CHAR && (veh = get_vehicle(targ))) && !(veh = get_vehicle_room(room, targ))) {
+	else if (!(*targ == UID_CHAR && (veh = get_vehicle(targ))) && !(veh = get_vehicle_room(room, targ, NULL))) {
 		wld_log(room, "wvehicleecho called with bad target");
 	}
 	else {
-		msg_to_vehicle(veh, FALSE, "%s\r\n", msg);
+		DL_FOREACH(character_list, iter) {
+			if (VEH_SITTING_ON(veh) == iter || GET_ROOM_VEHICLE(IN_ROOM(iter)) == veh) {
+				sub_write(msg, iter, TRUE, TO_CHAR | (use_queue ? TO_QUEUE : 0));
+			}
+		}
 	}
 }
 
@@ -387,7 +413,7 @@ WCMD(do_wdoor) {
 	char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
 	char field[MAX_INPUT_LENGTH], *value;
 	room_data *rm, *to_room;
-	struct room_direction_data *newexit, *temp;
+	struct room_direction_data *newexit;
 	int dir, fd;
 
 	const char *door_field[] = {
@@ -435,7 +461,7 @@ WCMD(do_wdoor) {
 	/* purge exit */
 	if (fd == 0) {
 		if (newexit) {
-			REMOVE_FROM_LIST(newexit, COMPLEX_DATA(rm)->exits, next);
+			LL_DELETE(COMPLEX_DATA(rm)->exits, newexit);
 			if (newexit->room_ptr) {
 				--GET_EXITS_HERE(newexit->room_ptr);
 			}
@@ -501,12 +527,6 @@ WCMD(do_wdoor) {
 
 
 WCMD(do_wsiege) {
-	void besiege_room(room_data *to_room, int damage);
-	extern bool besiege_vehicle(vehicle_data *veh, int damage, int siege_type);
-	extern room_data *dir_to_room(room_data *room, int dir, bool ignore_entrance);
-	extern bool find_siege_target_for_vehicle(char_data *ch, vehicle_data *veh, char *arg, room_data **room_targ, int *dir, vehicle_data **veh_targ);
-	extern bool validate_siege_target_room(char_data *ch, vehicle_data *veh, room_data *to_room);
-	
 	char scale_arg[MAX_INPUT_LENGTH], tar_arg[MAX_INPUT_LENGTH];
 	vehicle_data *veh_targ = NULL;
 	room_data *room_targ = NULL;
@@ -537,7 +557,7 @@ WCMD(do_wsiege) {
 		}
 	}
 	if (!veh_targ && !room_targ) {
-		veh_targ = get_vehicle_room(room, tar_arg);
+		veh_targ = get_vehicle_room(room, tar_arg, NULL);
 	}
 	
 	// seems ok
@@ -550,14 +570,59 @@ WCMD(do_wsiege) {
 	
 	if (room_targ) {
 		if (validate_siege_target_room(NULL, NULL, room_targ)) {
-			besiege_room(room_targ, dam);
+			besiege_room(NULL, room_targ, dam, NULL);
 		}
 	}
 	else if (veh_targ) {
-		besiege_vehicle(veh_targ, dam, SIEGE_PHYSICAL);
+		besiege_vehicle(NULL, veh_targ, dam, SIEGE_PHYSICAL, NULL);
 	}
 	else {
 		wld_log(room, "wsiege: invalid target");
+	}
+}
+
+
+// kills the target
+WCMD(do_wslay) {
+	char name[MAX_INPUT_LENGTH];
+	char_data *vict;
+	
+	argument = one_argument(argument, name);
+
+	if (!*name) {
+		wld_log(room, "wslay: no target");
+		return;
+	}
+	
+	if (*name == UID_CHAR) {
+		if (!(vict = get_char(name))) {
+			wld_log(room, "wslay: victim (%s) does not exist", name);
+			return;
+		}
+	}
+	else if (!(vict = get_char_by_room(room, name))) {
+		wld_log(room, "wslay: victim (%s) does not exist", name);
+		return;
+	}
+	
+	if (IS_IMMORTAL(vict)) {
+		msg_to_char(vict, "Being the cool immortal you are, you sidestep a trap, obviously placed to kill you.\r\n");
+	}
+	else {
+		// log
+		if (!IS_NPC(vict)) {
+			if (*argument) {
+				// custom death log?
+				log_to_slash_channel_by_name(DEATH_LOG_CHANNEL, vict, "%s", argument);
+			}
+			else {
+				// basic death log
+				log_to_slash_channel_by_name(DEATH_LOG_CHANNEL, vict, "%s has died at%s!", PERS(vict, vict, TRUE), coord_display_room(NULL, IN_ROOM(vict), FALSE));
+			}
+			syslog(SYS_DEATH, 0, TRUE, "DEATH: %s has been killed by a script at %s (room %d, rmt %d, bld %d)", GET_NAME(vict), room_log_identifier(IN_ROOM(vict)), GET_ROOM_VNUM(room), GET_ROOM_TEMPLATE(room) ? GET_RMT_VNUM(GET_ROOM_TEMPLATE(room)) : -1, GET_BUILDING(room) ? GET_BLD_VNUM(GET_BUILDING(room)) : -1);
+		}
+		
+		die(vict, vict);
 	}
 }
 
@@ -566,6 +631,7 @@ WCMD(do_wteleport) {
 	char_data *ch, *next_ch;
 	vehicle_data *veh;
 	room_data *target;
+	obj_data *obj, *cont;
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	struct instance_data *inst;
 	int iter;
@@ -574,93 +640,142 @@ WCMD(do_wteleport) {
 	argument = one_word(argument, arg2);
 
 	if (!*arg1 || !*arg2) {
-		wld_log(room, "wteleport called with too few args");
+		wld_log(room, "wteleport: called with too few args");
 		return;
 	}
 
-	target = get_room(room, arg2);
-
-	if (!target) {
-		wld_log(room, "wteleport target is an invalid room");
-		return;
-	}
+	// try to find a target for later -- this can fail
+	target = (*arg2 == UID_CHAR ? find_room(atoi(arg2 + 1)) : get_room(room, arg2));
 
 	if (!str_cmp(arg1, "all")) {
-		if (target == room) {
-			wld_log(room, "wteleport all target is itself");
+		if (!target) {
+			wld_log(room, "wteleport all: target is an invalid room");
 			return;
 		}
-
-		for (ch = room->people; ch; ch = next_ch) {
-			next_ch = ch->next_in_room;
+		else if (target == room) {
+			wld_log(room, "wteleport all: target is itself");
+			return;
+		}
+		
+		DL_FOREACH_SAFE2(ROOM_PEOPLE(room), ch, next_ch, next_in_room) {
 			if (!valid_dg_target(ch, DG_ALLOW_GODS)) 
 				continue;
-			if (!IS_NPC(ch)) {
-				GET_LAST_DIR(ch) = NO_DIR;
-			}
+			GET_LAST_DIR(ch) = NO_DIR;
 			char_from_room(ch);
 			char_to_room(ch, target);
-			enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
+			enter_triggers(ch, NO_DIR, "script", FALSE);
+			greet_triggers(ch, NO_DIR, "script", FALSE);
 			qt_visit_room(ch, IN_ROOM(ch));
+			RESET_LAST_MESSAGED_TEMPERATURE(ch);
+			msdp_update_room(ch);	// once we're sure we're staying
 		}
 	}
 	else if (!str_cmp(arg1, "adventure")) {
 		// teleport all players in the adventure
 		if (!(inst = ROOM_INSTANCE(room))) {
-			wld_log(room, "wteleport: 'adventure' mode called outside any adventure");
+			wld_log(room, "wteleport adventure: called outside any adventure");
+			return;
+		}
+		if (!target) {
+			wld_log(room, "wteleport adventure: target is an invalid room");
 			return;
 		}
 		
-		for (iter = 0; iter < inst->size; ++iter) {
+		for (iter = 0; iter < INST_SIZE(inst); ++iter) {
 			// only if it's not the target room, or we'd be here all day
-			if (inst->room[iter] && inst->room[iter] != target) {
-				for (ch = ROOM_PEOPLE(inst->room[iter]); ch; ch = next_ch) {
-					next_ch = ch->next_in_room;
-					
+			if (INST_ROOM(inst, iter) && INST_ROOM(inst, iter) != target) {
+				DL_FOREACH_SAFE2(ROOM_PEOPLE(INST_ROOM(inst, iter)), ch, next_ch, next_in_room) {
 					if (!valid_dg_target(ch, DG_ALLOW_GODS)) {
 						continue;
 					}
 					
 					// teleport players and their followers
-					if (!IS_NPC(ch) || (ch->master && !IS_NPC(ch->master))) {
+					if (!IS_NPC(ch) || (GET_LEADER(ch) && !IS_NPC(GET_LEADER(ch)))) {
 						char_from_room(ch);
 						char_to_room(ch, target);
-						if (!IS_NPC(ch)) {
-							GET_LAST_DIR(ch) = NO_DIR;
-						}
-						enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
+						GET_LAST_DIR(ch) = NO_DIR;
+						enter_triggers(ch, NO_DIR, "script", FALSE);
+						greet_triggers(ch, NO_DIR, "script", FALSE);
 						qt_visit_room(ch, IN_ROOM(ch));
+						RESET_LAST_MESSAGED_TEMPERATURE(ch);
+						msdp_update_room(ch);	// once we're sure we're staying
 					}
 				}
 			}
 		}
 	}
-	else {
+	else {	// single-target teleprot
 		if ((ch = get_char_by_room(room, arg1))) {
+			if (!target) {
+				wld_log(room, "wteleport character: target is an invalid room");
+				return;
+			}
 			if (valid_dg_target(ch, DG_ALLOW_GODS)) {
-				if (!IS_NPC(ch)) {
-					GET_LAST_DIR(ch) = NO_DIR;
-				}
+				GET_LAST_DIR(ch) = NO_DIR;
 				char_from_room(ch);
 				char_to_room(ch, target);
-				enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
+				enter_triggers(ch, NO_DIR, "script", FALSE);
+				greet_triggers(ch, NO_DIR, "script", FALSE);
 				qt_visit_room(ch, IN_ROOM(ch));
+				RESET_LAST_MESSAGED_TEMPERATURE(ch);
+				msdp_update_room(ch);	// once we're sure we're staying
 			}
 		}
-		else if ((*arg1 == UID_CHAR && (veh = get_vehicle(arg1))) || (veh = get_vehicle_room(room, arg1))) {
+		else if ((*arg1 == UID_CHAR && (veh = get_vehicle(arg1))) || (veh = get_vehicle_room(room, arg1, NULL))) {
+			if (!target) {
+				wld_log(room, "wteleport vehicle: target is an invalid room");
+				return;
+			}
 			vehicle_from_room(veh);
 			vehicle_to_room(veh, target);
-			entry_vtrigger(veh);
+			entry_vtrigger(veh, "script");
 		}
-		else
+		else if ((*arg1 == UID_CHAR && (obj = get_obj(arg1))) || (obj = get_obj_by_room(room, arg1))) {
+			// teleport object
+			if (target) {
+				// move obj to room
+				obj_to_room(obj, target);
+			}
+			else if ((ch = get_char_by_room(room, arg2))) {
+				// move obj to character
+				obj_to_char(obj, ch);
+			}
+			else if ((*arg2 == UID_CHAR && (veh = get_vehicle(arg2))) || (veh = get_vehicle_room(room, arg2, NULL))) {
+				// move obj to vehicle
+				if (!VEH_FLAGGED(veh, VEH_CONTAINER)) {
+					wld_log(room, "wteleport object: attempting to put an object in a vehicle that's not a container");
+					return;
+				}
+				else {
+					obj_to_vehicle(obj, veh);
+				}
+			}
+			else if ((*arg2 == UID_CHAR && (cont = get_obj(arg2))) || (cont = get_obj_by_room(room, arg2))) {
+				if (cont == obj || get_top_object(obj) == cont || get_top_object(cont) == obj) {
+					wld_log(room, "mteleport object: attempting to put an object inside itself");
+					return;
+				}
+				else if (GET_OBJ_TYPE(cont) != ITEM_CONTAINER && GET_OBJ_TYPE(cont) != ITEM_CORPSE) {
+					wld_log(room, "mteleport object: attempting to put an object in something that's not a container");
+					return;
+				}
+				else {
+					// move obj into obj
+					obj_to_obj(obj, cont);
+				}
+			}
+			else {
+				wld_log(room, "wteleport object: no valid target location found");
+			}
+		}
+		else {
 			wld_log(room, "wteleport: no target found");
+		}
 	}
 }
 
 
 WCMD(do_wterracrop) {
-	void do_dg_terracrop(room_data *target, crop_data *crop);
-
 	char loc_arg[MAX_INPUT_LENGTH], crop_arg[MAX_INPUT_LENGTH];
 	crop_data *crop;
 	room_data *target;
@@ -707,8 +822,6 @@ WCMD(do_wterracrop) {
 
 
 WCMD(do_wterraform) {
-	void do_dg_terraform(room_data *target, sector_data *sect);
-
 	char loc_arg[MAX_INPUT_LENGTH], sect_arg[MAX_INPUT_LENGTH];
 	sector_data *sect;
 	room_data *target;
@@ -772,9 +885,7 @@ WCMD(do_wforce) {
 	}
 
 	if (!str_cmp(arg1, "all")) {
-		for (ch = room->people; ch; ch = next_ch) {
-			next_ch = ch->next_in_room;
-
+		DL_FOREACH_SAFE2(ROOM_PEOPLE(room), ch, next_ch, next_in_room) {
 			if (valid_dg_target(ch, 0)) {
 				command_interpreter(ch, line);
 			}
@@ -794,9 +905,12 @@ WCMD(do_wforce) {
 }
 
 
+WCMD(do_wheal) {
+	script_heal(room, WLD_TRIGGER, argument);
+}
+
+
 WCMD(do_wown) {
-	void do_dg_own(empire_data *emp, char_data *vict, obj_data *obj, room_data *room, vehicle_data *veh);
-	
 	char type_arg[MAX_INPUT_LENGTH], targ_arg[MAX_INPUT_LENGTH], emp_arg[MAX_INPUT_LENGTH];
 	vehicle_data *vtarg = NULL;
 	empire_data *emp = NULL;
@@ -852,7 +966,7 @@ WCMD(do_wown) {
 			wld_log(room, "wown: Too few arguments (wown vehicle)");
 			return;
 		}
-		else if (!(vtarg = ((*targ_arg == UID_CHAR) ? get_vehicle(targ_arg) : get_vehicle_room(room, targ_arg)))) {
+		else if (!(vtarg = ((*targ_arg == UID_CHAR) ? get_vehicle(targ_arg) : get_vehicle_room(room, targ_arg, NULL)))) {
 			wld_log(room, "wown: Invalid vehicle target");
 			return;
 		}
@@ -883,7 +997,7 @@ WCMD(do_wown) {
 		else if (*targ_arg == UID_CHAR && ((vict = get_char(targ_arg)) || (vtarg = get_vehicle(targ_arg)) || (otarg = get_obj(targ_arg)) || (rtarg = get_room(room, targ_arg)))) {
 			// found by uid
 		}
-		else if ((vict = get_char_by_room(room, targ_arg)) || (vtarg = get_vehicle_room(room, targ_arg)) || (otarg = get_obj_by_room(room, targ_arg))) {
+		else if ((vict = get_char_by_room(room, targ_arg)) || (vtarg = get_vehicle_room(room, targ_arg, NULL)) || (otarg = get_obj_by_room(room, targ_arg))) {
 			// found by name
 		}
 		else {
@@ -943,14 +1057,12 @@ WCMD(do_wpurge) {
 
 	if (!*arg) {
 		/* purge all */
-		for (ch = room->people; ch; ch = next_ch ) {
-			next_ch = ch->next_in_room;
+		DL_FOREACH_SAFE2(ROOM_PEOPLE(room), ch, next_ch, next_in_room) {
 			if (IS_NPC(ch))
 				extract_char(ch);
 		}
-
-		for (obj = room->contents; obj; obj = next_obj ) {
-			next_obj = obj->next_content;
+		
+		DL_FOREACH_SAFE2(ROOM_CONTENTS(room), obj, next_obj, next_content) {
 			extract_obj(obj);
 		}
 
@@ -979,9 +1091,9 @@ WCMD(do_wpurge) {
 		extract_char(ch);
 	}
 	// purge vehicle
-	else if ((*arg == UID_CHAR && (veh = get_vehicle(arg))) || (veh = get_vehicle_room(room, arg))) {
+	else if ((*arg == UID_CHAR && (veh = get_vehicle(arg))) || (veh = get_vehicle_room(room, arg, NULL))) {
 		if (*argument) {
-			act(argument, TRUE, ROOM_PEOPLE(IN_ROOM(veh)), NULL, veh, TO_CHAR | TO_ROOM);
+			act(argument, TRUE, ROOM_PEOPLE(IN_ROOM(veh)), NULL, veh, TO_CHAR | TO_ROOM | ACT_VEH_VICT);
 		}
 		extract_vehicle(veh);
 	}
@@ -1001,29 +1113,35 @@ WCMD(do_wpurge) {
 
 // quest commands
 WCMD(do_wquest) {
-	void do_dg_quest(int go_type, void *go, char *argument);	
 	do_dg_quest(WLD_TRIGGER, room, argument);
 }
 
 
 /* loads a mobile or object into the room */
 WCMD(do_wload) {
-	void setup_generic_npc(char_data *mob, empire_data *emp, int name, int sex);
-	
-	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-	struct instance_data *inst = find_instance_by_room(room, FALSE);
-	int number = 0;
+	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], emp_arg[MAX_INPUT_LENGTH];
+	struct instance_data *inst = find_instance_by_room(room, FALSE, FALSE);
+	int number = 0, pos, veh_ok;
+	book_data *book;
+	empire_data *emp;
 	char_data *mob, *tch;
 	obj_data *object, *cnt;
 	room_data *in_room;
 	vehicle_data *veh;
+	struct empire_storage_data *store;
 	char *target;
-	int pos;
 
 	target = two_arguments(argument, arg1, arg2);
 	skip_spaces(&target);
 
-	if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0)) {
+	if (is_abbrev(arg1, "book")) {
+		// special checking for books
+		if (!*arg2 || (!is_number(arg2) && str_cmp(arg2, "lost")) || ((number = atoi(arg2)) < 0)) {
+			wld_log(room, "wload: bad syntax (book)");
+			return;
+		}
+	}
+	else if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0)) {
 		wld_log(room, "wload: bad syntax");
 		return;
 	}
@@ -1036,8 +1154,8 @@ WCMD(do_wload) {
 		mob = read_mobile(number, TRUE);
 		
 		// store instance id
-		if (COMPLEX_DATA(room) && COMPLEX_DATA(room)->instance) {
-			MOB_INSTANCE_ID(mob) = COMPLEX_DATA(room)->instance->id;
+		if (inst) {
+			MOB_INSTANCE_ID(mob) = INST_ID(inst);
 			if (MOB_INSTANCE_ID(mob) != NOTHING) {
 				add_instance_mob(real_instance(MOB_INSTANCE_ID(mob)), GET_MOB_VNUM(mob));
 			}
@@ -1045,23 +1163,64 @@ WCMD(do_wload) {
 		
 		if (*target && isdigit(*target)) {
 			scale_mob_to_level(mob, atoi(target));
-			SET_BIT(MOB_FLAGS(mob), MOB_NO_RESCALE);
+			set_mob_flags(mob, MOB_NO_RESCALE);
 		}
-		else if (COMPLEX_DATA(room) && COMPLEX_DATA(room)->instance && COMPLEX_DATA(room)->instance->level > 0) {
+		else if (inst && INST_LEVEL(inst) > 0) {
 			// instance level-locked
-			scale_mob_to_level(mob, COMPLEX_DATA(room)->instance->level);
+			scale_mob_to_level(mob, INST_LEVEL(inst));
 		}
 		
 		char_to_room(mob, room);
 		setup_generic_npc(mob, NULL, NOTHING, NOTHING);
 		load_mtrigger(mob);
 	}
-	else if (is_abbrev(arg1, "object")) {
-		if (!obj_proto(number)) {
-			wld_log(room, "wload: bad object vnum");
+	else if (is_abbrev(arg1, "object") || is_abbrev(arg1, "book") || is_abbrev(arg1, "einventory")) {
+		// object, book, or empire resource
+		if (is_abbrev(arg1, "object")) {
+			if (!obj_proto(number)) {
+				wld_log(room, "wload: bad object vnum");
+				return;
+			}
+			object = read_object(number, TRUE);
+		}
+		else if (is_abbrev(arg1, "book")) {
+			if (!str_cmp(arg2, "lost")) {
+				book = random_lost_book();
+			}
+			else {
+				book = book_proto(number);
+			}
+			
+			if (!book) {
+				wld_log(room, "wload: bad book vnum%s", !str_cmp(arg2, "lost") ? " - no lost books" : "");
+				return;
+			}
+			
+			object = create_book_obj(book);
+		}
+		else if (is_abbrev(arg1, "einventory")) {
+			// %load% einv <vnum> <empire> [target]
+			target = any_one_word(target, emp_arg);
+			if (!*emp_arg || !(emp = get_empire(emp_arg))) {
+				wld_log(room, "wload: bad empire '%s'", emp_arg);
+				return;
+			}
+			if (!(store = find_stored_resource(emp, GET_ISLAND_ID(room), number)) || store->amount < 1) {
+				wld_log(room, "wload: empire has no stored #%d on island %d", number, GET_ISLAND_ID(room));
+				return;
+			}
+			
+			// ok: charge it
+			charge_stored_resource(emp, GET_ISLAND_ID(room), number, 1, TRUE);
+			EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
+			
+			// and load it
+			object = read_object(number, TRUE);
+		}
+		else {
+			wld_log(room, "wload: bad object type ??");
 			return;
 		}
-		object = read_object(number, TRUE);
 		
 		if (inst) {
 			instance_obj_setup(inst, object);
@@ -1072,8 +1231,8 @@ WCMD(do_wload) {
 			obj_to_room(object, room);
 
 			// adventure is level-locked?		
-			if (inst && inst->level > 0) {
-				scale_item_to_level(object, inst->level);
+			if (inst && INST_LEVEL(inst) > 0) {
+				scale_item_to_level(object, INST_LEVEL(inst));
 			}
 		
 			load_otrigger(object);
@@ -1102,9 +1261,9 @@ WCMD(do_wload) {
 		if (*target && isdigit(*target)) {
 			scale_item_to_level(object, atoi(target));
 		}
-		else if ((inst = find_instance_by_room(room, FALSE)) && inst->level > 0) {
+		else if (inst && INST_LEVEL(inst) > 0) {
 			// scaling by locked adventure
-			scale_item_to_level(object, inst->level);
+			scale_item_to_level(object, INST_LEVEL(inst));
 		}
 		
 		if (in_room) {	// load in room
@@ -1115,7 +1274,12 @@ WCMD(do_wload) {
 		
 		tch = get_char_in_room(room, arg1);
 		if (tch) {
-			if (*arg2 && (pos = find_eq_pos_script(arg2)) >= 0 && !GET_EQ(tch, pos) && can_wear_on_pos(object, pos)) {
+			// mark as "gathered" like a resource
+			if (!IS_NPC(tch) && GET_LOYALTY(tch)) {
+				add_production_total(GET_LOYALTY(tch), GET_OBJ_VNUM(object), 1);
+			}
+			
+			if (*arg2 && (pos = find_eq_pos_script(arg2)) >= 0 && !GET_EQ(tch, pos) && CAN_WEAR(object, wear_data[pos].item_wear)) {
 				equip_char(tch, object, pos);
 				load_otrigger(object);
 				determine_gear_level(tch);
@@ -1126,7 +1290,7 @@ WCMD(do_wload) {
 			return;
 		}
 		cnt = get_obj_in_room(room, arg1);
-		if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
+		if (cnt && (GET_OBJ_TYPE(cnt) == ITEM_CONTAINER || GET_OBJ_TYPE(cnt) == ITEM_CORPSE)) {
 			obj_to_obj(object, cnt);
 			load_otrigger(object);
 			return;
@@ -1142,6 +1306,9 @@ WCMD(do_wload) {
 			return;
 		}
 		veh = read_vehicle(number, TRUE);
+		if (inst) {
+			VEH_INSTANCE_ID(veh) = INST_ID(inst);
+		}
 		
 		if (*target && isdigit(*target)) {
 			scale_vehicle_to_level(veh, atoi(target));
@@ -1152,10 +1319,30 @@ WCMD(do_wload) {
 		}
 		
 		vehicle_to_room(veh, room);
-		load_vtrigger(veh);
+		get_vehicle_interior(veh);	// ensure inside is loaded
+		// ownership
+		if (VEH_CLAIMS_WITH_ROOM(veh) && ROOM_OWNER(HOME_ROOM(room))) {
+			perform_claim_vehicle(veh, ROOM_OWNER(HOME_ROOM(room)));
+		}
+		veh_ok = load_vtrigger(veh);
+		if (veh_ok) {
+			veh_ok = complete_vtrigger(veh);
+		}
 	}
 	else
 		wld_log(room, "wload: bad type");
+}
+
+
+WCMD(do_wlog) {
+	char source_info[MAX_STRING_LENGTH];
+	safe_snprintf(source_info, sizeof(source_info), "room %d %s", GET_ROOM_VNUM(room), get_room_name(room, FALSE));
+	script_log_command(argument, source_info);
+}
+
+
+WCMD(do_wmod) {
+	script_modify(argument);
 }
 
 
@@ -1187,10 +1374,20 @@ WCMD(do_wmorph) {
 
 
 WCMD(do_wdamage) {
-	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH];
+	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
 	double modifier = 1.0;
 	char_data *ch;
-	int type;
+	int type, show_attack_message = NOTHING;
+	
+	// optional attack message arg
+	skip_spaces(&argument);
+	if (*argument == '#') {
+		argument = one_argument(argument, buf);
+		if ((show_attack_message = atoi(buf+1)) < 1 || !real_attack_message(show_attack_message)) {
+			wld_log(room, "wdamage: invalid attack message #%s", buf);
+			show_attack_message = NOTHING;
+		}
+	}
 
 	argument = two_arguments(argument, name, modarg);
 	argument = one_argument(argument, typearg);	// optional
@@ -1202,6 +1399,13 @@ WCMD(do_wdamage) {
 
 	if (*modarg) {
 		modifier = atof(modarg) / 100.0;
+	}
+	
+	// send negatives to %heal% instead
+	if (modifier < 0) {
+		sprintf(buf, "%s health %.2f", name, -atof(modarg));
+		script_heal(room, WLD_TRIGGER, buf);
+		return;
 	}
 	
 	ch = get_char_by_room(room, name);
@@ -1222,7 +1426,7 @@ WCMD(do_wdamage) {
 		type = DAM_PHYSICAL;
 	}
 
-	script_damage(ch, NULL, get_room_scale_level(room, ch), type, modifier);
+	script_damage(ch, NULL, get_room_scale_level(room, ch), type, modifier, show_attack_message);
 }
 
 
@@ -1230,7 +1434,17 @@ WCMD(do_waoe) {
 	char modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH];
 	char_data *vict, *next_vict;
 	double modifier = 1.0;
-	int level, type;
+	int level, type, show_attack_message = NOTHING;
+
+	// optional attack message arg
+	skip_spaces(&argument);
+	if (*argument == '#') {
+		argument = one_argument(argument, modarg);
+		if ((show_attack_message = atoi(modarg+1)) < 1 || !real_attack_message(show_attack_message)) {
+			wld_log(room, "waoe: invalid attack message #%s", modarg);
+			show_attack_message = NOTHING;
+		}
+	}
 
 	two_arguments(argument, modarg, typearg);
 	if (*modarg) {
@@ -1249,12 +1463,10 @@ WCMD(do_waoe) {
 	}
 	
 	level = get_room_scale_level(room, NULL);
-	for (vict = room->people; vict; vict = next_vict) {
-		next_vict = vict->next_in_room;
-		
+	DL_FOREACH_SAFE2(ROOM_PEOPLE(room), vict, next_vict, next_in_room) {
 		// harder to tell friend from foe: hit PCs or people following PCs
-		if (!IS_NPC(vict) || (vict->master && !IS_NPC(vict->master))) {
-			script_damage(vict, NULL, level, type, modifier);
+		if (!IS_NPC(vict) || (GET_LEADER(vict) && !IS_NPC(GET_LEADER(vict)))) {
+			script_damage(vict, NULL, level, type, modifier, show_attack_message);
 		}
 	}
 }
@@ -1262,11 +1474,20 @@ WCMD(do_waoe) {
 
 WCMD(do_wdot) {
 	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], durarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH], stackarg[MAX_INPUT_LENGTH];
+	any_vnum atype = ATYPE_DG_AFFECT;
 	double modifier = 1.0;
 	char_data *ch;
-	int type, max_stacks;
+	int type, max_stacks, duration;
 
 	argument = one_argument(argument, name);
+	// sometimes name is an affect vnum
+	if (*name == '#') {
+		atype = atoi(name+1);
+		argument = one_argument(argument, name);
+		if (!find_generic(atype, GENERIC_AFFECT)) {
+			atype = ATYPE_DG_AFFECT;
+		}
+	}
 	argument = one_argument(argument, modarg);
 	argument = one_argument(argument, durarg);
 	argument = one_argument(argument, typearg);	// optional, defualt: physical
@@ -1287,6 +1508,10 @@ WCMD(do_wdot) {
 		wld_log(room, "wdot: target not found");      
 		return;
 	}
+	if ((duration = atoi(durarg)) < 1) {
+		wld_log(room, "wdot: invalid duration '%s'", durarg);
+		return;
+	}
 	
 	if (*typearg) {
 		type = search_block(typearg, damage_types, FALSE);
@@ -1300,7 +1525,7 @@ WCMD(do_wdot) {
 	}
 
 	max_stacks = (*stackarg ? atoi(stackarg) : 1);
-	script_damage_over_time(ch, get_room_scale_level(room, ch), type, modifier, atoi(durarg), max_stacks, NULL);
+	script_damage_over_time(ch, atype, get_room_scale_level(room, ch), type, modifier, duration, max_stacks, NULL);
 }
 
 
@@ -1325,9 +1550,7 @@ WCMD(do_wat) {
 
 
 WCMD(do_wrestore) {
-	extern const bool aff_is_bad[];
-	extern const double apply_values[];
-	
+	bool need_trig = FALSE;
 	struct affected_type *aff, *next_aff;
 	char arg[MAX_INPUT_LENGTH];
 	vehicle_data *veh = NULL;
@@ -1350,7 +1573,7 @@ WCMD(do_wrestore) {
 	else if ((*arg == UID_CHAR && (victim = get_char(arg))) || (victim = get_char_in_room(room, arg))) {
 		// found victim
 	}
-	else if ((*arg == UID_CHAR && (veh = get_vehicle(arg))) || (veh = get_vehicle_room(room, arg))) {
+	else if ((*arg == UID_CHAR && (veh = get_vehicle(arg))) || (veh = get_vehicle_room(room, arg, NULL))) {
 		// found vehicle
 		if (!VEH_IS_COMPLETE(veh)) {
 			wld_log(room, "wrestore: used on unfinished vehicle");
@@ -1406,26 +1629,36 @@ WCMD(do_wrestore) {
 		if (GET_POS(victim) < POS_SLEEPING) {
 			GET_POS(victim) = POS_STANDING;
 		}
-		GET_HEALTH(victim) = GET_MAX_HEALTH(victim);
-		GET_MOVE(victim) = GET_MAX_MOVE(victim);
-		GET_MANA(victim) = GET_MAX_MANA(victim);
-		GET_BLOOD(victim) = GET_MAX_BLOOD(victim);
+		affect_total(victim);
+		set_health(victim, GET_MAX_HEALTH(victim));
+		set_move(victim, GET_MAX_MOVE(victim));
+		set_mana(victim, GET_MAX_MANA(victim));
+		set_blood(victim, GET_MAX_BLOOD(victim));
 	}
 	if (obj) {
 		// not sure what to do for objs
 	}
 	if (veh) {
-		free_resource_list(VEH_NEEDS_RESOURCES(veh));
-		VEH_NEEDS_RESOURCES(veh) = NULL;
-		VEH_HEALTH(veh) = VEH_MAX_HEALTH(veh);
-		REMOVE_BIT(VEH_FLAGS(veh), VEH_ON_FIRE);
+		remove_vehicle_flags(veh, VEH_ON_FIRE);
+		if (!VEH_IS_DISMANTLING(veh)) {
+			if (VEH_NEEDS_RESOURCES(veh) && !VEH_IS_COMPLETE(veh)) {
+				need_trig = TRUE;
+			}
+			
+			complete_vehicle(veh);
+			
+			if (need_trig) {
+				complete_vtrigger(veh);
+			}
+		}
 	}
 	if (rtarg) {
 		if (COMPLEX_DATA(rtarg)) {
 			free_resource_list(GET_BUILDING_RESOURCES(rtarg));
 			GET_BUILDING_RESOURCES(rtarg) = NULL;
-			COMPLEX_DATA(rtarg)->damage = 0;
-			COMPLEX_DATA(rtarg)->burning = 0;
+			set_room_damage(rtarg, 0);
+			set_burn_down_time(rtarg, 0, FALSE);
+			request_world_save(GET_ROOM_VNUM(rtarg), WSAVE_ROOM);
 		}
 	}
 }
@@ -1453,8 +1686,8 @@ WCMD(do_wscale) {
 	else if (*lvl_arg) {
 		level = atoi(lvl_arg);
 	}
-	else if ((inst = find_instance_by_room(room, FALSE))) {
-		level = inst->level;
+	else if ((inst = find_instance_by_room(room, FALSE, TRUE))) {
+		level = INST_LEVEL(inst);
 	}
 	else {
 		level = 0;
@@ -1467,8 +1700,7 @@ WCMD(do_wscale) {
 	
 	// scale adventure
 	if (!str_cmp(arg, "instance")) {
-		void scale_instance_to_level(struct instance_data *inst, int level);
-		if (inst || (inst = find_instance_by_room(room, FALSE))) {
+		if (inst || (inst = find_instance_by_room(room, FALSE, TRUE))) {
 			scale_instance_to_level(inst, level);
 		}
 	}
@@ -1480,10 +1712,10 @@ WCMD(do_wscale) {
 		}
 
 		scale_mob_to_level(victim, level);
-		SET_BIT(MOB_FLAGS(victim), MOB_NO_RESCALE);
+		set_mob_flags(victim, MOB_NO_RESCALE);
 	}
 	// scale vehicle
-	else if ((*arg == UID_CHAR && (veh = get_vehicle(arg))) || (veh = get_vehicle_room(room, arg))) {
+	else if ((*arg == UID_CHAR && (veh = get_vehicle(arg))) || (veh = get_vehicle_room(room, arg, NULL))) {
 		scale_vehicle_to_level(veh, level);
 	}
 	// scale obj
@@ -1492,8 +1724,7 @@ WCMD(do_wscale) {
 			scale_item_to_level(obj, level);
 		}
 		else if ((proto = obj_proto(GET_OBJ_VNUM(obj))) && OBJ_FLAGGED(proto, OBJ_SCALABLE)) {
-			fresh = read_object(GET_OBJ_VNUM(obj), TRUE);
-			scale_item_to_level(fresh, level);
+			fresh = fresh_copy_obj(obj, level, TRUE, TRUE);
 			swap_obj_for_obj(obj, fresh);
 			extract_obj(obj);
 		}
@@ -1508,6 +1739,9 @@ WCMD(do_wscale) {
 }
 
 
+ //////////////////////////////////////////////////////////////////////////////
+//// WORLD COMMAND INTERPRETER ///////////////////////////////////////////////
+
 const struct wld_command_info wld_cmd_info[] = {
 	{ "RESERVED", NULL, NO_SCMD },/* this must be first -- for specprocs */
 
@@ -1519,7 +1753,10 @@ const struct wld_command_info wld_cmd_info[] = {
 	{ "wechoaround", do_wsend, SCMD_WECHOAROUND },
 	{ "wechoneither", do_wechoneither, NO_SCMD },
 	{ "wforce", do_wforce, NO_SCMD },
+	{ "wheal", do_wheal, NO_SCMD },
 	{ "wload", do_wload, NO_SCMD },
+	{ "wlog", do_wlog, NO_SCMD },
+	{ "wmod", do_wmod, NO_SCMD },
 	{ "wmorph", do_wmorph, NO_SCMD },
 	{ "wpurge", do_wpurge, NO_SCMD },
 	{ "wquest", do_wquest, NO_SCMD },
@@ -1527,11 +1764,13 @@ const struct wld_command_info wld_cmd_info[] = {
 	{ "wscale", do_wscale, NO_SCMD },
 	{ "wsend", do_wsend, SCMD_WSEND },
 	{ "wsiege", do_wsiege, NO_SCMD },
+	{ "wslay", do_wslay, NO_SCMD },
 	{ "wteleport", do_wteleport, NO_SCMD },
 	{ "wterracrop", do_wterracrop, NO_SCMD },
 	{ "wterraform", do_wterraform, NO_SCMD },
 	{ "wbuildingecho", do_wbuildingecho, NO_SCMD },
 	{ "wregionecho", do_wregionecho, NO_SCMD },
+	{ "wsubecho", do_wsubecho, NO_SCMD },
 	{ "wvehicleecho", do_wvehicleecho, NO_SCMD },
 	{ "wdamage", do_wdamage, NO_SCMD },
 	{ "waoe", do_waoe, NO_SCMD },
@@ -1542,8 +1781,11 @@ const struct wld_command_info wld_cmd_info[] = {
 };
 
 
-/*
+/**
 *  This is the command interpreter used by rooms, called by script_driver.
+*
+* @param room_data *room The room running the command.
+* @param char *argument The rest of the line from the script.
 */
 void wld_command_interpreter(room_data *room, char *argument) {
 	int cmd, length;
@@ -1552,18 +1794,23 @@ void wld_command_interpreter(room_data *room, char *argument) {
 	skip_spaces(&argument);
 
 	/* just drop to next line for hitting CR */
-	if (!*argument)
+	if (!*argument) {
 		return;
+	}
 
 	half_chop(argument, arg, line);
 
 	/* find the command */
-	for (length = strlen(arg), cmd = 0; *wld_cmd_info[cmd].command != '\n'; cmd++)
-		if (!strn_cmp(wld_cmd_info[cmd].command, arg, length))
+	for (length = strlen(arg), cmd = 0; *wld_cmd_info[cmd].command != '\n'; cmd++) {
+		if (!strn_cmp(wld_cmd_info[cmd].command, arg, length)) {
 			break;
+		}
+	}
 
-	if (*wld_cmd_info[cmd].command == '\n')
+	if (*wld_cmd_info[cmd].command == '\n') {
 		wld_log(room, "Unknown world cmd: '%s'", argument);
-	else
+	}
+	else {
 		((*wld_cmd_info[cmd].command_pointer)(room, line, cmd, wld_cmd_info[cmd].subcmd));
+	}
 }

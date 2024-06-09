@@ -1,0 +1,1064 @@
+#18800
+spirit restless~
+a restless spirit~
+A restless spirit haunts this place.
+~
+0 0 bdho cnG 0
+2 0 0 15 -1
+D
+   She is dressed in tattered rags, bound in chains, wandering to and fro
+through the tomb. When she passes through you -- and she does -- you feel an
+unearthly chill that you cannot shake.
+~
+M
+0
+$n wails mournfully into the wind.~
+M
+0
+For an instant, you see $n's teeth as long, sharp daggers; then they vanish.~
+M
+0
+$n floats listlessly around the tomb.~
+M
+0
+$n floats listlessly around the tomb.~
+M
+0
+$n floats listlessly around the tomb.~
+S
+#18801
+centaur headless horseman man~
+the headless centaur~
+A headless horse man rears back and brandishes his sword!
+~
+25 400 bdoDK cG 4
+1 0 12 1 -1
+D
+   This mighty centaur stands head and shoulders above you. Well, shoulders,
+anyway. He is dressed in black armor and armed with a black steel sword, and he
+looks angry.
+~
+I 4 18830 12.50 1 L  # LOOT: glowing bone shield
+I 4 18831 12.50 1 L  # LOOT: leather batwing shield
+I 4 18832 12.50 1 L  # LOOT: black cat's talon
+I 4 18833 12.50 1 L  # LOOT: Tome of the Nightmare Empire
+I 4 18834 12.50 1 L  # LOOT: Skull of Valor
+I 4 18835 12.50 1 L  # LOOT: flaming gourd
+I 4 18837 12.50 1 L  # LOOT: headless centaur's saddle
+I 4 18829 12.50 1 L  # LOOT: goody bag
+I+ 3 0  # Normal
+I 4 18829 12.50 2 L  # LOOT: goody bag
+I+ 4 0  # Hard
+I 4 18829 12.50 3 L  # LOOT: goody bag
+I+ 5 0  # Group
+I 4 18829 12.50 4 L  # LOOT: goody bag
+I+ 6 0  # Boss
+M
+0
+$n rears back on $s hind legs, kicking $s front legs in the air.~
+M
+0
+$n lets out a deep, toneless groan.~
+M
+0
+$n's sword glows with hellfire.~
+M
+0
+A voice in your head says, 'How dare you challenge me?'~
+M
+0
+A voice in your head says, 'You think to defeat me? Neigh!'~
+T 18806
+T 18803
+T 18804
+T 18805
+T 9600
+T 9601
+T 9604
+S
+#18803
+guard cityguard risen~
+a risen city guard~
+A risen city guard hunts for intruders.
+~
+75 175 dhqtuA cG 3
+1 0 13 10 -1
+D
+   This guard was clearly more dedicated than any before him. Even in death, he
+patrols the empire, hunting down intruders. Don't mind the gray coloration of
+his skin, the straw-like feel of his remaining hair, or the smell that wafts
+from him with the slightest breeze.
+~
+I 4 18875 5.00 1  # LOOT: tooth whistle
+I 12 18875 5.00 1  # PICKPOCKET: tooth whistle
+M
+0
+A faint rustling comes from $n, as the wind blows.~
+M
+5
+$n tries to flex as $e prepares for combat.~
+M
+4
+$n blinks $s eyes hard against the light.~
+M
+0
+$n watches you with dead eyes.~
+M
+5
+$n groans aggressively.~
+M
+4
+$n groans softly.~
+M
+0
+A light creaking can be heard.~
+T 251
+T 18811
+S
+#18805
+lantern attack-o-lantern~
+the attack-o-lantern~
+An attack-o-lantern is floating here.
+~
+25 400 bdhozD c 3
+0 0 27 28 -1
+D
+It's a carved pumpkin, but it looks like it might be enchanted.
+~
+T 18807
+T 9600
+T 9601
+T 9604
+S
+#18822
+#n ghost~
+the ghost of #n~
+The ghost of #n is haunting this place.
+~
+0 0 do cmnG 0
+0 0 27 15 -1
+D
+You can see straight through the ghost. That can't be normal.
+~
+S
+#18824
+#n guard~
+guard #n~
+#n the guard is standing here.
+~
+5 125 bdoquv 0 3
+1 0 0 1 -1
+D
+The guard doesn't look happy at what you've been doing.
+~
+S
+#18826
+companion starry-eyed eyed~
+a starry-eyed companion~
+A companion stands, starry-eyed, looking around in wonder.
+~
+1 1 bdoD n 3
+2 0 0 15 -1
+D
+She looks like she's come from a different time.
+~
+M
+1
+This whole kingdom seems bigger from the inside.~
+M
+1
+Imagine a very big box fitting inside a very small box.~
+M
+1
+Let me be brave. Let me be brave.~
+M
+1
+You and me, time and space. Watch us run!~
+M
+1
+Oi! Watch it!~
+M
+1
+We're running out of places to run.~
+T 9901
+T 9902
+S
+#18828
+ghost knocking~
+a knocking ghost~
+A ghost lingers in the air.
+~
+25 75 dovI deG 0
+0 0 27 28 -1
+D
+It's knocking on the walls, the doors, and anything else it comes across.
+~
+M
+0
+You hear a strange knocking sound.~
+M
+0
+Something is knocking in the distance.~
+M
+0
+You nearly jump out of your boots as you hear a knocking sound behind you.~
+S
+#18829
+ghost rattling~
+a rattling ghost~
+A ghost lingers in the air.
+~
+25 75 dovI deG 0
+0 0 27 28 -1
+D
+The ghost is wrapped in chains, and rattles them loudly as it floats along.
+~
+M
+0
+You hear a strange rattle from behind.~
+M
+0
+A sharp rattling noise pierces your ears.~
+M
+0
+The rattling of bones fills the air.~
+S
+#18830
+hand skittering disembodied~
+a skittering hand~
+A disembodied hand skitters across the floor.
+~
+25 75 dovI 0 1
+0 0 8 15 -1
+D
+You're not sure where this Thing came from.
+~
+S
+#18838
+horse headless~
+a headless horse~
+A headless horse neighs silently in the breeze.
+~
+10 100 dej m 4
+0 0 25 11 -1
+D
+   The horse has a gleaming black coat, enormous bat wings, glowing hooves, and
+-- most strikingly -- no head. It navigates surprisingly well for a horse with
+no eyes.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+M
+0
+$n neighs silently.~
+S
+#18839
+horse headless~
+a headless horse~
+A headless horse neighs silently in the breeze.
+~
+10 100 dej 0 4
+0 0 14 11 -1
+D
+It navigates surprisingly well for a horse with no eyes.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+M
+0
+$n neighs silently.~
+S
+#18840
+nightmare pitch-black black~
+a nightmare~
+A pitch-black nightmare gallops across the sky.
+~
+100 150 bdej m 4
+0 0 12 11 -1
+D
+Legend says this black horse flies across the night sky.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+S
+#18841
+ghoul little~
+a little ghoul~
+A little ghoul scampers around, spreading mischief.
+~
+1 1 bdoD n 2
+0 0 0 9 -1
+D
+The ghoul is collecting bits of candy from the ground.
+~
+M
+0
+$n gasps and vanishes!~
+M
+0
+You notice $n has tied your bootlaces together.~
+M
+0
+$n fades in and out as $e runs in circles around you.~
+M
+0
+$n throws a bog roll over your head.~
+M
+0
+$n bangs a spoon against a pan.~
+M
+0
+$n digs around, as if $e's looking for something.~
+T 9901
+T 9902
+S
+#18842
+goblin mischievous~
+a mischievous goblin~
+A mischievous goblin is lurking around.
+~
+25 75 dovzI 0 2
+0 0 9 9 -1
+D
+This little goblin runs away when it realizes you're looking at it.
+~
+S
+#18843
+vampire skulking~
+a skulking vampire~
+A vampire is skulking in the shadows.
+~
+25 75 dovwzI 0 3
+0 0 7 9 -1
+D
+It's a vampire. Try not to get too close.
+~
+T 9064
+S
+#18844
+ghost~
+a ghost~
+A ghost hangs in the air like a sheet.
+~
+25 75 dhozD G 0
+0 0 27 16 -1
+D
+On second look, this might just be a floating sheet.
+~
+S
+#18845
+half-spider spider man half-man strange creature~
+a half-spider~
+A strange creature, half-spider, half-man, stands here.
+~
+25 75 dovzI v 3
+0 0 9 9 -1
+D
+   You're not sure what happened to this poor spider, but someone has turned
+half of it into a human!
+~
+S
+#18859
+ghost skeleton~
+a skeleton ghost~
+The ghost of a skeleton is creeping around.
+~
+1 1 bdoD n 2
+0 0 0 15 -1
+D
+   You can see straight through the little skeleton, and not just between the
+ribs! It seems to be wandering back and forth, lost, often passing straight
+through objects and people. It seems to be in good condition, minus the missing
+flesh and organs, though its eye sockets are strangely square.
+~
+M
+0
+$n wags its chin.~
+M
+0
+The hair on the back of your neck stands up as $n passes straight through you.~
+M
+0
+$n cracks its knuckles and then starts looking frantically for a way to fix them.~
+M
+0
+$n trips over its own two feet and falls through the ground, but quickly reappears nearby.~
+M
+0
+$n scratches its head.~
+M
+0
+$n does a macabre little dance.~
+M
+0
+$n vanishes, only to reappear in front of your face!~
+M
+0
+$n leaps into the air with fright as it sees a shadow on the ground.~
+S
+#18860
+Bylda bear~
+the Bylda~
+A Bylda is rampaging!
+~
+25 400 dyzM c 6
+0 0 26 24 -1
+D
+   The enormous bear looks cobbled together from leather and bad magic, and
+it's not happy about it! You duck as the Bylda swipes its mighty paw at you,
+narrowly avoiding its impressive reach but nearly soiling your pants in the
+process.
+~
+I 4 125 33.33 4  # LOOT: stack of lumber
+I 4 125 33.33 2  # LOOT: stack of lumber
+I 4 125 33.33 2  # LOOT: stack of lumber
+I 4 125 33.33 1  # LOOT: stack of lumber
+I 4 125 33.33 1  # LOOT: stack of lumber
+I 4 1357 33.33 4  # LOOT: large piece of leather
+I 4 1357 33.33 2  # LOOT: large piece of leather
+I 4 1357 33.33 2  # LOOT: large piece of leather
+I 4 1357 33.33 1  # LOOT: large piece of leather
+I 4 1357 33.33 1  # LOOT: large piece of leather
+I 4 6600 50.00 1  # LOOT: magic gem
+I 4 6420 33.33 4  # LOOT: plant fibers
+I 4 6420 33.33 2  # LOOT: plant fibers
+I 4 6420 33.33 2  # LOOT: plant fibers
+I 4 6420 33.33 1  # LOOT: plant fibers
+I 4 6420 33.33 1  # LOOT: plant fibers
+M
+0
+$n roars in your face! Its breath smells like rotten straw.~
+M
+0
+$n stands on its hind legs and lets out a low, rumbling roar.~
+M
+0
+$n rolls over, nearly crushing you!~
+M
+0
+$n paws at the ground, causing it to shake!~
+M
+0
+$n snaps at you, narrowly missing you with its wooden jaws!~
+M
+0
+$n swipes at you with its enormous claw, but it doesn't seem to judge the distance very well.~
+M
+0
+$n roars!~
+M
+0
+$n roars!~
+M
+0
+$n roars!~
+T 18851
+T 18849
+S
+#18861
+demon small basic~
+a small demon~
+A basic small demon growls here.
+~
+1 400 do c 2
+0 0 9 16 -1
+D
+   A basic demon, small enough to fit through the portal, nothing too
+noticeable about it.
+~
+M
+0
+A low growl comes from the shadows.~
+M
+4
+$n hisses as $e looks for shadows to hide in.~
+M
+5
+A patch of shadow resolves itself into $n.~
+M
+5
+The smell of fetted breath preceeds the glow of $n's eyes.~
+M
+0
+A snorting snuffling sound clearly indicates $n is looking for something, or someone.~
+T 18852
+T 18853
+S
+#18862
+demon nether massive~
+a nether demon~
+A massive demon of nether origin roars at you!
+~
+400 400 bdgyzABDF choqACDEK 5
+0 0 0 15 -1
+D
+   What are you doing looking at this thing? You should be trying to run, or
+preparing to die! It is massive, far too large to fit through the portal you
+just came through. Unfortunately, its coloring blends in with everything else
+in this nether land.
+~
+M
+1
+You never should have come here. Now you will never leave here.~
+M
+0
+Pure blackness emits from $n like heat off desert sand.~
+M
+4
+Sunlight shines down, but fails to reach the ground anywhere near $n.~
+M
+1
+Suffer.~
+S
+#18863
+doll antique eerie~
+an antique doll~
+An eerie, antique doll stands in the corner.
+~
+1 1 bdoD dn 1
+0 0 0 15 -1
+D
+   The doll's porcelain skin is cracked and its clothing tattered. Glassy,
+unblinking eyes seem to follow your every move, though it's probably just your
+imagination.
+~
+M
+0
+$n's head slowly turns to follow you as you move around the room.~
+M
+0
+$n's glassy eyes glow briefly with an otherworldly light.~
+M
+0
+You hear faint, ghastly giggling emanating from $n.~
+M
+0
+$n's tiny hand reaches out to touch your hand, sending a chill down your spine.~
+M
+0
+$n's expression changes, $s lips curling into a sinister smile.~
+M
+0
+$n levitates a few inches off the ground before settling back down.~
+M
+0
+A spectral mist surrounds $n before dissipating as quickly as it appeared.~
+M
+0
+$n's clothing rustles as if moved by an invisible hand.~
+M
+0
+$n emits a soft, eerie lullaby that sends shivers down your spine.~
+M
+1
+Play with me... forever.~
+M
+1
+Shhh... they're watching.~
+M
+1
+Don't go to sleep tonight.~
+M
+1
+I see you when you're sleeping.~
+M
+1
+Let's have a tea party, just you and me.~
+M
+1
+In the dark, we're never alone.~
+M
+1
+I didn't choose to be this way.~
+M
+1
+You're my new best friend... whether you like it or not.~
+M
+1
+Time to play a game, a very special game.~
+M
+1
+Do you hear the whispers too?~
+M
+1
+I'm not alone in here, and neither are you.~
+M
+1
+I remember your secrets.~
+M
+1
+Come closer, I have something to show you.~
+M
+1
+The night is so long, and the shadows so deep.~
+M
+1
+Behind your smile, I see fear.~
+S
+#18871
+ghost friendly~
+a friendly ghost~
+A ghost with a friendly looking smile hovers above the ground.
+~
+1 1 dh cmn 3
+0 0 0 15 -1
+D
+Other than a friendly smile, there isn't much to see about this spirit.
+~
+M
+3
+Aah, the sun is finally down. That's much better.~
+M
+4
+You watch as the sun fades $n into near invisibility.~
+M
+1
+I always did enjoy being a member of $l.~
+M
+0
+$n attempts to continue its living routine.~
+M
+2
+The sun is hard on us spirits but I wouldn't give this up for anything.~
+T 18871
+T 18872
+S
+#18873
+victim headless centaur's centaurs~
+the headless centaur's victim~
+The latest victim of the headless centaur lays on the ground dying.
+~
+1 1 bdvI nD 3
+1 0 0 15 -1
+D
+   This adventurer has been badly wounded by his fight with the headless
+centaur. Clearly, he wasn't ready for such a battle. You should ease his
+suffering until he passes on. Perhaps by playing some music?
+~
+M
+0
+$n groans pitifully.~
+M
+0
+$n hisses in pain through $s teeth.~
+M
+0
+$n shudders as $s muscles lock up.~
+T 18873
+T 18876
+S
+#18875
+t-rex zombie sue~
+a zombie t-rex~
+A dragon sized zombie stomps about.
+~
+1 100 deghkM c 5
+2 0 26 9 -1
+D
+   This former queen of the primeval world has a rough pebbled hide, colored
+similar to a jaguar's pelt. Solid muscle ripples under the desiccated flesh as
+she moves about. As you look up at her, the name Sue pops into your mind.
+~
+M
+0
+$n reaches down and plucks up a snack with $s mouth!~
+M
+4
+The sun highlights the zombified state of $n.~
+M
+5
+You can hear $n, but aren't certain just where it is.~
+M
+0
+Stomping footsteps shake the ground!~
+S
+#18876
+pig~
+a pig~
+A pig is leashed to keep it from fleeing.
+~
+5 15 bdjo 0 3
+0 0 0 9 -1
+D
+   This fat pig seems ready for market. It's surprisingly clean. Perhaps
+someone already washed it off.
+~
+I 0 3201 100.00 2  # BUTCHER: slab of pork
+S
+#18877
+#n butcher~
+#n Butcher~
+#n is sharpening a cleaver.
+~
+20 50 bdqvI 0 3
+0 1 0 2 -1
+D
+The butcher's face is disturbed by a vicious grin.
+~
+M
+0
+There's a rough grinding noise as $n sharpens a cleaver.~
+M
+0
+$n hums a low tune as $e sharpens $s knife.~
+M
+1
+This little piggy went to market...~
+S
+#18878
+tarantula hawk giant~
+a giant tarantula hawk~
+A giant tarantula hawk is buzzing above you.
+~
+100 125 dej m 4
+0 0 2 23 -1
+D
+   This oversized wasp is large enough to ride, but you're not sure you want to
+get close to that stinger.
+~
+S
+#18879
+tarantula giant~
+a giant tarantula~
+A giant tarantula menaces you with its hairy legs.
+~
+100 125 dej 0 4
+0 0 8 9 -1
+D
+   This is among the largest spiders you have ever seen -- and you shudder to
+remember the others. Perhaps you can ride it.
+~
+S
+#18880
+spirit faded grandmother ancestor~
+a faded spirit~
+A faded spirit is wandering here.
+~
+0 1 bdoDF mnG 3
+2 0 30 15 -1
+D
+   The hazy ghost of a nearly-forgotten ancestor floats listlessly before you.
+If you squint, it sort of looks like your grandmother!
+~
+S
+#18881
+grandmother~
+Grandmother~
+Grandmother is floating here.
+~
+0 1 dqvDFI nG 3
+2 0 27 15 -1
+D
+   This old spirit has returned to visit the land of the living once more. Her
+portrait has been placed on an altar near her grave, enabling her to cross the
+veil for a short time.
+~
+M
+0
+$n tries to offer you some food, but it passes right through you!~
+M
+0
+$n tries to clean a smudge on your face, but her handkerchief has no effect on the living!~
+M
+0
+$n hums an old tune to herself.~
+M
+1
+Have you married yet, dear?~
+M
+1
+Back when Grandpa and I were courting, the world was a lot simpler and nobody went on adventures.~
+M
+1
+You look like you could use a haircut.~
+M
+1
+Are you eating enough?~
+M
+0
+You can almost smell $n's favorite perfume.~
+M
+0
+$n fades into nostalgia for a moment.~
+T 18872
+S
+#18885
+terrier zombie~
+a zombie terrier~
+A zombie terrier is chasing its tail.
+~
+1 1 bdoD n 1
+0 0 0 9 -1
+D
+   This poor, adorable soul has been stitched back together and reanimated by
+some unknown necromancy. In life, it was an exuberant loyal terrier. In death,
+little has changed.
+~
+M
+0
+$n yips.~
+M
+0
+$n yips and a moth comes out.~
+M
+0
+$n's tail falls off and runs away... But the terrier chases it down and grabs it.~
+M
+0
+$n trips over its stitches as it tries to run circles around you.~
+M
+0
+$n runs up and licks your face! Its breath smells like death.~
+S
+#18890
+pumpkin great~
+the Great Pumpkin~
+The Great Pumpkin hovers before you!
+~
+100 125 bdo cmE 4
+0 0 0 36 -1
+D
+   Though few believe in the Great Pumpkin, his mighty gourdness floats here
+before you, leaving no doubt that he is real.
+~
+I 4 18891 100.00 5  # LOOT: bunch of pumpkin seeds
+T 18890
+S
+#18892
+spider little~
+a little spider~
+A little spider is hiding in the corner.
+~
+0 0 bdo klnJ 3
+0 0 0 15 -1
+D
+This mob is invisible to players. It provides the room echoes.
+~
+M
+0
+You hear footsteps above you.~
+M
+0
+Loud, stomping footsteps shake dust loose from the ceiling.~
+M
+0
+As you move through the room, the skulls seem to turn to follow you.~
+M
+0
+One of the skulls seems to be gnawing on something furry.~
+M
+0
+A rat brushes past your ankle.~
+M
+0
+You hear a sneeze from the wall of skulls, but all of them are acting like it wasn't them.~
+M
+0
+Your knees rattle at the sound of screaming from above. Then you realize those weren't your knees rattling.~
+M
+0
+You trip over something and look down only to find it's a fingerbone.~
+M
+0
+This place makes your bones ache.~
+S
+#18893
+spider little~
+a little spider~
+A little spider is hiding in the corner.
+~
+0 0 bdo klnJ 3
+0 0 0 15 -1
+D
+This mob is invisible to players. It provides the room echoes.
+~
+M
+0
+There's a wailing sound in the distance.~
+M
+0
+You brush a spiderweb from your face.~
+M
+0
+It feels like a spider is climbing your leg.~
+M
+0
+The dank smell makes you feel at home somehow.~
+M
+0
+It sounds like someone is rifling through the trunk in the corner.~
+M
+0
+Something skitters into a hole in the wall.~
+M
+0
+You bump your head on the sloping ceiling. Then there's a second bumping noise right behind you.~
+M
+0
+Every time you take a step, you hear a second footstep right after.~
+S
+#18894
+spider little~
+a little spider~
+A little spider is hiding in the corner.
+~
+0 0 bdo klnJ 3
+0 0 0 15 -1
+D
+This mob is invisible to players. It provides the room echoes.
+~
+M
+0
+You hear screaming from somewhere downstairs.~
+M
+0
+You hear screaming from somewhere upstairs.~
+M
+0
+Someone knocks at the door.~
+M
+0
+The hair on the back of your neck stands up.~
+M
+0
+You feel like you're forgetting something.~
+M
+0
+It feels like you've been climbing these stairs forever.~
+M
+0
+You barely catch the railing before vertigo sends you tumbling.~
+M
+0
+You hear a wailing from somewhere else in the house.~
+M
+0
+It sounds like someone is keening nearby.~
+S
+#18895
+spider little~
+a little spider~
+A little spider is hiding in the corner.
+~
+0 0 bdo klnJ 3
+0 0 0 15 -1
+D
+This mob is invisible to players. It provides the room echoes.
+~
+M
+0
+You hear screaming from somewhere downstairs.~
+M
+0
+You hear screaming from somewhere upstairs.~
+M
+0
+The hair on the back of your neck stands up.~
+M
+0
+You hear the sound of marble shattering from the hall.~
+M
+0
+A book flies in from the doorway and shelves itself.~
+M
+0
+Two books swap places on the shelf.~
+M
+0
+On the desk, a pen rises up and jots down a quick note.~
+M
+0
+When you look behind you, there's a trail of blood.~
+M
+0
+One of the books flips open with a screaming sound.~
+M
+0
+There's a sneezing sound and dust flies off of one of the bookshelves.~
+S
+#18896
+spider little~
+a little spider~
+A little spider is hiding in the corner.
+~
+0 0 bdo klnJ 3
+0 0 0 15 -1
+D
+This mob is invisible to players. It provides the room echoes.
+~
+M
+0
+You hear screaming from somewhere downstairs.~
+M
+0
+You hear screaming from somewhere upstairs.~
+M
+0
+One of the paintings seems to be watching you.~
+M
+0
+The hair on the back of your neck stands up.~
+M
+0
+You stumble as the floor tilts.~
+M
+0
+You think you see one of the statues dancing out of the corner of your eye.~
+M
+0
+One of the busts seems to be singing, 'When the crypt doors creak, and the tombstones quake, spooks come out for a singing wake...'~
+M
+0
+Blood appears to drip down one of the paintings, but when you look closer, it's just modern art.~
+M
+0
+When you turn around, the statues have swapped places.~
+M
+0
+You blink as you try to remember if you were standing this close to the angel statue before.~
+M
+0
+Something crawls up your leg.~
+S
+#18899
+spider little~
+a little spider~
+A little spider is hiding in the corner.
+~
+0 0 bdo klnJ 3
+0 0 0 15 -1
+D
+This mob is invisible to players. It provides the room echoes.
+~
+M
+0
+You hear screaming from somewhere downstairs.~
+M
+0
+You hear screaming from somewhere upstairs.~
+M
+0
+You lose your balance as the ceiling seems to rise away from you.~
+M
+0
+One of the paintings seems to be watching you.~
+M
+0
+Someone knocks at the door.~
+M
+0
+The hair on the back of your neck stands up.~
+M
+0
+A book flies by the doorway on its way to the library.~
+M
+0
+You hear the sound of marble shattering from the hall.~
+M
+0
+You stumble as the floor tilts.~
+M
+0
+You feel like you're forgetting something.~
+S
+$

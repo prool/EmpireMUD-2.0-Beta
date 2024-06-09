@@ -2,7 +2,7 @@
 *   File: olc.craft.c                                     EmpireMUD 2.0b5 *
 *  Usage: OLC for craft recipes                                           *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -20,6 +20,7 @@
 #include "olc.h"
 #include "skills.h"
 #include "handler.h"
+#include "constants.h"
 
 /**
 * Contents:
@@ -28,18 +29,8 @@
 *   Edit Modules
 */
 
-// externs
-extern const char *apply_types[];
-extern const char *bld_on_flags[];
-extern const char *craft_flags[];
-extern const char *craft_types[];
-extern const char *drinks[];
-extern const char *road_types[];
-
-// external funcs
-void init_craft(craft_data *craft);
-
 // locals
+const char *default_craft_name = "unnamed recipe";
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -55,22 +46,26 @@ void init_craft(craft_data *craft);
 bool audit_craft(craft_data *craft, char_data *ch) {
 	char temp[MAX_STRING_LENGTH];
 	bool problem = FALSE;
-	int count;
+	bld_data *bld = NULL;
 
-	if (GET_CRAFT_REQUIRES_OBJ(craft) == NOTHING && GET_CRAFT_ABILITY(craft) == NO_ABIL) {
-		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft requires no object or ability");
+	if (GET_CRAFT_REQUIRES_OBJ(craft) == NOTHING && GET_CRAFT_ABILITY(craft) == NO_ABIL && !CRAFT_FLAGGED(craft, CRAFT_LEARNED) && GET_CRAFT_TYPE(craft) != CRAFT_TYPE_WORKFORCE) {
+		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft requires no object, ability, or recipe");
 		problem = TRUE;
 	}
 	if (IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_IN_DEVELOPMENT)) {
 		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "IN-DEVELOPMENT");
 		problem = TRUE;
 	}
-	if (!IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_APIARIES | CRAFT_GLASS) && !GET_CRAFT_RESOURCES(craft)) {
+	if (!GET_CRAFT_RESOURCES(craft) && (!CRAFT_FLAGGED(craft, CRAFT_TAKE_REQUIRED_OBJ) || GET_CRAFT_REQUIRES_OBJ(craft) == NOTHING)) {
 		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft requires no resources");
 		problem = TRUE;
 	}
-	if (!str_cmp(GET_CRAFT_NAME(craft), "unnamed recipe")) {
+	if (!str_cmp(GET_CRAFT_NAME(craft), default_craft_name)) {
 		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft not named");
+		problem = TRUE;
+	}
+	if (CRAFT_FLAGGED(craft, CRAFT_TAKE_REQUIRED_OBJ) && GET_CRAFT_REQUIRES_OBJ(craft) == NOTHING) {
+		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Has TAKE-REQUIRED-OBJ but requires no obj");
 		problem = TRUE;
 	}
 	
@@ -87,8 +82,8 @@ bool audit_craft(craft_data *craft, char_data *ch) {
 	}
 	
 	// different types of crafts
-	if (GET_CRAFT_TYPE(craft) == CRAFT_TYPE_BUILD) {	// buildings only
-		if (GET_CRAFT_BUILD_TYPE(craft) == NOTHING || !building_proto(GET_CRAFT_BUILD_TYPE(craft))) {
+	if (CRAFT_IS_BUILDING(craft)) {	// buildings only
+		if (GET_CRAFT_BUILD_TYPE(craft) == NOTHING || !(bld = building_proto(GET_CRAFT_BUILD_TYPE(craft)))) {
 			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft makes nothing");
 			problem = TRUE;
 		}
@@ -96,8 +91,36 @@ bool audit_craft(craft_data *craft, char_data *ch) {
 			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft creates building with different vnum");
 			problem = TRUE;
 		}
+		if (bld && !CRAFT_FLAGGED(craft, CRAFT_IN_CITY_ONLY) && (IS_SET(GET_BLD_FLAGS(bld), BLD_IN_CITY_ONLY) || IS_SET(GET_BLD_FUNCTIONS(bld), FNC_IN_CITY_ONLY))) {
+			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Missing in-city-only flag on craft (already set on building or building functions)");
+			problem = TRUE;
+		}
+		if (bld && CRAFT_FLAGGED(craft, CRAFT_IN_CITY_ONLY) && !IS_SET(GET_BLD_FLAGS(bld), BLD_IN_CITY_ONLY) && !IS_SET(GET_BLD_FUNCTIONS(bld), FNC_IN_CITY_ONLY)) {
+			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Possible unnecessary in-city-only flag (not set on building or building functions)");
+			problem = TRUE;
+		}
+		if (bld && !GET_CRAFT_BUILD_FACING(craft) && !IS_SET(GET_BLD_FLAGS(bld), BLD_OPEN) && !CRAFT_FLAGGED(craft, CRAFT_UPGRADE)) {
+			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Missing build-facing");
+			problem = TRUE;
+		}
+		if (bld && GET_CRAFT_BUILD_FACING(craft) && CRAFT_FLAGGED(craft, CRAFT_UPGRADE)) {
+			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Upgrade craft has build-facing");
+			problem = TRUE;
+		}
+		if (GET_CRAFT_QUANTITY(craft) > 1) {
+			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Building craft with quantity > 1");
+			problem = TRUE;
+		}
+		if (GET_CRAFT_TIME(craft) > 1) {
+			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Building craft with time set");
+			problem = TRUE;
+		}
+		if (IS_SET(GET_CRAFT_BUILD_ON(craft), BLD_ON_ROAD)) {
+			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Building has 'road' build-on flag; this should only be used for vehicles and building-vehicles");
+			problem = TRUE;
+		}
 	}
-	else if (CRAFT_FLAGGED(craft, CRAFT_VEHICLE)) {	// vehicles only
+	else if (CRAFT_IS_VEHICLE(craft)) {	// vehicles only
 		if (GET_CRAFT_OBJECT(craft) == NOTHING || !vehicle_proto(GET_CRAFT_OBJECT(craft))) {
 			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft makes nothing");
 			problem = TRUE;
@@ -106,32 +129,55 @@ bool audit_craft(craft_data *craft, char_data *ch) {
 			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft creates vehicle with different vnum");
 			problem = TRUE;
 		}
-	}
-	else if (CRAFT_FLAGGED(craft, CRAFT_SOUP)) {	// soups only
-		if (GET_CRAFT_OBJECT(craft) < 0 || GET_CRAFT_OBJECT(craft) > NUM_LIQUIDS) {
-			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Invalid liquid type on soup recipe");
+		if (GET_CRAFT_QUANTITY(craft) > 1) {
+			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Vehicle craft with quantity > 1");
 			problem = TRUE;
 		}
+		/* probably don't need this:
+		if (GET_CRAFT_TIME(craft) > 1) {
+			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Vehicle craft with time set");
+			problem = TRUE;
+		}
+		*/
+	}
+	else if (CRAFT_FLAGGED(craft, CRAFT_SOUP) && !find_generic(GET_CRAFT_OBJECT(craft), GENERIC_LIQUID)) {	// soups only
+		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Invalid liquid type on soup recipe");
+		problem = TRUE;
 	}
 	else {	// normal craft (not special type))
 		if (GET_CRAFT_OBJECT(craft) == NOTHING || !obj_proto(GET_CRAFT_OBJECT(craft))) {
 			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft makes nothing");
 			problem = TRUE;
 		}
-		if (GET_CRAFT_OBJECT(craft) != NOTHING && GET_CRAFT_OBJECT(craft) != GET_CRAFT_VNUM(craft)) {
+		if (GET_CRAFT_OBJECT(craft) != NOTHING && GET_CRAFT_OBJECT(craft) != GET_CRAFT_VNUM(craft) && GET_CRAFT_TYPE(craft) != CRAFT_TYPE_WORKFORCE) {
 			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft creates item with different vnum");
 			problem = TRUE;
 		}
 	}
 	
-	count = (CRAFT_FLAGGED(craft, CRAFT_SOUP) ? 1 : 0) + (CRAFT_FLAGGED(craft, CRAFT_VEHICLE) ? 1 : 0) + ((GET_CRAFT_TYPE(craft) == CRAFT_TYPE_BUILD) ? 1 : 0);
-	if (count > 1) {
-		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Unusual combination of SOUP, VEHICLE, BUILD");
+	if (GET_CRAFT_BUILD_ON(craft) && !CRAFT_IS_VEHICLE(craft) && IS_SET(GET_CRAFT_BUILD_ON(craft), BLD_ON_FLAT_TERRAIN | BLD_FACING_CROP | BLD_FACING_OPEN_BUILDING)) {
+		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft has invalid build-on flags!");
+		problem = TRUE;
+	}
+	if (GET_CRAFT_BUILD_ON(craft) && IS_SET(GET_CRAFT_BUILD_ON(craft), BLD_ON_BASE_TERRAIN_ALLOWED)) {
+		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Builds on base-terrain-allowed -- this is not allowed in the buildon field");
+		problem = TRUE;
+	}
+	if (CRAFT_FLAGGED(craft, CRAFT_SOUP) && (CRAFT_FLAGGED(craft, CRAFT_VEHICLE) || GET_CRAFT_TYPE(craft) == CRAFT_TYPE_BUILD || CRAFT_FLAGGED(craft, CRAFT_BUILDING))) {
+		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Unusual combination of SOUP and VEHICLE or BUILD");
+		problem = TRUE;
+	}
+	if (CRAFT_FLAGGED(craft, CRAFT_VEHICLE) && CRAFT_FLAGGED(craft, CRAFT_BUILDING)) {
+		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft has both VEHICLE and BUILDING flags");
+		problem = TRUE;
+	}
+	if (CRAFT_FLAGGED(craft, CRAFT_TOOL_OR_FUNCTION) && (GET_CRAFT_REQUIRES_TOOL(craft) == NOBITS || GET_CRAFT_REQUIRES_FUNCTION(craft) == NOBITS)) {
+		olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft has TOOL-OR-FUCTION but is missing %s", (GET_CRAFT_REQUIRES_FUNCTION(craft) == NOBITS ? "tool" : "function"));
 		problem = TRUE;
 	}
 	
 	// anything not a building
-	if (GET_CRAFT_TYPE(craft) != CRAFT_TYPE_BUILD) {
+	if (!CRAFT_IS_BUILDING(craft)) {
 		if (GET_CRAFT_QUANTITY(craft) == 0) {
 			olc_audit_msg(ch, GET_CRAFT_VNUM(craft), "Craft creates 0 quantity");
 			problem = TRUE;
@@ -153,8 +199,6 @@ bool audit_craft(craft_data *craft, char_data *ch) {
 * @return craft_data* The new recipe's prototypes.
 */
 craft_data *create_craft_table_entry(craft_vnum vnum) {
-	void add_craft_to_table(craft_data *craft);
-	
 	craft_data *craft;
 	
 	// sanity
@@ -187,10 +231,10 @@ char *list_one_craft(craft_data *craft, bool detail) {
 	static char output[MAX_STRING_LENGTH];
 	
 	if (detail) {
-		snprintf(output, sizeof(output), "[%5d] %s", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
+		safe_snprintf(output, sizeof(output), "[%5d] %s (%s)", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft), craft_types[GET_CRAFT_TYPE(craft)]);
 	}
 	else {
-		snprintf(output, sizeof(output), "[%5d] %s", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
+		safe_snprintf(output, sizeof(output), "[%5d] %s", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
 	}
 	
 	return output;
@@ -204,16 +248,20 @@ char *list_one_craft(craft_data *craft, bool detail) {
 * @param craft_vnum vnum The vnum to delete.
 */
 void olc_delete_craft(char_data *ch, craft_vnum vnum) {
-	void cancel_gen_craft(char_data *ch);
-	void remove_craft_from_table(craft_data *craft);
-	
+	progress_data *prg, *next_prg;
+	empire_data *emp, *next_emp;
+	obj_data *obj, *next_obj;
+	descriptor_data *desc;
 	craft_data *craft;
 	char_data *iter;
+	char name[256];
 	
 	if (!(craft = craft_proto(vnum))) {
 		msg_to_char(ch, "There is no such craft %d.\r\n", vnum);
 		return;
 	}
+	
+	safe_snprintf(name, sizeof(name), "%s", NULLSAFE(GET_CRAFT_NAME(craft)));
 	
 	if (HASH_COUNT(craft_table) <= 1) {
 		msg_to_char(ch, "You can't delete the last craft.\r\n");
@@ -221,11 +269,20 @@ void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 	}
 	
 	// find players who are crafting it and stop them (BEFORE removing from table)
-	for (iter = character_list; iter; iter = iter->next) {
-		if (!IS_NPC(iter) && GET_ACTION(iter) == ACT_GEN_CRAFT && GET_ACTION_VNUM(iter, 0) == GET_CRAFT_VNUM(craft)) {
+	DL_FOREACH2(player_character_list, iter, next_plr) {
+		// currently crafting
+		if (GET_ACTION(iter) == ACT_GEN_CRAFT && GET_ACTION_VNUM(iter, 0) == GET_CRAFT_VNUM(craft)) {
 			msg_to_char(iter, "The craft you were making has been deleted.\r\n");
 			cancel_gen_craft(iter);
 		}
+		
+		// possibly learned
+		remove_learned_craft(ch, vnum);
+	}
+	
+	// find empires who had this in their learned list
+	HASH_ITER(hh, empire_table, emp, next_emp) {
+		remove_learned_craft_empire(emp, vnum, TRUE);
 	}
 	
 	// remove from table -- nothing else to check here
@@ -235,10 +292,186 @@ void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 	save_index(DB_BOOT_CRAFT);
 	save_library_file_for_vnum(DB_BOOT_CRAFT, vnum);
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted craft recipe %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Craft recipe %d deleted.\r\n", vnum);
+	// update objs
+	HASH_ITER(hh, object_table, obj, next_obj) {
+		if (IS_RECIPE(obj) && GET_RECIPE_VNUM(obj) == vnum) {
+			set_obj_val(obj, VAL_RECIPE_VNUM, 0);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Object %d %s lost deleted learnable craft", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
+			save_library_file_for_vnum(DB_BOOT_OBJ, GET_OBJ_VNUM(obj));
+		}
+	}
+	
+	// update progression
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		if (delete_progress_perk_from_list(&PRG_PERKS(prg), PRG_PERK_CRAFT, vnum)) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Progress %d %s lost deleted craft perk", PRG_VNUM(prg), PRG_NAME(prg));
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+		}
+	}
+	
+	// olc editor updates
+	for (desc = descriptor_list; desc; desc = desc->next) {
+		if (GET_OLC_OBJECT(desc)) {
+			if (IS_RECIPE(GET_OLC_OBJECT(desc)) && GET_RECIPE_VNUM(GET_OLC_OBJECT(desc)) == vnum) {
+				set_obj_val(GET_OLC_OBJECT(desc), VAL_RECIPE_VNUM, 0);
+				msg_to_char(desc->character, "The recipe used by the item you're editing was deleted.\r\n");
+			}
+		}
+		else if (GET_OLC_PROGRESS(desc)) {
+			if (delete_progress_perk_from_list(&PRG_PERKS(GET_OLC_PROGRESS(desc)), PRG_PERK_CRAFT, vnum)) {
+				save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(GET_OLC_PROGRESS(desc)));
+				msg_to_char(desc->character, "A craft used by the progress goal you're editing was deleted.\r\n");
+			}
+		}
+	}
+	
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted craft recipe %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Craft recipe %d (%s) deleted.\r\n", vnum, name);
 	
 	free_craft(craft);
+}
+
+
+/**
+* Searches properties of craft.
+*
+* @param char_data *ch The person searching.
+* @param char *argument The argument they entered.
+*/
+void olc_fullsearch_craft(char_data *ch, char *argument) {
+	char type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], find_keywords[MAX_INPUT_LENGTH];
+	int count;
+	
+	bitvector_t only_flags = NOBITS, not_flagged = NOBITS, only_tools = NOBITS, only_functions = NOBITS;
+	bitvector_t only_buildon = NOBITS, only_buildfacing = NOBITS;
+	int only_type = NOTHING, only_level = NOTHING, only_quantity = NOTHING, only_time = NOTHING;
+	int quantity_over = NOTHING, level_over = NOTHING, time_over = NOTHING;
+	int quantity_under = NOTHING, level_under = NOTHING, time_under = NOTHING, vmin = NOTHING, vmax = NOTHING;
+	bool requires_obj = FALSE;
+	
+	craft_data *craft, *next_craft;
+	
+	if (!*argument) {
+		msg_to_char(ch, "See HELP CEDIT FULLSEARCH for syntax.\r\n");
+		return;
+	}
+	
+	// process argument
+	*find_keywords = '\0';
+	while (*argument) {
+		// figure out a type
+		argument = any_one_arg(argument, type_arg);
+		
+		if (!strcmp(type_arg, "-")) {
+			continue;	// just skip stray dashes
+		}
+		
+		FULLSEARCH_LIST("type", only_type, craft_types)
+		FULLSEARCH_FLAGS("buildon", only_buildon, bld_on_flags)
+		FULLSEARCH_FLAGS("buildfacing", only_buildfacing, bld_on_flags)
+		FULLSEARCH_FLAGS("flags", only_flags, craft_flags)
+		FULLSEARCH_FLAGS("flagged", only_flags, craft_flags)
+		FULLSEARCH_FLAGS("unflagged", not_flagged, craft_flags)
+		FULLSEARCH_INT("quantity", only_quantity, 0, INT_MAX)
+		FULLSEARCH_INT("quantityover", quantity_over, 0, INT_MAX)
+		FULLSEARCH_INT("quantityunder", quantity_under, 0, INT_MAX)
+		FULLSEARCH_INT("level", only_level, 0, INT_MAX)
+		FULLSEARCH_INT("levelover", level_over, 0, INT_MAX)
+		FULLSEARCH_INT("levelunder", level_under, 0, INT_MAX)
+		FULLSEARCH_FLAGS("requiresfunction", only_functions, function_flags)
+		FULLSEARCH_BOOL("requiresobject", requires_obj)
+		FULLSEARCH_INT("time", only_time, 0, INT_MAX)
+		FULLSEARCH_INT("timesover", time_over, 0, INT_MAX)
+		FULLSEARCH_INT("timeunder", time_under, 0, INT_MAX)
+		FULLSEARCH_FLAGS("tools", only_tools, tool_flags)
+		FULLSEARCH_INT("vmin", vmin, 0, INT_MAX)
+		FULLSEARCH_INT("vmax", vmax, 0, INT_MAX)
+		
+		else {	// not sure what to do with it? treat it like a keyword
+			sprintf(find_keywords + strlen(find_keywords), "%s%s", *find_keywords ? " " : "", type_arg);
+		}
+		
+		// prepare for next loop
+		skip_spaces(&argument);
+	}
+	
+	build_page_display(ch, "Craft fullsearch: %s", show_color_codes(find_keywords));
+	count = 0;
+	
+	// okay now look up crafts
+	HASH_ITER(hh, craft_table, craft, next_craft) {
+		if ((vmin != NOTHING && GET_CRAFT_VNUM(craft) < vmin) || (vmax != NOTHING && GET_CRAFT_VNUM(craft) > vmax)) {
+			continue;	// vnum range
+		}
+		if (requires_obj && GET_CRAFT_REQUIRES_OBJ(craft) == NOTHING) {
+			continue;
+		}
+		if (only_buildon != NOBITS && (GET_CRAFT_BUILD_ON(craft) & only_buildon) != only_buildon) {
+			continue;
+		}
+		if (only_buildfacing != NOBITS && (GET_CRAFT_BUILD_FACING(craft) & only_buildfacing) != only_buildfacing) {
+			continue;
+		}
+		if (only_type != NOTHING && GET_CRAFT_TYPE(craft) != only_type) {
+			continue;
+		}
+		if (not_flagged != NOBITS && IS_SET(GET_CRAFT_FLAGS(craft), not_flagged)) {
+			continue;
+		}
+		if (only_flags != NOBITS && (GET_CRAFT_FLAGS(craft) & only_flags) != only_flags) {
+			continue;
+		}
+		if (only_functions != NOBITS && (GET_CRAFT_REQUIRES_FUNCTION(craft) & only_functions) != only_functions) {
+			continue;
+		}
+		if (only_quantity != NOTHING && GET_CRAFT_QUANTITY(craft) != only_quantity) {
+			continue;
+		}
+		if (quantity_over != NOTHING && GET_CRAFT_QUANTITY(craft) < quantity_over) {
+			continue;
+		}
+		if (quantity_under != NOTHING && (GET_CRAFT_QUANTITY(craft) > quantity_under || GET_CRAFT_QUANTITY(craft) == 0)) {
+			continue;
+		}
+		if (only_level != NOTHING && GET_CRAFT_MIN_LEVEL(craft) != only_level) {
+			continue;
+		}
+		if (level_over != NOTHING && GET_CRAFT_MIN_LEVEL(craft) < level_over) {
+			continue;
+		}
+		if (level_under != NOTHING && (GET_CRAFT_MIN_LEVEL(craft) > level_under || GET_CRAFT_MIN_LEVEL(craft) == 0)) {
+			continue;
+		}
+		if (only_time != NOTHING && GET_CRAFT_TIME(craft) != only_time) {
+			continue;
+		}
+		if (time_over != NOTHING && GET_CRAFT_TIME(craft) < time_over) {
+			continue;
+		}
+		if (time_under != NOTHING && (GET_CRAFT_TIME(craft) > time_under || GET_CRAFT_TIME(craft) == 0)) {
+			continue;
+		}
+		if (only_tools != NOBITS && (GET_CRAFT_REQUIRES_TOOL(craft) & only_tools) != only_tools) {
+			continue;
+		}
+		
+		if (*find_keywords && !multi_isname(find_keywords, GET_CRAFT_NAME(craft))) {
+			continue;
+		}
+		
+		// show it
+		build_page_display(ch, "[%5d] %s", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
+		++count;
+	}
+	
+	if (count > 0) {
+		build_page_display(ch, "(%d crafts)", count);
+	}
+	else {
+		build_page_display_str(ch, " none");
+	}
+	
+	send_page_display(ch);
 }
 
 
@@ -249,9 +482,10 @@ void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 * @param craft_vnum vnum The craft vnum.
 */
 void olc_search_craft(char_data *ch, craft_vnum vnum) {
-	char buf[MAX_STRING_LENGTH];
 	craft_data *craft = craft_proto(vnum);
-	int size, found;
+	progress_data *prg, *next_prg;
+	obj_data *obj, *next_obj;
+	int found;
 	
 	if (!craft) {
 		msg_to_char(ch, "There is no craft %d.\r\n", vnum);
@@ -259,18 +493,32 @@ void olc_search_craft(char_data *ch, craft_vnum vnum) {
 	}
 	
 	found = 0;
-	size = snprintf(buf, sizeof(buf), "Occurrences of craft %d (%s):\r\n", vnum, GET_CRAFT_NAME(craft));
+	build_page_display(ch, "Occurrences of craft %d (%s):", vnum, GET_CRAFT_NAME(craft));
+
+	// objects
+	HASH_ITER(hh, object_table, obj, next_obj) {
+		if (IS_RECIPE(obj) && GET_RECIPE_VNUM(obj) == vnum) {
+			++found;
+			build_page_display(ch, "OBJ [%5d] %s", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
+		}
+	}
 	
-	// crafts are not found anywhere in the world yet
+	// progression
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		if (find_progress_perk_in_list(PRG_PERKS(prg), PRG_PERK_CRAFT, vnum)) {
+			++found;
+			build_page_display(ch, "PRG [%5d] %s", PRG_VNUM(prg), PRG_NAME(prg));
+		}
+	}
 	
 	if (found > 0) {
-		size += snprintf(buf + size, sizeof(buf) - size, "%d location%s shown\r\n", found, PLURAL(found));
+		build_page_display(ch, "%d location%s shown", found, PLURAL(found));
 	}
 	else {
-		size += snprintf(buf + size, sizeof(buf) - size, " none\r\n");
+		build_page_display_str(ch, " none");
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -278,18 +526,19 @@ void olc_search_craft(char_data *ch, craft_vnum vnum) {
 * Removes any entries of an obj vnum from a resource list.
 *
 * @param struct resource_data **list A pointer to a resource list.
-* @param obj_vnum vnum The vnum to remove.
+* @param int type Any RES_ type, such as RES_OBJECT.
+* @param any_vnum vnum The vnum to remove.
 * @return bool TRUE if any were removed.
 */
-bool remove_obj_from_resource_list(struct resource_data **list, obj_vnum vnum) {
-	struct resource_data *res, *next_res, *temp;
+bool remove_thing_from_resource_list(struct resource_data **list, int type, any_vnum vnum) {
+	struct resource_data *res, *next_res;
 	int removed = 0;
 	
 	for (res = *list; res; res = next_res) {
 		next_res = res->next;
 		
-		if (res->type == RES_OBJECT && res->vnum == vnum) {
-			REMOVE_FROM_LIST(res, *list, next);
+		if (res->type == type && res->vnum == vnum) {
+			LL_DELETE(*list, res);
 			free(res);
 			++removed;
 		}
@@ -305,8 +554,6 @@ bool remove_obj_from_resource_list(struct resource_data **list, obj_vnum vnum) {
 * @param descriptor_data *desc The descriptor who is saving.
 */
 void save_olc_craft(descriptor_data *desc) {
-	extern int sort_crafts_by_data(craft_data *a, craft_data *b);
-	
 	craft_data *proto, *craft = GET_OLC_CRAFT(desc);
 	craft_vnum vnum = GET_OLC_VNUM(desc);
 	UT_hash_handle hh, sorted_hh;
@@ -327,7 +574,7 @@ void save_olc_craft(descriptor_data *desc) {
 		if (GET_CRAFT_NAME(craft)) {
 			free(GET_CRAFT_NAME(craft));
 		}
-		GET_CRAFT_NAME(craft) = str_dup("unnamed recipe");
+		GET_CRAFT_NAME(craft) = str_dup(default_craft_name);
 	}
 	
 	// save data back over the proto-type
@@ -353,8 +600,6 @@ void save_olc_craft(descriptor_data *desc) {
 * @return craft_data * The copied recipe.
 */
 craft_data *setup_olc_craft(craft_data *input) {
-	extern struct resource_data *copy_resource_list(struct resource_data *input);
-
 	craft_data *new;
 	
 	CREATE(new, craft_data, 1);
@@ -370,7 +615,7 @@ craft_data *setup_olc_craft(craft_data *input) {
 	}
 	else {
 		// brand new: some defaults
-		GET_CRAFT_NAME(new) = str_dup("unnamed recipe");
+		GET_CRAFT_NAME(new) = str_dup(default_craft_name);
 		GET_CRAFT_OBJECT(new) = NOTHING;
 		GET_CRAFT_ABILITY(new) = NOTHING;
 		GET_CRAFT_QUANTITY(new) = 1;
@@ -384,6 +629,22 @@ craft_data *setup_olc_craft(craft_data *input) {
 }
 
 
+/**
+* Counts the words of text in a craft's strings.
+*
+* @param craft_data *craft The craft whose strings to count.
+* @return int The number of words in the craft's strings.
+*/
+int wordcount_craft(craft_data *craft) {
+	int count = 0;
+	
+	count += wordcount_string(GET_CRAFT_NAME(craft));
+	
+	return count;
+}
+
+
+
  //////////////////////////////////////////////////////////////////////////////
 //// DISPLAYS ////////////////////////////////////////////////////////////////
 
@@ -394,8 +655,6 @@ craft_data *setup_olc_craft(craft_data *input) {
 * @param char_data *ch The person who is editing a craft and will see its display.
 */
 void olc_show_craft(char_data *ch) {
-	void get_resource_display(struct resource_data *list, char *save_buffer);
-
 	craft_data *craft = GET_OLC_CRAFT(ch->desc);
 	char lbuf[MAX_STRING_LENGTH];
 	ability_data *abil;
@@ -405,72 +664,78 @@ void olc_show_craft(char_data *ch) {
 		return;
 	}
 	
-	*buf = '\0';
-	sprintf(buf + strlen(buf), "[&c%d&0] &c%s&0\r\n", GET_OLC_VNUM(ch->desc), !craft_proto(GET_CRAFT_VNUM(craft)) ? "new craft" : GET_CRAFT_NAME(craft_proto(GET_CRAFT_VNUM(craft))));
-	sprintf(buf + strlen(buf), "<&yname&0> %s\r\n", GET_CRAFT_NAME(craft));
-	sprintf(buf + strlen(buf), "<&ytype&0> %s\r\n", craft_types[GET_CRAFT_TYPE(craft)]);
+	build_page_display(ch, "[%s%d\t0] %s%s\t0", OLC_LABEL_CHANGED, GET_OLC_VNUM(ch->desc), OLC_LABEL_UNCHANGED, !craft_proto(GET_CRAFT_VNUM(craft)) ? "new craft" : GET_CRAFT_NAME(craft_proto(GET_CRAFT_VNUM(craft))));
+	build_page_display(ch, "<%sname\t0> %s", OLC_LABEL_STR(GET_CRAFT_NAME(craft), default_craft_name), GET_CRAFT_NAME(craft));
+	build_page_display(ch, "<%stype\t0> %s", OLC_LABEL_VAL(GET_CRAFT_TYPE(craft), 0), craft_types[GET_CRAFT_TYPE(craft)]);
 	
-	if (GET_CRAFT_TYPE(craft) == CRAFT_TYPE_BUILD) {
+	if (CRAFT_IS_BUILDING(craft)) {
 		if (GET_CRAFT_BUILD_TYPE(craft) == NOTHING || !building_proto(GET_CRAFT_BUILD_TYPE(craft))) {
 			strcpy(lbuf, "nothing");
 		}
 		else {
 			strcpy(lbuf, GET_BLD_NAME(building_proto(GET_CRAFT_BUILD_TYPE(craft))));
 		}
-		sprintf(buf + strlen(buf), "<&ybuilds&0> [%d] %s\r\n", GET_CRAFT_BUILD_TYPE(craft), lbuf);
-		
-		prettier_sprintbit(GET_CRAFT_BUILD_ON(craft), bld_on_flags, buf1);
-		sprintf(buf + strlen(buf), "<&ybuildon&0> %s\r\n", buf1);
-		
-		prettier_sprintbit(GET_CRAFT_BUILD_FACING(craft), bld_on_flags, buf1);
-		sprintf(buf + strlen(buf), "<&ybuildfacing&0> %s\r\n", buf1);
+		build_page_display(ch, "<%sbuilds\t0> [%d] %s", OLC_LABEL_VAL(GET_CRAFT_BUILD_TYPE(craft), NOTHING), GET_CRAFT_BUILD_TYPE(craft), lbuf);
 	}
 	else if (IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP)) {
-		sprintf(buf + strlen(buf), "<&yliquid&0> [%d] %s\r\n", GET_CRAFT_OBJECT(craft), GET_CRAFT_OBJECT(craft) == NOTHING ? "none" : drinks[GET_CRAFT_OBJECT(craft)]);
-		sprintf(buf + strlen(buf), "<&yvolume&0> %d drink%s\r\n", GET_CRAFT_QUANTITY(craft), (GET_CRAFT_QUANTITY(craft) != 1 ? "s" : ""));
+		build_page_display(ch, "<%sliquid\t0> [%d] %s", OLC_LABEL_VAL(GET_CRAFT_OBJECT(craft), NOTHING), GET_CRAFT_OBJECT(craft), get_generic_name_by_vnum(GET_CRAFT_OBJECT(craft)));
+		build_page_display(ch, "<%svolume\t0> %d drink%s", OLC_LABEL_VAL(GET_CRAFT_QUANTITY(craft), 0), GET_CRAFT_QUANTITY(craft), (GET_CRAFT_QUANTITY(craft) != 1 ? "s" : ""));
 	}
-	else if (IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_VEHICLE)) {
+	else if (CRAFT_IS_VEHICLE(craft)) {
 		vehicle_data *proto = vehicle_proto(GET_CRAFT_OBJECT(craft));
-		sprintf(buf + strlen(buf), "<&ycreates&0> [%d] %s\r\n", GET_CRAFT_OBJECT(craft), !proto ? "nothing" : VEH_SHORT_DESC(proto));
+		build_page_display(ch, "<%screates\t0> [%d] %s", OLC_LABEL_VAL(GET_CRAFT_OBJECT(craft), NOTHING), GET_CRAFT_OBJECT(craft), !proto ? "nothing" : VEH_SHORT_DESC(proto));
 	
 	}
 	else {
 		// non-soup, non-building, non-vehicle
 		obj_data *proto = obj_proto(GET_CRAFT_OBJECT(craft));
-		sprintf(buf + strlen(buf), "<&ycreates&0> [%d] %s\r\n", GET_CRAFT_OBJECT(craft), !proto ? "nothing" : GET_OBJ_SHORT_DESC(proto));
-		sprintf(buf + strlen(buf), "<&yquantity&0> x%d\r\n", GET_CRAFT_QUANTITY(craft));
+		build_page_display(ch, "<%screates\t0> [%d] %s", OLC_LABEL_VAL(GET_CRAFT_OBJECT(craft), NOTHING), GET_CRAFT_OBJECT(craft), !proto ? "nothing" : GET_OBJ_SHORT_DESC(proto));
+		build_page_display(ch, "<%squantity\t0> x%d", OLC_LABEL_VAL(GET_CRAFT_QUANTITY(craft), 0), GET_CRAFT_QUANTITY(craft));
+	}
+	
+	if (CRAFT_IS_BUILDING(craft) || CRAFT_IS_VEHICLE(craft)) {
+		ordered_sprintbit(GET_CRAFT_BUILD_ON(craft), bld_on_flags, bld_on_flags_order, TRUE, lbuf);
+		build_page_display(ch, "<%sbuildon\t0> %s", OLC_LABEL_VAL(GET_CRAFT_BUILD_ON(craft), NOBITS), lbuf);
+		
+		ordered_sprintbit(GET_CRAFT_BUILD_FACING(craft), bld_on_flags, bld_on_flags_order, TRUE, lbuf);
+		build_page_display(ch, "<%sbuildfacing\t0> %s", OLC_LABEL_VAL(GET_CRAFT_BUILD_FACING(craft), NOBITS), lbuf);
 	}
 	
 	// ability required
 	if (!(abil = find_ability_by_vnum(GET_CRAFT_ABILITY(craft)))) {
-		strcpy(buf1, "none");
+		strcpy(lbuf, "none");
 	}
 	else {
-		sprintf(buf1, "%s", ABIL_NAME(abil));
+		sprintf(lbuf, "%s", ABIL_NAME(abil));
 		if (ABIL_ASSIGNED_SKILL(abil)) {
-			sprintf(buf1 + strlen(buf1), " (%s %d)", SKILL_NAME(ABIL_ASSIGNED_SKILL(abil)), ABIL_SKILL_LEVEL(abil));
+			sprintf(lbuf + strlen(lbuf), " (%s %d)", SKILL_NAME(ABIL_ASSIGNED_SKILL(abil)), ABIL_SKILL_LEVEL(abil));
 		}
 	}
-	sprintf(buf + strlen(buf), "<&yrequiresability&0> %s\r\n", buf1);
+	build_page_display(ch, "<%srequiresability\t0> %s", OLC_LABEL_VAL(GET_CRAFT_ABILITY(craft), NOTHING), lbuf);
 	
-	sprintf(buf + strlen(buf), "<&ylevelrequired&0> %d\r\n", GET_CRAFT_MIN_LEVEL(craft));
+	build_page_display(ch, "<%slevelrequired\t0> %d", OLC_LABEL_VAL(GET_CRAFT_MIN_LEVEL(craft), 0), GET_CRAFT_MIN_LEVEL(craft));
 
-	if (GET_CRAFT_TYPE(craft) != CRAFT_TYPE_BUILD && !CRAFT_FLAGGED(craft, CRAFT_VEHICLE)) {
+	if (!CRAFT_IS_BUILDING(craft) && !CRAFT_IS_VEHICLE(craft)) {
 		seconds = (GET_CRAFT_TIME(craft) * ACTION_CYCLE_TIME);
-		sprintf(buf + strlen(buf), "<&ytime&0> %d action tick%s (%d:%02d)\r\n", GET_CRAFT_TIME(craft), (GET_CRAFT_TIME(craft) != 1 ? "s" : ""), seconds / 60, seconds % 60);
+		build_page_display(ch, "<%stime\t0> %d action tick%s (%s)", OLC_LABEL_VAL(GET_CRAFT_TIME(craft), 1), GET_CRAFT_TIME(craft), (GET_CRAFT_TIME(craft) != 1 ? "s" : ""), colon_time(seconds, FALSE, NULL));
 	}
 
-	sprintbit(GET_CRAFT_FLAGS(craft), craft_flags, buf1, TRUE);
-	sprintf(buf + strlen(buf), "<&yflags&0> %s\r\n", buf1);
+	sprintbit(GET_CRAFT_FLAGS(craft), craft_flags, lbuf, TRUE);
+	build_page_display(ch, "<%sflags\t0> %s", OLC_LABEL_VAL(GET_CRAFT_FLAGS(craft), CRAFT_IN_DEVELOPMENT), lbuf);
 	
-	sprintf(buf + strlen(buf), "<&yrequiresobject&0> %d - %s\r\n", GET_CRAFT_REQUIRES_OBJ(craft), GET_CRAFT_REQUIRES_OBJ(craft) == NOTHING ? "none" : get_obj_name_by_proto(GET_CRAFT_REQUIRES_OBJ(craft)));
+	sprintbit(GET_CRAFT_REQUIRES_TOOL(craft), tool_flags, lbuf, TRUE);
+	build_page_display(ch, "<%stools\t0> %s", OLC_LABEL_VAL(GET_CRAFT_REQUIRES_TOOL(craft), NOBITS), lbuf);
+	
+	sprintbit(GET_CRAFT_REQUIRES_FUNCTION(craft), function_flags, lbuf, TRUE);
+	build_page_display(ch, "<%srequiresfunction\t0> %s", OLC_LABEL_VAL(GET_CRAFT_REQUIRES_FUNCTION(craft), NOBITS), lbuf);
+	
+	build_page_display(ch, "<%srequiresobject\t0> %d - %s", OLC_LABEL_VAL(GET_CRAFT_REQUIRES_OBJ(craft), NOTHING), GET_CRAFT_REQUIRES_OBJ(craft), GET_CRAFT_REQUIRES_OBJ(craft) == NOTHING ? "none" : get_obj_name_by_proto(GET_CRAFT_REQUIRES_OBJ(craft)));
 
 	// resources
-	sprintf(buf + strlen(buf), "Resources required: <&yresource&0>\r\n");
-	get_resource_display(GET_CRAFT_RESOURCES(craft), lbuf);
-	strcat(buf, lbuf);
+	build_page_display(ch, "Resources required: <%sresource\t0>", OLC_LABEL_PTR(GET_CRAFT_RESOURCES(craft)));
+	show_resource_display(ch, GET_CRAFT_RESOURCES(craft), FALSE);
 		
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -513,18 +778,8 @@ OLC_MODULE(cedit_ability) {
 OLC_MODULE(cedit_buildfacing) {	
 	craft_data *craft = GET_OLC_CRAFT(ch->desc);
 	
-	if (GET_CRAFT_TYPE(craft) != CRAFT_TYPE_BUILD) {
-		msg_to_char(ch, "You can only set that property on a building.\r\n");
-	}
-	else if (!str_cmp(argument, "generic")) {
-		GET_CRAFT_BUILD_FACING(craft) = config_get_bitvector("generic_facing");
-		
-		if (PRF_FLAGGED(ch, PRF_NOREPEAT)) {
-			send_config_msg(ch, "ok_string");
-		}
-		else {
-			msg_to_char(ch, "This recipe has been set to use generic facing.\r\n");
-		}
+	if (!CRAFT_IS_BUILDING(craft) && !CRAFT_IS_VEHICLE(craft) && !GET_CRAFT_BUILD_FACING(craft)) {
+		msg_to_char(ch, "You can only set that property on a building or vehicle.\r\n");
 	}
 	else {
 		GET_CRAFT_BUILD_FACING(craft) = olc_process_flag(ch, argument, "build-facing", "buildfacing", bld_on_flags, GET_CRAFT_BUILD_FACING(craft));
@@ -535,8 +790,8 @@ OLC_MODULE(cedit_buildfacing) {
 OLC_MODULE(cedit_buildon) {
 	craft_data *craft = GET_OLC_CRAFT(ch->desc);
 	
-	if (GET_CRAFT_TYPE(craft) != CRAFT_TYPE_BUILD) {
-		msg_to_char(ch, "You can only set that property on a building.\r\n");
+	if (!CRAFT_IS_BUILDING(craft) && !CRAFT_IS_VEHICLE(craft) && !GET_CRAFT_BUILD_ON(craft)) {
+		msg_to_char(ch, "You can only set that property on a building or vehicle.\r\n");
 	}
 	else {
 		GET_CRAFT_BUILD_ON(craft) = olc_process_flag(ch, argument, "build-on", "buildon", bld_on_flags, GET_CRAFT_BUILD_ON(craft));
@@ -548,7 +803,7 @@ OLC_MODULE(cedit_builds) {
 	craft_data *craft = GET_OLC_CRAFT(ch->desc);
 	any_vnum old_b;
 	
-	if (GET_CRAFT_TYPE(craft) != CRAFT_TYPE_BUILD) {
+	if (!CRAFT_IS_BUILDING(craft)) {
 		msg_to_char(ch, "You can only set that property on a building.\r\n");
 		return;
 	}
@@ -564,7 +819,7 @@ OLC_MODULE(cedit_builds) {
 		msg_to_char(ch, "You can't set it to build a ROOM type building. Old value restored.\r\n");
 	}	
 	else {
-		msg_to_char(ch, "It now builds a %s.\r\n", GET_BLD_NAME(building_proto(GET_CRAFT_BUILD_TYPE(craft))));
+		msg_to_char(ch, "It now builds %s %s.\r\n", AN(GET_BLD_NAME(building_proto(GET_CRAFT_BUILD_TYPE(craft)))), GET_BLD_NAME(building_proto(GET_CRAFT_BUILD_TYPE(craft))));
 	}
 }
 
@@ -576,10 +831,10 @@ OLC_MODULE(cedit_creates) {
 	if (IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP)) {
 		msg_to_char(ch, "You can't set that property on a soup.\r\n");
 	}
-	else if (GET_CRAFT_TYPE(craft) == CRAFT_TYPE_BUILD) {
+	else if (CRAFT_IS_BUILDING(craft)) {
 		msg_to_char(ch, "You can't set that property on a building.\r\n");
 	}
-	else if (IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_VEHICLE)) {
+	else if (CRAFT_IS_VEHICLE(craft)) {
 		GET_CRAFT_OBJECT(craft) = olc_process_number(ch, argument, "vehicle vnum", "creates", 0, MAX_VNUM, GET_CRAFT_OBJECT(craft));
 		if (!vehicle_proto(GET_CRAFT_OBJECT(craft))) {
 			GET_CRAFT_OBJECT(craft) = old;
@@ -605,15 +860,16 @@ OLC_MODULE(cedit_creates) {
 OLC_MODULE(cedit_flags) {
 	craft_data *craft = GET_OLC_CRAFT(ch->desc);
 	bool had_in_dev = IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_IN_DEVELOPMENT) ? TRUE : FALSE;
-	bitvector_t has_flags, had_flags = GET_CRAFT_FLAGS(craft) & (CRAFT_VEHICLE | CRAFT_SOUP);
+	bitvector_t has_flags, had_flags = GET_CRAFT_FLAGS(craft) & (CRAFT_VEHICLE | CRAFT_SOUP | CRAFT_BUILDING);
 	
 	GET_CRAFT_FLAGS(craft) = olc_process_flag(ch, argument, "craft", "flags", craft_flags, GET_CRAFT_FLAGS(craft));
 	
-	has_flags = GET_CRAFT_FLAGS(craft) & (CRAFT_VEHICLE | CRAFT_SOUP);
+	has_flags = GET_CRAFT_FLAGS(craft) & (CRAFT_VEHICLE | CRAFT_SOUP | CRAFT_BUILDING);
 	if (has_flags != had_flags) {
 		// clear these when vehicle/soup flags are added/removed
 		GET_CRAFT_QUANTITY(craft) = 1;
 		GET_CRAFT_OBJECT(craft) = NOTHING;
+		GET_CRAFT_BUILD_TYPE(craft) = NOTHING;
 	}
 	
 	// validate removal of CRAFT_IN_DEVELOPMENT
@@ -621,6 +877,12 @@ OLC_MODULE(cedit_flags) {
 		msg_to_char(ch, "You don't have permission to remove the IN-DEVELOPMENT flag.\r\n");
 		SET_BIT(GET_CRAFT_FLAGS(craft), CRAFT_IN_DEVELOPMENT);
 	}
+}
+
+
+OLC_MODULE(cedit_functions) {
+	craft_data *craft = GET_OLC_CRAFT(ch->desc);
+	GET_CRAFT_REQUIRES_FUNCTION(craft) = olc_process_flag(ch, argument, "function", "requiresfunction", function_flags, GET_CRAFT_REQUIRES_FUNCTION(craft));
 }
 
 
@@ -632,12 +894,22 @@ OLC_MODULE(cedit_levelrequired) {
 
 OLC_MODULE(cedit_liquid) {
 	craft_data *craft = GET_OLC_CRAFT(ch->desc);
+	any_vnum old;
 	
-	if (GET_CRAFT_TYPE(craft) == CRAFT_TYPE_BUILD || !IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP)) {
+	if (!IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP)) {
 		msg_to_char(ch, "You can only set the liquid type on a soup.\r\n");
 	}
 	else {
-		GET_CRAFT_OBJECT(craft) = olc_process_type(ch, argument, "liquid", "liquid", drinks, GET_CRAFT_OBJECT(craft));
+		old = GET_CRAFT_OBJECT(craft);
+		GET_CRAFT_OBJECT(craft) = olc_process_number(ch, argument, "liquid vnum", "liquid", 0, MAX_VNUM, GET_CRAFT_OBJECT(craft));
+		
+		if (!find_generic(GET_CRAFT_OBJECT(craft), GENERIC_LIQUID)) {
+			msg_to_char(ch, "Invalid liquid generic vnum %d. Old value restored.\r\n", GET_CRAFT_OBJECT(craft));
+			GET_CRAFT_OBJECT(craft) = old;
+		}
+		else {
+			msg_to_char(ch, "It now creates %s.\r\n", get_generic_name_by_vnum(GET_CRAFT_OBJECT(craft)));
+		}
 	}
 }
 
@@ -654,10 +926,10 @@ OLC_MODULE(cedit_quantity) {
 	if (IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP)) {
 		msg_to_char(ch, "You can't set that on a soup.\r\n");
 	}
-	else if (IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_VEHICLE)) {
+	else if (CRAFT_IS_VEHICLE(craft)) {
 		msg_to_char(ch, "You can't set that on a vehicle craft.\r\n");
 	}
-	else if (GET_CRAFT_TYPE(craft) == CRAFT_TYPE_BUILD) {
+	else if (CRAFT_IS_BUILDING(craft)) {
 		msg_to_char(ch, "You can't set that property on a building.\r\n");
 	}
 	else {
@@ -693,7 +965,6 @@ OLC_MODULE(cedit_requiresobject) {
 
 
 OLC_MODULE(cedit_resource) {
-	void olc_process_resources(char_data *ch, char *argument, struct resource_data **list);
 	craft_data *craft = GET_OLC_CRAFT(ch->desc);
 	olc_process_resources(ch, argument, &GET_CRAFT_RESOURCES(craft));
 }
@@ -702,10 +973,10 @@ OLC_MODULE(cedit_resource) {
 OLC_MODULE(cedit_time) {
 	craft_data *craft = GET_OLC_CRAFT(ch->desc);
 	
-	if (GET_CRAFT_TYPE(craft) == CRAFT_TYPE_BUILD) {
+	if (CRAFT_IS_BUILDING(craft)) {
 		msg_to_char(ch, "You can't set that property on a building.\r\n");
 	}
-	else if (CRAFT_FLAGGED(craft, CRAFT_VEHICLE)) {
+	else if (CRAFT_IS_VEHICLE(craft)) {
 		msg_to_char(ch, "You can't set that property on a vehicle craft.\r\n");
 	}
 	else {
@@ -714,24 +985,27 @@ OLC_MODULE(cedit_time) {
 }
 
 
+OLC_MODULE(cedit_tools) {
+	craft_data *craft = GET_OLC_CRAFT(ch->desc);
+	GET_CRAFT_REQUIRES_TOOL(craft) = olc_process_flag(ch, argument, "tool", "tools", tool_flags, GET_CRAFT_REQUIRES_TOOL(craft));
+}
+
+
 OLC_MODULE(cedit_type) {
 	craft_data *craft = GET_OLC_CRAFT(ch->desc);
-	int old = GET_CRAFT_TYPE(craft);
+	bool was_bld = CRAFT_IS_BUILDING(craft) ? TRUE : FALSE;
 	
 	GET_CRAFT_TYPE(craft) = olc_process_type(ch, argument, "type", "type", craft_types, GET_CRAFT_TYPE(craft));
 	
-	// things that reset when type is changed
-	if (GET_CRAFT_TYPE(craft) != old) {
-		// if it changed to or from build, clear all the things that toggle for build
-		if (GET_CRAFT_TYPE(craft) == CRAFT_TYPE_BUILD || old == CRAFT_TYPE_BUILD) {
-			GET_CRAFT_OBJECT(craft) = NOTHING;
-			GET_CRAFT_QUANTITY(craft) = 0;
-			GET_CRAFT_TIME(craft) = 1;
-			GET_CRAFT_BUILD_TYPE(craft) = NOTHING;
-			GET_CRAFT_BUILD_ON(craft) = NOBITS;
-			GET_CRAFT_BUILD_FACING(craft) = NOBITS;
-			REMOVE_BIT(GET_CRAFT_FLAGS(craft), CRAFT_SOUP | CRAFT_VEHICLE);
-		}
+	// things that reset when type is changed to or from a building
+	if ((was_bld && !CRAFT_IS_BUILDING(craft)) || (!was_bld && CRAFT_IS_BUILDING(craft))) {
+		GET_CRAFT_OBJECT(craft) = NOTHING;
+		GET_CRAFT_QUANTITY(craft) = 1;
+		GET_CRAFT_TIME(craft) = 1;
+		GET_CRAFT_BUILD_TYPE(craft) = NOTHING;
+		GET_CRAFT_BUILD_ON(craft) = NOBITS;
+		GET_CRAFT_BUILD_FACING(craft) = NOBITS;
+		REMOVE_BIT(GET_CRAFT_FLAGS(craft), CRAFT_SOUP);
 	}
 }
 
@@ -739,7 +1013,7 @@ OLC_MODULE(cedit_type) {
 OLC_MODULE(cedit_volume) {
 	craft_data *craft = GET_OLC_CRAFT(ch->desc);
 	
-	if (GET_CRAFT_TYPE(craft) == CRAFT_TYPE_BUILD || !IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP)) {
+	if (!IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP)) {
 		msg_to_char(ch, "You can only set the drink volume on a soup.\r\n");
 	}
 	else {

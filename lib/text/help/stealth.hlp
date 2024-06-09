@@ -1,16 +1,17 @@
-STEALTH "STEALTH SKILL"
+STEALTH "STEALTH SKILL" STL
 
 Stealth is the skill tree for all things secret, hidden, or shadow. Little is
 known about its practitioners. Rumors swirl of an underground group of thieves
 called the Guild, though no one dares confirm them.
 
+You can get additional Stealth abilities when you reach level 100, depending on
+which other skills you have at high levels. Use the 'role' command to choose
+which set of skills to use.
+
 (To begin your journey down the path of Stealth, try bribing the hidden guild-
 master.)
 
-See also: HIDE, SNEAK, BACKSTAB, PICKPOCKET, DISGUISE, JAB, TERRIFY,
-    DARKNESS, APPRAISAL, BLIND, VAULTCRACKING, POISONS, DEADLY POISONS,
-    SECRET CACHE, DAGGER MASTERY, CLOAK OF DARKNESS, INFILTRATE, SAP,
-    SHADOWSTEP, CONCEALMENT, ESCAPE, PRICK
+See also: ROLE, SKILL, SKILL SYNERGY
 #
 APPRAISAL
 
@@ -31,15 +32,15 @@ Backstab (Stealth ability)
 
 Usage:  backstab [victim]
 Cooldown:  9 seconds
-Cost:  15 move
+Cost:  25 move
 
 A brave warrior looks his foe in the eye, but a clever assassin looks his
 target in the back as he strikes. You must wield a stabbing weapon to use this
-ability.
+ability -- and have no one attacking you.
 
-Backstab deals 2x weapon damage on a successful attack, and the opponent has
-no chance to dodge if the attack succeeds. A particularly skilled assassin
-deals 4x weapon damage instead.
+Backstab deals massive weapon damage on a successful attack, and the opponent
+has no chance to dodge if the attack succeeds. A particularly skilled assassin
+can deal even more damage.
 
 Gains experience when you use Backstab, even if it fails.
 #
@@ -50,7 +51,7 @@ Blind (Stealth ability)
 Usage:  blind [victim]
 Cooldown:  10 seconds
 Cost:  15 move
-Debuff type:  Stealth
+Debuff type:  physical
 
 You toss sand in your opponents' eyes, blinding them for 10 seconds. Being
 unable to see your foes inflicts a penalty of -50 to To-hit, Block and Dodge.
@@ -66,6 +67,9 @@ Cling to Shadow (Stealth ability)
 With Cling to Shadow, your chance of successfully hiding (with the "hide"
 command) becomes 100% and you cannot be found using the "search" ability. You
 can still be found using the Sense Life and Detection rituals.
+
+This ability improves your ability to hide with someone watching, but does not
+guarantee it.
 
 Gains experience when you hide, and when people would find you using Search.
 
@@ -93,11 +97,10 @@ This ability gains skill points whenever they try.
 "CRUCIAL JAB"
 
 Crucial Jab
-Class ability: Bandit
-Debuff type: Stealth
+Stealth Synergy Ability: 100 Survival
+Debuff type: physical
 
-Your Jab ability causes a debuff equal to your total level divided by 80 to
-your victim's Dexterity, for 10 seconds.
+Your Jab ability causes a debuff to your victim's Dexterity for 10 seconds.
 
 See also: JAB
 #
@@ -110,13 +113,29 @@ Cooldown:  15 seconds
 Duration:  1 mud hour (75 seconds)
 Cost:  15 move
 
-Master the power of shadow to blanket an area in darkness. It becomes much
+Command the power of shadow to blanket an area in darkness. It becomes much
 harder to see anything at all, even where there should be daylight. This
 ability also grants the ability to see in the darkness it creates.
 
 Gains experience when you cast Darkness.
 
-See also: BLIND
+See also: BLIND, DARK
+#
+DARKSHROUD "DARK SHROUD"
+
+Darkshroud (Stealth ability)
+
+Usage:  darkshroud
+Linked trait:  wits
+Cost:  50 move +25 per additional target
+Cooldown:  30 seconds
+Duration:  20 seconds
+
+This power allows you to strike out with shards of darkness, cutting through
+enemies beyond the physical level and causing traumatic damage over time. This
+ability hits all enemies in the room at once. It is stronger in the melee role.
+
+See also: MELEE ROLE
 #
 "DAGGER MASTERY"
 
@@ -146,15 +165,27 @@ Gain experience by trying to disguise yourself.
 DIVERSION
 
 Diversion
-Class ability:  Smuggler
-Debuff type:  Stealth
-Cost:  50 move
+Stealth Synergy Ability: 100 Trade
+Debuff type:  mental
+Linked trait:  Charisma
+Cost:  20 move + 10 per additional target
 Cooldown:  30 seconds
 Usage:  diversion
 
-You create a flashy diversion, penalizing all enemies. The first victim loses
-Wits equal to your Charisma. Each additional victim loses Wits equal to half
-your Charisma (rounded up) instead. This effect lasts 15 seconds.
+You create a flashy diversion, penalizing all enemies with reduced Wits. The
+first target receives a larger penalty; other targets are lower. This effect
+lasts 15 seconds.
+#
+"DUAL-WIELD" "DUAL WIELD"
+
+Dual-Wield
+Stealth Synergy Ability: 100 Battle OR 100 Survival OR 100 Trade
+
+With this ability, you can attack with weapons in both hands (the wield and
+hold slots). Without it, you can still hold a weapon in your off-hand, but
+will never attack with it.
+
+Your off-hand receives a significant to-hit penalty.
 #
 ESCAPE
 
@@ -166,10 +197,11 @@ Time:  5 seconds
 
 Escape lets you run for the nearest window and quickly exit the building or
 ship you're in, making a quick getaway from even the most confusing castles.
+This will also work in adventures only from indoor rooms that allow "look out".
 
 Gains experience when you escape.
 #
-HIDE HIDING
+HIDE HIDING HIDDEN
 
 Hide (Stealth ability)
 
@@ -186,15 +218,16 @@ See also: CLING TO SHADOW, SEARCH, SNEAK, SENSE LIFE RITUAL
 HOWL
 
 Howl
-Class ability:  Shadow Wolf
-Debuff type:  Stealth
-Cost:  50 move
+Stealth Synergy Ability: 100 Natural Magic
+Linked trait: charisma
+Cost:  20 move + 10 per additional target
 Cooldown:  30 seconds
+Debuff type:  mental
 Usage:  howl
 
-You let out a terrifying howl, penalizing all enemies. The first victim loses
-to-hit equal to 4x your Charisma. Each additional victim loses to-hit equal to
-2x Charisma instead.
+You let out a terrifying howl, lowering the accuracy of all enemies. The first
+target receives the largest penalty; other targets are lower. This effect lasts
+15 seconds.
 #
 INFILTRATE "IMPROVED INFILTRATE"
 
@@ -216,7 +249,7 @@ give you a chance to get in undetected. Even if you are detected, your identity
 will not be revealed.
 
 Note: Like many stealth actions, infiltrate cannot be used against an empire
-which has no members online.
+which has no members online (unless you are at war or have a thievery permit).
 
 Both abilities gain experience when you try to infiltrate somewhere.
 #
@@ -246,14 +279,15 @@ Usage:  pickpocket <victim>
 
 A skilled thief can lift small items from an unsuspecting victim.
 
-You can only pickpocket NPCs, and even then only human ones. This ability does
-not remove items you see in their inventories, only "pocket items". The result
-is largely random but often includes coins. Each NPC can only be pickpocketed
-once.
+You can only pickpocket NPCs, and even then usually only human ones. This
+ability does not remove items you see in their inventories, only "pocket
+items". The result is largely random but often includes coins. Each NPC can
+only be pickpocketed once.
 
 Pickpocketing citizens of another empire counts as an act of hostility. Any
-empire coins you receive from pickpocketing came from the empire's treasury,
-including when you pickpocket your own citizens.
+empire coins you receive from pickpocketing came from the empire's treasury
+(if you are at war with that empire), and pickpocketing your own citizens
+always takes coins from your own treasury.
 
 NPCs more than 50 levels above you will always catch you if you try to
 pickpocket them.
@@ -266,6 +300,7 @@ Poisons, Deadly Poisons (Stealth abilities)
 
 Command:  mix [number] <poison>
           mix info <poison>
+          mix list <keywords>
           use <poison>
 
 You can mix poisons with the "mix" command in an alchemist shop, or anywhere
@@ -276,7 +311,8 @@ correct poison. Each time your weapon hits your opponent, you have a chance to
 envenom them with your chosen poison. When the vial runs out of poison, it will
 be removed from your inventory.
 
-All vials have 15 charges. Deadly Poisons doubles the effects of most poisons.
+All vials have 15 charges. The Deadly Poisons ability makes all your poisons
+50% more powerful (when the poison is applied; you won't see it on identify).
 Poisons only work with sharp weapons. Poisons also count as Stealth debuffs,
 and some NPCs are immune.
 
@@ -285,22 +321,18 @@ is resisted. You need to have these abilities in order both to create and to
 use the poisons.
 
 Basic Poisons:
-  searing  +5 damage
-  weakness  -25 health
-  exhaustion  -25 move
-  braindrain  -25 mana
-  strength  -1 strength
-  dexterity  -1 dexterity
-  charisma  -1 charisma
-  intelligence  -1 intelligence
-  wits  -2 wits
+  searing  (deals more damage)         weakness  (lowers max health)
+  exhaustion  (lowers max moves)       braindrain  (lowers max mana)
+  strength                             dexterity
+  charisma                             intelligence 
+  wits
 
 Deadly Poisons:
-  pain  4 damage-over-time
-  slow  slower combat rate
-  heartstop  vampires can't spend blood
+  pain  (deals damage over time)       slow  (slower attacks and movement)
+  heartstop  (vampires can't spend blood)
 
-See also: CRAFTING LEVEL, RESIST POISON, RESOURCES, KEEP, CRAFT INFO, RECIPES
+See also: CRAFTING LEVEL, RESIST POISON, RESOURCES, KEEP, CRAFT INFO, RECIPES,
+   CRAFTING ABILITIES
 #
 PRICK
 
@@ -326,7 +358,7 @@ Usage:  sap <victim>
 Cooldown:  9 seconds
 Cost:  15 move
 Duration:  1 minute
-Debuff type:  Stealth, Stun
+Debuff type:  mental, stun
 
 This ability will temporarily stun your victim, giving you a moment to collect
 yourself before starting combat.
@@ -336,23 +368,17 @@ second person will release the first one.
 
 Gains experience when you use Sap, even if it fails.
 #
-SEARCH
+"SEARCH ABILITY"
 
 Search (Stealth ability)
 
 Usage:  search
 Cooldown:  10 seconds
 
-When you know where to look, it's easier to find hidden thieves and assassins.
-This ability reveals people who use the hide command, although it doesn't
-always find them on the first try, and it won't find anyone who has Cling to
-Shadow.
+This ability allows you to use the search command. Gains experience when you
+search a room.
 
-You can also find out if someone is earthmelded beneath you.
-
-Gains experience when you search a room.
-
-See also: HIDE, SENSE LIFE RITUAL
+See also: SEARCH COMMAND
 #
 "SECRET CACHE" SECRETCACHE
 
@@ -368,19 +394,20 @@ See also: BUILD, VAULT
 "SHADOW JAB"
 
 Shadow Jab
-Class ability: Shade
-Debuff type: Stealth
+Stealth Synergy Ability:  100 Vampire
+Debuff type:  physical
+Linked trait: Charisma
 
-Your Jab ability causes a debuff equal to your Charisma divided by 5 (rounded
-up) to your victim's dodge, for 15 seconds. This effect may stack.
+Your Jab ability now causes a debuff to your victim's dodge for 15 seconds.
+This effect may stack. It is stronger in the melee role.
 
 See also: JAB
 #
 "SHADOW KICK"
 
 Shadow Kick
-Class ability:  Assassin
-Debuff type:  Battle
+Battle Synergy Ability:  100 Stealth
+Debuff type:  physical
 
 Your Kick ability causes a penalty to physical and magical damage equal to
 your total level divided by 50 for 10 seconds.
@@ -390,15 +417,16 @@ See also: KICK
 SHADOWCAGE "SHADOW CAGE"
 
 Shadowcage
-Class ability: Occultist
-Debuff type: Stealth
-Cost: 50 move
-Cooldown: 30 seconds
+Stealth Synergy Ability:  100 High Sorcery
+Debuff type:  mental
+Linked trait: charisma
+Cost:  20 move + 10 per additional target.
+Cooldown:  30 seconds
 Usage:  shadowcage
 
-You create a cage of shadows, penalizing all enemies. The first victim loses
-dodge equal to 4x your Charisma. Each additional victim loses dodge equal to 2x
-Charisma instead. This effect lasts 15 seconds.
+You create a cage of shadows, making it harder for all enemies to dodge. The
+first target gets the largest penalty; other targets are lower. This effect
+lasts 15 seconds.
 #
 SHADOWSTEP "SHADOW STEP"
 
@@ -417,7 +445,7 @@ Players in the room you leave will not notice your departure, but players at
 your destination will notice your arrival.
 
 You cannot shadowstep to NPCs that belong to other empires, or that are on land
-that belongs to other empires.
+that belongs to other empires. You also can't shadowstep while distracted.
 
 Gains experience when you use Shadowstep.
 
@@ -442,11 +470,12 @@ See also: HIDE
 "STAGGER JAB"
 
 Stagger Jab
-Class ability: Powerbroker
-Debuff type: Stealth
+Stealth Synergy Ability:  100 Battle
+Debuff type:  physical
+Linked trait: Charisma
 
-Your Jab ability causes a debuff equal to your Charisma divided by 5 (rounded
-up) to your victim's to-hit, for 15 seconds. This effect may stack.
+Your Jab ability now causes your victim to suffer lower to-hit for 15 seconds.
+This effect may stack. It is stronger in the melee role.
 
 See also: JAB
 #
@@ -462,6 +491,9 @@ There is a chance the other empire will be alerted to your location. You'll
 be marked internally as hostile for 1 hour, and become a valid PVP target. If
 you die, any items stolen in the last 30 minutes will be left on your corpse.
 
+You cannot steal from an empire if they have killed you in the last hour. This
+applies to all characters on your account.
+
 This ability has two functions:
 
 With Steal, you can pick up items from rooms that are claimed by other empires.
@@ -472,9 +504,11 @@ You can also steal stored resources. If you type "steal" in a storage room or
 building, it will list what you can steal there. Type "steal <item>" to take
 one.
 
+You need a thievery permit to steal from an empire.
+
 Gains experience when you steal something.
 
-See also: VAULTCRACKING
+See also: VAULTCRACKING, THIEVERY PERMIT
 #
 "SUMMON THUG"
 
@@ -498,12 +532,13 @@ Terrify (Stealth ability)
 Usage:  terrify [victim]
 Cooldown:  15 seconds
 Duration:  30 seconds
-Debuff type:  Stealth
-Cost:  15 move
+Linked trait: Charisma
+Debuff type:  mental
+Cost:  10+ move, depending on level
 
 Use the power of the shadows to make your foes cower in fear, lowering the
-physical and magical damage they deal by an amount equal to your total level
-divided by 30. This ability has a chance of success based on your Stealth level.
+physical and magical damage they deal based on your level and stats. This
+ability has a chance of success based on your Stealth level.
 
 Gains experience when you try to terrify someone.
 #
@@ -511,8 +546,9 @@ Gains experience when you try to terrify someone.
 
 Unseen Passing (Stealth ability)
 
-When in a city or indoors, Unseen Passing makes you immune to the "where" and
-"track" commands. It doesn't work in the wilderness or in adventures.
+When in a city, on a road, at a building, or indoors, Unseen Passing makes you
+immune to the "where" and "track" commands. It doesn't work in the wilderness
+or in adventures.
 
 This ability gains experience whenever it prevents you from being found with
 "where", and whenever it prevents you from leaving tracks.
@@ -533,7 +569,7 @@ See also: STEAL
 WHISPERSTRIDE
 
 Whisperstride
-Class ability: Assassin, Bandit, Powerbroker, Smuggler
+Stealth Synergy Ability: 100 Battle OR 100 Survival OR 100 Trade
 Usage:  whisperstride
 Cooldown:  5 minutes
 Cost:  100 move

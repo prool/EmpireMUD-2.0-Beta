@@ -2,7 +2,7 @@
 *   File: interpreter.h                                   EmpireMUD 2.0b5 *
 *  Usage: header file: public procs, macro defs, subcommand defines       *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -11,22 +11,29 @@
 ************************************************************************ */
 
 // command types
-#define ACMD(name)		void name(char_data *ch, char *argument, int cmd, int subcmd)
-#define LIBRARY_SCMD(name)  void name(char_data *ch, char *argument)
+#define ACMD(name)		void (name)(char_data *ch, char *argument, int cmd, int subcmd)
+#define EEDIT(name)		void (name)(char_data *ch, char *argument, empire_data *emp)
+#define EVENT_CMD(name)		void (name)(char_data *ch, char *argument)
+#define LIBRARY_SCMD(name)	void (name)(char_data *ch, char *argument)
 
 
 // prototypes
+bool char_can_act(char_data *ch, int min_pos, bool allow_animal, bool allow_invulnerable, bool override_feeding);
 void command_interpreter(char_data *ch, char *argument);
+int find_command(const char *command);
 char lower( char c );
 void nanny(descriptor_data *d, char *arg);
-int find_command(const char *command);
+void next_creation_step(descriptor_data *d);
+void parse_archetype_menu(descriptor_data *desc, char *argument);
+int _parse_name(char *arg, char *name, descriptor_data *desc, bool reduced_restrictions);
 void send_low_pos_msg(char_data *ch);
+int Valid_Name(char *newname);
 
 
 struct command_info {
 	const char *command;
 	byte minimum_position;
-	void (*command_pointer)	(char_data *ch, char * argument, int cmd, int subcmd);
+	ACMD(*command_pointer);
 	sh_int minimum_level;
 	bitvector_t grants;
 	int	subcmd;
@@ -34,6 +41,10 @@ struct command_info {
 	sh_int flags;
 	any_vnum ability;
 };
+
+
+// data
+extern const struct command_info cmd_info[];
 
 
 // for the command_info structure
@@ -51,7 +62,7 @@ struct command_info {
 #define CTYPE_UTIL		7	/* A utility command/other	*/
 #define CTYPE_SKILL		8	// ability-related (if it's not combat, empire or move)
 
-/* Command flags */
+// CMD_x: Command flags
 #define CMD_STAY_HIDDEN		BIT(0)	/* Doesn't unhide person 				*/
 #define CMD_UNHIDE_AFTER	BIT(1)	/* Doesn't unhide person until AFTER	*/
 #define CMD_IMM_OR_MOB_ONLY	BIT(2)	// disallows players from seeing/using it
@@ -59,6 +70,7 @@ struct command_info {
 #define CMD_VAMPIRE_ONLY	BIT(4)	/* Must be a vampire					*/
 #define CMD_NOT_RP			BIT(5)	/* Restricted to non-rpers				*/
 #define CMD_NO_ANIMALS		BIT(6)	// doesn't work in animal morphs
+#define CMD_WHILE_FEEDING	BIT(7)	// works while a vampire is feeding despite pos > SLEEPING
 
 
 struct alias_data {
@@ -90,6 +102,10 @@ struct alias_data {
 #define SCMD_ACCEPT  0
 #define SCMD_REJECT  1
 
+// do_alias
+#define SCMD_ALIAS  0
+#define SCMD_UNALIAS  1
+
 // for do_approve
 #define SCMD_APPROVE  0
 #define SCMD_UNAPPROVE  1
@@ -104,16 +120,8 @@ struct alias_data {
 #define SCMD_PILOT  2
 
 /* do_gen_ps */
-#define SCMD_INFO		0
-#define SCMD_HANDBOOK	1 
-#define SCMD_CREDITS	2
-#define SCMD_WIZLIST	3
-#define SCMD_POLICIES	4
-#define SCMD_VERSION	5
-#define SCMD_GODLIST	6
-#define SCMD_MOTD		7
-#define SCMD_IMOTD		8
-#define SCMD_CLEAR		9
+#define SCMD_VERSION  0
+#define SCMD_CLEAR  1
 
 /* do_say */
 #define SCMD_SAY			0
@@ -160,6 +168,10 @@ struct alias_data {
 #define SCMD_TYPO		1
 #define SCMD_IDEA		2
 
+// do_light
+#define SCMD_LIGHT  0
+#define SCMD_BURN  1
+
 /* do_look */
 #define SCMD_LOOK		0
 
@@ -174,9 +186,17 @@ struct alias_data {
 #define SCMD_POOFIN		0
 #define SCMD_POOFOUT	1
 
+// do_history
+#define SCMD_HISTORY  0
+#define SCMD_GOD_HISTORY  1
+#define SCMD_TELL_HISTORY  2
+#define SCMD_SAY_HISTORY  3
+#define SCMD_EMPIRE_HISTORY  4
+#define SCMD_ROLL_HISTORY  5
+
 /* do_hit */
 #define SCMD_HIT		0
-#define SCMD_MURDER		1
+#define SCMD_KILL		1
 
 /* do_eat */
 #define SCMD_EAT		0
@@ -200,25 +220,33 @@ struct alias_data {
 #define SCMD_KEEP  0
 #define SCMD_UNKEEP  1
 
+// do_fightmessages
+#define SCMD_FIGHT  0
+#define SCMD_STATUS  1
+
 // do_morph
 #define SCMD_MORPH  0
 #define SCMD_FASTMORPH  1
+
+// do_no_cmd
+#define NOCMD_CAST  1	// cast is actually a real command again as of b5.166
+#define NOCMD_GOSSIP  2
+#define NOCMD_LEVELS  3
+#define NOCMD_PRACTICE  4
+#define NOCMD_RENT  5
+#define NOCMD_REPORT  6
+#define NOCMD_UNGROUP  7
+#define NOCMD_WIMPY  8
+#define NOCMD_TOGGLE  9
 
 // do_prompt
 #define SCMD_PROMPT  0
 #define SCMD_FPROMPT  1
 
-/* do_reboot */
-#define SCMD_REBOOT			0
-#define SCMD_SHUTDOWN		1
-
-// do_reforge
-#define SCMD_REFORGE  0
-#define SCMD_REFASHION  1
-
-// do_ritual
-#define SCMD_RITUAL  0
-#define SCMD_CHANT  1
+// do_cast
+#define SCMD_CAST	0
+#define SCMD_RITUAL	1
+#define SCMD_CHANT	2
 
 // do_library
 #define SCMD_LIBRARY  0
@@ -228,27 +256,37 @@ struct alias_data {
 #define SCMD_EINVENTORY	0
 #define SCMD_EIDENTIFY	1
 
-// do_toggle
-#define TOG_ONOFF  0
-#define TOG_OFFON  1
-#define NUM_TOG_TYPES  2
+// do_warehouse
+#define SCMD_WAREHOUSE  0
+#define SCMD_HOME  1
 
 
-// movement types
-#define MOVE_NORMAL  0	// Normal move message
-#define MOVE_LEAD  1	// Leading message
-#define MOVE_FOLLOW  2	// Follower message
-#define MOVE_CIRCLE  3	// circling
-#define MOVE_EARTHMELD  4
-#define MOVE_SWIM  5	// swim skill
+// movement flags
+#define MOVE_LEAD  BIT(0)	// leading something
+#define MOVE_FOLLOW  BIT(1)	// following someone
+#define MOVE_CIRCLE  BIT(2)	// is circling a building
+#define MOVE_EARTHMELD  BIT(3)	// is earthmelded (can't be seen)
+#define MOVE_SWIM  BIT(4)	// player is swimming
+#define MOVE_CLIMB  BIT(5)	// player is climbing
+#define MOVE_HERD  BIT(6)	// mob being herded
+#define MOVE_WANDER  BIT(7)	// normal mob move
+#define MOVE_RUN  BIT(8)	// running
+#define MOVE_EXIT  BIT(9)	// the 'exit' command
+#define MOVE_ENTER_VEH  BIT(10)	// entering a vehicle
+#define MOVE_ENTER_PORTAL  BIT(11)	// entering a portal
+#define MOVE_NO_COST  BIT(12)	// modifier: ignore movement cost
+
+// flags that ignore some move checks
+#define MOVE_IGNORE  (MOVE_LEAD | MOVE_FOLLOW | MOVE_HERD | MOVE_WANDER)
 
 
 // obj desc flags
+// TODO: consider a config array for these, to set which ones show level/tags/colors, as well as what flags not to show
 #define OBJ_DESC_LONG  0	// long desc: in room
 #define OBJ_DESC_SHORT  1	// short desc: inventory, misc
 #define OBJ_DESC_CONTENTS  2	// short desc: is in an object
 #define OBJ_DESC_INVENTORY  3	// short desc: in inventory
-	// 4
+#define OBJ_DESC_WAREHOUSE  4	// short desc: in warehouse
 #define OBJ_DESC_LOOK_AT  5	// when you look AT the object
 	// 6
 #define OBJ_DESC_EQUIPMENT  7	// short desc: is equipped
@@ -258,3 +296,20 @@ struct alias_data {
 #define LRR_SHIP_PARTIAL  BIT(0)	// shows only part of the room, for use on ships.
 #define LRR_SHOW_DARK  BIT(1)	// for passing to show_map_to_char
 #define LRR_LOOK_OUT  BIT(2)	// show map even indoors
+#define LRR_LOOK_OUT_INSIDE  BIT(3)	// show an interior outside the vehicle
+
+
+ //////////////////////////////////////////////////////////////////////////////
+//// OBJ, ROOM, and VEHICLE SUBCOMMANDS //////////////////////////////////////
+
+// do_osend
+#define SCMD_OSEND  0
+#define SCMD_OECHOAROUND  1
+
+// do_vsend
+#define SCMD_VSEND  0
+#define SCMD_VECHOAROUND  1
+
+// do_wsend
+#define SCMD_WSEND  0
+#define SCMD_WECHOAROUND  1

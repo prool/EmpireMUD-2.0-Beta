@@ -2,7 +2,7 @@
 *   File: act.social.c                                    EmpireMUD 2.0b5 *
 *  Usage: Functions to handle socials                                     *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -20,22 +20,14 @@
 #include "handler.h"
 #include "db.h"
 #include "skills.h"
+#include "constants.h"
+#include "dg_scripts.h"
 
 /**
 * Contents:
 *   Social Core
 *   Commands
 */
-
-// external funcs
-void add_to_channel_history(char_data *ch, int type, char *message);
-void clear_last_act_message(descriptor_data *desc);
-extern bool validate_social_requirements(char_data *ch, social_data *soc);
-
-// locals
-social_data *find_social(char_data *ch, char *name, bool exact);
-void perform_social(char_data *ch, social_data *soc, char *argument);
-
 
  //////////////////////////////////////////////////////////////////////////////
 //// SOCIAL CORE /////////////////////////////////////////////////////////////
@@ -49,21 +41,40 @@ void perform_social(char_data *ch, social_data *soc, char *argument);
 * @return bool TRUE if it was a social and we acted; FALSE if not
 */
 bool check_social(char_data *ch, char *string, bool exact) {
-	char arg1[MAX_STRING_LENGTH];
+	char str[MAX_INPUT_LENGTH], arg1[MAX_INPUT_LENGTH];
 	social_data *soc;
 	
 	skip_spaces(&string);
-	half_chop(string, arg, arg1);
+	half_chop(string, str, arg1);
 	
-	if (!*arg)
+	if (!*str) {
 		return FALSE;
+	}
 	
-	if (!(soc = find_social(ch, arg, exact)))
-		return FALSE;
-
-	if (AFF_FLAGGED(ch, AFF_EARTHMELD | AFF_MUMMIFY | AFF_STUNNED) || IS_INJURED(ch, INJ_TIED | INJ_STAKED) || GET_FEEDING_FROM(ch) || GET_FED_ON_BY(ch)) {
-		msg_to_char(ch, "You can't do that right now!\r\n");
+	if (!(soc = find_social(ch, str, exact))) {
+		return FALSE;	// no match to any social
+	}
+	
+	// going to process the social: remove hide first
+	if (AFF_FLAGGED(ch, AFF_HIDDEN)) {
+		REMOVE_BIT(AFF_FLAGS(ch), AFF_HIDDEN);
+		affects_from_char_by_aff_flag(ch, AFF_HIDDEN, FALSE);
+	}
+	
+	// does a command trigger override this social?
+	if (strlen(string) < strlen(SOC_COMMAND(soc)) && check_command_trigger(ch, SOC_COMMAND(soc), arg1, CMDTRG_EXACT)) {
 		return TRUE;
+	}
+	
+	// earthmeld doesn't hit the correct error in char_can_act -- just block all socials in earthmeld
+	if (AFF_FLAGGED(ch, AFF_EARTHMELDED)) {
+		msg_to_char(ch, "You can't do that while earthmelded.\r\n");
+		return TRUE;
+	}
+	
+	// this passes POS_DEAD because social pos is checked in perform_social
+	if (!char_can_act(ch, POS_DEAD, TRUE, TRUE, FALSE)) {
+		return TRUE;	// sent its own error message
 	}
 	
 	perform_social(ch, soc, arg1);
@@ -132,8 +143,6 @@ social_data *find_social(char_data *ch, char *name, bool exact) {
 * @param char *argument The typed-in args, if any.
 */
 void perform_social(char_data *ch, social_data *soc, char *argument) {
-	void clear_last_act_message(descriptor_data *desc);
-	
 	char buf[MAX_INPUT_LENGTH], hbuf[MAX_INPUT_LENGTH];
 	char_data *vict, *c;
 	
@@ -148,9 +157,17 @@ void perform_social(char_data *ch, social_data *soc, char *argument) {
 		send_low_pos_msg(ch);
 		return;
 	}
+	if (GET_FEEDING_FROM(ch) && SOC_MIN_CHAR_POS(soc) >= POS_SLEEPING) {
+		msg_to_char(ch, "You can't do that right now!\r\n");
+		return;
+	}
+	if (GET_FED_ON_BY(ch) && SOC_MIN_CHAR_POS(soc) >= POS_SLEEPING) {
+		msg_to_char(ch, "The fangs in your flesh prevent you from even moving.\r\n");
+		return;
+	}
 	
 	// clear last act messages for everyone in the room
-	LL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), c, next_in_room) {
+	DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), c, next_in_room) {
 		if (c->desc) {
 			clear_last_act_message(c->desc);
 
@@ -161,24 +178,24 @@ void perform_social(char_data *ch, social_data *soc, char *argument) {
 	}
 
 	if (!*buf) {
-		sprintf(hbuf, "&%c%s&0\r\n", (!IS_NPC(ch) && GET_CUSTOM_COLOR(ch, CUSTOM_COLOR_EMOTE)) ? GET_CUSTOM_COLOR(ch, CUSTOM_COLOR_EMOTE) : '0', NULLSAFE(SOC_MESSAGE(soc, SOCM_NO_ARG_TO_CHAR)));
-		msg_to_char(ch, hbuf);
+		sprintf(hbuf, "&%c%s&0\r\n", CUSTOM_COLOR_CHAR(ch, CUSTOM_COLOR_EMOTE), NULLSAFE(SOC_MESSAGE(soc, SOCM_NO_ARG_TO_CHAR)));
+		send_to_char(hbuf, ch);
 		if (ch->desc) {
-			add_to_channel_history(ch, CHANNEL_HISTORY_SAY, hbuf);
+			add_to_channel_history(ch, CHANNEL_HISTORY_SAY, ch, hbuf, FALSE, 0, NOTHING);
 		}
 		
 		act(NULLSAFE(SOC_MESSAGE(soc, SOCM_NO_ARG_TO_OTHERS)), SOC_HIDDEN(soc), ch, FALSE, FALSE, TO_ROOM | TO_NOT_IGNORING);
 
 		// fetch and store channel history for the room
-		for (c = ROOM_PEOPLE(IN_ROOM(ch)); c; c = c->next_in_room) {
+		DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), c, next_in_room) {
 			if (c == ch || !c->desc) {
 				continue;
 			}
 			
 			if (c->desc->last_act_message) {
 				// the message was sent via act(), we can retrieve it from the desc
-				sprintf(hbuf, "&%c%s", (!IS_NPC(c) && GET_CUSTOM_COLOR(c, CUSTOM_COLOR_EMOTE)) ? GET_CUSTOM_COLOR(c, CUSTOM_COLOR_EMOTE) : '0', c->desc->last_act_message);
-				add_to_channel_history(c, CHANNEL_HISTORY_SAY, hbuf);
+				sprintf(hbuf, "&%c%s", CUSTOM_COLOR_CHAR(c, CUSTOM_COLOR_EMOTE), c->desc->last_act_message);
+				add_to_channel_history(c, CHANNEL_HISTORY_SAY, ch, hbuf, (IS_MORPHED(ch) || IS_DISGUISED(ch)), 0, NOTHING);
 			}
 			if (!IS_NPC(c) && GET_CUSTOM_COLOR(c, CUSTOM_COLOR_EMOTE)) {
 				// terminate color just in case
@@ -188,11 +205,11 @@ void perform_social(char_data *ch, social_data *soc, char *argument) {
 		
 		return;
 	}
-	if (!(vict = get_char_room_vis(ch, buf))) {
-		sprintf(hbuf, "&%c%s&0\r\n", (!IS_NPC(ch) && GET_CUSTOM_COLOR(ch, CUSTOM_COLOR_EMOTE)) ? GET_CUSTOM_COLOR(ch, CUSTOM_COLOR_EMOTE) : '0', NULLSAFE(SOC_MESSAGE(soc, SOCM_TARGETED_NOT_FOUND)));
-		msg_to_char(ch, hbuf);
+	if (!(vict = get_char_room_vis(ch, buf, NULL))) {
+		sprintf(hbuf, "&%c%s&0\r\n", CUSTOM_COLOR_CHAR(ch, CUSTOM_COLOR_EMOTE), NULLSAFE(SOC_MESSAGE(soc, SOCM_TARGETED_NOT_FOUND)));
+		send_to_char(hbuf, ch);
 		if (ch->desc) {
-			add_to_channel_history(ch, CHANNEL_HISTORY_SAY, hbuf);
+			add_to_channel_history(ch, CHANNEL_HISTORY_SAY, ch, hbuf, FALSE, 0, NOTHING);
 		}
 	}
 	else if (vict == ch) {
@@ -202,24 +219,24 @@ void perform_social(char_data *ch, social_data *soc, char *argument) {
 			return;
 		}
 		
-		sprintf(hbuf, "&%c%s&0\r\n", (!IS_NPC(ch) && GET_CUSTOM_COLOR(ch, CUSTOM_COLOR_EMOTE)) ? GET_CUSTOM_COLOR(ch, CUSTOM_COLOR_EMOTE) : '0', NULLSAFE(SOC_MESSAGE(soc, SOCM_SELF_TO_CHAR)));
-		msg_to_char(ch, hbuf);
+		sprintf(hbuf, "&%c%s&0\r\n", CUSTOM_COLOR_CHAR(ch, CUSTOM_COLOR_EMOTE), NULLSAFE(SOC_MESSAGE(soc, SOCM_SELF_TO_CHAR)));
+		send_to_char(hbuf, ch);
 		if (ch->desc) {
-			add_to_channel_history(ch, CHANNEL_HISTORY_SAY, hbuf);
+			add_to_channel_history(ch, CHANNEL_HISTORY_SAY, ch, hbuf, FALSE, 0, NOTHING);
 		}
 		
 		act(NULLSAFE(SOC_MESSAGE(soc, SOCM_SELF_TO_OTHERS)), SOC_HIDDEN(soc), ch, NULL, NULL, TO_ROOM | TO_NOT_IGNORING);
 
 		// fetch and store channel history for the room
-		LL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), c, next_in_room) {
+		DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), c, next_in_room) {
 			if (c == ch || !c->desc) {
 				continue;
 			}
 			
 			if (c->desc->last_act_message) {
 				// the message was sent via act(), we can retrieve it from the desc
-				sprintf(hbuf, "&%c%s", (!IS_NPC(c) && GET_CUSTOM_COLOR(c, CUSTOM_COLOR_EMOTE)) ? GET_CUSTOM_COLOR(c, CUSTOM_COLOR_EMOTE) : '0', c->desc->last_act_message);
-				add_to_channel_history(c, CHANNEL_HISTORY_SAY, hbuf);
+				sprintf(hbuf, "&%c%s", CUSTOM_COLOR_CHAR(c, CUSTOM_COLOR_EMOTE), c->desc->last_act_message);
+				add_to_channel_history(c, CHANNEL_HISTORY_SAY, ch, hbuf, (IS_MORPHED(ch) || IS_DISGUISED(ch)), 0, NOTHING);
 			}
 			if (!IS_NPC(c) && GET_CUSTOM_COLOR(c, CUSTOM_COLOR_EMOTE)) {
 				// terminate color just in case
@@ -260,15 +277,15 @@ void perform_social(char_data *ch, social_data *soc, char *argument) {
 			act(NULLSAFE(SOC_MESSAGE(soc, SOCM_TARGETED_TO_VICTIM)), SOC_HIDDEN(soc), ch, NULL, vict, TO_VICT | TO_NOT_IGNORING);
 
 			// fetch and store channel history for the room
-			LL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), c, next_in_room) {
+			DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), c, next_in_room) {
 				if (!c->desc) {
 					continue;
 				}
 				
 				if (c->desc->last_act_message) {
 					// the message was sent via act(), we can retrieve it from the desc
-					sprintf(hbuf, "&%c%s", (!IS_NPC(c) && GET_CUSTOM_COLOR(c, CUSTOM_COLOR_EMOTE)) ? GET_CUSTOM_COLOR(c, CUSTOM_COLOR_EMOTE) : '0', c->desc->last_act_message);
-					add_to_channel_history(c, CHANNEL_HISTORY_SAY, hbuf);
+					sprintf(hbuf, "&%c%s", CUSTOM_COLOR_CHAR(c, CUSTOM_COLOR_EMOTE), c->desc->last_act_message);
+					add_to_channel_history(c, CHANNEL_HISTORY_SAY, ch, hbuf, (IS_MORPHED(ch) || IS_DISGUISED(ch)), 0, NOTHING);
 				}
 				if (!IS_NPC(c) && GET_CUSTOM_COLOR(c, CUSTOM_COLOR_EMOTE)) {
 					// terminate color just in case
@@ -279,7 +296,7 @@ void perform_social(char_data *ch, social_data *soc, char *argument) {
 	}
 	
 	// clear color codes for people we missed
-	LL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), c, next_in_room) {
+	DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), c, next_in_room) {
 		if (!IS_NPC(c) && c->desc && !c->desc->last_act_message && GET_CUSTOM_COLOR(c, CUSTOM_COLOR_EMOTE)) {
 			send_to_char("\t0", c);
 		}
@@ -297,7 +314,7 @@ ACMD(do_insult) {
 	one_argument(argument, arg);
 
 	if (*arg) {
-		if (!(victim = get_char_room_vis(ch, arg))) {
+		if (!(victim = get_char_room_vis(ch, arg, NULL))) {
 			send_config_msg(ch, "no_person");
 		}
 		else {
@@ -341,10 +358,10 @@ ACMD(do_insult) {
 
 
 ACMD(do_point) {
-	extern const char *dirs[];
-	
-	char buf[MAX_STRING_LENGTH];
-	char_data *vict, *next_vict;
+	char buf[MAX_STRING_LENGTH], to_char[MAX_STRING_LENGTH], *to_room;
+	char_data *vict, *pers, *next_pers;
+	obj_data *obj;
+	vehicle_data *veh;
 	char color;
 	int dir;
 	
@@ -354,37 +371,85 @@ ACMD(do_point) {
 		msg_to_char(ch, "Point at what?\r\n");
 	}
 	else if ((dir = parse_direction(ch, arg)) != NO_DIR && dir != DIR_RANDOM) {
-		color = (!IS_NPC(ch) && GET_CUSTOM_COLOR(ch, CUSTOM_COLOR_EMOTE)) ? GET_CUSTOM_COLOR(ch, CUSTOM_COLOR_EMOTE) : '0';
+		color = CUSTOM_COLOR_CHAR(ch, CUSTOM_COLOR_EMOTE);
 		
 		sprintf(buf, "\t%cYou point %s.\t0\r\n", color, dirs[get_direction_for_char(ch, dir)]);
 		send_to_char(buf, ch);
 		if (ch->desc) {
-			add_to_channel_history(ch, CHANNEL_HISTORY_SAY, buf);
+			add_to_channel_history(ch, CHANNEL_HISTORY_SAY, ch, buf, FALSE, 0, NOTHING);
 		}
 		
-		for (vict = ROOM_PEOPLE(IN_ROOM(ch)); vict; vict = next_vict) {
-			next_vict = vict->next_in_room;
-			
-			if (vict != ch && CAN_SEE(vict, ch) && AWAKE(vict)) {
-				if (vict->desc) {
-					clear_last_act_message(vict->desc);
+		DL_FOREACH_SAFE2(ROOM_PEOPLE(IN_ROOM(ch)), pers, next_pers, next_in_room) {
+			if (pers != ch && CAN_SEE(pers, ch) && AWAKE(pers)) {
+				if (pers->desc) {
+					clear_last_act_message(pers->desc);
 				}
 				
-				color = (!IS_NPC(vict) && GET_CUSTOM_COLOR(vict, CUSTOM_COLOR_EMOTE)) ? GET_CUSTOM_COLOR(vict, CUSTOM_COLOR_EMOTE) : '0';
-				sprintf(buf, "\t%c$n points %s.\t0", color, dirs[get_direction_for_char(vict, dir)]);
-				act(buf, FALSE, ch, NULL, vict, TO_VICT | TO_NOT_IGNORING);
+				color = CUSTOM_COLOR_CHAR(pers, CUSTOM_COLOR_EMOTE);
+				sprintf(buf, "\t%c$n points %s.\t0", color, dirs[get_direction_for_char(pers, dir)]);
+				act(buf, FALSE, ch, NULL, pers, TO_VICT | TO_NOT_IGNORING);
 				
 				// channel history
-				if (vict->desc && vict->desc->last_act_message) {
-					add_to_channel_history(vict, CHANNEL_HISTORY_SAY, vict->desc->last_act_message);
+				if (pers->desc && pers->desc->last_act_message) {
+					add_to_channel_history(pers, CHANNEL_HISTORY_SAY, ch, pers->desc->last_act_message, (IS_MORPHED(ch) || IS_DISGUISED(ch)), 0, NOTHING);
+				}
+			}
+		}
+	}
+	else if (!generic_find(arg, NULL, FIND_CHAR_ROOM | FIND_OBJ_ROOM | FIND_VEHICLE_ROOM | FIND_VEHICLE_INSIDE, ch, &vict, &obj, &veh)) {
+		msg_to_char(ch, "You must have a VERY long index finger because you don't see %s %s here.\r\n", AN(arg), arg);
+	}
+	else if (vict) {
+		// normal point social
+		sprintf(buf, "point %s", argument);
+		check_social(ch, buf, FALSE);
+	}
+	else if (obj || veh) {
+		// combine these as they both do the same loop
+		color = CUSTOM_COLOR_CHAR(ch, CUSTOM_COLOR_EMOTE);
+		
+		if (obj) {
+			safe_snprintf(to_char, sizeof(to_char), "\t%cYou point at $p.\t0", color);
+			to_room = "$n points at $p.\t0";
+		}
+		else if (veh) {
+			safe_snprintf(to_char, sizeof(to_char), "\t%cYou point at $v.\t0", color);
+			to_room = "$n points at $v.";
+		}
+		else {
+			// ??
+			msg_to_char(ch, "You try to point.\r\n");
+			return;
+		}
+		
+		// send to ch
+		if (ch->desc) {
+			clear_last_act_message(ch->desc);
+		}
+		act(to_char, FALSE, ch, obj ? (const void*)obj : (const void*)veh, NULL, TO_CHAR | (obj ? NOBITS : ACT_VEH_OBJ));
+		if (ch->desc && ch->desc->last_act_message) {
+			add_to_channel_history(ch, CHANNEL_HISTORY_SAY, ch, ch->desc->last_act_message, FALSE, 0, NOTHING);
+		}
+		
+		DL_FOREACH_SAFE2(ROOM_PEOPLE(IN_ROOM(ch)), pers, next_pers, next_in_room) {
+			if (pers != ch && CAN_SEE(pers, ch) && AWAKE(pers)) {
+				if (pers->desc) {
+					clear_last_act_message(pers->desc);
+				}
+				
+				color = CUSTOM_COLOR_CHAR(pers, CUSTOM_COLOR_EMOTE);
+				sprintf(buf, "\t%c%s", color, to_room);
+				act(buf, FALSE, ch, obj ? (const void*)obj : (const void*)veh, pers, TO_VICT | TO_NOT_IGNORING | (obj ? NOBITS : ACT_VEH_OBJ));
+				
+				// channel history
+				if (pers->desc && pers->desc->last_act_message) {
+					add_to_channel_history(pers, CHANNEL_HISTORY_SAY, ch, pers->desc->last_act_message, (IS_MORPHED(ch) || IS_DISGUISED(ch)), 0, NOTHING);
 				}
 			}
 		}
 	}
 	else {
-		// normal point
-		sprintf(buf, "point %s", argument);
-		check_social(ch, buf, FALSE);
+		msg_to_char(ch, "You must have a VERY long index finger because you don't see %s %s here.\r\n", AN(arg), arg);
 	}
 }
 
@@ -435,20 +500,20 @@ ACMD(do_roll) {
 	}
 	
 	// clear room last-act
-	LL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), vict, next_in_room) {
+	DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), vict, next_in_room) {
 		if (vict->desc) {
 			clear_last_act_message(vict->desc);
 		}
 	}
 	
 	if (num == 1) {
-		snprintf(buf, sizeof(buf), "You roll a %d-sided die and get: %d\r\n", size, total);
+		safe_snprintf(buf, sizeof(buf), "You roll a %d-sided die and get: %d\r\n", size, total);
 		send_to_char(buf, ch);
 		if (ch->desc) {
-			add_to_channel_history(ch, CHANNEL_HISTORY_SAY, buf);
+			add_to_channel_history(ch, CHANNEL_HISTORY_ROLL, ch, buf, FALSE, 0, NOTHING);
 		}
 		
-		snprintf(buf, sizeof(buf), "$n rolls a %d-sided die and gets: %d", size, total);
+		safe_snprintf(buf, sizeof(buf), "$n rolls a %d-sided die and gets: %d", size, total);
 		act(buf, FALSE, ch, NULL, NULL, TO_ROOM);
 		
 		if (GROUP(ch)) {
@@ -461,17 +526,20 @@ ACMD(do_roll) {
 					act(buf, FALSE, ch, NULL, mem->member, TO_VICT | TO_SLEEP);
 					
 					if (mem->member->desc && mem->member->desc->last_act_message) {
-						add_to_channel_history(mem->member, CHANNEL_HISTORY_SAY, mem->member->desc->last_act_message);
+						add_to_channel_history(mem->member, CHANNEL_HISTORY_ROLL, ch, mem->member->desc->last_act_message, (IS_MORPHED(ch) || IS_DISGUISED(ch)), 0, NOTHING);
 					}
 				}
 			}
 		}
 	}
 	else {
-		msg_to_char(ch, "You roll %dd%d and get: %d\r\n", num, size, total);
-		// local hist
+		safe_snprintf(buf, sizeof(buf), "You roll %dd%d and get: %d\r\n", num, size, total);
+		send_to_char(buf, ch);
+		if (ch->desc) {
+			add_to_channel_history(ch, CHANNEL_HISTORY_ROLL, ch, buf, FALSE, 0, NOTHING);
+		}
 		
-		snprintf(buf, sizeof(buf), "$n rolls %dd%d and gets: %d", num, size, total);
+		safe_snprintf(buf, sizeof(buf), "$n rolls %dd%d and gets: %d", num, size, total);
 		act(buf, FALSE, ch, NULL, NULL, TO_ROOM);
 		
 		if (GROUP(ch)) {
@@ -484,7 +552,7 @@ ACMD(do_roll) {
 					act(buf, FALSE, ch, NULL, mem->member, TO_VICT | TO_SLEEP);
 					
 					if (mem->member->desc && mem->member->desc->last_act_message) {
-						add_to_channel_history(mem->member, CHANNEL_HISTORY_SAY, mem->member->desc->last_act_message);
+						add_to_channel_history(mem->member, CHANNEL_HISTORY_ROLL, ch, mem->member->desc->last_act_message, (IS_MORPHED(ch) || IS_DISGUISED(ch)), 0, NOTHING);
 					}
 				}
 			}
@@ -492,27 +560,20 @@ ACMD(do_roll) {
 	}
 	
 	// save room last-act
-	LL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), vict, next_in_room) {
+	DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), vict, next_in_room) {
 		if (vict != ch && vict->desc && vict->desc->last_act_message) {
-			add_to_channel_history(vict, CHANNEL_HISTORY_SAY, vict->desc->last_act_message);
+			add_to_channel_history(vict, CHANNEL_HISTORY_ROLL, ch, vict->desc->last_act_message, (IS_MORPHED(ch) || IS_DISGUISED(ch)), 0, NOTHING);
 		}
 	}
 }
 
 
 ACMD(do_socials) {
-	char buf[MAX_STRING_LENGTH];
 	social_data *soc, *next_soc, *last = NULL;
-	int count = 0;
-	size_t size;
 	
-	size = snprintf(buf, sizeof(buf), "The following social commands are available:\r\n");
+	build_page_display(ch, "The following social commands are available:");
 	
 	HASH_ITER(sorted_hh, sorted_socials, soc, next_soc) {
-		if (size + 11 > sizeof(buf)) {	// early exit for full buffer
-			break;
-		}
-		
 		if (SOCIAL_FLAGGED(soc, SOC_IN_DEVELOPMENT)) {
 			continue;
 		}
@@ -524,13 +585,8 @@ ACMD(do_socials) {
 		}
 		
 		last = soc;	// duplicate prevention
-		size += snprintf(buf + size, sizeof(buf) - size, "%-11.11s%s", SOC_COMMAND(soc), (!(++count % 7)) ? "\r\n" : "");
+		build_page_display_col_str(ch, 7, FALSE, SOC_COMMAND(soc));
 	}
 	
-	// terminating crlf if possible
-	if (count % 7 && (size + 2) < sizeof(buf)) {
-		strcat(buf, "\r\n");
-	}
-	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }

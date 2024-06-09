@@ -1,22 +1,39 @@
 #800
 flask glass~
-a flask~
-A glass flask has been left here.~
-You can keep water in the flask.
+a glass flask~
+A flask has been left here.~
+This glass flask can be used to hold water, or to make potions.
 ~
-5 0 a 2
+5 l a 0 0 7
 10 0 0
 8 0
+C
+1 1
+R
+4 5135 0
+R
+4 5130 0
 S
 #801
 jar glass~
-a jar~
-A glass jar has been left here.~
-You can keep water in the jar.
+a glass jar~
+A jar has been left here.~
+   It's a simple glass jar. You can keep water in the jar. It can also be used
+to make some foods.
 ~
-5 0 a 2
+5 l a 0 0 9
 10 0 0
 8 0
+C
+1 1
+R
+4 5135 0
+R
+4 5606 0
+R
+4 5114 0
+R
+4 5130 0
 S
 #802
 glass small pane~
@@ -24,59 +41,74 @@ a small pane of glass~
 A small pane of glass has been left here.~
 Glass panes can be used to make various items.
 ~
-3 0 a 1
+3 l a 0 0 4
 0 0 0
 8 0
+C
+1 1
+R
+4 5135 0
 S
 #803
 mirror tarnished small~
 a tarnished mirror~
 A small mirror has fallen here.~
 ~
-3 0 a 1
+3 0 a 0 0 2
 0 0 0
 8 0
+C
+1 1
 R
-5610 0
+4 5610 0
 R
-5121 0
+4 5121 0
 T 803
 S
 #804
 lantern~
 a lantern~
 A lantern has been set here.~
-Light the lantern to see after dark.
+   Lanterns are a good way to light the way at night. Use 'light lantern' and
+'douse lantern' to save wax. You can refill the lantern with 'put candle
+lantern'.
 ~
-3 0 a 1
-0 0 0
+29 0 a 0 0 7
+48 0 2
 8 0
-I 11 805 100.00 1  # LIGHT: a bright lantern
+C
+1 1
 R
-5121 0
+4 5121 0
 R
-5610 0
+4 5610 0
+T 804
 S
 #805
-lantern bright~
-a bright lantern~
-A bright lantern has been set here.~
-The lantern really lights up the place.
+lantern~
+a lantern~
+A lantern has been set here.~
+   Lanterns are a good way to light the way at night. Use 'light lantern' and
+'douse lantern' to save wax. You can refill the lantern with 'put candle
+lantern'.
 ~
-3 c ao 1
-0 0 0
-8 48
+29 0 ao 0 0 4
+48 1 2
+8 0
+T 804
 S
 #806
 mirror looking glass silver~
 a silver looking glass~
 A silver looking glass has been left here.~
 ~
-3 0 a 1
+3 0 a 0 0 2
 0 0 0
 3 0
+C
+1 1
 R
-5610 0
+4 5610 0
 T 806
 S
 #807
@@ -84,12 +116,30 @@ mirror looking glass gold~
 a gold looking glass~
 A gold looking glass has been left here.~
 ~
-3 0 a 1
+3 0 a 0 0 2
 0 0 0
 4 0
+C
+1 1
 R
-5610 0
+4 5610 0
 T 806
+S
+#808
+vial glass~
+a glass vial~
+A vial is lying on the ground.~
+This little glass vial is empty.
+~
+3 l a 0 0 9
+0 0 0
+8 0
+C
+1 1
+R
+4 5135 0
+R
+4 5130 0
 S
 #850
 wax beeswax pile~
@@ -97,29 +147,44 @@ some beeswax~
 A pile of beeswax has been left here.~
 Wax can be crafted into a candle.
 ~
-3 0 a 1
+3 l a 0 0 8
 0 0 0
-9 100
+9 0
+C
+1 1
+O+ 1 6891
+R
+4 5131 0
+R
+4 5121 0
 S
 #851
-candle unlit~
-an unlit candle~
-An unlit candle has been dropped here.~
-Light the candle to see after dark.
+candle~
+a candle~
+A candle is sitting on the ground.~
+   Candles have long been a simple way to see at night. Use 'light candle' and
+'douse candle' to use it.
 ~
-3 l ao 3
-0 0 0
-9 8064
-I 11 852 100.00 1  # LIGHT: a candle
+29 l ao 0 0 10
+8 0 7
+9 0
+C
+1 1
+O+ 1 851
+R
+4 5121 0
+R
+4 5610 0
 S
 #852
 candle~
 a candle~
-A candle has been dropped here.~
-The candle lights the way.
+A candle is sitting on the ground.~
+A candle lights the way. Use 'light candle' and 'douse candle' to use it.
 ~
-3 cl ao 1
-0 0 0
-9 6
+29 0 ao 0 0 7
+8 1 7
+9 0
+O+ 1 851
 S
 $

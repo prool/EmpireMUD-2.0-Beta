@@ -1,7 +1,7 @@
 #10550
 Frozen River~
 A Frozen River~
-'~' 2 0 25 0 0
+'~' 2 fy 25 x 0
 D0
 ~~~~~
 &W~
@@ -9,37 +9,173 @@ E
 4 0 5.00 5
 E
 9 0 100.00 5
-I 6 10562 95.00 1 F  # FORAGE: a handful of red and green seeds
-I 6 10563 5.00 1 F  # FORAGE: a seed of pure ice
-M
-9172 5.00 g
-M
-9173 5.00 ag
-M
-9177 5.00 g
+I 6 10562 95.00 25 F  # FORAGE: handful of red and green seeds
+I 6 10563 5.00 25 F  # FORAGE: seed of pure ice
 M
 9178 0.03 g
 M
-9179 15.00 g
-M
-9182 5.00 g
-M
 9186 5.00 0
-M
-9171 5.00 0
-M
-9185 5.00 h
 M
 10556 5.00 0
 M
 10557 5.00 0
 M
 10558 5.00 0
+X
+river frozen ice around~
+   The river has turned to solid ice! You can see fish frozen in place just
+beneath the surface.
+~
+X
+fish down~
+A little fish stares up at you from beneath the ice, but it doesn't move.
+~
+S
+#10551
+Frozen Estuary~
+A Frozen Estuary~
+'~' 2 fy 25 0 0
+D0
+~~~~~
+&W~
+E
+4 0 5.00 53
+E
+9 0 100.00 53
+I 6 10562 95.00 25 F  # FORAGE: handful of red and green seeds
+I 6 10563 5.00 25 F  # FORAGE: seed of pure ice
+M
+9178 0.03 g
+M
+9186 5.00 0
+M
+10556 5.00 0
+M
+10557 5.00 0
+M
+10558 5.00 0
+X
+estuary river frozen ice around~
+The waters of the estuary have turned to solid ice!
+~
+S
+#10552
+Frozen Canal~
+A Frozen Canal~
+'~' 2 fy 25 C 0
+D0
+~~~~~
+&W~
+E
+4 0 5.00 19
+E
+9 0 100.00 19
+I 6 10562 95.00 25 F  # FORAGE: handful of red and green seeds
+I 6 10563 5.00 25 F  # FORAGE: seed of pure ice
+M
+9178 0.03 g
+M
+9186 5.00 0
+M
+10556 5.00 0
+M
+10557 5.00 0
+M
+10558 5.00 0
+X
+frozen canal ice around~
+The canal has frozen solid!
+~
+S
+#10553
+Frozen Lake~
+A Frozen Lake~
+'~' 2 fy 25 x 0
+D0
+~~~~~
+&W~
+E
+4 0 5.00 32
+E
+9 0 100.00 32
+I 6 10562 95.00 25 F  # FORAGE: handful of red and green seeds
+I 6 10563 5.00 25 F  # FORAGE: seed of pure ice
+M
+9178 0.03 g
+M
+9186 5.00 0
+M
+10556 5.00 0
+M
+10557 5.00 0
+M
+10558 5.00 0
+X
+lake frozen ice around~
+   The lake has frozen completely solid! You can't even hear it creak when you
+walk.
+~
+S
+#10554
+Frozen Irrigation Canal~
+A Frozen Irrigation Canal~
+'~' 2 fy 25 C 0
+D0
+~~~~~
+&W~
+E
+4 0 5.00 85
+E
+9 0 100.00 85
+I 6 10562 95.00 25 F  # FORAGE: handful of red and green seeds
+I 6 10563 5.00 25 F  # FORAGE: seed of pure ice
+M
+9178 0.03 g
+M
+9186 5.00 0
+M
+10556 5.00 0
+M
+10557 5.00 0
+M
+10558 5.00 0
+X
+canal irrigation frozen ice around~
+The canal has frozen solid!
+~
+S
+#10555
+Frozen Canal~
+A Frozen Canal~
+'~' 2 fy 25 C 0
+D0
+~~~~~
+&W~
+E
+4 0 5.00 87
+E
+9 0 100.00 87
+I 6 10562 95.00 25 F  # FORAGE: handful of red and green seeds
+I 6 10563 5.00 25 F  # FORAGE: seed of pure ice
+M
+9178 0.03 g
+M
+9186 5.00 0
+M
+10556 5.00 0
+M
+10557 5.00 0
+M
+10558 5.00 0
+X
+canal frozen ice around~
+The canal has frozen solid!
+~
 S
 #10562
 Thin Evergreen Forest~
 A Thin Evergreen Forest~
-'.' 33 1 3 dl n
+'.' 33 fjqr 3 dl np
 C
 chop, dig, gather, pick~
 D1
@@ -52,415 +188,170 @@ D3
 .&j^&?..~
 &g~
 D4
-.^..~
+.&j^&?..~
 &0~
 E
-0 1 100.00 0
+0 1 100.00 10566
 E
 4 0 0.80 10563
 E
 9 0 50.00 10563
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 10552 100.00 1  # FORAGE: some arctic brambleberries
-I 7 1201 100.00 1  # FIND-HERB: some fiveleaf
-I 9 121 100.00 1  # GATHER: a stick
-I 20 10558 100.00 1  # CHOP: a spruce tree
-M
-9140 1.00 dh
-M
-9139 5.00 dh
-M
-9138 5.00 dh
-M
-9135 5.00 adh
-M
-9134 5.00 bdh
-M
-9037 5.00 dh
-M
-9038 5.00 dh
-M
-9036 5.00 dh
-M
-9006 5.00 dg
-M
-9141 5.00 dg
-M
-9137 5.00 dg
-M
-9128 5.00 dg
-M
-9121 5.00 dg
-M
-9132 5.00 dg
-M
-9007 5.00 dg
-M
-9120 15.00 adg
-M
-9002 5.00 adg
-M
-9013 5.00 bdg
-M
-9039 5.00 dg
-M
-9035 5.00 dg
-M
-9033 5.00 dg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9024 5.00 d
-M
-9023 5.00 d
-M
-9034 5.00 d
-M
-9133 5.00 ad
-M
-9116 5.00 ad
-M
-9022 5.00 ad
-M
-9032 1.00 bd
-M
-9031 1.00 bd
-M
-9030 1.00 bd
-M
-9029 1.00 bd
-M
-9025 5.00 bd
-M
-9011 5.00 bd
-M
-9021 5.00 bd
-M
-9020 5.00 bd
-M
-9009 10.00 bd
-M
-9012 10.00 bd
-M
-9010 5.00 bd
-M
-9004 5.00 bd
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9154 10.00 bc
-M
-9153 10.00 bc
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9064 0.90 ad
-M
-9172 5.00 g
-M
-9177 5.00 g
-M
-9179 15.00 g
-M
-9171 5.00 0
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 10552 75.00 25  # FORAGE: arctic brambleberries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 100.00 50  # GATHER: sticks and leaves
+I 20 10558 100.00 1  # CHOP: spruce tree
 M
 10556 5.00 0
 M
 10557 5.00 0
 M
 10558 5.00 0
+U
+0
+An evergreen tree shoots up from the ground!~
+X
+evergreens forest trees pines around~
+   An evergreen pine towers over you. The hairs on your arms stand up as you
+approach it; a chill hits your cheeks and you realize the cold emanates from
+the tree itself. There's a certain peace in the air, broken only by the
+occasional call of a tern.
+~
 S
 #10563
 Evergreen Forest~
 An Evergreen Forest~
-'^' 33 1 4 dl n
+'^' 33 fjq 4 dl np
 C
 chop, dig, gather, pick~
 D1
-&j^^&?..~
-&g~
+^^&g..~
+&j~
 D1
-.&j^^&?.~
-&g~
+&g.&?^^&g.~
+&j~
 D1
-..&j^^~
-&g~
+&g..&?^^~
+&j~
 D2
-&j^^&?..~
-&g~
+^^&g..~
+&j~
 D2
-.&j^^&?.~
-&g~
+&g.&?^^&g.~
+&j~
 D2
-..&j^^~
-&g~
+&g..&?^^~
+&j~
 D3
-&j^^&?..~
-&g~
+^^&g..~
+&j~
 D3
-.&j^^&?.~
-&g~
+&g.&?^^&g.~
+&j~
 D3
-..&j^^~
-&g~
+&g..&?^^~
+&j~
 D4
-^^..~
-&0~
+^^&0..~
+&j~
 D4
-.^^.~
-&0~
+&0.&?^^&0.~
+&j~
 D4
-..^^~
-&0~
+&0..&?^^~
+&j~
 E
 0 1 100.00 10562
 E
 4 0 0.80 10564
 E
 9 0 50.00 10564
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 10552 100.00 1  # FORAGE: some arctic brambleberries
-I 7 1201 100.00 1  # FIND-HERB: some fiveleaf
-I 9 121 100.00 1  # GATHER: a stick
-I 20 10558 100.00 1  # CHOP: a spruce tree
-M
-9109 10.00 dh
-M
-9145 5.00 adh
-M
-9147 5.00 bdh
-M
-9007 5.00 dg
-M
-9006 5.00 dg
-M
-9141 5.00 dg
-M
-9146 5.00 adg
-M
-9144 5.00 adg
-M
-9002 5.00 adg
-M
-9003 5.00 dg
-M
-9136 5.00 bdg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9150 5.00 d
-M
-9149 5.00 d
-M
-9148 5.00 d
-M
-9023 5.00 d
-M
-9008 5.00 d
-M
-9133 5.00 ad
-M
-9116 5.00 ad
-M
-9022 5.00 ad
-M
-9032 5.00 bd
-M
-9031 5.00 bd
-M
-9030 5.00 bd
-M
-9029 5.00 bd
-M
-9025 5.00 bd
-M
-9020 5.00 bd
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9154 10.00 bc
-M
-9153 10.00 bc
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9064 0.90 ad
-M
-9172 5.00 g
-M
-9177 5.00 g
-M
-9179 15.00 g
-M
-9171 5.00 0
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 10552 75.00 25  # FORAGE: arctic brambleberries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 100.00 50  # GATHER: sticks and leaves
+I 20 10558 100.00 1  # CHOP: spruce tree
 M
 10556 5.00 0
 M
 10557 5.00 0
 M
 10558 5.00 0
+U
+0
+An evergreen tree shoots up from the ground!~
+X
+evergreens forest trees pines around~
+   The majestic evergreens loom over you, filling the air with the invigorating
+scent of pine. The air is cool and crisp, ever moreso as you approach the
+trees. It's almost as if they're emanating cold itself -- if such a thing were
+possible. The only sounds you hear are the rustling of needles in the breeze
+and the occasional call of an arctic tern.
+~
 S
 #10564
 Overgrown Evergreen Forest~
 An Overgrown Evergreen Forest~
-'^' 33 1 5 dl n
+'^' 33 fjq 5 dl np
 C
 chop, dig, gather, pick~
 D1
-&j^^&?.&j^~
-&g~
+^^&g.&?^~
+&j~
 D2
-&j^^&?.&j^~
-&g~
+^^&g.&?^~
+&j~
 D3
-&j^^&?.&j^~
-&g~
+^^&g.&?^~
+&j~
 D4
-^^.^~
-&0~
+^^&0.&?^~
+&j~
 E
 0 1 100.00 10563
 E
 4 0 0.20 10565
 E
 9 0 50.00 10565
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 10552 100.00 1  # FORAGE: some arctic brambleberries
-I 7 1201 100.00 1  # FIND-HERB: some fiveleaf
-I 9 121 100.00 1  # GATHER: a stick
-I 20 10558 100.00 1  # CHOP: a spruce tree
-M
-9109 10.00 dh
-M
-9145 5.00 adh
-M
-9147 5.00 bdh
-M
-9007 5.00 dg
-M
-9006 5.00 dg
-M
-9141 5.00 dg
-M
-9146 5.00 adg
-M
-9144 5.00 adg
-M
-9002 5.00 adg
-M
-9001 10.00 dg
-M
-9136 5.00 bdg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9017 5.00 d
-M
-9150 5.00 d
-M
-9149 5.00 d
-M
-9148 5.00 d
-M
-9008 5.00 d
-M
-9133 5.00 ad
-M
-9116 5.00 ad
-M
-9025 5.00 bd
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9154 10.00 bc
-M
-9153 10.00 bc
-M
-9035 5.00 cg
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9064 0.90 ad
-M
-9172 5.00 g
-M
-9177 5.00 g
-M
-9179 15.00 g
-M
-9171 5.00 0
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 10552 75.00 25  # FORAGE: arctic brambleberries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 100.00 50  # GATHER: sticks and leaves
+I 20 10558 100.00 1  # CHOP: spruce tree
 M
 10556 5.00 0
 M
 10557 5.00 0
 M
 10558 5.00 0
+U
+0
+An evergreen tree shoots up from the ground!~
+X
+evergreens forest trees pines around~
+   The evergreens have closed in around you and you can see little else.
+Above, they grow tall and straight, reaching like colossal fingers toward the
+sky. The countless needles buffer all sound except the gentle breeze and the
+infrequent call of a loud bird. The air is cold -- colder than you were
+expecting -- but filled with the fresh scent of pine.
+~
 S
 #10565
 Thick Evergreen Forest~
 A Thick Evergreen Forest~
-'^' 33 1 6 dl dn
+'^' 33 fjq 6 dl dnp
 C
 chop, dig, gather, pick~
 D1
@@ -474,102 +365,93 @@ D3
 &j~
 D4
 ^^^^~
-&0~
+&j~
 E
 0 1 100.00 10564
-I 5 102 9.00 1 X  # DIG: a flint stone
-I 5 100 100.00 1 X  # DIG: a rock
-I 6 10552 100.00 1  # FORAGE: some arctic brambleberries
-I 7 1201 100.00 1  # FIND-HERB: some fiveleaf
-I 9 121 100.00 1  # GATHER: a stick
-I 20 10558 100.00 1  # CHOP: a spruce tree
-M
-9040 0.01 d
-M
-9056 0.01 d
-M
-9109 10.00 dh
-M
-9145 5.00 adh
-M
-9147 5.00 bdh
-M
-9007 5.00 dg
-M
-9006 5.00 dg
-M
-9141 5.00 dg
-M
-9146 5.00 adg
-M
-9144 5.00 adg
-M
-9002 5.00 adg
-M
-9001 10.00 dg
-M
-9136 5.00 bdg
-M
-250 0.10 ad
-M
-248 1.00 bd
-M
-247 0.10 d
-M
-246 0.30 ad
-M
-9017 5.00 d
-M
-9150 5.00 d
-M
-9149 5.00 d
-M
-9148 5.00 d
-M
-9008 5.00 d
-M
-9133 5.00 ad
-M
-9116 5.00 ad
-M
-9025 5.00 bd
-M
-253 10.00 cf
-M
-240 6.00 bc
-M
-9039 5.00 cg
-M
-9035 5.00 cg
-M
-9154 10.00 bc
-M
-9153 10.00 bc
-M
-9033 5.00 cg
-M
-9037 5.00 ch
-M
-9038 5.00 ch
-M
-9036 5.00 ch
-M
-9034 5.00 c
-M
-9064 0.90 ad
-M
-9172 5.00 g
-M
-9177 5.00 g
-M
-9179 15.00 g
-M
-9171 5.00 0
+E
+17 4 0.01 10565
+E
+17 0 0.10 10562
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 100 100.00 125 X  # DIG: rock
+I 6 10552 75.00 25  # FORAGE: arctic brambleberries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 9 121 100.00 50  # GATHER: sticks and leaves
+I 20 10558 100.00 2  # CHOP: spruce tree
 M
 10556 5.00 0
 M
 10557 5.00 0
 M
 10558 5.00 0
+U
+0
+An evergreen tree shoots up from the ground!~
+X
+evergreens forest trees pines around~
+   You've found yourself in the densest part of a forest of towering
+evergreens, where the ground is made entirely of soft pine needles and the cold
+air carries nothing but the crisp scent of the trees. Above you, the sky is
+only visible in the gaps between the spruces and pines. There's a deep and
+permeating serenity to this place that you hardly want to leave.
+~
+S
+#10566
+Stumps~
+A Field of Stumps~
+'.' 10 fjr 2 dl bp
+C
+burn stumps, dig~
+D1
+.&t.&?..~
+&g~
+D1
+..&t.&?.~
+&g~
+D2
+.&t.&?..~
+&g~
+D2
+..&t.&?.~
+&g~
+D3
+.&t.&?..~
+&g~
+D3
+..&t.&?.~
+&g~
+D4
+.&t.&?..~
+&0~
+D4
+..&t.&?.~
+&0~
+E
+4 0 1.00 10562
+E
+9 0 50.00 10562
+E
+16 0 100.00 0
+E
+23 0 100.00 0
+I 5 10552 9.00 125 X  # DIG: arctic brambleberries
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3013 75.00 25  # FORAGE: handful of nuts
+M
+10556 5.00 0
+M
+10557 5.00 0
+M
+10558 5.00 0
+X
+stumps field forest trees pines evergreens around~
+   The field of stumps around you has begun to rot. From what you can tell,
+most of these were spruce and pine -- trees that do not regrow once felled. A
+chill still lingers in the air, moreso near the stumps. Perhaps the magic is
+not gone from this forest.
+~
 S
 $

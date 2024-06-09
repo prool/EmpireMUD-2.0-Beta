@@ -1,0 +1,51 @@
+#18100
+Stumps~
+A Field of Stumps~
+'.' 10 jr 2 d p
+C
+dig, chop~
+D1
+.&t.&?..~
+&g~
+D1
+..&t.&?.~
+&g~
+D2
+.&t.&?..~
+&g~
+D2
+..&t.&?.~
+&g~
+D3
+.&t.&?..~
+&g~
+D3
+..&t.&?.~
+&g~
+D4
+.&t.&?..~
+&0~
+D4
+..&t.&?.~
+&0~
+E
+4 0 0.20 1
+E
+4 0 100.00 36
+E
+9 0 50.00 1
+E
+16 0 100.00 0
+E
+23 0 100.00 0
+I 5 102 15.00 125 X  # DIG: flint stone
+I 5 101 15.00 125 X  # DIG: lump of clay
+I 5 100 100.00 125 X  # DIG: rock
+I 6 3013 75.00 25  # FORAGE: handful of nuts
+I 20 121 100.00 10 a  # CHOP: sticks and leaves
+X
+stumps field around~
+The stumps that dot this field look like they were hacked apart by tiny axes.
+~
+S
+$

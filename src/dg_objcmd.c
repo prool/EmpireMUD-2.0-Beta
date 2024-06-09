@@ -3,7 +3,7 @@
 *  Usage: contains the command_interpreter for objects, object commands.  *
 *                                                                         *
 *  DG Scripts code by galion, 1996/08/04 23:10:16, revision 3.8           *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -24,48 +24,17 @@
 #include "db.h"
 #include "skills.h"
 #include "vnums.h"
+#include "constants.h"
 
-// external vars
-extern const char *damage_types[];
-extern const char *dirs[];
-extern const char *alt_dirs[];
-extern struct instance_data *quest_instance_global;
+/**
+* Contents:
+*   Helpers
+*   Object Commands
+*   Object Command Interpreter
+*/
 
-// external functions
-void obj_command_interpreter(obj_data *obj, char *argument);
-void send_char_pos(char_data *ch, int dam);
-extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom);
-char_data *get_char_by_obj(obj_data *obj, char *name);
-obj_data *get_obj_by_obj(obj_data *obj, char *name);
-room_data *get_room(room_data *ref, char *name);
-extern vehicle_data *get_vehicle(char *name);
-vehicle_data *get_vehicle_by_obj(obj_data *obj, char *name);
-vehicle_data *get_vehicle_near_obj(obj_data *obj, char *name);
-void instance_obj_setup(struct instance_data *inst, obj_data *obj);
-void sub_write(char *arg, char_data *ch, byte find_invis, int targets);
-void die(char_data *ch, char_data *killer);
-void scale_item_to_level(obj_data *obj, int level);
-void scale_mob_to_level(char_data *mob, int level);
-void scale_vehicle_to_level(vehicle_data *veh, int level);
-
-// locals
-room_data *obj_room(obj_data *obj);
-
-
-#define OCMD(name)  void (name)(obj_data *obj, char *argument, int cmd, int subcmd)
-
-
-struct obj_command_info {
-	char *command;
-	void (*command_pointer)(obj_data *obj, char *argument, int cmd, int subcmd);
-	int subcmd;
-};
-
-
-/* do_osend */
-#define SCMD_OSEND         0
-#define SCMD_OECHOAROUND   1
-
+ //////////////////////////////////////////////////////////////////////////////
+//// HELPERS /////////////////////////////////////////////////////////////////
 
 /**
 * Determines the scale level for a obj, with a character target as a backup
@@ -83,15 +52,15 @@ int get_obj_scale_level(obj_data *obj, char_data *targ) {
 	if (GET_OBJ_CURRENT_SCALE_LEVEL(obj) > 0) {
 		level = GET_OBJ_CURRENT_SCALE_LEVEL(obj);
 	}
-	else if (orm && COMPLEX_DATA(orm) && (inst = COMPLEX_DATA(orm)->instance)) {
-		if (inst->level) {
-			level = inst->level;
+	else if (orm && (inst = find_instance_by_room(orm, FALSE, FALSE))) {
+		if (INST_LEVEL(inst)) {
+			level = INST_LEVEL(inst);
 		}
-		else if (GET_ADV_MIN_LEVEL(inst->adventure) > 0) {
-			level = GET_ADV_MIN_LEVEL(inst->adventure);
+		else if (GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst)) > 0) {
+			level = GET_ADV_MIN_LEVEL(INST_ADVENTURE(inst));
 		}
-		else if (GET_ADV_MAX_LEVEL(inst->adventure) > 0) {
-			level = GET_ADV_MAX_LEVEL(inst->adventure) / 2; // average?
+		else if (GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) > 0) {
+			level = GET_ADV_MAX_LEVEL(INST_ADVENTURE(inst)) / 2; // average?
 		}
 	}
 	
@@ -109,7 +78,7 @@ void obj_log(obj_data *obj, const char *format, ...) {
 	va_list args;
 	char output[MAX_STRING_LENGTH];
 
-	snprintf(output, sizeof(output), "Obj (%s, VNum %d):: %s", GET_OBJ_SHORT_DESC(obj), GET_OBJ_VNUM(obj), format);
+	safe_snprintf(output, sizeof(output), "Obj (%s, VNum %d):: %s", GET_OBJ_SHORT_DESC(obj), GET_OBJ_VNUM(obj), format);
 
 	va_start(args, format);
 	script_vlog(output, args);
@@ -137,17 +106,16 @@ room_data *obj_room(obj_data *obj) {
 }
 
 
-/* obj_data *commands */
+ //////////////////////////////////////////////////////////////////////////////
+//// OBJECT COMMANDS /////////////////////////////////////////////////////////
 
 OCMD(do_oadventurecomplete) {
-	void mark_instance_completed(struct instance_data *inst);
-	
 	struct instance_data *inst;
 	room_data *room = obj_room(obj);
 	
 	inst = quest_instance_global;
 	if (!inst) {
-		inst = room ? find_instance_by_room(room, FALSE) : NULL;
+		inst = room ? find_instance_by_room(room, FALSE, TRUE) : NULL;
 	}
 	
 	if (inst) {
@@ -157,8 +125,6 @@ OCMD(do_oadventurecomplete) {
 
 
 OCMD(do_obuild) {
-	void do_dg_build(room_data *target, char *argument);
-
 	char loc_arg[MAX_INPUT_LENGTH], bld_arg[MAX_INPUT_LENGTH], *tmp;
 	room_data *orm = obj_room(obj), *target;
 	
@@ -199,14 +165,15 @@ OCMD(do_obuild) {
 
 OCMD(do_oecho) {
 	room_data *room;
+	bool use_queue;
 
-	skip_spaces(&argument);
+	use_queue = script_message_should_queue(&argument);
 
 	if (!*argument) 
 		obj_log(obj, "oecho called with no args");
 	else if ((room = obj_room(obj))) {
 		if (ROOM_PEOPLE(room))
-			sub_write(argument, ROOM_PEOPLE(room), TRUE, TO_ROOM | TO_CHAR);
+			sub_write(argument, ROOM_PEOPLE(room), TRUE, TO_ROOM | TO_CHAR | (use_queue ? TO_QUEUE : 0));
 	}
 	else
 		obj_log(obj, "oecho called by object in no location");
@@ -229,8 +196,7 @@ OCMD(do_oforce) {
 		if (!(room = obj_room(obj))) 
 			obj_log(obj, "oforce called by object in no location");
 		else {
-			for (ch = ROOM_PEOPLE(room); ch; ch = next_ch) {
-				next_ch = ch->next_in_room;
+			DL_FOREACH_SAFE2(ROOM_PEOPLE(room), ch, next_ch, next_in_room) {
 				if (valid_dg_target(ch, 0)) {
 					command_interpreter(ch, line);
 				}
@@ -250,29 +216,73 @@ OCMD(do_oforce) {
 }
 
 
+OCMD(do_oheal) {
+	script_heal(obj, OBJ_TRIGGER, argument);
+}
+
+
+/* prints the argument to all the rooms aroud the obj */
+OCMD(do_oasound) {
+	bool use_queue, map_echo = FALSE;
+	struct room_direction_data *ex;
+	room_data *to_room, *room;
+	int dir;
+	
+	if (!(room = obj_room(obj))) {
+		return;	// can't find room
+	}
+
+	use_queue = script_message_should_queue(&argument);
+	
+	if (!*argument) {
+		obj_log(obj, "oasound called with no argument");
+		return;
+	}
+
+	if (GET_ROOM_VNUM(room) < MAP_SIZE) {
+		for (dir = 0; dir < NUM_2D_DIRS; ++dir) {
+			if ((to_room = SHIFT_DIR(room, dir))) {
+				sub_write_to_room(argument, to_room, use_queue);
+			}
+		}
+		map_echo = TRUE;
+	}
+
+	if (COMPLEX_DATA(room)) {
+		LL_FOREACH(COMPLEX_DATA(room)->exits, ex) {
+			if ((to_room = ex->room_ptr) && room != to_room) {
+				// this skips rooms already hit by the direction shift
+				if (!map_echo || GET_ROOM_VNUM(to_room) >= MAP_SIZE) {
+					sub_write_to_room(argument, to_room, use_queue);
+				}
+			}
+		}
+	}
+}
+
+
 OCMD(do_obuildingecho) {
-	room_data *froom, *home_room, *iter;
+	room_data *froom, *home_room;
 	room_data *orm = obj_room(obj);
-	char room_number[MAX_INPUT_LENGTH], buf[MAX_INPUT_LENGTH], *msg;
+	char room_number[MAX_INPUT_LENGTH], *msg;
+	char_data *iter;
+	bool use_queue;
 
 	msg = any_one_word(argument, room_number);
-	skip_spaces(&msg);
+	use_queue = script_message_should_queue(&msg);
 
 	if (!*room_number || !*msg) {
 		obj_log(obj, "obuildingecho called with too few args");
 	}
-	else if (!(froom = get_room(orm, arg))) {
+	else if (!(froom = get_room(orm, room_number))) {
 		obj_log(obj, "obuildingecho called with invalid target");
 	}
 	else {
-		home_room = HOME_ROOM(froom);	// right?
+		home_room = HOME_ROOM(froom);
 		
-		sprintf(buf, "%s\r\n", msg);
-		
-		send_to_room(buf, home_room);
-		for (iter = interior_room_list; iter; iter = iter->next_interior) {
-			if (HOME_ROOM(iter) == home_room && iter != home_room && ROOM_PEOPLE(iter)) {
-				send_to_room(buf, iter);
+		DL_FOREACH(character_list, iter) {
+			if (HOME_ROOM(IN_ROOM(iter)) == home_room) {
+				sub_write(msg, iter, TRUE, TO_CHAR | (use_queue ? TO_QUEUE : 0));
 			}
 		}
 	}
@@ -281,15 +291,14 @@ OCMD(do_obuildingecho) {
 
 OCMD(do_oregionecho) {
 	char room_number[MAX_INPUT_LENGTH], radius_arg[MAX_INPUT_LENGTH], *msg;
-	descriptor_data *desc;
 	room_data *center, *orm = obj_room(obj);
+	bool use_queue, outdoor_only = FALSE;
 	char_data *targ;
 	int radius;
-	bool indoor_only = FALSE;
 
 	argument = any_one_word(argument, room_number);
 	msg = one_argument(argument, radius_arg);
-	skip_spaces(&msg);
+	use_queue = script_message_should_queue(&msg);
 
 	if (!*room_number || !*radius_arg || !*msg) {
 		obj_log(obj, "oregionecho called with too few args");
@@ -301,29 +310,62 @@ OCMD(do_oregionecho) {
 		obj_log(obj, "oregionecho called with invalid target");
 	}
 	else {
-		center = get_map_location_for(center);
+		center = GET_MAP_LOC(center) ? real_room(GET_MAP_LOC(center)->vnum) : NULL;
 		radius = atoi(radius_arg);
 		if (radius < 0) {
 			radius = -radius;
-			indoor_only = TRUE;
+			outdoor_only = TRUE;
 		}
 		
-		if (center) {			
-			for (desc = descriptor_list; desc; desc = desc->next) {
-				if (STATE(desc) != CON_PLAYING || !(targ = desc->character)) {
-					continue;
-				}
-				if (RMT_FLAGGED(IN_ROOM(targ), RMT_NO_LOCATION)) {
+		if (center) {
+			DL_FOREACH(character_list, targ) {
+				if (!same_subzone(center, IN_ROOM(targ))) {
 					continue;
 				}
 				if (compute_distance(center, IN_ROOM(targ)) > radius) {
 					continue;
 				}
-				
-				if (!indoor_only || IS_OUTDOORS(targ)) {
-					msg_to_desc(desc, "%s\r\n", CAP(msg));
+				if (outdoor_only && !IS_OUTDOORS(targ)) {
+					continue;
 				}
+				
+				// send
+				sub_write(msg, targ, TRUE, TO_CHAR | (use_queue ? TO_QUEUE : 0));
 			}
+		}
+	}
+}
+
+
+OCMD(do_osubecho) {
+	char room_number[MAX_INPUT_LENGTH], *msg;
+	bool use_queue;
+	room_data *where, *orm = obj_room(obj);
+	char_data *targ;
+	
+	msg = any_one_word(argument, room_number);
+	use_queue = script_message_should_queue(&msg);
+
+	if (!*room_number || !*msg) {
+		obj_log(obj, "osubecho called with too few args");
+	}
+	else if (!(where = get_room(orm, room_number))) {
+		obj_log(obj, "osubecho called with invalid target");
+	}
+	else if (!ROOM_INSTANCE(where)) {
+		obj_log(obj, "osubecho called outside an adventure");
+	}
+	else {
+		DL_FOREACH(character_list, targ) {
+			if (ROOM_INSTANCE(where) != ROOM_INSTANCE(IN_ROOM(targ))) {
+				continue;	// wrong instance
+			}
+			if (!same_subzone(where, IN_ROOM(targ))) {
+				continue;	// wrong subzone
+			}
+			
+			// send
+			sub_write(msg, targ, TRUE, TO_CHAR | (use_queue ? TO_QUEUE : 0));
 		}
 	}
 }
@@ -332,9 +374,11 @@ OCMD(do_oregionecho) {
 OCMD(do_ovehicleecho) {
 	char targ[MAX_INPUT_LENGTH], *msg;
 	vehicle_data *veh;
+	char_data *iter;
+	bool use_queue;
 
 	msg = any_one_word(argument, targ);
-	skip_spaces(&msg);
+	use_queue = script_message_should_queue(&msg);
 
 	if (!*targ || !*msg) {
 		obj_log(obj, "ovehicleecho called with too few args");
@@ -343,7 +387,11 @@ OCMD(do_ovehicleecho) {
 		obj_log(obj, "ovehicleecho called with invalid target");
 	}
 	else {
-		msg_to_vehicle(veh, FALSE, "%s\r\n", msg);
+		DL_FOREACH(character_list, iter) {
+			if (VEH_SITTING_ON(veh) == iter || GET_ROOM_VEHICLE(IN_ROOM(iter)) == veh) {
+				sub_write(msg, iter, TRUE, TO_CHAR | (use_queue ? TO_QUEUE : 0));
+			}
+		}
 	}
 }
 
@@ -352,10 +400,11 @@ OCMD(do_ovehicleecho) {
 OCMD(do_oechoneither) {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	char_data *vict1, *vict2, *iter;
+	bool use_queue;
 	char *p;
 
 	p = two_arguments(argument, arg1, arg2);
-	skip_spaces(&p);
+	use_queue = script_message_should_queue(&p);
 
 	if (!*arg1 || !*arg2 || !*p) {
 		obj_log(obj, "oechoneither called with missing arguments");
@@ -371,18 +420,16 @@ OCMD(do_oechoneither) {
 		return;
 	}
 	
-	for (iter = ROOM_PEOPLE(IN_ROOM(vict1)); iter; iter = iter->next_in_room) {
+	DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(vict1)), iter, next_in_room) {
 		if (iter->desc && iter != vict1 && iter != vict2) {
-			sub_write(p, iter, TRUE, TO_CHAR);
+			sub_write(p, iter, TRUE, TO_CHAR | (use_queue ? TO_QUEUE : 0));
 		}
 	}
 }
 
 
 OCMD(do_orestore) {
-	extern const bool aff_is_bad[];
-	extern const double apply_values[];
-	
+	bool need_trig = FALSE;
 	struct affected_type *aff, *next_aff;
 	char arg[MAX_INPUT_LENGTH];
 	vehicle_data *veh = NULL;
@@ -462,26 +509,36 @@ OCMD(do_orestore) {
 		if (GET_POS(victim) < POS_SLEEPING) {
 			GET_POS(victim) = POS_STANDING;
 		}
-		GET_HEALTH(victim) = GET_MAX_HEALTH(victim);
-		GET_MOVE(victim) = GET_MAX_MOVE(victim);
-		GET_MANA(victim) = GET_MAX_MANA(victim);
-		GET_BLOOD(victim) = GET_MAX_BLOOD(victim);
+		affect_total(victim);
+		set_health(victim, GET_MAX_HEALTH(victim));
+		set_move(victim, GET_MAX_MOVE(victim));
+		set_mana(victim, GET_MAX_MANA(victim));
+		set_blood(victim, GET_MAX_BLOOD(victim));
 	}
 	if (otarg) {
 		// not sure what to do for objs
 	}
 	if (veh) {
-		free_resource_list(VEH_NEEDS_RESOURCES(veh));
-		VEH_NEEDS_RESOURCES(veh) = NULL;
-		VEH_HEALTH(veh) = VEH_MAX_HEALTH(veh);
-		REMOVE_BIT(VEH_FLAGS(veh), VEH_ON_FIRE);
+		remove_vehicle_flags(veh, VEH_ON_FIRE);
+		if (!VEH_IS_DISMANTLING(veh)) {
+			if (VEH_NEEDS_RESOURCES(veh) && !VEH_IS_COMPLETE(veh)) {
+				need_trig = TRUE;
+			}
+			
+			complete_vehicle(veh);
+			
+			if (need_trig) {
+				complete_vtrigger(veh);
+			}
+		}
 	}
 	if (room) {
 		if (COMPLEX_DATA(room)) {
 			free_resource_list(GET_BUILDING_RESOURCES(room));
 			GET_BUILDING_RESOURCES(room) = NULL;
-			COMPLEX_DATA(room)->damage = 0;
-			COMPLEX_DATA(room)->burning = 0;
+			set_room_damage(room, 0);
+			set_burn_down_time(room, 0, FALSE);
+			request_world_save(GET_ROOM_VNUM(room), WSAVE_ROOM);
 		}
 	}
 }
@@ -489,6 +546,7 @@ OCMD(do_orestore) {
 
 OCMD(do_osend) {
 	char buf[MAX_INPUT_LENGTH], *msg;
+	bool use_queue;
 	char_data *ch;
 
 	msg = any_one_arg(argument, buf);
@@ -498,7 +556,7 @@ OCMD(do_osend) {
 		return;
 	}
 
-	skip_spaces(&msg);
+	use_queue = script_message_should_queue(&msg);
 
 	if (!*msg) {
 		obj_log(obj, "osend called without a message");
@@ -507,9 +565,9 @@ OCMD(do_osend) {
 
 	if ((ch = get_char_by_obj(obj, buf))) {
 		if (subcmd == SCMD_OSEND)
-			sub_write(msg, ch, TRUE, TO_CHAR);
+			sub_write(msg, ch, TRUE, TO_CHAR | TO_SLEEP | (use_queue ? TO_QUEUE : 0));
 		else if (subcmd == SCMD_OECHOAROUND)
-			sub_write(msg, ch, TRUE, TO_ROOM);
+			sub_write(msg, ch, TRUE, TO_ROOM | (use_queue ? TO_QUEUE : 0));
 	}
 	else
 		obj_log(obj, "no target found for osend");
@@ -526,8 +584,11 @@ OCMD(do_otimer) {
 		obj_log(obj, "otimer: missing argument");
 	else if (!isdigit(*arg)) 
 		obj_log(obj, "otimer: bad argument");
-	else
+	else {
 		GET_OBJ_TIMER(obj) = atoi(arg);
+		schedule_obj_timer_update(obj, FALSE);
+		request_obj_save_in_world(obj);
+	}
 }
 
 
@@ -537,7 +598,6 @@ OCMD(do_otimer) {
 OCMD(do_otransform) {
 	char arg[MAX_INPUT_LENGTH];
 	obj_data *o;
-	obj_data tmpobj;
 	char_data *wearer = NULL;
 	int pos = 0;
 
@@ -562,8 +622,10 @@ OCMD(do_otransform) {
 			wearer = obj->worn_by;
 			unequip_char(obj->worn_by, pos);
 		}
+		
+		// NOTE: none of this will work
 
-		/* move new obj info over to old object and delete new obj */
+		/* move new obj info over to old object and delete new obj *
 		memcpy(&tmpobj, o, sizeof(*o));
 		tmpobj.in_room = IN_ROOM(obj);
 		tmpobj.last_empire_id = obj->last_empire_id;
@@ -580,9 +642,8 @@ OCMD(do_otransform) {
 		tmpobj.script_id = obj->script_id;
 		tmpobj.proto_script = obj->proto_script;
 		tmpobj.script = obj->script;
-		tmpobj.next_content = obj->next_content;
-		tmpobj.next = obj->next;
 		memcpy(obj, &tmpobj, sizeof(*obj));
+		*/
 
 		if (wearer) {
 			equip_char(wearer, obj, pos);
@@ -590,6 +651,18 @@ OCMD(do_otransform) {
 
 		extract_obj(o);
 	}
+}
+
+
+OCMD(do_olog) {
+	char source_info[MAX_STRING_LENGTH];
+	safe_snprintf(source_info, sizeof(source_info), "obj %d %s", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
+	script_log_command(argument, source_info);
+}
+
+
+OCMD(do_omod) {
+	script_modify(argument);
 }
 
 
@@ -621,8 +694,6 @@ OCMD(do_omorph) {
 
 
 OCMD(do_oown) {
-	void do_dg_own(empire_data *emp, char_data *vict, obj_data *obj, room_data *room, vehicle_data *veh);
-	
 	char type_arg[MAX_INPUT_LENGTH], targ_arg[MAX_INPUT_LENGTH], emp_arg[MAX_INPUT_LENGTH];
 	room_data *orm = obj_room(obj);
 	vehicle_data *vtarg = NULL;
@@ -777,14 +848,12 @@ OCMD(do_opurge) {
 	if (!*arg) {
 		/* purge all */
 		if ((rm = obj_room(obj))) {
-			for (ch = ROOM_PEOPLE(rm); ch; ch = next_ch ) {
-				next_ch = ch->next_in_room;
+			DL_FOREACH_SAFE2(ROOM_PEOPLE(rm), ch, next_ch, next_in_room) {
 				if (IS_NPC(ch))
 					extract_char(ch);
 			}
-
-			for (o = ROOM_CONTENTS(rm); o; o = next_obj ) {
-				next_obj = o->next_content;
+			
+			DL_FOREACH_SAFE2(ROOM_CONTENTS(rm), o, next_obj, next_content) {
 				if (o != obj)
 					extract_obj(o);
 			}
@@ -799,7 +868,7 @@ OCMD(do_opurge) {
 		room_data *room = obj_room(obj);
 		struct instance_data *inst = quest_instance_global;
 		if (!inst) {
-			inst = room ? find_instance_by_room(room, FALSE) : NULL;
+			inst = room ? find_instance_by_room(room, FALSE, TRUE) : NULL;
 		}
 		
 		if (!inst) {
@@ -823,15 +892,12 @@ OCMD(do_opurge) {
 	// purge vehicle
 	else if ((veh = get_vehicle_by_obj(obj, arg))) {
 		if (*argument) {
-			act(argument, TRUE, ROOM_PEOPLE(IN_ROOM(veh)), NULL, veh, TO_CHAR | TO_ROOM);
+			act(argument, TRUE, ROOM_PEOPLE(IN_ROOM(veh)), NULL, veh, TO_CHAR | TO_ROOM | ACT_VEH_VICT);
 		}
 		extract_vehicle(veh);
 	}
 	// purge obj
 	else if ((o = get_obj_by_obj(obj, arg))) {
-		if (o == obj) {
-			dg_owner_purged = 1;
-		}
 		if (*argument) {
 			room_data *room = obj_room(o);
 			act(argument, TRUE, room ? ROOM_PEOPLE(room) : NULL, o, NULL, TO_CHAR | TO_ROOM);
@@ -846,18 +912,11 @@ OCMD(do_opurge) {
 
 // quest commands
 OCMD(do_oquest) {
-	void do_dg_quest(int go_type, void *go, char *argument);	
 	do_dg_quest(OBJ_TRIGGER, obj, argument);
 }
 
 
 OCMD(do_osiege) {
-	void besiege_room(room_data *to_room, int damage);
-	extern bool besiege_vehicle(vehicle_data *veh, int damage, int siege_type);
-	extern room_data *dir_to_room(room_data *room, int dir, bool ignore_entrance);
-	extern bool find_siege_target_for_vehicle(char_data *ch, vehicle_data *veh, char *arg, room_data **room_targ, int *dir, vehicle_data **veh_targ);
-	extern bool validate_siege_target_room(char_data *ch, vehicle_data *veh, room_data *to_room);
-	
 	char scale_arg[MAX_INPUT_LENGTH], tar_arg[MAX_INPUT_LENGTH];
 	vehicle_data *veh_targ = NULL;
 	room_data *orm, *room_targ = NULL;
@@ -901,14 +960,60 @@ OCMD(do_osiege) {
 	
 	if (room_targ) {
 		if (validate_siege_target_room(NULL, NULL, room_targ)) {
-			besiege_room(room_targ, dam);
+			besiege_room(NULL, room_targ, dam, NULL);
 		}
 	}
 	else if (veh_targ) {
-		besiege_vehicle(veh_targ, dam, SIEGE_PHYSICAL);
+		besiege_vehicle(NULL, veh_targ, dam, SIEGE_PHYSICAL, NULL);
 	}
 	else {
 		obj_log(obj, "osiege: invalid target");
+	}
+}
+
+
+// kills the target
+OCMD(do_oslay) {
+	char name[MAX_INPUT_LENGTH];
+	char_data *vict;
+	
+	argument = one_argument(argument, name);
+	skip_spaces(&argument);
+
+	if (!*name) {
+		obj_log(obj, "oslay: no target");
+		return;
+	}
+	
+	if (*name == UID_CHAR) {
+		if (!(vict = get_char(name))) {
+			obj_log(obj, "oslay: victim (%s) does not exist", name);
+			return;
+		}
+	}
+	else if (!(vict = get_char_by_obj(obj, name))) {
+		obj_log(obj, "oslay: victim (%s) does not exist", name);
+		return;
+	}
+	
+	if (IS_IMMORTAL(vict)) {
+		msg_to_char(vict, "Being the cool immortal you are, you sidestep a trap, obviously placed to kill you.\r\n");
+	}
+	else {
+		// log
+		if (!IS_NPC(vict)) {
+			if (*argument) {
+				// custom death log?
+				log_to_slash_channel_by_name(DEATH_LOG_CHANNEL, vict, "%s", argument);
+			}
+			else {
+				// basic death log
+				log_to_slash_channel_by_name(DEATH_LOG_CHANNEL, vict, "%s has died at%s!", PERS(vict, vict, TRUE), coord_display_room(NULL, IN_ROOM(vict), FALSE));
+			}
+			syslog(SYS_DEATH, 0, TRUE, "DEATH: %s has been killed by a script at %s (obj %d)", GET_NAME(vict), room_log_identifier(IN_ROOM(vict)), GET_OBJ_VNUM(obj));
+		}
+		
+		die(vict, vict);
 	}
 }
 
@@ -919,86 +1024,140 @@ OCMD(do_oteleport) {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	struct instance_data *inst;
 	vehicle_data *veh;
+	obj_data *tobj, *cont;
 	int iter;
-
+	
 	two_arguments(argument, arg1, arg2);
-
+	
 	if (!*arg1 || !*arg2) {
-		obj_log(obj, "oteleport called with too few args");
-		return;
-	}
-
-	target = get_room(orm, arg2);
-
-	if (!target) {
-		obj_log(obj, "oteleport target is an invalid room");
+		obj_log(obj, "oteleport: called with too few args");
 		return;
 	}
 	
+	// try to find a target for later -- this can fail
+	target = (*arg2 == UID_CHAR ? find_room(atoi(arg2 + 1)) : get_room(orm, arg2));
+	
 	if (!str_cmp(arg1, "all")) {
-		if (target == orm)
-			obj_log(obj, "oteleport target is itself");
-
-		for (ch = ROOM_PEOPLE(orm); ch; ch = next_ch) {
-			next_ch = ch->next_in_room;
-			if (!valid_dg_target(ch, DG_ALLOW_GODS)) 
+		if (!target) {
+			obj_log(obj, "oteleport all: target is an invalid room");
+			return;
+		}
+		if (target == orm) {
+			obj_log(obj, "oteleport all: target is itself");
+			// not a fatal error
+		}
+		
+		DL_FOREACH_SAFE2(ROOM_PEOPLE(orm), ch, next_ch, next_in_room) {
+			if (!valid_dg_target(ch, DG_ALLOW_GODS)) {
 				continue;
+			}
 			char_from_room(ch);
 			char_to_room(ch, target);
-			if (!IS_NPC(ch)) {
-				GET_LAST_DIR(ch) = NO_DIR;
-			}
-			enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
+			GET_LAST_DIR(ch) = NO_DIR;
+			enter_triggers(ch, NO_DIR, "script", FALSE);
+			greet_triggers(ch, NO_DIR, "script", FALSE);
 			qt_visit_room(ch, IN_ROOM(ch));
+			RESET_LAST_MESSAGED_TEMPERATURE(ch);
+			msdp_update_room(ch);
 		}
 	}
 	else if (!str_cmp(arg1, "adventure")) {
 		// teleport all players in the adventure
-		if (!orm || !(inst = find_instance_by_room(orm, FALSE))) {
-			obj_log(obj, "oteleport: 'adventure' mode called outside any adventure");
+		if (!orm || !(inst = find_instance_by_room(orm, FALSE, TRUE))) {
+			obj_log(obj, "oteleport adventure: called outside any adventure");
+			return;
+		}
+		else if (!target) {
+			obj_log(obj, "oteleport adventure: target is an invalid room");
 			return;
 		}
 		
-		for (iter = 0; iter < inst->size; ++iter) {
+		for (iter = 0; iter < INST_SIZE(inst); ++iter) {
 			// only if it's not the target room, or we'd be here all day
-			if (inst->room[iter] && inst->room[iter] != target) {
-				for (ch = ROOM_PEOPLE(inst->room[iter]); ch; ch = next_ch) {
-					next_ch = ch->next_in_room;
-					
+			if (INST_ROOM(inst, iter) && INST_ROOM(inst, iter) != target) {
+				DL_FOREACH_SAFE2(ROOM_PEOPLE(INST_ROOM(inst, iter)), ch, next_ch, next_in_room) {
 					if (!valid_dg_target(ch, DG_ALLOW_GODS)) {
 						continue;
 					}
 					
 					// teleport players and their followers
-					if (!IS_NPC(ch) || (ch->master && !IS_NPC(ch->master))) {
+					if (!IS_NPC(ch) || (GET_LEADER(ch) && !IS_NPC(GET_LEADER(ch)))) {
 						char_from_room(ch);
 						char_to_room(ch, target);
-						if (!IS_NPC(ch)) {
-							GET_LAST_DIR(ch) = NO_DIR;
-						}
-						enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
+						GET_LAST_DIR(ch) = NO_DIR;
+						enter_triggers(ch, NO_DIR, "script", FALSE);
+						greet_triggers(ch, NO_DIR, "script", FALSE);
 						qt_visit_room(ch, IN_ROOM(ch));
+						RESET_LAST_MESSAGED_TEMPERATURE(ch);
+						msdp_update_room(ch);
 					}
 				}
 			}
 		}
 	}
-	else {
+	else {	// single-target teleport
 		if ((ch = get_char_by_obj(obj, arg1))) {
+			if (!target) {
+				obj_log(obj, "oteleport character: target is an invalid room");
+				return;
+			}
 			if (valid_dg_target(ch, DG_ALLOW_GODS)) {
 				char_from_room(ch);
 				char_to_room(ch, target);
-				if (!IS_NPC(ch)) {
-					GET_LAST_DIR(ch) = NO_DIR;
-				}
-				enter_wtrigger(IN_ROOM(ch), ch, NO_DIR);
+				GET_LAST_DIR(ch) = NO_DIR;
+				enter_triggers(ch, NO_DIR, "script", FALSE);
+				greet_triggers(ch, NO_DIR, "script", FALSE);
 				qt_visit_room(ch, IN_ROOM(ch));
+				RESET_LAST_MESSAGED_TEMPERATURE(ch);
+				msdp_update_room(ch);
 			}
 		}
 		else if ((veh = get_vehicle_near_obj(obj, arg1))) {
+			if (!target) {
+				obj_log(obj, "oteleport vehicle: target is an invalid room");
+				return;
+			}
 			vehicle_from_room(veh);
 			vehicle_to_room(veh, target);
-			entry_vtrigger(veh);
+			entry_vtrigger(veh, "script");
+		}
+		else if ((tobj = get_obj_by_obj(obj, arg1))) {
+			if (target) {
+				// move obj to room
+				obj_to_room(tobj, target);
+			}
+			else if ((ch = get_char_by_obj(obj, arg2))) {
+				// move obj to character
+				obj_to_char(tobj, ch);
+			}
+			else if ((veh = get_vehicle_near_obj(obj, arg2))) {
+				// move obj to vehicle
+				if (!VEH_FLAGGED(veh, VEH_CONTAINER)) {
+					obj_log(obj, "oteleport object: attempting to put an object in a vehicle that's not a container");
+					return;
+				}
+				else {
+					obj_to_vehicle(tobj, veh);
+				}
+			}
+			else if ((cont = get_obj_by_obj(obj, arg2))) {
+				// move obj into obj
+				if (cont == tobj || get_top_object(tobj) == cont || get_top_object(cont) == tobj) {
+					obj_log(obj, "oteleport object: attempting to put an object inside itself");
+					return;
+				}
+				else if (GET_OBJ_TYPE(cont) != ITEM_CONTAINER && GET_OBJ_TYPE(cont) != ITEM_CORPSE) {
+					obj_log(obj, "oteleport object: attempting to put an object in something that's not a container");
+					return;
+				}
+				else {
+					// move obj into obj
+					obj_to_obj(tobj, cont);
+				}
+			}
+			else {
+				obj_log(obj, "oteleport object: no valid target location found");
+			}
 		}
 		else {
 			obj_log(obj, "oteleport: no target found");
@@ -1008,8 +1167,6 @@ OCMD(do_oteleport) {
 
 
 OCMD(do_oterracrop) {
-	void do_dg_terracrop(room_data *target, crop_data *crop);
-
 	char loc_arg[MAX_INPUT_LENGTH], crop_arg[MAX_INPUT_LENGTH];
 	crop_data *crop;
 	room_data *orm = obj_room(obj), *target;
@@ -1057,8 +1214,6 @@ OCMD(do_oterracrop) {
 
 
 OCMD(do_oterraform) {
-	void do_dg_terraform(room_data *target, sector_data *sect);
-
 	char loc_arg[MAX_INPUT_LENGTH], sect_arg[MAX_INPUT_LENGTH];
 	sector_data *sect;
 	room_data *orm = obj_room(obj), *target;
@@ -1110,23 +1265,30 @@ OCMD(do_oterraform) {
 }
 
 
-OCMD(do_dgoload) {
-	void setup_generic_npc(char_data *mob, empire_data *emp, int name, int sex);
-	
-	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
+OCMD(do_oload) {
+	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], emp_arg[MAX_INPUT_LENGTH];
 	struct instance_data *inst = NULL;
-	int number = 0;
+	int number = 0, pos, veh_ok;
+	book_data *book;
+	empire_data *emp;
 	room_data *room, *in_room;
 	char_data *mob, *tch;
 	obj_data *object, *cnt;
 	vehicle_data *veh;
+	struct empire_storage_data *store;
 	char *target;
-	int pos;
 
 	target = two_arguments(argument, arg1, arg2);
 	skip_spaces(&target);
 
-	if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0)) {
+	if (is_abbrev(arg1, "book")) {
+		// special checking for books
+		if (!*arg2 || (!is_number(arg2) && str_cmp(arg2, "lost")) || ((number = atoi(arg2)) < 0)) {
+			obj_log(obj, "oload: bad syntax (book)");
+			return;
+		}
+	}
+	else if (!*arg1 || !*arg2 || !is_number(arg2) || ((number = atoi(arg2)) < 0)) {
 		obj_log(obj, "oload: bad syntax");
 		return;
 	}
@@ -1135,9 +1297,8 @@ OCMD(do_dgoload) {
 		obj_log(obj, "oload: object in no location trying to load");
 		return;
 	}
-	
-	if (obj_room(obj)) {
-		inst = find_instance_by_room(obj_room(obj), FALSE);
+	else {
+		inst = find_instance_by_room(room, FALSE, TRUE);
 	}
 
 	if (is_abbrev(arg1, "mobile")) {
@@ -1146,10 +1307,10 @@ OCMD(do_dgoload) {
 			return;
 		}
 		mob = read_mobile(number, TRUE);
-		if (COMPLEX_DATA(room) && COMPLEX_DATA(room)->instance) {
-			MOB_INSTANCE_ID(mob) = COMPLEX_DATA(room)->instance->id;
+		if (get_adventure_for_vnum(GET_OBJ_VNUM(obj)) == get_adventure_for_vnum(number) && (inst = find_instance_by_room(room, FALSE, TRUE))) {
+			MOB_INSTANCE_ID(mob) = INST_ID(inst);
 			if (MOB_INSTANCE_ID(mob) != NOTHING) {
-				add_instance_mob(real_instance(MOB_INSTANCE_ID(mob)), GET_MOB_VNUM(mob));
+				add_instance_mob(inst, GET_MOB_VNUM(mob));
 			}
 		}
 		char_to_room(mob, room);
@@ -1158,17 +1319,58 @@ OCMD(do_dgoload) {
 		if (target && *target && isdigit(*target)) {
 			// target is scale level
 			scale_mob_to_level(mob, atoi(target));
-			SET_BIT(MOB_FLAGS(mob), MOB_NO_RESCALE);
+			set_mob_flags(mob, MOB_NO_RESCALE);
 		}
 		
 		load_mtrigger(mob);
 	}
-	else if (is_abbrev(arg1, "object")) {
-		if (!obj_proto(number)) {
-			obj_log(obj, "oload: bad object vnum");
+	else if (is_abbrev(arg1, "object") || is_abbrev(arg1, "book") || is_abbrev(arg1, "einventory")) {
+		// object, book, or empire resource
+		if (is_abbrev(arg1, "object")) {
+			if (!obj_proto(number)) {
+				obj_log(obj, "oload: bad object vnum");
+				return;
+			}
+			object = read_object(number, TRUE);
+		}
+		else if (is_abbrev(arg1, "book")) {
+			if (!str_cmp(arg2, "lost")) {
+				book = random_lost_book();
+			}
+			else {
+				book = book_proto(number);
+			}
+			
+			if (!book) {
+				obj_log(obj, "oload: bad book vnum%s", !str_cmp(arg2, "lost") ? " - no lost books" : "");
+				return;
+			}
+			
+			object = create_book_obj(book);
+		}
+		else if (is_abbrev(arg1, "einventory")) {
+			// %load% einv <vnum> <empire> [target]
+			target = any_one_word(target, emp_arg);
+			if (!*emp_arg || !(emp = get_empire(emp_arg))) {
+				obj_log(obj, "oload: bad empire '%s'", emp_arg);
+				return;
+			}
+			if (!(store = find_stored_resource(emp, GET_ISLAND_ID(room), number)) || store->amount < 1) {
+				obj_log(obj, "oload: empire has no stored #%d on island %d", number, GET_ISLAND_ID(room));
+				return;
+			}
+			
+			// ok: charge it
+			charge_stored_resource(emp, GET_ISLAND_ID(room), number, 1, TRUE);
+			EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
+			
+			// and load it
+			object = read_object(number, TRUE);
+		}
+		else {
+			obj_log(obj, "oload: bad object type ??");
 			return;
 		}
-		object = read_object(number, TRUE);
 		
 		if (inst) {
 			instance_obj_setup(inst, object);
@@ -1180,6 +1382,11 @@ OCMD(do_dgoload) {
 		
 			// must scale now if possible
 			scale_item_to_level(object, GET_OBJ_CURRENT_SCALE_LEVEL(obj));
+			
+			// copy existing bindings
+			if (OBJ_FLAGGED(object, OBJ_BIND_ON_PICKUP) && OBJ_BOUND_TO(obj)) {
+				OBJ_BOUND_TO(object) = copy_obj_bindings(OBJ_BOUND_TO(obj));
+			}
 
 			load_otrigger(object);
 			return;
@@ -1211,6 +1418,11 @@ OCMD(do_dgoload) {
 			scale_item_to_level(object, GET_OBJ_CURRENT_SCALE_LEVEL(obj));
 		}
 		
+		// copy existing bindings
+		if (OBJ_FLAGGED(object, OBJ_BIND_ON_PICKUP) && OBJ_BOUND_TO(obj)) {
+			OBJ_BOUND_TO(object) = copy_obj_bindings(OBJ_BOUND_TO(obj));
+		}
+		
 		if (in_room) {	// load in the room
 			obj_to_room(object, in_room); 
 			load_otrigger(object);
@@ -1219,7 +1431,12 @@ OCMD(do_dgoload) {
 		
 		tch = get_char_near_obj(obj, arg1);
 		if (tch) {
-			if (*arg2 && (pos = find_eq_pos_script(arg2)) >= 0 && !GET_EQ(tch, pos) && can_wear_on_pos(object, pos)) {
+			// mark as "gathered" like a resource
+			if (!IS_NPC(tch) && GET_LOYALTY(tch)) {
+				add_production_total(GET_LOYALTY(tch), GET_OBJ_VNUM(object), 1);
+			}
+			
+			if (*arg2 && (pos = find_eq_pos_script(arg2)) >= 0 && !GET_EQ(tch, pos) && CAN_WEAR(object, wear_data[pos].item_wear)) {
 				equip_char(tch, object, pos);
 				load_otrigger(object);
 				determine_gear_level(tch);
@@ -1230,7 +1447,7 @@ OCMD(do_dgoload) {
 			return;
 		}
 		cnt = get_obj_near_obj(obj, arg1);
-		if (cnt && GET_OBJ_TYPE(cnt) == ITEM_CONTAINER) {
+		if (cnt && (GET_OBJ_TYPE(cnt) == ITEM_CONTAINER || GET_OBJ_TYPE(cnt) == ITEM_CORPSE)) {
 			obj_to_obj(object, cnt);
 			load_otrigger(object);
 			return;
@@ -1246,6 +1463,9 @@ OCMD(do_dgoload) {
 			return;
 		}
 		veh = read_vehicle(number, TRUE);
+		if (get_adventure_for_vnum(GET_OBJ_VNUM(obj)) == get_adventure_for_vnum(number) && (inst = find_instance_by_room(room, FALSE, TRUE))) {
+			VEH_INSTANCE_ID(veh) = INST_ID(inst);
+		}
 		vehicle_to_room(veh, room);
 		
 		if (target && *target && isdigit(*target)) {
@@ -1260,7 +1480,17 @@ OCMD(do_dgoload) {
 			scale_vehicle_to_level(veh, 0);
 		}
 		
-		load_vtrigger(veh);
+		get_vehicle_interior(veh);	// ensure inside is loaded
+		
+		// ownership
+		if (VEH_CLAIMS_WITH_ROOM(veh) && ROOM_OWNER(HOME_ROOM(room))) {
+			perform_claim_vehicle(veh, ROOM_OWNER(HOME_ROOM(room)));
+		}
+		
+		veh_ok = load_vtrigger(veh);
+		if (veh_ok) {
+			veh_ok = complete_vtrigger(veh);
+		}
 	}
 	else {
 		obj_log(obj, "oload: bad type");
@@ -1269,11 +1499,21 @@ OCMD(do_dgoload) {
 
 
 OCMD(do_odamage) {
-	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH];
+	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
 	double modifier = 1.0;
 	char_data *ch;
-	int type;
-
+	int type, show_attack_message = NOTHING;
+	
+	// optional attack message arg
+	skip_spaces(&argument);
+	if (*argument == '#') {
+		argument = one_argument(argument, buf);
+		if ((show_attack_message = atoi(buf+1)) < 1 || !real_attack_message(show_attack_message)) {
+			obj_log(obj, "odamage: invalid attack message #%s", buf);
+			show_attack_message = NOTHING;
+		}
+	}
+	
 	argument = two_arguments(argument, name, modarg);
 	argument = one_argument(argument, typearg);	// optional
 
@@ -1285,6 +1525,13 @@ OCMD(do_odamage) {
 
 	if (*modarg) {
 		modifier = atof(modarg) / 100.0;
+	}
+	
+	// send negatives to %heal% instead
+	if (modifier < 0) {
+		sprintf(buf, "%s health %.2f", name, -atof(modarg));
+		script_heal(obj, OBJ_TRIGGER, buf);
+		return;
 	}
 
 	ch = get_char_by_obj(obj, name);
@@ -1305,20 +1552,30 @@ OCMD(do_odamage) {
 		type = DAM_PHYSICAL;
 	}
 	
-	script_damage(ch, NULL, get_obj_scale_level(obj, ch), type, modifier);
+	script_damage(ch, NULL, get_obj_scale_level(obj, ch), type, modifier, show_attack_message);
 }
 
 
 OCMD(do_oaoe) {
 	char modarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH];
 	double modifier = 1.0;
-	int level, type;
+	int level, type, show_attack_message = NOTHING;
 	room_data *orm = obj_room(obj);
 	char_data *vict, *next_vict;
 	
 	// no room == no work
 	if (!orm) {
 		return;
+	}
+
+	// optional attack message arg
+	skip_spaces(&argument);
+	if (*argument == '#') {
+		argument = one_argument(argument, modarg);
+		if ((show_attack_message = atoi(modarg+1)) < 1 || !real_attack_message(show_attack_message)) {
+			obj_log(obj, "oaoe: invalid attack message #%s", modarg);
+			show_attack_message = NOTHING;
+		}
 	}
 
 	two_arguments(argument, modarg, typearg);
@@ -1338,12 +1595,10 @@ OCMD(do_oaoe) {
 	}
 
 	level = get_obj_scale_level(obj, NULL);
-	for (vict = ROOM_PEOPLE(orm); vict; vict = next_vict) {
-		next_vict = vict->next_in_room;
-		
+	DL_FOREACH_SAFE2(ROOM_PEOPLE(orm), vict, next_vict, next_in_room) {
 		// harder to tell friend from foe: hit PCs or people following PCs
-		if (!IS_NPC(vict) || (vict->master && !IS_NPC(vict->master))) {
-			script_damage(vict, NULL, level, type, modifier);
+		if (!IS_NPC(vict) || (GET_LEADER(vict) && !IS_NPC(GET_LEADER(vict)))) {
+			script_damage(vict, NULL, level, type, modifier, show_attack_message);
 		}
 	}
 }
@@ -1351,11 +1606,20 @@ OCMD(do_oaoe) {
 
 OCMD(do_odot) {
 	char name[MAX_INPUT_LENGTH], modarg[MAX_INPUT_LENGTH], durarg[MAX_INPUT_LENGTH], typearg[MAX_INPUT_LENGTH], stackarg[MAX_INPUT_LENGTH];
+	any_vnum atype = ATYPE_DG_AFFECT;
 	double modifier = 1.0;
 	char_data *ch;
-	int type, max_stacks;
+	int type, max_stacks, duration;
 
 	argument = one_argument(argument, name);
+	// sometimes name is an affect vnum
+	if (*name == '#') {
+		atype = atoi(name+1);
+		argument = one_argument(argument, name);
+		if (!find_generic(atype, GENERIC_AFFECT)) {
+			atype = ATYPE_DG_AFFECT;
+		}
+	}
 	argument = one_argument(argument, modarg);
 	argument = one_argument(argument, durarg);
 	argument = one_argument(argument, typearg);	// optional, default: physical
@@ -1377,6 +1641,10 @@ OCMD(do_odot) {
 		obj_log(obj, "odot: target not found");        
 		return;
 	}
+	if ((duration = atoi(durarg)) < 1) {
+		obj_log(obj, "odot: invalid duration '%s'", durarg);
+		return;
+	}
 	
 	if (*typearg) {
 		type = search_block(typearg, damage_types, FALSE);
@@ -1390,7 +1658,7 @@ OCMD(do_odot) {
 	}
 	
 	max_stacks = (*stackarg ? atoi(stackarg) : 1);
-	script_damage_over_time(ch, get_obj_scale_level(obj, ch), type, modifier, atoi(durarg), max_stacks, NULL);
+	script_damage_over_time(ch, atype, get_obj_scale_level(obj, ch), type, modifier, duration, max_stacks, NULL);
 }
 
 
@@ -1398,7 +1666,7 @@ OCMD(do_odoor) {
 	char target[MAX_INPUT_LENGTH], direction[MAX_INPUT_LENGTH];
 	char field[MAX_INPUT_LENGTH], *value;
 	room_data *rm, *troom, *orm = obj_room(obj);
-	struct room_direction_data *newexit, *temp;
+	struct room_direction_data *newexit;
 	int dir, fd;
 
 	const char *door_field[] = {
@@ -1446,7 +1714,7 @@ OCMD(do_odoor) {
 	/* purge exit */
 	if (fd == 0) {
 		if (newexit) {
-			REMOVE_FROM_LIST(newexit, COMPLEX_DATA(rm)->exits, next);
+			LL_DELETE(COMPLEX_DATA(rm)->exits, newexit);
 			if (newexit->room_ptr) {
 				--GET_EXITS_HERE(newexit->room_ptr);
 			}
@@ -1513,6 +1781,7 @@ OCMD(do_odoor) {
 OCMD(do_osetval) {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	int position, new_value;
+	bool was_lit;
 
 	two_arguments(argument, arg1, arg2);
 	if (!*arg1 || !*arg2 || !is_number(arg1) || !is_number(arg2)) {
@@ -1522,10 +1791,29 @@ OCMD(do_osetval) {
 
 	position = atoi(arg1);
 	new_value = atoi(arg2);
-	if (position >= 0 && position < NUM_OBJ_VAL_POSITIONS)
-		GET_OBJ_VAL(obj, position) = new_value;
-	else
+	if (position >= 0 && position < NUM_OBJ_VAL_POSITIONS) {
+		// this can change the lights
+		was_lit = LIGHT_IS_LIT(obj);
+		
+		set_obj_val(obj, position, new_value);
+		
+		// check lights
+		if (was_lit != LIGHT_IS_LIT(obj)) {
+			if (was_lit) {
+				apply_obj_light(obj, FALSE);
+			}
+			else {
+				apply_obj_light(obj, TRUE);
+			}
+		}
+		if (GET_OBJ_TYPE(obj) == ITEM_LIGHT && position == VAL_LIGHT_IS_LIT) {
+			// in case
+			schedule_obj_timer_update(obj, FALSE);
+		}
+	}
+	else {
 		obj_log(obj, "osetval: position out of bounds!");
+	}
 }
 
 /* submitted by PurpleOnyx - tkhasi@shadowglen.com*/
@@ -1598,10 +1886,9 @@ OCMD(do_oscale) {
 
 	// scale adventure
 	if (!str_cmp(arg, "instance")) {
-		void scale_instance_to_level(struct instance_data *inst, int level);
 		room_data *orm = obj_room(obj);
 		struct instance_data *inst;
-		if ((inst = find_instance_by_room(orm, FALSE))) {
+		if ((inst = find_instance_by_room(orm, FALSE, TRUE))) {
 			scale_instance_to_level(inst, level);
 		}
 	}
@@ -1613,7 +1900,7 @@ OCMD(do_oscale) {
 		}
 
 		scale_mob_to_level(victim, level);
-		SET_BIT(MOB_FLAGS(victim), MOB_NO_RESCALE);
+		set_mob_flags(victim, MOB_NO_RESCALE);
 	}
 	// scale vehicle
 	else if ((veh = get_vehicle_by_obj(obj, arg))) {
@@ -1625,12 +1912,8 @@ OCMD(do_oscale) {
 			scale_item_to_level(otarg, level);
 		}
 		else if ((proto = obj_proto(GET_OBJ_VNUM(otarg))) && OBJ_FLAGGED(proto, OBJ_SCALABLE)) {
-			fresh = read_object(GET_OBJ_VNUM(otarg), TRUE);
-			scale_item_to_level(fresh, level);
+			fresh = fresh_copy_obj(otarg, level, TRUE, TRUE);
 			swap_obj_for_obj(otarg, fresh);
-			if (otarg == obj) {
-				dg_owner_purged = 1;
-			}
 			extract_obj(otarg);
 		}
 		else {
@@ -1644,10 +1927,14 @@ OCMD(do_oscale) {
 }
 
 
+ //////////////////////////////////////////////////////////////////////////////
+//// OBJECT COMMAND INTERPRETER //////////////////////////////////////////////
+
 const struct obj_command_info obj_cmd_info[] = {
 	{ "RESERVED", 0, 0 },/* this must be first -- for specprocs */
 
 	{ "oadventurecomplete", do_oadventurecomplete, NO_SCMD },
+	{ "oasound", do_oasound, NO_SCMD },
 	{ "oat", do_oat, NO_SCMD },
 	{ "obuild", do_obuild, NO_SCMD },
 	{ "odoor", do_odoor, NO_SCMD },
@@ -1658,7 +1945,10 @@ const struct obj_command_info obj_cmd_info[] = {
 	{ "oechoaround", do_osend, SCMD_OECHOAROUND },
 	{ "oechoneither", do_oechoneither, NO_SCMD },
 	{ "oforce", do_oforce, NO_SCMD },
-	{ "oload", do_dgoload, NO_SCMD },
+	{ "oheal", do_oheal, NO_SCMD },
+	{ "oload", do_oload, NO_SCMD },
+	{ "olog", do_olog, NO_SCMD },
+	{ "omod", do_omod, NO_SCMD },
 	{ "omorph", do_omorph, NO_SCMD },
 	{ "oown", do_oown, NO_SCMD },
 	{ "opurge", do_opurge, NO_SCMD },
@@ -1668,6 +1958,7 @@ const struct obj_command_info obj_cmd_info[] = {
 	{ "osend", do_osend, SCMD_OSEND },
 	{ "osetval", do_osetval, NO_SCMD },
 	{ "osiege", do_osiege, NO_SCMD },
+	{ "oslay", do_oslay, NO_SCMD },
 	{ "oteleport", do_oteleport, NO_SCMD },
 	{ "oterracrop", do_oterracrop, NO_SCMD },
 	{ "oterraform", do_oterraform, NO_SCMD },
@@ -1675,15 +1966,18 @@ const struct obj_command_info obj_cmd_info[] = {
 	{ "otransform", do_otransform, NO_SCMD },
 	{ "obuildingecho", do_obuildingecho, NO_SCMD }, /* fix by Rumble */
 	{ "oregionecho", do_oregionecho, NO_SCMD },
+	{ "osubecho", do_osubecho, NO_SCMD },
 	{ "ovehicleecho", do_ovehicleecho, NO_SCMD },
 
 	{ "\n", 0, 0 }        /* this must be last */
 };
 
 
-
-/*
+/**
 *  This is the command interpreter used by objects, called by script_driver.
+*
+* @param obj_data *obj The object executing the command.
+* @param argument The remaining script line.
 */
 void obj_command_interpreter(obj_data *obj, char *argument) {
 	int cmd, length;
@@ -1692,18 +1986,23 @@ void obj_command_interpreter(obj_data *obj, char *argument) {
 	skip_spaces(&argument);
 
 	/* just drop to next line for hitting CR */
-	if (!*argument)
+	if (!*argument) {
 		return;
+	}
 
 	half_chop(argument, arg, line);
 
 	/* find the command */
-	for (length = strlen(arg), cmd = 0; *obj_cmd_info[cmd].command != '\n'; cmd++)
-		if (!strn_cmp(obj_cmd_info[cmd].command, arg, length))
+	for (length = strlen(arg), cmd = 0; *obj_cmd_info[cmd].command != '\n'; cmd++) {
+		if (!strn_cmp(obj_cmd_info[cmd].command, arg, length)) {
 			break;
+		}
+	}
 
-	if (*obj_cmd_info[cmd].command == '\n')
+	if (*obj_cmd_info[cmd].command == '\n') {
 		obj_log(obj, "Unknown object cmd: '%s'", argument);
-	else
+	}
+	else {
 		((*obj_cmd_info[cmd].command_pointer) (obj, line, cmd, obj_cmd_info[cmd].subcmd));
+	}
 }

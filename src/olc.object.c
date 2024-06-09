@@ -2,7 +2,7 @@
 *   File: olc.object.c                                    EmpireMUD 2.0b5 *
 *  Usage: OLC for items                                                   *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -21,40 +21,20 @@
 #include "skills.h"
 #include "handler.h"
 #include "dg_scripts.h"
+#include "constants.h"
 
 /**
 * Contents:
 *   Helpers
+*   Object Setters
 *   Displays
 *   Edit Modules
 */
 
-// externs
-extern const char *affected_bits[];
-extern const char *apply_type_names[];
-extern const char *apply_types[];
-extern const char *armor_types[NUM_ARMOR_TYPES+1];
-extern const char *component_flags[];
-extern const char *component_types[];
-extern const char *container_bits[];
-extern const char *drinks[];
-extern const char *extra_bits[];
-extern const char *interact_types[];
-extern const char *item_types[];
-extern const struct material_data materials[NUM_MATERIALS];
-extern const char *obj_custom_types[];
-extern const char *offon_types[];
-extern const struct poison_data_type poison_data[];
-extern const struct potion_data_type potion_data[];
-extern const char *storage_bits[];
-extern const char *wear_bits[];
-
-// external funcs
-extern double get_base_dps(obj_data *weapon);
-extern double get_weapon_speed(obj_data *weapon);
-
 // locals
-char **get_weapon_types_string();
+const char *default_obj_keywords = "object new";
+const char *default_obj_short = "a new object";
+const char *default_obj_long = "A new object is sitting here.";
 
 // data
 char **olc_material_list = NULL;	// used for olc
@@ -71,13 +51,13 @@ char **olc_material_list = NULL;	// used for olc
 * @return bool TRUE if any problems were reported; FALSE if all good.
 */
 bool audit_object(obj_data *obj, char_data *ch) {
-	extern adv_data *get_adventure_for_vnum(rmt_vnum vnum);
-	
 	bool is_adventure = (get_adventure_for_vnum(GET_OBJ_VNUM(obj)) != NULL);
-	char temp[MAX_STRING_LENGTH], *ptr;
-	bool problem = FALSE;
+	char temp[MAX_STRING_LENGTH], temp2[MAX_STRING_LENGTH], temp3[MAX_STRING_LENGTH], unplural[MAX_STRING_LENGTH], *ptr;
+	obj_data *obj_iter, *next_obj;
+	bool problem = FALSE, found;
+	attack_message_data *amd = NULL;
 	
-	if (!GET_OBJ_KEYWORDS(obj) || !*GET_OBJ_KEYWORDS(obj) || !str_cmp(GET_OBJ_KEYWORDS(obj), "object new")) {
+	if (!GET_OBJ_KEYWORDS(obj) || !*GET_OBJ_KEYWORDS(obj) || !str_cmp(GET_OBJ_KEYWORDS(obj), default_obj_keywords)) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Keywords not set");
 		problem = TRUE;
 	}
@@ -85,14 +65,18 @@ bool audit_object(obj_data *obj, char_data *ch) {
 		ptr = GET_OBJ_KEYWORDS(obj);
 		do {
 			ptr = any_one_arg(ptr, temp);
-			if (*temp && !str_str(GET_OBJ_SHORT_DESC(obj), temp) && !str_str(GET_OBJ_LONG_DESC(obj), temp)) {
+			strcpy(unplural, temp);
+			if (unplural[strlen(unplural)-1] == 's') {
+				unplural[strlen(unplural)-1] = '\0';	// trim last letter -- trying to see if this keyword is a plural form
+			}
+			if (*temp && !str_str(GET_OBJ_SHORT_DESC(obj), temp) && !str_str(GET_OBJ_SHORT_DESC(obj), unplural) && !str_str(GET_OBJ_LONG_DESC(obj), temp) && !str_str(GET_OBJ_LONG_DESC(obj), unplural)) {
 				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Keyword '%s' not found in strings", temp);
 				problem = TRUE;
 			}
 		} while (*ptr);
 	}
 	
-	if (!str_cmp(GET_OBJ_LONG_DESC(obj), "A new object is sitting here.")) {
+	if (!str_cmp(GET_OBJ_LONG_DESC(obj), default_obj_long)) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Long desc not set");
 		problem = TRUE;
 	}
@@ -104,7 +88,7 @@ bool audit_object(obj_data *obj, char_data *ch) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Long desc not capitalized");
 		problem = TRUE;
 	}
-	if (!str_cmp(GET_OBJ_SHORT_DESC(obj), "a new object")) {
+	if (!str_cmp(GET_OBJ_SHORT_DESC(obj), default_obj_short)) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Short desc not set");
 		problem = TRUE;
 	}
@@ -125,7 +109,7 @@ bool audit_object(obj_data *obj, char_data *ch) {
 		while (*temp && ispunct(temp[strlen(temp)-1])) {
 			temp[strlen(temp)-1] = '\0';
 		}
-		if (*temp && !fill_word(temp) && !reserved_word(temp) && !isname(temp, GET_OBJ_KEYWORDS(obj))) {
+		if (*temp && !fill_word(temp) && !reserved_word(temp) && !isname(temp, GET_OBJ_KEYWORDS(obj)) && search_block(temp, ignore_missing_keywords, TRUE) == NOTHING) {
 			olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Suggested missing keyword '%s'", temp);
 			problem = TRUE;
 		}
@@ -143,8 +127,20 @@ bool audit_object(obj_data *obj, char_data *ch) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "CREATABLE");
 		problem = TRUE;
 	}
+	if (OBJ_FLAGGED(obj, OBJ_LONG_TIMER_IN_STORAGE) && GET_OBJ_TIMER(obj) <= 0) {
+		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "LONG-TIMER-IN-STORAGE set with no timer");
+		problem = TRUE;
+	}
+	if (OBJ_FLAGGED(obj, OBJ_NO_DECAY_IN_STORAGE) && GET_OBJ_TIMER(obj) <= 0) {
+		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "NO-DECAY-IN-STORAGE set with no timer");
+		problem = TRUE;
+	}
+	if (OBJ_FLAGGED(obj, OBJ_LONG_TIMER_IN_STORAGE) && OBJ_FLAGGED(obj, OBJ_NO_DECAY_IN_STORAGE)) {
+		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "LONG-TIMER-IN-STORAGE set with NO-DECAY-IN-STORAGE");
+		problem = TRUE;
+	}
 	if (OBJ_FLAGGED(obj, OBJ_LIGHT) && GET_OBJ_TIMER(obj) <= 0) {
-		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Infinite light");
+		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Infinite light (LIGHT flag)");
 		problem = TRUE;
 	}
 	if (OBJ_FLAGGED(obj, OBJ_HARD_DROP | OBJ_GROUP_DROP)) {
@@ -163,19 +159,67 @@ bool audit_object(obj_data *obj, char_data *ch) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Two bind flags");
 		problem = TRUE;
 	}
+	if (OBJ_FLAGGED(obj, OBJ_BIND_ON_PICKUP) && GET_OBJ_STORAGE(obj)) {
+		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "BoP item has storage locations");
+		problem = TRUE;
+	}
 	if (!is_adventure && OBJ_FLAGGED(obj, OBJ_SCALABLE) && GET_OBJ_MAX_SCALE_LEVEL(obj) == 0) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "No maximum scale level on non-adventure obj");
 		problem = TRUE;
 	}
-	if (OBJ_FLAGGED(obj, OBJ_SCALABLE) && obj->storage) {
+	if (OBJ_FLAGGED(obj, OBJ_SCALABLE) && GET_OBJ_STORAGE(obj) && GET_OBJ_MAX_SCALE_LEVEL(obj) != GET_OBJ_MIN_SCALE_LEVEL(obj)) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Scalable object has storage locations");
 		problem = TRUE;
 	}
-	if (OBJ_FLAGGED(obj, OBJ_SCALABLE) && !OBJ_FLAGGED(obj, OBJ_BIND_ON_EQUIP | OBJ_BIND_ON_PICKUP)) {
+	if (OBJ_FLAGGED(obj, OBJ_SCALABLE) && !OBJ_FLAGGED(obj, OBJ_BIND_ON_EQUIP | OBJ_BIND_ON_PICKUP) && GET_OBJ_MAX_SCALE_LEVEL(obj) != GET_OBJ_MIN_SCALE_LEVEL(obj)) {
 		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Scalable object has no bind flags");
 		problem = TRUE;
 	}
+	if (CAN_WEAR(obj, ITEM_WEAR_WIELD) && !IS_WEAPON(obj)) {
+		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Wieldable item is not a weapon");
+		problem = TRUE;
+	}
+	if (CAN_WEAR(obj, ITEM_WEAR_RANGED) && !IS_MISSILE_WEAPON(obj)) {
+		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Ranged item is not a missile weapon");
+		problem = TRUE;
+	}
+	if (GET_OBJ_COMPONENT(obj) != NOTHING && !find_generic(GET_OBJ_COMPONENT(obj), GENERIC_COMPONENT)) {
+		olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Invalid component vnum %d does not match a generic component", GET_OBJ_COMPONENT(obj));
+		problem = TRUE;
+	}
 	
+	// look for full keyword collisions
+	HASH_ITER(hh, object_table, obj_iter, next_obj) {
+		if (GET_OBJ_VNUM(obj_iter) == GET_OBJ_VNUM(obj)) {
+			continue;	// same obj
+		}
+		
+		// duplicate the string
+		strcpy(temp, NULLSAFE(GET_OBJ_KEYWORDS(obj)));
+		found = FALSE;
+		
+		// check all keywords
+		while (*temp && !found) {
+			// strip 1st remaining keyword
+			half_chop(temp, temp2, temp3);
+			strcpy(temp, temp3);
+			
+			if (!isname(temp2, GET_OBJ_KEYWORDS(obj_iter))) {
+				found = TRUE;	// keyword doesn't match
+			}
+		}
+		
+		// problem?
+		if (!found) {
+			olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Full keyword overlap with obj [%d] %s", GET_OBJ_VNUM(obj_iter), GET_OBJ_SHORT_DESC(obj_iter));
+			problem = TRUE;
+		}
+	}
+	
+	// interactions
+	problem |= audit_interactions(GET_OBJ_VNUM(obj), GET_OBJ_INTERACTIONS(obj), TYPE_OBJ, ch);
+	
+	// ITEM_X: auditors
 	switch (GET_OBJ_TYPE(obj)) {
 		case ITEM_COINS: {
 			if (GET_COINS_AMOUNT(obj) == 0) {
@@ -184,9 +228,24 @@ bool audit_object(obj_data *obj, char_data *ch) {
 			}
 			break;
 		}
+		case ITEM_CURRENCY: {
+			if (GET_CURRENCY_AMOUNT(obj) == 0) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Currency amount not set");
+				problem = TRUE;
+			}
+			if (!find_generic(GET_CURRENCY_VNUM(obj), GENERIC_CURRENCY)) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Currency vnum not set");
+				problem = TRUE;
+			}
+			break;
+		}
 		case ITEM_WEAPON: {
-			if (GET_WEAPON_TYPE(obj) == TYPE_RESERVED) {
+			if (GET_WEAPON_TYPE(obj) == ATTACK_RESERVED || !(amd = real_attack_message(GET_WEAPON_TYPE(obj)))) {
 				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Weapon type not set");
+				problem = TRUE;
+			}
+			if (amd && !ATTACK_FLAGGED(amd, AMDF_WEAPON)) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Weapon type %d is not valid (it is missing WEAPON)", GET_WEAPON_TYPE(obj));
 				problem = TRUE;
 			}
 			if (GET_WEAPON_DAMAGE_BONUS(obj) == 0) {
@@ -217,15 +276,23 @@ bool audit_object(obj_data *obj, char_data *ch) {
 			break;
 		}
 		case ITEM_MISSILE_WEAPON: {
+			if (GET_MISSILE_WEAPON_TYPE(obj) == ATTACK_RESERVED || !(amd = real_attack_message(GET_MISSILE_WEAPON_TYPE(obj)))) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Missile weapon type not set");
+				problem = TRUE;
+			}
+			if (amd && !ATTACK_FLAGGED(amd, AMDF_WEAPON)) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Missile weapon type %d is not valid (it is missing WEAPON)", GET_MISSILE_WEAPON_TYPE(obj));
+				problem = TRUE;
+			}
 			if (GET_MISSILE_WEAPON_DAMAGE(obj) == 0) {
 				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Damage amount not set");
 				problem = TRUE;
 			}
 			break;
 		}
-		case ITEM_ARROW: {
-			if (GET_ARROW_QUANTITY(obj) == 0) {
-				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Arrow quantity not set");
+		case ITEM_AMMO: {
+			if (GET_AMMO_QUANTITY(obj) == 0) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Ammo quantity not set");
 				problem = TRUE;
 			}
 			break;
@@ -237,9 +304,28 @@ bool audit_object(obj_data *obj, char_data *ch) {
 			}
 			break;
 		}
+		case ITEM_PAINT: {
+			if (!GET_PAINT_COLOR(obj)) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Paint color not set");
+				problem = TRUE;
+			}
+			break;
+		}
 		case ITEM_POISON: {
 			if (GET_POISON_CHARGES(obj) == 0) {
 				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Poison charges not set");
+				problem = TRUE;
+			}
+			break;
+		}
+		case ITEM_RECIPE: {
+			craft_data *craft = craft_proto(GET_RECIPE_VNUM(obj));
+			if (GET_RECIPE_VNUM(obj) <= 0 || !craft) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Invalid recipe vnum");
+				problem = TRUE;
+			}
+			if (craft && !CRAFT_FLAGGED(craft, CRAFT_LEARNED)) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Recipe is not set LEARNED");
 				problem = TRUE;
 			}
 			break;
@@ -254,6 +340,31 @@ bool audit_object(obj_data *obj, char_data *ch) {
 		case ITEM_WEALTH: {
 			if (GET_WEALTH_VALUE(obj) == 0) {
 				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Wealth value not set");
+				problem = TRUE;
+			}
+			break;
+		}
+		case ITEM_LIGHTER: {
+			if (GET_LIGHTER_USES(obj) == 0) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Number of uses not set");
+				problem = TRUE;
+			}
+			break;
+		}
+		case ITEM_MINIPET: {
+			if (GET_MINIPET_VNUM(obj) == NOTHING || !mob_proto(GET_MINIPET_VNUM(obj))) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Minipet not set");
+				problem = TRUE;
+			}
+			break;
+		}
+		case ITEM_LIGHT: {
+			if (GET_LIGHT_HOURS_REMAINING(obj) == UNLIMITED && GET_OBJ_TIMER(obj) <= 0) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Infinite light (LIGHT item type)");
+				problem = TRUE;
+			}
+			if (OBJ_FLAGGED(obj, OBJ_LIGHT)) {
+				olc_audit_msg(ch, GET_OBJ_VNUM(obj), "Item has both LIGHT type and LIGHT flag");
 				problem = TRUE;
 			}
 			break;
@@ -299,8 +410,6 @@ void check_oedit_material_list(void) {
 * @return obj_data* The new object's prototype.
 */
 obj_data *create_obj_table_entry(obj_vnum vnum) {
-	void add_object_to_table(obj_data *obj);
-	
 	obj_data *obj;
 	
 	// sanity
@@ -312,6 +421,7 @@ obj_data *create_obj_table_entry(obj_vnum vnum) {
 	CREATE(obj, obj_data, 1);
 	clear_object(obj);
 	obj->vnum = vnum;
+	obj->proto_data = create_obj_proto_data();
 	add_object_to_table(obj);
 	
 	// save obj index and obj file now so there's no trouble later
@@ -319,29 +429,6 @@ obj_data *create_obj_table_entry(obj_vnum vnum) {
 	save_library_file_for_vnum(DB_BOOT_OBJ, vnum);
 
 	return obj;
-}
-
-
-/**
-* @return char** A "\n"-terminated list of weapon types.
-*/
-char **get_weapon_types_string(void) {
-	static char **wtypes = NULL;
-	int iter;
-	
-	// this does not have a const char** list .. build one the first time
-	if (!wtypes) {
-		CREATE(wtypes, char*, NUM_ATTACK_TYPES+1);
-		
-		for (iter = 0; iter < NUM_ATTACK_TYPES; ++iter) {
-			wtypes[iter] = str_dup(attack_hit_info[iter].name);
-		}
-		
-		// must terminate
-		wtypes[NUM_ATTACK_TYPES] = str_dup("\n");
-	}
-	
-	return wtypes;
 }
 
 
@@ -365,10 +452,10 @@ char *list_one_object(obj_data *obj, bool detail) {
 		else {
 			*flags = '\0';
 		}
-		snprintf(output, sizeof(output), "[%5d] %s (%s) %s", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj), level_range_string(GET_OBJ_MIN_SCALE_LEVEL(obj), GET_OBJ_MAX_SCALE_LEVEL(obj), 0), flags);
+		safe_snprintf(output, sizeof(output), "[%5d] %s (%s) %s", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj), level_range_string(GET_OBJ_MIN_SCALE_LEVEL(obj), GET_OBJ_MAX_SCALE_LEVEL(obj), 0), flags);
 	}
 	else {
-		snprintf(output, sizeof(output), "[%5d] %s", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
+		safe_snprintf(output, sizeof(output), "[%5d] %s", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
 	}
 	
 	return output;
@@ -382,45 +469,42 @@ char *list_one_object(obj_data *obj, bool detail) {
 * @param obj_vnum vnum The vnum to delete.
 */
 void olc_delete_object(char_data *ch, obj_vnum vnum) {
-	void complete_building(room_data *room);
-	extern bool delete_from_interaction_list(struct interaction_item **list, int vnum_type, any_vnum vnum);
-	extern bool delete_from_spawn_template_list(struct adventure_spawn **list, int spawn_type, mob_vnum vnum);
-	extern bool delete_link_rule_by_portal(struct adventure_link_rule **list, obj_vnum portal_vnum);
-	extern bool delete_quest_giver_from_list(struct quest_giver **list, int type, any_vnum vnum);
-	extern bool delete_quest_reward_from_list(struct quest_reward **list, int type, any_vnum vnum);
-	extern bool delete_requirement_from_list(struct req_data **list, int type, any_vnum vnum);
-	void expire_trading_post_item(struct trading_post_data *tpd);
-	extern bool remove_obj_from_resource_list(struct resource_data **list, obj_vnum vnum);
-	void remove_object_from_table(obj_data *obj);
-	void save_trading_post();
-
 	struct empire_trade_data *trade, *next_trade;
 	struct trading_post_data *tpd, *next_tpd;
 	struct archetype_gear *gear, *next_gear;
 	obj_data *proto, *obj_iter, *next_obj;
 	struct global_data *glb, *next_glb;
+	struct empire_production_total *egt;
 	archetype_data *arch, *next_arch;
 	room_template *rmt, *next_rmt;
 	sector_data *sect, *next_sect;
+	ability_data *abil, *next_abil;
 	craft_data *craft, *next_craft;
+	event_data *event, *next_event;
 	morph_data *morph, *next_morph;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	augment_data *aug, *next_aug;
+	generic_data *gen, *next_gen;
 	vehicle_data *veh, *next_veh;
 	crop_data *crop, *next_crop;
 	room_data *room, *next_room;
+	shop_data *shop, *next_shop;
 	empire_data *emp, *next_emp;
 	social_data *soc, *next_soc;
-	char_data *mob, *next_mob;
+	char_data *mob, *next_mob, *chiter;
 	adv_data *adv, *next_adv;
 	bld_data *bld, *next_bld;
 	descriptor_data *desc;
-	bool save, found, any_trades = FALSE;
+	char name[256];
+	bool found, any_trades = FALSE;
 	
 	if (!(proto = obj_proto(vnum))) {
 		msg_to_char(ch, "There is no such object %d.\r\n", vnum);
 		return;
 	}
+	
+	safe_snprintf(name, sizeof(name), "%s", NULLSAFE(GET_OBJ_SHORT_DESC(proto)));
 	
 	if (HASH_COUNT(object_table) <= 1) {
 		msg_to_char(ch, "You can't delete the last object.\r\n");
@@ -428,9 +512,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	}
 	
 	// remove live objects: DO THIS FIRST
-	for (obj_iter = object_list; obj_iter; obj_iter = next_obj) {
-		next_obj = obj_iter->next;
-		
+	DL_FOREACH_SAFE(object_list, obj_iter, next_obj) {
 		if (GET_OBJ_VNUM(obj_iter) == vnum) {
 			// this is the removed item
 			
@@ -444,6 +526,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 				act("$p has been deleted.", FALSE, ROOM_PEOPLE(IN_ROOM(obj_iter)), obj_iter, NULL, TO_CHAR);
 			}
 			
+			empty_obj_before_extract(obj_iter);
 			extract_obj(obj_iter);
 		}
 	}
@@ -455,12 +538,16 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 		}
 		
 		if (GET_BUILT_WITH(room)) {
-			remove_obj_from_resource_list(&GET_BUILT_WITH(room), vnum);
+			if (remove_thing_from_resource_list(&GET_BUILT_WITH(room), RES_OBJECT, vnum)) {
+				request_world_save(GET_ROOM_VNUM(room), WSAVE_ROOM);
+			}
 		}
-		if (GET_BUILDING_RESOURCES(room)) {
-			remove_obj_from_resource_list(&GET_BUILDING_RESOURCES(room), vnum);
+		if (BUILDING_RESOURCES(room)) {
+			if (remove_thing_from_resource_list(&GET_BUILDING_RESOURCES(room), RES_OBJECT, vnum)) {
+				request_world_save(GET_ROOM_VNUM(room), WSAVE_ROOM);
+			}
 			
-			if (!GET_BUILDING_RESOURCES(room)) {
+			if (!BUILDING_RESOURCES(room)) {
 				// removing this resource finished the building
 				if (IS_DISMANTLING(room)) {
 					disassociate_building(room);
@@ -472,52 +559,62 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 		}
 	}
 	
+	// remove from home storage
+	DL_FOREACH2(player_character_list, chiter, next_plr) {
+		if (delete_unique_storage_by_vnum(&GET_HOME_STORAGE(chiter), vnum)) {
+			queue_delayed_update(chiter, CDU_SAVE);
+		}
+	}
+	
 	// remove from live resource lists: vehicle maintenance
-	LL_FOREACH(vehicle_list, veh) {
+	DL_FOREACH_SAFE(vehicle_list, veh, next_veh) {
+		if (VEH_BUILT_WITH(veh)) {
+			remove_thing_from_resource_list(&VEH_BUILT_WITH(veh), RES_OBJECT, vnum);
+			request_vehicle_save_in_world(veh);
+		}
 		if (VEH_NEEDS_RESOURCES(veh)) {
-			remove_obj_from_resource_list(&VEH_NEEDS_RESOURCES(veh), vnum);
+			remove_thing_from_resource_list(&VEH_NEEDS_RESOURCES(veh), RES_OBJECT, vnum);
+			request_vehicle_save_in_world(veh);
 			
 			if (!VEH_NEEDS_RESOURCES(veh)) {
-				// removing the resource finished the vehicle
-				if (VEH_FLAGGED(veh, VEH_INCOMPLETE)) {
-					REMOVE_BIT(VEH_FLAGS(veh), VEH_INCOMPLETE);
-					load_vtrigger(veh);
-				}
+				complete_vehicle(veh);
+				
+				// run triggers: this could purge it
+				complete_vtrigger(veh);
 			}
 		}
 	}
 	
 	// remove from empire inventories and trade -- DO THIS BEFORE REMOVING FROM OBJ TABLE
 	HASH_ITER(hh, empire_table, emp, next_emp) {
-		save = FALSE;
-		
 		if (delete_stored_resource(emp, vnum)) {
-			save = TRUE;
+			EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
 		}
 		
-		if (delete_unique_storage_by_vnum(emp, vnum)) {
-			save = TRUE;
+		if (delete_unique_storage_by_vnum(&EMPIRE_UNIQUE_STORAGE(emp), vnum)) {
+			EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
 		}
 		
 		for (trade = EMPIRE_TRADE(emp); trade; trade = next_trade) {
 			next_trade = trade->next;
 			if (trade->vnum == vnum) {
-				struct empire_trade_data *temp;
-				REMOVE_FROM_LIST(trade, EMPIRE_TRADE(emp), next);
+				LL_DELETE(EMPIRE_TRADE(emp), trade);
 				free(trade);	// certified
-				save = TRUE;
+				EMPIRE_NEEDS_SAVE(emp) = TRUE;
 			}
 		}
 		
-		if (save) {
-			save_empire(emp);
+		// delete gather totals
+		HASH_FIND_INT(EMPIRE_PRODUCTION_TOTALS(emp), &vnum, egt);
+		if (egt) {
+			HASH_DEL(EMPIRE_PRODUCTION_TOTALS(emp), egt);
+			free(egt);
+			EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
 		}
 	}
 	
 	// remove from trading post -- again, BEFORE removing from obj table
-	for (tpd = trading_list; tpd; tpd = next_tpd) {
-		next_tpd = tpd->next;
-		
+	DL_FOREACH_SAFE(trading_list, tpd, next_tpd) {
 		if (tpd->obj && GET_OBJ_VNUM(tpd->obj) == vnum) {
 			expire_trading_post_item(tpd);
 			add_to_object_list(tpd->obj);
@@ -546,20 +643,32 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 		}
 	}
 	
+	// update abilities
+	HASH_ITER(hh, ability_table, abil, next_abil) {
+		found = FALSE;
+		found |= delete_from_ability_data_list(abil, ADL_READY_WEAPON, vnum);
+		found |= delete_from_interaction_list(&ABIL_INTERACTIONS(abil), TYPE_OBJ, vnum);
+		
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Ability %d %s lost deleted related object", ABIL_VNUM(abil), ABIL_NAME(abil));
+			save_library_file_for_vnum(DB_BOOT_ABIL, ABIL_VNUM(abil));
+		}
+	}
+	
 	// update archetypes
 	HASH_ITER(hh, archetype_table, arch, next_arch) {
 		found = FALSE;
 		for (gear = GET_ARCH_GEAR(arch); gear; gear = next_gear) {
 			next_gear = gear->next;
 			if (gear->vnum == vnum) {
-				struct archetype_gear *temp;
-				REMOVE_FROM_LIST(gear, GET_ARCH_GEAR(arch), next);
+				LL_DELETE(GET_ARCH_GEAR(arch), gear);
 				free(gear);
 				found = TRUE;
 			}
 		}
 		
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Archetype %d %s lost deleted gear object", GET_ARCH_VNUM(arch), GET_ARCH_NAME(arch));
 			save_library_file_for_vnum(DB_BOOT_ARCH, GET_ARCH_VNUM(arch));
 		}
 	}
@@ -573,10 +682,11 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			found = TRUE;
 		}
 		
-		found |= remove_obj_from_resource_list(&GET_AUG_RESOURCES(aug), vnum);
+		found |= remove_thing_from_resource_list(&GET_AUG_RESOURCES(aug), RES_OBJECT, vnum);
 		
 		if (found) {
 			SET_BIT(GET_AUG_FLAGS(aug), AUG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Augment %d %s set IN-DEV due to deleted object", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
 			save_library_file_for_vnum(DB_BOOT_AUG, GET_AUG_VNUM(aug));
 		}
 	}
@@ -584,8 +694,9 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	// update buildings
 	HASH_ITER(hh, building_table, bld, next_bld) {
 		found = delete_from_interaction_list(&GET_BLD_INTERACTIONS(bld), TYPE_OBJ, vnum);
-		found |= remove_obj_from_resource_list(&GET_BLD_YEARLY_MAINTENANCE(bld), vnum);
+		found |= remove_thing_from_resource_list(&GET_BLD_REGULAR_MAINTENANCE(bld), RES_OBJECT, vnum);
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Building %d %s lost deleted related object", GET_BLD_VNUM(bld), GET_BLD_NAME(bld));
 			save_library_file_for_vnum(DB_BOOT_BLD, GET_BLD_VNUM(bld));
 		}
 	}
@@ -593,7 +704,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	// update crafts
 	HASH_ITER(hh, craft_table, craft, next_craft) {
 		found = FALSE;
-		if (GET_CRAFT_TYPE(craft) != CRAFT_TYPE_BUILD && !IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP | CRAFT_VEHICLE) && GET_CRAFT_OBJECT(craft) == vnum) {
+		if (!CRAFT_IS_BUILDING(craft) && !CRAFT_IS_VEHICLE(craft) && !IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP) && GET_CRAFT_OBJECT(craft) == vnum) {
 			GET_CRAFT_OBJECT(craft) = NOTHING;
 			found = TRUE;
 		}
@@ -603,10 +714,11 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			found = TRUE;
 		}
 		
-		found |= remove_obj_from_resource_list(&GET_CRAFT_RESOURCES(craft), vnum);
+		found |= remove_thing_from_resource_list(&GET_CRAFT_RESOURCES(craft), RES_OBJECT, vnum);
 		
 		if (found) {
 			SET_BIT(GET_CRAFT_FLAGS(craft), CRAFT_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Craft %d %s set IN-DEV due to deleted object", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
 			save_library_file_for_vnum(DB_BOOT_CRAFT, GET_CRAFT_VNUM(craft));
 		}
 	}
@@ -615,7 +727,30 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	HASH_ITER(hh, crop_table, crop, next_crop) {
 		found = delete_from_interaction_list(&GET_CROP_INTERACTIONS(crop), TYPE_OBJ, vnum);
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Crop %d %s lost deleted related object", GET_CROP_VNUM(crop), GET_CROP_NAME(crop));
 			save_library_file_for_vnum(DB_BOOT_CROP, GET_CROP_VNUM(crop));
+		}
+	}
+	
+	// update events
+	HASH_ITER(hh, event_table, event, next_event) {
+		// QR_x: event reward types
+		found = delete_event_reward_from_list(&EVT_RANK_REWARDS(event), QR_OBJECT, vnum);
+		found |= delete_event_reward_from_list(&EVT_THRESHOLD_REWARDS(event), QR_OBJECT, vnum);
+		
+		if (found) {
+			// SET_BIT(EVT_FLAGS(event), EVTF_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Event %d %s had rewards for a deleted object (removed rewards but did not set IN-DEV)", EVT_VNUM(event), EVT_NAME(event));
+			save_library_file_for_vnum(DB_BOOT_EVT, EVT_VNUM(event));
+		}
+	}
+	
+	// update generics
+	HASH_ITER(hh, generic_table, gen, next_gen) {
+		if (GET_COMPONENT_OBJ_VNUM(gen) == vnum) {
+			GEN_VALUE(gen, GVAL_OBJ_VNUM) = NOTHING;
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Generic %d %s lost deleted related object", GEN_VNUM(gen), GEN_NAME(gen));
+			save_library_file_for_vnum(DB_BOOT_GEN, GEN_VNUM(gen));
 		}
 	}
 	
@@ -623,14 +758,24 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	HASH_ITER(hh, globals_table, glb, next_glb) {
 		found = delete_from_interaction_list(&GET_GLOBAL_INTERACTIONS(glb), TYPE_OBJ, vnum);
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Global %d %s lost deleted related object", GET_GLOBAL_VNUM(glb), GET_GLOBAL_NAME(glb));
 			save_library_file_for_vnum(DB_BOOT_GLB, GET_GLOBAL_VNUM(glb));
 		}
 	}
 	
 	// update mobs
 	HASH_ITER(hh, mobile_table, mob, next_mob) {
+		// interactions
 		found = delete_from_interaction_list(&mob->interactions, TYPE_OBJ, vnum);
+		
+		// corpse
+		if (MOB_CUSTOM_CORPSE(mob) == vnum) {
+			found |= TRUE;
+			MOB_CUSTOM_CORPSE(mob) = NOTHING;
+		}
+		
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Mobile %d %s lost deleted related object", GET_MOB_VNUM(mob), GET_SHORT_DESC(mob));
 			save_library_file_for_vnum(DB_BOOT_MOB, mob->vnum);
 		}
 	}
@@ -646,20 +791,39 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(MORPH_FLAGS(morph), MORPHF_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Morph %d %s set IN-DEV due to deleted object", MORPH_VNUM(morph), MORPH_SHORT_DESC(morph));
 			save_library_file_for_vnum(DB_BOOT_MORPH, MORPH_VNUM(morph));
 		}
 	}
 	
 	// update objs
 	HASH_ITER(hh, object_table, obj_iter, next_obj) {
-		found = delete_from_interaction_list(&obj_iter->interactions, TYPE_OBJ, vnum);
+		found = delete_from_interaction_list(&obj_iter->proto_data->interactions, TYPE_OBJ, vnum);
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Object %d %s lost deleted related object", GET_OBJ_VNUM(obj_iter), GET_OBJ_SHORT_DESC(obj_iter));
 			save_library_file_for_vnum(DB_BOOT_OBJ, GET_OBJ_VNUM(obj_iter));
+		}
+	}
+	
+	// update progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		// REQ_x:
+		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_GET_OBJECT, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_WEARING, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_WEARING_OR_HAS, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
+		
+		if (found) {
+			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Progress %d %s set IN-DEV due to deleted object", PRG_VNUM(prg), PRG_NAME(prg));
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+			need_progress_refresh = TRUE;
 		}
 	}
 	
 	// update quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
+		// QG_x, QR_x, REQ_x:
 		found = delete_quest_giver_from_list(&QUEST_STARTS_AT(quest), QG_OBJECT, vnum);
 		found |= delete_quest_giver_from_list(&QUEST_ENDS_AT(quest), QG_OBJECT, vnum);
 		found |= delete_quest_reward_from_list(&QUEST_REWARDS(quest), QR_OBJECT, vnum);
@@ -669,9 +833,12 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_WEARING, vnum);
 		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_WEARING_OR_HAS, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_WEARING_OR_HAS, vnum);
+		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
+		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 		if (found) {
 			SET_BIT(QUEST_FLAGS(quest), QST_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Quest %d %s set IN-DEV due to deleted object", QUEST_VNUM(quest), QUEST_NAME(quest));
 			save_library_file_for_vnum(DB_BOOT_QST, QUEST_VNUM(quest));
 		}
 	}
@@ -681,6 +848,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 		found = delete_from_spawn_template_list(&GET_RMT_SPAWNS(rmt), ADV_SPAWN_OBJ, vnum);
 		found |= delete_from_interaction_list(&GET_RMT_INTERACTIONS(rmt), TYPE_OBJ, vnum);
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Room template %d %s lost deleted related object", GET_RMT_VNUM(rmt), GET_RMT_TITLE(rmt));
 			save_library_file_for_vnum(DB_BOOT_RMT, GET_RMT_VNUM(rmt));
 		}
 	}
@@ -689,26 +857,44 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	HASH_ITER(hh, sector_table, sect, next_sect) {
 		found = delete_from_interaction_list(&GET_SECT_INTERACTIONS(sect), TYPE_OBJ, vnum);
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Sector %d %s lost deleted related object", GET_SECT_VNUM(sect), GET_SECT_NAME(sect));
 			save_library_file_for_vnum(DB_BOOT_SECTOR, GET_SECT_VNUM(sect));
+		}
+	}
+	
+	// update shops
+	HASH_ITER(hh, shop_table, shop, next_shop) {
+		found = delete_quest_giver_from_list(&SHOP_LOCATIONS(shop), QG_OBJECT, vnum);
+		found |= delete_shop_item_from_list(&SHOP_ITEMS(shop), vnum);
+		
+		if (found) {
+			SET_BIT(SHOP_FLAGS(shop), SHOP_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Shop %d %s set IN-DEV due to deleted object", SHOP_VNUM(shop), SHOP_NAME(shop));
+			save_library_file_for_vnum(DB_BOOT_SHOP, SHOP_VNUM(shop));
 		}
 	}
 	
 	// update socials
 	HASH_ITER(hh, social_table, soc, next_soc) {
+		// REQ_x:
 		found = delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_GET_OBJECT, vnum);
 		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_WEARING, vnum);
 		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_WEARING_OR_HAS, vnum);
+		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 		if (found) {
 			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Social %d %s set IN-DEV due to deleted object", SOC_VNUM(soc), SOC_NAME(soc));
 			save_library_file_for_vnum(DB_BOOT_SOC, SOC_VNUM(soc));
 		}
 	}
 	
 	// update vehicles
 	HASH_ITER(hh, vehicle_table, veh, next_veh) {
-		found = remove_obj_from_resource_list(&VEH_YEARLY_MAINTENANCE(veh), vnum);
+		found = remove_thing_from_resource_list(&VEH_REGULAR_MAINTENANCE(veh), RES_OBJECT, vnum);
+		found |= delete_from_interaction_list(&VEH_INTERACTIONS(veh), TYPE_OBJ, vnum);
 		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Vehicle %d %s lost deleted related object", VEH_VNUM(veh), VEH_SHORT_DESC(veh));
 			save_library_file_for_vnum(DB_BOOT_VEH, VEH_VNUM(veh));
 		}
 	}
@@ -716,9 +902,18 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	// olc editor updates
 	for (desc = descriptor_list; desc; desc = desc->next) {
 		if (desc->character && !IS_NPC(desc->character) && GET_ACTION_RESOURCES(desc->character)) {
-			remove_obj_from_resource_list(&GET_ACTION_RESOURCES(desc->character), vnum);
+			remove_thing_from_resource_list(&GET_ACTION_RESOURCES(desc->character), RES_OBJECT, vnum);
 		}
 		
+		if (GET_OLC_ABILITY(desc)) {
+			found = FALSE;
+			found |= delete_from_ability_data_list(GET_OLC_ABILITY(desc), ADL_READY_WEAPON, vnum);
+			found |= delete_from_interaction_list(&ABIL_INTERACTIONS(GET_OLC_ABILITY(desc)), TYPE_OBJ, vnum);
+		
+			if (found) {
+				msg_to_desc(desc, "An object listed in the data or interactions for the ability you're editing has been removed.\r\n");
+			}
+		}
 		if (GET_OLC_ADVENTURE(desc)) {
 			found = FALSE;
 			found |= delete_link_rule_by_portal(&(GET_OLC_ADVENTURE(desc)->linking), vnum);
@@ -732,8 +927,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			for (gear = GET_ARCH_GEAR(GET_OLC_ARCHETYPE(desc)); gear; gear = next_gear) {
 				next_gear = gear->next;
 				if (gear->vnum == vnum) {
-					struct archetype_gear *temp;
-					REMOVE_FROM_LIST(gear, GET_ARCH_GEAR(GET_OLC_ARCHETYPE(desc)), next);
+					LL_DELETE(GET_ARCH_GEAR(GET_OLC_ARCHETYPE(desc)), gear);
 					free(gear);
 					found = TRUE;
 				}
@@ -751,7 +945,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 				found = TRUE;
 			}
 			
-			found |= remove_obj_from_resource_list(&GET_AUG_RESOURCES(GET_OLC_AUGMENT(desc)), vnum);
+			found |= remove_thing_from_resource_list(&GET_AUG_RESOURCES(GET_OLC_AUGMENT(desc)), RES_OBJECT, vnum);
 			
 			if (found) {
 				SET_BIT(GET_AUG_FLAGS(GET_OLC_AUGMENT(desc)), AUG_IN_DEVELOPMENT);
@@ -761,14 +955,14 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 		}
 		if (GET_OLC_BUILDING(desc)) {
 			found = delete_from_interaction_list(&GET_OLC_BUILDING(desc)->interactions, TYPE_OBJ, vnum);
-			found |= remove_obj_from_resource_list(&GET_BLD_YEARLY_MAINTENANCE(GET_OLC_BUILDING(desc)), vnum);
+			found |= remove_thing_from_resource_list(&GET_BLD_REGULAR_MAINTENANCE(GET_OLC_BUILDING(desc)), RES_OBJECT, vnum);
 			if (found) {
 				msg_to_char(desc->character, "One of the objects used in the building you're editing was deleted.\r\n");
 			}
 		}
 		if (GET_OLC_CRAFT(desc)) {
 			found = FALSE;
-			if (GET_OLC_CRAFT(desc)->type != CRAFT_TYPE_BUILD && !IS_SET(GET_OLC_CRAFT(desc)->flags, CRAFT_SOUP | CRAFT_VEHICLE) && GET_OLC_CRAFT(desc)->object == vnum) {
+			if (!CRAFT_IS_BUILDING(GET_OLC_CRAFT(desc)) && !CRAFT_IS_VEHICLE(GET_OLC_CRAFT(desc)) && !IS_SET(GET_OLC_CRAFT(desc)->flags, CRAFT_SOUP) && GET_OLC_CRAFT(desc)->object == vnum) {
 				GET_OLC_CRAFT(desc)->object = NOTHING;
 				found = TRUE;
 			}
@@ -778,7 +972,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 				found = TRUE;
 			}
 			
-			found |= remove_obj_from_resource_list(&GET_OLC_CRAFT(desc)->resources, vnum);
+			found |= remove_thing_from_resource_list(&GET_OLC_CRAFT(desc)->resources, RES_OBJECT, vnum);
 		
 			if (found) {
 				SET_BIT(GET_OLC_CRAFT(desc)->flags, CRAFT_IN_DEVELOPMENT);
@@ -790,6 +984,22 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 				msg_to_char(desc->character, "One of the objects in an interaction for the crop you're editing was deleted.\r\n");
 			}
 		}
+		if (GET_OLC_EVENT(desc)) {
+			// QR_x: event reward types
+			found = delete_event_reward_from_list(&EVT_RANK_REWARDS(GET_OLC_EVENT(desc)), QR_OBJECT, vnum);
+			found |= delete_event_reward_from_list(&EVT_THRESHOLD_REWARDS(GET_OLC_EVENT(desc)), QR_OBJECT, vnum);
+		
+			if (found) {
+				// SET_BIT(EVT_FLAGS(GET_OLC_EVENT(desc)), EVTF_IN_DEVELOPMENT);
+				msg_to_desc(desc, "An object used as a reward by the event you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_GENERIC(desc)) {
+			if (GET_COMPONENT_OBJ_VNUM(GET_OLC_GENERIC(desc)) == vnum) {
+				GEN_VALUE(GET_OLC_GENERIC(desc), GVAL_OBJ_VNUM) = NOTHING;
+				msg_to_char(ch, "The matching item for the generic component you're editing was deleted.\r\n");
+			}
+		}
 		if (GET_OLC_GLOBAL(desc)) {
 			found = delete_from_interaction_list(&GET_GLOBAL_INTERACTIONS(GET_OLC_GLOBAL(desc)), TYPE_OBJ, vnum);
 			if (found) {
@@ -797,8 +1007,17 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			}
 		}
 		if (GET_OLC_MOBILE(desc)) {
-			if (delete_from_interaction_list(&GET_OLC_MOBILE(desc)->interactions, TYPE_OBJ, vnum)) {
-				msg_to_char(desc->character, "One of the objects in an interaction for the mob you're editing was deleted.\r\n");
+			// interactions
+			found = delete_from_interaction_list(&GET_OLC_MOBILE(desc)->interactions, TYPE_OBJ, vnum);
+			
+			// corpse
+			if (MOB_CUSTOM_CORPSE(GET_OLC_MOBILE(desc)) == vnum) {
+				found |= TRUE;
+				MOB_CUSTOM_CORPSE(GET_OLC_MOBILE(desc)) = NOTHING;
+			}
+			
+			if (found) {
+				msg_to_char(desc->character, "One of the objects used by the mob you're editing was deleted.\r\n");
 			}
 		}
 		if (GET_OLC_MORPH(desc)) {
@@ -815,12 +1034,25 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			}
 		}
 		if (GET_OLC_OBJECT(desc)) {
-			found = delete_from_interaction_list(&GET_OLC_OBJECT(desc)->interactions, TYPE_OBJ, vnum);
+			found = delete_from_interaction_list(&GET_OLC_OBJECT(desc)->proto_data->interactions, TYPE_OBJ, vnum);
 			if (found) {
 				msg_to_char(desc->character, "One of the objects in an interaction for the item you're editing was deleted.\r\n");
 			}
 		}
+		if (GET_OLC_PROGRESS(desc)) {
+			// REQ_x:
+			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_GET_OBJECT, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_WEARING, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_WEARING_OR_HAS, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
+		
+			if (found) {
+				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
+				msg_to_desc(desc, "An object used by the progression goal you're editing has been deleted.\r\n");
+			}
+		}
 		if (GET_OLC_QUEST(desc)) {
+			// QG_x, QR_x, REQ_x:
 			found = delete_quest_giver_from_list(&QUEST_STARTS_AT(GET_OLC_QUEST(desc)), QG_OBJECT, vnum);
 			found |= delete_quest_giver_from_list(&QUEST_ENDS_AT(GET_OLC_QUEST(desc)), QG_OBJECT, vnum);
 			found |= delete_quest_reward_from_list(&QUEST_REWARDS(GET_OLC_QUEST(desc)), QR_OBJECT, vnum);
@@ -830,6 +1062,8 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_WEARING, vnum);
 			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_WEARING_OR_HAS, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_WEARING_OR_HAS, vnum);
+			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
+			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 			if (found) {
 				SET_BIT(QUEST_FLAGS(GET_OLC_QUEST(desc)), QST_IN_DEVELOPMENT);
@@ -849,10 +1083,21 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 				msg_to_char(desc->character, "One of the objects in an interaction for the sector you're editing was deleted.\r\n");
 			}
 		}
+		if (GET_OLC_SHOP(desc)) {
+			found = delete_quest_giver_from_list(&SHOP_LOCATIONS(GET_OLC_SHOP(desc)), QG_OBJECT, vnum);
+			found |= delete_shop_item_from_list(&SHOP_ITEMS(GET_OLC_SHOP(desc)), vnum);
+			
+			if (found) {
+				SET_BIT(SHOP_FLAGS(GET_OLC_SHOP(desc)), SHOP_IN_DEVELOPMENT);
+				msg_to_desc(desc, "An object used by the shop you are editing was deleted.\r\n");
+			}
+		}
 		if (GET_OLC_SOCIAL(desc)) {
+			// REQ_x:
 			found = delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_GET_OBJECT, vnum);
 			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_WEARING, vnum);
 			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_WEARING_OR_HAS, vnum);
+			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
@@ -860,15 +1105,16 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			}
 		}
 		if (GET_OLC_VEHICLE(desc)) {
-			found = remove_obj_from_resource_list(&VEH_YEARLY_MAINTENANCE(GET_OLC_VEHICLE(desc)), vnum);
+			found = remove_thing_from_resource_list(&VEH_REGULAR_MAINTENANCE(GET_OLC_VEHICLE(desc)), RES_OBJECT, vnum);
+			found |= delete_from_interaction_list(&VEH_INTERACTIONS(GET_OLC_VEHICLE(desc)), TYPE_OBJ, vnum);
 			if (found) {
-				msg_to_char(desc->character, "One of the objects used for maintenance for the vehicle you're editing was deleted.\r\n");
+				msg_to_char(desc->character, "One of the objects used on the vehicle you're editing was deleted.\r\n");
 			}
 		}
 	}
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted object %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Object %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted object %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Object %d (%s) deleted.\r\n", vnum, name);
 	
 	free_obj(proto);
 }
@@ -881,147 +1127,85 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 * @param char *argument The argument they entered.
 */
 void olc_fullsearch_obj(char_data *ch, char *argument) {
-	char buf[MAX_STRING_LENGTH], line[MAX_STRING_LENGTH], type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], find_keywords[MAX_INPUT_LENGTH];
+	char type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], find_keywords[MAX_INPUT_LENGTH], extra_search[MAX_INPUT_LENGTH];
 	bitvector_t find_applies = NOBITS, found_applies, not_flagged = NOBITS, only_flags = NOBITS;
-	bitvector_t only_worn = NOBITS, cmp_flags = NOBITS, not_cmp_flagged = NOBITS, only_affs = NOBITS;
-	bitvector_t  find_interacts = NOBITS, found_interacts, find_custom = NOBITS, found_custom;
-	int count, lookup, only_level = NOTHING, only_type = NOTHING, only_mat = NOTHING, only_cmp = NOTHING;
+	bitvector_t only_worn = NOBITS, not_worn = NOBITS, only_affs = NOBITS;
+	bitvector_t find_interacts = NOBITS, found_interacts, find_custom = NOBITS, found_custom;
+	bitvector_t only_tools = NOBITS, only_requires_tool = NOBITS, only_light_flags = NOBITS;
+	int count, only_level = NOTHING, only_type = NOTHING, only_mat = NOTHING;
+	int vmin = NOTHING, vmax = NOTHING, only_timer = -2, timer_over = NOTHING, timer_under = NOTHING;
+	int only_val0 = INT_MIN+1, only_val1 = INT_MIN+1, only_val2 = INT_MIN+1;
+	int val0_over = INT_MIN+1, val1_over = INT_MIN+1, val2_over = INT_MIN+1;
+	int val0_under = INT_MIN+1, val1_under = INT_MIN+1, val2_under = INT_MIN+1;
+	// light hours uses -2 because the valid range is -1 to INT_MAX
+	int only_light_hours = -2 ,light_hours_over = -2, light_hours_under = -2;
+	bool only_storable = FALSE, not_storable = FALSE, light_is_lit = FALSE, light_is_unlit = FALSE;
+	attack_message_data *only_weapontype = NULL;
 	struct interaction_item *inter;
 	struct custom_message *cust;
 	obj_data *obj, *next_obj;
 	struct obj_apply *app;
-	size_t size;
 	
 	if (!*argument) {
 		msg_to_char(ch, "See HELP OEDIT FULLSEARCH for syntax.\r\n");
 		return;
 	}
 	
+	check_oedit_material_list();
+	
 	// process argument
 	*find_keywords = '\0';
+	*extra_search = '\0';
 	while (*argument) {
 		// figure out a type
 		argument = any_one_arg(argument, type_arg);
 		
-		if (is_abbrev(type_arg, "-affects")) {
-			argument = any_one_word(argument, val_arg);
-			if ((lookup = search_block(val_arg, affected_bits, FALSE)) != NOTHING) {
-				only_affs |= BIT(lookup);
-			}
-			else {
-				msg_to_char(ch, "Invalid affect flag '%s'.\r\n", val_arg);
-				return;
-			}
+		if (!strcmp(type_arg, "-")) {
+			continue;	// just skip stray dashes
 		}
-		else if (is_abbrev(type_arg, "-apply") || is_abbrev(type_arg, "-applies")) {
-			argument = any_one_word(argument, val_arg);
-			if ((lookup = search_block(val_arg, apply_types, FALSE)) != NOTHING) {
-				find_applies |= BIT(lookup);
-			}
-			else {
-				msg_to_char(ch, "Invalid apply type '%s'.\r\n", val_arg);
-				return;
-			}
-		}
-		else if (is_abbrev(type_arg, "-cflags") || is_abbrev(type_arg, "-cflagged")) {
-			argument = any_one_word(argument, val_arg);
-			if ((lookup = search_block(val_arg, component_flags, FALSE)) != NOTHING) {
-				cmp_flags |= BIT(lookup);
-			}
-			else {
-				msg_to_char(ch, "Invalid component flag '%s'.\r\n", val_arg);
-				return;
-			}
-		}
-		else if (is_abbrev(type_arg, "-component")) {
-			argument = any_one_word(argument, val_arg);
-			if ((only_cmp = search_block(val_arg, component_types, FALSE)) == NOTHING) {
-				msg_to_char(ch, "Invalid component '%s'.\r\n", val_arg);
-				return;
-			}
-		}
-		else if (is_abbrev(type_arg, "-custom")) {
-			argument = any_one_word(argument, val_arg);
-			if ((lookup = search_block(val_arg, obj_custom_types, FALSE)) != NOTHING) {
-				find_custom |= BIT(lookup);
-			}
-			else {
-				msg_to_char(ch, "Invalid custom message type '%s'.\r\n", val_arg);
-				return;
-			}
-		}
-		else if (is_abbrev(type_arg, "-flags") || is_abbrev(type_arg, "-flagged")) {
-			argument = any_one_word(argument, val_arg);
-			if ((lookup = search_block(val_arg, extra_bits, FALSE)) != NOTHING) {
-				only_flags |= BIT(lookup);
-			}
-			else {
-				msg_to_char(ch, "Invalid flag '%s'.\r\n", val_arg);
-				return;
-			}
-		}
-		else if (is_abbrev(type_arg, "-interaction")) {
-			argument = any_one_word(argument, val_arg);
-			if ((lookup = search_block(val_arg, interact_types, FALSE)) != NOTHING) {
-				find_interacts |= BIT(lookup);
-			}
-			else {
-				msg_to_char(ch, "Invalid interaction type '%s'.\r\n", val_arg);
-				return;
-			}
-		}
-		else if (is_abbrev(type_arg, "-level")) {
-			argument = any_one_word(argument, val_arg);
-			if (!isdigit(*val_arg) || (only_level = atoi(val_arg)) < 0) {
-				msg_to_char(ch, "Invalid level '%s'.\r\n", val_arg);
-				return;
-			}
-		}
-		else if (is_abbrev(type_arg, "-material")) {
-			check_oedit_material_list();
-			argument = any_one_word(argument, val_arg);
-			if ((only_mat = search_block(val_arg, (const char **)olc_material_list, FALSE)) == NOTHING) {
-				msg_to_char(ch, "Invalid material '%s'.\r\n", val_arg);
-				return;
-			}
-		}
-		else if (is_abbrev(type_arg, "-type")) {
-			argument = any_one_word(argument, val_arg);
-			if ((only_type = search_block(val_arg, item_types, FALSE)) == NOTHING) {
-				msg_to_char(ch, "Invalid type '%s'.\r\n", val_arg);
-				return;
-			}
-		}
-		else if (is_abbrev(type_arg, "-uncflagged")) {
-			argument = any_one_word(argument, val_arg);
-			if ((lookup = search_block(val_arg, component_flags, FALSE)) != NOTHING) {
-				not_cmp_flagged |= BIT(lookup);
-			}
-			else {
-				msg_to_char(ch, "Invalid component flag '%s'.\r\n", val_arg);
-				return;
-			}
-		}
-		else if (is_abbrev(type_arg, "-unflagged")) {
-			argument = any_one_word(argument, val_arg);
-			if ((lookup = search_block(val_arg, extra_bits, FALSE)) != NOTHING) {
-				not_flagged |= BIT(lookup);
-			}
-			else {
-				msg_to_char(ch, "Invalid flag '%s'.\r\n", val_arg);
-				return;
-			}
-		}
-		else if (is_abbrev(type_arg, "-wear") || is_abbrev(type_arg, "-worn")) {
-			argument = any_one_word(argument, val_arg);
-			if ((lookup = search_block(val_arg, wear_bits, FALSE)) != NOTHING) {
-				only_worn |= BIT(lookup);
-			}
-			else {
-				msg_to_char(ch, "Invalid wear location '%s'.\r\n", val_arg);
-				return;
-			}
-		}
+		
+		FULLSEARCH_FLAGS("affects", only_affs, affected_bits)
+		FULLSEARCH_FLAGS("apply", find_applies, apply_types)
+		FULLSEARCH_FLAGS("applies", find_applies, apply_types)
+		FULLSEARCH_FLAGS("custom", find_custom, obj_custom_types)
+		FULLSEARCH_STRING("extradesc", extra_search)
+		FULLSEARCH_FLAGS("flags", only_flags, extra_bits)
+		FULLSEARCH_FLAGS("flagged", only_flags, extra_bits)
+		FULLSEARCH_FLAGS("interaction", find_interacts, interact_types)
+		FULLSEARCH_INT("level", only_level, 0, INT_MAX)
+		FULLSEARCH_FLAGS("lightflags", only_light_flags, light_flags)
+		FULLSEARCH_INT("lighthours", only_light_hours, -1, INT_MAX)
+		FULLSEARCH_INT("lighthoursover", light_hours_over, -1, INT_MAX)
+		FULLSEARCH_INT("lighthoursunder", light_hours_under, -1, INT_MAX)
+		FULLSEARCH_BOOL("lightislit", light_is_lit)
+		FULLSEARCH_BOOL("lightisunlit", light_is_unlit)
+		FULLSEARCH_LIST("material", only_mat, (const char **)olc_material_list)
+		FULLSEARCH_FLAGS("requirestools", only_requires_tool, tool_flags)
+		FULLSEARCH_BOOL("storable", only_storable)
+		FULLSEARCH_INT("timer", only_timer, -1, INT_MAX)
+		FULLSEARCH_INT("timerover", timer_over, 0, INT_MAX)
+		FULLSEARCH_INT("timerunder", timer_under, 0, INT_MAX)
+		FULLSEARCH_FLAGS("tools", only_tools, tool_flags)
+		FULLSEARCH_LIST("type", only_type, item_types)
+		FULLSEARCH_FLAGS("unflagged", not_flagged, extra_bits)
+		FULLSEARCH_BOOL("unstorable", not_storable)
+		FULLSEARCH_FUNC("weapontype", only_weapontype, find_attack_message_by_name_or_vnum(val_arg, FALSE))
+		FULLSEARCH_FLAGS("wear", only_worn, wear_bits)
+		FULLSEARCH_FLAGS("nowear", not_worn, wear_bits)
+		FULLSEARCH_FLAGS("worn", only_worn, wear_bits)
+		FULLSEARCH_FLAGS("noworn", not_worn, wear_bits)
+		FULLSEARCH_INT("val0", only_val0, INT_MIN+1, INT_MAX)
+		FULLSEARCH_INT("val0over", val0_over, INT_MIN+1, INT_MAX)
+		FULLSEARCH_INT("val0under", val0_under, INT_MIN+1, INT_MAX)
+		FULLSEARCH_INT("val1", only_val1, INT_MIN+1, INT_MAX)
+		FULLSEARCH_INT("val1over", val1_over, INT_MIN+1, INT_MAX)
+		FULLSEARCH_INT("val1under", val1_under, INT_MIN+1, INT_MAX)
+		FULLSEARCH_INT("val2", only_val2, INT_MIN+1, INT_MAX)
+		FULLSEARCH_INT("val2over", val2_over, INT_MIN+1, INT_MAX)
+		FULLSEARCH_INT("val2under", val2_under, INT_MIN+1, INT_MAX)
+		FULLSEARCH_INT("vmin", vmin, 0, INT_MAX)
+		FULLSEARCH_INT("vmax", vmax, 0, INT_MAX)
+		
 		else {	// not sure what to do with it? treat it like a keyword
 			sprintf(find_keywords + strlen(find_keywords), "%s%s", *find_keywords ? " " : "", type_arg);
 		}
@@ -1030,11 +1214,14 @@ void olc_fullsearch_obj(char_data *ch, char *argument) {
 		skip_spaces(&argument);
 	}
 	
-	size = snprintf(buf, sizeof(buf), "Object fullsearch: %s\r\n", find_keywords);
+	build_page_display(ch, "Object fullsearch: %s", show_color_codes(find_keywords));
 	count = 0;
 	
 	// okay now look up items
 	HASH_ITER(hh, object_table, obj, next_obj) {
+		if ((vmin != NOTHING && GET_OBJ_VNUM(obj) < vmin) || (vmax != NOTHING && GET_OBJ_VNUM(obj) > vmax)) {
+			continue;	// vnum range
+		}
 		if (only_level != NOTHING) {	// level-based checks
 			if (GET_OBJ_MAX_SCALE_LEVEL(obj) != 0 && only_level > GET_OBJ_MAX_SCALE_LEVEL(obj)) {
 				continue;
@@ -1043,13 +1230,13 @@ void olc_fullsearch_obj(char_data *ch, char *argument) {
 				continue;
 			}
 		}
-		if (only_cmp != NOTHING && GET_OBJ_CMP_TYPE(obj) != only_cmp) {
+		if (only_storable && !GET_OBJ_STORAGE(obj)) {
+			continue;
+		}
+		if (not_storable && GET_OBJ_STORAGE(obj)) {
 			continue;
 		}
 		if (only_type != NOTHING && GET_OBJ_TYPE(obj) != only_type) {
-			continue;
-		}
-		if (not_cmp_flagged != NOBITS && OBJ_CMP_FLAGGED(obj, not_cmp_flagged)) {
 			continue;
 		}
 		if (not_flagged != NOBITS && OBJ_FLAGGED(obj, not_flagged)) {
@@ -1058,16 +1245,82 @@ void olc_fullsearch_obj(char_data *ch, char *argument) {
 		if (only_affs != NOBITS && (GET_OBJ_AFF_FLAGS(obj) & only_affs) != only_affs) {
 			continue;
 		}
-		if (cmp_flags != NOBITS && (GET_OBJ_CMP_FLAGS(obj) & cmp_flags) != cmp_flags) {
+		if (only_flags != NOBITS && (GET_OBJ_EXTRA(obj) & only_flags) != only_flags) {
 			continue;
 		}
-		if (only_flags != NOBITS && (GET_OBJ_EXTRA(obj) & only_flags) != only_flags) {
+		if (only_timer != -2 && GET_OBJ_TIMER(obj) != only_timer) {
+			continue;
+		}
+		if (timer_over != NOTHING && GET_OBJ_TIMER(obj) < timer_over) {
+			continue;
+		}
+		if (timer_under != NOTHING && (GET_OBJ_TIMER(obj) <= 0 || GET_OBJ_TIMER(obj) > timer_under)) {
+			continue;
+		}
+		if (only_light_flags != NOBITS && (!IS_LIGHT(obj) || (GET_LIGHT_FLAGS(obj) & only_light_flags) != only_light_flags)) {
+			continue;
+		}
+		if (only_light_hours != -2 && (!IS_LIGHT(obj) || GET_LIGHT_HOURS_REMAINING(obj) != only_light_hours)) {
+			continue;
+		}
+		if (light_hours_over != -2 && (!IS_LIGHT(obj) || GET_LIGHT_HOURS_REMAINING(obj) < light_hours_over)) {
+			continue;
+		}
+		if (light_hours_under != -2 && (!IS_LIGHT(obj) || GET_LIGHT_HOURS_REMAINING(obj) > light_hours_under)) {
+			continue;
+		}
+		if (light_is_lit && (!IS_LIGHT(obj) || !GET_LIGHT_IS_LIT(obj))) {
+			continue;
+		}
+		if (light_is_unlit && (!IS_LIGHT(obj) || GET_LIGHT_IS_LIT(obj))) {
 			continue;
 		}
 		if (only_worn != NOBITS && (GET_OBJ_WEAR(obj) & only_worn) != only_worn) {
 			continue;
 		}
+		if (not_worn != NOBITS && CAN_WEAR(obj, not_worn)) {
+			continue;
+		}
+		if (only_tools != NOBITS && (GET_OBJ_TOOL_FLAGS(obj) & only_tools) != only_tools) {
+			continue;
+		}
+		if (only_requires_tool != NOBITS && (GET_OBJ_REQUIRES_TOOL(obj) & only_requires_tool) != only_requires_tool) {
+			continue;
+		}
 		if (only_mat != NOTHING && GET_OBJ_MATERIAL(obj) != only_mat) {
+			continue;
+		}
+		if (only_weapontype && (!IS_WEAPON(obj) || GET_WEAPON_TYPE(obj) != ATTACK_VNUM(only_weapontype))) {
+			continue;
+		}
+		if (only_val0 != INT_MIN+1 && GET_OBJ_VAL(obj, 0) != only_val0) {
+			continue;
+		}
+		if (val0_over != INT_MIN+1 && GET_OBJ_VAL(obj, 0) < val0_over) {
+			continue;
+		}
+		if (val0_under != INT_MIN+1 && GET_OBJ_VAL(obj, 0) > val0_under) {
+			continue;
+		}
+		if (only_val1 != INT_MIN+1 && GET_OBJ_VAL(obj, 1) != only_val1) {
+			continue;
+		}
+		if (val1_over != INT_MIN+1 && GET_OBJ_VAL(obj, 1) < val1_over) {
+			continue;
+		}
+		if (val1_under != INT_MIN+1 && GET_OBJ_VAL(obj, 1) > val1_under) {
+			continue;
+		}
+		if (only_val2 != INT_MIN+1 && GET_OBJ_VAL(obj, 2) != only_val2) {
+			continue;
+		}
+		if (val2_over != INT_MIN+1 && GET_OBJ_VAL(obj, 2) < val2_over) {
+			continue;
+		}
+		if (val2_under != INT_MIN+1 && GET_OBJ_VAL(obj, 2) > val2_under) {
+			continue;
+		}
+		if (*extra_search && !find_exdesc(extra_search, GET_OBJ_EX_DESCS(obj), NULL)) {
 			continue;
 		}
 		if (find_applies) {	// look up its applies
@@ -1081,7 +1334,7 @@ void olc_fullsearch_obj(char_data *ch, char *argument) {
 		}
 		if (find_custom) {	// look up its custom messages
 			found_custom = NOBITS;
-			LL_FOREACH(obj->custom_msgs, cust) {
+			LL_FOREACH(GET_OBJ_CUSTOM_MSGS(obj), cust) {
 				found_custom |= BIT(cust->type);
 			}
 			if ((find_custom & found_custom) != find_custom) {
@@ -1090,39 +1343,30 @@ void olc_fullsearch_obj(char_data *ch, char *argument) {
 		}
 		if (find_interacts) {	// look up its interactions
 			found_interacts = NOBITS;
-			LL_FOREACH(obj->interactions, inter) {
+			LL_FOREACH(GET_OBJ_INTERACTIONS(obj), inter) {
 				found_interacts |= BIT(inter->type);
 			}
 			if ((find_interacts & found_interacts) != find_interacts) {
 				continue;
 			}
 		}
-		if (*find_keywords && !multi_isname(find_keywords, GET_OBJ_KEYWORDS(obj)) && !multi_isname(find_keywords, GET_OBJ_SHORT_DESC(obj)) && !multi_isname(find_keywords, GET_OBJ_LONG_DESC(obj)) && !multi_isname(find_keywords, NULLSAFE(GET_OBJ_ACTION_DESC(obj)))) {
+		if (*find_keywords && !multi_isname(find_keywords, GET_OBJ_KEYWORDS(obj)) && !multi_isname(find_keywords, GET_OBJ_SHORT_DESC(obj)) && !multi_isname(find_keywords, GET_OBJ_LONG_DESC(obj)) && !multi_isname(find_keywords, NULLSAFE(GET_OBJ_ACTION_DESC(obj))) && !search_custom_messages(find_keywords, GET_OBJ_CUSTOM_MSGS(obj)) && !search_extra_descs(find_keywords, GET_OBJ_EX_DESCS(obj))) {
 			continue;
 		}
 		
 		// show it
-		snprintf(line, sizeof(line), "[%5d] %s\r\n", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
-		if (strlen(line) + size < sizeof(buf)) {
-			size += snprintf(buf + size, sizeof(buf) - size, "%s", line);
-			++count;
-		}
-		else {
-			size += snprintf(buf + size, sizeof(buf) - size, "OVERFLOW\r\n");
-			break;
-		}
+		build_page_display(ch, "[%5d] %s", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
+		++count;
 	}
 	
-	if (count > 0 && (size + 14) < sizeof(buf)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "(%d objects)\r\n", count);
+	if (count > 0) {
+		build_page_display(ch, "(%d objects)", count);
 	}
-	else if (count == 0) {
-		size += snprintf(buf + size, sizeof(buf) - size, " none\r\n");
+	else {
+		build_page_display_str(ch, " none");
 	}
 	
-	if (ch->desc) {
-		page_string(ch->desc, buf, TRUE);
-	}
+	send_page_display(ch);
 }
 
 
@@ -1133,33 +1377,32 @@ void olc_fullsearch_obj(char_data *ch, char *argument) {
 * @param crop_vnum vnum The crop vnum.
 */
 void olc_search_obj(char_data *ch, obj_vnum vnum) {
-	extern bool find_quest_giver_in_list(struct quest_giver *list, int type, any_vnum vnum);
-	extern bool find_quest_reward_in_list(struct quest_reward *list, int type, any_vnum vnum);
-	extern bool find_requirement_in_list(struct req_data *list, int type, any_vnum vnum);
-	extern const byte interact_vnum_types[NUM_INTERACTS];
-	
-	char buf[MAX_STRING_LENGTH];
 	struct adventure_spawn *asp;
 	struct interaction_item *inter;
 	struct adventure_link_rule *link;
 	struct global_data *glb, *next_glb;
 	archetype_data *arch, *next_arch;
+	ability_data *abil, *next_abil;
 	craft_data *craft, *next_craft;
 	morph_data *morph, *next_morph;
+	event_data *event, *next_event;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	room_template *rmt, *next_rmt;
 	sector_data *sect, *next_sect;
 	augment_data *aug, *next_aug;
+	generic_data *gen, *next_gen;
 	vehicle_data *veh, *next_veh;
 	social_data *soc, *next_soc;
 	struct archetype_gear *gear;
 	crop_data *crop, *next_crop;
+	shop_data *shop, *next_shop;
 	char_data *mob, *next_mob;
 	adv_data *adv, *next_adv;
 	bld_data *bld, *next_bld;
 	obj_data *proto, *obj, *next_obj;
 	struct resource_data *res;
-	int size, found;
+	int found;
 	bool any;
 	
 	if (!(proto = obj_proto(vnum))) {
@@ -1168,14 +1411,33 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 	}
 	
 	found = 0;
-	size = snprintf(buf, sizeof(buf), "Occurrences of object %d (%s):\r\n", vnum, GET_OBJ_SHORT_DESC(proto));
+	build_page_display(ch, "Occurrences of object %d (%s):", vnum, GET_OBJ_SHORT_DESC(proto));
+	
+	// abilities
+	HASH_ITER(hh, ability_table, abil, next_abil) {
+		any = FALSE;
+		if (find_ability_data_entry_for(abil, ADL_READY_WEAPON, vnum)) {
+			any = TRUE;
+		}
+		LL_FOREACH(ABIL_INTERACTIONS(abil), inter) {
+			if (interact_data[inter->type].vnum_type == TYPE_OBJ && inter->vnum == vnum) {
+				any = TRUE;
+				break;
+			}
+		}
+		
+		if (any) {
+			++found;
+			build_page_display(ch, "ABIL [%5d] %s", ABIL_VNUM(abil), ABIL_NAME(abil));
+		}
+	}
 	
 	// adventure zones
 	HASH_ITER(hh, adventure_table, adv, next_adv) {
 		for (link = GET_ADV_LINKING(adv); link; link = link->next) {
 			if (link->portal_in == vnum || link->portal_out == vnum) {
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "ADV [%5d] %s\r\n", GET_ADV_VNUM(adv), GET_ADV_NAME(adv));
+				build_page_display(ch, "ADV [%5d] %s", GET_ADV_VNUM(adv), GET_ADV_NAME(adv));
 				break;	// only need 1
 			}
 		}
@@ -1188,7 +1450,7 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 			if (gear->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "ARCH [%5d] %s\r\n", GET_ARCH_VNUM(arch), GET_ARCH_NAME(arch));
+				build_page_display(ch, "ARCH [%5d] %s", GET_ARCH_VNUM(arch), GET_ARCH_NAME(arch));
 			}
 		}
 	}
@@ -1199,13 +1461,13 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 		if (!any && GET_AUG_REQUIRES_OBJ(aug) == vnum) {
 			any = TRUE;
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "AUG [%5d] %s\r\n", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
+			build_page_display(ch, "AUG [%5d] %s", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
 		}
 		for (res = GET_AUG_RESOURCES(aug); res && !any; res = res->next) {
-			if (res->vnum == vnum) {
+			if (res->type == RES_OBJECT && res->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "AUG [%5d] %s\r\n", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
+				build_page_display(ch, "AUG [%5d] %s", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
 			}
 		}
 	}
@@ -1214,10 +1476,17 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 	HASH_ITER(hh, building_table, bld, next_bld) {
 		any = FALSE;
 		for (inter = GET_BLD_INTERACTIONS(bld); inter && !any; inter = inter->next) {
-			if (interact_vnum_types[inter->type] == TYPE_OBJ && inter->vnum == vnum) {
+			if (interact_data[inter->type].vnum_type == TYPE_OBJ && inter->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "BDG [%5d] %s\r\n", GET_BLD_VNUM(bld), GET_BLD_NAME(bld));
+				build_page_display(ch, "BLD [%5d] %s", GET_BLD_VNUM(bld), GET_BLD_NAME(bld));
+			}
+		}
+		for (res = GET_BLD_REGULAR_MAINTENANCE(bld); res && !any; res = res->next) {
+			if (res->type == RES_OBJECT && res->vnum == vnum) {
+				any = TRUE;
+				++found;
+				build_page_display(ch, "BLD [%5d] %s", GET_BLD_VNUM(bld), GET_BLD_NAME(bld));
 			}
 		}
 	}
@@ -1225,21 +1494,21 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 	// crafts
 	HASH_ITER(hh, craft_table, craft, next_craft) {
 		any = FALSE;
-		if (GET_CRAFT_TYPE(craft) != CRAFT_TYPE_BUILD && !IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP | CRAFT_VEHICLE) && GET_CRAFT_OBJECT(craft) == vnum) {
+		if (!CRAFT_IS_BUILDING(craft) && !CRAFT_IS_VEHICLE(craft) && !IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_SOUP) && GET_CRAFT_OBJECT(craft) == vnum) {
 			any = TRUE;
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "CFT [%5d] %s\r\n", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
+			build_page_display(ch, "CFT [%5d] %s", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
 		}
 		if (!any && GET_CRAFT_REQUIRES_OBJ(craft) == vnum) {
 			any = TRUE;
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "CFT [%5d] %s\r\n", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
+			build_page_display(ch, "CFT [%5d] %s", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
 		}
 		for (res = GET_CRAFT_RESOURCES(craft); res && !any; res = res->next) {
-			if (res->vnum == vnum) {
+			if (res->type == RES_OBJECT && res->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "CFT [%5d] %s\r\n", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
+				build_page_display(ch, "CFT [%5d] %s", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
 			}
 		}
 	}
@@ -1248,11 +1517,31 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 	HASH_ITER(hh, crop_table, crop, next_crop) {
 		any = FALSE;
 		for (inter = GET_CROP_INTERACTIONS(crop); inter && !any; inter = inter->next) {
-			if (interact_vnum_types[inter->type] == TYPE_OBJ && inter->vnum == vnum) {
+			if (interact_data[inter->type].vnum_type == TYPE_OBJ && inter->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "CRP [%5d] %s\r\n", GET_CROP_VNUM(crop), GET_CROP_NAME(crop));
+				build_page_display(ch, "CRP [%5d] %s", GET_CROP_VNUM(crop), GET_CROP_NAME(crop));
 			}
+		}
+	}
+	
+	// events
+	HASH_ITER(hh, event_table, event, next_event) {
+		// QR_x: event rewards
+		any = find_event_reward_in_list(EVT_RANK_REWARDS(event), QR_OBJECT, vnum);
+		any |= find_event_reward_in_list(EVT_THRESHOLD_REWARDS(event), QR_OBJECT, vnum);
+		
+		if (any) {
+			++found;
+			build_page_display(ch, "EVT [%5d] %s", EVT_VNUM(event), EVT_NAME(event));
+		}
+	}
+	
+	// generics
+	HASH_ITER(hh, generic_table, gen, next_gen) {
+		if (GET_COMPONENT_OBJ_VNUM(gen) == vnum) {
+			++found;
+			build_page_display(ch, "GEN [%5d] %s", GEN_VNUM(gen), GEN_NAME(gen));
 		}
 	}
 	
@@ -1260,22 +1549,38 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 	HASH_ITER(hh, globals_table, glb, next_glb) {
 		any = FALSE;
 		for (inter = GET_GLOBAL_INTERACTIONS(glb); inter && !any; inter = inter->next) {
-			if (interact_vnum_types[inter->type] == TYPE_OBJ && inter->vnum == vnum) {
+			if (interact_data[inter->type].vnum_type == TYPE_OBJ && inter->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "GLB [%5d] %s\r\n", GET_GLOBAL_VNUM(glb), GET_GLOBAL_NAME(glb));
+				build_page_display(ch, "GLB [%5d] %s", GET_GLOBAL_VNUM(glb), GET_GLOBAL_NAME(glb));
+			}
+		}
+		for (gear = GET_GLOBAL_GEAR(glb); gear && !any; gear = gear->next) {
+			if (gear->vnum == vnum) {
+				any = TRUE;
+				++found;
+				build_page_display(ch, "GLB [%5d] %s", GET_GLOBAL_VNUM(glb), GET_GLOBAL_NAME(glb));
 			}
 		}
 	}
 	
-	// mob interactions
+	// mobs
 	HASH_ITER(hh, mobile_table, mob, next_mob) {
 		any = FALSE;
+		
+		// corpse
+		if (MOB_CUSTOM_CORPSE(mob) == vnum) {
+			any = TRUE;
+			++found;
+			build_page_display(ch, "MOB [%5d] %s", GET_MOB_VNUM(mob), GET_SHORT_DESC(mob));
+		}
+		
+		// interactions
 		for (inter = mob->interactions; inter && !any; inter = inter->next) {
-			if (interact_vnum_types[inter->type] == TYPE_OBJ && inter->vnum == vnum) {
+			if (interact_data[inter->type].vnum_type == TYPE_OBJ && inter->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "MOB [%5d] %s\r\n", GET_MOB_VNUM(mob), GET_SHORT_DESC(mob));
+				build_page_display(ch, "MOB [%5d] %s", GET_MOB_VNUM(mob), GET_SHORT_DESC(mob));
 			}
 		}
 	}
@@ -1284,27 +1589,39 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 	HASH_ITER(hh, morph_table, morph, next_morph) {
 		if (MORPH_REQUIRES_OBJ(morph) == vnum) {
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "MPH [%5d] %s\r\n", MORPH_VNUM(morph), MORPH_SHORT_DESC(morph));
+			build_page_display(ch, "MPH [%5d] %s", MORPH_VNUM(morph), MORPH_SHORT_DESC(morph));
 		}
 	}
 	
 	// obj interactions
 	HASH_ITER(hh, object_table, obj, next_obj) {
 		any = FALSE;
-		for (inter = obj->interactions; inter && !any; inter = inter->next) {
-			if (interact_vnum_types[inter->type] == TYPE_OBJ && inter->vnum == vnum) {
+		for (inter = GET_OBJ_INTERACTIONS(obj); inter && !any; inter = inter->next) {
+			if (interact_data[inter->type].vnum_type == TYPE_OBJ && inter->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "OBJ [%5d] %s\r\n", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
+				build_page_display(ch, "OBJ [%5d] %s", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
 			}
+		}
+	}
+	
+	// progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		// REQ_x: requirement search
+		any = find_requirement_in_list(PRG_TASKS(prg), REQ_GET_OBJECT, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_WEARING, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_WEARING_OR_HAS, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
+		
+		if (any) {
+			++found;
+			build_page_display(ch, "PRG [%5d] %s", PRG_VNUM(prg), PRG_NAME(prg));
 		}
 	}
 	
 	// quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
-		if (size >= sizeof(buf)) {
-			break;
-		}
+		// QG_x, QR_x, REQ_x:
 		any = find_quest_giver_in_list(QUEST_STARTS_AT(quest), QG_OBJECT, vnum);
 		any |= find_quest_giver_in_list(QUEST_ENDS_AT(quest), QG_OBJECT, vnum);
 		any |= find_quest_reward_in_list(QUEST_REWARDS(quest), QR_OBJECT, vnum);
@@ -1314,10 +1631,12 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_WEARING, vnum);
 		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_WEARING_OR_HAS, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_WEARING_OR_HAS, vnum);
+		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
+		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 		if (any) {
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "QST [%5d] %s\r\n", QUEST_VNUM(quest), QUEST_NAME(quest));
+			build_page_display(ch, "QST [%5d] %s", QUEST_VNUM(quest), QUEST_NAME(quest));
 		}
 	}
 	
@@ -1328,14 +1647,14 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 			if (asp->type == ADV_SPAWN_OBJ && asp->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "RMT [%5d] %s\r\n", GET_RMT_VNUM(rmt), GET_RMT_TITLE(rmt));
+				build_page_display(ch, "RMT [%5d] %s", GET_RMT_VNUM(rmt), GET_RMT_TITLE(rmt));
 			}
 		}
 		for (inter = GET_RMT_INTERACTIONS(rmt); inter && !any; inter = inter->next) {
-			if (interact_vnum_types[inter->type] == TYPE_OBJ && inter->vnum == vnum) {
+			if (interact_data[inter->type].vnum_type == TYPE_OBJ && inter->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "RMT [%5d] %s\r\n", GET_RMT_VNUM(rmt), GET_RMT_TITLE(rmt));
+				build_page_display(ch, "RMT [%5d] %s", GET_RMT_VNUM(rmt), GET_RMT_TITLE(rmt));
 			}
 		}
 	}
@@ -1344,49 +1663,67 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 	HASH_ITER(hh, sector_table, sect, next_sect) {
 		any = FALSE;
 		for (inter = GET_SECT_INTERACTIONS(sect); inter && !any; inter = inter->next) {
-			if (interact_vnum_types[inter->type] == TYPE_OBJ && inter->vnum == vnum) {
+			if (interact_data[inter->type].vnum_type == TYPE_OBJ && inter->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "SCT [%5d] %s\r\n", GET_SECT_VNUM(sect), GET_SECT_NAME(sect));
+				build_page_display(ch, "SCT [%5d] %s", GET_SECT_VNUM(sect), GET_SECT_NAME(sect));
 			}
+		}
+	}
+	
+	// shops
+	HASH_ITER(hh, shop_table, shop, next_shop) {
+		any = find_quest_giver_in_list(SHOP_LOCATIONS(shop), QG_OBJECT, vnum);
+		any |= find_shop_item_in_list(SHOP_ITEMS(shop), vnum);
+		
+		if (any) {
+			++found;
+			build_page_display(ch, "SHOP [%5d] %s", SHOP_VNUM(shop), SHOP_NAME(shop));
 		}
 	}
 	
 	// socials
 	HASH_ITER(hh, social_table, soc, next_soc) {
-		if (size >= sizeof(buf)) {
-			break;
-		}
+		// REQ_x:
 		any = find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_GET_OBJECT, vnum);
 		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_WEARING, vnum);
 		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_WEARING_OR_HAS, vnum);
+		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_EMPIRE_PRODUCED_OBJECT, vnum);
 		
 		if (any) {
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "SOC [%5d] %s\r\n", SOC_VNUM(soc), SOC_NAME(soc));
+			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
 		}
 	}
 	
 	// vehicles
 	HASH_ITER(hh, vehicle_table, veh, next_veh) {
 		any = FALSE;
-		for (res = VEH_YEARLY_MAINTENANCE(veh); res && !any; res = res->next) {
-			if (res->vnum == vnum) {
+		for (res = VEH_REGULAR_MAINTENANCE(veh); res && !any; res = res->next) {
+			if (res->type == RES_OBJECT && res->vnum == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "VEH [%5d] %s\r\n", VEH_VNUM(veh), VEH_SHORT_DESC(veh));
+				build_page_display(ch, "VEH [%5d] %s", VEH_VNUM(veh), VEH_SHORT_DESC(veh));
+			}
+		}
+		LL_FOREACH(VEH_INTERACTIONS(veh), inter) {
+			if (interact_data[inter->type].vnum_type == TYPE_OBJ && inter->vnum == vnum) {
+				any = TRUE;
+				++found;
+				build_page_display(ch, "VEH [%5d] %s", VEH_VNUM(veh), VEH_SHORT_DESC(veh));
+				break;
 			}
 		}
 	}
 	
 	if (found > 0) {
-		size += snprintf(buf + size, sizeof(buf) - size, "%d location%s shown\r\n", found, PLURAL(found));
+		build_page_display(ch, "%d location%s shown", found, PLURAL(found));
 	}
 	else {
-		size += snprintf(buf + size, sizeof(buf) - size, " none\r\n");
+		build_page_display_str(ch, " none");
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -1402,6 +1739,11 @@ void update_live_obj_from_olc(obj_data *to_update, obj_data *old_proto, obj_data
 	// NOTE: If you ever choose to update flags here, some flags like LIGHT
 	// also require updates to the light counts in the world.
 	
+	// proto data
+	if (to_update->proto_data == old_proto->proto_data) {
+		to_update->proto_data = new_proto->proto_data;
+	}
+	
 	// strings
 	if (GET_OBJ_KEYWORDS(to_update) == GET_OBJ_KEYWORDS(old_proto)) {
 		GET_OBJ_KEYWORDS(to_update) = GET_OBJ_KEYWORDS(new_proto);
@@ -1416,30 +1758,16 @@ void update_live_obj_from_olc(obj_data *to_update, obj_data *old_proto, obj_data
 		GET_OBJ_ACTION_DESC(to_update) = GET_OBJ_ACTION_DESC(new_proto);
 	}
 	
-	// pointers
-	if (to_update->ex_description == old_proto->ex_description) {
-		to_update->ex_description = new_proto->ex_description;
-	}
-	if (to_update->storage == old_proto->storage) {
-		to_update->storage = new_proto->storage;
-	}
-	if (to_update->interactions == old_proto->interactions) {
-		to_update->interactions = new_proto->interactions;
-	}
-	if (to_update->custom_msgs == old_proto->custom_msgs) {
-		to_update->custom_msgs = new_proto->custom_msgs;
-	}
-	
 	// remove old scripts
 	if (SCRIPT(to_update)) {
-		extract_script(to_update, OBJ_TRIGGER);
+		remove_all_triggers(to_update, OBJ_TRIGGER);
 	}
-	if (to_update->proto_script && to_update->proto_script != old_proto->proto_script) {
-		free_proto_scripts(&to_update->proto_script);
+	if (GET_OBJ_SCRIPTS(to_update) && GET_OBJ_SCRIPTS(to_update) != GET_OBJ_SCRIPTS(old_proto)) {
+		free_proto_scripts(&GET_OBJ_SCRIPTS(to_update));
 	}
 	
 	// re-attach scripts
-	to_update->proto_script = copy_trig_protos(new_proto->proto_script);
+	GET_OBJ_SCRIPTS(to_update) = copy_trig_protos(GET_OBJ_SCRIPTS(new_proto));
 	assign_triggers(to_update, OBJ_TRIGGER);
 }
 
@@ -1450,16 +1778,13 @@ void update_live_obj_from_olc(obj_data *to_update, obj_data *old_proto, obj_data
 * @param descriptor_data *desc The descriptor who is saving an object.
 */
 void save_olc_object(descriptor_data *desc) {
-	void prune_extra_descs(struct extra_descr_data **list);
-	
 	obj_data *obj = GET_OLC_OBJECT(desc), *obj_iter, *proto;
 	obj_vnum vnum = GET_OLC_VNUM(desc);
 	struct empire_unique_storage *eus;
-	struct interaction_item *interact;
-	struct obj_storage_type *store;
 	struct trading_post_data *tpd;
 	empire_data *emp, *next_emp;
-	struct quest_lookup *ql;
+	char_data *chiter;
+	int old_timer;
 	UT_hash_handle hh;
 	
 	// have a place to save it?
@@ -1467,16 +1792,28 @@ void save_olc_object(descriptor_data *desc) {
 		proto = create_obj_table_entry(vnum);
 	}
 	
+	// for updating storage timers later
+	old_timer = GET_OBJ_TIMER(proto);
+	
 	// update the strings, pointers, and stats on live items
-	for (obj_iter = object_list; obj_iter; obj_iter = obj_iter->next) {
+	DL_FOREACH(object_list, obj_iter) {
 		if (GET_OBJ_VNUM(obj_iter) == vnum) {
 			update_live_obj_from_olc(obj_iter, proto, obj);
 		}
 	}
 	
+	// update objs in home storage
+	DL_FOREACH2(player_character_list, chiter, next_plr) {
+		DL_FOREACH(GET_HOME_STORAGE(chiter), eus) {
+			if (eus->obj && GET_OBJ_VNUM(eus->obj) == vnum) {
+				update_live_obj_from_olc(eus->obj, proto, obj);
+			}
+		}
+	}
+	
 	// update objects in unique storage
 	HASH_ITER(hh, empire_table, emp, next_emp) {
-		for (eus = EMPIRE_UNIQUE_STORAGE(emp); eus; eus = eus->next) {
+		DL_FOREACH(EMPIRE_UNIQUE_STORAGE(emp), eus) {
 			if (eus->obj && GET_OBJ_VNUM(eus->obj) == vnum) {
 				update_live_obj_from_olc(eus->obj, proto, obj);
 			}
@@ -1484,10 +1821,19 @@ void save_olc_object(descriptor_data *desc) {
 	}
 	
 	// update objs in trading post
-	for (tpd = trading_list; tpd; tpd = tpd->next) {
+	DL_FOREACH(trading_list, tpd) {
 		if (tpd->obj && GET_OBJ_VNUM(tpd->obj) == vnum) {
 			update_live_obj_from_olc(tpd->obj, proto, obj);
 		}
+	}
+	
+	// migrate over the quest/shop lookups
+	if (proto->proto_data) {
+		obj->proto_data->quest_lookups = proto->proto_data->quest_lookups;
+		proto->proto_data->quest_lookups = NULL;	// prevent freeing
+		
+		obj->proto_data->shop_lookups = proto->proto_data->shop_lookups;
+		proto->proto_data->shop_lookups = NULL;	// prevent freeing
 	}
 	
 	// free prototype strings and pointers
@@ -1503,47 +1849,46 @@ void save_olc_object(descriptor_data *desc) {
 	if (GET_OBJ_ACTION_DESC(proto)) {
 		free(GET_OBJ_ACTION_DESC(proto));
 	}
-	free_extra_descs(&proto->ex_description);
-	while ((interact = proto->interactions)) {
-		proto->interactions = interact->next;
-		free(interact);
-	}
-	while ((store = proto->storage)) {
-		proto->storage = store->next;
-		free(store);
-	}
-	free_custom_messages(proto->custom_msgs);
+	free_obj_proto_data(proto->proto_data);
 	
 	// old applies
 	free_obj_apply_list(GET_OBJ_APPLIES(proto));
 	GET_OBJ_APPLIES(proto) = NULL;
 	
 	// free old script?
-	if (proto->proto_script) {
-		free_proto_scripts(&proto->proto_script);
+	if (GET_OBJ_SCRIPTS(proto)) {
+		free_proto_scripts(&GET_OBJ_SCRIPTS(proto));
 	}
 	
 	// timer must be converted
 	if (GET_OBJ_TIMER(obj) <= 0) {
 		GET_OBJ_TIMER(obj) = UNLIMITED;
 	}
-	prune_extra_descs(&obj->ex_description);
+	prune_extra_descs(&obj->proto_data->ex_description);
 
 	// save data back over the proto-type
 	hh = proto->hh;	// save old hash handle
-	ql = proto->quest_lookups;	// save lookups
 	
 	*proto = *obj;
 	proto->vnum = vnum;	// ensure correct vnum
 	
 	proto->hh = hh;	// restore hash handle
-	proto->quest_lookups = ql;	// restore lookups
 	
 	// remove the reference to this so it won't be free'd
 	GET_OBJ_APPLIES(obj) = NULL;
 	
 	// and save to file
 	save_library_file_for_vnum(DB_BOOT_OBJ, vnum);
+	
+	// lastly, if timers changed:
+	if (GET_OBJ_TIMER(proto) != old_timer) {
+		ensure_storage_timers(vnum);
+		
+		// update objs in home storage
+		DL_FOREACH2(player_character_list, chiter, next_plr) {
+			ensure_home_storage_timers(chiter, vnum);
+		}
+	}
 }
 
 
@@ -1565,9 +1910,9 @@ void setup_extra_desc_editor(char_data *ch, struct extra_descr_data *ex) {
 * @return struct extra_descr_data* The copied list.
 */
 struct extra_descr_data *copy_extra_descs(struct extra_descr_data *list) {
-	struct extra_descr_data *new, *newlist, *last, *iter;
+	struct extra_descr_data *new, *newlist, *iter;
 	
-	newlist = last = NULL;
+	newlist = NULL;
 	for (iter = list; iter; iter = iter->next) {
 		// skip empty descriptions entirely
 		if (!iter->description || !*iter->description || !iter->keyword || !*iter->keyword) {
@@ -1577,19 +1922,30 @@ struct extra_descr_data *copy_extra_descs(struct extra_descr_data *list) {
 		CREATE(new, struct extra_descr_data, 1);
 		new->keyword = iter->keyword ? str_dup(iter->keyword) : NULL;
 		new->description = iter->description ? str_dup(iter->description) : NULL;
-		new->next = NULL;
-	
-		if (last) {
-			last->next = new;
-		}
-		else {
-			newlist = new;
-		}
-	
-		last = new;
+		LL_APPEND(newlist, new);
 	}
 	
 	return newlist;
+}
+
+
+/**
+* Duplicates a list of storage locations.
+*
+* @param struct obj_storage_type *list The list to copy.
+* @return struct obj_storage_type* The copied list.
+*/
+struct obj_storage_type *copy_storage(struct obj_storage_type *list) {
+	struct obj_storage_type *store, *new_store, *new_list;
+	
+	new_list = NULL;
+	LL_FOREACH(list, store) {
+		CREATE(new_store, struct obj_storage_type, 1);
+		*new_store = *store;
+		LL_APPEND(new_list, new_store);
+	}
+	
+	return new_list;
 }
 
 
@@ -1602,7 +1958,6 @@ struct extra_descr_data *copy_extra_descs(struct extra_descr_data *list) {
 * @return obj_data *The copied object.
 */
 obj_data *setup_olc_object(obj_data *input) {
-	struct obj_storage_type *store, *new_store, *last_store;
 	obj_data *new;
 	
 	CREATE(new, obj_data, 1);
@@ -1618,57 +1973,218 @@ obj_data *setup_olc_object(obj_data *input) {
 		GET_OBJ_SHORT_DESC(new) = GET_OBJ_SHORT_DESC(input) ? str_dup(GET_OBJ_SHORT_DESC(input)) : NULL;
 		GET_OBJ_ACTION_DESC(new) = GET_OBJ_ACTION_DESC(input) ? str_dup(GET_OBJ_ACTION_DESC(input)) : NULL;
 		
-		// copy extra descs
-		new->ex_description = copy_extra_descs(input->ex_description);
-		
-		// copy interactions
-		new->interactions = copy_interaction_list(input->interactions);
-		
-		new->storage = NULL;
-		last_store = NULL;
-		for (store = input->storage; store; store = store->next) {
-			CREATE(new_store, struct obj_storage_type, 1);
-			
-			*new_store = *store;
-			new_store->next = NULL;
-			
-			if (last_store) {
-				last_store->next = new_store;
-			}
-			else {
-				new->storage = new_store;
-			}
-			last_store = new_store;
-		}
-		
-		// copy custom msgs
-		new->custom_msgs = copy_custom_messages(input->custom_msgs);
+		// copy prototype data
+		new->proto_data = create_obj_proto_data();
+		*new->proto_data = *input->proto_data;
+		new->proto_data->ex_description = copy_extra_descs(input->proto_data->ex_description);
+		new->proto_data->custom_msgs = copy_custom_messages(input->proto_data->custom_msgs);
+		new->proto_data->interactions = copy_interaction_list(input->proto_data->interactions);
+		new->proto_data->storage = copy_storage(input->proto_data->storage);
+		// don't keep quest_lookups or shop_lookups
+		new->proto_data->quest_lookups = NULL;
+		new->proto_data->shop_lookups = NULL;
 		
 		// copy applies
 		GET_OBJ_APPLIES(new) = copy_obj_apply_list(GET_OBJ_APPLIES(input));
 		
 		// copy scripts
 		SCRIPT(new) = NULL;
-		new->proto_script = copy_trig_protos(input->proto_script);
+		GET_OBJ_SCRIPTS(new) = copy_trig_protos(GET_OBJ_SCRIPTS(input));
 		
 		// update version number
 		OBJ_VERSION(new) += 1;
 	}
 	else {
 		// brand new
-		GET_OBJ_KEYWORDS(new) = str_dup("object new");
-		GET_OBJ_SHORT_DESC(new) = str_dup("a new object");
-		GET_OBJ_LONG_DESC(new) = str_dup("A new object is sitting here.");
+		new->proto_data = create_obj_proto_data();
+		GET_OBJ_KEYWORDS(new) = str_dup(default_obj_keywords);
+		GET_OBJ_SHORT_DESC(new) = str_dup(default_obj_short);
+		GET_OBJ_LONG_DESC(new) = str_dup(default_obj_long);
 		GET_OBJ_ACTION_DESC(new) = NULL;
 		GET_OBJ_WEAR(new) = ITEM_WEAR_TAKE;
 		OBJ_VERSION(new) = 1;
 
 		SCRIPT(new) = NULL;
-		new->proto_script = NULL;
+		GET_OBJ_SCRIPTS(new) = NULL;
 	}
 	
 	// done
 	return new;
+}
+
+
+/**
+* Counts the words of text in an object's strings.
+*
+* @param obj_data *obj The object whose strings to count.
+* @return int The number of words in the object's strings.
+*/
+int wordcount_object(obj_data *obj) {
+	int count = 0;
+	
+	count += wordcount_string(GET_OBJ_KEYWORDS(obj));
+	count += wordcount_string(GET_OBJ_SHORT_DESC(obj));
+	count += wordcount_string(GET_OBJ_LONG_DESC(obj));
+	count += wordcount_string(GET_OBJ_ACTION_DESC(obj));
+	count += wordcount_extra_descriptions(GET_OBJ_EX_DESCS(obj));
+	count += wordcount_custom_messages(GET_OBJ_CUSTOM_MSGS(obj));
+	
+	return count;
+}
+
+
+ //////////////////////////////////////////////////////////////////////////////
+//// OBJECT SETTERS //////////////////////////////////////////////////////////
+
+/**
+* Updates the object's keywords. It does no validation, so you must
+* pre-validate the text.
+*
+* @param obj_data *obj The object to change.
+* @param const char *str The new keywords (will be copied). Or, NULL to set it back to the prototype.
+*/
+void set_obj_keywords(obj_data *obj, const char *str) {
+	obj_data *proto = obj_proto(GET_OBJ_VNUM(obj));
+	const char *default_val = "object unknown";
+	
+	if (GET_OBJ_KEYWORDS(obj) && (!proto || GET_OBJ_KEYWORDS(obj) != GET_OBJ_KEYWORDS(proto))) {
+		free(GET_OBJ_KEYWORDS(obj));
+	}
+	GET_OBJ_KEYWORDS(obj) = (str ? str_dup(str) : (proto ? GET_OBJ_KEYWORDS(proto) : str_dup(default_val)));
+	request_obj_save_in_world(obj);
+}
+
+
+/**
+* Updates the object's long desc. It does no validation, so you must
+* pre-validate the text.
+*
+* @param obj_data *obj The object to change.
+* @param const char *str The new long desc (will be copied). Or, NULL to set it back to the prototype.
+*/
+void set_obj_long_desc(obj_data *obj, const char *str) {
+	obj_data *proto = obj_proto(GET_OBJ_VNUM(obj));
+	const char *default_val = "An unknown object is here.";
+	
+	if (GET_OBJ_LONG_DESC(obj) && (!proto || GET_OBJ_LONG_DESC(obj) != GET_OBJ_LONG_DESC(proto))) {
+		free(GET_OBJ_LONG_DESC(obj));
+	}
+	GET_OBJ_LONG_DESC(obj) = (str ? str_dup(str) : (proto ? GET_OBJ_LONG_DESC(proto) : str_dup(default_val)));
+	request_obj_save_in_world(obj);
+}
+
+
+/**
+* Updates the object's look desc. It does no validation, so you must
+* pre-validate the text.
+*
+* @param obj_data *obj The object to change.
+* @param const char *str The new look desc (will be copied). Or, NULL to set it back to the prototype.
+* @param bool format If TRUE, will format it as a paragraph (IF str was not-null).
+*/
+void set_obj_look_desc(obj_data *obj, const char *str, bool format) {
+	obj_data *proto = obj_proto(GET_OBJ_VNUM(obj));
+	const char *default_val = "An unknown object is here.\r\n";
+	char temp[MAX_STRING_LENGTH];
+	const char *val = str;
+	
+	if (GET_OBJ_ACTION_DESC(obj) && (!proto || GET_OBJ_ACTION_DESC(obj) != GET_OBJ_ACTION_DESC(proto))) {
+		free(GET_OBJ_ACTION_DESC(obj));
+	}
+	
+	// check trailing crlf
+	if (str && *str && str[strlen(str)-1] != '\r' && str[strlen(str)-1] != '\n') {
+		strcpy(temp, str);
+		strcat(temp, "\r\n");	// I think there's always room for this
+		val = temp;
+	}
+	GET_OBJ_ACTION_DESC(obj) = (val ? str_dup(val) : (proto ? GET_OBJ_ACTION_DESC(proto) : str_dup(default_val)));
+	
+	// format if requested
+	if (val && format) {
+		format_text(&GET_OBJ_ACTION_DESC(obj), (strlen(GET_OBJ_ACTION_DESC(obj)) >= 80 ? FORMAT_INDENT : NOBITS), NULL, MAX_STRING_LENGTH);
+	}
+	
+	request_obj_save_in_world(obj);
+}
+
+
+/**
+* Updates the object's look desc by adding to the end. It does no validation,
+* so you must pre-validate the text.
+*
+* @param obj_data *obj The object to change.
+* @param const char *str The text to append to the look desc (will be copied).
+* @param bool format If TRUE, will format it as a paragraph.
+*/
+void set_obj_look_desc_append(obj_data *obj, const char *str, bool format) {
+	obj_data *proto = obj_proto(GET_OBJ_VNUM(obj));
+	char temp[MAX_STRING_LENGTH];
+	
+	if (str && *str) {
+		safe_snprintf(temp, sizeof(temp), "%s%s", NULLSAFE(GET_OBJ_ACTION_DESC(obj)), str);
+		
+		// check trailing crlf
+		if (str[strlen(str)-1] != '\r' && str[strlen(str)-1] != '\n') {
+			strcat(temp, "\r\n");
+		}
+		if (GET_OBJ_ACTION_DESC(obj) && (!proto || GET_OBJ_ACTION_DESC(obj) != GET_OBJ_ACTION_DESC(proto))) {
+			free(GET_OBJ_ACTION_DESC(obj));
+		}
+		GET_OBJ_ACTION_DESC(obj) = str_dup(temp);
+		if (format) {
+			format_text(&GET_OBJ_ACTION_DESC(obj), (strlen(GET_OBJ_ACTION_DESC(obj)) >= 80 ? FORMAT_INDENT : NOBITS), NULL, MAX_STRING_LENGTH);
+		}
+		
+		request_obj_save_in_world(obj);
+	}
+}
+
+
+/**
+* Updates the object's short desc. It does no validation, so you must
+* pre-validate the text.
+*
+* @param obj_data *obj The object to change.
+* @param const char *str The new short desc (will be copied). Or, NULL to set it back to the prototype.
+*/
+void set_obj_short_desc(obj_data *obj, const char *str) {
+	obj_data *proto = obj_proto(GET_OBJ_VNUM(obj));
+	const char *default_val = "an unknown object";
+	
+	if (GET_OBJ_SHORT_DESC(obj) && (!proto || GET_OBJ_SHORT_DESC(obj) != GET_OBJ_SHORT_DESC(proto))) {
+		free(GET_OBJ_SHORT_DESC(obj));
+	}
+	GET_OBJ_SHORT_DESC(obj) = (str ? str_dup(str) : (proto ? GET_OBJ_SHORT_DESC(proto) : str_dup(default_val)));
+	request_obj_save_in_world(obj);
+}
+
+
+/**
+* Sets one of an object's generic numeric values and ensures the object gets
+* saved if necessary.
+*
+* @param obj_data *obj The object.
+* @param int pos Which value position (generally 0-2).
+* @param int value What to set it to.
+* @return int Passes back 'value' so this can be used like a regular '=' assignment.
+*/
+int set_obj_val(obj_data *obj, int pos, int value) {
+	// safety
+	if (pos < 0 || pos >= NUM_OBJ_VAL_POSITIONS) {
+		log("SYSERR: set_obj_val called with invalid position %d", pos);
+		return value;
+	}
+	
+	// will it need to save?
+	if (GET_OBJ_VAL(obj, pos) != value) {
+		request_obj_save_in_world(obj);
+	}
+	
+	// and set it
+	GET_OBJ_VAL(obj, pos) = value;
+	
+	return value;
 }
 
 
@@ -1688,80 +2204,137 @@ void olc_get_values_display(char_data *ch, char *storage) {
 	
 	*storage = '\0';
 	
+	// ITEM_X: editor prompts
 	switch (GET_OBJ_TYPE(obj)) {
 		case ITEM_COINS: {
-			sprintf(storage + strlen(storage), "<&ycoinamount&0> %d\r\n", GET_COINS_AMOUNT(obj));
+			sprintf(storage + strlen(storage), "<%scoinamount\t0> %d%s\r\n", OLC_LABEL_VAL(GET_COINS_AMOUNT(obj), 0), GET_COINS_AMOUNT(obj), OBJ_FLAGGED(obj, OBJ_SCALABLE) ? " (scalable)" : "");
 			// empire number is not supported -- it will always use OTHER_COIN
 			break;
 		}
+		case ITEM_CURRENCY: {
+			sprintf(storage + strlen(storage), "<%scurrency\t0> %d %s\r\n", OLC_LABEL_VAL(GET_CURRENCY_VNUM(obj), NOTHING), GET_CURRENCY_VNUM(obj), get_generic_name_by_vnum(GET_CURRENCY_VNUM(obj)));
+			sprintf(storage + strlen(storage), "<%scoinamount\t0> %d\r\n", OLC_LABEL_VAL(GET_CURRENCY_AMOUNT(obj), 0), GET_CURRENCY_AMOUNT(obj));
+			break;
+		}
 		case ITEM_CORPSE: {
-			sprintf(storage + strlen(storage), "<&ycorpseof&0> %d %s\r\n", GET_CORPSE_NPC_VNUM(obj), get_mob_name_by_proto(GET_CORPSE_NPC_VNUM(obj)));
+			sprintf(storage + strlen(storage), "<%scorpseof\t0> %d %s\r\n", OLC_LABEL_VAL(GET_CORPSE_NPC_VNUM(obj), 0), GET_CORPSE_NPC_VNUM(obj), get_mob_name_by_proto(GET_CORPSE_NPC_VNUM(obj), FALSE));
+			sprintf(storage + strlen(storage), "<%ssize\t0> %s\r\n", OLC_LABEL_VAL(GET_CORPSE_SIZE(obj), 0), size_types[GET_CORPSE_SIZE(obj)]);
 			break;
 		}
 		case ITEM_WEAPON: {
-			sprintf(storage + strlen(storage), "<&yweapontype&0> %s\r\n", attack_hit_info[GET_WEAPON_TYPE(obj)].name);
-			sprintf(storage + strlen(storage), "<&ydamage&0> %d (speed %.2f, %s+%.2f base dps)\r\n", GET_WEAPON_DAMAGE_BONUS(obj), get_weapon_speed(obj), (IS_MAGIC_ATTACK(GET_WEAPON_TYPE(obj)) ? "Intelligence" : "Strength"), get_base_dps(obj));
+			sprintf(storage + strlen(storage), "<%sweapontype\t0> %d %s\r\n", OLC_LABEL_VAL(GET_WEAPON_TYPE(obj), 0), GET_WEAPON_TYPE(obj), get_attack_name_by_vnum(GET_WEAPON_TYPE(obj)));
+			if (OBJ_FLAGGED(obj, OBJ_SCALABLE)) {
+				sprintf(storage + strlen(storage), "<%sdamage\t0> %d (scalable, speed %.2f)\r\n", OLC_LABEL_VAL(GET_WEAPON_DAMAGE_BONUS(obj), 0), GET_WEAPON_DAMAGE_BONUS(obj), get_weapon_speed(obj));
+			}
+			else {	// not scalable
+				sprintf(storage + strlen(storage), "<%sdamage\t0> %d (speed %.2f, %s+%.2f base dps)\r\n", OLC_LABEL_VAL(GET_WEAPON_DAMAGE_BONUS(obj), 0), GET_WEAPON_DAMAGE_BONUS(obj), get_weapon_speed(obj), (IS_MAGIC_ATTACK(GET_WEAPON_TYPE(obj)) ? "Intelligence" : "Strength"), get_base_dps(obj));
+			}
 			break;
 		}
 		case ITEM_CONTAINER: {
-			sprintf(storage + strlen(storage), "<&ycapacity&0> %d object%s\r\n", GET_MAX_CONTAINER_CONTENTS(obj), PLURAL(GET_MAX_CONTAINER_CONTENTS(obj)));
+			sprintf(storage + strlen(storage), "<%scapacity\t0> %d object%s\r\n", OLC_LABEL_VAL(GET_MAX_CONTAINER_CONTENTS(obj), 0), GET_MAX_CONTAINER_CONTENTS(obj), PLURAL(GET_MAX_CONTAINER_CONTENTS(obj)));
 			
 			sprintbit(GET_CONTAINER_FLAGS(obj), container_bits, temp, TRUE);
-			sprintf(storage + strlen(storage), "<&ycontainerflags&0> %s\r\n", temp);
+			sprintf(storage + strlen(storage), "<%scontainerflags\t0> %s\r\n", OLC_LABEL_VAL(GET_CONTAINER_FLAGS(obj), NOBITS), temp);
 			break;
 		}
 		case ITEM_DRINKCON: {
-			sprintf(storage + strlen(storage), "<&ycapacity&0> %d drink%s\r\n", GET_DRINK_CONTAINER_CAPACITY(obj), PLURAL(GET_DRINK_CONTAINER_CAPACITY(obj)));
-			sprintf(storage + strlen(storage), "<&ycontents&0> %d drink%s\r\n", GET_DRINK_CONTAINER_CONTENTS(obj), PLURAL(GET_DRINK_CONTAINER_CONTENTS(obj)));
-			sprintf(storage + strlen(storage), "<&yliquid&0> %s\r\n", drinks[GET_DRINK_CONTAINER_TYPE(obj)]);
+			if (OBJ_FLAGGED(obj, OBJ_SCALABLE)) {
+				sprintf(storage + strlen(storage), "<%scapacity\t0> %d (scalable)\r\n", OLC_LABEL_VAL(GET_DRINK_CONTAINER_CAPACITY(obj), 0), GET_DRINK_CONTAINER_CAPACITY(obj));
+			}
+			else {
+				sprintf(storage + strlen(storage), "<%scapacity\t0> %d drink%s\r\n", OLC_LABEL_VAL(GET_DRINK_CONTAINER_CAPACITY(obj), 0), GET_DRINK_CONTAINER_CAPACITY(obj), PLURAL(GET_DRINK_CONTAINER_CAPACITY(obj)));
+			}
+			sprintf(storage + strlen(storage), "<%scontents\t0> %d drink%s\r\n", OLC_LABEL_VAL(GET_DRINK_CONTAINER_CONTENTS(obj), 0), GET_DRINK_CONTAINER_CONTENTS(obj), PLURAL(GET_DRINK_CONTAINER_CONTENTS(obj)));
+			sprintf(storage + strlen(storage), "<%sliquid\t0> %d %s\r\n", OLC_LABEL_VAL(GET_DRINK_CONTAINER_TYPE(obj), 0), GET_DRINK_CONTAINER_TYPE(obj), get_generic_name_by_vnum(GET_DRINK_CONTAINER_TYPE(obj)));
 			break;
 		}
 		case ITEM_FOOD: {
-			sprintf(storage + strlen(storage), "<&yfullness&0> %d hour%s\r\n", GET_FOOD_HOURS_OF_FULLNESS(obj), (GET_FOOD_HOURS_OF_FULLNESS(obj) != 1 ? "s" : ""));
+			sprintf(storage + strlen(storage), "<%sfullness\t0> %d hour%s\r\n", OLC_LABEL_VAL(GET_FOOD_HOURS_OF_FULLNESS(obj), 0), GET_FOOD_HOURS_OF_FULLNESS(obj), (GET_FOOD_HOURS_OF_FULLNESS(obj) != 1 ? "s" : ""));
 			break;
 		}
 		case ITEM_PORTAL: {
-			sprintf(storage + strlen(storage), "<&yroomvnum&0> %d\r\n", GET_PORTAL_TARGET_VNUM(obj));
+			sprintf(storage + strlen(storage), "<%sroomvnum\t0> %d\r\n", OLC_LABEL_VAL(GET_PORTAL_TARGET_VNUM(obj), 0), GET_PORTAL_TARGET_VNUM(obj));
 			break;
 		}
 		case ITEM_MISSILE_WEAPON: {
-			sprintf(storage + strlen(storage), "<&ymissilespeed&0> %.2f\r\n", missile_weapon_speed[GET_MISSILE_WEAPON_SPEED(obj)]);
-			sprintf(storage + strlen(storage), "<&ydamage&0> %d (speed %.2f, %.2f base dps)\r\n", GET_MISSILE_WEAPON_DAMAGE(obj), get_weapon_speed(obj), get_base_dps(obj));
-			sprintf(storage + strlen(storage), "<&yarrowtype&0> %c\r\n", 'A' + GET_MISSILE_WEAPON_TYPE(obj));
+			sprintf(storage + strlen(storage), "<%sweapontype\t0> %d %s\r\n", OLC_LABEL_VAL(GET_MISSILE_WEAPON_TYPE(obj), 0), GET_MISSILE_WEAPON_TYPE(obj), get_attack_name_by_vnum(GET_MISSILE_WEAPON_TYPE(obj)));
+			if (OBJ_FLAGGED(obj, OBJ_SCALABLE)) {
+				sprintf(storage + strlen(storage), "<%sdamage\t0> %d (scalable, speed %.2f)\r\n", OLC_LABEL_VAL(GET_MISSILE_WEAPON_DAMAGE(obj), 0), GET_MISSILE_WEAPON_DAMAGE(obj), get_weapon_speed(obj));
+			}
+			else {
+				sprintf(storage + strlen(storage), "<%sdamage\t0> %d (speed %.2f, %s+%.2f base dps)\r\n", OLC_LABEL_VAL(GET_MISSILE_WEAPON_DAMAGE(obj), 0), GET_MISSILE_WEAPON_DAMAGE(obj), get_weapon_speed(obj), (IS_MAGIC_ATTACK(GET_MISSILE_WEAPON_TYPE(obj)) ? "Intelligence" : "Strength"), get_base_dps(obj));
+			}
+			sprintf(storage + strlen(storage), "<%sammotype\t0> %c\r\n", OLC_LABEL_VAL(GET_MISSILE_WEAPON_AMMO_TYPE(obj), 0), 'A' + GET_MISSILE_WEAPON_AMMO_TYPE(obj));
 			break;
 		}
-		case ITEM_ARROW: {
-			sprintf(storage + strlen(storage), "<&yquantity&0> %d\r\n", GET_ARROW_QUANTITY(obj));
-			sprintf(storage + strlen(storage), "<&ydamage&0> %+d\r\n", GET_ARROW_DAMAGE_BONUS(obj));
-			sprintf(storage + strlen(storage), "<&yarrowtype&0> %c\r\n", 'A' + GET_ARROW_TYPE(obj));
+		case ITEM_AMMO: {
+			sprintf(storage + strlen(storage), "<%squantity\t0> %d\r\n", OLC_LABEL_VAL(GET_AMMO_QUANTITY(obj), 0), GET_AMMO_QUANTITY(obj));
+			sprintf(storage + strlen(storage), "<%sdamage\t0> %+d%s\r\n", OLC_LABEL_VAL(GET_AMMO_DAMAGE_BONUS(obj), 0), GET_AMMO_DAMAGE_BONUS(obj), OBJ_FLAGGED(obj, OBJ_SCALABLE) ? " (scalable)" : "");
+			sprintf(storage + strlen(storage), "<%sammotype\t0> %c\r\n", OLC_LABEL_VAL(GET_AMMO_TYPE(obj), 0), 'A' + GET_AMMO_TYPE(obj));
 			break;
 		}
 		case ITEM_PACK: {
-			sprintf(storage + strlen(storage), "<&ycapacity&0> %d object%s\r\n", GET_PACK_CAPACITY(obj), PLURAL(GET_PACK_CAPACITY(obj)));
+			sprintf(storage + strlen(storage), "<%scapacity\t0> %d object%s%s\r\n", OLC_LABEL_VAL(GET_PACK_CAPACITY(obj), 0), GET_PACK_CAPACITY(obj), PLURAL(GET_PACK_CAPACITY(obj)), OBJ_FLAGGED(obj, OBJ_SCALABLE) ? " (scalable)" : "");
+			break;
+		}
+		case ITEM_PAINT: {
+			sprintf(storage + strlen(storage), "<%spaint\t0> %s%s\t0\r\n", OLC_LABEL_VAL(GET_PAINT_COLOR(obj), 0), paint_colors[GET_PAINT_COLOR(obj)], paint_names[GET_PAINT_COLOR(obj)]);
 			break;
 		}
 		case ITEM_POTION: {
-			sprintf(storage + strlen(storage), "<&ypotion&0> %s\r\n", potion_data[GET_POTION_TYPE(obj)].name);
-			sprintf(storage + strlen(storage), "<&ypotionscale&0> %d\r\n", GET_POTION_SCALE(obj));
+			sprintf(storage + strlen(storage), "<%saffecttype\t0> [%d] %s\r\n", OLC_LABEL_VAL(GET_POTION_AFFECT(obj), NOTHING), GET_POTION_AFFECT(obj), GET_POTION_AFFECT(obj) != NOTHING ? get_generic_name_by_vnum(GET_POTION_AFFECT(obj)) : "not custom");
+			sprintf(storage + strlen(storage), "<%scooldown\t0> [%d] %s, <%scdtime\t0> %d second%s\r\n", OLC_LABEL_VAL(GET_POTION_COOLDOWN_TYPE(obj), NOTHING), GET_POTION_COOLDOWN_TYPE(obj), GET_POTION_COOLDOWN_TYPE(obj) != NOTHING ? get_generic_name_by_vnum(GET_POTION_COOLDOWN_TYPE(obj)) : "no cooldown", OLC_LABEL_VAL(GET_POTION_COOLDOWN_TIME(obj), 0), GET_POTION_COOLDOWN_TIME(obj), PLURAL(GET_POTION_COOLDOWN_TIME(obj)));
 			break;
 		}
 		case ITEM_POISON: {
-			sprintf(storage + strlen(storage), "<&ypoison&0> %s\r\n", poison_data[GET_POISON_TYPE(obj)].name);
-			sprintf(storage + strlen(storage), "<&ycharges&0> %d\r\n", GET_POISON_CHARGES(obj));
+			sprintf(storage + strlen(storage), "<%saffecttype\t0> [%d] %s\r\n", OLC_LABEL_VAL(GET_POISON_AFFECT(obj), NOTHING), GET_POISON_AFFECT(obj), GET_POISON_AFFECT(obj) != NOTHING ? get_generic_name_by_vnum(GET_POISON_AFFECT(obj)) : "not custom");
+			sprintf(storage + strlen(storage), "<%scharges\t0> %d\r\n", OLC_LABEL_VAL(GET_POISON_CHARGES(obj), 0), GET_POISON_CHARGES(obj));
+			break;
+		}
+		case ITEM_RECIPE: {
+			craft_data *cft = craft_proto(GET_RECIPE_VNUM(obj));
+			sprintf(storage + strlen(storage), "<%srecipe\t0> %d %s\r\n", OLC_LABEL_VAL(GET_RECIPE_VNUM(obj), 0), GET_RECIPE_VNUM(obj), cft ? GET_CRAFT_NAME(cft) : "none");
 			break;
 		}
 		case ITEM_ARMOR: {
-			sprintf(storage + strlen(storage), "<&yarmortype&0> %s\r\n", armor_types[GET_ARMOR_TYPE(obj)]);
+			sprintf(storage + strlen(storage), "<%sarmortype\t0> %s\r\n", OLC_LABEL_VAL(GET_ARMOR_TYPE(obj), 0), armor_types[GET_ARMOR_TYPE(obj)]);
 			break;
 		}
 		case ITEM_BOOK: {
 			book = book_proto(GET_BOOK_ID(obj));
-			sprintf(storage + strlen(storage), "<&ytext&0> [%d] %s\r\n", GET_BOOK_ID(obj), (book ? book->title : "not set"));
+			sprintf(storage + strlen(storage), "<%stext\t0> [%d] %s\r\n", OLC_LABEL_VAL(GET_BOOK_ID(obj), 0), GET_BOOK_ID(obj), (book ? BOOK_TITLE(book) : "not set"));
 			break;
 		}
 		case ITEM_WEALTH: {
-			sprintf(storage + strlen(storage), "<&ywealth&0> %d\r\n", GET_WEALTH_VALUE(obj));
-			sprintf(storage + strlen(storage), "<&yautomint&0> %s\r\n", offon_types[GET_WEALTH_AUTOMINT(obj)]);
+			sprintf(storage + strlen(storage), "<%swealth\t0> %d\r\n", OLC_LABEL_VAL(GET_WEALTH_VALUE(obj), 0), GET_WEALTH_VALUE(obj));
+			sprintbit(GET_WEALTH_MINT_FLAGS(obj), mint_flags, temp, TRUE);
+			sprintf(storage + strlen(storage), "<%smintflags\t0> %s\r\n", OLC_LABEL_VAL(GET_WEALTH_MINT_FLAGS(obj), NOBITS), temp);
+			break;
+		}
+		case ITEM_LIGHTER: {
+			if (GET_LIGHTER_USES(obj) == UNLIMITED) {
+				sprintf(storage + strlen(storage), "<%suses\t0> unlimited\r\n", OLC_LABEL_VAL(GET_LIGHTER_USES(obj), 0));
+			}
+			else {
+				sprintf(storage + strlen(storage), "<%suses\t0> %d\r\n", OLC_LABEL_VAL(GET_LIGHTER_USES(obj), 0), GET_LIGHTER_USES(obj));
+			}
+			break;
+		}
+		case ITEM_MINIPET: {
+			sprintf(storage + strlen(storage), "<%sminipet\t0> %d %s\r\n", OLC_LABEL_VAL(GET_MINIPET_VNUM(obj), NOTHING), GET_MINIPET_VNUM(obj), get_mob_name_by_proto(GET_MINIPET_VNUM(obj), FALSE));
+			break;
+		}
+		case ITEM_LIGHT: {
+			if (GET_LIGHT_HOURS_REMAINING(obj) == UNLIMITED) {
+				sprintf(storage + strlen(storage), "<%slighthours\t0> unlimited\r\n", OLC_LABEL_VAL(GET_LIGHT_HOURS_REMAINING(obj), 0));
+			}
+			else {
+				sprintf(storage + strlen(storage), "<%slighthours\t0> %d\r\n", OLC_LABEL_VAL(GET_LIGHT_HOURS_REMAINING(obj), 0), GET_LIGHT_HOURS_REMAINING(obj));
+			}
+			sprintbit(GET_LIGHT_FLAGS(obj), light_flags, temp, TRUE);
+			sprintf(storage + strlen(storage), "<%slightflags\t0> %s\r\n", OLC_LABEL_VAL(GET_LIGHT_FLAGS(obj), NOBITS), temp);
+			sprintf(storage + strlen(storage), "<%slightislit\t0> %s\r\n", OLC_LABEL_VAL(GET_LIGHT_IS_LIT(obj), 1), GET_LIGHT_IS_LIT(obj) ? "yes" : "no");
 			break;
 		}
 		
@@ -1780,10 +2353,10 @@ void olc_get_values_display(char_data *ch, char *storage) {
 		default: {
 			// don't show "value2" (val 1) if it's plantable
 			if (OBJ_FLAGGED(obj, OBJ_PLANTABLE) && GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE) >= 0) {
-				sprintf(storage + strlen(storage), "<&yvalue0&0> %d, <&yvalue2&0> %d\r\n", GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 2));
+				sprintf(storage + strlen(storage), "<%svalue0\t0> %d, <%svalue2\t0> %d\r\n", OLC_LABEL_VAL(GET_OBJ_VAL(obj, 0), 0), GET_OBJ_VAL(obj, 0), OLC_LABEL_VAL(GET_OBJ_VAL(obj, 2), 0), GET_OBJ_VAL(obj, 2));
 			}
 			else {
-				sprintf(storage + strlen(storage), "<&yvalue0&0> %d, <&yvalue1&0> %d, <&yvalue2&0> %d\r\n", GET_OBJ_VAL(obj, 0), GET_OBJ_VAL(obj, 1), GET_OBJ_VAL(obj, 2));
+				sprintf(storage + strlen(storage), "<%svalue0\t0> %d, <%svalue1\t0> %d, <%svalue2\t0> %d\r\n", OLC_LABEL_VAL(GET_OBJ_VAL(obj, 0), 0), GET_OBJ_VAL(obj, 0), OLC_LABEL_VAL(GET_OBJ_VAL(obj, 1), 0), GET_OBJ_VAL(obj, 1), OLC_LABEL_VAL(GET_OBJ_VAL(obj, 2), 0), GET_OBJ_VAL(obj, 2));
 			}
 			break;
 		}
@@ -1791,7 +2364,7 @@ void olc_get_values_display(char_data *ch, char *storage) {
 	
 	// this is added for all of them
 	if (OBJ_FLAGGED(obj, OBJ_PLANTABLE) && GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE) >= 0) {
-		sprintf(storage + strlen(storage), "<&yplants&0> [%d] %s\r\n", GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE), GET_CROP_NAME(crop_proto(GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE))));
+		sprintf(storage + strlen(storage), "<%splants\t0> [%d] %s\r\n", OLC_LABEL_VAL(GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE), 0), GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE), GET_CROP_NAME(crop_proto(GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE))));
 	}
 }
 
@@ -1803,120 +2376,121 @@ void olc_get_values_display(char_data *ch, char *storage) {
 * @param char_data *ch The person who is editing an object and will see its display.
 */
 void olc_show_object(char_data *ch) {
-	void get_extra_desc_display(struct extra_descr_data *list, char *save_buffer);
-	void get_interaction_display(struct interaction_item *list, char *save_buffer);
-	void get_script_display(struct trig_proto_list *list, char *save_buffer);
-	
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	char buf1[MAX_STRING_LENGTH*4];
 	struct obj_storage_type *store;
 	struct custom_message *ocm;
 	struct obj_apply *apply;
-	int count, minutes;
-	bld_data *bld;
+	int count, seconds;
 	
 	if (!obj) {
 		return;
 	}
 	
-	*buf = '\0';
-	sprintf(buf + strlen(buf), "[&c%d&0] &c%s&0 (Gear rating [&c%.2f&0])\r\n", GET_OLC_VNUM(ch->desc), !obj_proto(GET_OLC_VNUM(ch->desc)) ? "new object" : get_obj_name_by_proto(GET_OLC_VNUM(ch->desc)), rate_item(obj));
-	sprintf(buf + strlen(buf), "<&ykeywords&0> %s\r\n", GET_OBJ_KEYWORDS(obj));
-	sprintf(buf + strlen(buf), "<&yshortdescription&0> %s\r\n", GET_OBJ_SHORT_DESC(obj));
-	sprintf(buf + strlen(buf), "<&ylongdescription&0> %s\r\n", GET_OBJ_LONG_DESC(obj));
-	sprintf(buf + strlen(buf), "<&ylookdescription&0>\r\n%s", NULLSAFE(GET_OBJ_ACTION_DESC(obj)));
+	build_page_display(ch, "[%s%d\t0] %s%s\t0 (Gear rating [%s%.2f\t0])", OLC_LABEL_CHANGED, GET_OLC_VNUM(ch->desc), OLC_LABEL_UNCHANGED, !obj_proto(GET_OLC_VNUM(ch->desc)) ? "new object" : get_obj_name_by_proto(GET_OLC_VNUM(ch->desc)), OLC_LABEL_CHANGED, rate_item(obj));
+	build_page_display(ch, "<%skeywords\t0> %s", OLC_LABEL_STR(GET_OBJ_KEYWORDS(obj), default_obj_keywords), GET_OBJ_KEYWORDS(obj));
+	build_page_display(ch, "<%sshortdescription\t0> %s", OLC_LABEL_STR(GET_OBJ_SHORT_DESC(obj), default_obj_short), GET_OBJ_SHORT_DESC(obj));
+	build_page_display(ch, "<%slongdescription\t0> %s", OLC_LABEL_STR(GET_OBJ_LONG_DESC(obj), default_obj_long), GET_OBJ_LONG_DESC(obj));
+	build_page_display(ch, "<%slookdescription\t0>\r\n%s", OLC_LABEL_STR(GET_OBJ_ACTION_DESC(obj), ""), NULLSAFE(GET_OBJ_ACTION_DESC(obj)));
 	
 	if (GET_OBJ_TIMER(obj) > 0) {
-		minutes = GET_OBJ_TIMER(obj) * SECS_PER_MUD_HOUR / SECS_PER_REAL_MIN;
-		sprintf(buf1, "%d ticks (%d:%02d)", GET_OBJ_TIMER(obj), minutes / 60, minutes % 60);
+		seconds = GET_OBJ_TIMER(obj) * SECS_PER_MUD_HOUR;
+		sprintf(buf1, "%d tick%s (%s)", GET_OBJ_TIMER(obj), PLURAL(GET_OBJ_TIMER(obj)), colon_time(seconds, FALSE, NULL));
 	}
 	else {
 		strcpy(buf1, "none");
 	}
-	sprintf(buf + strlen(buf), "<&ytype&0> %s, <&ymaterial&0> %s, <&ytimer&0> %s\r\n", item_types[(int) GET_OBJ_TYPE(obj)], materials[GET_OBJ_MATERIAL(obj)].name, buf1);
+	build_page_display(ch, "<%stype\t0> %s, <%smaterial\t0> %s, <%stimer\t0> %s", OLC_LABEL_VAL(GET_OBJ_TYPE(obj), 0), item_types[(int) GET_OBJ_TYPE(obj)], OLC_LABEL_VAL(GET_OBJ_MATERIAL(obj), 0), materials[GET_OBJ_MATERIAL(obj)].name, OLC_LABEL_VAL(GET_OBJ_TIMER(obj), 0), buf1);
 	
 	sprintbit(GET_OBJ_WEAR(obj), wear_bits, buf1, TRUE);
-	sprintf(buf + strlen(buf), "<&ywear&0> %s\r\n", buf1);
+	build_page_display(ch, "<%swear\t0> %s", OLC_LABEL_VAL(GET_OBJ_WEAR(obj), ITEM_WEAR_TAKE), buf1);
 	
 	sprintbit(GET_OBJ_EXTRA(obj), extra_bits, buf1, TRUE);
-	sprintf(buf + strlen(buf), "<&yflags&0> %s\r\n", buf1);
+	build_page_display(ch, "<%sflags\t0> %s", OLC_LABEL_VAL(GET_OBJ_EXTRA(obj), NOBITS), buf1);
 	
-	sprintf(buf + strlen(buf), "<&ycomponent&0> %s\r\n", component_types[GET_OBJ_CMP_TYPE(obj)]);
-	if (GET_OBJ_CMP_TYPE(obj) != CMP_NONE) {
-		prettier_sprintbit(GET_OBJ_CMP_FLAGS(obj), component_flags, buf1);
-		sprintf(buf + strlen(buf), "<&ycompflags&0> %s\r\n", buf1);
-	}
+	sprintbit(GET_OBJ_TOOL_FLAGS(obj), tool_flags, buf1, TRUE);
+	build_page_display(ch, "<%stools\t0> %s", OLC_LABEL_VAL(GET_OBJ_TOOL_FLAGS(obj), NOBITS), buf1);
+	
+	sprintbit(GET_OBJ_REQUIRES_TOOL(obj), tool_flags, buf1, TRUE);
+	build_page_display(ch, "<%srequirestools\t0> %s", OLC_LABEL_VAL(GET_OBJ_REQUIRES_TOOL(obj), NOBITS), buf1);
+	
+	build_page_display(ch, "<%scomponent\t0> [%d] %s", OLC_LABEL_VAL(GET_OBJ_COMPONENT(obj), NOTHING), GET_OBJ_COMPONENT(obj), GET_OBJ_COMPONENT(obj) != NOTHING ? get_generic_name_by_vnum(GET_OBJ_COMPONENT(obj)) : "none");
 	
 	if (GET_OBJ_MIN_SCALE_LEVEL(obj) > 0) {
-		sprintf(buf + strlen(buf), "<&yminlevel&0> %d\r\n", GET_OBJ_MIN_SCALE_LEVEL(obj));
+		build_page_display(ch, "<%sminlevel\t0> %d", OLC_LABEL_CHANGED, GET_OBJ_MIN_SCALE_LEVEL(obj));
 	}
 	else {
-		sprintf(buf + strlen(buf), "<&yminlevel&0> none\r\n");
+		build_page_display(ch, "<%sminlevel\t0> none", OLC_LABEL_UNCHANGED);
 	}
 	if (GET_OBJ_MAX_SCALE_LEVEL(obj) > 0) {
-		sprintf(buf + strlen(buf), "<&ymaxlevel&0> %d\r\n", GET_OBJ_MAX_SCALE_LEVEL(obj));
+		build_page_display(ch, "<%smaxlevel\t0> %d", OLC_LABEL_CHANGED, GET_OBJ_MAX_SCALE_LEVEL(obj));
 	}
 	else {
-		sprintf(buf + strlen(buf), "<&ymaxlevel&0> none\r\n");
+		build_page_display(ch, "<%smaxlevel\t0> none", OLC_LABEL_UNCHANGED);
 	}
 	
 	if (GET_OBJ_REQUIRES_QUEST(obj) != NOTHING) {
-		sprintf(buf + strlen(buf), "<&yrequiresquest&0> [%d] %s\r\n", GET_OBJ_REQUIRES_QUEST(obj), get_quest_name_by_proto(GET_OBJ_REQUIRES_QUEST(obj)));
+		build_page_display(ch, "<%srequiresquest\t0> [%d] %s", OLC_LABEL_CHANGED, GET_OBJ_REQUIRES_QUEST(obj), get_quest_name_by_proto(GET_OBJ_REQUIRES_QUEST(obj)));
 	}
 	else {
-		sprintf(buf + strlen(buf), "<&yrequiresquest&0> none\r\n");
+		build_page_display(ch, "<%srequiresquest\t0> none", OLC_LABEL_UNCHANGED);
 	}
 	
 	olc_get_values_display(ch, buf1);
-	strcat(buf, buf1);
+	if (*buf1) {
+		build_page_display_str(ch, buf1);
+	}
 
 	sprintbit(GET_OBJ_AFF_FLAGS(obj), affected_bits, buf1, TRUE);
-	sprintf(buf + strlen(buf), "<&yaffects&0> %s\r\n", buf1);
+	build_page_display(ch, "<%saffects\t0> %s", OLC_LABEL_VAL(GET_OBJ_AFF_FLAGS(obj), NOBITS), buf1);
 	
 	// applies / affected[]
 	count = 0;
-	sprintf(buf + strlen(buf), "Attribute Applies: <&yapply&0>\r\n");
+	build_page_display(ch, "Attribute Applies: <%sapply\t0>%s", OLC_LABEL_PTR(GET_OBJ_APPLIES(obj)), OBJ_FLAGGED(obj, OBJ_SCALABLE) ? " (scalable)" : "");
 	for (apply = GET_OBJ_APPLIES(obj); apply; apply = apply->next) {
-		sprintf(buf + strlen(buf), " &y%2d&0. %+d to %s (%s)\r\n", ++count, apply->modifier, apply_types[(int) apply->location], apply_type_names[(int)apply->apply_type]);
+		build_page_display_col(ch, 2, FALSE, " \ty%2d\t0. %+d to %s (%s)", ++count, apply->modifier, apply_types[(int) apply->location], apply_type_names[(int)apply->apply_type]);
 	}
 	
 	// exdesc
-	sprintf(buf + strlen(buf), "Extra descriptions: <&yextra&0>\r\n");
-	if (obj->ex_description) {
-		get_extra_desc_display(obj->ex_description, buf1);
-		strcat(buf, buf1);
+	build_page_display(ch, "Extra descriptions: <%sextra\t0>", OLC_LABEL_PTR(GET_OBJ_EX_DESCS(obj)));
+	if (GET_OBJ_EX_DESCS(obj)) {
+		show_extra_desc_display(ch, GET_OBJ_EX_DESCS(obj), FALSE);
 	}
 
-	sprintf(buf + strlen(buf), "Interactions: <&yinteraction&0>\r\n");
-	if (obj->interactions) {
-		get_interaction_display(obj->interactions, buf1);
-		strcat(buf, buf1);
+	build_page_display(ch, "Interactions: <%sinteraction\t0>", OLC_LABEL_PTR(GET_OBJ_INTERACTIONS(obj)));
+	if (GET_OBJ_INTERACTIONS(obj)) {
+		show_interaction_display(ch, GET_OBJ_INTERACTIONS(obj), FALSE);
 	}
 	
 	// storage
-	sprintf(buf + strlen(buf), "Storage: <&ystorage&0>\r\n");
+	build_page_display(ch, "Storage: <%sstorage\t0>", OLC_LABEL_PTR(GET_OBJ_STORAGE(obj)));
 	count = 0;
-	for (store = obj->storage; store; store = store->next) {
-		bld = building_proto(store->building_type);
-		
+	LL_FOREACH(GET_OBJ_STORAGE(obj), store) {
 		sprintbit(store->flags, storage_bits, buf2, TRUE);
-		sprintf(buf + strlen(buf), " &y%d&0. [%d] %s ( %s)\r\n", ++count, GET_BLD_VNUM(bld), GET_BLD_NAME(bld), buf2);
+		
+		// TYPE_x: storage type
+		if (store->type == TYPE_BLD) {
+			build_page_display_col(ch, 2, FALSE, " \ty%d\t0. [B%d] %s ( %s)", ++count, store->vnum, get_bld_name_by_proto(store->vnum), buf2);
+		}
+		else if (store->type == TYPE_VEH) {
+			build_page_display_col(ch, 2, FALSE, " \ty%d\t0. [V%d] %s ( %s)", ++count, store->vnum, get_vehicle_name_by_proto(store->vnum), buf2);
+		}
 	}
 	
 	// custom messages
-	sprintf(buf + strlen(buf), "Custom messages: <&ycustom&0>\r\n");
+	build_page_display(ch, "Custom messages: <%scustom\t0>", OLC_LABEL_PTR(GET_OBJ_CUSTOM_MSGS(obj)));
 	count = 0;
-	for (ocm = obj->custom_msgs; ocm; ocm = ocm->next) {
-		sprintf(buf + strlen(buf), " &y%d&0. [%s] %s\r\n", ++count, obj_custom_types[ocm->type], ocm->msg);
+	for (ocm = GET_OBJ_CUSTOM_MSGS(obj); ocm; ocm = ocm->next) {
+		build_page_display(ch, " \ty%2d\t0. [%s] %s", ++count, obj_custom_types[ocm->type], ocm->msg);
 	}
 	
 	// scripts
-	sprintf(buf + strlen(buf), "Scripts: <&yscript&0>\r\n");
-	if (obj->proto_script) {
-		get_script_display(obj->proto_script, buf1);
-		strcat(buf, buf1);
+	build_page_display(ch, "Scripts: <%sscript\t0>", OLC_LABEL_PTR(GET_OBJ_SCRIPTS(obj)));
+	if (GET_OBJ_SCRIPTS(obj)) {
+		show_script_display(ch, GET_OBJ_SCRIPTS(obj), FALSE);
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -1942,12 +2516,51 @@ OLC_MODULE(oedit_affects) {
 }
 
 
+OLC_MODULE(oedit_affecttype) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	any_vnum old;
+	int pos;
+	
+	switch (GET_OBJ_TYPE(obj)) {
+		case ITEM_POTION: {
+			pos = VAL_POTION_AFFECT;
+			break;
+		}
+		case ITEM_POISON: {
+			pos = VAL_POISON_AFFECT;
+			break;
+		}
+		default: {
+			msg_to_char(ch, "You can't set an affecttype on this type of item.\r\n");
+			return;
+		}
+	}
+	
+	if (!str_cmp(argument, "none")) {
+		set_obj_val(obj, pos, NOTHING);
+		msg_to_char(ch, "It now has no custom affect type.\r\n");
+	}
+	else {
+		old = GET_OBJ_VAL(obj, pos);
+		set_obj_val(obj, pos, olc_process_number(ch, argument, "affect vnum", "affecttype", 0, MAX_VNUM, GET_OBJ_VAL(obj, pos)));
+
+		if (!find_generic(GET_OBJ_VAL(obj, pos), GENERIC_AFFECT)) {
+			msg_to_char(ch, "Invalid affect generic vnum %d. Old value restored.\r\n", GET_OBJ_VAL(obj, pos));
+			set_obj_val(obj, pos, old);
+		}
+		else {
+			msg_to_char(ch, "Affect type set to [%d] %s.\r\n", GET_OBJ_VAL(obj, pos), get_generic_name_by_vnum(GET_OBJ_VAL(obj, pos)));
+		}
+	}
+}
+
+
 OLC_MODULE(oedit_apply) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH], arg4[MAX_INPUT_LENGTH];
 	char num_arg[MAX_INPUT_LENGTH], type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH];
 	int loc, num, iter, apply_type;
-	struct obj_apply *apply, *change, *temp;
+	struct obj_apply *apply, *change;
 	bool found;
 	
 	// arg1 arg2 arg3
@@ -1973,7 +2586,7 @@ OLC_MODULE(oedit_apply) {
 					found = TRUE;
 					
 					msg_to_char(ch, "You remove the %+d to %s (%s).\r\n", apply->modifier, apply_types[(int)apply->location], apply_type_names[(int)apply->apply_type]);
-					REMOVE_FROM_LIST(apply, GET_OBJ_APPLIES(obj), next);
+					LL_DELETE(GET_OBJ_APPLIES(obj), apply);
 					free(apply);
 				}
 			}
@@ -2004,17 +2617,7 @@ OLC_MODULE(oedit_apply) {
 			apply->location = loc;
 			apply->modifier = num;
 			apply->apply_type = apply_type;
-			
-			// append to end
-			if ((temp = GET_OBJ_APPLIES(obj))) {
-				while (temp->next) {
-					temp = temp->next;
-				}
-				temp->next = apply;
-			}
-			else {
-				GET_OBJ_APPLIES(obj) = apply;
-			}
+			LL_APPEND(GET_OBJ_APPLIES(obj), apply);
 			
 			msg_to_char(ch, "You add %+d to %s (%s).\r\n", num, apply_types[loc], apply_type_names[apply_type]);
 		}
@@ -2043,7 +2646,7 @@ OLC_MODULE(oedit_apply) {
 		if (!change) {
 			msg_to_char(ch, "Invalid apply number.\r\n");
 		}
-		else if (is_abbrev(type_arg, "value")) {
+		else if (is_abbrev(type_arg, "value") || is_abbrev(type_arg, "amount")) {
 			num = atoi(val_arg);
 			if ((!isdigit(*val_arg) && *val_arg != '-') || num == 0) {
 				msg_to_char(ch, "Invalid value '%s'.\r\n", val_arg);
@@ -2106,12 +2709,12 @@ OLC_MODULE(oedit_armortype) {
 		msg_to_char(ch, "You can only set armor on an armor object.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_ARMOR_TYPE) = olc_process_type(ch, argument, "armor type", "armortype", armor_types, GET_OBJ_VAL(obj, VAL_ARMOR_TYPE));
+		set_obj_val(obj, VAL_ARMOR_TYPE, olc_process_type(ch, argument, "armor type", "armortype", armor_types, GET_OBJ_VAL(obj, VAL_ARMOR_TYPE)));
 	}
 }
 
 
-OLC_MODULE(oedit_arrowtype) {
+OLC_MODULE(oedit_ammotype) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	int slot = NOTHING;
 	char val;
@@ -2119,36 +2722,24 @@ OLC_MODULE(oedit_arrowtype) {
 	// this chooses the VAL slot and validates the type
 	switch (GET_OBJ_TYPE(obj)) {
 		case ITEM_MISSILE_WEAPON: {
-			slot = VAL_MISSILE_WEAPON_TYPE;
+			slot = VAL_MISSILE_WEAPON_AMMO_TYPE;
 			break;
 		}
-		case ITEM_ARROW: {
-			slot = VAL_ARROW_TYPE;
+		case ITEM_AMMO: {
+			slot = VAL_AMMO_TYPE;
 			break;
 		}
 	}
 	
 	if (slot == NOTHING) {
-		msg_to_char(ch, "You can only set arrowtype for missile weapons and arrows.\r\n");
+		msg_to_char(ch, "You can only set ammotype for missile weapons and ammo.\r\n");
 	}
 	else if (strlen(argument) > 1 || (val = UPPER(*argument)) < 'A' || val > 'Z') {
-		msg_to_char(ch, "Arrowtype must by a letter from A to Z.\r\n");
+		msg_to_char(ch, "Ammotype must by a letter from A to Z.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, slot) = val - 'A';
-		msg_to_char(ch, "You set the arrowtype to %c.\r\n", val);
-	}
-}
-
-
-OLC_MODULE(oedit_automint) {
-	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	
-	if (GET_OBJ_TYPE(obj) != ITEM_WEALTH) {
-		msg_to_char(ch, "You can only set the automint value on a wealth item.\r\n");
-	}
-	else {
-		GET_OBJ_VAL(obj, VAL_WEALTH_AUTOMINT) = olc_process_type(ch, argument, "automint value", "automint", offon_types, GET_OBJ_VAL(obj, VAL_WEALTH_AUTOMINT));
+		set_obj_val(obj, slot, val - 'A');
+		msg_to_char(ch, "You set the ammotype to %c.\r\n", val);
 	}
 }
 
@@ -2160,15 +2751,15 @@ OLC_MODULE(oedit_text) {
 	book_data *book;
 	
 	if (!IS_BOOK(obj)) {
-		msg_to_char(ch, "You can only set etxt id on a book.\r\n");
+		msg_to_char(ch, "You can only set text id on a book.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_BOOK_ID) = olc_process_number(ch, argument, "text id", "text", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_BOOK_ID));
+		set_obj_val(obj, VAL_BOOK_ID, olc_process_number(ch, argument, "text id", "text", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_BOOK_ID)));
 		book = book_proto(GET_BOOK_ID(obj));
 		
 		if (!book) {
 			msg_to_char(ch, "Invalid text book vnum. Old vnum %d restored.\r\n", old);
-			GET_OBJ_VAL(obj, VAL_BOOK_ID) = old;
+			set_obj_val(obj, VAL_BOOK_ID, old);
 		}
 	}
 }
@@ -2198,8 +2789,15 @@ OLC_MODULE(oedit_capacity) {
 		msg_to_char(ch, "You can't set capacity on this type of object.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, slot) = olc_process_number(ch, argument, "capacity", "capacity", 0, MAX_INT, GET_OBJ_VAL(obj, slot));
+		set_obj_val(obj, slot, olc_process_number(ch, argument, "capacity", "capacity", 0, MAX_INT, GET_OBJ_VAL(obj, slot)));
 	}
+}
+
+
+OLC_MODULE(oedit_cdtime) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	
+	set_obj_val(obj, VAL_POTION_COOLDOWN_TIME, olc_process_number(ch, argument, "cooldown time", "cdtime", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TIME)));
 }
 
 
@@ -2210,45 +2808,58 @@ OLC_MODULE(oedit_charges) {
 		msg_to_char(ch, "You can only set charges on a poison.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_POISON_CHARGES) = olc_process_number(ch, argument, "charges", "charges", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_POISON_CHARGES));
+		set_obj_val(obj, VAL_POISON_CHARGES, olc_process_number(ch, argument, "charges", "charges", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_POISON_CHARGES)));
 	}
 }
 
 
 OLC_MODULE(oedit_coinamount) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	int pos;
 	
-	if (!IS_COINS(obj)) {
-		msg_to_char(ch, "You can only set this on coins.\r\n");
+	switch (GET_OBJ_TYPE(obj)) {
+		case ITEM_COINS: {
+			pos = VAL_COINS_AMOUNT;
+			break;
+		}
+		case ITEM_CURRENCY: {
+			pos = VAL_CURRENCY_AMOUNT;
+			break;
+		}
+		default: {
+			msg_to_char(ch, "You can only set this on coins or currency.\r\n");
+			return;
+		}
 	}
-	else {
-		GET_OBJ_VAL(obj, VAL_COINS_AMOUNT) = olc_process_number(ch, argument, "coin amount", "coinamount", 0, MAX_COIN, GET_OBJ_VAL(obj, VAL_COINS_AMOUNT));
-	}
-}
-
-
-OLC_MODULE(oedit_compflags) {
-	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	
-	if (GET_OBJ_CMP_TYPE(obj) == CMP_NONE) {
-		msg_to_char(ch, "You can only set component flags once you've set a component type.\r\n");
-	}
-	else {
-		GET_OBJ_CMP_FLAGS(obj) = olc_process_flag(ch, argument, "component", "compflags", component_flags, GET_OBJ_CMP_FLAGS(obj));
-	}
+	set_obj_val(obj, pos, olc_process_number(ch, argument, "coin amount", "coinamount", 0, MAX_COIN, GET_OBJ_VAL(obj, pos)));
 }
 
 
 OLC_MODULE(oedit_component) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	int old = GET_OBJ_CMP_TYPE(obj);
+	generic_data *cmp;
 	
-	GET_OBJ_CMP_TYPE(obj) = olc_process_type(ch, argument, "component type", "component", component_types, GET_OBJ_CMP_TYPE(obj));
-	
-	// reset flags if going to/from none
-	if (old == CMP_NONE || GET_OBJ_CMP_TYPE(obj) == CMP_NONE) {
-		GET_OBJ_CMP_FLAGS(obj) = NOBITS;
+	if (!str_cmp(argument, "none") || atoi(argument) == NOTHING) {
+		obj->proto_data->component = NOTHING;
+		if (PRF_FLAGGED(ch, PRF_NOREPEAT)) {
+			send_config_msg(ch, "ok_string");
+		}
+		else {
+			msg_to_char(ch, "It is no longer a component.\r\n");
+		}
 	}
+	else {
+		cmp = find_generic_component(argument);
+		if (!cmp) {
+			msg_to_char(ch, "There is no generic component with that vnum.\r\n");
+		}
+		else {
+			obj->proto_data->component = GEN_VNUM(cmp);
+			msg_to_char(ch, "It is now %s (%s).\r\n", AN(get_generic_name_by_vnum(GET_OBJ_COMPONENT(obj))), get_generic_name_by_vnum(GET_OBJ_COMPONENT(obj)));
+		}
+	}
+
 }
 
 
@@ -2259,7 +2870,7 @@ OLC_MODULE(oedit_containerflags) {
 		msg_to_char(ch, "You can only set containerflags on a container.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS) = olc_process_flag(ch, argument, "container", "containerflags", container_bits, GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS));
+		set_obj_val(obj, VAL_CONTAINER_FLAGS, olc_process_flag(ch, argument, "container", "containerflags", container_bits, GET_OBJ_VAL(obj, VAL_CONTAINER_FLAGS)));
 	}
 }
 
@@ -2271,7 +2882,33 @@ OLC_MODULE(oedit_contents) {
 		msg_to_char(ch, "You can only set contents on a drink container.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_DRINK_CONTAINER_CONTENTS) = olc_process_number(ch, argument, "contents", "contents", 0, GET_DRINK_CONTAINER_CAPACITY(obj), GET_OBJ_VAL(obj, VAL_DRINK_CONTAINER_CONTENTS));
+		set_obj_val(obj, VAL_DRINK_CONTAINER_CONTENTS, olc_process_number(ch, argument, "contents", "contents", 0, GET_DRINK_CONTAINER_CAPACITY(obj), GET_OBJ_VAL(obj, VAL_DRINK_CONTAINER_CONTENTS)));
+	}
+}
+
+
+OLC_MODULE(oedit_cooldown) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	any_vnum old;
+	
+	if (!IS_POTION(obj)) {
+		msg_to_char(ch, "You can only set cooldown type on a potion.\r\n");
+	}
+	else if (!str_cmp(argument, "none")) {
+		set_obj_val(obj, VAL_POTION_COOLDOWN_TYPE, NOTHING);
+		msg_to_char(ch, "It now has no cooldown type.\r\n");
+	}
+	else {
+		old = GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE);
+		set_obj_val(obj, VAL_POTION_COOLDOWN_TYPE, olc_process_number(ch, argument, "cooldown vnum", "cooldown", 0, MAX_VNUM, GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE)));
+
+		if (!find_generic(GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE), GENERIC_COOLDOWN)) {
+			msg_to_char(ch, "Invalid cooldown generic vnum %d. Old value restored.\r\n", GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE));
+			set_obj_val(obj, VAL_POTION_COOLDOWN_TYPE, old);
+		}
+		else {
+			msg_to_char(ch, "Cooldown type set to [%d] %s.\r\n", GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE), get_generic_name_by_vnum(GET_OBJ_VAL(obj, VAL_POTION_COOLDOWN_TYPE)));
+		}
 	}
 }
 
@@ -2284,13 +2921,33 @@ OLC_MODULE(oedit_corpseof) {
 		msg_to_char(ch, "You can only set this on a corpse.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_CORPSE_IDNUM) = olc_process_number(ch, argument, "corpse of", "corpseof", 0, MAX_VNUM, GET_OBJ_VAL(obj, VAL_CORPSE_IDNUM));
+		set_obj_val(obj, VAL_CORPSE_IDNUM, olc_process_number(ch, argument, "corpse of", "corpseof", 0, MAX_VNUM, GET_OBJ_VAL(obj, VAL_CORPSE_IDNUM)));
 		if (!mob_proto(GET_CORPSE_NPC_VNUM(obj))) {
-			GET_OBJ_VAL(obj, VAL_CORPSE_IDNUM) = old;
+			set_obj_val(obj, VAL_CORPSE_IDNUM, old);
 			msg_to_char(ch, "There is no mobile with that vnum. Old value restored.\r\n");
 		}
 		else if (!PRF_FLAGGED(ch, PRF_NOREPEAT)) {
-			msg_to_char(ch, "It is now the corpse of: %s\r\n", get_mob_name_by_proto(GET_CORPSE_NPC_VNUM(obj)));
+			msg_to_char(ch, "It is now the corpse of: %s\r\n", get_mob_name_by_proto(GET_CORPSE_NPC_VNUM(obj), FALSE));
+		}
+		else {
+			send_config_msg(ch, "ok_string");
+		}
+	}
+}
+
+
+OLC_MODULE(oedit_currency) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	any_vnum old = GET_CURRENCY_VNUM(obj);
+	
+	if (!IS_CURRENCY(obj)) {
+		msg_to_char(ch, "You can only set that on a currency object.\r\n");
+	}
+	else {
+		set_obj_val(obj, VAL_CURRENCY_VNUM, olc_process_number(ch, argument, "currency vnum", "currency", 0, MAX_VNUM, GET_OBJ_VAL(obj, VAL_CURRENCY_VNUM)));
+		if (GET_CURRENCY_VNUM(obj) != old && !find_generic(GET_CURRENCY_VNUM(obj), GENERIC_CURRENCY)) {
+			msg_to_char(ch, "%d is not a currency generic. Old value restored.\r\n", GET_CURRENCY_VNUM(obj));
+			set_obj_val(obj, VAL_CURRENCY_VNUM, old);
 		}
 	}
 }
@@ -2298,139 +2955,7 @@ OLC_MODULE(oedit_corpseof) {
 
 OLC_MODULE(oedit_custom) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], *msgstr;
-	char num_arg[MAX_INPUT_LENGTH], type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH];
-	int num, iter, msgtype;
-	struct custom_message *ocm, *change, *temp;
-	bool found;
-	
-	// arg1 arg2
-	half_chop(argument, arg1, arg2);
-	
-	if (is_abbrev(arg1, "remove")) {
-		if (!*arg2) {
-			msg_to_char(ch, "Remove which custom message (number)?\r\n");
-		}
-		else if (!str_cmp(arg2, "all")) {
-			while ((ocm = obj->custom_msgs)) {
-				obj->custom_msgs = ocm->next;
-				if (ocm->msg) {
-					free(ocm->msg);
-				}
-				free(ocm);
-			}
-			msg_to_char(ch, "You remove all the custom messages.\r\n");
-		}
-		else if (!isdigit(*arg2) || (num = atoi(arg2)) < 1) {
-			msg_to_char(ch, "Invalid custom message number.\r\n");
-		}
-		else {
-			found = FALSE;
-			for (ocm = obj->custom_msgs; ocm && !found; ocm = ocm->next) {
-				if (--num == 0) {
-					found = TRUE;
-					
-					msg_to_char(ch, "You remove custom message #%d.\r\n", atoi(arg2));
-					
-					REMOVE_FROM_LIST(ocm, obj->custom_msgs, next);
-					if (ocm->msg) {
-						free(ocm->msg);
-					}
-					free(ocm);
-				}
-			}
-			
-			if (!found) {
-				msg_to_char(ch, "Invalid custom message number.\r\n");
-			}
-		}
-	}
-	else if (is_abbrev(arg1, "add")) {
-		msgstr = any_one_word(arg2, arg);
-		skip_spaces(&msgstr);
-		
-		if (!*arg || !*msgstr) {
-			msg_to_char(ch, "Usage: custom add <type> <string>\r\n");
-		}
-		else if ((msgtype = search_block(arg, obj_custom_types, FALSE)) == NOTHING) {
-			msg_to_char(ch, "Invalid type '%s'.\r\n", arg);
-		}
-		else {
-			delete_doubledollar(msgstr);
-			
-			CREATE(ocm, struct custom_message, 1);
-
-			ocm->type = msgtype;
-			ocm->msg = str_dup(msgstr);
-			ocm->next = NULL;
-			
-			// append to end
-			if (obj->custom_msgs) {
-				temp = obj->custom_msgs;
-				while (temp->next) {
-					temp = temp->next;
-				}
-				temp->next = ocm;
-			}
-			else {
-				obj->custom_msgs = ocm;
-			}
-			
-			msg_to_char(ch, "You add a custom '%s' message:\r\n%s\r\n", obj_custom_types[ocm->type], ocm->msg);			
-		}
-	}
-	else if (is_abbrev(arg1, "change")) {
-		half_chop(arg2, num_arg, arg1);
-		half_chop(arg1, type_arg, val_arg);
-		
-		if (!*num_arg || !isdigit(*num_arg) || !*type_arg || !*val_arg) {
-			msg_to_char(ch, "Usage: custom change <number> <type | message> <value>\r\n");
-			return;
-		}
-		
-		// find which one to change
-		num = atoi(num_arg);
-		change = NULL;
-		for (ocm = obj->custom_msgs; ocm && !change; ocm = ocm->next) {
-			if (--num == 0) {
-				change = ocm;
-				break;
-			}
-		}
-		
-		if (!change) {
-			msg_to_char(ch, "Invalid custom message number.\r\n");
-		}
-		else if (is_abbrev(type_arg, "type")) {
-			if ((msgtype = search_block(val_arg, obj_custom_types, FALSE)) == NOTHING) {
-				msg_to_char(ch, "Invalid type '%s'.\r\n", val_arg);
-			}
-			else {
-				change->type = msgtype;
-				msg_to_char(ch, "Custom message %d changed to type %s.\r\n", atoi(num_arg), obj_custom_types[msgtype]);
-			}
-		}
-		else if (is_abbrev(type_arg, "message")) {
-			if (change->msg) {
-				free(change->msg);
-			}
-			delete_doubledollar(val_arg);
-			change->msg = str_dup(val_arg);
-			msg_to_char(ch, "Custom message %d changed to: %s\r\n", atoi(num_arg), val_arg);
-		}
-		else {
-			msg_to_char(ch, "You can only change the type or message.\r\n");
-		}
-	}
-	else {
-		msg_to_char(ch, "Usage: custom add <type> <message>\r\n");
-		msg_to_char(ch, "Usage: custom change <number> <type | message> <value>\r\n");
-		msg_to_char(ch, "Usage: custom remove <number | all>\r\n");
-		msg_to_char(ch, "Available types:\r\n");
-		for (iter = 0; *obj_custom_types[iter] != '\n'; ++iter) {
-			msg_to_char(ch, " %s\r\n", obj_custom_types[iter]);
-		}
-	}
+	olc_process_custom_messages(ch, argument, &(obj->proto_data->custom_msgs), obj_custom_types, obj_custom_type_help);
 }
 
 
@@ -2451,8 +2976,8 @@ OLC_MODULE(oedit_damage) {
 			showdps = TRUE;
 			break;
 		}
-		case ITEM_ARROW: {
-			slot = VAL_ARROW_DAMAGE_BONUS;
+		case ITEM_AMMO: {
+			slot = VAL_AMMO_DAMAGE_BONUS;
 			break;
 		}
 	}
@@ -2461,7 +2986,7 @@ OLC_MODULE(oedit_damage) {
 		msg_to_char(ch, "You can't set damage on this type of object.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, slot) = olc_process_number(ch, argument, "damage", "damage", -10000, 10000, GET_OBJ_VAL(obj, slot));
+		set_obj_val(obj, slot, olc_process_number(ch, argument, "damage", "damage", -10000, 10000, GET_OBJ_VAL(obj, slot)));
 		if (showdps) {
 			msg_to_char(ch, "It now has %.2f base dps.\r\n", get_base_dps(obj));
 		}
@@ -2471,7 +2996,7 @@ OLC_MODULE(oedit_damage) {
 
 OLC_MODULE(oedit_extra_desc) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	olc_process_extra_desc(ch, argument, &obj->ex_description);
+	olc_process_extra_desc(ch, argument, &obj->proto_data->ex_description);
 }
 
 
@@ -2488,14 +3013,14 @@ OLC_MODULE(oedit_fullness) {
 		msg_to_char(ch, "You can only set fullness on food.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_FOOD_HOURS_OF_FULLNESS) = olc_process_number(ch, argument, "fullness", "fullness", -(MAX_CONDITION / REAL_UPDATES_PER_MUD_HOUR), 10 * (MAX_CONDITION / REAL_UPDATES_PER_MUD_HOUR), GET_OBJ_VAL(obj, VAL_FOOD_HOURS_OF_FULLNESS));
+		set_obj_val(obj, VAL_FOOD_HOURS_OF_FULLNESS, olc_process_number(ch, argument, "fullness", "fullness", -(MAX_CONDITION / REAL_UPDATES_PER_MUD_HOUR), 10 * (MAX_CONDITION / REAL_UPDATES_PER_MUD_HOUR), GET_OBJ_VAL(obj, VAL_FOOD_HOURS_OF_FULLNESS)));
 	}
 }
 
 
 OLC_MODULE(oedit_interaction) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	olc_process_interactions(ch, argument, &obj->interactions, TYPE_OBJ);
+	olc_process_interactions(ch, argument, &obj->proto_data->interactions, TYPE_OBJ);
 }
 
 
@@ -2505,14 +3030,93 @@ OLC_MODULE(oedit_keywords) {
 }
 
 
+OLC_MODULE(oedit_mintflags) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	
+	if (!IS_WEALTH_ITEM(obj)) {
+		msg_to_char(ch, "You can only set mintflags on a wealth object.\r\n");
+	}
+	else {
+		set_obj_val(obj, VAL_WEALTH_MINT_FLAGS, olc_process_flag(ch, argument, "mint", "mintflags", mint_flags, GET_OBJ_VAL(obj, VAL_WEALTH_MINT_FLAGS)));
+	}
+}
+
+
+OLC_MODULE(oedit_lightflags) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	
+	if (!IS_LIGHT(obj)) {
+		msg_to_char(ch, "You can only set lightflags on a light object.\r\n");
+	}
+	else {
+		set_obj_val(obj, VAL_LIGHT_FLAGS, olc_process_flag(ch, argument, "light", "lightflags", light_flags, GET_OBJ_VAL(obj, VAL_LIGHT_FLAGS)));
+	}
+}
+
+
+OLC_MODULE(oedit_lighthours) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	
+	if (!IS_LIGHT(obj)) {
+		msg_to_char(ch, "You can only set light-hours on a LIGHT object.\r\n");
+	}
+	else if (is_abbrev(argument, "unlimited")) {
+		set_obj_val(obj, VAL_LIGHT_HOURS_REMAINING, UNLIMITED);
+		
+		if (PRF_FLAGGED(ch, PRF_NOREPEAT)) {
+			send_config_msg(ch, "ok_string");
+		}
+		else {
+			msg_to_char(ch, "It now has unlimited hours of light.\r\n");
+		}
+	}
+	else {
+		set_obj_val(obj, VAL_LIGHT_HOURS_REMAINING, olc_process_number(ch, argument, "hours of light", "lighthours", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_LIGHT_HOURS_REMAINING)));
+	}
+}
+
+
+OLC_MODULE(oedit_lightislit) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	
+	if (!IS_LIGHT(obj)) {
+		msg_to_char(ch, "You can only set light-is-lit on a light object.\r\n");
+	}
+	else if (!*argument) {
+		msg_to_char(ch, "Usage: .ligthislit <yes | no>\r\n");
+	}
+	else if (!str_cmp(argument, "1") || is_abbrev(argument, "yes") || is_abbrev(argument, "on") || is_abbrev(argument, "lit")) {
+		GET_OBJ_VAL(obj, VAL_LIGHT_IS_LIT) = 1;
+		msg_to_char(ch, "It now defaults to 'lit'.\r\n");
+	}
+	else if (!str_cmp(argument, "0") || is_abbrev(argument, "no") || is_abbrev(argument, "off") || is_abbrev(argument, "unlit")) {
+		GET_OBJ_VAL(obj, VAL_LIGHT_IS_LIT) = 0;
+		msg_to_char(ch, "It now defaults to 'unlit'.\r\n");
+	}
+	else {
+		msg_to_char(ch, "You must specify yes/on/lit or no/off/unlit.\r\n");
+	}
+}
+
+
 OLC_MODULE(oedit_liquid) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	any_vnum old;
 	
 	if (!IS_DRINK_CONTAINER(obj)) {
 		msg_to_char(ch, "You can only set liquid on a drink container.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_DRINK_CONTAINER_TYPE) = olc_process_type(ch, argument, "liquid", "liquid", drinks, GET_OBJ_VAL(obj, VAL_DRINK_CONTAINER_TYPE));
+		old = GET_OBJ_VAL(obj, VAL_DRINK_CONTAINER_TYPE);
+		set_obj_val(obj, VAL_DRINK_CONTAINER_TYPE, olc_process_number(ch, argument, "liquid vnum", "liquid", 0, MAX_VNUM, GET_OBJ_VAL(obj, VAL_DRINK_CONTAINER_TYPE)));
+
+		if (!find_generic(GET_OBJ_VAL(obj, VAL_DRINK_CONTAINER_TYPE), GENERIC_LIQUID)) {
+			msg_to_char(ch, "Invalid liquid generic vnum %d. Old value restored.\r\n", GET_OBJ_VAL(obj, VAL_DRINK_CONTAINER_TYPE));
+			set_obj_val(obj, VAL_DRINK_CONTAINER_TYPE, old);
+		}
+		else {
+			msg_to_char(ch, "It now contains %s.\r\n", get_generic_name_by_vnum(GET_OBJ_VAL(obj, VAL_DRINK_CONTAINER_TYPE)));
+		}
 	}
 }
 
@@ -2526,53 +3130,67 @@ OLC_MODULE(oedit_long_desc) {
 OLC_MODULE(oedit_material) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	check_oedit_material_list();
-	GET_OBJ_MATERIAL(obj) = olc_process_type(ch, argument, "material", "material", (const char**)olc_material_list, GET_OBJ_MATERIAL(obj));
+	obj->proto_data->material = olc_process_type(ch, argument, "material", "material", (const char**)olc_material_list, GET_OBJ_MATERIAL(obj));
 }
 
 
 OLC_MODULE(oedit_maxlevel) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	
-	GET_OBJ_MAX_SCALE_LEVEL(obj) = olc_process_number(ch, argument, "maximum level", "maxlevel", 0, MAX_INT, GET_OBJ_MAX_SCALE_LEVEL(obj));
+	obj->proto_data->max_scale_level = olc_process_number(ch, argument, "maximum level", "maxlevel", 0, MAX_INT, GET_OBJ_MAX_SCALE_LEVEL(obj));
+}
+
+
+OLC_MODULE(oedit_minipet) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	mob_vnum old = GET_MINIPET_VNUM(obj);
+	char buf[MAX_STRING_LENGTH];
+	char_data *mob;
+	
+	if (!IS_MINIPET(obj)) {
+		msg_to_char(ch, "You can only set this on a MINIPET item.\r\n");
+	}
+	else {
+		set_obj_val(obj, VAL_MINIPET_VNUM, olc_process_number(ch, argument, "minipet", "minipet", 0, MAX_VNUM, GET_OBJ_VAL(obj, VAL_MINIPET_VNUM)));
+		if (!(mob = mob_proto(GET_MINIPET_VNUM(obj)))) {
+			set_obj_val(obj, VAL_MINIPET_VNUM, old);
+			msg_to_char(ch, "There is no mobile with that vnum. Old value restored.\r\n");
+			return;
+		}
+		else if (!PRF_FLAGGED(ch, PRF_NOREPEAT)) {
+			msg_to_char(ch, "It now gives the minipet: %s\r\n", get_mob_name_by_proto(GET_MINIPET_VNUM(obj), FALSE));
+		}
+		else {
+			send_config_msg(ch, "ok_string");
+		}
+		
+		if (!MOB_FLAGGED(mob, DEFAULT_MINIPET_FLAGS)) {
+			sprintbit(DEFAULT_MINIPET_FLAGS, action_bits, buf, TRUE);
+			msg_to_char(ch, "Warning: mob should have these flags: buf\r\n");
+		}
+		if (!AFF_FLAGGED(mob, DEFAULT_MINIPET_AFFS)) {
+			sprintbit(DEFAULT_MINIPET_AFFS, affected_bits, buf, TRUE);
+			msg_to_char(ch, "Warning: mob should have these affects: buf\r\n");
+		}
+	}
 }
 
 
 OLC_MODULE(oedit_minlevel) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	
-	GET_OBJ_MIN_SCALE_LEVEL(obj) = olc_process_number(ch, argument, "minimum level", "minlevel", 0, MAX_INT, GET_OBJ_MIN_SCALE_LEVEL(obj));
+	obj->proto_data->min_scale_level = olc_process_number(ch, argument, "minimum level", "minlevel", 0, MAX_INT, GET_OBJ_MIN_SCALE_LEVEL(obj));
 }
 
 
-OLC_MODULE(oedit_missilespeed) {
+OLC_MODULE(oedit_paint) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	static char **speed_types = NULL;
-	int iter, count;
 	
-	// this does not have a const char** list .. build one the first time
-	if (!speed_types) {
-		// count types
-		count = 0;
-		for (iter = 0; missile_weapon_speed[iter] > 0; ++iter) {
-			++count;
-		}
-	
-		CREATE(speed_types, char*, count+1);
-		
-		for (iter = 0; iter < count; ++iter) {
-			sprintf(buf, "%.2f", missile_weapon_speed[iter]);
-			speed_types[iter] = str_dup(buf);
-		}
-		
-		// must terminate
-		speed_types[count] = str_dup("\n");
-	}
-
-	if (!IS_MISSILE_WEAPON(obj)) {
-		msg_to_char(ch, "You can only set missilespeed type on a missile weapon.\r\n");
+	if (!IS_PAINT(obj)) {
+		msg_to_char(ch, "You can only set paint color on a paint object.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_MISSILE_WEAPON_SPEED) = olc_process_type(ch, argument, "missile speed", "missilespeed", (const char**)speed_types, GET_OBJ_VAL(obj, VAL_MISSILE_WEAPON_SPEED));
+		set_obj_val(obj, VAL_PAINT_COLOR, olc_process_type(ch, argument, "paint color", "paint", paint_names, GET_OBJ_VAL(obj, VAL_PAINT_COLOR)));
 	}
 }
 
@@ -2586,90 +3204,14 @@ OLC_MODULE(oedit_plants) {
 		msg_to_char(ch, "You can only set plants on a plantable item.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE) = olc_process_number(ch, argument, "plant", "plants", 0, MAX_VNUM, GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE));
+		set_obj_val(obj, VAL_FOOD_CROP_TYPE, olc_process_number(ch, argument, "plant", "plants", 0, MAX_VNUM, GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE)));
 		if ((cp = crop_proto(GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE)))) {
 			msg_to_char(ch, "It will plant %s.\r\n", GET_CROP_NAME(cp));
 		}
 		else {
 			msg_to_char(ch, "No such crop vnum. Old value restored.\r\n");
-			GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE) = old;
+			set_obj_val(obj, VAL_FOOD_CROP_TYPE, old);
 		}
-	}
-}
-
-
-OLC_MODULE(oedit_poison) {
-	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	static char **poison_types = NULL;
-	int iter, count;
-	
-	// this does not have a const char** list .. build one the first time
-	if (!poison_types) {
-		// count types
-		count = 0;
-		for (iter = 0; *poison_data[iter].name != '\n'; ++iter) {
-			++count;
-		}
-	
-		CREATE(poison_types, char*, count+1);
-		
-		for (iter = 0; iter < count; ++iter) {
-			poison_types[iter] = str_dup(poison_data[iter].name);
-		}
-		
-		// must terminate
-		poison_types[count] = str_dup("\n");
-	}
-	
-	if (!IS_POISON(obj)) {
-		msg_to_char(ch, "You can only set poison type on a poison object.\r\n");
-	}
-	else {
-		GET_OBJ_VAL(obj, VAL_POISON_TYPE) = olc_process_type(ch, argument, "poison", "poison", (const char**)poison_types, GET_OBJ_VAL(obj, VAL_POISON_TYPE));
-	}
-}
-
-
-OLC_MODULE(oedit_potion) {
-	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	static char **potion_types = NULL;
-	int iter, count;
-	
-	// this does not have a const char** list .. build one the first time
-	if (!potion_types) {
-		// count types
-		count = 0;
-		for (iter = 0; *potion_data[iter].name != '\n'; ++iter) {
-			++count;
-		}
-	
-		CREATE(potion_types, char*, count+1);
-		
-		for (iter = 0; iter < count; ++iter) {
-			potion_types[iter] = str_dup(potion_data[iter].name);
-		}
-		
-		// must terminate
-		potion_types[count] = str_dup("\n");
-	}
-
-	if (!IS_POTION(obj)) {
-		msg_to_char(ch, "You can only set potion type on a potion object.\r\n");
-	}
-	else {
-		GET_OBJ_VAL(obj, VAL_POTION_TYPE) = olc_process_type(ch, argument, "potion", "potion", (const char**)potion_types, GET_OBJ_VAL(obj, VAL_POTION_TYPE));
-	}
-}
-
-
-OLC_MODULE(oedit_potionscale) {
-	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	
-	if (!IS_POTION(obj)) {
-		msg_to_char(ch, "You can't set potionscale on this type of item.\r\n");
-	}
-	else {
-		GET_OBJ_VAL(obj, VAL_POTION_SCALE) = olc_process_number(ch, argument, "potion scale", "potionscale", 0, 1000, GET_OBJ_VAL(obj, VAL_POTION_SCALE));
 	}
 }
 
@@ -2677,11 +3219,112 @@ OLC_MODULE(oedit_potionscale) {
 OLC_MODULE(oedit_quantity) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	
-	if (!IS_ARROW(obj)) {
+	if (!IS_AMMO(obj)) {
 		msg_to_char(ch, "You can't set quantity on this type of item.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_ARROW_QUANTITY) = olc_process_number(ch, argument, "quantity", "quantity", 0, 100, GET_OBJ_VAL(obj, VAL_ARROW_QUANTITY));
+		set_obj_val(obj, VAL_AMMO_QUANTITY, olc_process_number(ch, argument, "quantity", "quantity", 0, 100, GET_OBJ_VAL(obj, VAL_AMMO_QUANTITY)));
+	}
+}
+
+
+OLC_MODULE(oedit_quick_recipe) {
+	char new_vnum_arg[MAX_INPUT_LENGTH], from_vnum_arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH], cmd[256];
+	any_vnum new_vnum, from_vnum;
+	craft_data *cft;
+	obj_data *obj;
+	
+	argument = any_one_arg(argument, new_vnum_arg);
+	argument = any_one_arg(argument, from_vnum_arg);
+	skip_spaces(&argument);
+	
+	if (!*new_vnum_arg || !*from_vnum_arg) {
+		msg_to_char(ch, "Usage: .quickrecipe <new vnum> <craft vnum> [pattern | design | etc]\r\n");
+		return;
+	}
+	if (!isdigit(*new_vnum_arg) || (new_vnum = atoi(new_vnum_arg)) < 0 || new_vnum > MAX_VNUM) {
+		msg_to_char(ch, "You must pick a valid vnum between 0 and %d.\r\n", MAX_VNUM);
+		return;
+	}
+	if (obj_proto(new_vnum)) {
+		msg_to_char(ch, "There is already an object with that vnum.\r\n");
+		return;
+	}
+	if (!isdigit(*from_vnum_arg) || (from_vnum = atoi(from_vnum_arg)) < 0 || from_vnum > MAX_VNUM) {
+		msg_to_char(ch, "You must pick a valid vnum between 0 and %d.\r\n", MAX_VNUM);
+		return;
+	}
+	if (!(cft = craft_proto(from_vnum))) {
+		msg_to_char(ch, "There is no craft with that vnum.\r\n");
+		return;
+	}
+	if (!CRAFT_FLAGGED(cft, CRAFT_LEARNED)) {
+		msg_to_char(ch, "The craft must have the LEARNED flag to do that.\r\n");
+		return;
+	}
+	if (!can_start_olc_edit(ch, OLC_OBJECT, new_vnum)) {
+		return;	// sends own message
+	}
+	
+	// create it
+	obj = GET_OLC_OBJECT(ch->desc) = setup_olc_object(NULL);
+	obj->proto_data->type_flag = ITEM_RECIPE;
+	set_obj_val(obj, VAL_RECIPE_VNUM, GET_CRAFT_VNUM(cft));
+	
+	// keywords
+	safe_snprintf(buf, sizeof(buf), "%s %s", (*argument ? argument : "recipe"), GET_CRAFT_NAME(cft));
+	if (GET_OBJ_KEYWORDS(obj)) {
+		free(GET_OBJ_KEYWORDS(obj));
+	}
+	GET_OBJ_KEYWORDS(obj) = str_dup(buf);
+	
+	// short desc
+	safe_snprintf(buf, sizeof(buf), "the %s %s", GET_CRAFT_NAME(cft), *argument ? argument : "recipe");
+	if (GET_OBJ_SHORT_DESC(obj)) {
+		free(GET_OBJ_SHORT_DESC(obj));
+	}
+	GET_OBJ_SHORT_DESC(obj) = str_dup(buf);
+	
+	// long desc
+	safe_snprintf(buf, sizeof(buf), "The %s %s is on the ground.", GET_CRAFT_NAME(cft), *argument ? argument : "recipe");
+	if (GET_OBJ_LONG_DESC(obj)) {
+		free(GET_OBJ_LONG_DESC(obj));
+	}
+	GET_OBJ_LONG_DESC(obj) = str_dup(buf);
+	
+	// look desc
+	strcpy(cmd, craft_types[GET_CRAFT_TYPE(cft)]);
+	safe_snprintf(buf, sizeof(buf), "This %s will teach you to %s: %s.\r\n", (*argument ? argument : "recipe"), strtolower(cmd), GET_CRAFT_NAME(cft));
+	if (GET_OBJ_ACTION_DESC(obj)) {
+		free(GET_OBJ_ACTION_DESC(obj));
+	}
+	GET_OBJ_ACTION_DESC(obj) = str_dup(buf);
+	
+	// SUCCESS
+	msg_to_char(ch, "You create a quick recipe %d:\r\n", new_vnum);
+	GET_OLC_TYPE(ch->desc) = OLC_OBJECT;
+	GET_OLC_VNUM(ch->desc) = new_vnum;
+	
+	// ensure some data
+	GET_OBJ_VNUM(GET_OLC_OBJECT(ch->desc)) = new_vnum;
+	olc_show_object(ch);
+}
+
+
+OLC_MODULE(oedit_recipe) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	any_vnum old = GET_RECIPE_VNUM(obj);
+	craft_data *cft;
+	
+	if (!IS_RECIPE(obj)) {
+		msg_to_char(ch, "You can only set that on a recipe object.\r\n");
+	}
+	else {
+		set_obj_val(obj, VAL_RECIPE_VNUM, olc_process_number(ch, argument, "recipe vnum", "recipe", 0, MAX_VNUM, GET_OBJ_VAL(obj, VAL_RECIPE_VNUM)));
+		if (GET_RECIPE_VNUM(obj) != old && (!(cft = craft_proto(GET_RECIPE_VNUM(obj))) || !CRAFT_FLAGGED(cft, CRAFT_LEARNED))) {
+			msg_to_char(ch, "%d is not a learned recipe. Old value restored.\r\n", GET_RECIPE_VNUM(obj));
+			set_obj_val(obj, VAL_RECIPE_VNUM, old);
+		}
 	}
 }
 
@@ -2691,7 +3334,7 @@ OLC_MODULE(oedit_requiresquest) {
 	obj_vnum old = GET_OBJ_REQUIRES_QUEST(obj);
 	
 	if (!str_cmp(argument, "none") || atoi(argument) == NOTHING) {
-		GET_OBJ_REQUIRES_QUEST(obj) = NOTHING;
+		obj->proto_data->requires_quest = NOTHING;
 		if (PRF_FLAGGED(ch, PRF_NOREPEAT)) {
 			send_config_msg(ch, "ok_string");
 		}
@@ -2700,15 +3343,21 @@ OLC_MODULE(oedit_requiresquest) {
 		}
 	}
 	else {
-		GET_OBJ_REQUIRES_QUEST(obj) = olc_process_number(ch, argument, "quest vnum", "requiresquest", 0, MAX_VNUM, GET_OBJ_REQUIRES_QUEST(obj));
+		obj->proto_data->requires_quest = olc_process_number(ch, argument, "quest vnum", "requiresquest", 0, MAX_VNUM, GET_OBJ_REQUIRES_QUEST(obj));
 		if (!quest_proto(GET_OBJ_REQUIRES_QUEST(obj))) {
-			GET_OBJ_REQUIRES_QUEST(obj) = old;
+			obj->proto_data->requires_quest = old;
 			msg_to_char(ch, "There is no quest with that vnum. Old value restored.\r\n");
 		}
 		else if (!PRF_FLAGGED(ch, PRF_NOREPEAT)) {
 			msg_to_char(ch, "It now requires %s.\r\n", get_quest_name_by_proto(GET_OBJ_REQUIRES_QUEST(obj)));
 		}
 	}
+}
+
+
+OLC_MODULE(oedit_requirestools) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	obj->proto_data->requires_tool = olc_process_flag(ch, argument, "required tool", "requiredtools", tool_flags, GET_OBJ_REQUIRES_TOOL(obj));
 }
 
 
@@ -2719,14 +3368,14 @@ OLC_MODULE(oedit_roomvnum) {
 		msg_to_char(ch, "You can only set roomvnum on a portal.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_PORTAL_TARGET_VNUM) = olc_process_number(ch, argument, "room vnum", "roomvnum", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_PORTAL_TARGET_VNUM));
+		set_obj_val(obj, VAL_PORTAL_TARGET_VNUM, olc_process_number(ch, argument, "room vnum", "roomvnum", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_PORTAL_TARGET_VNUM)));
 	}
 }
 
 
 OLC_MODULE(oedit_script) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	olc_process_script(ch, argument, &(obj->proto_script), OBJ_TRIGGER);
+	olc_process_script(ch, argument, &GET_OBJ_SCRIPTS(obj), OBJ_TRIGGER);
 }
 
 
@@ -2736,15 +3385,24 @@ OLC_MODULE(oedit_short_description) {
 }
 
 
-OLC_MODULE(oedit_storage) {
-	extern bld_data *get_building_by_name(char *name, bool room_only);
+OLC_MODULE(oedit_size) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	
+	if (!IS_CORPSE(obj)) {
+		msg_to_char(ch, "You can only set the size on a corpse.\r\n");
+	}
+	else {
+		set_obj_val(obj, VAL_CORPSE_SIZE, olc_process_type(ch, argument, "size", "size", size_types, GET_CORPSE_SIZE(obj)));
+	}
+}
+
+
+OLC_MODULE(oedit_storage) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], *flagarg;
 	char num_arg[MAX_INPUT_LENGTH], type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH];
-	int loc, num, iter;
-	struct obj_storage_type *store, *change, *temp;
-	bld_vnum bld;
+	int loc, num, iter, mode;
+	struct obj_storage_type *store, *change;
 	bool found;
 	
 	// arg1 arg2
@@ -2755,8 +3413,8 @@ OLC_MODULE(oedit_storage) {
 			msg_to_char(ch, "Remove which storage location (number)?\r\n");
 		}
 		else if (!str_cmp(arg2, "all")) {
-			while ((store = obj->storage)) {
-				obj->storage = store->next;
+			while ((store = GET_OBJ_STORAGE(obj))) {
+				obj->proto_data->storage = store->next;
 				free(store);
 			}
 			msg_to_char(ch, "You remove all the storage locations.\r\n");
@@ -2766,14 +3424,21 @@ OLC_MODULE(oedit_storage) {
 		}
 		else {
 			found = FALSE;
-			for (store = obj->storage; store && !found; store = store->next) {
+			for (store = GET_OBJ_STORAGE(obj); store && !found; store = store->next) {
 				if (--num == 0) {
 					found = TRUE;
 					
-					msg_to_char(ch, "You remove the storage in the %s.\r\n", GET_BLD_NAME(building_proto(store->building_type)));
+					// TYPE_x: storage types
+					if (store->type == TYPE_BLD) {
+						msg_to_char(ch, "You remove the storage in the %s.\r\n", get_bld_name_by_proto(store->vnum));
+					}
+					else if (store->type == TYPE_VEH) {
+						msg_to_char(ch, "You remove the storage in %s.\r\n", get_vehicle_name_by_proto(store->vnum));
+					}
 					
-					REMOVE_FROM_LIST(store, obj->storage, next);
+					LL_DELETE(obj->proto_data->storage, store);
 					free(store);
+					break;
 				}
 			}
 			
@@ -2783,36 +3448,48 @@ OLC_MODULE(oedit_storage) {
 		}
 	}
 	else if (is_abbrev(arg1, "add")) {
-		flagarg = any_one_word(arg2, arg);
-		bld = atoi(arg);
+		half_chop(arg2, type_arg, arg);
+		flagarg = any_one_word(arg, val_arg);
 		
 		// flagarg MAY contain space-separated flags
 		
-		if (!*arg || !isdigit(*arg)) {
-			msg_to_char(ch, "Usage: storage add <building/room> [flags]\r\n");
+		// types
+		if (is_abbrev(type_arg, "building") || is_abbrev(type_arg, "room")) {
+			mode = TYPE_BLD;
 		}
-		else if (!building_proto(bld)) {
-			msg_to_char(ch, "Invalid building vnum '%s'.\r\n", arg);
+		else if (is_abbrev(type_arg, "vehicle")) {
+			mode = TYPE_VEH;
 		}
 		else {
-			CREATE(store, struct obj_storage_type, 1);
-			
-			store->building_type = bld;
-			
-			store->flags = 0;
-			store->next = NULL;
-			
-			// append to end
-			if (obj->storage) {
-				temp = obj->storage;
-				while (temp->next) {
-					temp = temp->next;
+			mode = -1;
+		}
+		
+		num = atoi(val_arg);
+		
+		if (!*type_arg || !*val_arg || !isdigit(*val_arg) || mode == -1) {
+			msg_to_char(ch, "Usage: storage add <building | vehicle> <vnum> [flags]\r\n");
+		}
+		else if (mode == TYPE_BLD && !building_proto(num)) {
+			msg_to_char(ch, "Invalid building vnum '%s'.\r\n", val_arg);
+		}
+		else if (mode == TYPE_VEH && !vehicle_proto(num)) {
+			msg_to_char(ch, "Invalid vehicle vnum '%s'.\r\n", val_arg);
+		}
+		else {
+			// ensure we don't already have it?
+			LL_FOREACH(GET_OBJ_STORAGE(obj), store) {
+				if (store->type == mode && store->vnum == num) {
+					msg_to_char(ch, "It already stores there.\r\n");
+					return;
 				}
-				temp->next = store;
 			}
-			else {
-				obj->storage = store;
-			}
+			
+			// ok:
+			CREATE(store, struct obj_storage_type, 1);
+			store->type = mode;
+			store->vnum = num;
+			store->flags = 0;
+			LL_APPEND(obj->proto_data->storage, store);
 			
 			// process flags as space-separated string
 			while (*flagarg) {
@@ -2824,7 +3501,14 @@ OLC_MODULE(oedit_storage) {
 			}
 			
 			sprintbit(store->flags, storage_bits, buf1, TRUE);
-			msg_to_char(ch, "You add storage in the %s with flags: %s\r\n", GET_BLD_NAME(building_proto(store->building_type)), buf1);
+			
+			// TYPE_x: storage types
+			if (mode == TYPE_BLD) {
+				msg_to_char(ch, "You add storage in the %s with flags: %s\r\n", get_bld_name_by_proto(num), buf1);
+			}
+			else if (mode == TYPE_VEH) {
+				msg_to_char(ch, "You add storage in %s with flags: %s\r\n", get_vehicle_name_by_proto(num), buf1);
+			}
 		}
 	}
 	else if (is_abbrev(arg1, "change")) {
@@ -2832,14 +3516,14 @@ OLC_MODULE(oedit_storage) {
 		half_chop(arg1, type_arg, val_arg);
 		
 		if (!*num_arg || !isdigit(*num_arg) || !*type_arg || !*val_arg) {
-			msg_to_char(ch, "Usage: storage change <number> <building | flags> <value>\r\n");
+			msg_to_char(ch, "Usage: storage change <number> flags <value>\r\n");
 			return;
 		}
 		
 		// find which one to change
 		num = atoi(num_arg);
 		change = NULL;
-		for (store = obj->storage; store && !change; store = store->next) {
+		for (store = GET_OBJ_STORAGE(obj); store && !change; store = store->next) {
 			if (--num == 0) {
 				change = store;
 				break;
@@ -2849,26 +3533,16 @@ OLC_MODULE(oedit_storage) {
 		if (!change) {
 			msg_to_char(ch, "Invalid storage number.\r\n");
 		}
-		else if (is_abbrev(type_arg, "building") || is_abbrev(type_arg, "room")) {
-			bld = atoi(val_arg);
-			if (!isdigit(*val_arg) || !building_proto(bld)) {
-				msg_to_char(ch, "Invalid building vnum '%s'.\r\n", val_arg);
-			}
-			else {
-				change->building_type = bld;
-				msg_to_char(ch, "Storage %d changed to building %d (%s).\r\n", atoi(num_arg), bld, GET_BLD_NAME(building_proto(bld)));
-			}
-		}
 		else if (is_abbrev(type_arg, "flags")) {
 			change->flags = olc_process_flag(ch, val_arg, "storage", "storage change flags", storage_bits, change->flags);
 		}
 		else {
-			msg_to_char(ch, "You can only change the building/room or flags.\r\n");
+			msg_to_char(ch, "You can only change the flags.\r\n");
 		}
 	}
 	else {
-		msg_to_char(ch, "Usage: storage add <building/room> [flags]\r\n");
-		msg_to_char(ch, "Usage: storage change <number> <building | flags> <value>\r\n");
+		msg_to_char(ch, "Usage: storage add <building | vehicle> <vnum> [flags]\r\n");
+		msg_to_char(ch, "Usage: storage change <number> flags <value>\r\n");
 		msg_to_char(ch, "Usage: storage remove <number | all>\r\n");
 		msg_to_char(ch, "Available flags:\r\n");
 		
@@ -2884,7 +3558,20 @@ OLC_MODULE(oedit_storage) {
 
 OLC_MODULE(oedit_timer) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
-	GET_OBJ_TIMER(obj) = olc_process_number(ch, argument, "decay timer", "timer", -1, MAX_INT, GET_OBJ_TIMER(obj));
+	
+	if (!str_cmp(argument, "none") || !str_cmp(argument, "unlimited") || !str_cmp(argument, "infinite")) {
+		GET_OBJ_TIMER(obj) = UNLIMITED;
+		msg_to_char(ch, "It now has no decay timer.\r\n");
+	}
+	else {
+		GET_OBJ_TIMER(obj) = olc_process_number(ch, argument, "decay timer", "timer", -1, MAX_INT, GET_OBJ_TIMER(obj));
+	}
+}
+
+
+OLC_MODULE(oedit_tools) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	obj->proto_data->tool_flags = olc_process_flag(ch, argument, "tool", "tools", tool_flags, GET_OBJ_TOOL_FLAGS(obj));
 }
 
 
@@ -2892,32 +3579,75 @@ OLC_MODULE(oedit_type) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
 	int old = GET_OBJ_TYPE(obj);
 	
-	GET_OBJ_TYPE(obj) = olc_process_type(ch, argument, "type", "type", item_types, GET_OBJ_TYPE(obj));
+	obj->proto_data->type_flag = olc_process_type(ch, argument, "type", "type", item_types, GET_OBJ_TYPE(obj));
 	
 	// reset values to defaults now
 	if (old != GET_OBJ_TYPE(obj)) {
-		GET_OBJ_VAL(obj, 0) = 0;
-		GET_OBJ_VAL(obj, 1) = 0;
-		GET_OBJ_VAL(obj, 2) = 0;
+		set_obj_val(obj, 0, 0);
+		set_obj_val(obj, 1, 0);
+		set_obj_val(obj, 2, 0);
 	
 		switch (GET_OBJ_TYPE(obj)) {
 			case ITEM_COINS: {
-				GET_OBJ_VAL(obj, VAL_COINS_AMOUNT) = 0;
-				GET_OBJ_VAL(obj, VAL_COINS_EMPIRE_ID) = OTHER_COIN;
+				set_obj_val(obj, VAL_COINS_AMOUNT, 0);
+				set_obj_val(obj, VAL_COINS_EMPIRE_ID, OTHER_COIN);
+				break;
+			}
+			case ITEM_CURRENCY: {
+				set_obj_val(obj, VAL_CURRENCY_VNUM, NOTHING);
 				break;
 			}
 			case ITEM_PORTAL: {
-				GET_OBJ_VAL(obj, VAL_PORTAL_TARGET_VNUM) = NOTHING;
+				set_obj_val(obj, VAL_PORTAL_TARGET_VNUM, NOTHING);
 				break;
 			}
 			case ITEM_WEAPON: {
-				GET_OBJ_VAL(obj, VAL_WEAPON_TYPE) = TYPE_SLASH;
+				// do not set a default, or it shows as 'changed' in the editor/auditor even if it was missed
+				break;
+			}
+			case ITEM_POTION: {
+				set_obj_val(obj, VAL_POTION_COOLDOWN_TYPE, NOTHING);
+				set_obj_val(obj, VAL_POTION_AFFECT, NOTHING);
+				break;
+			}
+			case ITEM_POISON: {
+				set_obj_val(obj, VAL_POISON_AFFECT, NOTHING);
+				break;
+			}
+			case ITEM_MINIPET: {
+				set_obj_val(obj, VAL_MINIPET_VNUM, NOTHING);
+				break;
+			}
+			case ITEM_LIGHT: {
+				set_obj_val(obj, VAL_LIGHT_IS_LIT, 1);
 				break;
 			}
 			default: {
 				break;
 			}
 		}
+	}
+}
+
+
+OLC_MODULE(oedit_uses) {
+	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	
+	if (GET_OBJ_TYPE(obj) != ITEM_LIGHTER) {
+		msg_to_char(ch, "You can only set uses on a LIGHTER object.\r\n");
+	}
+	else if (is_abbrev(argument, "unlimited")) {
+		set_obj_val(obj, VAL_LIGHTER_USES, UNLIMITED);
+		
+		if (PRF_FLAGGED(ch, PRF_NOREPEAT)) {
+			send_config_msg(ch, "ok_string");
+		}
+		else {
+			msg_to_char(ch, "It now has unlimited uses.\r\n");
+		}
+	}
+	else {
+		set_obj_val(obj, VAL_LIGHTER_USES, olc_process_number(ch, argument, "lighter uses", "uses", 0, MAX_INT, GET_OBJ_VAL(obj, VAL_LIGHTER_USES)));
 	}
 }
 
@@ -2929,7 +3659,7 @@ OLC_MODULE(oedit_value0) {
 		msg_to_char(ch, "You can only manually set values on OTHER-type objects.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, 0) = olc_process_number(ch, argument, "value 0", "value0", -MAX_INT, MAX_INT, GET_OBJ_VAL(obj, 0));
+		set_obj_val(obj, 0, olc_process_number(ch, argument, "value 0", "value0", -MAX_INT, MAX_INT, GET_OBJ_VAL(obj, 0)));
 	}
 }
 
@@ -2941,7 +3671,7 @@ OLC_MODULE(oedit_value1) {
 		msg_to_char(ch, "You can only manually set values on OTHER-type objects.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, 1) = olc_process_number(ch, argument, "value 1", "value1", -MAX_INT, MAX_INT, GET_OBJ_VAL(obj, 1));
+		set_obj_val(obj, 1, olc_process_number(ch, argument, "value 1", "value1", -MAX_INT, MAX_INT, GET_OBJ_VAL(obj, 1)));
 	}
 }
 
@@ -2953,7 +3683,7 @@ OLC_MODULE(oedit_value2) {
 		msg_to_char(ch, "You can only manually set values on OTHER-type objects.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, 2) = olc_process_number(ch, argument, "value 2", "value2", -MAX_INT, MAX_INT, GET_OBJ_VAL(obj, 2));
+		set_obj_val(obj, 2, olc_process_number(ch, argument, "value 2", "value2", -MAX_INT, MAX_INT, GET_OBJ_VAL(obj, 2)));
 	}
 }
 
@@ -2965,20 +3695,45 @@ OLC_MODULE(oedit_wealth) {
 		msg_to_char(ch, "You can only set the wealth value on a wealth item.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_WEALTH_VALUE) = olc_process_number(ch, argument, "wealth value", "wealth", 0, 1000, GET_OBJ_VAL(obj, VAL_WEALTH_VALUE));
+		set_obj_val(obj, VAL_WEALTH_VALUE, olc_process_number(ch, argument, "wealth value", "wealth", 0, 1000, GET_OBJ_VAL(obj, VAL_WEALTH_VALUE)));
 	}
 }
 
 
 OLC_MODULE(oedit_weapontype) {
 	obj_data *obj = GET_OLC_OBJECT(ch->desc);
+	attack_message_data *amd;
+	int pos = 0;
 	
-	if (GET_OBJ_TYPE(obj) != ITEM_WEAPON) {
-		msg_to_char(ch, "You can only set weapontype on a weapon.\r\n");
+	switch (GET_OBJ_TYPE(obj)) {
+		case ITEM_WEAPON: {
+			pos = VAL_WEAPON_TYPE;
+			break;
+		}
+		case ITEM_MISSILE_WEAPON: {
+			pos = VAL_MISSILE_WEAPON_TYPE;
+			break;
+		}
+		default: {
+			msg_to_char(ch, "You can only set weapontype on a weapon.\r\n");
+			return;
+		}
+	}
+	
+	if (!*argument) {
+		msg_to_char(ch, "Set the weapon type to what attack message (vnum or name)?\r\n");
+	}
+	else if (!(amd = find_attack_message_by_name_or_vnum(argument, FALSE))) {
+		msg_to_char(ch, "Unknown attack message '%s'.\r\n", argument);
+	}
+	else if (!ATTACK_FLAGGED(amd, AMDF_WEAPON)) {
+		msg_to_char(ch, "That attack type is not available on weapons.\r\n");
 	}
 	else {
-		GET_OBJ_VAL(obj, VAL_WEAPON_TYPE) = olc_process_type(ch, argument, "weapon type", "weapontype", (const char**)get_weapon_types_string(), GET_OBJ_VAL(obj, VAL_WEAPON_TYPE));
+		set_obj_val(obj, pos, ATTACK_VNUM(amd));
+		msg_to_char(ch, "Weapon type set to [%d] %s.\r\n", ATTACK_VNUM(amd), ATTACK_NAME(amd));
 	}
+
 }
 
 

@@ -1,0 +1,846 @@
+#16600
+Winter Wonderland: Grateful For The Gift~
+   Father Christmas has a gift for you. Probably polite to thank him, after you
+open it. Unless, of course, you aren't the holiday type, in which case the
+guild might have an interest in what the wintry guy is giving out.
+Note: This daily quest does not reward you with a stocking.
+~
+You thank Father Christmas and he rewards your politeness.
+~
+25 ej 0 0 -1
+A
+3 10705
+P
+36 10700 0 1 -
+R
+9 10700 10
+W
+36 10700 0 1 a
+W+
+11 0 0 1 a
+Open a gift~
+W
+6 16601 0 1 a
+Z
+4 10702
+Z
+1 10703
+S
+#16601
+Winter Wonderland: The Guild's Interest in Father Christmas's Gifts~
+   The Guild head is very busy running the guild. He wishes he could go collect
+his gift from Father Christmas, but is stuck at the hall. If you're feeling
+kind, you could collect a gift on his behalf. This would probably mean giving
+up your own gift, though, as Father Christmas only gives one per visitor.
+~
+   The Guild head is greatful for your kindness and ready to spread holiday
+cheer himself now.
+~
+18 dej 0 0 -1
+A
+1 18211
+A
+1 18219
+P
+0 16608 0 1 a
+P
+16 18200 0 6 a
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+W
+2 10702 0 1 a
+W
+36 10700 0 1 a
+W
+6 16600 0 1 a
+Z
+1 18219
+Z
+1 18211
+S
+#16602
+Winter Wonderland: Winter's Blood~
+   As a wanderer, this poor soul has never gotten gifts from Father Christmas.
+As an act of revenge for the vampire, a vial of Father Christmas's blood must
+be collected from the source. Take the tin syringe and hunt him down. Return
+the full vial of blood to the wanderer when you're finished.
+Type: use syringe <target>
+~
+   You got the blood and the wanderer is delighted. Here's hoping it hurt the
+old fool.
+~
+16 dej 0 0 -1
+A
+1 9064
+D 16602
+P
+9 7 0 1 a
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W
+2 16603 0 1 a
+W
+9 7 0 1 a
+Z
+4 16601
+S
+#16603
+Winter Wonderland: Magic Blood~
+   As a ranking member of the Guild of Adventurers, this vampire doesn't
+collect samples any longer. That's a job for underlings, such as yourself.
+Take the tin syringe, find a reindeer, and bring a full vial of its blood back
+to the guild for examination.
+Type: use syringe <target>
+~
+   After so many years, perhaps this magic blood will grant vampires the
+ability to fly without turning into giant bats. Hopefully it was from a flying
+reindeer.
+~
+23 dej 0 0 -1
+A
+1 18208
+A
+1 18218
+D 16602
+P
+16 18200 0 6 a
+P
+9 7 0 1 a
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W
+2 16603 0 1 a
+W
+9 7 0 1 a
+Z
+4 16601
+S
+#16604
+Winter Wonderland: Letter to Father Christmas~
+   This young child wrote a letter to Father Christmas, but isn't allowed to
+send it. As the good samaritan that you are, you offer to take and post the
+letter for them. Take the letter to any building you can send mail from and
+Instructions:
+- Take the letter to a Pigeon Post
+- Type: post letter
+~
+   As you watch the bird take flight, you feel more holiday cheer infuse your
+body.
+~
+14 ej 0 0 -1
+A
+1 200
+D 16604
+P
+26 0 4096 1 a
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W
+26 0 4096 1 a
+W
+2 16604 0 1 a
+Z
+4 16604
+S
+#16605
+Winter Wonderland: Letter to Father Christmas~
+   This young child wrote a letter to Father Christmas, but isn't allowed to
+send it. As the good samaritan that you are, you offer to take and post the
+letter for them. Take the letter to any building you can send mail from and
+Instructions:
+- Take the letter to a Pigeon Post
+- Type: post letter
+~
+   As you watch the bird take flight, you feel more holiday cheer infuse your
+body.
+~
+14 ej 0 0 -1
+A
+1 201
+D 16604
+P
+26 0 4096 1 a
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W
+26 0 4096 1 a
+W
+2 16604 0 1 a
+Z
+4 16604
+S
+#16606
+Winter Wonderland: Snobody Like My Snow Buddy~
+   The carolers think you look lonely and have found a magic top hat. With the
+understanding that you will use said hat to finish up a personalized snowman,
+they give it to you. Use the hat to magically make three snow balls, then build
+your snowman in your image.
+Instructions:
+- 'make snowball' 3 times
+- Then 'make snowman'
+~
+   It looks just like you, and it should last a while. Just don't let it go
+inside.
+~
+16 dej 0 0 -1
+A
+1 10701
+D 16606
+P
+36 10700 0 1 -
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W
+2 16600 0 1 a
+W
+2 16605 0 3 a
+W+
+11 0 0 1 a
+Make a snowman~
+Z
+4 16600
+S
+#16607
+Winter Wonderland: Stand a Christmas Tree~
+   It's time to put up a Christmas tree for the holiday season. Get your axe,
+take this binding, and search for a Christmas tree. Evergreen forests are a
+great place to find one. You might also find something useable in any overgrown
+forest. There's even been reports of people finding Christmas-worthy trees in
+enchanted forests before.
+Instructions:
+- Travel to your chosen forest
+- Chop trees until you find a Christmas-worthy tree
+- Craft a Christmas tree stand (see 'craft info christmas tree stand'; you'll
+  also need to craft a pot)
+- Type 'plant tree' at your city center
+~
+   Your citizens are excited to see the new tree and hope it'll get some
+ornaments soon!
+~
+23 dej 0 0 -1
+A
+1 10701
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W
+2 16602 0 1 a
+W
+2 16606 0 1 a
+W+
+11 0 0 1 a
+Plant a Christmas tree at your city center~
+Z
+4 16606
+S
+#16608
+Winter Wonderland: Cookies For The Guild~
+   Your guild is too grumpy. It's time to bring some Christmas cheer to them.
+Make some cookies and deliver them to the superintendant.
+(If you don't have the recipe for Christmas cookies, try opening more gifts.)
+~
+   Who can stay grumpy with Christmas cookies in their belly? Wonder how else
+you could cheer the guild up.
+~
+8 dj 0 0 -1
+A
+1 18219
+A
+1 18211
+P
+36 10700 0 1 -
+R
+2 16678 1
+W
+2 10716 0 20 a
+W
+36 10700 0 1 a
+Z
+1 18211
+Z
+1 18219
+S
+#16610
+Winter Wonderland: Be An Angel~
+   Seeing your tree makes you wish there was some other wintry beauty around
+the city. Take this enchanted snowflake and make five snow angels to brighten
+up your empire.
+Type: make snow angel
+~
+That will sure make things more wintry around here!
+~
+14 ej 0 0 -1
+A
+2 16607
+D 16606
+P
+36 10700 0 1 -
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 5 a
+Make snow angels~
+Z
+4 16610
+S
+#16611
+Winter Wonderland: The Winter Robin Hood~
+   There's so many gifts in the back of this sleigh. Surely one going missing
+couldn't draw attention? You should take a wrapped gift, sneak into one of your
+citizen's bedrooms, and leave it for them to find.
+~
+   Upon finding the room empty, you put the gift on the bed and grin to
+yourself at the joy you've brought another citizen of your empire.
+~
+13 ej 0 0 -1
+A
+6 16650
+A
+6 10715
+D 16611
+P
+36 10700 0 1 a
+P
+9 4 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W
+9 4 0 1 a
+W+
+11 0 0 1 a
+Place a gift in a citizen's bedroom~
+Z
+4 16611
+S
+#16612
+Winter Wonderland: That Red Stocking Cap~
+   The mage of the guild of adventurers has been interested in what gives
+Father Christmas his powers. Unfortunately, to date Father Christmas hasn't
+been willing to tell him. The latest theory is that Father Christmas's hat is
+magical. The mage would like you to go and pickpocket his hat and bring it back
+to the guild mage.
+~
+   The guild mage is shocked that you managed the theft, but appreciative all
+the same.
+~
+11 dej 0 0 -1
+A
+1 18209
+A
+1 18217
+D 16611
+P
+16 18200 0 6 a
+P
+36 10700 0 1 a
+P
+9 4 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+W
+9 4 0 1 a
+W
+36 10700 0 1 a
+W
+2 16612 0 1 a
+Z
+1 18217
+Z
+1 18209
+S
+#16613
+Winter Wonderland: He's a Mean One~
+   He's a mean one, all right. There's a grinchy demon going around stealing
+delivered gifts from citizens in the empire. Father Christmas would like you to
+take care of him. Take the sack, find a bedroom to lie in wait, and use it to
+capture him. He'll probably put up a fight, so be ready. The quest will
+complete when you've defeated the demon. If you lose the sack, you need to drop
+this quest and start it again from Father Christmas.
+Type 'use sack <normal | hard | group | boss>' to summon the demon.
+~
+   You've stopped the grinchy demon, for now. Even though he got away, the
+citizens' gifts are safe for another night.
+~
+18 ej 0 0 -1
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 1 a
+Summon and defeat the demon~
+Z
+4 16603
+S
+#16617
+Winter Wonderland: Terrorize the Terriers~
+   While standing in your stable, you get the great idea that the animals of
+the empire should get into the holiday spirit as well. So, you take a couple
+elf outfits and begin your search for two terriers to dress up. Terriers are
+afraid of the dark, so you probably won't find them at night.
+Type: 'dress terrier'
+~
+   There, now even the animals of your empire are in the holiday mood, whether
+they want to be or not.
+~
+15 ej 0 0 -1
+A
+0 5111
+A
+0 10923
+D 16618
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 2 a
+Dress up terriers~
+Z
+4 16618
+S
+#16618
+Winter Wonderland: Replica Reindeer Wrangling~
+   While standing in your stable, you get the great idea that the animals of
+the empire should get into the holiday spirit as well. So, you take some
+reindeer outfits and begin your search for five horses or camels to dress up
+around your city.
+Type: dress <horse | camel>
+~
+   There! Now even the animals of your empire are in the holiday mood, whether
+they want to be or not.
+~
+14 ej 0 0 -1
+A
+0 5111
+A
+0 10923
+D 16618
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 5 a
+Dress up horses or camels~
+Z
+4 16618
+S
+#16620
+Winter Wonderland: Deck the Halls~
+   Nestled in the branches of the Christmas tree is a folded paper. After
+unfolding it, you find directions for more ways to decorate the empire. All you
+have to do is craft a 'winter ornament set', and begin hanging them around the
+land you own. Should be fun, and your citizens will certainly enjoy the winter
+cheer.
+Type 'craft winter ornament set' to make them, then 'hang ornament' in 4 rooms.
+~
+   You've got this decorating thing down. Tree? Check! Ornaments? Check! What
+else could your citizens ask for?
+~
+16 ej 0 0 -1
+A
+2 16607
+D 16620
+P
+36 10700 0 1 a
+P
+9 6 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 4 a
+Hang ornaments around town~
+Z
+4 16620
+S
+#16626
+Winter Wonderland: Topping Off~
+   Looking at the Christmas tree, you notice it's not quite up to snuff. Most
+importantly, it's missing a topper! Take this wand and go freeze a pixy for the
+tree. They can be found all over the place, so if you don't find one
+immediately just keep looking.
+type: 'freeze pixy' to freeze a winter pixy.
+type: 'place pixy' to place a frozen pixy on the tree.
+~
+You and your citizens agree that makes the tree look much better.
+~
+15 dej 0 0 -1
+A
+2 16607
+D 16626
+P
+36 10700 0 1 a
+P
+9 3 0 1 a
+P
+36 10700 0 1 b
+P
+9 2 0 1 b
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 1 a
+Place a frozen pixy on your Christmas tree~
+W
+2 16626 0 1 a
+Z
+4 16626
+S
+#16628
+Winter Wonderland: That's Just Abominable~
+   Your snow buddy is being threatened by an abominable snowman. The last one
+stated that good sir snowy is going to be turned to mush. Unfortunately, the
+abominable snowman is immune to an out right attack, so you'll have to get
+inventive. Enchant a snowball with freezing, and throw it at the abominable
+snowman to turn him into a snow man in truth. You can use this one that your
+buddy has pulled from his own body for you.
+Type: 'enchant snowball freezing'
+Type: 'throw snowball abominable'
+~
+   That'll teach him! Or not, given he's been turned into a snowman. At least
+your buddy is safe again.
+~
+20 dej 0 0 -1
+A
+1 16600
+D 16626
+P
+36 10700 0 1 a
+P
+9 3 0 1 a
+P
+36 10700 0 1 b
+P
+9 2 0 1 b
+R
+2 16678 1
+R
+9 10700 10
+T 16602
+W
+2 16628 0 1 a
+W+
+11 0 0 1 a
+Throw an enchanted snowball at the abominable snowman~
+W
+36 10700 0 1 a
+Z
+4 16628
+S
+#16643
+Winter Wonderland: Got Your Goat~
+   Some sorcerers have been enchanting the little straw goats made by the
+villagers so that the goats run around. For some people, it's a constant source
+of mirth. But for certain Guild members, it has become a nuissance. The straw
+goats are drawing too much attention to covert activities -- and perhaps that's
+what the sorcerers designed them to do.
+   A subtle escalation merits a subtle reaction. Find a straw goat and light it
+on fire. Children will love the little bonfires and it will warm the poorest
+citizens while also thwarting those city sorcerers.
+   'Light' or 'burn' a little straw goat. You'll need a lighter. If you have
+trouble with witnesses, try hiding first.
+~
+Your actions today have warmed the hearts -- and bodies -- of the citizens.
+~
+8 ej 0 0 -1
+A
+2 16607
+D 16643
+P
+9 4 0 1 a
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 1 a
+Burn a straw goat~
+Z
+4 16644
+S
+#16644
+Winter Wonderland: Hay, Got a Light?~
+   The winter festivities have descended on the city like a blizzard, and
+everyone is abustle decorating. Some citizens have built up a giant straw goat
+near here and an important client of the Guild has paid to bring it back down.
+   Now, there's a competition amongst the city's underworld to be the first to
+burn down the giant straw goat for the client. This won't be a paid job, but it
+will certainly increase someone's holiday cheer. As a bonus, the massive
+bonfire from the burning goat will surely warm the hearts -- and bodies -- of
+many of the empire's poorest citizens.
+   Find the giant straw goat and 'light' it on fire.
+~
+You've managed to burn down a straw goat! It looks like you won the competition.
+~
+8 ej 0 0 -1
+A
+2 16607
+D 16643
+P
+36 10700 0 1 a
+P
+9 4 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 1 a
+Light a giant straw goat on fire~
+Z
+4 16644
+S
+#16660
+Winter Wonderland: Goat to Celebrate~
+   People are eager to see a giant straw goat to rival the one from last year.
+Craft one in your city for them to dance and party around, but beware: vandals
+love to burn the straw goat. You will need to stand guard until the revelry has
+ended.
+Steps:
+1. Find a good place and 'craft giant straw goat'.
+2. Stand around and wait for the crowd to gather.
+3. If someone from the crowd approaches the straw goat, type 'protect goat'.
+4. Wait until the party ends and the crowd disperses.
+~
+Your giant straw goat was a huge hit this year. That was the biggest crowd yet!
+~
+6 ej 0 0 -1
+A
+2 16607
+D 16620
+P
+9 6 0 1 a
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 1 a
+Protect the straw goat~
+Z
+6 16660
+S
+#16676
+Winter Wonderland: Cheer for the City~
+   Take this tambourine and go around your city, playing it for 10 of your
+citizens until they catch the holiday spirit and start dancing! This should
+lift everyone's spirits and bring cheer to the entire city. Just hold the
+tambourine (or any instrument) and play music in front of each citizen.
+~
+You've lifted everyone's holiday spirit!
+~
+21 ej 0 0 -1
+A
+1 10701
+D 16676
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 10 a
+Make your citizens dance~
+Z
+4 16677
+S
+#16677
+Winter Wonderland: Charity Concert~
+   Take these sleigh bells, return to your city, and lift everyone's holiday
+spirits by playing charity concerts at 4 different shrines, temples, statues,
+or other dedicate-able buildings. Any building that can be dedicated will do.
+Just hold the sleigh bells (or any instrument) and play music at each of the 4
+buildings.
+~
+Through the gift of charity, you've lifted everyone's holiday spirit!
+~
+21 ej 0 0 -1
+A
+1 10701
+D 16676
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 4 a
+Play a concert at dedicated buildings~
+Z
+4 16677
+S
+#16680
+Winter Wonderland: Naughty List~
+   Whether Christmas, Hannukah, Kwanzaa, the Solstice, or whatever holiday you
+might celebrate this time of year, all of them are threatened by demons from
+beyond the icy veil of winter. Father Christmas hands you a fragile slip of
+parchment -- the naughty list -- with a strange symbol written on it.
+   'Find the demon whose symbol is on this list and defeat it before it can
+threaten the winter festivities,' Father Christmas says. 'There's one place
+with enough holiday magic to summon the demon and fight it: the icy cave lower
+on this very mountain!'
+Type 'use list <normal | hard | group | boss>' in the ice cave.
+~
+   You've managed to stop the demon, for now. Your empire's holiday festivities
+are safe for another night but beware, because the demon could try again each
+and every day.
+~
+18 ej 0 0 -1
+A
+1 10703
+P
+36 10700 0 1 a
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 1 a
+Summon and fight the demon~
+Z
+4 16603
+S
+#16690
+Winter Wonderland: Feed the Polar Vortex~
+   A Frostwarden -- one of the Guardians of Winter -- appears and warns you
+that demi-elves from a dark, snow-covered world are on the verge of invading
+our realm right in the middle of winter. The elves are hungry and that hunger
+is sated by few things in our realm. However, the Frostwarden tells you, the
+elves seem satisfied by the cookies and chocolates that are found in the
+stockings during the Winter Wonderland event. Nobody knows why the demi-elves
+crave the cookies, but the Frostwarden needs each of you to do your part.
+   Put any leftover cookies and chocolates from your stockings into this
+miniature polar vortex with the command 'put <item> vortex' or 'put
+all.cookie vortex'. When you've filled the polar vortex with enough cookies,
+a special reward awaits you.
+~
+   The Frostwarden appears in a flurry of snow and hail. He takes the polar
+vortex from you and thanks you for your help in sating the demi-elves on the
+other side. Since it's the holidays, a lot of pets need good homes, so the
+reward for your hard work is an adoption certificate to get a free puppy or
+kitten.
+~
+11 j 0 0 -1
+A
+2 16659
+A
+2 16678
+A
+2 16690
+P
+36 10700 0 1 -
+R
+2 16640 1
+T 16602
+W+
+11 0 0 50 -
+Feed the vortex treats~
+Z
+2 16690
+S
+$

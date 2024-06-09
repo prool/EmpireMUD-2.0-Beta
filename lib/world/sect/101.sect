@@ -1,7 +1,7 @@
 #10190
 Flowing Lava~
 A Raging Lava Flow~
-'^' 3 0 100 sv 0
+'^' 3 em 100 svx 0
 D0
 /\/\~
 &R~
@@ -9,11 +9,18 @@ E
 4 0 0.01 8
 M
 9060 0.10 d
+X
+lava flowing magma raging mountains volcano~
+   Rivers of red-hot lava flow down the sides of the mountain and even where
+you manage to avoid them, the heat is so intense that it threatens to overwhelm
+you. The once-picturesque mountain range has been reduced to smouldering char.
+Perhaps this isn't a good place to stand.
+~
 S
 #10191
 Cooling Lava~
 A Cooling Lava Flow~
-'^' 34 0 100 sv 0
+'^' 34 em 100 svx 0
 D0
 /\/\~
 &w~
@@ -21,11 +28,17 @@ E
 4 0 0.01 8
 M
 9060 0.10 d
+X
+lava cooling flowing magma mountains volcano~
+   The once-scenic mountain range is covered in black lava, still smoking as it
+cools. There is no sign of life here. You're not even sure this is a safe place
+to stand.
+~
 S
 #10192
 Volcanic Mountain~
 On a Volcanic Mountain~
-'^' 27 0 100 sv 0
+'^' 27 em 100 svx 0
 C
 dig~
 D0
@@ -35,25 +48,16 @@ E
 4 0 1.00 8
 E
 9 0 100.00 8
-I 5 104 17.00 1 X  # DIG: a red bloodstone
-I 5 100 83.00 1 X  # DIG: a rock
+I 5 106 8.00 125 X  # DIG: rough piece of obsidian
+I 5 104 17.00 125 X  # DIG: red bloodstone
+I 5 100 100.00 125 X  # DIG: rock
 M
 9060 0.05 d
-M
-9143 10.00 dh
-M
-9142 10.00 dh
-M
-9017 5.00 dg
-M
-9118 10.00 adg
-M
-9008 10.00 bd
-M
-9025 10.00 d
-M
-9005 10.00 bd
-M
-9018 10.00 d
+X
+volcano volcanic mountains~
+   The entirety of the mountainside is covered in gray ash and black rivers of
+cooled lava. Hints of life begin to poke out of the ash layer, but it will be a
+long time before this area regains its verdant splendor.
+~
 S
 $

@@ -21,7 +21,7 @@
 *       It has been tossed around rigorously, if you are going to use     *
 *       it, heed the warning above.                                       *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -299,7 +299,7 @@ struct b3_player_special_data_saved {
 	sh_int skill_level;  // levels computed based on class skills
 	sh_int highest_known_level;	// maximum level ever achieved (used for gear restrictions)
 	sh_int last_known_level;	// set on save/quit/alt
-	ubyte class_progression;	// % of the way from SPECIALTY_SKILL_CAP to CLASS_SKILL_CAP
+	ubyte class_progression;	// % of the way from SPECIALTY_SKILL_CAP to MAX_SKILL_CAP
 	ubyte class_role;	// ROLE_x chosen by the player
 	sh_int character_class;  // character's class as determined by top skills
 	
@@ -749,8 +749,7 @@ void push_free_list(long pos) {
 
 	CREATE(new_pos, b3_position_list_type, 1);
 	new_pos->position = pos;
-	new_pos->next = free_list;
-	free_list = new_pos;
+	LL_PREPEND(free_list, new_pos);
 }
 
 
@@ -860,7 +859,9 @@ void read_from_file(void *buffer, int size, long filepos) {
 	}
 
 	fseek(mail_file, filepos, SEEK_SET);
-	fread(buffer, size, 1, mail_file);
+	if (fread(buffer, size, 1, mail_file) < 1) {
+		printf("SYSERR: Unable to read mail file '%s'.\r\n", MAIL_FILE);
+	}
 	fclose(mail_file);
 	return;
 }
@@ -881,14 +882,12 @@ void index_mail(long id_to_index, long pos) {
 		new_index->list_start = NULL;
 
 		/* add to front of list */
-		new_index->next = mail_index;
-		mail_index = new_index;
+		LL_PREPEND(mail_index, new_index);
 	}
 	/* now, add this position to front of position list */
 	CREATE(new_position, b3_position_list_type, 1);
 	new_position->position = pos;
-	new_position->next = new_index->list_start;
-	new_index->list_start = new_position;
+	LL_PREPEND(new_index->list_start, new_position);
 }
 
 
@@ -930,13 +929,13 @@ int scan_mail_file(void) {
 
 
 /*
- * Retrieves one messsage for a player. The mail is then discarded from
+ * Retrieves one message for a player. The mail is then discarded from
  * the file and the mail index.
  */
 char *read_delete(long recipient, int *from, time_t *timestamp) {
 	b3_header_block_type header;
 	b3_data_block_type data;
-	b3_mail_index_type *mail_pointer, *prev_mail;
+	b3_mail_index_type *mail_pointer;
 	b3_position_list_type *position_pointer;
 	long mail_address, following_block;
 	char *message;
@@ -962,16 +961,8 @@ char *read_delete(long recipient, int *from, time_t *timestamp) {
 		free(position_pointer);
 
 		/* now free up the actual name entry */
-		if (mail_index == mail_pointer) {	/* name is 1st in list */
-			mail_index = mail_pointer->next;
-			free(mail_pointer);
-		}
-		else {
-			/* find entry before the one we're going to del */
-			for (prev_mail = mail_index; prev_mail->next != mail_pointer; prev_mail = prev_mail->next);
-			prev_mail->next = mail_pointer->next;
-			free(mail_pointer);
-		}
+		LL_DELETE(mail_index, mail_pointer);
+		free(mail_pointer);
 	}
 	else {
 		/* move to next-to-last record */
@@ -1031,7 +1022,7 @@ char *read_delete(long recipient, int *from, time_t *timestamp) {
 * @return struct mail_data* The linked list of mail, or NULL.
 */
 struct mail_data *get_converted_mail(long recipient) {
-	struct mail_data *mail, *last_mail = NULL, *list = NULL;
+	struct mail_data *mail, *list = NULL;
 	time_t timestamp;
 	int from;
 	
@@ -1040,14 +1031,7 @@ struct mail_data *get_converted_mail(long recipient) {
 		mail->body = read_delete(recipient, &from, &timestamp);
 		mail->from = from;
 		mail->timestamp = timestamp;
-		
-		if (last_mail) {
-			last_mail->next = mail;
-		}
-		else {
-			list = mail;
-		}
-		last_mail = mail;
+		LL_APPEND(list, mail);
 	}
 	
 	return list;
@@ -1069,7 +1053,7 @@ void convert_char(struct b3_char_file_u *cfu) {
 	char charname_lower[MAX_STRING_LENGTH], buf[MAX_STRING_LENGTH];
 	char temp[MAX_STRING_LENGTH], str_in1[MAX_STRING_LENGTH];
 	char str_in2[MAX_STRING_LENGTH], line[MAX_STRING_LENGTH];
-	struct account_player *acct_player, *last_acct_player;
+	struct account_player *acct_player;
 	struct mail_data *mail, *mail_list;
 	struct b3_lore_data lore;
 	struct b3_alias_data alias;
@@ -1124,15 +1108,7 @@ void convert_char(struct b3_char_file_u *cfu) {
 	}
 	CREATE(acct_player, struct account_player, 1);
 	acct_player->name = strdup(charname_lower);
-	if ((last_acct_player = acct->players)) {
-		while (last_acct_player->next) {
-			last_acct_player = last_acct_player->next;
-		}
-		last_acct_player->next = acct_player;
-	}
-	else {	// no list yet
-		acct->players = acct_player;
-	}
+	LL_APPEND(acct->players, acct_player);
 	// account: import flags and remove them from the character
 	if (IS_SET(cfu->char_specials_saved.act, b3_PLR_FROZEN)) {
 		SET_BIT(acct->flags, ACCT_FROZEN);
@@ -1152,7 +1128,7 @@ void convert_char(struct b3_char_file_u *cfu) {
 	REMOVE_BIT(cfu->char_specials_saved.act, b3_PLR_MULTIOK | b3_PLR_DELETED | b3_PLR_NOTITLE | b3_PLR_MUTED | b3_PLR_SITEOK | b3_PLR_FROZEN);
 	// account: notes -- merge from each character
 	if (*cfu->player_specials_saved.admin_notes) {
-		snprintf(temp, sizeof(temp), "%s%s%s", acct->notes ? acct->notes : "", acct->notes ? "\r\n" : "", cfu->player_specials_saved.admin_notes);
+		safe_snprintf(temp, sizeof(temp), "%s%s%s", acct->notes ? acct->notes : "", acct->notes ? "\r\n" : "", cfu->player_specials_saved.admin_notes);
 		acct->notes = strdup(temp);
 	}
 	
@@ -1570,13 +1546,21 @@ int main(int argc, char *argv[]) {
 	
 	// first determine top account
 	while (!feof(ptOldHndl)) {
-		fread(&stOld, sizeof(struct b3_char_file_u), 1, ptOldHndl);
-		top_account_id = MAX(top_account_id, stOld.player_specials_saved.account_id);
+		if (fread(&stOld, sizeof(struct b3_char_file_u), 1, ptOldHndl) > 0) {
+			top_account_id = MAX(top_account_id, stOld.player_specials_saved.account_id);
+		}
+		else {
+			printf("Failure reading file: lib/etc/players\n");
+			exit(1);
+		}
 	}
 	rewind(ptOldHndl);
 	
 	while (!feof(ptOldHndl)) {
-		fread(&stOld, sizeof(struct b3_char_file_u), 1, ptOldHndl);
+		if (fread(&stOld, sizeof(struct b3_char_file_u), 1, ptOldHndl) > 0) {
+			printf("Failure reading file: lib/etc/players\n");
+			exit(1);
+		}
 		convert_char(&stOld);
 		
 		// log progress to screen
@@ -1602,6 +1586,7 @@ int main(int argc, char *argv[]) {
 	write_account_index(fl);
 	fprintf(fl, "$\n");
 	fclose(fl);
+	fl = NULL;
 	
 	// write account files
 	last_zone = -1;
@@ -1609,9 +1594,10 @@ int main(int argc, char *argv[]) {
 		this_zone = (int)(acct->id / 100);
 		
 		if (last_zone != this_zone) {
-			if (last_zone != -1) {
+			if (fl && last_zone != -1) {
 				fprintf(fl, "$\n");
 				fclose(fl);
+				fl = NULL;
 			}
 			sprintf(fname, "lib/players/accounts/%d.acct", this_zone);
 			if (!(fl = fopen(fname, "w"))) {
@@ -1621,11 +1607,14 @@ int main(int argc, char *argv[]) {
 			last_zone = this_zone;
 		}
 		
-		write_account_to_file(fl, acct);
+		if (fl) {
+			write_account_to_file(fl, acct);
+		}
 	}
-	if (last_zone != -1) {
+	if (fl && last_zone != -1) {
 		fprintf(fl, "$\n");
 		fclose(fl);
+		fl = NULL;
 	}
 	
 	// remove old-style files

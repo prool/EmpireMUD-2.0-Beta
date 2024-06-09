@@ -41,7 +41,7 @@ kiss~
 kiss~
 b 5 0
 M0
-You making kissy faces at everyone.~
+You make kissy faces at everyone.~
 M1
 $n makes a kissy face.~
 M2
@@ -151,7 +151,7 @@ You mutter something under your breath.~
 M1
 $n mutters something under $s breath.~
 M2
-You mutter something about $N under $s breath.~
+You mutter something about $N under your breath.~
 M3
 $n mutters something about $N under $s breath.~
 M4
@@ -298,7 +298,7 @@ BOIINNNNNNGG!~
 M1
 $n bounces around happily.~
 M2
-You grab $M and bounce and around the room together!~
+You grab $M and bounce around the room together!~
 M3
 $n grabs $N and bounces $m around the room.~
 M4
@@ -1465,7 +1465,7 @@ S
 #190
 snore~
 snore~
-0 5 0
+0 4 0
 M0
 Zzzzzzzzzzzzzzzzz.~
 M1

@@ -2,7 +2,7 @@
 *   File: data.c                                          EmpireMUD 2.0b5 *
 *  Usage: Related to saving/loading/using the global game data system     *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -41,6 +41,11 @@ struct stored_data_type stored_data_info[] = {
 	{ "last_new_year", DATYPE_LONG },	// DATA_LAST_NEW_YEAR
 	{ "world_start", DATYPE_LONG },	// DATA_WORLD_START
 	{ "max_players_today", DATYPE_INT },	// DATA_MAX_PLAYERS_TODAY
+	{ "last_island_descs", DATYPE_LONG },	// DATA_LAST_ISLAND_DESCS
+	{ "last_construction_id", DATYPE_INT },	// DATA_LAST_CONSTRUCTION_ID
+	{ "start_playtime_tracking", DATYPE_LONG },	// DATA_START_PLAYTIME_TRACKING
+	{ "top_idnum", DATYPE_INT },	// DATA_TOP_IDNUM
+	{ "top_vehicle_id", DATYPE_INT },	// DATA_TOP_VEHICLE_ID
 	
 	{ "\n", NOTHING }	// last
 };
@@ -48,6 +53,16 @@ struct stored_data_type stored_data_info[] = {
 
  //////////////////////////////////////////////////////////////////////////////
 //// HELPERS /////////////////////////////////////////////////////////////////
+
+/**
+* Any data in the table that needs to be updated at startup can be done here:
+*/
+void check_data_table(void) {
+	// set this as the start time if not yet set: prevents timing out old empires on existing muds
+	if (data_get_long(DATA_START_PLAYTIME_TRACKING) == 0) {
+		data_set_long(DATA_START_PLAYTIME_TRACKING, time(0));
+	}
+}
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -230,6 +245,10 @@ void save_data_table(bool force) {
 	struct stored_data *data, *next_data;
 	FILE *fl;
 	
+	if (block_all_saves_due_to_shutdown) {
+		return;
+	}
+	
 	if (!force && !data_table_needs_save) {
 		return;
 	}
@@ -284,6 +303,7 @@ void load_data_table(void) {
 	// aaand read from file	
 	if (!(fl = fopen(DATA_FILE, "r"))) {
 		// no config exists
+		check_data_table();
 		return;
 	}
 	
@@ -359,4 +379,5 @@ void load_data_table(void) {
 	}
 	
 	fclose(fl);
+	check_data_table();
 }

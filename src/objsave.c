@@ -5,7 +5,7 @@
 *  Note: ITEM_CART is deprecated but this will still put items inside of  *
 *  one so that the 2.0 b3.8 auto-converter will move them to vehicles.    *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -29,6 +29,7 @@
 #include "interpreter.h"
 #include "utils.h"
 #include "dg_scripts.h"
+#include "constants.h"
 
 /**
 * Contents:
@@ -38,10 +39,6 @@
 *   World Object Saving
 *   Object Utils
 */
-
-// externs
-extern const struct wear_data_type wear_data[NUM_WEARS];
-
 
  //////////////////////////////////////////////////////////////////////////////
 //// BASIC OBJECT LOADING ////////////////////////////////////////////////////
@@ -54,22 +51,13 @@ extern const struct wear_data_type wear_data[NUM_WEARS];
 */
 void ensure_safe_obj(obj_data *obj) {
 	if (!GET_OBJ_KEYWORDS(obj) || !*GET_OBJ_KEYWORDS(obj)) {
-		if (GET_OBJ_KEYWORDS(obj)) {
-			free(GET_OBJ_KEYWORDS(obj));
-		}
-		GET_OBJ_KEYWORDS(obj) = str_dup("object item unknown");
+		set_obj_keywords(obj, "object item unknown");
 	}
 	if (!GET_OBJ_SHORT_DESC(obj) || !*GET_OBJ_SHORT_DESC(obj)) {
-		if (GET_OBJ_SHORT_DESC(obj)) {
-			free(GET_OBJ_SHORT_DESC(obj));
-		}
-		GET_OBJ_SHORT_DESC(obj) = str_dup("an unknown object");
+		set_obj_short_desc(obj, "an unknown object");
 	}
 	if (!GET_OBJ_LONG_DESC(obj) || !*GET_OBJ_LONG_DESC(obj)) {
-		if (GET_OBJ_LONG_DESC(obj)) {
-			free(GET_OBJ_LONG_DESC(obj));
-		}
-		GET_OBJ_LONG_DESC(obj) = str_dup("An unknown object is here.");
+		set_obj_long_desc(obj, "An unknown object is here.");
 	}
 }
 
@@ -79,21 +67,25 @@ void ensure_safe_obj(obj_data *obj) {
 *
 * @param FILE *fl The open item file.
 * @param obj_vnum vnum The vnum of the item being loaded, or NOTHING for non-prototyped item.
-* @param int *location A place to bind the current WEAR_x position of the item; also used to track container contents.
+* @param int *location A place to bind the current WEAR_ position of the item; also used to track container contents.
 * @param char_data *notify Optional: A person to notify if an item is updated (NULL for none).
+* @param char *error_str Used in logging errors.
 * @return obj_data* The loaded item, or NULL if it's not available.
 */
-obj_data *Obj_load_from_file(FILE *fl, obj_vnum vnum, int *location, char_data *notify) {
-	void scale_item_to_level(obj_data *obj, int level);
-
-	char line[MAX_INPUT_LENGTH], error[MAX_STRING_LENGTH], s_in[MAX_INPUT_LENGTH];
+obj_data *Obj_load_from_file(FILE *fl, obj_vnum vnum, int *location, char_data *notify, char *error_str) {
+	char line[MAX_INPUT_LENGTH], error[MAX_STRING_LENGTH], s_in[MAX_INPUT_LENGTH], *tmp;
 	obj_data *proto = obj_proto(vnum);
 	struct extra_descr_data *ex;
 	struct obj_apply *apply, *last_apply = NULL;
 	obj_data *obj, *new;
 	bool end = FALSE;
-	int length, i_in[3];
+	int i_in[3];
 	bool seek_end = FALSE;
+	
+	#define LOG_BAD_TAG_WARNINGS  TRUE	// triggers syslogs for invalid objfile tags
+	#define BAD_TAG_WARNING(src)  else if (LOG_BAD_TAG_WARNINGS) { \
+		log("SYSERR: Bad tag in object %d for %s: %s", vnum, NULLSAFE(error_str), (src));	\
+	}
 	
 	// up-front
 	*location = 0;
@@ -125,22 +117,20 @@ obj_data *Obj_load_from_file(FILE *fl, obj_vnum vnum, int *location, char_data *
 	}
 	
 	// for fread_string
-	sprintf(error, "Obj_load_from_file %d", vnum);
-	
-	// for more readable if/else chain	
-	#define OBJ_FILE_TAG(src, tag, len)  (!strn_cmp((src), (tag), ((len) = strlen(tag))))
+	sprintf(error, "Obj_load_from_file #%d %s", vnum, NULLSAFE(error_str));
 
 	while (!end) {
 		if (!get_line(fl, line)) {
-			log("SYSERR: Unexpected end of obj file in Obj_load_from_file");
+			log("SYSERR: Unexpected end of obj file in Obj_load_from_file for %s", NULLSAFE(error_str));
 			exit(1);
 		}
 		
-		if (OBJ_FILE_TAG(line, "End", length)) {
+		if (!str_cmp(line, "End")) {
+			// this MUST be before seek_end
 			end = TRUE;
 			continue;
 		}
-		else if (seek_end) {
+		if (seek_end) {
 			// are we looking for the end of the object? ignore this line
 			// WARNING: don't put any ifs that require "obj" above seek_end; obj is not guaranteed
 			continue;
@@ -149,20 +139,20 @@ obj_data *Obj_load_from_file(FILE *fl, obj_vnum vnum, int *location, char_data *
 		// normal tags by letter
 		switch (UPPER(*line)) {
 			case 'A': {
-				if (OBJ_FILE_TAG(line, "Action-desc:", length)) {
+				if (!strn_cmp(line, "Action-desc:", 12)) {
 					if (GET_OBJ_ACTION_DESC(obj) && (!proto || GET_OBJ_ACTION_DESC(obj) != GET_OBJ_ACTION_DESC(proto))) {
 						free(GET_OBJ_ACTION_DESC(obj));
 					}
 					GET_OBJ_ACTION_DESC(obj) = fread_string(fl, error);
 				}
-				else if (OBJ_FILE_TAG(line, "Affects:", length)) {
-					if (sscanf(line + length + 1, "%s", s_in)) {
+				else if (!strn_cmp(line, "Affects: ", 9)) {
+					if (sscanf(line + 9, "%s", s_in)) {
 						obj->obj_flags.bitvector = asciiflag_conv(s_in);
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Applies:", length)) {
+				else if (!strn_cmp(line, "Applies: ", 9)) {
 					// this is the CURRENT version of the "Apply" tag
-					if (sscanf(line + length + 1, "%d %d %d", &i_in[0], &i_in[1], &i_in[2])) {
+					if (sscanf(line + 9, "%d %d %d", &i_in[0], &i_in[1], &i_in[2])) {
 						CREATE(apply, struct obj_apply, 1);
 						apply->location = i_in[0];
 						apply->modifier = i_in[1];
@@ -178,9 +168,9 @@ obj_data *Obj_load_from_file(FILE *fl, obj_vnum vnum, int *location, char_data *
 						last_apply = apply;
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Apply:", length)) {
+				else if (!strn_cmp(line, "Apply: ", 7)) {
 					// this is an OLD version of the tag that has a different set of params
-					if (sscanf(line + length + 1, "%d %d %d", &i_in[0], &i_in[1], &i_in[2])) {
+					if (sscanf(line + 7, "%d %d %d", &i_in[0], &i_in[1], &i_in[2])) {
 						if (i_in[1] != APPLY_NONE && i_in[2] != 0) {
 							CREATE(apply, struct obj_apply, 1);
 							apply->location = i_in[1];
@@ -198,180 +188,245 @@ obj_data *Obj_load_from_file(FILE *fl, obj_vnum vnum, int *location, char_data *
 						}
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Autostore-timer:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				else if (!strn_cmp(line, "Autostore-timer: ", 17)) {
+					if (sscanf(line + 17, "%d", &i_in[0])) {
 						GET_AUTOSTORE_TIMER(obj) = i_in[0];
 					}
 				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'B': {
-				if (OBJ_FILE_TAG(line, "Bound-to:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				if (!strn_cmp(line, "Bound-to: ", 10)) {
+					if (sscanf(line + 10, "%d", &i_in[0])) {
 						struct obj_binding *bind;
 						CREATE(bind, struct obj_binding, 1);
 						bind->idnum = i_in[0];
-						bind->next = OBJ_BOUND_TO(obj);
-						OBJ_BOUND_TO(obj) = bind;
+						LL_PREPEND(OBJ_BOUND_TO(obj), bind);
 					}
 				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'C': {
-				if (OBJ_FILE_TAG(line, "Component:", length)) {
-					if (sscanf(line + length + 1, "%d %s", &i_in[0], s_in) == 2) {
-						GET_OBJ_CMP_TYPE(obj) = i_in[0];
-						GET_OBJ_CMP_FLAGS(obj) = asciiflag_conv(s_in);
+				if (!strn_cmp(line, "Component: ", 11)) {
+					if (sscanf(line + 11, "%d %s", &i_in[0], s_in) == 2) {
+						// old pre-b5.88 version: ignore
+						// GET_OBJ_CMP_TYPE(obj) = i_in[0];
+						// GET_OBJ_CMP_FLAGS(obj) = asciiflag_conv(s_in);
+					}
+					else if (sscanf(line + 11, "%d", &i_in[0]) == 1) {
+						// newer version
+						if (GET_OBJ_VNUM(obj) == NOTHING) {
+							// only allowed for 'anonymous' objs
+							obj->proto_data->component = i_in[0];
+						}
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Current-scale:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				else if (!strn_cmp(line, "Current-scale: ", 15)) {
+					if (sscanf(line + 15, "%d", &i_in[0])) {
 						GET_OBJ_CURRENT_SCALE_LEVEL(obj) = i_in[0];
 					}
 				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'E': {
-				if (OBJ_FILE_TAG(line, "Extra-desc:", length)) {
-					if (proto && obj->ex_description == proto->ex_description) {
-						obj->ex_description = NULL;
+				if (!strn_cmp(line, "Extra-desc:", 11)) {
+					if (GET_OBJ_VNUM(obj) == NOTHING) {
+						// only allowed on 'anonymous' objs
+						CREATE(ex, struct extra_descr_data, 1);
+						LL_PREPEND(obj->proto_data->ex_description, ex);
+						
+						ex->keyword = fread_string(fl, error);
+						ex->description = fread_string(fl, error);
 					}
-			
-					CREATE(ex, struct extra_descr_data, 1);
-					ex->next = obj->ex_description;
-					obj->ex_description = ex;
-			
-					ex->keyword = fread_string(fl, error);
-					ex->description = fread_string(fl, error);
+					else {
+						// not allowed; read in 2 strings but dump them
+						if ((tmp = fread_string(fl, error))) {
+							free(tmp);
+						}
+						if ((tmp = fread_string(fl, error))) {
+							free(tmp);
+						}
+					}
 				}
+				else if (!strn_cmp(line, "Eq-set: ", 8)) {
+					if (sscanf(line + 8, "%d %d", &i_in[0], &i_in[1]) == 2) {
+						add_obj_to_eq_set(obj, i_in[0], i_in[1]);
+					}
+				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'F': {
-				if (OBJ_FILE_TAG(line, "Flags:", length)) {
-					if (sscanf(line + length + 1, "%s", s_in)) {
+				if (!strn_cmp(line, "Flags: ", 7)) {
+					if (sscanf(line + 7, "%s", s_in)) {
 						GET_OBJ_EXTRA(obj) = asciiflag_conv(s_in);
 					}
 				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'K': {
-				if (OBJ_FILE_TAG(line, "Keywords:", length)) {
+				if (!strn_cmp(line, "Keywords:", 9)) {
 					if (GET_OBJ_KEYWORDS(obj) && (!proto || GET_OBJ_KEYWORDS(obj) != GET_OBJ_KEYWORDS(proto))) {
 						free(GET_OBJ_KEYWORDS(obj));
 					}
 					GET_OBJ_KEYWORDS(obj) = fread_string(fl, error);
 				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'L': {
-				if (OBJ_FILE_TAG(line, "Last-empire:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				if (!strn_cmp(line, "Last-empire: ", 13)) {
+					if (sscanf(line + 13, "%d", &i_in[0])) {
 						obj->last_empire_id = i_in[0];
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Last-owner:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				else if (!strn_cmp(line, "Last-owner: ", 12)) {
+					if (sscanf(line + 12, "%d", &i_in[0])) {
 						obj->last_owner_id = i_in[0];
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Location:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0]) == 1) {
+				else if (!strn_cmp(line, "Location: ", 10)) {
+					if (sscanf(line + 10, "%d", &i_in[0]) == 1) {
 						*location = i_in[0];
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Long-desc:", length)) {
+				else if (!strn_cmp(line, "Long-desc:", 10)) {
 					if (GET_OBJ_LONG_DESC(obj) && (!proto || GET_OBJ_LONG_DESC(obj) != GET_OBJ_LONG_DESC(proto))) {
 						free(GET_OBJ_LONG_DESC(obj));
 					}
 					GET_OBJ_LONG_DESC(obj) = fread_string(fl, error);
 				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'M': {
-				if (OBJ_FILE_TAG(line, "Max-scale:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
-						GET_OBJ_MAX_SCALE_LEVEL(obj) = i_in[0];
+				if (!strn_cmp(line, "Max-scale: ", 11)) {
+					if (sscanf(line + 11, "%d", &i_in[0])) {
+						if (GET_OBJ_VNUM(obj) == NOTHING) {
+							// only allowed for 'anonymous' objs
+							obj->proto_data->max_scale_level = i_in[0];
+						}
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Material:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
-						GET_OBJ_MATERIAL(obj) = i_in[0];
+				else if (!strn_cmp(line, "Material: ", 10)) {
+					if (sscanf(line + 10, "%d", &i_in[0])) {
+						if (GET_OBJ_VNUM(obj) == NOTHING) {
+							// only allowed for 'anonymous' objs
+							obj->proto_data->material = i_in[0];
+						}
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Min-scale:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
-						GET_OBJ_MIN_SCALE_LEVEL(obj) = i_in[0];
+				else if (!strn_cmp(line, "Min-scale: ", 11)) {
+					if (sscanf(line + 11, "%d", &i_in[0])) {
+						if (GET_OBJ_VNUM(obj) == NOTHING) {
+							// only allowed for 'anonymous' objs
+							obj->proto_data->min_scale_level = i_in[0];
+						}
 					}
 				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'Q': {
-				if (OBJ_FILE_TAG(line, "Quest:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
-						GET_OBJ_REQUIRES_QUEST(obj) = i_in[0];
+				if (!strn_cmp(line, "Quest: ", 7)) {
+					if (sscanf(line + 7, "%d", &i_in[0])) {
+						if (GET_OBJ_VNUM(obj) == NOTHING) {
+							// only allowed for 'anonymous' objs
+							obj->proto_data->requires_quest = i_in[0];
+						}
 					}
 				}
+				BAD_TAG_WARNING(line)
+				break;
+			}
+			case 'R': {
+				if (!strn_cmp(line, "Requires-tool: ", 15)) {
+					if (sscanf(line + 15, "%s", s_in)) {
+						if (GET_OBJ_VNUM(obj) == NOTHING) {
+							// only allowed for 'anonymous' objs
+							obj->proto_data->requires_tool = asciiflag_conv(s_in);
+						}
+					}
+				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'S': {
-				if (OBJ_FILE_TAG(line, "Short-desc:", length)) {
+				if (!strn_cmp(line, "Short-desc:", 11)) {
 					if (GET_OBJ_SHORT_DESC(obj) && (!proto || GET_OBJ_SHORT_DESC(obj) != GET_OBJ_SHORT_DESC(proto))) {
 						free(GET_OBJ_SHORT_DESC(obj));
 					}
 					GET_OBJ_SHORT_DESC(obj) = fread_string(fl, error);
 				}
-				else if (OBJ_FILE_TAG(line, "Stolen-from:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				else if (!strn_cmp(line, "Stolen-from: ", 13)) {
+					if (sscanf(line + 13, "%d", &i_in[0])) {
 						obj->stolen_from = i_in[0];
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Stolen-timer:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				else if (!strn_cmp(line, "Stolen-timer: ", 14)) {
+					if (sscanf(line + 14, "%d", &i_in[0])) {
 						obj->stolen_timer = i_in[0];
 					}
 				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'T': {
-				if (OBJ_FILE_TAG(line, "Timer:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				if (!strn_cmp(line, "Timer: ", 7)) {
+					if (sscanf(line + 7, "%d", &i_in[0])) {
 						GET_OBJ_TIMER(obj) = i_in[0];
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Trigger:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0]) && real_trigger(i_in[0])) {
+				else if (!strn_cmp(line, "Tool: ", 6)) {
+					if (sscanf(line + 6, "%s", s_in)) {
+						if (GET_OBJ_VNUM(obj) == NOTHING) {
+							// only allowed for 'anonymous' objs
+							obj->proto_data->tool_flags = asciiflag_conv(s_in);
+						}
+					}
+				}
+				else if (!strn_cmp(line, "Trigger: ", 9)) {
+					if (sscanf(line + 9, "%d", &i_in[0]) && real_trigger(i_in[0])) {
 						if (!SCRIPT(obj)) {
 							create_script_data(obj, OBJ_TRIGGER);
 						}
 						add_trigger(SCRIPT(obj), read_trigger(i_in[0]), -1);
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Type:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
-						GET_OBJ_TYPE(obj) = i_in[0];
+				else if (!strn_cmp(line, "Type: ", 6)) {
+					if (sscanf(line + 6, "%d", &i_in[0])) {
+						if (GET_OBJ_VNUM(obj) == NOTHING) {
+							// only allowed for 'anonymous' objs
+							obj->proto_data->type_flag = i_in[0];
+						}
 					}
 				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'V': {
-				if (OBJ_FILE_TAG(line, "Val-0:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				if (!strn_cmp(line, "Val-0: ", 7)) {
+					if (sscanf(line + 7, "%d", &i_in[0])) {
 						GET_OBJ_VAL(obj, 0) = i_in[0];
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Val-1:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				else if (!strn_cmp(line, "Val-1: ", 7)) {
+					if (sscanf(line + 7, "%d", &i_in[0])) {
 						GET_OBJ_VAL(obj, 1) = i_in[0];
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Val-2:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				else if (!strn_cmp(line, "Val-2: ", 7)) {
+					if (sscanf(line + 7, "%d", &i_in[0])) {
 						GET_OBJ_VAL(obj, 2) = i_in[0];
 					}
 				}
-				else if (OBJ_FILE_TAG(line, "Variable:", length)) {
-					if (sscanf(line + length + 1, "%s %d", s_in, &i_in[0]) != 2 || !get_line(fl, line)) {
-						log("SYSERR: Bad variable format in Obj_load_from_file: #%d", GET_OBJ_VNUM(obj));
+				else if (!strn_cmp(line, "Variable: ", 10)) {
+					if (sscanf(line + 10, "%s %d", s_in, &i_in[0]) != 2 || !get_line(fl, line)) {
+						log("SYSERR: Bad variable format in Obj_load_from_file for %s: #%d", NULLSAFE(error_str), GET_OBJ_VNUM(obj));
 						exit(1);
 					}
 					if (!SCRIPT(obj)) {
@@ -379,19 +434,21 @@ obj_data *Obj_load_from_file(FILE *fl, obj_vnum vnum, int *location, char_data *
 					}
 					add_var(&(SCRIPT(obj)->global_vars), s_in, line, i_in[0]);
 				}
-				else if (OBJ_FILE_TAG(line, "Version:", length)) {
-					if (sscanf(line + length + 1, "%d", &i_in[0])) {
+				else if (!strn_cmp(line, "Version: ", 9)) {
+					if (sscanf(line + 9, "%d", &i_in[0])) {
 						OBJ_VERSION(obj) = i_in[0];
 					}
 				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			case 'W': {
-				if (OBJ_FILE_TAG(line, "Wear:", length)) {
-					if (sscanf(line + length + 1, "%s", s_in)) {
+				if (!strn_cmp(line, "Wear: ", 6)) {
+					if (sscanf(line + 6, "%s", s_in)) {
 						GET_OBJ_WEAR(obj) = asciiflag_conv(s_in);
 					}
 				}
+				BAD_TAG_WARNING(line)
 				break;
 			}
 			
@@ -406,12 +463,12 @@ obj_data *Obj_load_from_file(FILE *fl, obj_vnum vnum, int *location, char_data *
 	
 	// check versioning: load a new version
 	if (obj && proto && OBJ_VERSION(obj) < OBJ_VERSION(proto) && config_get_bool("auto_update_items")) {
-		new = fresh_copy_obj(obj, GET_OBJ_CURRENT_SCALE_LEVEL(obj));		
+		new = fresh_copy_obj(obj, GET_OBJ_CURRENT_SCALE_LEVEL(obj), TRUE, TRUE);
 		extract_obj(obj);
 		obj = new;
 		
 		if (notify && notify->desc) {
-			msg_to_char(notify, "&yItem '%s' updated.&0\r\n", GET_OBJ_SHORT_DESC(obj));
+			stack_msg_to_desc(notify->desc, "&yItem '%s' updated.&0\r\n", GET_OBJ_SHORT_DESC(obj));
 		}
 	}
 	
@@ -445,8 +502,6 @@ void Crash_extract_objs(obj_data *obj) {
 * @param int location The gear or bag position.
 */
 void Crash_save(obj_data *obj, FILE *fp, int location) {
-	void Crash_save_one_obj_to_file(FILE *fl, obj_data *obj, int location);
-
 	if (obj) {
 		Crash_save(obj->next_content, fp, location);
 		Crash_save(obj->contains, fp, MIN(LOC_INVENTORY, location) - 1);
@@ -467,6 +522,7 @@ void Crash_save_one_obj_to_file(FILE *fl, obj_data *obj, int location) {
 	char temp[MAX_STRING_LENGTH];
 	struct extra_descr_data *ex;
 	struct trig_var_data *tvd;
+	struct eq_set_obj *eq_set;
 	struct obj_binding *bind;
 	struct obj_apply *apply;
 	obj_data *proto;
@@ -501,8 +557,8 @@ void Crash_save_one_obj_to_file(FILE *fl, obj_data *obj, int location) {
 		fprintf(fl, "Action-desc:\n%s~\n", temp);
 	}
 
-	if (!proto || obj->ex_description != proto->ex_description) {
-		for (ex = obj->ex_description; ex; ex = ex->next) {
+	if (!proto && GET_OBJ_EX_DESCS(obj)) {
+		LL_FOREACH(GET_OBJ_EX_DESCS(obj), ex) {
 			fprintf(fl, "Extra-desc:\n%s~\n", NULLSAFE(ex->keyword));
 			strcpy(temp, NULLSAFE(ex->description));
 			strip_crlf(temp);
@@ -518,7 +574,7 @@ void Crash_save_one_obj_to_file(FILE *fl, obj_data *obj, int location) {
 	// always save flags
 	fprintf(fl, "Flags: %s\n", bitv_to_alpha(GET_OBJ_EXTRA(obj)));
 	
-	if (!proto || GET_OBJ_TYPE(obj) != GET_OBJ_TYPE(proto)) {
+	if (!proto) {	// only saves if no proto
 		fprintf(fl, "Type: %d\n", GET_OBJ_TYPE(obj));
 	}
 	if (!proto || GET_OBJ_WEAR(obj) != GET_OBJ_WEAR(proto)) {
@@ -530,23 +586,29 @@ void Crash_save_one_obj_to_file(FILE *fl, obj_data *obj, int location) {
 	if (!proto || GET_OBJ_TIMER(obj) != GET_OBJ_TIMER(proto)) {
 		fprintf(fl, "Timer: %d\n", GET_OBJ_TIMER(obj));
 	}
-	if (!proto || GET_OBJ_MATERIAL(obj) != GET_OBJ_MATERIAL(proto)) {
+	if (!proto) {	// only saves if no proto
 		fprintf(fl, "Material: %d\n", GET_OBJ_MATERIAL(obj));
 	}
-	if (!proto || GET_OBJ_CMP_TYPE(obj) != GET_OBJ_CMP_TYPE(proto) || GET_OBJ_CMP_FLAGS(obj) != GET_OBJ_CMP_FLAGS(proto)) {
-		fprintf(fl, "Component: %d %s\n", GET_OBJ_CMP_TYPE(obj), bitv_to_alpha(GET_OBJ_CMP_FLAGS(obj)));
+	if (!proto && GET_OBJ_COMPONENT(obj) != NOTHING) {
+		fprintf(fl, "Component: %d\n", GET_OBJ_COMPONENT(obj));
 	}
 	if (!proto || GET_OBJ_CURRENT_SCALE_LEVEL(obj) != GET_OBJ_CURRENT_SCALE_LEVEL(proto)) {
 		fprintf(fl, "Current-scale: %d\n", GET_OBJ_CURRENT_SCALE_LEVEL(obj));
 	}
-	if (!proto || GET_OBJ_MIN_SCALE_LEVEL(obj) != GET_OBJ_MIN_SCALE_LEVEL(proto)) {
+	if (!proto && GET_OBJ_MIN_SCALE_LEVEL(obj) > 0) {
 		fprintf(fl, "Min-scale: %d\n", GET_OBJ_MIN_SCALE_LEVEL(obj));
 	}
-	if (!proto || GET_OBJ_MAX_SCALE_LEVEL(obj) != GET_OBJ_MAX_SCALE_LEVEL(proto)) {
+	if (!proto && GET_OBJ_MAX_SCALE_LEVEL(obj) > 0) {
 		fprintf(fl, "Max-scale: %d\n", GET_OBJ_MAX_SCALE_LEVEL(obj));
 	}
-	if (!proto || GET_OBJ_REQUIRES_QUEST(obj) != GET_OBJ_REQUIRES_QUEST(proto)) {
+	if (!proto && GET_OBJ_REQUIRES_QUEST(obj) != NOTHING) {
 		fprintf(fl, "Quest: %d\n", GET_OBJ_REQUIRES_QUEST(obj));
+	}
+	if (!proto && GET_OBJ_TOOL_FLAGS(obj) != NOBITS) {
+		fprintf(fl, "Tool: %s\n", bitv_to_alpha(GET_OBJ_TOOL_FLAGS(obj)));
+	}
+	if (!proto && GET_OBJ_REQUIRES_TOOL(obj) != NOBITS) {
+		fprintf(fl, "Requires-tool: %s\n", bitv_to_alpha(GET_OBJ_REQUIRES_TOOL(obj)));
 	}
 
 	if (obj->last_empire_id != NOTHING) {
@@ -573,6 +635,11 @@ void Crash_save_one_obj_to_file(FILE *fl, obj_data *obj, int location) {
 		fprintf(fl, "Bound-to: %d\n", bind->idnum);
 	}
 	
+	// any equipment sets it's in
+	LL_FOREACH(GET_OBJ_EQ_SETS(obj), eq_set) {
+		fprintf(fl, "Eq-set: %d %d\n", eq_set->id, eq_set->pos);
+	}
+	
 	// scripts
 	if (SCRIPT(obj)) {
 		trig_data *trig;
@@ -582,7 +649,7 @@ void Crash_save_one_obj_to_file(FILE *fl, obj_data *obj, int location) {
 		}
 		
 		LL_FOREACH (SCRIPT(obj)->global_vars, tvd) {
-			if (*tvd->name == '-') { // don't save if it begins with -
+			if (*tvd->name == '-' || !*tvd->value) { // don't save if it begins with - or is empty
 				continue;
 			}
 			
@@ -603,6 +670,11 @@ void Crash_save_one_obj_to_file(FILE *fl, obj_data *obj, int location) {
 void extract_all_items(char_data *ch) {
 	int iter;
 	
+	// it's no longer safe to save the delay file -- saving it after extracting items results in losing all items
+	if (!IS_NPC(ch)) {
+		DONT_SAVE_DELAY(ch) = TRUE;
+	}
+	
 	for (iter = 0; iter < NUM_WEARS; ++iter) {
 		if (GET_EQ(ch, iter)) {
 			Crash_extract_objs(GET_EQ(ch, iter));
@@ -620,7 +692,7 @@ void extract_all_items(char_data *ch) {
 * This code seeks to autoequip the character with an item from the crash file,
 * rather than loading all items into inventory like a stock CircleMUD.
 *
-* The 'location' parameter is a WEAR_x flag + 1 (the +1 is because 0 is
+* The 'location' parameter is a WEAR_ flag + 1 (the +1 is because 0 is
 * special-cased in the autoequip code we used).
 *
 * This function formerly checked if the object was wearable in the position
@@ -662,17 +734,14 @@ void auto_equip(char_data *ch, obj_data *obj, int *location) {
 * @param obj_data *obj The object.
 * @param char_data *ch The person to give/equip it to.
 * @param int location Where it should be equipped.
+* @param obj_data ***cont_row For putting items back in containers (must be at least MAX_BAG_ROWS long).
 */
-void loaded_obj_to_char(obj_data *obj, char_data *ch, int location) {
-	obj_data *obj2, *cont_row[MAX_BAG_ROWS];
+void loaded_obj_to_char(obj_data *obj, char_data *ch, int location, obj_data ***cont_row) {
+	obj_data *o, *next_o;
 	int iter;
 	
 	if (!obj || !ch) {
 		return;
-	}
-	
-	for (iter = 0; iter < MAX_BAG_ROWS; ++iter) {
-		cont_row[iter] = NULL;
 	}
 	
 	auto_equip(ch, obj, &location);
@@ -701,61 +770,55 @@ void loaded_obj_to_char(obj_data *obj, char_data *ch, int location) {
 	 */
 	if (location > 0) {		/* Equipped */
 		for (iter = MAX_BAG_ROWS - 1; iter > 0; --iter) {
-			if (cont_row[iter]) {	/* No container, back to inventory. */
-				for (; cont_row[iter]; cont_row[iter] = obj2) {
-					obj2 = cont_row[iter]->next_content;
-					obj_to_char(cont_row[iter], ch);
-				}
-				cont_row[iter] = NULL;
+			DL_FOREACH_SAFE2((*cont_row)[iter], o, next_o, next_content) {
+				// No container, back to inventory.
+				DL_DELETE2((*cont_row)[iter], o, prev_content, next_content);
+				obj_to_char(o, ch);
 			}
 		}
-		if (cont_row[0]) {	/* Content list existing. */
+		if ((*cont_row)[0]) {	/* Content list existing. */
 			if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER || GET_OBJ_TYPE(obj) == ITEM_CART || IS_CORPSE(obj)) {
 				/* Remove object, fill it, equip again. */
 				obj = unequip_char(ch, location - 1);
 				obj->contains = NULL;	/* Should be NULL anyway, but just in case. */
-				for (; cont_row[0]; cont_row[0] = obj2) {
-					obj2 = cont_row[0]->next_content;
-					obj_to_obj(cont_row[0], obj);
+				DL_FOREACH_SAFE2((*cont_row)[0], o, next_o, next_content) {
+					DL_DELETE2((*cont_row)[iter], o, prev_content, next_content);
+					obj_to_obj(o, obj);
 				}
 				equip_char(ch, obj, location - 1);
 			}
 			else {			/* Object isn't container, empty the list. */
-				for (; cont_row[0]; cont_row[0] = obj2) {
-					obj2 = cont_row[0]->next_content;
-					obj_to_char(cont_row[0], ch);
+				DL_FOREACH_SAFE2((*cont_row)[0], o, next_o, next_content) {
+					DL_DELETE2((*cont_row)[0], o, prev_content, next_content);
+					obj_to_char(o, ch);
 				}
-				cont_row[0] = NULL;
 			}
 		}
 	}
 	else {	/* location <= 0 */
 		for (iter = MAX_BAG_ROWS - 1; iter > -location; --iter) {
-			if (cont_row[iter]) {	/* No container, back to inventory. */
-				for (; cont_row[iter]; cont_row[iter] = obj2) {
-					obj2 = cont_row[iter]->next_content;
-					obj_to_char(cont_row[iter], ch);
-				}
-				cont_row[iter] = NULL;
+			// No container, back to inventory.
+			DL_FOREACH_SAFE2((*cont_row)[iter], o, next_o, next_content) {
+				DL_DELETE2((*cont_row)[iter], o, prev_content, next_content);
+				obj_to_char(o, ch);
 			}
 		}
-		if (iter == -location && cont_row[iter]) {	/* Content list exists. */
+		if (iter == -location && (*cont_row)[iter]) {	/* Content list exists. */
 			if (GET_OBJ_TYPE(obj) == ITEM_CONTAINER || GET_OBJ_TYPE(obj) == ITEM_CART || IS_CORPSE(obj)) {
 				/* Take the item, fill it, and give it back. */
 				obj_from_char(obj);
 				obj->contains = NULL;
-				for (; cont_row[iter]; cont_row[iter] = obj2) {
-					obj2 = cont_row[iter]->next_content;
-					obj_to_obj(cont_row[iter], obj);
+				DL_FOREACH_SAFE2((*cont_row)[iter], o, next_o, next_content) {
+					DL_DELETE2((*cont_row)[iter], o, prev_content, next_content);
+					obj_to_obj(o, obj);
 				}
 				obj_to_char(obj, ch);	/* Add to inventory first. */
 			}
 			else {	/* Object isn't container, empty content list. */
-				for (; cont_row[iter]; cont_row[iter] = obj2) {
-					obj2 = cont_row[iter]->next_content;
-					obj_to_char(cont_row[iter], ch);
+				DL_FOREACH_SAFE2((*cont_row)[iter], o, next_o, next_content) {
+					DL_DELETE2((*cont_row)[iter], o, prev_content, next_content);
+					obj_to_char(o, ch);
 				}
-				cont_row[iter] = NULL;
 			}
 		}
 		if (location < 0 && location >= -MAX_BAG_ROWS) {
@@ -765,15 +828,7 @@ void loaded_obj_to_char(obj_data *obj, char_data *ch, int location) {
 			 * the character rented.
 			 */
 			obj_from_char(obj);
-			if ((obj2 = cont_row[-location - 1]) != NULL) {
-				while (obj2->next_content) {
-					obj2 = obj2->next_content;
-				}
-				obj2->next_content = obj;
-			}
-			else {
-				cont_row[-location - 1] = obj;
-			}
+			DL_APPEND2((*cont_row)[-location - 1], obj, prev_content, next_content);
 		}
 	}
 }
@@ -789,19 +844,34 @@ void loaded_obj_to_char(obj_data *obj, char_data *ch, int location) {
 * update commands don't support loading objects other than prototypes.
 *
 * @param room_data *room The world location whose objects we are saving.
+* @return bool TRUE if it saved a pack, FALSE if it did not.
 */
 bool objpack_save_room(room_data *room) {
-	void Crash_save_vehicles(vehicle_data *room_list, FILE *fl);
-	
 	char filename[MAX_INPUT_LENGTH], tempname[MAX_INPUT_LENGTH];
 	FILE *fp;
-
-	if (!ROOM_CONTENTS(room) && !ROOM_VEHICLES(room)) {
+	
+	if (!room) {
+		return FALSE;	// shortcut out
+	}
+	
+	get_world_filename(filename, GET_ROOM_VNUM(room), SUF_PACK);
+	
+	if (!ROOM_NEEDS_PACK_SAVE(room)) {
+		if (IS_SET(room->save_info, SAVE_INFO_PACK_SAVED)) {
+			REMOVE_BIT(room->save_info, SAVE_INFO_PACK_SAVED);
+			request_world_save(GET_ROOM_VNUM(room), WSAVE_ROOM);
+		}
+		
+		if (!block_all_saves_due_to_shutdown && access(filename, F_OK) == 0) {
+			unlink(filename);
+		}
+		
 		return FALSE;
 	}
-
-	// TODO split into dirs?
-	sprintf(filename, "%s%d.%s", LIB_OBJPACK, GET_ROOM_VNUM(room), SUF_PACK);
+	
+	// otherwise save the pack file
+	
+	// temp file
 	strcpy(tempname, filename);
 	strcat(tempname, TEMP_SUFFIX);
 
@@ -816,6 +886,11 @@ bool objpack_save_room(room_data *room) {
 
 	fclose(fp);
 	rename(tempname, filename);
+	
+	if (!IS_SET(room->save_info, SAVE_INFO_PACK_SAVED)) {
+		SET_BIT(room->save_info, SAVE_INFO_PACK_SAVED);
+		request_world_save(GET_ROOM_VNUM(room), WSAVE_ROOM);
+	}
 
 	return TRUE;
 }
@@ -825,12 +900,11 @@ bool objpack_save_room(room_data *room) {
 * Loads an object pack for a room. This is done at startup.
 *
 * @param room_data *room The room.
+* @param bool use_pre_b5_116_dir If TRUE, loads from the old 'packs' directory
 */
-void objpack_load_room(room_data *room) {
-	extern vehicle_data *unstore_vehicle_from_file(FILE *fl, any_vnum vnum);
-
-	obj_data *obj, *obj2, *cont_row[MAX_BAG_ROWS];
-	char fname[MAX_STRING_LENGTH], line[MAX_INPUT_LENGTH];
+void objpack_load_room(room_data *room, bool use_pre_b5_116_dir) {
+	obj_data *obj, *o, *next_o, *cont_row[MAX_BAG_ROWS];
+	char fname[MAX_STRING_LENGTH], line[MAX_INPUT_LENGTH], err_str[256];
 	int iter, location;
 	vehicle_data *veh;
 	obj_vnum vnum;
@@ -841,15 +915,27 @@ void objpack_load_room(room_data *room) {
 	for (iter = 0; iter < MAX_BAG_ROWS; iter++) {
 		cont_row[iter] = NULL;
 	}
-
-	sprintf(fname, "%s%d.%s", LIB_OBJPACK, GET_ROOM_VNUM(room), SUF_PACK);
+	
+	// determine file location based on version
+	if (use_pre_b5_116_dir) {
+		// only for backwards-compatibility
+		sprintf(fname, "%s%d%s", LIB_OBJPACK, GET_ROOM_VNUM(room), SUF_PACK);
+	}
+	else {
+		get_world_filename(fname, GET_ROOM_VNUM(room), SUF_PACK);
+	}
 
 	if (!(fl = fopen(fname, "r"))) {
-		if (errno != ENOENT) {
-			log("SYSERR: READING OBJECT FILE %s (5): %s", fname, strerror(errno));
+		if (errno == ENOENT) {
+			log("SYSERR: Unable to find expected pack file: %s", fname);
+		}
+		else {
+			log("SYSERR: READING PACK FILE %s (5): %s", fname, strerror(errno));
 		}
 		return;
 	}
+	
+	sprintf(err_str, "vehicle in pack file for room %d", GET_ROOM_VNUM(room));
 	
 	// iterate over file
 	for (;;) {
@@ -869,8 +955,9 @@ void objpack_load_room(room_data *room) {
 				return;
 			}
 			
-			if ((obj = Obj_load_from_file(fl, vnum, &location, NULL))) {
+			if ((obj = Obj_load_from_file(fl, vnum, &location, NULL, err_str))) {
 				// Obj_load_from_file may return a NULL for deleted objs
+				suspend_autostore_updates = TRUE;	// see end of block for FALSE
 				
 				// Not really an inventory, but same idea.
 				if (location > 0) {
@@ -880,17 +967,15 @@ void objpack_load_room(room_data *room) {
 				// store autostore timer through obj_to_room
 				timer = GET_AUTOSTORE_TIMER(obj);
 				obj_to_room(obj, room);
-				GET_AUTOSTORE_TIMER(obj) = timer;
+				schedule_obj_autostore_check(obj, timer);
 				
 				for (iter = MAX_BAG_ROWS - 1; iter > -location; --iter) {
-					if (cont_row[iter]) {		/* No container, back to room. */
-						for (; cont_row[iter]; cont_row[iter] = obj2) {
-							obj2 = cont_row[iter]->next_content;
-							timer = GET_AUTOSTORE_TIMER(cont_row[iter]);
-							obj_to_room(cont_row[iter], room);
-							GET_AUTOSTORE_TIMER(cont_row[iter]) = timer;
-						}
-						cont_row[iter] = NULL;
+					// No container, back to room.
+					DL_FOREACH_SAFE2(cont_row[iter], o, next_o, next_content) {
+						DL_DELETE2(cont_row[iter], o, prev_content, next_content);
+						timer = GET_AUTOSTORE_TIMER(o);
+						obj_to_room(o, room);
+						schedule_obj_autostore_check(o, timer);
 					}
 				}
 				if (iter == -location && cont_row[iter]) {			/* Content list exists. */
@@ -898,39 +983,45 @@ void objpack_load_room(room_data *room) {
 						/* Take the item, fill it, and give it back. */
 						obj_from_room(obj);
 						obj->contains = NULL;
-						for (; cont_row[iter]; cont_row[iter] = obj2) {
-							obj2 = cont_row[iter]->next_content;
-							obj_to_obj(cont_row[iter], obj);
+						DL_FOREACH_SAFE2(cont_row[iter], o, next_o, next_content) {
+							DL_DELETE2(cont_row[iter], o, prev_content, next_content);
+							obj_to_obj(o, obj);
 						}
 						timer = GET_AUTOSTORE_TIMER(obj);
 						obj_to_room(obj, room);			/* Add to room first. */
-						GET_AUTOSTORE_TIMER(obj) = timer;
+						schedule_obj_autostore_check(obj, timer);
 					}
 					else {				/* Object isn't container, empty content list. */
-						for (; cont_row[iter]; cont_row[iter] = obj2) {
-							obj2 = cont_row[iter]->next_content;
-							timer = GET_AUTOSTORE_TIMER(cont_row[iter]);
-							obj_to_room(cont_row[iter], room);
-							GET_AUTOSTORE_TIMER(cont_row[iter]) = timer;
+						DL_FOREACH_SAFE2(cont_row[iter], o, next_o, next_content) {
+							DL_DELETE2(cont_row[iter], o, prev_content, next_content);
+							timer = GET_AUTOSTORE_TIMER(o);
+							obj_to_room(o, room);
+							schedule_obj_autostore_check(o, timer);
 						}
-						cont_row[iter] = NULL;
 					}
 				}
 				if (location < 0 && location >= -MAX_BAG_ROWS) {
 					obj_from_room(obj);
-					if ((obj2 = cont_row[-location - 1]) != NULL) {
-						while (obj2->next_content) {
-							obj2 = obj2->next_content;
-						}
-						obj2->next_content = obj;
-					}
-					else {
-						cont_row[-location - 1] = obj;
-					}
+					DL_APPEND2(cont_row[-location - 1], obj, prev_content, next_content);
 				}
+				
+				suspend_autostore_updates = FALSE;
 			}
 			else {
 				// no obj returned -- it was probably deleted
+				suspend_autostore_updates = TRUE;
+				
+				// item is missing here -- attempt to dump stuff back to the room if pending
+				for (iter = MAX_BAG_ROWS - 1; iter >= 0; --iter) {
+					DL_FOREACH_SAFE2(cont_row[iter], o, next_o, next_content) {
+						DL_DELETE2(cont_row[iter], o, prev_content, next_content);
+						timer = GET_AUTOSTORE_TIMER(o);
+						obj_to_room(o, room);
+						schedule_obj_autostore_check(o, timer);
+					}
+				}
+				
+				suspend_autostore_updates = FALSE;
 				
 				/*
 				log("SYSERR: Got back non-object while loading vnum %d for %s", vnum, fname);
@@ -946,7 +1037,7 @@ void objpack_load_room(room_data *room) {
 				return;
 			}
 			
-			if ((veh = unstore_vehicle_from_file(fl, vnum))) {
+			if ((veh = unstore_vehicle_from_file(fl, vnum, err_str))) {
 				vehicle_to_room(veh, room);
 			}
 		}
@@ -978,10 +1069,6 @@ void objpack_load_room(room_data *room) {
 * @param char *name The name of the person whose rent file to show.
 */
 void Crash_listrent(char_data *ch, char *name) {
-	void check_delayed_load(char_data *ch);
-	void list_obj_to_char(obj_data *list, char_data *ch, int mode, int show);
-	void show_obj_to_char(obj_data *obj, char_data *ch, int mode);
-	
 	char_data *victim;
 	bool file = FALSE;
 	int iter;
@@ -993,18 +1080,19 @@ void Crash_listrent(char_data *ch, char *name) {
 	
 	check_delayed_load(victim);
 	
-	msg_to_char(ch, "%s is using:\r\n", GET_NAME(victim));
+	build_page_display(ch, "%s is using:", GET_NAME(victim));
 	for (iter = 0; iter < NUM_WEARS; ++iter) {
 		if (GET_EQ(victim, iter)) {
-			msg_to_char(ch, wear_data[iter].eq_prompt);
-			show_obj_to_char(GET_EQ(victim, iter), ch, OBJ_DESC_EQUIPMENT);
+			build_page_display(ch, "%s%s", wear_data[iter].eq_prompt, obj_desc_for_char(GET_EQ(victim, iter), ch, OBJ_DESC_EQUIPMENT));
 		}
 	}
 	
-	msg_to_char(ch, "Inventory:\r\n");
-	list_obj_to_char(victim->carrying, ch, OBJ_DESC_INVENTORY, TRUE);
+	build_page_display(ch, "Inventory:");
+	list_obj_to_char(victim->carrying, ch, OBJ_DESC_INVENTORY, TRUE, TRUE);
 	
 	if (file) {
 		free_char(victim);
 	}
+	
+	send_page_display(ch);
 }

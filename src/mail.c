@@ -2,7 +2,7 @@
 *   File: mail.c                                          EmpireMUD 2.0b5 *
 *  Usage: Internal funcs and handlers of mud-mail system                  *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -137,11 +137,12 @@ void write_mail_to_file(FILE *fl, char_data *ch) {
 //// MAIL COMMANDS ///////////////////////////////////////////////////////////
 
 ACMD(do_mail) {
-	char mail_buf[MAX_STRING_LENGTH * 2];
+	char mail_buf[MAX_STRING_LENGTH * 2], part[256];
 	player_index_data *index;
 	int amt = -1, count = 0;
 	struct mail_data *mail;
-	char *tmstr, **write;
+	char *tmstr, **write, *replaced;
+	const char *msg;
 	obj_data *obj;
 	
 	if (IS_NPC(ch)) {
@@ -158,10 +159,10 @@ ACMD(do_mail) {
 	}
 	else if (is_abbrev(arg, "check")) {
 		if (GET_MAIL_PENDING(ch)) {
-			msg_to_char(ch, "A pigeon is circling overhead with mail for you.\r\n");
+			msg_to_char(ch, "%s\r\n", config_get_string("mail_available_message") ? config_get_string("mail_available_message") : "You have mail waiting for you.");
 		}
 		else {
-			msg_to_char(ch, "You can't see any mail pigeons following you.\r\n");
+			msg_to_char(ch, "%s\r\n", config_get_string("mail_not_available_message") ? config_get_string("mail_not_available_message") : "You don't seem to have any mail waiting for you.");
 		}
 	}
 	else if (is_abbrev(arg, "receive")) {
@@ -169,16 +170,19 @@ ACMD(do_mail) {
 			amt = MAX(1, atoi(buf));
 		}
 
-		if (!GET_MAIL_PENDING(ch)) {
+		if (config_get_bool("mail_requires_building_to_receive") && !IS_IMMORTAL(ch) && !room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_MAIL)) {
+			msg_to_char(ch, "%s\r\n", config_get_string("mail_requires_building_to_receive_message") ? config_get_string("mail_requires_building_to_receive_message") : "You can only receive mail at a working post office.");
+		}
+		else if (!GET_MAIL_PENDING(ch)) {
 			msg_to_char(ch, "You don't have any mail waiting.\r\n");
 		}
 		else {
 			while ((mail = GET_MAIL_PENDING(ch)) && amt-- && ++count) {
 				obj = create_obj();
-				GET_OBJ_KEYWORDS(obj) = str_dup("letter small mail");
-				GET_OBJ_SHORT_DESC(obj) = str_dup("a small letter");
-				GET_OBJ_LONG_DESC(obj) = str_dup("Someone has left a small letter here.");
-				GET_OBJ_TYPE(obj) = ITEM_MAIL;
+				set_obj_keywords(obj, "letter small mail");
+				set_obj_short_desc(obj, "a small letter");
+				set_obj_long_desc(obj, "Someone has left a small letter here.");
+				obj->proto_data->type_flag = ITEM_MAIL;
 				GET_OBJ_WEAR(obj) = ITEM_WEAR_TAKE | ITEM_WEAR_HOLD;
 				GET_OBJ_TIMER(obj) = UNLIMITED;
 				
@@ -186,30 +190,49 @@ ACMD(do_mail) {
 				tmstr = asctime(localtime(&mail->timestamp));
 				*(tmstr + strlen(tmstr) - 1) = '\0';
 
-				snprintf(mail_buf, sizeof(mail_buf),
+				safe_snprintf(mail_buf, sizeof(mail_buf),
 					" * * * * Empire Mail System * * * *\r\n"
 					"Date: %s\r\n"
 					"  To: %s\r\n"
 					"From: %s\r\n\r\n%s", tmstr, PERS(ch, ch, TRUE),
 						index ? index->fullname : "Unknown", NULLSAFE(mail->body));
-				GET_OBJ_ACTION_DESC(obj) = str_dup(mail_buf);
+				set_obj_look_desc(obj, mail_buf, FALSE);
 				
 				obj_to_char(obj, ch);
 				
 				GET_MAIL_PENDING(ch) = mail->next;
 				free_mail(mail);
 			}
-			msg_to_char(ch, "A pigeon lands and you find %d letter%s attached to its leg.\r\n", count, count != 1 ? "s" : "");
-			sprintf(buf1, "A pigeon lands and $n unties %d letter%s from its leg.", count, count != 1 ? "s" : "");
-			act(buf1, TRUE, ch, NULL, NULL, TO_ROOM);
+			
+			// pre-messaging
+			safe_snprintf(part, sizeof(part), "%d letter%s", count, PLURAL(count));
+			
+			// message to player
+			msg = config_get_string("mail_receive_message_to_char") ? config_get_string("mail_receive_message_to_char") : "You receive ##.";
+			if (strstr(msg, "##")) {
+				replaced = str_replace("##", part, msg);
+				msg_to_char(ch, "%s\r\n", replaced);
+				free(replaced);
+			}
+			else {
+				msg_to_char(ch, "%s\r\n", msg);
+			}
+			
+			// message to room
+			msg = config_get_string("mail_receive_message_to_room") ? config_get_string("mail_receive_message_to_room") : "$n receives ##.";
+			if (strstr(msg, "##")) {
+				replaced = str_replace("##", part, msg);
+				act(replaced, TRUE, ch, NULL, NULL, TO_ROOM);
+				free(replaced);
+			}
+			else {
+				act(msg, TRUE, ch, NULL, NULL, TO_ROOM);
+			}
 		}
 	}
 	else if (is_abbrev(arg, "send")) {
-		if (!IS_IMMORTAL(ch) && (!HAS_FUNCTION(IN_ROOM(ch), FNC_MAIL) || !IS_COMPLETE(IN_ROOM(ch)))) {
-			msg_to_char(ch, "You can only send mail from a pigeon post.\r\n");
-		}
-		else if (!IS_IMMORTAL(ch) && !check_in_city_requirement(IN_ROOM(ch), TRUE)) {
-			msg_to_char(ch, "This building must be in a city to use it.\r\n");
+		if (config_get_bool("mail_requires_building_to_send") && !IS_IMMORTAL(ch) && !room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_MAIL)) {
+			msg_to_char(ch, "%s\r\n", config_get_string("mail_requires_building_to_send_message") ? config_get_string("mail_requires_building_to_send_message") : "You can only send mail from a working post office.");
 		}
 		else if (!ch->desc) {
 			msg_to_char(ch, "You can't do that.\r\n");
@@ -232,6 +255,6 @@ ACMD(do_mail) {
 		}
 	}
 	else {
-		msg_to_char(ch, "Usage: mail send <name>, mail check, mail receive <number>\r\n");
+		msg_to_char(ch, "Usage: mail send <name>, mail check, mail receive [number]\r\n");
 	}
 }

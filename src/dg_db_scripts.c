@@ -3,7 +3,7 @@
 *  Usage: Contains routines to handle db functions for scripts and trigs  *
 *                                                                         *
 *  DG Scripts code by egreen, 1996/09/30 21:27:54, revision 3.7           *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -26,17 +26,7 @@
 #include "interpreter.h"
 
 // external vars
-extern int max_mob_id;
-extern int max_obj_id;
-extern int max_vehicle_id;
-extern struct reboot_control_data reboot_control;
-
-// external fucs
-extern void half_chop(char *string, char *arg1, char *arg2);
-
-// locals
-void trig_data_copy(trig_data *this_data, const trig_data *trg);
-void free_trigger(trig_data *trig);
+extern int top_script_uid;
 
 
 /**
@@ -72,8 +62,6 @@ struct cmdlist_element *compile_command_list(char *input) {
 
 
 void parse_trigger(FILE *trig_f, int nr) {
-	void add_trigger_to_table(trig_data *trig);
-
 	int t[2], k, attach_type;
 	char line[256], *cmds, *s, flags[256], errors[MAX_INPUT_LENGTH];
 	struct cmdlist_element *cle;
@@ -83,7 +71,7 @@ void parse_trigger(FILE *trig_f, int nr) {
 	trig->vnum = nr;
 	add_trigger_to_table(trig);
 
-	snprintf(errors, sizeof(errors), "trig vnum %d", nr);
+	safe_snprintf(errors, sizeof(errors), "trig vnum %d", nr);
 
 	trig->name = fread_string(trig_f, errors);
 
@@ -169,6 +157,8 @@ void trig_data_copy(trig_data *this_data, const trig_data *trg) {
 	this_data->narg = trg->narg;
 	if (trg->arglist)
 		this_data->arglist = strdup(trg->arglist);
+	
+	this_data->purge_tracker = NULL;
 }
 
 
@@ -207,7 +197,7 @@ void dg_obj_trigger(char *line, obj_data *obj) {
 	char junk[8];
 	int vnum, count;
 	trig_data *trproto;
-	struct trig_proto_list *trg_proto, *new_trg;
+	struct trig_proto_list *new_trg;
 
 	count = sscanf(line, "%s %d", junk, &vnum);
 
@@ -224,17 +214,7 @@ void dg_obj_trigger(char *line, obj_data *obj) {
 
 	CREATE(new_trg, struct trig_proto_list, 1);
 	new_trg->vnum = vnum;
-	new_trg->next = NULL;
-
-	trg_proto = obj->proto_script;
-	if (!trg_proto) {
-		obj->proto_script = trg_proto = new_trg;
-	}
-	else {
-		while (trg_proto->next)
-			trg_proto = trg_proto->next;
-		trg_proto->next = new_trg;
-	}
+	LL_APPEND(obj->proto_script, new_trg);
 }
 
 void assign_triggers(void *i, int type) {
@@ -262,6 +242,8 @@ void assign_triggers(void *i, int type) {
 				}
 				trg_proto = trg_proto->next;
 			}
+			reread_companion_trigs(mob);
+			request_char_save_in_world(mob);
 			break;
 		case OBJ_TRIGGER:
 			obj = (obj_data*)i;
@@ -279,6 +261,7 @@ void assign_triggers(void *i, int type) {
 				}
 				trg_proto = trg_proto->next;
 			}
+			request_obj_save_in_world(obj);
 			break;
 		case WLD_TRIGGER:
 		case ADV_TRIGGER:
@@ -300,6 +283,7 @@ void assign_triggers(void *i, int type) {
 				}
 				trg_proto = trg_proto->next;
 			}
+			request_world_save(GET_ROOM_VNUM(room), WSAVE_ROOM);
 			break;
 		case VEH_TRIGGER: {
 			veh = (vehicle_data*)i;
@@ -317,6 +301,11 @@ void assign_triggers(void *i, int type) {
 				}
 				trg_proto = trg_proto->next;
 			}
+			request_vehicle_save_in_world(veh);
+			break;
+		}
+		case EMP_TRIGGER: {
+			syslog(SYS_ERROR, LVL_BUILDER, TRUE, "SYSERR: unable to assign triggers to empires in assign_triggers()");
 			break;
 		}
 		default:
@@ -333,15 +322,24 @@ void assign_triggers(void *i, int type) {
 * @return int The unique ID.
 */
 int char_script_id(char_data *ch) {
-	if (ch->script_id == 0) {
-		ch->script_id = max_mob_id++;
-		add_to_lookup_table(ch->script_id, (void *)ch);
+	if (ch->script_id == 0 && IS_NPC(ch)) {
+		ch->script_id = top_script_uid++;
+		add_to_lookup_table(ch->script_id, (void *)ch, TYPE_MOB);
+		ch->in_lookup_table = TRUE;
 		
-		if (max_mob_id >= EMPIRE_ID_BASE && reboot_control.time > 16) {
-			reboot_control.time = 16;
-			reboot_control.type = SCMD_REBOOT;
+		if (top_script_uid == INT_MAX && (!REBOOT_IS_SET() || reboot_control.time > config_get_int("reboot_warning_minutes") + 1)) {
+			reboot_control.time = config_get_int("reboot_warning_minutes") + 1;
+			if (reboot_control.type != REBOOT_SHUTDOWN) {
+				reboot_control.type = REBOOT_REBOOT;
+			}
 			syslog(SYS_ERROR, 0, TRUE, "SYSERR: Script IDs for mobiles has exceeded the limit, scheduling an auto-reboot");
+			top_script_uid = OTHER_ID_BASE;
 		}
+	}
+	else if (ch->script_id == 0 && !IS_NPC(ch) && GET_IDNUM(ch) > 0) {
+		ch->script_id = GET_IDNUM(ch);
+		add_to_lookup_table(ch->script_id, (void *)ch, TYPE_MOB);
+		ch->in_lookup_table = TRUE;
 	}
 	return ch->script_id;
 }
@@ -355,37 +353,39 @@ int char_script_id(char_data *ch) {
 */
 int obj_script_id(obj_data *obj) {
 	if (obj->script_id == 0) {
-		obj->script_id = max_obj_id++;
-		add_to_lookup_table(obj->script_id, (void *)obj);
+		obj->script_id = top_script_uid++;
+		add_to_lookup_table(obj->script_id, (void *)obj, TYPE_OBJ);
 		
-		/* objs don't run out of idspace, currently
-		if (max_obj_id > x && reboot_control.time > 16) {
-			reboot_control.time = 16;
-			reboot_control.type = SCMD_REBOOT;
+		if (top_script_uid == INT_MAX && (!REBOOT_IS_SET() || reboot_control.time > config_get_int("reboot_warning_minutes") + 1)) {
+			reboot_control.time = config_get_int("reboot_warning_minutes") + 1;
+			if (reboot_control.type != REBOOT_SHUTDOWN) {
+				reboot_control.type = REBOOT_REBOOT;
+			}
 			syslog(SYS_ERROR, 0, TRUE, "SYSERR: Script IDs for objects has exceeded the limit, scheduling an auto-reboot");
+			top_script_uid = OTHER_ID_BASE;
 		}
-		*/
 	}
 	return obj->script_id;
 }
 
 
 /**
-* Fetches the vehicle's script id -- may also set it here if it's not set yet.
+* Fetches the vehicle's script idd -- may also set it here if it's not set yet.
 *
 * @param vehicle_data *veh The vehicle.
 * @return int The unique ID.
 */
 int veh_script_id(vehicle_data *veh) {
 	if (veh->script_id == 0) {
-		veh->script_id = max_vehicle_id++;
-		add_to_lookup_table(veh->script_id, (void *)veh);
+		// the -1 here is because vehicle idnums start with 1
+		veh->script_id = VEHICLE_ID_BASE - 1 + VEH_IDNUM(veh);
+		add_to_lookup_table(veh->script_id, (void *)veh, TYPE_VEH);
 		
-		if (max_vehicle_id >= OBJ_ID_BASE && reboot_control.time > 16) {
-			reboot_control.time = 16;
-			reboot_control.type = SCMD_REBOOT;
-			syslog(SYS_ERROR, 0, TRUE, "SYSERR: Script IDs for vehicles has exceeded the limit, scheduling an auto-reboot");
+		if (veh->script_id >= ROOM_ID_BASE) {
+			// warn
+			log("SCRIPT ERR: Vehicle idnum for copy of vehicle [%d] %s is beyond maximum safe vnum for scripts", VEH_VNUM(veh), VEH_SHORT_DESC(veh));
 		}
 	}
+	
 	return veh->script_id;
 }

@@ -1,0 +1,71 @@
+#12300
+Fur Dragon~
+Paul Clarke and Domino~
+   It looks like you've found a legendary fur dragon... Or perhaps it has found
+you! These warm-blooded dragons live in burrows and stalk their prey -- which
+ranges from bison to elephants -- from the shadows. They're known to retreat to
+their den when threatened. Follow it inside if you dare, but be warned that few
+adventurers come back out.
+   This adventure features a new 'study' mechanic. By studying the chewed-up,
+mangled, and downright tattered gear that the fur dragon has collected from
+other adventurers, you can create crafting patterns for those same items.
+Studying consumes at least one of the items, depending on the item's quality.
+~
+12300 12349 225-325
+5 0 n 0
+L
+5 0
+4320 -1 -1 -1
+-1 0 0
+L
+4 0
+12300 12300 12301 -1
+-1 b p
+L
+4 0
+12301 12300 12301 -1
+-1 d p
+L
+4 0
+12302 12300 12301 -1
+-1 e p
+L
+4 0
+12303 12300 12301 -1
+-1 g p
+L
+6 0
+100 -1 -1 -1
+-1 0 0
+T 12308
+S
+#12350
+Hoarfrost Serragon~
+Paul Clarke~
+   A hole to the frigid abyss has burst open in the heart of the desert,
+encasing the once-scalding sands in a glistening sheet of ice. A chilling hush
+pervades the air, and the ground beneath is now a carpet of feathery frost,
+marking the rise of the legendary hoarfrost serragon! These elusive behemoths,
+seldom seen beyond the confines of their icy lairs, wreak havoc on the land,
+devouring wildlife and freezing crops. Longer than a city street and with a maw
+wide enough to eat a camel -- or worse, an adventurer -- whole, an adult
+serragon is a threat that cannot stand. Can you thwart the serragon's frosty
+onslaught and save the empire from being entombed in an eternal winter?
+~
+12350 12399 100-200
+2 0 gln 0
+L
+5 0
+43200 -1 -1 -1
+-1 0 0
+L
+6 0
+75 -1 -1 -1
+-1 0 0
+L
+1 0
+12350 -1 -1 -1
+14 e ejl
+Z1 4
+S
+$

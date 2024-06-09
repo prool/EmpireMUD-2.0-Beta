@@ -2,7 +2,7 @@
 *   File: act.fight.c                                     EmpireMUD 2.0b5 *
 *  Usage: non-skill commands and functions related to the fight system    *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -22,26 +22,60 @@
 #include "skills.h"
 #include "dg_scripts.h"
 #include "vnums.h"
+#include "constants.h"
 
 /**
 * Contents:
+*   Helpers
 *   Commands
 */
 
-// external vars
-extern const char *dirs[];
 
-// external functions
-void death_log(char_data *ch, char_data *killer, int type);
-extern obj_data *die(char_data *ch, char_data *killer);
-extern int determine_best_scale_level(char_data *ch, bool check_group);	// mobact.c
-extern bool is_fight_ally(char_data *ch, char_data *frenemy);	// fight.c
-extern bool is_fight_enemy(char_data *ch, char_data *frenemy);	// fight.c
-void trigger_distrust_from_hostile(char_data *ch, empire_data *emp);	// fight.c
+ //////////////////////////////////////////////////////////////////////////////
+//// HELPERS ////////////////////////////////////////////////////////////////
+
+/**
+* For the "use" command -- switches your preferred arrows.
+*
+* @param char_data *ch The player.
+* @param obj_data *obj The ammo to prefer.
+*/
+void use_ammo(char_data *ch, obj_data *obj) {
+	if (!IS_AMMO(obj)) {
+		// ??? shouldn't ever get here
+		act("$p isn't something you can use like this.", FALSE, ch, obj, NULL, TO_CHAR);
+		return;
+	}
+	
+	USING_AMMO(ch) = GET_OBJ_VNUM(obj);
+	act("You are now using $p as your preferred ammunition.", FALSE, ch, obj, NULL, TO_CHAR);
+}
 
 
  //////////////////////////////////////////////////////////////////////////////
 //// COMMANDS ////////////////////////////////////////////////////////////////
+
+ACMD(do_approach) {
+	if (!FIGHTING(ch)) {
+		msg_to_char(ch, "You aren't even fighting.\r\n");
+	}
+	else if (FIGHT_MODE(ch) == FMODE_MELEE) {
+		msg_to_char(ch, "You're already in melee combat.\r\n");
+	}
+	else if (FIGHT_MODE(ch) == FMODE_WAITING) {
+		msg_to_char(ch, "You're already trying to approach!\r\n");
+	}
+	else if (AFF_FLAGGED(ch, AFF_STUNNED | AFF_HARD_STUNNED | AFF_IMMOBILIZED)) {
+		msg_to_char(ch, "You can't try to approach right now!\r\n");
+	}
+	else {
+		FIGHT_MODE(ch) = FMODE_WAITING;
+		FIGHT_WAIT(ch) = 4;
+		msg_to_char(ch, "You start to approach!\r\n");
+		act("$n starts to approach!", FALSE, ch, NULL, NULL, TO_ROOM);
+	}
+}
+
 
 ACMD(do_assist) {
 	char_data *helpee, *opponent;
@@ -54,7 +88,7 @@ ACMD(do_assist) {
 
 	if (!*arg)
 		send_to_char("Whom do you wish to assist?\r\n", ch);
-	else if (!(helpee = get_char_vis(ch, arg, FIND_CHAR_ROOM)))
+	else if (!(helpee = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM)))
 		send_config_msg(ch, "no_person");
 	else if (helpee == ch)
 		send_to_char("You can't help yourself any more than this!\r\n", ch);
@@ -62,10 +96,16 @@ ACMD(do_assist) {
 		/*
 		 * Hit the same enemy the person you're helping is.
 		 */
-		if (FIGHTING(helpee))
+		if (FIGHTING(helpee)){
 			opponent = FIGHTING(helpee);
-		else
-			for (opponent = ROOM_PEOPLE(IN_ROOM(ch)); opponent && (FIGHTING(opponent) != helpee); opponent = opponent->next_in_room);
+		}
+		else {
+			DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), opponent, next_in_room) {
+				if (FIGHTING(opponent) == helpee) {
+					break;	// found!
+				}
+			}
+		}
 
 		if (!opponent)
 			act("But nobody is fighting $M!", FALSE, ch, 0, helpee, TO_CHAR);
@@ -87,9 +127,6 @@ ACMD(do_assist) {
 
 
 ACMD(do_clearmeters) {
-	void reset_combat_meters(char_data *ch);
-	void stop_combat_meters(char_data *ch);
-	
 	if (!IS_NPC(ch)) {
 		reset_combat_meters(ch);
 		GET_COMBAT_METERS(ch).over = TRUE;
@@ -99,26 +136,36 @@ ACMD(do_clearmeters) {
 
 
 ACMD(do_consider) {
-	extern bool check_scaling(char_data *mob, char_data *attacker);
-	extern int get_dodge_modifier(char_data *ch, char_data *attacker, bool can_gain_skill);
-	extern int get_to_hit(char_data *ch, char_data *victim, bool off_hand, bool can_gain_skill);
-	extern const char *affected_bits_consider[];
-	
 	char buf[MAX_STRING_LENGTH];
 	bitvector_t bits;
 	int diff, pos, hitch;
 	char_data *vict;
+	bool any = FALSE;
 	
 	one_argument(argument, arg);
 	
 	if (!*arg) {
 		msg_to_char(ch, "Consider whom?\r\n");
 	}
-	else if (!(vict = get_char_vis(ch, arg, FIND_CHAR_ROOM))) {
+	else if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM))) {
 		send_config_msg(ch, "no_person");
 	}
 	else if (vict == ch) {
 		msg_to_char(ch, "You look pretty wimpy.\r\n");
+	}
+	else if (!can_fight_mtrigger(vict, ch) || AFF_FLAGGED(vict, AFF_NO_ATTACK)) {
+		if (AFF_FLAGGED(vict, AFF_NO_ATTACK)) {
+			// never attackable
+			act("$N cannot be attacked.", FALSE, ch, NULL, vict, TO_CHAR);
+		}
+		else {	// script-based
+			act("You cannot attack $N.", FALSE, ch, NULL, vict, TO_CHAR);
+		}
+		
+		// show this anyway
+		if (mob_has_custom_message(vict, MOB_CUSTOM_CONSIDER_INFO)) {
+			msg_to_char(ch, "%s\r\n", mob_get_custom_message(vict, MOB_CUSTOM_CONSIDER_INFO));
+		}
 	}
 	else {
 		// scale first
@@ -132,51 +179,75 @@ ACMD(do_consider) {
 		act("$n considers $s chances against you.", FALSE, ch, NULL, vict, TO_VICT);
 		
 		if (diff != 0) {
-			snprintf(buf, sizeof(buf), "$E is %d level%s %s you.", ABSOLUTE(diff), PLURAL(ABSOLUTE(diff)), diff > 0 ? "below" : "above");
+			safe_snprintf(buf, sizeof(buf), "%s$E is %d level%s %s you.\t0", color_by_difficulty(ch, get_approximate_level(ch) + diff), ABSOLUTE(diff), PLURAL(ABSOLUTE(diff)), diff > 0 ? "below" : "above");
 			act(buf, FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 		
 		// difficulty
 		if (MOB_FLAGGED(vict, MOB_HARD) && MOB_FLAGGED(vict, MOB_GROUP)) {
 			act("$E is a boss fight (requires 4 players of proper level).", FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 		else if (MOB_FLAGGED(vict, MOB_GROUP)) {
 			act("$E is a group fight (requires 3 players of proper level).", FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 		else if (MOB_FLAGGED(vict, MOB_HARD)) {
 			act("$E is a hard fight (may require 2 players of proper level).", FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 
 		// hit/dodge
 		hitch = get_to_hit(ch, vict, FALSE, FALSE) - get_dodge_modifier(vict, ch, FALSE);
 		if (hitch < 50) {
 			act("You would have trouble hitting $M.", FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 		hitch = get_to_hit(vict, ch, FALSE, FALSE) - get_dodge_modifier(ch, vict, FALSE);
 		if (hitch > 50) {
 			act("You would have trouble dodging $S attacks.", FALSE, ch, NULL, vict, TO_CHAR);
+			any = TRUE;
 		}
 
 		// flags (with overflow protection on affected_bits_consider[])
 		for (bits = AFF_FLAGS(vict), pos = 0; bits && *affected_bits_consider[pos] != '\n'; bits >>= 1, ++pos) {
 			if (IS_SET(bits, BIT(0)) && *affected_bits_consider[pos]) {
 				act(affected_bits_consider[pos], FALSE, ch, NULL, vict, TO_CHAR);
+				any = TRUE;
 			}
+		}
+		
+		// no message sent?
+		if (!any) {
+			msg_to_char(ch, "You seem to be an even match.\r\n");
+		}
+		
+		// custom text
+		if (mob_has_custom_message(vict, MOB_CUSTOM_CONSIDER_INFO)) {
+			msg_to_char(ch, "%s\r\n", mob_get_custom_message(vict, MOB_CUSTOM_CONSIDER_INFO));
+		}
+		
+		// update spawn time: delay despawn due to interaction
+		if (MOB_FLAGGED(vict, MOB_SPAWNED)) {
+			set_mob_spawn_time(vict, time(0));
 		}
 	}
 }
 
 
 ACMD(do_execute) {
-	void perform_execute(char_data *ch, char_data *victim, int attacktype, int damtype);
-
 	char_data *victim;
 
 	one_argument(argument, arg);
-
-	if (!*arg)
+	
+	if (vampire_kill_feeding_target(ch, argument)) {
+		// sends own messages
+	}
+	else if (!*arg) {
 		msg_to_char(ch, "Execute whom?\r\n");
-	else if (!(victim = get_char_vis(ch, arg, FIND_CHAR_ROOM)))
+	}
+	else if (!(victim = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM)))
 		send_config_msg(ch, "no_person");
 	else if (victim == ch)
 		msg_to_char(ch, "Seek professional help.\r\n");
@@ -189,19 +260,16 @@ ACMD(do_execute) {
 		act("You can't execute $N!", FALSE, ch, NULL, victim, TO_CHAR);
 	}
 	else {
-		perform_execute(ch, victim, TYPE_UNDEFINED, DAM_PHYSICAL);
+		perform_execute(ch, victim, ATTACK_UNDEFINED, DAM_PHYSICAL);
 	}
 }
 
 
 ACMD(do_flee) {
-	extern int perform_move(char_data *ch, int dir, int need_specials_check, byte mode);
-	extern const bool can_flee_dir[NUM_OF_DIRS];
-	
 	int i, attempt, try;
 	room_data *to_room = NULL;
 	char_data *was_fighting;
-	bool inside = ROOM_IS_CLOSED(IN_ROOM(ch));
+	bool upgrade, inside = ROOM_IS_CLOSED(IN_ROOM(ch));
 	struct room_direction_data *ex;
 
 	if (GET_POS(ch) < POS_FIGHTING) {
@@ -209,15 +277,17 @@ ACMD(do_flee) {
 		return;
 	}
 	
-	if (AFF_FLAGGED(ch, AFF_ENTANGLED)) {
-		msg_to_char(ch, "You are entangled and can't flee.\r\n");
+	if (AFF_FLAGGED(ch, AFF_IMMOBILIZED)) {
+		msg_to_char(ch, "You are immobilized and can't flee.\r\n");
 		return;
 	}
+	
+	upgrade = !IS_NPC(ch) && has_player_tech(ch, PTECH_FLEE_UPGRADE);
 
 	// try more times if FLEET
-	for (i = 0; i < NUM_2D_DIRS * ((!IS_NPC(ch) && has_ability(ch, ABIL_FLEET)) ? 2 : 1); i++) {
+	for (i = 0; i < NUM_2D_DIRS * (upgrade ? 2 : 1); i++) {
 		// chance to fail if not FLEET
-		if ((IS_NPC(ch) || !has_ability(ch, ABIL_FLEET)) && number(0, 2) == 0) {
+		if (!upgrade && number(0, 2) == 0) {
 			continue;
 		}
 
@@ -244,12 +314,13 @@ ACMD(do_flee) {
 		if ((inside && (ex = find_exit(IN_ROOM(ch), attempt)) && CAN_GO(ch, ex)) || (!inside && to_room && (!ROOM_SECT_FLAGGED(to_room, SECTF_ROUGH | SECTF_FRESH_WATER | SECTF_OCEAN) || IS_RIDING(ch)) && !ROOM_IS_CLOSED(to_room))) {
 			act("$n panics, and attempts to flee!", TRUE, ch, 0, 0, TO_ROOM);
 			was_fighting = FIGHTING(ch);
-			if (perform_move(ch, attempt, TRUE, 0)) {
+			if (perform_move(ch, attempt, NULL, NOBITS)) {
 				send_to_char("You flee head over heels.\r\n", ch);
 				if (was_fighting && can_gain_exp_from(ch, was_fighting)) {
-					gain_ability_exp(ch, ABIL_FLEET, 5);
+					gain_player_tech_exp(ch, PTECH_FLEE_UPGRADE, 15);
 				}
 				GET_WAIT_STATE(ch) = 2 RL_SEC;
+				run_ability_hooks_by_player_tech(ch, PTECH_FLEE_UPGRADE, NULL, NULL, NULL, NULL);
 			}
 			else {
 				act("$n tries to flee, but can't!", TRUE, ch, 0, 0, TO_ROOM);
@@ -264,20 +335,28 @@ ACMD(do_flee) {
 }
 
 
+// also: do_kill
 ACMD(do_hit) {
 	char_data *vict;
 
 	one_argument(argument, arg);
 
-	if (!*arg)
+	if (subcmd == SCMD_KILL && vampire_kill_feeding_target(ch, argument)) {
+		// vampire kills someone they are biting: sends own messages
+	}
+	else if (subcmd != SCMD_KILL && GET_FEEDING_FROM(ch)) {
+		msg_to_char(ch, "You can't do that while feeding!\r\n");
+	}
+	else if (!*arg) {
 		send_to_char("Hit whom?\r\n", ch);
-	else if (!(vict = get_char_vis(ch, arg, FIND_CHAR_ROOM)))
+	}
+	else if (!(vict = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM)))
 		send_to_char("They don't seem to be here.\r\n", ch);
 	else if (vict == ch) {
 		send_to_char("You hit yourself...OUCH!.\r\n", ch);
 		act("$n hits $mself, and says OUCH!", FALSE, ch, 0, vict, TO_ROOM);
 		}
-	else if (AFF_FLAGGED(ch, AFF_CHARM) && (ch->master == vict))
+	else if (AFF_FLAGGED(ch, AFF_CHARM) && (GET_LEADER(ch) == vict))
 		act("$N is just such a good friend, you simply can't hit $M.", FALSE, ch, 0, vict, TO_CHAR);
 	else if (vict == FIGHTING(ch) && FIGHT_MODE(ch) == FMODE_MISSILE) {
 		if (FIGHT_MODE(vict) == FMODE_MISSILE) {
@@ -291,7 +370,7 @@ ACMD(do_hit) {
 		}
 	}
 	else if (can_fight(ch, vict)) {
-		if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master && !IS_NPC(ch->master) && !IS_NPC(vict))
+		if (AFF_FLAGGED(ch, AFF_CHARM) && GET_LEADER(ch) && !IS_NPC(GET_LEADER(ch)) && !IS_NPC(vict))
 			return;
 
 		if (FIGHTING(ch) == vict) {
@@ -303,10 +382,31 @@ ACMD(do_hit) {
 			command_lag(ch, WAIT_OTHER);
 		}
 		else {
-			hit(ch, vict, GET_EQ(ch, WEAR_WIELD), FIGHTING(ch) ? FALSE : TRUE);	// count as exp only if not already fighting
-			// ensure hitting
-			if (vict && !EXTRACTED(vict) && !IS_DEAD(vict) && FIGHTING(ch) && FIGHTING(ch) != vict) {
+			if (!FIGHTING(ch)) {
+				hit(ch, vict, GET_EQ(ch, WEAR_WIELD), FIGHTING(ch) ? FALSE : TRUE);	// count as exp only if not already fighting
+				
+				// ensure hitting
+				if (vict && !EXTRACTED(vict) && !IS_DEAD(vict) && FIGHTING(ch) && FIGHTING(ch) != vict) {
+					FIGHTING(ch) = vict;
+				}
+			}
+			else {	// already fighting -- just change targets
+				act("You change your focus to $N.", FALSE, ch, NULL, vict, TO_CHAR);
+				act("$n changes $s focus to $N.", FALSE, ch, NULL, vict, TO_NOTVICT);
+				act("$n changes $s focus to you!", FALSE, ch, NULL, vict, TO_VICT);
+				
 				FIGHTING(ch) = vict;
+				
+				if (FIGHTING(vict) == ch && FIGHT_MODE(vict) == FMODE_MELEE) {
+					FIGHT_MODE(ch) = FMODE_MELEE;
+					FIGHT_WAIT(ch) = 0;
+				}
+				else if (FIGHT_MODE(vict) == FMODE_MISSILE) {
+					if (FIGHT_MODE(ch) != FMODE_MISSILE) {
+						FIGHT_MODE(ch) = FMODE_MISSILE;
+					}
+					FIGHT_WAIT(ch) = 0;
+				}
 			}
 			
 			// cancel combat if auto-execute is off and the mob is unconscious after the hit
@@ -339,7 +439,7 @@ ACMD(do_meters) {
 	
 	// raw length
 	length = (mtr->over ? mtr->end : time(0)) - mtr->start;
-	msg_to_char(ch, "Fight length: %d:%02d (%d second%s)\r\n", (length/60), (length%60), length, PLURAL(length));
+	msg_to_char(ch, "Fight length: %s (%d second%s)\r\n", colon_time(length, FALSE, NULL), length, PLURAL(length));
 	
 	// prevent divide-by-zero
 	length = MAX(1, length);
@@ -371,8 +471,7 @@ ACMD(do_meters) {
 
 
 ACMD(do_respawn) {
-	extern room_data *find_load_room(char_data *ch);
-	extern obj_data *player_death(char_data *ch);
+	struct affected_type *af;
 	
 	if (!IS_DEAD(ch) && !IS_INJURED(ch, INJ_STAKED)) {
 		msg_to_char(ch, "You aren't even dead yet!\r\n");
@@ -391,16 +490,24 @@ ACMD(do_respawn) {
 		char_to_room(ch, find_load_room(ch));
 		GET_LAST_DIR(ch) = NO_DIR;
 		qt_visit_room(ch, IN_ROOM(ch));
+		pre_greet_mtrigger(ch, IN_ROOM(ch), NO_DIR, "respawn");	// cannot pre-greet for respawn
 		
 		syslog(SYS_DEATH, GET_INVIS_LEV(ch), TRUE, "%s has respawned at %s", GET_NAME(ch), room_log_identifier(IN_ROOM(ch)));
 		act("$n rises from the dead!", TRUE, ch, NULL, NULL, TO_ROOM);
 		look_at_room(ch);
 		
 		affect_total(ch);
-		SAVE_CHAR(ch);
-		greet_mtrigger(ch, NO_DIR);
-		greet_memory_mtrigger(ch);
-		greet_vtrigger(ch, NO_DIR);
+		queue_delayed_update(ch, CDU_SAVE);
+		enter_triggers(ch, NO_DIR, "respawn", FALSE);
+		greet_triggers(ch, NO_DIR, "respawn", FALSE);
+		
+		// temporary safety effect after a respawn
+		af = create_flag_aff(ATYPE_BRIEF_RESPITE, 30, AFF_IMMUNE_TEMPERATURE, ch);
+		affect_join(ch, af, NOBITS);
+		RESET_LAST_MESSAGED_TEMPERATURE(ch);
+		
+		msdp_update_room(ch);
+		run_ability_hooks(ch, AHOOK_RESPAWN, 0, 0, NULL, NULL, NULL, NULL, NOBITS);
 	}
 }
 
@@ -409,21 +516,45 @@ ACMD(do_shoot) {
 	char_data *vict;
 
 	one_argument(argument, arg);
-
-	if (!*arg)
+	
+	if (FIGHTING(ch) && FIGHT_MODE(ch) == FMODE_MELEE) {
+		msg_to_char(ch, "You can't shoot anyone while you're in melee combat.\r\n");
+	}
+	else if (!*arg)
 		msg_to_char(ch, "Shoot whom?\r\n");
-	else if (!(vict= get_char_vis(ch, arg, FIND_CHAR_ROOM)))
+	else if (!(vict= get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM)))
 		send_config_msg(ch, "no_person");
 	else if (vict == ch)
 		msg_to_char(ch, "Shooting yourself in the foot will do you no good now.\r\n");
-	else if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master == vict)
+	else if (AFF_FLAGGED(ch, AFF_CHARM) && GET_LEADER(ch) == vict)
 		act("$N is just such a good friend, you simply can't hit $M.", FALSE, ch, 0, vict, TO_CHAR);
-	else if (!GET_EQ(ch, WEAR_RANGED) || GET_OBJ_TYPE(GET_EQ(ch, WEAR_RANGED)) != ITEM_MISSILE_WEAPON)
-		msg_to_char(ch, "You don't have anything to shoot!\r\n");
-	else if (FIGHTING(ch))
-		msg_to_char(ch, "You're already fighting for your life!\r\n");
+	else if (!GET_EQ(ch, WEAR_RANGED)) {
+		msg_to_char(ch, "You aren't holding anything you can shoot!\r\n");
+	}
+	else if (GET_OBJ_TYPE(GET_EQ(ch, WEAR_RANGED)) != ITEM_MISSILE_WEAPON) {
+		msg_to_char(ch, "The item in your ranged slot isn't a ranged weapon.\r\n");
+	}
+	else if (FIGHTING(ch) && vict == FIGHTING(ch)) {
+		act("You're already fighting $N!", FALSE, ch, NULL, vict, TO_CHAR);
+	}
+	else if (FIGHTING(ch)) {
+		// switch target (we are either in missile or ranged states
+		FIGHTING(ch) = vict;
+		if (FIGHT_MODE(ch) == FMODE_WAITING) {
+			FIGHT_WAIT(ch) = 0;
+		}
+		FIGHT_MODE(ch) = FMODE_MISSILE;
+		
+		act("You change your focus to $N.", FALSE, ch, NULL, vict, TO_CHAR);
+		act("$n changes $s focus to $N.", FALSE, ch, NULL, vict, TO_NOTVICT);
+		act("$n changes $s focus to you!", FALSE, ch, NULL, vict, TO_VICT);
+		
+		if (!FIGHTING(vict)) {
+			set_fighting(vict, ch, FMODE_MISSILE);
+		}
+	}
 	else if (can_fight(ch, vict)) {
-		if (AFF_FLAGGED(ch, AFF_CHARM) && ch->master && !IS_NPC(ch->master) && !IS_NPC(vict))
+		if (AFF_FLAGGED(ch, AFF_CHARM) && GET_LEADER(ch) && !IS_NPC(GET_LEADER(ch)) && !IS_NPC(vict))
 			return;
 
 		msg_to_char(ch, "You take aim.\r\n");
@@ -444,8 +575,6 @@ ACMD(do_shoot) {
 
 
 ACMD(do_stake) {
-	void scale_item_to_level(obj_data *obj, int level);
-	
 	char_data *victim;
 	obj_data *stake;
 
@@ -453,7 +582,7 @@ ACMD(do_stake) {
 
 	if (!*arg)
 		msg_to_char(ch, "%stake whom?\r\n", subcmd ? "Uns" : "S");
-	else if (!(victim = get_char_vis(ch, arg, FIND_CHAR_ROOM)))
+	else if (!(victim = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM)))
 		send_config_msg(ch, "no_person");
 	else if (IS_GOD(victim) || IS_IMMORTAL(victim))
 		msg_to_char(ch, "You can't stake up a god!\r\n");
@@ -491,7 +620,7 @@ ACMD(do_stake) {
 		
 		SET_BIT(INJURY_FLAGS(victim), INJ_STAKED);
 		if (GET_HEALTH(victim) <= 0) {
-			GET_HEALTH(victim) = 0;
+			set_health(victim, 0);
 			GET_POS(victim) = POS_STUNNED;
 		}
 		extract_obj(stake);
@@ -525,15 +654,13 @@ ACMD(do_struggle) {
 
 
 ACMD(do_summary) {
-	extern char *prompt_color_by_prc(int cur, int max);
-	
 	char_data *iter;
 	bool is_ally, is_enemy, found;
 	
 	found = FALSE;
 	*buf = '\0';
 	
-	for (iter = ROOM_PEOPLE(IN_ROOM(ch)); iter; iter = iter->next_in_room) {
+	DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), iter, next_in_room) {
 		is_ally = in_same_group(ch, iter) || is_fight_ally(ch, iter);
 		is_enemy = is_fight_enemy(ch, iter);
 		
@@ -596,8 +723,7 @@ ACMD(do_summary) {
 
 // do_untie -- search hint
 ACMD(do_tie) {
-	void perform_npc_tie(char_data *ch, char_data *victim, int subcmd);
-
+	bool kept = FALSE;
 	char_data *victim;
 	obj_data *rope;
 
@@ -607,7 +733,7 @@ ACMD(do_tie) {
 
 	if (!*arg)
 		msg_to_char(ch, "%sie whom?\r\n", subcmd ? "Unt" : "T");
-	else if (!(victim = get_char_vis(ch, arg, FIND_CHAR_ROOM)))
+	else if (!(victim = get_char_vis(ch, arg, NULL, FIND_CHAR_ROOM)))
 		send_config_msg(ch, "no_person");
 	else if (IS_DEAD(victim)) {
 		msg_to_char(ch, "You can't do that to someone who is already dead.\r\n");
@@ -624,34 +750,44 @@ ACMD(do_tie) {
 		act("You unbind $N.", FALSE, ch, 0, victim, TO_CHAR);
 		act("$n unbinds you!", FALSE, ch, 0, victim, TO_VICT | TO_SLEEP);
 		act("$n unbinds $N.", FALSE, ch, 0, victim, TO_NOTVICT);
-		GET_HEALTH(victim) = MAX(1, GET_HEALTH(victim));
+		set_health(victim, MAX(1, GET_HEALTH(victim)));
 		GET_POS(victim) = POS_RESTING;
 		REMOVE_BIT(INJURY_FLAGS(victim), INJ_TIED);
-		obj_to_char((rope = read_object(o_ROPE, TRUE)), ch);
-		load_otrigger(rope);
+		
+		if (GET_ROPE_VNUM(victim) != NOTHING && (rope = read_object(GET_ROPE_VNUM(victim), TRUE))) {
+			obj_to_char(rope, ch);
+			scale_item_to_level(rope, 1);	// minimum
+			if (load_otrigger(rope)) {
+				// conditional on not purging itself
+				act("You receive $p.", FALSE, ch, rope, NULL, TO_CHAR);
+			}
+		}
+		GET_ROPE_VNUM(victim) = NOTHING;
+		request_char_save_in_world(victim);
 	}
 	else if (GET_POS(victim) >= POS_SLEEPING)
 		act("You need to knock $M out first.", FALSE, ch, 0, victim, TO_CHAR);
-	else if (!(rope = get_obj_in_list_num(o_ROPE, ch->carrying)))
-		msg_to_char(ch, "You don't have any rope.\r\n");
+	else if (!(rope = get_component_in_list(COMP_ROPE, ch->carrying, &kept))) {
+		msg_to_char(ch, "You don't seem to have any rope%s.\r\n", kept ? " that isn't marked 'keep'" : "");
+	}
 	else {
 		act("You bind and gag $N!", FALSE, ch, 0, victim, TO_CHAR);
 		act("$n binds and gags you!", FALSE, ch, 0, victim, TO_VICT | TO_SLEEP);
 		act("$n binds and gags $N!", FALSE, ch, 0, victim, TO_NOTVICT);
 		SET_BIT(INJURY_FLAGS(victim), INJ_TIED);
 		if (GET_HEALTH(victim) <= 1) {
-			GET_HEALTH(victim) = 1;
+			set_health(victim, 1);
 			GET_POS(victim) = POS_RESTING;
 		}
+		GET_ROPE_VNUM(victim) = GET_OBJ_VNUM(rope);
 		extract_obj(rope);
+		request_char_save_in_world(victim);
 	}
 }
 
 
 ACMD(do_throw) {
-	extern int count_objs_in_room(room_data *room);
-	extern const int rev_dir[];
-
+	char buf[MAX_STRING_LENGTH];
 	int dir = NO_DIR;
 	char_data *vict;
 	obj_data *obj = NULL;
@@ -662,7 +798,7 @@ ACMD(do_throw) {
 
 	if (!*arg || !*buf)
 		msg_to_char(ch, "What would you like to throw, and which direction?\r\n");
-	else if (!(obj = get_obj_in_list_vis(ch, arg, ch->carrying)))
+	else if (!(obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying)))
 		msg_to_char(ch, "You don't have anything like that.\r\n");
 	else if ((dir = parse_direction(ch, buf)) == NO_DIR)
 		msg_to_char(ch, "Which way did you want to throw it?\r\n");
@@ -700,7 +836,7 @@ ACMD(do_throw) {
 		return;
 	}
 	if (ROOM_BLD_FLAGGED(to_room, BLD_ITEM_LIMIT)) {
-		int size = (OBJ_FLAGGED(obj, OBJ_LARGE) ? 2 : 1);
+		int size = obj_carry_size(obj);
 		if ((size + count_objs_in_room(to_room)) > config_get_int("room_item_limit")) {
 			msg_to_char(ch, "You can't throw any more items there.\r\n");
 			return;
@@ -712,7 +848,7 @@ ACMD(do_throw) {
 	sprintf(buf, "You throw $p %s as hard as you can!", dirs[get_direction_for_char(ch, dir)]);
 	act(buf, FALSE, ch, obj, 0, TO_CHAR);
 	
-	for (vict = ROOM_PEOPLE(IN_ROOM(ch)); vict; vict = vict->next_in_room) {
+	DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), vict, next_in_room) {
 		if (vict != ch && vict->desc) {
 			sprintf(buf1, "$n throws $p %s as hard as $e can!", dirs[get_direction_for_char(vict, dir)]);
 			act(buf1, TRUE, ch, obj, vict, TO_VICT);
@@ -721,7 +857,7 @@ ACMD(do_throw) {
 
 	obj_to_room(obj, to_room);
 	
-	for (vict = ROOM_PEOPLE(IN_ROOM(obj)); vict; vict = vict->next_in_room) {
+	DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(obj)), vict, next_in_room) {
 		if (vict->desc) {
 			sprintf(buf, "$p is hurled in from the %s and falls to the ground at your feet!", dirs[get_direction_for_char(vict, rev_dir[dir])]);
 			act(buf, FALSE, vict, obj, 0, TO_CHAR);
@@ -730,6 +866,9 @@ ACMD(do_throw) {
 	
 	// throwing item abuse log
 	if (IS_IMMORTAL(ch)) {
-		syslog(SYS_GC, GET_ACCESS_LEVEL(ch), TRUE, "ABUSE: %s threw %s from %s to %s", GET_NAME(ch), GET_OBJ_SHORT_DESC(obj), room_log_identifier(IN_ROOM(ch)), room_log_identifier(to_room));
+		strcpy(buf, room_log_identifier(to_room));	// store one in a buf because it can't show 2 different locations in 1 line
+		syslog(SYS_GC, GET_ACCESS_LEVEL(ch), TRUE, "ABUSE: %s threw %s from %s to %s", GET_NAME(ch), GET_OBJ_SHORT_DESC(obj), room_log_identifier(IN_ROOM(ch)), buf);
 	}
+	
+	command_lag(ch, WAIT_COMBAT_ABILITY);
 }

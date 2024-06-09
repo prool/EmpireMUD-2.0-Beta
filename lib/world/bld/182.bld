@@ -13,19 +13,25 @@ S
 Adventurer's Guild~
 The Adventurer's Guildhall~
 &t[&j@@&t]~
-96 10 jR 0
+96 10 jlnR 0
 0 0 0 18216
+C
+nearby~
 D
    The great room of the guildhall is spacious, but it has been filled with
 chairs and desks, for its far-flung members to use when they're passing through
 the city. The mahogany walls are windowless, but light is provided by glowing
 chandeliers. For so much clutter, the guildhall is surprisingly well-kept.
 ~
+F
+H
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
 R
-8 1 5 0
+1008 1 5 0
 R
-2 1 5 0
+1002 1 5 0
 T 18216
+T 18215
 S
 #18217
 Guildhall Tower~
@@ -38,6 +44,8 @@ D
 unobstructed view of the city. Tables are strewn with strange trinkets and
 unusual potions, along with handwritten notes and scribbled drawings.
 ~
+F
+H
 S
 #18218
 Guildhall Basement~
@@ -50,6 +58,8 @@ D
 and supported by huge wooden pillars. The entire basement is filled with
 bookshelves, packed with copies of the guild's arcane knowledge.
 ~
+F
+H
 S
 #18219
 Guildhall Office~
@@ -62,10 +72,12 @@ D
 rest of the guildhall, it is free of clutter. Only a desk and two chairs fill
 the room, and all decoration is restricted to the walls.
 ~
+F
+H
 S
 #18220
 Guildhall Vault~
-The Vault~
+The Guildhall Vault~
 &0[  ]~
 1 0 a 0
 0 0 0 18220
@@ -74,12 +86,16 @@ D
 new, but the shelves are already lined with fascinating and exotic items. A
 small safe is tucked in the corner, and securely locked.
 ~
+F
+H
+U
+1 5193
 S
 #18221
 Strange Egg~
 A Strange Egg~
 .&yO&?..~
-10 0 bd 0
+10 0 bdn 0
 0 0 0 -1
 E
 egg strange~
@@ -87,13 +103,13 @@ egg strange~
 weather, it seems to be warm to the touch.
 ~
 R
-1 1 5 0
+1001 1 5 0
 S
 #18222
 Gigantic Egg~
 A Gigantic Egg~
 .&y()&?.~
-10 0 bd 0
+10 0 bdn 0
 0 0 0 -1
 E
 egg gigantic~
@@ -102,29 +118,29 @@ inside this egg is so strong, you can feel it pulse along the ground beneath
 your feet.
 ~
 R
-1 1 5 0
+1001 1 5 0
 S
 #18223
 Hatching Egg~
 A Gigantic, Hatching Egg~
 .&y(`)~
-10 0 bd 0
+10 0 bdn 0
 0 0 0 -1
 E
 egg hatching gigantic~
 The egg is nearly the size of a small castle, and has begun to tear open!
 ~
 R
-1 1 5 0
+1001 1 5 0
 S
 #18224
 Tortoise's Back~
 On the Tortoise's Back~
 ~
-0 0 aHR 0
+0 0 aqHR 0
 0 1 0 -1
 C
-disembark, drive~
+drive~
 D
 You're riding on an atlasian tortoise!
 ~
@@ -142,7 +158,7 @@ as it requires solid walls to survive the heavy footfalls of the tortoise. A
 cozy chair is bolted to the floor next to the hearth.
 ~
 F
-G
+GL
 S
 #18226
 Tortoise Bedroom~
@@ -170,5 +186,7 @@ The Tortoise's Observatory~
 D
 You can see everything from atop the atlasian tortoise.
 ~
+F
+H
 S
 $

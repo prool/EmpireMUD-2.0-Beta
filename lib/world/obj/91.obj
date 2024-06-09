@@ -1,32 +1,153 @@
+#9113
+fur furs spotted~
+a spotted fur~
+A spotted fur is draped here.~
+This spotted fur looks like it must have come from some exotic cat.
+~
+3 0 a 0 0 5
+0 0 0
+7 0
+C
+1 1
+O+ 1 6541
+R
+4 5120 0
+S
+#9124
+feather feathers large ostrich~
+a large ostrich feather~
+A large ostrich feather is lying here.~
+This feather is so large you could almost stuff a pillow with it alone.
+~
+3 0 a 0 0 8
+0 0 0
+7 0
+C
+1 1
+O+ 1 6443
+R
+4 5137 0
+S
+#9128
+horns pronged set~
+a set of pronged horns~
+A set of pronged horns are lying here.~
+   These odd bifurcated horns can only have come from the pronghorn. Perhaps
+they could be used for crafts.
+~
+3 0 a 0 0 6
+0 0 0
+14 0
+C
+1 1
+O+ 1 6562
+R
+4 5120 0
+S
+#9136
+antler antlers huge~
+a huge antler~
+A huge antler is lying here.~
+This antler must have come from a truly enormous animal!
+~
+3 e a 0 0 5
+0 0 0
+14 0
+C
+1 1
+O+ 1 6561
+R
+4 5120 0
+S
+#9139
+horn horns rare rhinoceros~
+a rare rhinoceros horn~
+A rare rhinoceros horn is lying here.~
+   This exotic conical horn comes from a rhinoceros. Due to their rarity, the
+horns are quite expensive.
+~
+15 0 a 0 0 12
+8 2 0
+14 0
+C
+1 1
+O+ 1 6562
+R
+4 5193 a
+S
+#9140
+tusk tusks ivory huge~
+a huge ivory tusk~
+A huge ivory tusk is lying here.~
+The long, elegantly curved ivory tusk must have come from a great elephant.
+~
+15 e a 0 0 10
+4 2 0
+14 0
+C
+1 1
+O+ 1 6563
+R
+4 5193 a
+S
+#9141
+horn horns rhinoceros common~
+a common rhinoceros horn~
+A rhinoceros horn is lying here.~
+The horn is cracked, but should still fetch a decent price.
+~
+15 0 a 0 0 14
+1 2 0
+14 0
+C
+1 1
+O+ 1 6562
+R
+4 5193 a
+S
+#9160
+fire fool's fools ball~
+a ball of fool's fire~
+A ball of fool's fire is floating here.~
+   The ball of fire almost looks alive as it dances back and forth without
+burning you.
+~
+29 p ao 0 0 3
+8064 1 4
+10 0
+S
 #9173
 cabin tent collapsed folded~
 a collapsed cabin tent~
 A collapsed cabin tent is folded on the ground.~
    A patchwork of large animal hides, sewn together into several long side
 pieces, and one large roof. Stacked between the folds are several weathered
-tusks, to be used as uprights. You can set this tent up using 'build
-cabintent'.
+tusks, to be used as uprights. You can set this tent up using 'build cabin
+tent'.
 ~
-3 0 a 2
+3 0 a 0 0 4
 0 0 0
 7 0
+C
+100 100
 S
 #9175
 rack antlers reindeer~
 a reindeer's antlers~
 A rack of reindeer antlers rest nearby.~
-   The root of the antler is as thick as a man's wrist and gnarled with boney
+   The root of the antler is as thick as a man's wrist and gnarled with bony
 warts before branching smoothly into a half-dozen, widely-spaced prongs.
 
 Forge (Deadly Weapons): reindeer antler dagger
 ~
-3 e a 3
+3 e a 0 0 6
 0 0 0
 14 0
-O
-2 0
+C
+1 1
+O+ 1 6561
 R
-5120 0
+4 5120 0
 S
 #9176
 dagger antler reindeer~
@@ -36,7 +157,7 @@ A dagger forged from a reindeer antler rests nearby.~
 brace for the wielder's wrist. It is as unique a piece as the animal which
 produced it.
 ~
-1 hmo ano 2
+1 hmo ano f 0 3
 0 1 4
 14 0
 A
@@ -47,7 +168,7 @@ C
 1 100
 S
 #9177
-fur bear polar~
+fur furs bear polar~
 a polar bear fur~
 A polar bear's fur is heaped on the ice.~
    The polar bear fur is thick and warm. It could be sewn into garments for
@@ -55,22 +176,23 @@ added protection from the winter elements.
 
 Sew (Dangerous Leathers): polar bear cloak
 ~
-3 e a 3
+3 e a 0 0 4
 0 0 0
 7 0
-O
-10 f
+C
+1 1
+O+ 1 6550
 R
-5120 0
+4 5120 0
 S
 #9178
-horn narwhal narwal~
+horn horns narwhal narwal~
 a narwhal's horn~
 A narwhal's horn pokes through the ice nearby.~
    Long as a lance from base to tip, the exposed surface of the horn weaves a
 mesmerizing spiral around its core, and glistens with permanent cold.
 ~
-1 mp an 1
+1 mp an 0 0 1
 0 1 20
 14 0
 A
@@ -81,7 +203,7 @@ C
 100 150
 S
 #9180
-tusk walrus~
+tusk tusks walrus~
 a walrus tusk~
 A tusk from a walrus sticks out of the ice nearby.~
    The tusk forms a curve from massive root to blunted tip, easily the length
@@ -89,14 +211,17 @@ of an adult man's arm.
 
 Sew (Dangerous Leathers): cabin tent
 ~
-3 e a 2
+3 e a 0 0 4
 0 0 0
 14 0
+C
+1 1
+O+ 1 6563
 R
-5120 0
+4 5120 0
 S
 #9181
-fur wolverine~
+fur furs wolverine~
 a wolverine fur~
 A wolverine fur is piled on the ice.~
    The thick, slightly oily wolverine fur is a bristling mess of tawny-tipped
@@ -105,13 +230,14 @@ for added protection against the cold.
 
 Sew (Dangerous Leathers): wolverine fur cap
 ~
-3 0 a 3
+3 0 a 0 0 4
 0 0 0
 7 0
-O
-10 o
+C
+1 1
+O+ 1 6541
 R
-5120 0
+4 5120 0
 S
 #9182
 cap fur wolverine~
@@ -121,33 +247,37 @@ A cap, covered with wolverine fur, rests here.~
 mocha-coloured undercoat. The sides stick out wildly, but could be brushed down
 over the ears for added warmth.
 ~
-2 mo ae 1
+2 mo ae 0 0 2
 0 0 0
 7 0
 A
 3 1 0
+A
+30 2 0
 C
 75 100
 S
 #9183
-bear polarbear cloak~
+cloak bear polarbear~
 a polar bear cloak~
 A cloak of polar bear fur rests nearby.~
    The thick white fur is slightly oily to the touch, perfect for protection
 from harsh winter elements.
 ~
-2 mo ak 1
+2 mo ak 0 0 2
 0 0 0
 7 0
 A
 5 1 0
 A
 1 1 0
+A
+30 2 0
 C
 100 150
 S
 #9185
-sealskin skin~
+sealskin skins~
 a sealskin~
 A sealskin is piled on the ice.~
    The skin of the elephant seal is beaded with melted snow, which runs off due
@@ -156,13 +286,14 @@ against the wet and cold.
 
 Sew (Dangerous Leathers): sealskin leggings
 ~
-3 e a 4
+3 e a 0 0 5
 0 0 0
 7 0
-O
-24 fk
+C
+1 1
+O+ 1 6510
 R
-5120 0
+4 5120 0
 S
 #9186
 leggings sealskin~
@@ -171,7 +302,7 @@ A pair of sealskin leggings are piled here.~
    The trousers are made of sealskin, with short brown hairs, slicked by
 natural oils, forming a protective barrier against wet or wintery weather.
 ~
-27 mo af 2
+27 mo af 0 0 3
 2 0 0
 7 0
 A
@@ -180,6 +311,8 @@ A
 11 1 0
 A
 17 1 0
+A
+30 2 0
 C
 100 150
 S
@@ -189,11 +322,13 @@ an arctic aura~
 An arctic aura hovers nearby.~
 The aura is a pale blue pulse in the air, warmer than the current around it.
 ~
-3 mp ak 1
+3 mp ak 0 0 2
 0 0 0
 10 0
 A
 15 1 0
+A
+30 1 0
 C
 150 150
 S

@@ -1,0 +1,89 @@
+#12424
+Smuggler's Deck~
+On the Smuggler's Deck~
+~
+0 0 aqHR 0
+0 0 0 -1
+C
+sail~
+D
+You're standing on the deck of the smuggler's ship.
+~
+M
+12427 100.00 c
+S
+#12425
+Pirate Deck~
+On the Deck of the Pirate Ship~
+~
+0 0 aqHR 0
+0 0 0 -1
+C
+sail~
+D
+You're standing on the deck of the pirate ship.
+~
+M
+12427 100.00 c
+S
+#12426
+Cliffside Docks~
+Some Cliffside Docks~
+@w&0==@e~
+24 0 bdnxD 0
+0 0 0 -1
+B0
+&0==~
+B1
+&0=~
+C
+board, load, unload~
+E
+docks~
+   The docks are made from sturdy lumber and reinforced for their precarious
+position on the cliffside.
+~
+E
+cliffside~
+The docks are attached directly to the cliffside.
+~
+F
+g
+I 29 5010 100.00 1 r  # RUINS-TO-BLD: Flooded Ruins
+M
+12426 100.00 c
+R
+6000 1 1 0
+R
+6790 1 1 0
+S
+#12427
+Smuggler's Wharf~
+A Smuggler's Wharf~
+@w&0==@e~
+24 0 bdnpxD 0
+0 0 0 -1
+A
+d
+B0
+&0==~
+B1
+&0=~
+C
+board, load, unload~
+E
+wharf smugglers smuggler's~
+   The smuggler's wharf is well-camouflaged for discreet loading and unloading
+in the dark of night.
+~
+F
+g
+I 29 5010 100.00 1 r  # RUINS-TO-BLD: Flooded Ruins
+M
+12426 100.00 c
+R
+6000 1 1 0
+R
+6790 1 1 0
+S
+$

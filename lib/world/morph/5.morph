@@ -2,7 +2,7 @@
 werewolf savage~
 a savage werewolf~
 A savage werewolf stands over you, snarling and baring its teeth.~
-h 10 28 0 0
+h 10 28 0 0 4
 1 50 212 -1
 A
 21 2
@@ -14,12 +14,16 @@ A
 18 -2
 A
 16 -1
+D
+   Half-man but all-beast, the werewolf gives you a foreboding feeling as you
+look up at its toothy snarl.
+~
 S
 #501
 werewolf towering~
 a towering werewolf~
 A towering werewolf looms over you, covered with terrible scars.~
-h 10 28 0 0
+h 10 28 0 0 4
 1 50 213 -1
 A
 15 3
@@ -33,12 +37,17 @@ A
 7 -2
 A
 9 -2
+D
+   The werewolf towers over you, a tremendous beast to be sure. Though it's
+half-man, you can scarcely make out the resemblance and you would hate to argue
+the point with a beast so large you can't see past it.
+~
 S
 #502
 werewolf sage~
 a sage werewolf~
 A sage werewolf stands in serene contemplation.~
-h 28 28 0 0
+h 28 28 0 0 3
 1 50 214 -1
 A
 23 3
@@ -52,12 +61,17 @@ A
 18 -2
 A
 17 -2
+D
+   Though this half-man, half-beast creature is loaded with a battery of sharp
+teeth and claws the size of nails, there's a zen-like peace in its face that's
+almost enough to make you stop quivering at the sight of it.
+~
 S
 #503
 deer white-tailed tailed~
 a deer~
 A white-tailed deer is grazing here.~
-cej 9 0 100 0
+cej 9 0 100 0 4
 2 25 215 -1
 A
 6 2
@@ -67,12 +81,16 @@ A
 1 -1
 A
 8 -1
+D
+   The flecked brown deer strolls warily through the grass, keeping one eye on
+you as it slowly grazes.
+~
 S
 #504
 raccoon~
 a raccoon~
 A raccoon is cleaning its paws.~
-cej 9 0 100 0
+cej 9 0 100 0 2
 2 25 215 -1
 A
 6 2
@@ -82,12 +100,15 @@ A
 1 -1
 A
 8 -1
+D
+The sly little bandit sits on its rear feet, rubbing its paws together.
+~
 S
 #505
 turtle forest~
 a forest turtle~
 A forest turtle is munching on something.~
-cej 9 0 100 0
+cej 9 0 100 0 1
 2 25 215 -1
 A
 6 2
@@ -97,12 +118,16 @@ A
 1 -1
 A
 8 -1
+D
+   This flat little brown turtle plods along through the underbrush, stopping
+occasionally to grab a berry or leaf in its beak.
+~
 S
 #506
 ostrich~
 an ostrich~
 An ostrich ruffles its feathers and backs away from you.~
-cfj 11 0 100 0
+cfj 11 0 100 0 3
 2 25 215 -1
 A
 6 2
@@ -112,12 +137,17 @@ A
 1 -1
 A
 8 -1
+D
+   This awkward creature looks like a baby bird that forgot to moult as it
+grew. It is taller than you are, with a long, bare neck and huge, downy
+feathers.
+~
 S
 #507
 bobcat cat curious~
 a bobcat~
 A curious bobcat is sitting here, waiting.~
-cfj 10 0 100 0
+cfj 10 0 100 0 2
 2 25 215 -1
 A
 6 2
@@ -127,12 +157,17 @@ A
 1 -1
 A
 8 -1
+D
+   Though larger than a housecat, this spotted bobcat isn't very large. It
+lowers its ears behind its ruffled face as it sees you, and waits for you to
+pass.
+~
 S
 #508
 rattlesnake snake sidewinder~
 a sidewinder~
 A sidewinder rattlesnake is coiled and rattling.~
-cfj 9 5 100 0
+cfj 9 5 100 0 1
 2 25 215 -1
 A
 6 2
@@ -142,12 +177,17 @@ A
 1 -1
 A
 8 -1
+D
+   The sidewinder moves in a characteristic sideways motion, waving across the
+sand almost as if it's water. The rattle on the end of its tail lets you know
+you probably shouldn't get any closer.
+~
 S
 #509
 tapir~
 a tapir~
 A tapir is rooting around a bush.~
-cgj 9 0 100 0
+cgj 9 0 100 0 3
 2 25 215 -1
 A
 6 2
@@ -157,12 +197,16 @@ A
 1 -1
 A
 8 -1
+D
+   The tapir is tapered on the front end. It's the strangest animal you've ever
+seen, like a horse and a pig had a baby and it was raised by an elephant.
+~
 S
 #510
 monkey brown little~
 a monkey~
 A little brown monkey is walking along a low branch.~
-cgj 9 0 100 0
+cgj 9 0 100 0 2
 2 25 215 -1
 A
 6 2
@@ -172,12 +216,16 @@ A
 1 -1
 A
 8 -1
+D
+   The little monkey is balanced carefully on a low branch, clinging to the
+branch with its nimble toes as it reaches for dangling branches with its hands.
+~
 S
 #511
 muskrat~
 a muskrat~
 A muskrat is digging around.~
-cgj 9 0 100 0
+cgj 9 0 100 0 2
 2 25 215 -1
 A
 6 2
@@ -187,12 +235,15 @@ A
 1 -1
 A
 8 -1
+D
+The muskrat is big, for a rodent. It's more like a beaver than a rat.
+~
 S
 #512
 werewolf astral~
 an astral werewolf~
 An astral werewolf stands here, head held high.~
-h 28 28 0 0
+h 28 28 0 0 3
 1 50 267 -1
 A
 22 3
@@ -206,12 +257,16 @@ A
 18 -2
 A
 12 -2
+D
+   The starry-eyed werewolf stares up toward the sky, paying you little mind,
+though you're always within reach of its long, sharp claws.
+~
 S
 #513
 werewolf~
 a werewolf~
 A werewolf hunches low, warily eyeing you.~
-0 10 28 0 0
+0 10 28 0 0 3
 1 50 269 -1
 A
 15 1
@@ -219,5 +274,10 @@ A
 17 1
 A
 18 1
+D
+   The werewolf hunches low, though still on its back feet with its clawed
+hands free to swipe. It's a furry amalgamation of man and beast and, looking in
+its yellow eyes, you cannot tell which half has control.
+~
 S
 $

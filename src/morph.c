@@ -2,15 +2,13 @@
 *   File: morph.c                                         EmpireMUD 2.0b5 *
 *  Usage: morph loading, saving, and OLC                                  *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
 *  CircleMUD (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#include <math.h>
 
 #include "conf.h"
 #include "sysdep.h"
@@ -25,6 +23,7 @@
 #include "handler.h"
 #include "dg_scripts.h"
 #include "vnums.h"
+#include "constants.h"
 
 /**
 * Contents:
@@ -36,25 +35,13 @@
 *   Edit Modules
 */
 
+// external functions
+ACMD(do_dismount);
+
 // local data
 const char *default_morph_keywords = "morph unnamed shapeless";
 const char *default_morph_short_desc = "an unnamed morph";
 const char *default_morph_long_desc = "A shapeless morph is standing here.";
-
-// external consts
-extern const char *affected_bits[];
-extern const bool apply_never_scales[];
-extern const char *apply_types[];
-extern const char *mob_move_types[];
-extern const char *morph_flags[];
-extern const char *pool_types[];
-
-// external funcs
-extern struct resource_data *copy_resource_list(struct resource_data *input);
-void get_resource_display(struct resource_data *list, char *save_buffer);
-
-// local protos
-void finish_morphing(char_data *ch, morph_data *morph);
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -66,8 +53,6 @@ void finish_morphing(char_data *ch, morph_data *morph);
 * @param char_data *ch The character to add morph affects to.
 */
 void add_morph_affects(char_data *ch) {
-	extern const double apply_values[];
-	
 	double points_available, remaining, share;
 	morph_data *morph = GET_MORPH(ch);
 	struct affected_type *af = NULL;
@@ -89,6 +74,15 @@ void add_morph_affects(char_data *ch) {
 	// determine points
 	points_available = scale / 100.0 * config_get_double("scale_points_at_100");
 	points_available = MAX(points_available, 1.0);
+	
+	// weight by mob flags
+	// TODO should this be configured somewhere? these are based on obj flag scaling -pc
+	if (MOB_FLAGGED(ch, MOB_HARD)) {
+		points_available *= 1.2;
+	}
+	if (MOB_FLAGGED(ch, MOB_GROUP)) {
+		points_available *= 1.3333;
+	}
 	
 	// figure out how many total weight points are used
 	total_weight = 0;
@@ -200,6 +194,13 @@ void end_morph(char_data *ch) {
 morph_data *find_morph_by_name(char_data *ch, char *name) {
 	morph_data *morph, *next_morph, *partial = NULL;
 	char temp[MAX_STRING_LENGTH];
+	int number;
+	bool had_number = isdigit(*name) ? TRUE : FALSE;
+	
+	number = get_number(&name);
+	if (number == 0) {
+		return NULL;	// 0.morph has no meaning
+	}
 	
 	HASH_ITER(sorted_hh, sorted_morphs, morph, next_morph) {
 		if (MORPH_FLAGGED(morph, MORPHF_IN_DEVELOPMENT | MORPHF_SCRIPT_ONLY) && !IS_IMMORTAL(ch)) {
@@ -208,19 +209,26 @@ morph_data *find_morph_by_name(char_data *ch, char *name) {
 		if (MORPH_ABILITY(morph) != NO_ABIL && !has_ability(ch, MORPH_ABILITY(morph))) {
 			continue;
 		}
-		if (MORPH_REQUIRES_OBJ(morph) != NOTHING && !get_obj_in_list_vnum(MORPH_REQUIRES_OBJ(morph), ch->carrying)) {
+		if (MORPH_REQUIRES_OBJ(morph) != NOTHING && !has_required_object(ch, MORPH_REQUIRES_OBJ(morph))) {
 			continue;
 		}
 		
 		// matches:
 		strcpy(temp, skip_filler(MORPH_SHORT_DESC(morph)));
-		if (!str_cmp(name, temp)) {
+		if (!had_number && !str_cmp(name, temp)) {
 			// perfect match
-			return morph;
+			if (--number == 0) {
+				return morph;
+			}
 		}
-		if (!partial && multi_isname(name, MORPH_KEYWORDS(morph))) {
+		if ((!partial || had_number) && multi_isname(name, MORPH_KEYWORDS(morph))) {
 			// probable match
-			partial = morph;
+			if (had_number && --number == 0) {
+				return morph;
+			}
+			else if (!had_number && !partial) {
+				partial = morph;
+			}
 		}
 	}
 	
@@ -237,8 +245,6 @@ morph_data *find_morph_by_name(char_data *ch, char *name) {
 * @param morph_data *morph Which form to change into (NULL for none).
 */
 void finish_morphing(char_data *ch, morph_data *morph) {
-	void undisguise(char_data *ch);
-
 	char lbuf[MAX_STRING_LENGTH];
 	
 	// can't be disguised while morphed
@@ -255,6 +261,55 @@ void finish_morphing(char_data *ch, morph_data *morph) {
 	
 	if (morph && MORPH_ABILITY(morph) != NO_ABIL) {
 		gain_ability_exp(ch, MORPH_ABILITY(morph), 33.4);
+		run_ability_hooks(ch, AHOOK_ABILITY, MORPH_ABILITY(morph), 0, ch, NULL, NULL, NULL, NOBITS);
+	}
+
+	// update msdp
+	update_MSDP_name(ch, UPDATE_SOON);
+}
+
+
+/**
+* This function gets/generates a short/long description for a morphed person
+* or npc. It returns simple output if NOT morphed, but you should really only
+* use this for a morphed person.
+* 
+* @param char_data *ch The person who is morphed.
+* @param bool long_desc_if_true If TRUE, returns a long description instead of a short desc.
+* @return const char* A pointer to the generated description.
+*/
+const char *get_morph_desc(char_data *ch, bool long_desc_if_true) {
+	static char output[MAX_STRING_LENGTH], realname[128];
+	
+	// all senses end up needing the real name
+	if (IS_NPC(ch)) {
+		strcpy(realname, GET_SHORT_DESC(ch));
+	}
+	else {
+		safe_snprintf(realname, sizeof(realname), "%s%s%s", GET_PC_NAME(ch), GET_CURRENT_LASTNAME(ch) ? " " : "", NULLSAFE(GET_CURRENT_LASTNAME(ch)));
+	}
+	
+	if (GET_MORPH(ch)) {
+		char *source = long_desc_if_true ? MORPH_LONG_DESC(GET_MORPH(ch)) : MORPH_SHORT_DESC(GET_MORPH(ch));
+		if (strstr(source, "#n")) {
+			char *tmp = str_replace("#n", realname, source);
+			strcpy(output, tmp);
+			free(tmp);	// str_replace allocated this
+			if (long_desc_if_true) {
+				CAP(output);
+			}
+			return output;
+		}
+		else if (long_desc_if_true) {
+			return MORPH_LONG_DESC(GET_MORPH(ch));
+		}
+		else {	// short desc and no data
+			return MORPH_SHORT_DESC(GET_MORPH(ch));
+		}
+	}
+	else {	// not morphed
+		safe_snprintf(output, sizeof(output), "%s%s", realname, long_desc_if_true ? " is standing here." : "");
+		return output;
 	}
 }
 
@@ -267,29 +322,23 @@ void finish_morphing(char_data *ch, morph_data *morph) {
 * @return bool TRUE if the morph passes the affinities check.
 */
 bool morph_affinity_ok(room_data *location, morph_data *morph) {
-	int climate = NOTHING;
-	crop_data *cp;
 	bool ok = TRUE;
+	bitvector_t climate;
 	
 	// shortcut
 	if (!morph) {
 		return TRUE;
 	}
 	
-	if (ROOM_SECT_FLAGGED(location, SECTF_HAS_CROP_DATA) && (cp = ROOM_CROP(location))) {
-		climate = GET_CROP_CLIMATE(cp);
-	}
-	else {
-		climate = GET_SECT_CLIMATE(SECT(location));
-	}
+	climate = get_climate(location);
 	
-	if (MORPH_FLAGGED(morph, MORPHF_TEMPERATE_AFFINITY) && climate != CLIMATE_TEMPERATE) {
+	if (MORPH_FLAGGED(morph, MORPHF_TEMPERATE_AFFINITY) && !IS_SET(climate, CLIM_TEMPERATE)) {
 		ok = FALSE;
 	}
-	if (MORPH_FLAGGED(morph, MORPHF_ARID_AFFINITY) && climate != CLIMATE_ARID) {
+	if (MORPH_FLAGGED(morph, MORPHF_ARID_AFFINITY) && !IS_SET(climate, CLIM_ARID)) {
 		ok = FALSE;
 	}
-	if (MORPH_FLAGGED(morph, MORPHF_TROPICAL_AFFINITY) && climate != CLIMATE_TROPICAL) {
+	if (MORPH_FLAGGED(morph, MORPHF_TROPICAL_AFFINITY) && !IS_SET(climate, CLIM_TROPICAL)) {
 		ok = FALSE;
 	}
 	
@@ -304,13 +353,12 @@ bool morph_affinity_ok(room_data *location, morph_data *morph) {
 * @param morph_data *morph Which morph (NULL to revert to normal).
 */
 void perform_morph(char_data *ch, morph_data *morph) {
-	ACMD(do_dismount);
 	double move_mod, health_mod, mana_mod;
 	
 	// read current pools
-	health_mod = (double) GET_HEALTH(ch) / GET_MAX_HEALTH(ch);
-	move_mod = (double) GET_MOVE(ch) / GET_MAX_MOVE(ch);
-	mana_mod = (double) GET_MANA(ch) / GET_MAX_MANA(ch);
+	health_mod = (double) GET_HEALTH(ch) / MAX(1, GET_MAX_HEALTH(ch));
+	move_mod = (double) GET_MOVE(ch) / MAX(1, GET_MAX_MOVE(ch));
+	mana_mod = (double) GET_MANA(ch) / MAX(1, GET_MAX_MANA(ch));
 	
 	// remove all existing morph effects
 	affect_from_char(ch, ATYPE_MORPH, FALSE);
@@ -324,14 +372,32 @@ void perform_morph(char_data *ch, morph_data *morph) {
 	add_morph_affects(ch);
 
 	// set new pools
-	GET_HEALTH(ch) = (sh_int) (GET_MAX_HEALTH(ch) * health_mod);
-	GET_MOVE(ch) = (sh_int) (GET_MAX_MOVE(ch) * move_mod);
-	GET_MANA(ch) = (sh_int) (GET_MAX_MANA(ch) * mana_mod);
+	set_health(ch, (int) (GET_MAX_HEALTH(ch) * health_mod));
+	set_move(ch, (int) (GET_MAX_MOVE(ch) * move_mod));
+	set_mana(ch, (int) (GET_MAX_MANA(ch) * mana_mod));
 	
 	// in case this is called by something else while they're already morphing
 	if (!IS_NPC(ch) && GET_ACTION(ch) == ACT_MORPHING) {
-		GET_ACTION(ch) = ACT_NONE;
+		end_action(ch);
 	}
+}
+
+
+/**
+* Counts the words of text in a morph's strings.
+*
+* @param morph_data *mph The morph whose strings to count.
+* @return int The number of words in the morph's strings.
+*/
+int wordcount_morph(morph_data *mph) {
+	int count = 0;
+	
+	count += wordcount_string(MORPH_KEYWORDS(mph));
+	count += wordcount_string(MORPH_SHORT_DESC(mph));
+	count += wordcount_string(MORPH_LONG_DESC(mph));
+	count += wordcount_string(MORPH_LOOK_DESC(mph));
+	
+	return count;
 }
 
 
@@ -349,6 +415,7 @@ bool audit_morph(morph_data *morph, char_data *ch) {
 	char temp[MAX_STRING_LENGTH];
 	struct apply_data *app;
 	bool problem = FALSE;
+	attack_message_data *amd = NULL;
 	obj_data *obj = NULL;
 	
 	if (MORPH_FLAGGED(morph, MORPHF_IN_DEVELOPMENT)) {
@@ -387,6 +454,11 @@ bool audit_morph(morph_data *morph, char_data *ch) {
 		problem = TRUE;
 	}
 	
+	if (!MORPH_LOOK_DESC(morph) || !*MORPH_LOOK_DESC(morph)) {
+		olc_audit_msg(ch, MORPH_VNUM(morph), "No look description");
+		problem = TRUE;
+	}
+	
 	for (app = MORPH_APPLIES(morph); app; app = app->next) {
 		if (app->location == APPLY_NONE || app->weight == 0) {
 			olc_audit_msg(ch, MORPH_VNUM(morph), "Invalid apply: %d to %s", app->weight, apply_types[app->location]);
@@ -394,7 +466,7 @@ bool audit_morph(morph_data *morph, char_data *ch) {
 		}
 	}
 	
-	if (MORPH_ABILITY(morph) == NO_ABIL && MORPH_REQUIRES_OBJ(morph) == NOTHING) {
+	if (MORPH_ABILITY(morph) == NO_ABIL && MORPH_REQUIRES_OBJ(morph) == NOTHING && !MORPH_FLAGGED(morph, MORPHF_SCRIPT_ONLY)) {
 		olc_audit_msg(ch, MORPH_VNUM(morph), "Requires no ability or object");
 		problem = TRUE;
 	}
@@ -412,8 +484,12 @@ bool audit_morph(morph_data *morph, char_data *ch) {
 		olc_audit_msg(ch, MORPH_VNUM(morph), "Flagged CONSUME-OBJ but no object required");
 		problem = TRUE;
 	}
-	if (MORPH_ATTACK_TYPE(morph) == TYPE_RESERVED) {
+	if (MORPH_ATTACK_TYPE(morph) == ATTACK_RESERVED || !(amd = real_attack_message(MORPH_ATTACK_TYPE(morph)))) {
 		olc_audit_msg(ch, MORPH_VNUM(morph), "Invalid attack type");
+		problem = TRUE;
+	}
+	if (amd && !ATTACK_FLAGGED(amd, AMDF_MOBILE)) {
+		olc_audit_msg(ch, MORPH_VNUM(morph), "Attack type %d is not valid (it is missing the MOBILE flag)", MORPH_ATTACK_TYPE(morph));
 		problem = TRUE;
 	}
 	
@@ -451,10 +527,10 @@ char *list_one_morph(morph_data *morph, bool detail) {
 			strcat(part, ")");
 		}
 		
-		snprintf(output, sizeof(output), "[%5d] %s%s", MORPH_VNUM(morph), MORPH_SHORT_DESC(morph), part);
+		safe_snprintf(output, sizeof(output), "[%5d] %s%s", MORPH_VNUM(morph), MORPH_SHORT_DESC(morph), part);
 	}
 	else {
-		snprintf(output, sizeof(output), "[%5d] %s", MORPH_VNUM(morph), MORPH_SHORT_DESC(morph));
+		safe_snprintf(output, sizeof(output), "[%5d] %s", MORPH_VNUM(morph), MORPH_SHORT_DESC(morph));
 	}
 		
 	return output;
@@ -468,9 +544,8 @@ char *list_one_morph(morph_data *morph, bool detail) {
 * @param any_vnum vnum The morph vnum.
 */
 void olc_search_morph(char_data *ch, any_vnum vnum) {
-	char buf[MAX_STRING_LENGTH];
 	morph_data *morph = morph_proto(vnum);
-	int size, found;
+	int found;
 	
 	if (!morph) {
 		msg_to_char(ch, "There is no morph %d.\r\n", vnum);
@@ -478,18 +553,18 @@ void olc_search_morph(char_data *ch, any_vnum vnum) {
 	}
 	
 	found = 0;
-	size = snprintf(buf, sizeof(buf), "Occurrences of morph %d (%s):\r\n", vnum, MORPH_SHORT_DESC(morph));
+	build_page_display(ch, "Occurrences of morph %d (%s):", vnum, MORPH_SHORT_DESC(morph));
 	
 	// morphs are not actually used anywhere else
 	
 	if (found > 0) {
-		size += snprintf(buf + size, sizeof(buf) - size, "%d location%s shown\r\n", found, PLURAL(found));
+		build_page_display(ch, "%d location%s shown", found, PLURAL(found));
 	}
 	else {
-		size += snprintf(buf + size, sizeof(buf) - size, " none\r\n");
+		build_page_display_str(ch, " none");
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -587,7 +662,7 @@ void clear_morph(morph_data *morph) {
 	MORPH_VNUM(morph) = NOTHING;
 	MORPH_ABILITY(morph) = NO_ABIL;
 	MORPH_REQUIRES_OBJ(morph) = NOTHING;
-	MORPH_ATTACK_TYPE(morph) = TYPE_HIT;
+	MORPH_SIZE(morph) = SIZE_NORMAL;
 }
 
 
@@ -610,6 +685,9 @@ void free_morph(morph_data *morph) {
 	if (MORPH_LONG_DESC(morph) && (!proto || MORPH_LONG_DESC(morph) != MORPH_LONG_DESC(proto))) {
 		free(MORPH_LONG_DESC(morph));
 	}
+	if (MORPH_LOOK_DESC(morph) && (!proto || MORPH_LOOK_DESC(morph) != MORPH_LOOK_DESC(proto))) {
+		free(MORPH_LOOK_DESC(morph));
+	}
 	
 	if (MORPH_APPLIES(morph) && (!proto || MORPH_APPLIES(morph) != MORPH_APPLIES(proto))) {
 		free_apply_list(MORPH_APPLIES(morph));
@@ -626,9 +704,6 @@ void free_morph(morph_data *morph) {
 * @param any_vnum vnum The morph vnum
 */
 void parse_morph(FILE *fl, any_vnum vnum) {
-	void parse_apply(FILE *fl, struct apply_data **list, char *error_str);
-	void parse_resource(FILE *fl, struct resource_data **list, char *error_str);
-
 	char line[256], error[256], str_in[256], str_in2[256];
 	morph_data *morph, *find;
 	int int_in[4];
@@ -652,10 +727,14 @@ void parse_morph(FILE *fl, any_vnum vnum) {
 	MORPH_SHORT_DESC(morph) = fread_string(fl, error);
 	MORPH_LONG_DESC(morph) = fread_string(fl, error);
 	
-	// 4. flags attack-type move-type max-level affects
-	if (!get_line(fl, line) || sscanf(line, "%s %d %d %d %s", str_in, &int_in[0], &int_in[1], &int_in[2], str_in2) != 5) {
-		log("SYSERR: Format error in line 4 of %s", error);
-		exit(1);
+	// 4. flags attack-type move-type max-level affects [size]
+	if (!get_line(fl, line) || sscanf(line, "%s %d %d %d %s %d", str_in, &int_in[0], &int_in[1], &int_in[2], str_in2, &int_in[3]) != 6) {
+		int_in[3] = SIZE_NORMAL;	// backward-compatible
+		
+		if (sscanf(line, "%s %d %d %d %s", str_in, &int_in[0], &int_in[1], &int_in[2], str_in2) != 5) {
+			log("SYSERR: Format error in line 4 of %s", error);
+			exit(1);
+		}
 	}
 	
 	MORPH_FLAGS(morph) = asciiflag_conv(str_in);
@@ -663,6 +742,7 @@ void parse_morph(FILE *fl, any_vnum vnum) {
 	MORPH_MOVE_TYPE(morph) = int_in[1];
 	MORPH_MAX_SCALE(morph) = int_in[2];
 	MORPH_AFFECTS(morph) = asciiflag_conv(str_in2);
+	MORPH_SIZE(morph) = int_in[3];
 	
 	// 5. cost-type cost-amount ability requires-obj
 	if (!get_line(fl, line) || sscanf(line, "%d %d %d %d", &int_in[0], &int_in[1], &int_in[2], &int_in[3]) != 4) {
@@ -684,6 +764,10 @@ void parse_morph(FILE *fl, any_vnum vnum) {
 		switch (*line) {
 			case 'A': {	// applies
 				parse_apply(fl, &MORPH_APPLIES(morph), error);
+				break;
+			}
+			case 'D': { // look desc
+				MORPH_LOOK_DESC(morph) = fread_string(fl, error);
 				break;
 			}
 						
@@ -727,8 +811,6 @@ void write_morphs_index(FILE *fl) {
 * @param morph_data *morph The thing to save.
 */
 void write_morph_to_file(FILE *fl, morph_data *morph) {
-	void write_applies_to_file(FILE *fl, struct apply_data *list);
-	
 	char temp[256], temp2[256];
 	
 	if (!fl || !morph) {
@@ -743,16 +825,23 @@ void write_morph_to_file(FILE *fl, morph_data *morph) {
 	fprintf(fl, "%s~\n", NULLSAFE(MORPH_SHORT_DESC(morph)));
 	fprintf(fl, "%s~\n", NULLSAFE(MORPH_LONG_DESC(morph)));
 	
-	// 4. flags attack-type move-type max-level affs
+	// 4. flags attack-type move-type max-level affs size
 	strcpy(temp, bitv_to_alpha(MORPH_FLAGS(morph)));
 	strcpy(temp2, bitv_to_alpha(MORPH_AFFECTS(morph)));
-	fprintf(fl, "%s %d %d %d %s\n", temp, MORPH_ATTACK_TYPE(morph), MORPH_MOVE_TYPE(morph), MORPH_MAX_SCALE(morph), temp2);
+	fprintf(fl, "%s %d %d %d %s %d\n", temp, MORPH_ATTACK_TYPE(morph), MORPH_MOVE_TYPE(morph), MORPH_MAX_SCALE(morph), temp2, MORPH_SIZE(morph));
 	
 	// 5. cost-type cost-amount ability requires-obj
 	fprintf(fl, "%d %d %d %d\n", MORPH_COST_TYPE(morph), MORPH_COST(morph), MORPH_ABILITY(morph), MORPH_REQUIRES_OBJ(morph));
 	
 	// 'A': applies
 	write_applies_to_file(fl, MORPH_APPLIES(morph));
+	
+	// D: look desc
+	if (MORPH_LOOK_DESC(morph) && *MORPH_LOOK_DESC(morph)) {
+		strcpy(temp, MORPH_LOOK_DESC(morph));
+		strip_crlf(temp);
+		fprintf(fl, "D\n%s~\n", temp);
+	}
 	
 	// end
 	fprintf(fl, "S\n");
@@ -803,14 +892,17 @@ morph_data *create_morph_table_entry(any_vnum vnum) {
 void olc_delete_morph(char_data *ch, any_vnum vnum) {
 	char_data *chiter, *next_ch;
 	morph_data *morph;
+	char name[256];
 	
 	if (!(morph = morph_proto(vnum))) {
 		msg_to_char(ch, "There is no such morph %d.\r\n", vnum);
 		return;
 	}
 	
+	safe_snprintf(name, sizeof(name), "%s", NULLSAFE(MORPH_SHORT_DESC(morph)));
+	
 	// un-morph everyone
-	LL_FOREACH_SAFE(character_list, chiter, next_ch) {
+	DL_FOREACH_SAFE(character_list, chiter, next_ch) {
 		if (IS_MORPHED(chiter) && MORPH_VNUM(GET_MORPH(chiter)) == vnum) {
 			finish_morphing(chiter, NULL);
 		}
@@ -823,8 +915,8 @@ void olc_delete_morph(char_data *ch, any_vnum vnum) {
 	save_index(DB_BOOT_MORPH);
 	save_library_file_for_vnum(DB_BOOT_MORPH, vnum);
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted morph %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Morph %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted morph %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Morph %d (%s) deleted.\r\n", vnum, name);
 	
 	free_morph(morph);
 }
@@ -855,6 +947,9 @@ void save_olc_morph(descriptor_data *desc) {
 	if (MORPH_LONG_DESC(proto)) {
 		free(MORPH_LONG_DESC(proto));
 	}
+	if (MORPH_LOOK_DESC(proto)) {
+		free(MORPH_LOOK_DESC(proto));
+	}
 	free_apply_list(MORPH_APPLIES(proto));
 	
 	// sanity
@@ -875,6 +970,10 @@ void save_olc_morph(descriptor_data *desc) {
 			free(MORPH_LONG_DESC(morph));
 		}
 		MORPH_LONG_DESC(morph) = str_dup(default_morph_long_desc);
+	}
+	if (MORPH_LOOK_DESC(morph) && !*MORPH_LOOK_DESC(morph)) {
+		free(MORPH_LOOK_DESC(morph));
+		MORPH_LOOK_DESC(morph) = NULL;
 	}
 
 	// save data back over the proto-type
@@ -900,8 +999,6 @@ void save_olc_morph(descriptor_data *desc) {
 * @return morph_data* The copied morph.
 */
 morph_data *setup_olc_morph(morph_data *input) {
-	extern struct apply_data *copy_apply_list(struct apply_data *input);
-	
 	morph_data *new;
 	
 	CREATE(new, morph_data, 1);
@@ -915,6 +1012,7 @@ morph_data *setup_olc_morph(morph_data *input) {
 		MORPH_KEYWORDS(new) = MORPH_KEYWORDS(input) ? str_dup(MORPH_KEYWORDS(input)) : NULL;
 		MORPH_SHORT_DESC(new) = MORPH_SHORT_DESC(input) ? str_dup(MORPH_SHORT_DESC(input)) : NULL;
 		MORPH_LONG_DESC(new) = MORPH_LONG_DESC(input) ? str_dup(MORPH_LONG_DESC(input)) : NULL;
+		MORPH_LOOK_DESC(new) = MORPH_LOOK_DESC(input) ? str_dup(MORPH_LOOK_DESC(input)) : NULL;
 		
 		// copy lists
 		MORPH_APPLIES(new) = copy_apply_list(MORPH_APPLIES(input));
@@ -942,49 +1040,48 @@ morph_data *setup_olc_morph(morph_data *input) {
 * @param morph_data *morph The morph to display.
 */
 void do_stat_morph(char_data *ch, morph_data *morph) {
-	char buf[MAX_STRING_LENGTH], part[MAX_STRING_LENGTH];
+	char part[MAX_STRING_LENGTH];
 	struct apply_data *app;
 	ability_data *abil;
-	size_t size;
 	int num;
+	struct page_display *line;
 	
 	if (!morph) {
 		return;
 	}
 	
 	// first line
-	size = snprintf(buf, sizeof(buf), "VNum: [\tc%d\t0], Keywords: \tc%s\t0, Short desc: \ty%s\t0\r\n", MORPH_VNUM(morph), MORPH_KEYWORDS(morph), MORPH_SHORT_DESC(morph));
-	size += snprintf(buf + size, sizeof(buf) - size, "L-Desc: \ty%s\t0\r\n", MORPH_LONG_DESC(morph));
+	build_page_display(ch, "VNum: [\tc%d\t0], Keywords: \tc%s\t0, Short desc: \ty%s\t0", MORPH_VNUM(morph), MORPH_KEYWORDS(morph), MORPH_SHORT_DESC(morph));
+	build_page_display(ch, "L-Desc: \ty%s\t0\r\n%s", MORPH_LONG_DESC(morph), NULLSAFE(MORPH_LOOK_DESC(morph)));
 	
-	snprintf(part, sizeof(part), "%s", (MORPH_ABILITY(morph) == NO_ABIL ? "none" : get_ability_name_by_vnum(MORPH_ABILITY(morph))));
+	safe_snprintf(part, sizeof(part), "%s", (MORPH_ABILITY(morph) == NO_ABIL ? "none" : get_ability_name_by_vnum(MORPH_ABILITY(morph))));
 	if ((abil = find_ability_by_vnum(MORPH_ABILITY(morph))) && ABIL_ASSIGNED_SKILL(abil) != NULL) {
-		snprintf(part + strlen(part), sizeof(part) - strlen(part), " (%s %d)", SKILL_ABBREV(ABIL_ASSIGNED_SKILL(abil)), ABIL_SKILL_LEVEL(abil));
+		safe_snprintf(part + strlen(part), sizeof(part) - strlen(part), " (%s %d)", SKILL_ABBREV(ABIL_ASSIGNED_SKILL(abil)), ABIL_SKILL_LEVEL(abil));
 	}
-	size += snprintf(buf + size, sizeof(buf) - size, "Cost: [\ty%d %s\t0], Max Level: [\ty%d%s\t0], Requires Ability: [\ty%s\t0]\r\n", MORPH_COST(morph), MORPH_COST(morph) > 0 ? pool_types[MORPH_COST_TYPE(morph)] : "/ none", MORPH_MAX_SCALE(morph), (MORPH_MAX_SCALE(morph) == 0 ? " none" : ""), part);
+	build_page_display(ch, "Cost: [\ty%d %s\t0], Max Level: [\ty%d%s\t0], Requires Ability: [\ty%s\t0]", MORPH_COST(morph), MORPH_COST(morph) > 0 ? pool_types[MORPH_COST_TYPE(morph)] : "/ none", MORPH_MAX_SCALE(morph), (MORPH_MAX_SCALE(morph) == 0 ? " none" : ""), part);
 	
 	if (MORPH_REQUIRES_OBJ(morph) != NOTHING) {
-		size += snprintf(buf + size, sizeof(buf) - size, "Requires item: [%d] \tg%s\t0\r\n", MORPH_REQUIRES_OBJ(morph), skip_filler(get_obj_name_by_proto(MORPH_REQUIRES_OBJ(morph))));
+		build_page_display(ch, "Requires item: [%d] \tg%s\t0", MORPH_REQUIRES_OBJ(morph), skip_filler(get_obj_name_by_proto(MORPH_REQUIRES_OBJ(morph))));
 	}
 	
-	size += snprintf(buf + size, sizeof(buf) - size, "Attack type: \ty%s\t0, Move type: \ty%s\t0\r\n", attack_hit_info[MORPH_ATTACK_TYPE(morph)].name, mob_move_types[MORPH_MOVE_TYPE(morph)]);
+	build_page_display(ch, "Attack type: \ty%d %s\t0, Move type: \ty%s\t0, Size: \ty%s\t0", MORPH_ATTACK_TYPE(morph), get_attack_name_by_vnum(MORPH_ATTACK_TYPE(morph)), mob_move_types[MORPH_MOVE_TYPE(morph)], size_types[MORPH_SIZE(morph)]);
 	
 	sprintbit(MORPH_FLAGS(morph), morph_flags, part, TRUE);
-	size += snprintf(buf + size, sizeof(buf) - size, "Flags: \tg%s\t0\r\n", part);
+	build_page_display(ch, "Flags: \tg%s\t0", part);
 	
 	sprintbit(MORPH_AFFECTS(morph), affected_bits, part, TRUE);
-	size += snprintf(buf + size, sizeof(buf) - size, "Affects: \tc%s\t0\r\n", part);
+	build_page_display(ch, "Affects: \tc%s\t0", part);
 	
 	// applies
-	size += snprintf(buf + size, sizeof(buf) - size, "Applies: ");
+	line = build_page_display(ch, "Applies: ");
 	for (app = MORPH_APPLIES(morph), num = 0; app; app = app->next, ++num) {
-		size += snprintf(buf + size, sizeof(buf) - size, "%s%d to %s", num ? ", " : "", app->weight, apply_types[app->location]);
+		append_page_display_line(line, "%s%d to %s", num ? ", " : "", app->weight, apply_types[app->location]);
 	}
 	if (!MORPH_APPLIES(morph)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "none");
+		append_page_display_line(line, "none");
 	}
-	size += snprintf(buf + size, sizeof(buf) - size, "\r\n");
-		
-	page_string(ch->desc, buf, TRUE);
+	
+	send_page_display(ch);
 }
 
 
@@ -996,7 +1093,7 @@ void do_stat_morph(char_data *ch, morph_data *morph) {
 */
 void olc_show_morph(char_data *ch) {
 	morph_data *morph = GET_OLC_MORPH(ch->desc);
-	char buf[MAX_STRING_LENGTH], lbuf[MAX_STRING_LENGTH];
+	char lbuf[MAX_STRING_LENGTH];
 	struct apply_data *app;
 	ability_data *abil;
 	int num;
@@ -1005,31 +1102,31 @@ void olc_show_morph(char_data *ch) {
 		return;
 	}
 	
-	*buf = '\0';
-	
-	sprintf(buf + strlen(buf), "[\tc%d\t0] \tc%s\t0\r\n", GET_OLC_VNUM(ch->desc), !morph_proto(MORPH_VNUM(morph)) ? "new morph" : MORPH_SHORT_DESC(morph_proto(MORPH_VNUM(morph))));
-	sprintf(buf + strlen(buf), "<\tykeywords\t0> %s\r\n", NULLSAFE(MORPH_KEYWORDS(morph)));
-	sprintf(buf + strlen(buf), "<\tyshortdescription\t0> %s\r\n", NULLSAFE(MORPH_SHORT_DESC(morph)));
-	sprintf(buf + strlen(buf), "<\tylongdescription\t0> %s\r\n", NULLSAFE(MORPH_LONG_DESC(morph)));
+	build_page_display(ch, "[%s%d\t0] %s%s\t0", OLC_LABEL_CHANGED, GET_OLC_VNUM(ch->desc), OLC_LABEL_UNCHANGED, !morph_proto(MORPH_VNUM(morph)) ? "new morph" : MORPH_SHORT_DESC(morph_proto(MORPH_VNUM(morph))));
+	build_page_display(ch, "<%skeywords\t0> %s", OLC_LABEL_STR(MORPH_KEYWORDS(morph), default_morph_keywords), NULLSAFE(MORPH_KEYWORDS(morph)));
+	build_page_display(ch, "<%sshortdescription\t0> %s", OLC_LABEL_STR(MORPH_SHORT_DESC(morph), default_morph_short_desc), NULLSAFE(MORPH_SHORT_DESC(morph)));
+	build_page_display(ch, "<%slongdescription\t0> %s", OLC_LABEL_STR(MORPH_LONG_DESC(morph), default_morph_long_desc), NULLSAFE(MORPH_LONG_DESC(morph)));
+	build_page_display(ch, "<%slookdescription\t0>\r\n%s", OLC_LABEL_PTR(MORPH_LOOK_DESC(morph)), NULLSAFE(MORPH_LOOK_DESC(morph)));
 	
 	sprintbit(MORPH_FLAGS(morph), morph_flags, lbuf, TRUE);
-	sprintf(buf + strlen(buf), "<\tyflags\t0> %s\r\n", lbuf);
+	build_page_display(ch, "<%sflags\t0> %s", OLC_LABEL_VAL(MORPH_FLAGS(morph), MORPHF_IN_DEVELOPMENT), lbuf);
 	
-	sprintf(buf + strlen(buf), "<\tyattack\t0> %s\r\n", attack_hit_info[MORPH_ATTACK_TYPE(morph)].name);
-	sprintf(buf + strlen(buf), "<\tymovetype\t0> %s\r\n", mob_move_types[MORPH_MOVE_TYPE(morph)]);
+	build_page_display(ch, "<%sattack\t0> %d %s", OLC_LABEL_VAL(MORPH_ATTACK_TYPE(morph), 0), MORPH_ATTACK_TYPE(morph), get_attack_name_by_vnum(MORPH_ATTACK_TYPE(morph)));
+	build_page_display(ch, "<%smovetype\t0> %s", OLC_LABEL_VAL(MORPH_MOVE_TYPE(morph), 0), mob_move_types[MORPH_MOVE_TYPE(morph)]);
+	build_page_display(ch, "<%ssize\t0> %s", OLC_LABEL_VAL(MORPH_SIZE(morph), SIZE_NORMAL), size_types[MORPH_SIZE(morph)]);
 
 	sprintbit(MORPH_AFFECTS(morph), affected_bits, lbuf, TRUE);
-	sprintf(buf + strlen(buf), "<\tyaffects\t0> %s\r\n", lbuf);
+	build_page_display(ch, "<%saffects\t0> %s", OLC_LABEL_VAL(MORPH_AFFECTS(morph), NOBITS), lbuf);
 	
 	if (MORPH_MAX_SCALE(morph) > 0) {
-		sprintf(buf + strlen(buf), "<\tymaxlevel\t0> %d\r\n", MORPH_MAX_SCALE(morph));
+		build_page_display(ch, "<%smaxlevel\t0> %d", OLC_LABEL_CHANGED, MORPH_MAX_SCALE(morph));
 	}
 	else {
-		sprintf(buf + strlen(buf), "<\tymaxlevel\t0> none\r\n");
+		build_page_display(ch, "<%smaxlevel\t0> none", OLC_LABEL_UNCHANGED);
 	}
 	
-	sprintf(buf + strlen(buf), "<\tycost\t0> %d\r\n", MORPH_COST(morph));
-	sprintf(buf + strlen(buf), "<\tycosttype\t0> %s\r\n", pool_types[MORPH_COST_TYPE(morph)]);
+	build_page_display(ch, "<%scost\t0> %d", OLC_LABEL_VAL(MORPH_COST(morph), 0), MORPH_COST(morph));
+	build_page_display(ch, "<%scosttype\t0> %s", OLC_LABEL_VAL(MORPH_COST_TYPE(morph), 0), pool_types[MORPH_COST_TYPE(morph)]);
 	
 	// ability required
 	if (MORPH_ABILITY(morph) == NO_ABIL || !(abil = find_ability_by_vnum(MORPH_ABILITY(morph)))) {
@@ -1041,17 +1138,17 @@ void olc_show_morph(char_data *ch) {
 			sprintf(buf1 + strlen(buf1), " (%s %d)", SKILL_NAME(ABIL_ASSIGNED_SKILL(abil)), ABIL_SKILL_LEVEL(abil));
 		}
 	}
-	sprintf(buf + strlen(buf), "<\tyrequiresability\t0> %s\r\n", buf1);
+	build_page_display(ch, "<%srequiresability\t0> %s", OLC_LABEL_VAL(MORPH_ABILITY(morph), NO_ABIL), buf1);
 
-	sprintf(buf + strlen(buf), "<\tyrequiresobject\t0> %d - %s\r\n", MORPH_REQUIRES_OBJ(morph), MORPH_REQUIRES_OBJ(morph) == NOTHING ? "none" : get_obj_name_by_proto(MORPH_REQUIRES_OBJ(morph)));
+	build_page_display(ch, "<%srequiresobject\t0> %d - %s", OLC_LABEL_VAL(MORPH_REQUIRES_OBJ(morph), NOTHING), MORPH_REQUIRES_OBJ(morph), MORPH_REQUIRES_OBJ(morph) == NOTHING ? "none" : get_obj_name_by_proto(MORPH_REQUIRES_OBJ(morph)));
 	
 	// applies
-	sprintf(buf + strlen(buf), "Applies: <\tyapply\t0>\r\n");
+	build_page_display(ch, "Applies: <%sapply\t0>", OLC_LABEL_PTR(MORPH_APPLIES(morph)));
 	for (app = MORPH_APPLIES(morph), num = 1; app; app = app->next, ++num) {
-		sprintf(buf + strlen(buf), " %2d. %d to %s\r\n", num, app->weight, apply_types[app->location]);
+		build_page_display_col(ch, 2, FALSE, " %2d. %d to %s", num, app->weight, apply_types[app->location]);
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -1068,10 +1165,11 @@ int vnum_morph(char *searchname, char_data *ch) {
 	
 	HASH_ITER(hh, morph_table, iter, next_iter) {
 		if (multi_isname(searchname, MORPH_KEYWORDS(iter))) {
-			msg_to_char(ch, "%3d. [%5d] %s\r\n", ++found, MORPH_VNUM(iter), MORPH_SHORT_DESC(iter));
+			build_page_display(ch, "%3d. [%5d] %s", ++found, MORPH_VNUM(iter), MORPH_SHORT_DESC(iter));
 		}
 	}
 	
+	send_page_display(ch);
 	return found;
 }
 
@@ -1119,16 +1217,28 @@ OLC_MODULE(morphedit_affects) {
 
 
 OLC_MODULE(morphedit_apply) {
-	void olc_process_applies(char_data *ch, char *argument, struct apply_data **list);
 	morph_data *morph = GET_OLC_MORPH(ch->desc);
 	olc_process_applies(ch, argument, &MORPH_APPLIES(morph));
 }
 
 
 OLC_MODULE(morphedit_attack) {
-	extern char **get_weapon_types_string();
 	morph_data *morph = GET_OLC_MORPH(ch->desc);
-	MORPH_ATTACK_TYPE(morph) = olc_process_type(ch, argument, "attack type", "attack", (const char**)get_weapon_types_string(), MORPH_ATTACK_TYPE(morph));
+	attack_message_data *amd;
+	
+	if (!*argument) {
+		msg_to_char(ch, "Set the attack type to what attack message (vnum or name)?\r\n");
+	}
+	else if (!(amd = find_attack_message_by_name_or_vnum(argument, FALSE))) {
+		msg_to_char(ch, "Unknown attack message '%s'.\r\n", argument);
+	}
+	else if (!ATTACK_FLAGGED(amd, AMDF_MOBILE)) {
+		msg_to_char(ch, "That attack type is not available on morphs.\r\n");
+	}
+	else {
+		MORPH_ATTACK_TYPE(morph) = ATTACK_VNUM(amd);
+		msg_to_char(ch, "Attack type set to [%d] %s.\r\n", ATTACK_VNUM(amd), ATTACK_NAME(amd));
+	}
 }
 
 
@@ -1167,6 +1277,19 @@ OLC_MODULE(morphedit_keywords) {
 OLC_MODULE(morphedit_longdesc) {
 	morph_data *morph = GET_OLC_MORPH(ch->desc);
 	olc_process_string(ch, argument, "long description", &MORPH_LONG_DESC(morph));
+}
+
+
+OLC_MODULE(morphedit_lookdescription) {
+	morph_data *morph = GET_OLC_MORPH(ch->desc);
+
+	if (ch->desc->str) {
+		msg_to_char(ch, "You are already editing a string.\r\n");
+	}
+	else {
+		sprintf(buf, "description for %s", MORPH_SHORT_DESC(morph));
+		start_string_editor(ch->desc, buf, &MORPH_LOOK_DESC(morph), MAX_PLAYER_DESCRIPTION, TRUE);
+	}
 }
 
 
@@ -1211,4 +1334,10 @@ OLC_MODULE(morphedit_requiresobject) {
 OLC_MODULE(morphedit_shortdesc) {
 	morph_data *morph = GET_OLC_MORPH(ch->desc);
 	olc_process_string(ch, argument, "short description", &MORPH_SHORT_DESC(morph));
+}
+
+
+OLC_MODULE(morphedit_size) {
+	morph_data *morph = GET_OLC_MORPH(ch->desc);
+	MORPH_SIZE(morph) = olc_process_type(ch, argument, "size", "size", size_types, MORPH_SIZE(morph));
 }

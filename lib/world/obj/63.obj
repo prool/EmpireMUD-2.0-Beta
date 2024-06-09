@@ -1,0 +1,71 @@
+#6320
+oil oils skin~
+a skin of oil~
+A skin of oil is lying here.~
+The oil can be used for crafts or cooking.
+~
+3 C a 0 0 11
+0 0 0
+7 0
+C
+1 1
+O+ 1 6320
+R
+4 5134 0
+R
+4 5192 0
+R
+4 5619 0
+S
+#6321
+oil oils skin seed~
+a skin of seed oil~
+A skin of seed oil is lying here.~
+The oil can be used for crafts or cooking.
+~
+3 C a 0 0 13
+0 0 0
+7 0
+C
+1 1
+O+ 1 6321
+R
+4 5134 0
+R
+4 5192 0
+R
+4 5619 0
+S
+#6322
+oil oils skin vegetable~
+a skin of vegetable oil~
+A skin of vegetable oil is lying here.~
+The oil can be used for crafts or cooking.
+~
+3 C a 0 0 14
+0 0 0
+7 0
+C
+1 1
+O+ 1 6322
+R
+4 5134 0
+R
+4 5192 0
+R
+4 5619 0
+S
+#6340
+sweetener sweeteners~
+some sweetener~
+Some sweetener has been left here.~
+You're not sure what this is made from, but it tastes sweeter than fruit.
+~
+3 0 a 0 0 3
+0 0 0
+7 96
+C
+1 1
+O+ 1 6340
+S
+$

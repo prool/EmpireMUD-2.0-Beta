@@ -1,18 +1,17 @@
 #1300
-seashell shell green glowing~
+seashell shells green glowing gems~
 a glowing green seashell~
 A glowing green seashell is sitting on the ground.~
 The seashell can be used in certain crafts and enchantments.
 ~
-3 l a 3
+3 l a 0 0 5
 0 0 0
 1 0
-O
-11 gu
+C
+1 1
+O+ 1 6600
 R
-5164 0
-R
-5511 0
+4 5164 0
 S
 #1301
 barbfish striped remains fish~
@@ -20,13 +19,16 @@ a striped barbfish~
 The remains of a striped barbfish is rotting here.~
 You can eat the fish.
 ~
-6 kl a 3
+6 glC a 0 0 8
 24 0 0
-7 168
-O
-17 lt
+7 24
+C
+1 1
+O+ 1 6203
 R
-5119 0
+4 5119 0
+R
+4 5196 0
 S
 #1302
 linefish giant remains fish~
@@ -34,13 +36,16 @@ a giant linefish~
 The remains of a giant linefish is rotting here.~
 You can eat the fish.
 ~
-6 k a 3
+6 gC a 0 0 8
 24 0 0
-7 168
-O
-17 lt
+7 24
+C
+1 1
+O+ 1 6203
 R
-5119 0
+4 5119 0
+R
+4 5196 0
 S
 #1303
 arrowfish magenta remains fish~
@@ -48,13 +53,16 @@ a magenta arrowfish~
 The remains of a magenta arrowfish is rotting here.~
 You can eat the fish.
 ~
-6 k a 3
+6 gC a 0 0 8
 24 0 0
-7 168
-O
-17 lt
+7 24
+C
+1 1
+O+ 1 6203
 R
-5119 0
+4 5119 0
+R
+4 5196 0
 S
 #1304
 junk sea pile~
@@ -62,7 +70,7 @@ some sea junk~
 A pile of sea junk has been left here.~
 It looks worthless.
 ~
-3 k a 1
+3 k a 0 0 1
 0 0 0
 1 0
 S
@@ -76,7 +84,7 @@ use it to practice disenchanting.
 
 Craft (Fine Pottery): restored statuette [consumes worn statuette]
 ~
-3 j ao 6
+3 j ao 0 0 6
 0 0 0
 1 0
 A
@@ -88,9 +96,11 @@ a pouch of nails~
 A pouch of nails is sitting here.~
 Nails are used for building.
 ~
-3 l a 4
+3 l a 0 c 6
 0 0 0
 2 0
+C
+1 1
 M
 0
 You hammer nails into the wood joints.~
@@ -103,17 +113,16 @@ You hammer nails into $V.~
 M
 7
 $n hammers nails into $V.~
-O
-19 u
+O+ 1 6790
 R
-5134 0
+4 5134 0
 R
-5121 0
+4 5121 0
 R
-5610 0
+4 5610 0
 S
 #1307
-dye deadly violet vial~
+dye dyes deadly violet vial~
 deadly violet dye~
 A vial of deadly violet dye is sitting here.~
    The vial is filled with a liquid so dark it almost looks black. But when you
@@ -121,35 +130,37 @@ hold it up to the light, you can see its true color is a deep, deep violet.
 This dye, made from a mix of wild berries, imbues a fabric with unusual
 properties.
 ~
-3 l a 2
+3 l a 0 0 4
 0 0 0
 8 0
-O
-5 0
+C
+1 1
+I 26 808 100.00 1  # DECAYS-TO: glass vial
 R
-5137 0
+4 5137 0
 S
 #1308
-dye deep orange vial~
+dye dyes deep orange vial~
 deep orange dye~
 A vial of deep orange dye is sitting here.~
    Deep orange dye is made from the peels of fresh fruit, mixed with the
 pigment of a magenta arrowfish. It has an unusual glow in dim light, like it
 catches and amplifies every ray of light that hits it.
 ~
-3 l a 3
+3 l a 0 0 5
 0 0 0
 8 0
+C
+1 1
+I 26 808 100.00 1  # DECAYS-TO: glass vial
 M
 6
 You paint $V orange.~
 M
 7
 $n paints $V orange.~
-O
-5 0
 R
-5137 0
+4 5137 0
 S
 #1309
 mill coin~
@@ -157,7 +168,7 @@ a coin mill~
 There is a coin mill here.~
 Coin mills are required to build a mint.
 ~
-3 el a 2
+3 el a 0 0 2
 0 0 0
 2 0
 M
@@ -171,10 +182,9 @@ S
 statuette old restored~
 a restored old statuette~
 An old statuette is lying here, restored by a craftsman.~
-   This recently repaired statuette's enchantment will increase your charisma
-when you hold it, helping you to catch fish faster!
+The odd little statuette seems to make people like you more.
 ~
-3 jmo ao 4
+3 jmo ao 0 0 5
 0 0 0
 1 0
 A
@@ -185,32 +195,40 @@ C
 0 100
 S
 #1311
-eel spotted~
+eel spotted fish~
 a spotted eel~
 A spotted eel is dried up and rotting.~
 You can eat the fish.
 ~
-6 k a 4
+6 gC a 0 0 10
 24 0 0
-7 168
-O
-17 lt
+7 24
+C
+1 1
+O+ 1 6203
 R
-5119 0
+4 5119 0
+R
+4 5207 0
 S
 #1312
-trout speckled~
+trout speckled fish~
 a speckled trout~
 A speckled trout lies dead on the ground.~
 You can eat the fish.
 ~
-6 k a 5
+6 gC a 0 0 11
 24 0 0
-7 168
-O
-17 lt
+7 24
+C
+1 1
+O+ 1 6203
 R
-5119 0
+4 5119 0
+R
+4 5207 0
+R
+4 5208 0
 S
 #1313
 fish leaping red bright~
@@ -218,13 +236,16 @@ a bright red leaping fish~
 A bright red leaping fish is rotting on the ground.~
 You can eat the fish.
 ~
-6 k a 7
+6 gC a 0 0 12
 24 0 0
-7 168
-O
-17 lt
+7 24
+C
+1 1
+O+ 1 6203
 R
-5119 0
+4 5119 0
+R
+4 5207 0
 S
 #1314
 catfish fish fat~
@@ -232,27 +253,33 @@ a fat catfish~
 A fat catfish is lying on the ground.~
 You can eat the fish.
 ~
-6 k a 9
+6 gC a 0 0 14
 24 0 0
-7 168
-O
-17 lt
+7 24
+C
+1 1
+O+ 1 6203
 R
-5119 0
+4 5119 0
+R
+4 5208 0
 S
 #1315
-perch yellow~
+perch yellow fish~
 a yellow perch~
 A yellow perch lies dead on the ground.~
 You can eat the fish.
 ~
-6 k a 9
+6 gC a 0 0 14
 24 0 0
-7 168
-O
-17 lt
+7 24
+C
+1 1
+O+ 1 6203
 R
-5119 0
+4 5119 0
+R
+4 5208 0
 S
 #1316
 gator small~
@@ -260,139 +287,157 @@ a small gator~
 A small gator lies dead on the ground.~
 You could eat the gator.
 ~
-6 k a 10
+6 gC a 0 0 16
 24 0 0
-7 168
-O
-17 l
+7 24
+C
+1 1
+O+ 1 6200
 R
-5119 0
+4 5119 0
 S
 #1350
-smallskin skin small pile~
+smallskin skins small pile~
 a small skin~
 A small pile of skin is stacked on the ground.~
 Skin can be tanned to make leather.
 ~
-3 l a 4
+3 l a 0 0 5
 0 0 0
 7 0
-I 18 1356 100.00 1  # TAN: a small piece of leather
-O
-24 ou
+C
+1 1
+I 18 1356 100.00 1  # TAN: small piece of leather
+O+ 1 6501
 R
-5120 0
+4 5120 0
 S
 #1351
-largeskin skin large pile~
+largeskin skins large pile~
 a large skin~
 A large pile of skin is stacked on the ground.~
 Skin can be tanned to make leather.
 ~
-3 l a 4
+3 l a 0 0 5
 0 0 0
 7 0
-I 18 1357 100.00 1  # TAN: a large piece of leather
-O
-24 fu
+C
+1 1
+I 18 1357 100.00 1  # TAN: large piece of leather
+O+ 1 6510
 R
-5120 0
+4 5120 0
 S
 #1352
-fur fox luxurious~
+fur furs fox luxurious~
 a luxurious fox fur~
 A fox fur is crumpled on the ground.~
 Fox fur is used in some types of clothing.
 ~
-3 0 a 3
+3 0 a 0 0 4
 0 0 0
 7 0
-O
-10 ou
+C
+1 1
+O+ 1 6541
 R
-5120 0
+4 5120 0
 S
 #1353
-pelt big cat~
+pelt furs big cat~
 a big cat pelt~
 A big cat pelt is lying here.~
 This pelt, from a dangerous big cat, can be made into fancy clothing.
 ~
-3 l a 3
+3 l a 0 0 4
 0 0 0
 7 0
-O
-10 fu
+C
+1 1
+O+ 1 6550
 R
-5120 0
+4 5120 0
 S
 #1354
-skin shark~
+skin skins shark~
 a shark skin~
 A shark skin is drying on the ground.~
 The shark skin is smooth one way, rough the other.
 ~
-3 0 a 3
+3 0 a 0 0 4
 0 0 0
 7 0
+C
+1 1
 R
-5120 0
+4 5120 0
 S
 #1355
-snakeskin skin~
+snakeskin skins~
 some snakeskin~
 Some snakeskin is crumpled on the ground.~
 The snakeskin can be used for certain crafts.
 ~
-3 l a 3
+3 l a 0 0 4
 0 0 0
 7 0
+C
+1 1
 R
-5120 0
+4 5120 0
 S
 #1356
-smallleather leather small piece~
+smallleather leathers small piece~
 a small piece of leather~
 A pile of small pieces of leather is sitting here.~
 Leather can be sewn into armor.
 ~
-3 l a 3
+3 l a 0 0 4
 0 0 0
 7 0
-O
-15 ou
+C
+1 1
+O+ 1 6521
 R
-5134 0
+4 5134 0
 R
-5120 0
+4 5120 0
 S
 #1357
-largeleather leather large piece~
+largeleather leathers large piece~
 a large piece of leather~
 A pile of large pieces of leather is sitting here.~
 Leather can be sewn into armor.
 ~
-3 l a 3
+3 l a 0 0 5
 0 0 0
 7 0
-O
-15 fu
+C
+1 1
+M
+6
+You stretch $p onto $V.~
+M
+7
+$n stretches $p onto $V.~
+O+ 1 6530
 R
-5120 0
+4 5120 0
 S
 #1358
-wool bag~
-a bag of wool~
+wool bag sheep's sheeps~
+a bag of sheep's wool~
 Some wool is scattered on the ground.~
 You can weave the wool into cloth.
 ~
-3 l a 4
+3 l a 0 0 7
 0 0 0
 7 0
-O
-7 a
+C
+1 1
+O+ 1 6441
 R
-5137 0
+4 5137 0
 S
 #1359
 cloth cotton bolt~
@@ -400,21 +445,22 @@ a bolt of cotton cloth~
 A bolt of cotton cloth is lying on the ground.~
 This simple cloth is used to sew clothing.
 ~
-3 l a 7
+3 l a 0 0 9
 0 0 0
 11 0
+C
+1 1
 M
 6
 You hang some cloth on $V.~
 M
 7
 $n hangs some cloth on $V.~
-O
-26 hu
+O+ 1 6801
 R
-5137 0
+4 5137 0
 R
-5134 0
+4 5134 0
 S
 #1360
 cloth wool bolt~
@@ -422,21 +468,22 @@ a bolt of wool cloth~
 A bolt of wool cloth is sitting here.~
 This simple cloth is used to sew clothing.
 ~
-3 l a 8
+3 l a 0 0 10
 0 0 0
 11 0
+C
+1 1
 M
 6
 You hang some cloth on $V.~
 M
 7
 $n hangs some cloth on $V.~
-O
-26 hu
+O+ 1 6801
 R
-5137 0
+4 5137 0
 R
-5134 0
+4 5134 0
 S
 #1361
 wool llama soft bag~
@@ -445,13 +492,14 @@ Some soft llama wool is scattered on the ground.~
    Llama wool is softer than sheep wool, and comes in a variety of colors. It
 can be woven into llama fiber cloth.
 ~
-3 l a 2
+3 l a 0 0 4
 0 0 0
 7 0
-O
-7 a
+C
+1 1
+O+ 1 6441
 R
-5137 0
+4 5137 0
 S
 #1362
 cloth wool llama bolt~
@@ -460,14 +508,33 @@ A bolt of llama wool cloth is lying here.~
    Often smoother and warmer than sheep wool, llama wool cloth can be used to
 sew clothing.
 ~
-3 0 a 2
+3 0 a 0 0 4
 0 0 0
 11 0
-O
-26 hu
+C
+1 1
+O+ 1 6801
 R
-5137 0
+4 5137 0
 R
-5134 0
+4 5134 0
+S
+#1363
+cloth wool yak soft~
+a soft bolt of yak wool cloth~
+A bolt of yak wool cloth has been left here.~
+   The warm, soft cloth is made from dark yak's wool. Though not as fine as
+some wool, it is highly prized for its insulation and appearance.
+~
+3 0 a 0 0 5
+0 0 0
+11 0
+C
+1 1
+O+ 1 6801
+R
+4 5137 0
+R
+4 5134 0
 S
 $

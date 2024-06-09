@@ -8,6 +8,9 @@ bld - Buildings and designated rooms
 class - Player classes
 craft - Craft (forge, sew, etc) and build recipes
 crop - Crops
+evt - Events
+fct - Factions
+gen - Generics
 glb - Global data
 mob - Mobiles/NPCs
 morph - Morphs
@@ -15,9 +18,12 @@ obj - Objects
 qst - Quests
 rmt - Room templates (for adventures)
 sect - Sectors (map terrain types)
+shop - Shop definitions
 skill - Player skills
+soc - Socials
 trg - DG Scripts triggers
 veh - Vehicles (ships, carts)
 
-The final one is different.
+Additional files and directories:
+base_map - No longer used as of b5.116
 wld - The live world map and live rooms

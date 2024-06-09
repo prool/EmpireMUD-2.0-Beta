@@ -29,6 +29,8 @@ G
 19 2102  # a short sword
 G
 21 2104  # a torch
+G
+22 2147  # a simple skinning knife
 K
 0 10
 K
@@ -38,7 +40,7 @@ K
 S
 #1
 Noble Birth~
-Raised to rule (Empire, Battle)~
+Raised to rule (Battle, Trade)~
 Left the manor in search of greatness~
 Lord~
 Lady~
@@ -67,14 +69,16 @@ G
 19 2102  # a short sword
 G
 21 2104  # a torch
+G
+-1 2146  # fine sewing needles
 K
-1 20
+0 20
 K
-0 10
+6 10
 S
 #2
 Skilled Apprentice~
-Trained by a master artisan (Trade)~
+Trained by a great artisan (Trade)~
 Graduated from an apprenticeship~
 Tradesman~
 Tradesman~
@@ -103,6 +107,10 @@ G
 19 2102  # a short sword
 G
 21 2104  # a torch
+G
+-1 2145  # feather sewing needles
+G
+22 2148  # a hobby knife
 K
 6 30
 S
@@ -173,6 +181,8 @@ G
 19 2101  # a woodsman's axe
 G
 21 2104  # a torch
+G
+22 2147  # a simple skinning knife
 K
 5 20
 K
@@ -180,7 +190,7 @@ K
 S
 #5
 Tribal Leader~
-Rise from nothing (Empire, Survival)~
+Rise from nothing (Trade, Survival)~
 Left the tribe to seek greatness~
 Elder~
 Elder~
@@ -192,11 +202,11 @@ A
 A
 2 1
 A
-3 2
+3 3
 A
 4 2
 A
-5 3
+5 2
 G
 0 2001  # a leather hood
 G
@@ -209,10 +219,12 @@ G
 19 2100  # a stone axe
 G
 21 2104  # a torch
-K
-1 15
+G
+22 2147  # a simple skinning knife
 K
 5 15
+K
+6 15
 S
 #6
 Street Urchin~
@@ -251,7 +263,7 @@ K
 0 10
 S
 #7
-Druidic Commune~
+Manaweaver Commune~
 Wield ancient magic (Natural Magic, Survival)~
 Left the commune~
 Elder~
@@ -279,6 +291,8 @@ G
 19 2100  # a stone axe
 G
 21 2104  # a torch
+G
+22 2147  # a simple skinning knife
 K
 3 20
 K
@@ -286,10 +300,10 @@ K
 S
 #8
 Novice Sorcerer~
-Master the rituals (High Sorcery, Battle)~
+Practice the rituals (High Sorcery, Battle)~
 Graduated from the Academy~
-Master~
-Mistress~
+Sorcerer~
+Sorceress~
 0 b
 A
 0 1
@@ -388,7 +402,7 @@ K
 S
 #11
 Reclusive Baron~
-A vampire noble from an old family (Vampire, Empire)~
+A vampire noble from an old family (Vampire skill)~
 Became a recluse~
 Baron~
 Baroness~
@@ -418,9 +432,7 @@ G
 G
 21 2104  # a torch
 K
-7 15
-K
-1 15
+7 30
 S
 #12
 Herbalist~
@@ -451,6 +463,8 @@ G
 19 2100  # a stone axe
 G
 21 2104  # a torch
+G
+22 2148  # a hobby knife
 K
 3 20
 K

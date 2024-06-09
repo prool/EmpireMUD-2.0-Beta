@@ -2,7 +2,7 @@
 *   File: boards.h                                        EmpireMUD 2.0b5 *
 *  Usage: header file for bulletin boards                                 *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -19,7 +19,7 @@
 #define BOARD_MAGIC	1048575			/* arbitrary number - see modify.c */
 
 struct board_msginfo {
-	int	slot_num;		/* pos of message in "master index"				*/
+	int	slot_num;		/* pos of message in "global index"				*/
 	char *heading;		/* pointer to message's heading					*/
 	int reply_num;		/* slot_num of message this is a reply for		*/
 	int	level;			/* level of poster								*/
@@ -47,6 +47,8 @@ struct board_info_type {
 #define MSG_REPLY(i, j)  (msg_index[i][j].reply_num)
 #define MSG_LEVEL(i, j)  (msg_index[i][j].level)
 
+extern int board_loaded;
+
 int Board_display_msg(int board_type, char_data *ch, char *arg, obj_data *board);
 int Board_show_board(int board_type, char_data *ch, char *arg, obj_data *board);
 int Board_remove_msg(int board_type, char_data *ch, char *arg, obj_data *board);
@@ -56,3 +58,6 @@ void Board_display_response(int board_type, int slot_num, char *output, obj_data
 void Board_save_board(int board_type);
 void Board_load_board(int board_type);
 void Board_reset_board(int board_num);
+
+int find_board(char_data *ch);
+void init_boards(void);

@@ -12,7 +12,7 @@ Instructions for EmpireMUD administrators:
     temperate newbie islands on your mud.
 ~
 10800 10824 0-50
-1 0 h 0
+1 0 ahl 0
 L
 1 0
 10800 -1 -1
@@ -27,7 +27,7 @@ L
 -1 0 0
 S
 #51
-Tutorial: Museum of Early Man~
+Trade Tutorial: Museum of Early Man~
 Paul Clarke~
    This tutorial has quests for people who have the Trade skill under level 50.
 If you don't have Trade at all, look for the wandering museum crier and start
@@ -40,7 +40,7 @@ Instructions for EmpireMUD Administrators:
     newbie islands with mountains on them.
 ~
 10825 10849 0-50
-1 0 h 0
+1 0 hl 0
 L
 6 0
 100 -1 -1
@@ -60,8 +60,8 @@ Paul Clarke~
    Learn the basics of EmpireMUD including its quests and skills. This short
 tutorial will help you find your way in the world, and will also lead you to
 some other tutorials. Steps to begin:
- 1. Type 'quest start' (or 'q s') to see the quests available here.
- 2. Type 'quest start Enter the Soulstream' to begin the tutorials.
+ 1. Type 'quest start' (or just 'start') to see the quests available here.
+ 2. Type 'start Enter the Soulstream' to begin the tutorials.
  3. Follow the instructions on that quest.
 
 Instructions for EmpireMUD administrators:
@@ -69,7 +69,7 @@ Instructions for EmpireMUD administrators:
 locations) in your game.
 ~
 10850 10899 0-50
-1 0 0 0
+1 0 l 0
 L
 5 0
 43200 -1 -1

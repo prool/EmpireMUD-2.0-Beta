@@ -1,9 +1,20 @@
+books/libraries
+channels/*
+!channels/index
+equipment.csv
+misc/game_data
 players/*/*.plr
+players/*/*.mem
 players/*/*.delay
 players/accounts/*.acct
+players/deleted/*/*.plr
+players/deleted/*/*.mem
+players/deleted/*/*.delay
 plralias/*/*.alias
 plrlore/*/*.lore
 plrobjs/*/*.objs
 plrvars/*/*.mem
-# prool's
-*.log
+world/binary_map
+world/binary_world_index
+world/wld/binary_map
+world/wld/binary_world_index

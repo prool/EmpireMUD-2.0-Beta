@@ -2,7 +2,7 @@
 *   File: eedit.c                                         EmpireMUD 2.0b5 *
 *  Usage: empire editor code                                              *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -20,6 +20,7 @@
 #include "handler.h"
 #include "db.h"
 #include "olc.h"
+#include "constants.h"
 
 /**
 * Contents:
@@ -28,14 +29,13 @@
 *   Editor Commands
 */
 
-// helpful
-#define EEDIT(name)		void (name)(char_data *ch, char *argument, empire_data *emp)
-
-// externs
-void eliminate_linkdead_players();
+// external data
+extern char *invalid_list[MAX_INVALID_NAMES];
+extern int num_invalid;
 
 // locals
 EEDIT(eedit_adjective);
+EEDIT(eedit_admin_flags);
 EEDIT(eedit_banner);
 EEDIT(eedit_change_leader);
 EEDIT(eedit_description);
@@ -52,22 +52,25 @@ EEDIT(eedit_num_ranks);
 
 /**
 * @param char *str The proposed banner string (color codes)
+* @param bool allow_neutral_color If TRUE, allows &0/&n. If FALSE, does not.
+* @param bool allow_underline If TRUE, allows &u. If FALSE, does not.
 * @return bool TRUE if the banner is valid; FALSE otherwise
 */
-bool check_banner_color_string(char *str) {
-	const char *valid_colors = "rgbymcwajloptvnRGBYMCWAJLOPTV0u";
+bool check_banner_color_string(char *str, bool allow_neutral_color, bool allow_underline) {
+	const char *valid_colors = "rgbymcwajloptvRGBYMCWAJLOPTV";
+	const char *neutral_colors = "0n";
+	const char *underline_colors = "u";
 	
 	bool ok = TRUE;
 	int pos, num_codes = 0;
 	
 	for (pos = 0; pos < strlen(str); ++pos) {
-		if (str[pos] == '&') {
+		if (str[pos] == COLOUR_CHAR) {
 			if (pos == (strlen(str)-1)) {
 				// trailing &
 				ok = FALSE;
 			}
-			else if (strchr(valid_colors, str[pos+1])) {
-				// this code is ok but count number of non-underlined codes
+			else if (strchr(valid_colors, str[pos+1]) || (allow_neutral_color && strchr(neutral_colors, str[pos+1])) || (allow_underline && strchr(underline_colors, str[pos+1]))) {
 				if (str[pos+1] != 'u') {
 					++num_codes;
 				}
@@ -119,26 +122,109 @@ bool check_unique_empire_name(empire_data *for_emp, char *name) {
 
 
 /**
+* Determines how the banner will appear on the graphical version of the
+* political map.
+*
+* @param const char *banner The empire banner.
+* @return char A mapout token character.
+*/
+char empire_banner_to_mapout_token(const char *banner) {
+	int num, color;
+	
+	color = -1;
+	for (num = 0; banner_to_mapout_token[0][0] != '\n'; ++num) {
+		if (banner && strchr(banner, banner_to_mapout_token[num][0])) {
+			color = num;
+			break;
+		}
+	}
+	
+	return (color != -1 ? banner_to_mapout_token[color][1] : '?');
+}
+
+
+/**
+* Updates the empire's adjective and also sets (or removes) the short-adjective
+* field, as needed.
+*
+* @param empire_data *emp The empire.
+* @param char *adjective The new adjective.
+*/
+void set_empire_adjective(empire_data *emp, char *adjective) {
+	char temp[MAX_RANK_LENGTH * 2];
+	
+	// main adjective
+	if (EMPIRE_ADJECTIVE(emp)) {
+		free(EMPIRE_ADJECTIVE(emp));
+	}
+	EMPIRE_ADJECTIVE(emp) = str_dup(NULLSAFE(adjective));
+	
+	// short version adjective
+	if (EMPIRE_SHORT_ADJECTIVE(emp)) {
+		free(EMPIRE_SHORT_ADJECTIVE(emp));
+	}
+	strcpy(temp, skip_wordlist(NULLSAFE(adjective), empire_words, TRUE));
+	if (*temp && strcmp(NULLSAFE(adjective), temp)) {
+		EMPIRE_SHORT_ADJECTIVE(emp) = str_dup(temp);
+	}
+	else {
+		EMPIRE_SHORT_ADJECTIVE(emp) = NULL;
+	}
+}
+
+
+/**
+* Updates the empire's name and also sets (or removes) the short-name field
+* if needed.
+*
+* @param empire_data *emp The empire.
+* @param char *name The new name.
+*/
+void set_empire_name(empire_data *emp, char *name) {
+	char temp[MAX_RANK_LENGTH * 2];
+	
+	// main name
+	if (EMPIRE_NAME(emp)) {
+		free(EMPIRE_NAME(emp));
+	}
+	EMPIRE_NAME(emp) = str_dup(NULLSAFE(name));
+	
+	// short version of name
+	if (EMPIRE_SHORT_NAME(emp)) {
+		free(EMPIRE_SHORT_NAME(emp));
+	}
+	strcpy(temp, skip_wordlist(NULLSAFE(name), empire_words, TRUE));
+	if (*temp && strcmp(NULLSAFE(name), temp)) {
+		EMPIRE_SHORT_NAME(emp) = str_dup(temp);
+	}
+	else {
+		EMPIRE_SHORT_NAME(emp) = NULL;
+	}
+}
+
+
+/**
 * @param char *newname The proposed empire name.
 * @return bool TRUE if the name is ok.
 */
 bool valid_empire_name(char *newname) {
-	extern char *invalid_list[MAX_INVALID_NAMES];
-	extern int num_invalid;
-
-	char *ptr, buf[MAX_STRING_LENGTH];
-	char tempname[MAX_INPUT_LENGTH];
+	char *ptr, tempname[MAX_INPUT_LENGTH];
 	bool ok = TRUE;
 	int iter;
 	
 	// check for illegal & codes (anything other than &&)
-	if ((ptr = strchr(newname, '&')) && *(ptr+1) != '&') {
+	if ((ptr = strchr(newname, COLOUR_CHAR)) && *(ptr+1) != COLOUR_CHAR) {
+		ok = FALSE;
+	}
+	
+	// check alpha
+	if (!isalpha(*newname)) {
 		ok = FALSE;
 	}
 	
 	// check fill/reserved
-	strcpy(buf, newname);
-	if (fill_word(buf) || reserved_word(buf)) {
+	strcpy(tempname, newname);
+	if (ok && (fill_word(tempname) || reserved_word(tempname))) {
 		ok = FALSE;
 	}
 	
@@ -151,10 +237,18 @@ bool valid_empire_name(char *newname) {
 		
 		// compare to banned names
 		for (iter = 0; iter < num_invalid && ok; ++iter) {
-			if (strstr(tempname, invalid_list[iter])) {
-				ok = FALSE;
+			if (*invalid_list[iter] == '%') {	// leading % means substr
+				if (strstr(tempname, invalid_list[iter] + 1)) {
+					ok = FALSE;
+				}
+			}
+			else {	// otherwise exact-match
+				if (!str_cmp(tempname, invalid_list[iter])) {
+					ok = FALSE;
+				}
 			}
 		}
+
 	}
 	
 	return ok;
@@ -204,12 +298,16 @@ bool valid_rank_name(char_data *ch, char *newname) {
  //////////////////////////////////////////////////////////////////////////////
 //// CONTROL STRUCTURE ///////////////////////////////////////////////////////
 
+#define EEDIT_FLAG_IMM_ONLY  BIT(0)	// only a cimpl or granted imm can do this
+
+
 const struct {
 	char *command;
 	EEDIT(*func);
 	bitvector_t flags;
 } eedit_cmd[] = {
 	{ "adjective", eedit_adjective, NOBITS },
+	{ "adminflags", eedit_admin_flags, EEDIT_FLAG_IMM_ONLY },
 	{ "banner", eedit_banner, NOBITS },
 	{ "changeleader", eedit_change_leader, NOBITS },
 	{ "description", eedit_description, NOBITS },
@@ -244,6 +342,10 @@ ACMD(do_eedit) {
 	
 	// find type?
 	for (iter = 0; *eedit_cmd[iter].command != '\n' && type == NOTHING; ++iter) {
+		if (!imm_access && IS_SET(eedit_cmd[iter].flags, EEDIT_FLAG_IMM_ONLY)) {
+			continue;
+		}
+		
 		if (is_abbrev(arg, eedit_cmd[iter].command)) {
 			type = iter;
 		}
@@ -262,17 +364,22 @@ ACMD(do_eedit) {
 		msg_to_char(ch, "Available eedit commands: ");
 		found = FALSE;
 		for (iter = 0; *eedit_cmd[iter].command != '\n'; ++iter) {
+			if (!imm_access && IS_SET(eedit_cmd[iter].flags, EEDIT_FLAG_IMM_ONLY)) {
+				continue;
+			}
+			
 			msg_to_char(ch, "%s%s", (found ? ", " : ""), eedit_cmd[iter].command);
 			found = TRUE;
 		}
 		msg_to_char(ch, "%s\r\n", (found ? "" : "none"));
 	}
+	else if (!imm_access && IS_SET(eedit_cmd[type].flags, EEDIT_FLAG_IMM_ONLY)) {
+		msg_to_char(ch, "You don't have permission to do that.\r\n");
+	}
 	else {
 		// pass to child function
 		(eedit_cmd[type].func)(ch, argptr, emp);
-		
-		// always save
-		save_empire(emp);
+		EMPIRE_NEEDS_SAVE(emp) = TRUE;
 	}
 }
 
@@ -286,14 +393,17 @@ EEDIT(eedit_adjective) {
 	if (ACCOUNT_FLAGGED(ch, ACCT_NOTITLE)) {
 		msg_to_char(ch, "You are not allowed to change the empire's adjective.\r\n");
 	}
+	else if (!IS_IMMORTAL(ch) && EMPIRE_ADMIN_FLAGGED(emp, EADM_NO_RENAME)) {
+		msg_to_char(ch, "You are not allowed to change the empire's adjective.\r\n");
+	}
 	else if (is_at_war(emp)) {
 		msg_to_char(ch, "You can't rename your empire while at war.\r\n");
 	}
 	else if (!*argument) {
 		msg_to_char(ch, "Set the empire's adjective form to what?\r\n");
 	}
-	else if (color_code_length(argument) > 0 || strchr(argument, '&') != NULL) {
-		msg_to_char(ch, "Empire adjective forms may not contain color codes or ampersands. Set the banner instead.\r\n");
+	else if (color_code_length(argument) > 0 || strchr(argument, COLOUR_CHAR) != NULL) {
+		msg_to_char(ch, "Empire adjective forms may not contain color codes or \t%c. Set the banner instead.\r\n", COLOUR_CHAR);
 	}
 	else if (strstr(argument, "%") != NULL) {
 		msg_to_char(ch, "Empire adjective forms may not contain the percent sign (%%).\r\n");
@@ -311,10 +421,7 @@ EEDIT(eedit_adjective) {
 		msg_to_char(ch, "Invalid empire adjective.\r\n");
 	}
 	else {
-		if (EMPIRE_ADJECTIVE(emp)) {
-			free(EMPIRE_ADJECTIVE(emp));
-		}
-		EMPIRE_ADJECTIVE(emp) = str_dup(argument);
+		set_empire_adjective(emp, argument);
 		
 		log_to_empire(emp, ELOG_ADMIN, "%s has changed the empire's adjective form to %s", PERS(ch, ch, TRUE), EMPIRE_ADJECTIVE(emp));
 		msg_to_char(ch, "The empire's adjective form is now: %s\r\n", EMPIRE_ADJECTIVE(emp));
@@ -322,18 +429,38 @@ EEDIT(eedit_adjective) {
 		if (emp != GET_LOYALTY(ch)) {
 			syslog(SYS_GC, GET_INVIS_LEV(ch), TRUE, "ABUSE: %s has changed %s's adjective form to %s", GET_NAME(ch), EMPIRE_NAME(emp), EMPIRE_ADJECTIVE(emp));
 		}
+		
+		TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_MSDP_UPDATE_ALL);
+	}
+}
+
+
+EEDIT(eedit_admin_flags) {
+	bitvector_t old_flags = EMPIRE_ADMIN_FLAGS(emp);
+	char buf[MAX_STRING_LENGTH];
+	
+	EMPIRE_ADMIN_FLAGS(emp) = olc_process_flag(ch, argument, "admin flags", NULL, empire_admin_flags, EMPIRE_ADMIN_FLAGS(emp));
+	
+	if (EMPIRE_ADMIN_FLAGS(emp) != old_flags) {
+		if (emp != GET_LOYALTY(ch)) {
+			prettier_sprintbit(EMPIRE_ADMIN_FLAGS(emp), empire_admin_flags, buf);
+			syslog(SYS_GC, GET_INVIS_LEV(ch), TRUE, "ABUSE: %s has changed %s's admin flags to: %s", GET_NAME(ch), EMPIRE_NAME(emp), buf);
+		}
 	}
 }
 
 
 EEDIT(eedit_banner) {
-	extern char *show_color_codes(char *string);
+	room_data *room, *next_room;
 	
 	if (!*argument) {
 		msg_to_char(ch, "Set the empire banner to what (HELP COLOR)?\r\n");
 	}
-	else if (!check_banner_color_string(argument)) {
+	else if (!check_banner_color_string(argument, FALSE, FALSE)) {
 		msg_to_char(ch, "Invalid banner color (HELP COLOR) or too many color codes.\r\n");
+	}
+	else if (!strcmp(argument, NULLSAFE(EMPIRE_BANNER(emp)))) {
+		msg_to_char(ch, "That is already your current banner.\r\n");
 	}
 	else {
 		if (EMPIRE_BANNER(emp)) {
@@ -342,12 +469,22 @@ EEDIT(eedit_banner) {
 		EMPIRE_BANNER(emp) = str_dup(argument);
 		
 		EMPIRE_BANNER_HAS_UNDERLINE(emp) = (strstr(EMPIRE_BANNER(emp), "&u") ? TRUE : FALSE);
+		EMPIRE_MAPOUT_TOKEN(emp) = empire_banner_to_mapout_token(EMPIRE_BANNER(emp));
 
 		log_to_empire(emp, ELOG_ADMIN, "%s has changed the banner color", PERS(ch, ch, TRUE));
 		msg_to_char(ch, "The empire's banner is now: %s%s&0\r\n", EMPIRE_BANNER(emp), show_color_codes(EMPIRE_BANNER(emp)));
 		
 		if (emp != GET_LOYALTY(ch)) {
 			syslog(SYS_GC, GET_INVIS_LEV(ch), TRUE, "ABUSE: %s has changed %s's banner to %s%s&0", GET_NAME(ch), EMPIRE_NAME(emp), EMPIRE_BANNER(emp), show_color_codes(EMPIRE_BANNER(emp)));
+		}
+		
+		TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_MSDP_UPDATE_ALL);
+		
+		// graphical map update for all tiles I own 
+		HASH_ITER(hh, world_table, room, next_room) {
+			if (GET_ROOM_VNUM(room) < MAP_SIZE && ROOM_OWNER(room) == emp) {
+				request_mapout_update(GET_ROOM_VNUM(room));
+			}
 		}
 	}
 }
@@ -400,7 +537,7 @@ EEDIT(eedit_change_leader) {
 			file = FALSE;
 		}
 		else {
-			SAVE_CHAR(victim);
+			queue_delayed_update(victim, CDU_SAVE);
 		}
 		
 		// demote old leader (at least, in lore)
@@ -415,13 +552,15 @@ EEDIT(eedit_change_leader) {
 					file = FALSE;
 				}
 				else {
-					SAVE_CHAR(victim);
+					queue_delayed_update(victim, CDU_SAVE);
 				}
 			}
 			else if (file) {
 				free_char(victim);
 			}
 		}
+		
+		TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_MSDP_UPDATE_ALL);
 	}
 	
 	// clean up
@@ -437,6 +576,14 @@ EEDIT(eedit_description) {
 
 	if (!ch->desc) {
 		msg_to_char(ch, "You can't do that.\r\n");
+		return;
+	}
+	if (ACCOUNT_FLAGGED(ch, ACCT_NOTITLE)) {
+		return;
+		msg_to_char(ch, "You are not allowed to change the empire's description.\r\n");
+	}
+	if (!IS_IMMORTAL(ch) && EMPIRE_ADMIN_FLAGGED(emp, EADM_NO_RENAME)) {
+		msg_to_char(ch, "You are not allowed to change the empire's description.\r\n");
 		return;
 	}
 	if (ch->desc->str) {
@@ -459,8 +606,6 @@ EEDIT(eedit_description) {
 
 
 EEDIT(eedit_frontiertraits) {
-	extern const char *empire_trait_types[];
-	
 	bitvector_t old_traits = EMPIRE_FRONTIER_TRAITS(emp);
 	char buf[MAX_STRING_LENGTH];
 	
@@ -516,6 +661,9 @@ EEDIT(eedit_name) {
 	if (ACCOUNT_FLAGGED(ch, ACCT_NOTITLE)) {
 		msg_to_char(ch, "You are not allowed to change the empire's name.\r\n");
 	}
+	else if (!IS_IMMORTAL(ch) && EMPIRE_ADMIN_FLAGGED(emp, EADM_NO_RENAME)) {
+		msg_to_char(ch, "You are not allowed to change the empire's name.\r\n");
+	}
 	else if (is_at_war(emp)) {
 		msg_to_char(ch, "You can't rename your empire while at war.\r\n");
 	}
@@ -525,8 +673,8 @@ EEDIT(eedit_name) {
 	else if (!isalpha(*argument)) {
 		msg_to_char(ch, "Empire names must begin with a letter.\r\n");
 	}
-	else if (color_code_length(argument) > 0 || strchr(argument, '&') != NULL) {
-		msg_to_char(ch, "Empire names may not contain color codes or ampersands. Set the banner instead.\r\n");
+	else if (color_code_length(argument) > 0 || strchr(argument, COLOUR_CHAR) != NULL) {
+		msg_to_char(ch, "Empire names may not contain color codes or \t%c. Set the banner instead.\r\n", COLOUR_CHAR);
 	}
 	else if (strchr(argument, '%')) {
 		msg_to_char(ch, "Empire names may not contain the percent sign (%%).\r\n");
@@ -544,16 +692,12 @@ EEDIT(eedit_name) {
 		msg_to_char(ch, "Invalid empire name.\r\n");
 	}
 	else {
-		strcpy(buf, NULLSAFE(EMPIRE_NAME(emp)));
-		if (EMPIRE_NAME(emp)) {
-			free(EMPIRE_NAME(emp));
-		}
-		EMPIRE_NAME(emp) = str_dup(argument);
+		// full name
+		set_empire_name(emp, argument);
 		
-		if (EMPIRE_ADJECTIVE(emp)) {
-			free(EMPIRE_ADJECTIVE(emp));
-		}
-		EMPIRE_ADJECTIVE(emp) = str_dup(argument);
+		// adjective
+		strcpy(buf, skip_filler(argument));
+		set_empire_adjective(emp, *buf ? buf : argument);
 		
 		log_to_empire(emp, ELOG_ADMIN, "%s has changed the empire name to %s", PERS(ch, ch, TRUE), EMPIRE_NAME(emp));
 		msg_to_char(ch, "The empire's name is now: %s\r\n", EMPIRE_NAME(emp));
@@ -570,7 +714,7 @@ EEDIT(eedit_name) {
 			}
 			
 			if ((mem = find_or_load_player(index->name, &file))) {
-				remove_recent_lore(ch, LORE_JOIN_EMPIRE);
+				remove_recent_lore(mem, LORE_JOIN_EMPIRE);
 				add_lore(mem, LORE_JOIN_EMPIRE, "Empire became %s%s&0", EMPIRE_BANNER(emp), EMPIRE_NAME(emp));
 				
 				if (file) {
@@ -578,13 +722,13 @@ EEDIT(eedit_name) {
 				}
 			}
 		}
+		
+		TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_MSDP_UPDATE_ALL);
 	}
 }
 
 
 EEDIT(eedit_privilege) {
-	extern const char *priv[];
-
 	int pr, rnk, iter;
 	
 	argument = any_one_word(argument, arg);
@@ -629,6 +773,9 @@ EEDIT(eedit_rank) {
 	if (ACCOUNT_FLAGGED(ch, ACCT_NOTITLE)) {
 		msg_to_char(ch, "You are not allowed to change the empire's rank names.\r\n");
 	}
+	else if (!IS_IMMORTAL(ch) && EMPIRE_ADMIN_FLAGGED(emp, EADM_NO_RENAME)) {
+		msg_to_char(ch, "You are not allowed to change the empire's rank names.\r\n");
+	}
 	else if (!*argument || !*arg) {
 		msg_to_char(ch, "Usage: eedit rank <rank> <new name>\r\n");
 		msg_to_char(ch, "Current ranks:\r\n");
@@ -671,6 +818,8 @@ EEDIT(eedit_rank) {
 				}
 			}
 		}
+		
+		TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_MSDP_UPDATE_ALL);
 	}
 }
 
@@ -689,8 +838,6 @@ EEDIT(eedit_num_ranks) {
 		msg_to_char(ch, "You must choose a number of ranks between 2 and %d.\r\n", MAX_RANKS);
 	}
 	else {
-		eliminate_linkdead_players();
-		
 		// update all players
 		HASH_ITER(idnum_hh, player_table_by_idnum, index, next_index) {
 			if (index->loyalty != emp) {
@@ -718,7 +865,7 @@ EEDIT(eedit_num_ranks) {
 				mem = NULL;
 			}
 			else {
-				SAVE_CHAR(mem);
+				queue_delayed_update(mem, CDU_SAVE);
 			}
 		}
 		
@@ -758,5 +905,7 @@ EEDIT(eedit_num_ranks) {
 		if (emp != GET_LOYALTY(ch)) {
 			syslog(SYS_GC, GET_INVIS_LEV(ch), TRUE, "ABUSE: %s has changed %s's number of ranks to %d", GET_NAME(ch), EMPIRE_NAME(emp), EMPIRE_NUM_RANKS(emp));
 		}
+		
+		TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_MSDP_UPDATE_ALL);
 	}
 }

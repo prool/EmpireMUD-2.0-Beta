@@ -2,15 +2,13 @@
 *   File: mobact.c                                        EmpireMUD 2.0b5 *
 *  Usage: Functions for generating intelligent (?) behavior in mobiles    *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
 *  CircleMUD (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#include <math.h>
 
 #include "conf.h"
 #include "sysdep.h"
@@ -22,12 +20,16 @@
 #include "interpreter.h"
 #include "handler.h"
 #include "skills.h"
+#include "dg_event.h"
 #include "dg_scripts.h"
+#include "vnums.h"
+#include "constants.h"
 
 /**
 * Contents:
 *   Helpers
 *   Generic NPCs
+*   DG Events for Mobs
 *   Mob Movement
 *   Mob Activity
 *   Mob Spawning
@@ -35,19 +37,29 @@
 */
 
 // external vars
-extern struct generic_name_data *generic_names;
 
 // external funcs
-extern int perform_move(char_data *ch, int dir, int need_specials_check, byte mode);
+ACMD(do_exit);
+ACMD(do_say);
 
-// local protos
-void end_pursuit(char_data *ch, char_data *target);
-struct generic_name_data *get_generic_name_list(int name_set, int sex);
-void scale_mob_to_level(char_data *mob, int level);
+// local functions
+bool check_aggro(char_data *ch);
+bool check_mob_pursuit(char_data *ch);
+
+
+// for validate_global_map_spawns, run_global_map_spawns
+struct glb_map_spawn_bean {
+	room_data *room;
+	int x_coord, y_coord;
+	bool in_city;
+};
 
 
  //////////////////////////////////////////////////////////////////////////////
 //// HELPERS /////////////////////////////////////////////////////////////////
+
+// when a mob is too busy for regular activity
+#define MOB_IS_BUSY(ch)  (GET_FED_ON_BY(ch) || EXTRACTED(ch) || IS_DEAD(ch) || AFF_FLAGGED((ch), AFF_STUNNED | AFF_HARD_STUNNED) || FIGHTING(ch) || !AWAKE(ch) || AFF_FLAGGED(ch, AFF_CHARM) || MOB_FLAGGED(ch, MOB_TIED) || IS_INJURED(ch, INJ_TIED) || GET_LED_BY(ch))
 
 /**
 * Creates a new mob pursuit entry -- this will delete any old entry for the
@@ -68,12 +80,51 @@ void add_pursuit(char_data *ch, char_data *target) {
 	
 	// add new instance
 	CREATE(purs, struct pursuit_data, 1);
-	purs->next = MOB_PURSUIT(ch);
-	MOB_PURSUIT(ch) = purs;
+	LL_PREPEND(MOB_PURSUIT(ch), purs);
 	
 	purs->idnum = GET_IDNUM(target);
 	purs->last_seen = time(0);
 	purs->location = GET_ROOM_VNUM(HOME_ROOM(IN_ROOM(ch)));
+	
+	purs->morph = (GET_MORPH(target) && CHAR_MORPH_FLAGGED(target, MORPHF_ANIMAL)) ? MORPH_VNUM(GET_MORPH(target)) : NOTHING;
+	purs->disguise = (IS_DISGUISED(target) && GET_DISGUISED_NAME(target)) ? strdup(GET_DISGUISED_NAME(target)) : NULL;
+	
+	schedule_pursuit_event(ch);
+}
+
+
+/**
+* Checks if a person is the one a pursuit item refers to. This checks morphs
+* and disguise unless over-leveled.
+*
+* @param char_data *mob The mob doing pursuit.
+* @param struct pursuit_data *purs The pursuit entry.
+* @param char_data *ch The person to check.
+* @return bool TRUE if this is the target; FALSE if not.
+*/
+bool check_pursuit_target(char_data *mob, struct pursuit_data *purs, char_data *ch) {
+	bool morph_ok, disguise_ok;
+	
+	if (!purs || !ch) {
+		return FALSE;	// no person
+	}
+	else if (IS_NPC(ch) || purs->idnum != GET_IDNUM(ch)) {
+		return FALSE;	// wrong person
+	}
+	else if (get_approximate_level(mob) > get_approximate_level(ch) + 25) {
+		return TRUE;	// over-level: ignore morph and disguise
+	}
+	
+	// check morph
+	morph_ok = (purs->morph == NOTHING && (!GET_MORPH(ch) || !CHAR_MORPH_FLAGGED(ch, MORPHF_ANIMAL)));
+	morph_ok |= (purs->morph != NOTHING && GET_MORPH(ch) && purs->morph == MORPH_VNUM(GET_MORPH(ch)));
+	
+	// check disguise
+	disguise_ok = (!purs->disguise && !IS_DISGUISED(ch));
+	disguise_ok |= (purs->disguise && IS_DISGUISED(ch) && GET_DISGUISED_NAME(ch) && !strcmp(purs->disguise, GET_DISGUISED_NAME(ch)));
+	
+	// can we recognize them?
+	return morph_ok && disguise_ok;
 }
 
 
@@ -84,7 +135,7 @@ void add_pursuit(char_data *ch, char_data *target) {
 * @param char_data *target The victim
 */
 void end_pursuit(char_data *ch, char_data *target) {
-	struct pursuit_data *purs, *next_purs, *temp;
+	struct pursuit_data *purs, *next_purs;
 	
 	// only mobs have this
 	if (!IS_NPC(ch)) {
@@ -96,9 +147,22 @@ void end_pursuit(char_data *ch, char_data *target) {
 		next_purs = purs->next;
 		
 		if (purs->idnum == GET_IDNUM(target)) {
-			REMOVE_FROM_LIST(purs, MOB_PURSUIT(ch), next);
-			free(purs);
+			LL_DELETE(MOB_PURSUIT(ch), purs);
+			free_pursuit(purs);
 		}
+	}
+}
+
+
+/**
+* @param struct pursuit_data *purs Ths pursuit data to free.
+*/
+void free_pursuit(struct pursuit_data *purs) {
+	if (purs) {
+		if (purs->disguise) {
+			free(purs->disguise);
+		}
+		free(purs);
 	}
 }
 
@@ -113,7 +177,7 @@ bool return_to_pursuit_location(char_data *ch) {
 	struct pursuit_data *purs, *next_purs;
 	room_data *loc;
 	
-	if (!ch || ch->desc || !IS_NPC(ch) || FIGHTING(ch) || GET_POS(ch) < POS_STANDING || AFF_FLAGGED(ch, AFF_ENTANGLED) || MOB_PURSUIT_LEASH_LOC(ch) == NOWHERE) {
+	if (!ch || ch->desc || !IS_NPC(ch) || FIGHTING(ch) || GET_POS(ch) < POS_STANDING || AFF_FLAGGED(ch, AFF_IMMOBILIZED) || MOB_PURSUIT_LEASH_LOC(ch) == NOWHERE) {
 		return FALSE;
 	}
 	
@@ -131,7 +195,7 @@ bool return_to_pursuit_location(char_data *ch) {
 	
 	// reset pursue data to avoid loops
 	LL_FOREACH_SAFE(MOB_PURSUIT(ch), purs, next_purs) {
-		free(purs);
+		free_pursuit(purs);
 	}
 	MOB_PURSUIT(ch) = NULL;
 	
@@ -150,7 +214,7 @@ int mob_coins(char_data *mob) {
 	empire_data *emp;
 	int amt = 0;
 	
-	if (IS_NPC(mob) && MOB_FLAGGED(mob, MOB_HUMAN) && !MOB_FLAGGED(mob, MOB_PICKPOCKETED)) {
+	if (IS_NPC(mob) && MOB_FLAGGED(mob, MOB_COINS) && !MOB_FLAGGED(mob, MOB_PICKPOCKETED)) {
 		amt = number(-20, get_approximate_level(mob));
 		if (MOB_FLAGGED(mob, MOB_HARD)) {
 			amt *= 3;
@@ -162,8 +226,7 @@ int mob_coins(char_data *mob) {
 		
 		if ((emp = GET_LOYALTY(mob))) {
 			amt = MIN(amt, EMPIRE_COINS(emp));
-			EMPIRE_COINS(emp) -= amt;
-			EMPIRE_NEEDS_SAVE(emp) = TRUE;
+			increase_empire_coins(emp, emp, -amt);
 		}
 	}
 	
@@ -171,9 +234,8 @@ int mob_coins(char_data *mob) {
 }
 
 
+// INTERACTION_FUNC provides: ch, interaction, inter_room, inter_mob, inter_item, inter_veh
 INTERACTION_FUNC(run_one_encounter) {
-	void setup_generic_npc(char_data *mob, empire_data *emp, int name, int sex);
-	
 	char_data *aggr;
 	int iter;
 	bool any = FALSE;
@@ -182,13 +244,15 @@ INTERACTION_FUNC(run_one_encounter) {
 		aggr = read_mobile(interaction->vnum, TRUE);
 		setup_generic_npc(aggr, NULL, NOTHING, NOTHING);
 		if (COMPLEX_DATA(IN_ROOM(ch)) && COMPLEX_DATA(IN_ROOM(ch))->instance) {
-			MOB_INSTANCE_ID(aggr) = COMPLEX_DATA(IN_ROOM(ch))->instance->id;
+			MOB_INSTANCE_ID(aggr) = INST_ID(COMPLEX_DATA(IN_ROOM(ch))->instance);
 			if (MOB_INSTANCE_ID(aggr) != NOTHING) {
 				add_instance_mob(real_instance(MOB_INSTANCE_ID(aggr)), GET_MOB_VNUM(aggr));
 			}
 		}
 		char_to_room(aggr, IN_ROOM(ch));
-		SET_BIT(MOB_FLAGS(aggr), MOB_SPAWNED);
+		if (!MOB_FLAGGED(aggr, MOB_SPAWNED)) {
+			set_mob_flags(aggr, MOB_SPAWNED);
+		}
 		act("$N appears!", FALSE, ch, 0, aggr, TO_CHAR | TO_ROOM);
 		hit(aggr, ch, GET_EQ(aggr, WEAR_WIELD), TRUE);
 		load_mtrigger(aggr);
@@ -210,7 +274,7 @@ void random_encounter(char_data *ch) {
 		return;
 	}
 
-	if (AFF_FLAGGED(ch, AFF_FLY | AFF_MAJESTY)) {
+	if (AFF_FLAGGED(ch, AFF_FLYING | AFF_MAJESTY)) {
 		return;
 	}
 	
@@ -219,7 +283,7 @@ void random_encounter(char_data *ch) {
 		return;
 	}
 
-	run_room_interactions(ch, IN_ROOM(ch), INTERACT_ENCOUNTER, run_one_encounter);
+	run_room_interactions(ch, IN_ROOM(ch), INTERACT_ENCOUNTER, NULL, NOTHING, run_one_encounter);
 }
 
 
@@ -347,7 +411,7 @@ char *replace_npc_names(const char *str, const char *name, const char *empire_na
 * @param int sex Which sex it should be -- NOTHING for auto-pick
 */
 void setup_generic_npc(char_data *mob, empire_data *emp, int name, int sex) {
-	char *free_name = NULL, *free_short = NULL, *free_long = NULL;
+	char *free_name = NULL, *free_short = NULL, *free_long = NULL, *free_look = NULL;
 	struct generic_name_data *name_set;
 	char_data *proto;
 	
@@ -400,27 +464,578 @@ void setup_generic_npc(char_data *mob, empire_data *emp, int name, int sex) {
 	if (GET_LONG_DESC(mob) && (!proto || GET_LONG_DESC(mob) != GET_LONG_DESC(proto))) {
 		free_long = GET_LONG_DESC(mob);
 	}
+	if (GET_LOOK_DESC(mob) && (!proto || GET_LOOK_DESC(mob) != GET_LOOK_DESC(proto))) {
+		free_look = GET_LOOK_DESC(mob);
+	}
 	
 	// restrings: uses "afar"/"lost" if there is no empire
-	GET_PC_NAME(mob) = str_dup(replace_npc_names(GET_PC_NAME(proto ? proto : mob), name_set->names[name], !emp ? "afar" : EMPIRE_NAME(emp), !emp ? "lost" : EMPIRE_ADJECTIVE(emp)));
-	GET_SHORT_DESC(mob) = str_dup(replace_npc_names(GET_SHORT_DESC(proto ? proto : mob), name_set->names[name], !emp ? "afar" : EMPIRE_NAME(emp), !emp ? "lost" : EMPIRE_ADJECTIVE(emp)));
-	GET_LONG_DESC(mob) = str_dup(replace_npc_names(GET_LONG_DESC(proto ? proto : mob), name_set->names[name], !emp ? "afar" : EMPIRE_NAME(emp), !emp ? "lost" : EMPIRE_ADJECTIVE(emp)));
+	if (strchr(GET_PC_NAME(proto ? proto : mob), '#')) {
+		GET_PC_NAME(mob) = str_dup(replace_npc_names(GET_PC_NAME(proto ? proto : mob), name_set->names[name], !emp ? "afar" : EMPIRE_NAME(emp), !emp ? "lost" : EMPIRE_ADJECTIVE(emp)));
+		if (free_name) {
+			free(free_name);
+		}
+	}
+	if (strchr(GET_SHORT_DESC(proto ? proto : mob), '#')) {
+		GET_SHORT_DESC(mob) = str_dup(replace_npc_names(GET_SHORT_DESC(proto ? proto : mob), name_set->names[name], !emp ? "afar" : EMPIRE_NAME(emp), !emp ? "lost" : EMPIRE_ADJECTIVE(emp)));
+		if (free_short) {
+			free(free_short);
+		}
+	}
+	if (strchr(GET_LONG_DESC(proto ? proto : mob), '#')) {
+		GET_LONG_DESC(mob) = str_dup(replace_npc_names(GET_LONG_DESC(proto ? proto : mob), name_set->names[name], !emp ? "afar" : EMPIRE_NAME(emp), !emp ? "lost" : EMPIRE_ADJECTIVE(emp)));
+		CAP(GET_LONG_DESC(mob));
+		if (free_long) {
+			free(free_long);
+		}
+	}
+	if (GET_LOOK_DESC(mob) && strchr(GET_LOOK_DESC(proto ? proto : mob), '#')) {
+		GET_LOOK_DESC(mob) = str_dup(replace_npc_names(GET_LOOK_DESC(proto ? proto : mob), name_set->names[name], !emp ? "afar" : EMPIRE_NAME(emp), !emp ? "lost" : EMPIRE_ADJECTIVE(emp)));
+		if (free_look) {
+			free(free_look);
+		}
+	}
 	
-	// and free that memory if necessary
-	if (free_name) {
-		free(free_name);
+	request_char_save_in_world(mob);
+}
+
+
+ //////////////////////////////////////////////////////////////////////////////
+//// DG EVENTS FOR MOBS //////////////////////////////////////////////////////
+
+// handles aggro/cityguard
+EVENTFUNC(mob_aggro_event) {
+	struct mob_event_data *data = (struct mob_event_data*)event_obj;
+	char_data *mob = data->mob;
+	bool remove;
+	
+	// always delete first
+	delete_stored_event(&GET_STORED_EVENTS(mob), SEV_AGGRO);
+	
+	if (!MOB_FLAGGED(mob, MOB_AGGRESSIVE | MOB_CITYGUARD)) {
+		remove = TRUE;	// no flag
 	}
-	if (free_short) {
-		free(free_short);
+	else if (MOB_IS_BUSY(mob)) {
+		remove = FALSE;	// various busy flags -- re-enqueue
 	}
-	if (free_long) {
-		free(free_long);
+	else {
+		// ok
+		remove = check_aggro(mob) ? FALSE : TRUE;
+	}
+	
+	if (remove || IS_DEAD(mob) || EXTRACTED(mob)) {
+		// removed by request or when dead
+		free(data);
+		return 0;	// no re-enqueue
+	}
+	else {
+		// re-store, re-enqueue, and try again
+		if (!find_stored_event(GET_STORED_EVENTS(mob), SEV_AGGRO)) {
+			add_stored_event(&GET_STORED_EVENTS(mob), SEV_AGGRO, the_event);
+			return number(1, 10) RL_SEC;
+		}
+		else {
+			// already added a new one -- just flush this one
+			free(data);
+			return 0;
+		}
+	}
+}
+
+
+// handles mob movement
+EVENTFUNC(mob_move_event) {
+	struct mob_event_data *data = (struct mob_event_data*)event_obj;
+	char_data *mob = data->mob;
+	bool remove;
+	
+	// always delete first
+	delete_stored_event(&GET_STORED_EVENTS(mob), SEV_MOVEMENT);
+	
+	if (!IS_NPC(mob) || MOB_FLAGGED(mob, MOB_SENTINEL | MOB_TIED)) {
+		// things that cancel movement entirely
+		remove = TRUE;
+	}
+	else if ((MOB_FLAGGED(mob, MOB_PURSUE) && MOB_PURSUIT(mob)) || MOB_IS_BUSY(mob)) {
+		remove = FALSE;	// various busy flags -- re-enqueue
+	}
+	else if (AFF_FLAGGED(mob, AFF_CHARM | AFF_IMMOBILIZED) || GET_POS(mob) < POS_STANDING || (GET_LEADER(mob) && IN_ROOM(mob) == IN_ROOM(GET_LEADER(mob))) || (MOB_FLAGGED(mob, MOB_PURSUE) && MOB_PURSUIT(mob))) {
+		// cancel temporarily but re-enquue
+		remove = FALSE;
+	}
+	else {
+		// ok to try a move!
+		try_mobile_movement(mob);
+		remove = FALSE;
+	}
+	
+	if (remove || IS_DEAD(mob) || EXTRACTED(mob)) {
+		// removed by request or when dead
+		free(data);
+		return 0;	// no re-enqueue
+	}
+	else {
+		// re-store, re-enqueue, and try again
+		if (!find_stored_event(GET_STORED_EVENTS(mob), SEV_MOVEMENT)) {
+			add_stored_event(&GET_STORED_EVENTS(mob), SEV_MOVEMENT, the_event);
+			return 10 RL_SEC;
+		}
+		else {
+			// already added a new one -- just flush this one
+			free(data);
+			return 0;
+		}
+	}
+}
+
+
+// handles mob pursuit
+EVENTFUNC(mob_pursuit_event) {
+	struct mob_event_data *data = (struct mob_event_data*)event_obj;
+	char_data *mob = data->mob;
+	bool remove;
+	
+	// always delete first
+	delete_stored_event(&GET_STORED_EVENTS(mob), SEV_PURSUIT);
+	
+	if (!IS_NPC(mob) || !MOB_FLAGGED(mob, MOB_PURSUE) || !MOB_PURSUIT(mob)) {
+		// things that cancel pursuit entirely
+		remove = TRUE;
+	}
+	else if (MOB_IS_BUSY(mob)) {
+		remove = FALSE;	// various busy flags -- re-enqueue
+	}
+	else {
+		// ok to pursue!
+		check_mob_pursuit(mob);
+		remove = FALSE;
+	}
+	
+	if (remove || IS_DEAD(mob) || EXTRACTED(mob)) {
+		// removed by request or when dead
+		free(data);
+		return 0;	// no re-enqueue
+	}
+	else {
+		// re-store, re-enqueue, and try again
+		add_stored_event(&GET_STORED_EVENTS(mob), SEV_PURSUIT, the_event);
+		return (2 + number(0, 6)) RL_SEC;
+	}
+}
+
+
+// checks if it's time to reset the mob; reschedules itself if not
+EVENTFUNC(mob_reset_event) {
+	struct mob_event_data *data = (struct mob_event_data*)event_obj;
+	char_data *mob = data->mob;
+	bool result;
+	
+	// always delete first
+	delete_stored_event(&GET_STORED_EVENTS(mob), SEV_RESET_MOB);
+	
+	// safety first
+	if (!IS_NPC(mob)) {
+		free(data);
+		return 0;	// do not re-enqueue
+	}
+	
+	// ok, try it
+	result = check_reset_mob(mob, FALSE);
+	
+	if (result) {
+		// success on the reset and goodbye
+		free(data);
+		return 0;	// do not re-enqueue
+	}
+	else {
+		// did not reset
+		if (GET_POS(mob) < POS_STUNNED) {
+			set_health(mob, GET_HEALTH(mob) - 1);
+			update_pos(mob);
+			if (GET_POS(mob) == POS_DEAD) {
+				die(mob, mob);
+				free(data);
+				return 0;	// do not re-enqueue
+			}
+		}
+		
+		// try again soon
+		if (!find_stored_event(GET_STORED_EVENTS(mob), SEV_RESET_MOB)) {
+			add_stored_event(&GET_STORED_EVENTS(mob), SEV_RESET_MOB, the_event);
+			return MOB_RESTORE_INTERVAL RL_SEC;	// re-enqueue
+		}
+	}
+	
+	// if we got here, it's done
+	free(data);
+	return 0;	// do not re-enqueue
+}
+
+
+// handles scavenger mobs trying to eat a corpse
+EVENTFUNC(mob_scavenge_event) {
+	struct mob_event_data *data = (struct mob_event_data*)event_obj;
+	char_data *mob;
+	obj_data *obj;
+	bool found = FALSE;
+	
+	// grab data
+	mob = data->mob;
+	
+	if (MOB_IS_BUSY(mob)) {
+		return 5 RL_SEC;	// try again soon
+	}
+	
+	// always delete first
+	delete_stored_event(&GET_STORED_EVENTS(mob), SEV_SCAVENGE);
+	
+	if (MOB_FLAGGED(mob, MOB_SCAVENGER)) {
+		DL_FOREACH2(ROOM_CONTENTS(IN_ROOM(mob)), obj, next_content) {
+			if (IS_CORPSE(obj) && GET_CORPSE_SIZE(obj) <= GET_SIZE(mob)) {
+				// valid corpse... random chance to eat it
+				if (!number(0, 5) && CAN_SEE_OBJ(mob, obj)) {
+					act("You eat $p.", FALSE, mob, obj, NULL, TO_CHAR);
+					if (mob_has_custom_message(mob, MOB_CUSTOM_SCAVENGE_CORPSE)) {
+						act(mob_get_custom_message(mob, MOB_CUSTOM_SCAVENGE_CORPSE), FALSE, mob, obj, NULL, TO_ROOM);
+					}
+					else {
+						act("$n eats $p.", FALSE, mob, obj, NULL, TO_ROOM);
+					}
+					empty_obj_before_extract(obj);
+					extract_obj(obj);
+				}
+				
+				found = TRUE;
+				break;	// only 1 corpse, even if we didn't eat it (will re-enqueue this event)
+			}
+		}
+	}
+	
+	if (found) {
+		// re-store, re-enqueue, and try again
+		add_stored_event(&GET_STORED_EVENTS(mob), SEV_SCAVENGE, the_event);
+		return 5 RL_SEC;
+	}
+	else {
+		// nothing to scavenge
+		free(data);
+		return 0;	// do not re-enqueue
+	}
+}
+
+
+/**
+* Schedule a scavenge event for all scavengers in the room.
+*
+* @param room_data *room The room to check scavengers in.
+*/
+void check_scavengers(room_data *room) {
+	char_data *ch_iter;
+	
+	if (room) {
+		DL_FOREACH2(ROOM_PEOPLE(room), ch_iter, next_in_room) {
+			if (MOB_FLAGGED(ch_iter, MOB_SCAVENGER)) {
+				schedule_scavenge_event(ch_iter, TRUE);
+			}
+		}
+	}
+}
+
+
+/**
+* Looks for unscheduled DG events that a mob requires, and schedules them if
+* so.
+*
+* @param char_data *mob The mob to schedule events for, if needed.
+*/
+void check_scheduled_events_mob(char_data *mob) {
+	if (!mob || !IS_NPC(mob) || EXTRACTED(mob)) {
+		return;	// no work
+	}
+	
+	// all these check their own conditions
+	schedule_aggro_event(mob);
+	schedule_scavenge_event(mob, TRUE);
+	schedule_mob_move_event(mob, TRUE);
+	schedule_pursuit_event(mob);
+	schedule_despawn_event(mob);
+}
+
+
+/**
+* Schedules a DG event for an aggro/cityguard mob to look for attackable
+* targets.
+*
+* @param char_data *ch The mob to schedule for.
+*/
+void schedule_aggro_event(char_data *ch) {
+	struct mob_event_data *data;
+	struct dg_event *ev;
+	
+	if (ch && MOB_FLAGGED(ch, MOB_AGGRESSIVE | MOB_CITYGUARD) && !find_stored_event(GET_STORED_EVENTS(ch), SEV_AGGRO)) {
+		CREATE(data, struct mob_event_data, 1);
+		data->mob = ch;
+		
+		ev = dg_event_create(mob_aggro_event, data, (number(0,6) - 0.75) RL_SEC);
+		add_stored_event(&GET_STORED_EVENTS(ch), SEV_AGGRO, ev);
+	}
+}
+
+
+/**
+* Schedules normal movement for a mob.
+*
+* @param char_data *ch The mob who will be moving.
+* @param bool randomize If TRUE, schedules for 10-20 seconds from now. If FALSE, it's always 10 seconds.
+*/
+void schedule_mob_move_event(char_data *ch, bool randomize) {
+	struct mob_event_data *data;
+	struct dg_event *ev;
+	
+	if (ch && !MOB_FLAGGED(ch, MOB_SENTINEL | MOB_TIED) && !find_stored_event(GET_STORED_EVENTS(ch), SEV_MOVEMENT)) {
+		CREATE(data, struct mob_event_data, 1);
+		data->mob = ch;
+		
+		ev = dg_event_create(mob_move_event, data, (randomize ? 10 + number(0,10) : 10) RL_SEC);
+		add_stored_event(&GET_STORED_EVENTS(ch), SEV_MOVEMENT, ev);
+	}
+}
+
+
+/**
+* Schedules DG events (aggro, scavenging) that happen when a person moves into
+* a room.
+*
+* @param char_data *ch The person (PC or NPC) who moved into their current room.
+*/
+void schedule_movement_events(char_data *ch) {
+	char_data *ch_iter;
+	
+	if (!ch || !IN_ROOM(ch)) {
+		return;	// huh?
+	}
+	
+	// check mobs in the room
+	DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), ch_iter, next_in_room) {
+		if (MOB_FLAGGED(ch_iter, MOB_AGGRESSIVE | MOB_CITYGUARD)) {
+			// mobs (including me) who might aggro
+			schedule_aggro_event(ch);
+		}
+	}
+	
+	schedule_check_leading_event(ch);
+	
+	// everything else is for NPCs only; players exit here
+	if (!IS_NPC(ch)) {
+		return;
+	}
+	
+	// events on this mob
+	schedule_scavenge_event(ch, FALSE);
+	schedule_mob_move_event(ch, FALSE);
+}
+
+
+/**
+* Schedules the pursuit event for a mob. Call when a mob gains pursuit targets
+* and at startup.
+*
+* @param char_data *ch The mob who is pursuing.
+*/
+void schedule_pursuit_event(char_data *ch) {
+	struct mob_event_data *data;
+	struct dg_event *ev;
+	
+	if (ch && MOB_FLAGGED(ch, MOB_PURSUE) && MOB_PURSUIT(ch) && !find_stored_event(GET_STORED_EVENTS(ch), SEV_PURSUIT)) {
+		CREATE(data, struct mob_event_data, 1);
+		data->mob = ch;
+		
+		ev = dg_event_create(mob_pursuit_event, data, (2 + number(0, 6)) RL_SEC);
+		add_stored_event(&GET_STORED_EVENTS(ch), SEV_PURSUIT, ev);
+	}
+}
+
+
+/**
+* Schedules a check_reset_mob(). Call this when the mob has taken damage, or
+* anything else that would be reset by that function.
+*
+* @param char_data *ch The mob to schedule to reset.
+*/
+void schedule_reset_mob(char_data *ch) {
+	if (IS_NPC(ch) && !find_stored_event(GET_STORED_EVENTS(ch), SEV_RESET_MOB)) {
+		struct mob_event_data *data;
+		struct dg_event *ev;
+		
+		CREATE(data, struct mob_event_data, 1);
+		data->mob = ch;
+		
+		ev = dg_event_create(mob_reset_event, data, MOB_RESTORE_INTERVAL RL_SEC);
+		add_stored_event(&GET_STORED_EVENTS(ch), SEV_RESET_MOB, ev);
+	}
+}
+
+
+/**
+* Schedules the scavenger flag for a mob. Call when:
+* - entering a room
+* - corpse drops in the room
+* - gaining scavenger flag
+* - at startup for all scavenger mobs
+*
+* @param char_data *ch The mob who will scavenge.
+* @param bool randomize If TRUE, schedules for 5-10 seconds from now. If FALSE, it's always 5 seconds.
+*/
+void schedule_scavenge_event(char_data *ch, bool randomize) {
+	struct mob_event_data *data;
+	struct dg_event *ev;
+	
+	if (ch && MOB_FLAGGED(ch, MOB_SCAVENGER) && !find_stored_event(GET_STORED_EVENTS(ch), SEV_SCAVENGE)) {
+		CREATE(data, struct mob_event_data, 1);
+		data->mob = ch;
+		
+		ev = dg_event_create(mob_scavenge_event, data, (randomize ? 5 + number(0,5) : 5) RL_SEC);
+		add_stored_event(&GET_STORED_EVENTS(ch), SEV_SCAVENGE, ev);
 	}
 }
 
 
  //////////////////////////////////////////////////////////////////////////////
 //// MOB MOVEMENT ////////////////////////////////////////////////////////////
+
+/**
+* Runs a mob's pursuit. 
+*
+* @param char_data *ch The mob who's pursuing someone.
+* @return bool TRUE if we took action/moved, FALSE if not
+*/
+bool check_mob_pursuit(char_data *ch) {
+	struct pursuit_data *purs, *next_purs;
+	struct track_data *track, *next_track;
+	room_vnum track_to_room = NOWHERE;
+	char_data *vict;
+	int dir = NO_DIR;
+	bool found = FALSE, moved = FALSE;
+	
+	// break out early if not pursuing
+	if (!MOB_PURSUIT(ch)) {
+		return FALSE;
+	}
+	
+	// store location to return to, if none is already set
+	if (MOB_PURSUIT_LEASH_LOC(ch) == NOWHERE) {
+		MOB_PURSUIT_LEASH_LOC(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+	}
+	
+	LL_FOREACH_SAFE(MOB_PURSUIT(ch), purs, next_purs) {
+		// check pursuit timeout and distance
+		if (time(0) - purs->last_seen > config_get_int("mob_pursuit_timeout") * SECS_PER_REAL_MIN || compute_distance(IN_ROOM(ch), real_room(purs->location)) > config_get_int("mob_pursuit_distance")) {
+			LL_DELETE(MOB_PURSUIT(ch), purs);
+			free_pursuit(purs);
+			continue;
+		}
+		
+		// now see if we can track from here
+		found = FALSE;
+
+		// look in this room
+		DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), vict, next_in_room) {
+			if (!IS_NPC(vict) && CAN_SEE(ch, vict) && check_pursuit_target(ch, purs, vict) && can_fight(ch, vict)) {
+				found = TRUE;
+				act("$n runs toward you!", FALSE, ch, NULL, vict, TO_VICT);
+				act("$n runs toward $N!", FALSE, ch, NULL, vict, TO_NOTVICT);
+				engage_combat(ch, vict, FALSE);
+				
+				// exit early: we're now in combat
+				return TRUE;
+			}
+		}
+		
+		// track to next room
+		HASH_ITER(hh, ROOM_TRACKS(IN_ROOM(ch)), track, next_track) {
+			// don't bother checking track lifespan here -- just let mobs follow it till it gets removed
+			// (player idnum is negative)
+			if (track->id == -1 * purs->idnum) {
+				found = TRUE;
+				dir = track->dir;
+				track_to_room = track->to_room;
+				break;
+			}
+		}
+		
+		// try line-of-sight tracking
+		if (!found && IS_OUTDOORS(ch)) {
+			// first see if they're playing
+			if (!(vict = is_playing(purs->idnum))) {
+				LL_DELETE(MOB_PURSUIT(ch), purs);
+				free_pursuit(purs);
+				continue;
+			}
+			
+			// check distance: TODO this is magic-numbered to 7, similar to how far you can see players in mapview.c
+			if (IS_OUTDOORS(vict) && compute_distance(IN_ROOM(ch), IN_ROOM(vict)) <= 7) {
+				dir = get_direction_to(IN_ROOM(ch), IN_ROOM(vict));
+				if (dir != NO_DIR) {
+					// found one
+					found = TRUE;
+				}
+			}
+		}
+		
+		// break out if we found anything to do
+		if (found) {
+			break;
+		}
+	}	// end iteration
+	
+	if (found && (dir != NO_DIR || track_to_room != NOWHERE) && !AFF_FLAGGED(ch, AFF_CHARM | AFF_IMMOBILIZED)) {
+		if (track_to_room && find_portal_in_room_targetting(IN_ROOM(ch), track_to_room)) {
+			perform_move(ch, NO_DIR, real_room(track_to_room), MOVE_ENTER_PORTAL | MOVE_WANDER);
+			moved = TRUE;
+		}
+		else if (track_to_room != NOWHERE && find_vehicle_in_room_with_interior(IN_ROOM(ch), track_to_room)) {
+			perform_move(ch, NO_DIR, real_room(track_to_room), MOVE_ENTER_VEH | MOVE_WANDER);
+			moved = TRUE;
+		}
+		else if (GET_ROOM_VEHICLE(IN_ROOM(ch)) && IN_ROOM(GET_ROOM_VEHICLE(IN_ROOM(ch))) && GET_ROOM_VNUM(IN_ROOM(GET_ROOM_VEHICLE(IN_ROOM(ch)))) == track_to_room) {
+			perform_move(ch, NO_DIR, real_room(track_to_room), MOVE_EXIT | MOVE_WANDER);
+			moved = TRUE;
+		}
+		else if (dir != NO_DIR) {
+			perform_move(ch, dir, NULL, MOVE_WANDER);
+			moved = TRUE;
+		}
+	}
+	
+	// look for target again
+	if (moved) {
+		found = FALSE;
+
+		for (purs = MOB_PURSUIT(ch); !found && purs; purs = next_purs) {
+			next_purs = purs->next;
+			
+			DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), vict, next_in_room) {
+				if (!IS_NPC(vict) && CAN_SEE(ch, vict) && check_pursuit_target(ch, purs, vict) && can_fight(ch, vict)) {
+					found = TRUE;
+					act("$n runs toward you!", FALSE, ch, NULL, vict, TO_VICT);
+					act("$n runs toward $N!", FALSE, ch, NULL, vict, TO_NOTVICT);
+					
+					engage_combat(ch, vict, FALSE);
+					
+					// exit now: we are in combat
+					return TRUE;
+				}
+			}
+		}
+	}
+	
+	// try to go back if unable to move from pursuit
+	if (!moved) {
+		moved = return_to_pursuit_location(ch);
+	}
+	
+	return moved;
+}
+
 
 /**
 * This checks if a mob is willing to move onto a given sect.
@@ -435,16 +1050,27 @@ bool mob_can_move_to_sect(char_data *mob, room_data *to_room) {
 	bool ok = FALSE;
 	
 	// sect- and ability-based determinations
-	
-	if (SECT_FLAGGED(sect, SECTF_IS_ROAD) && !MOB_FLAGGED(mob, MOB_AQUATIC) && move_type != MOB_MOVE_SWIM) {
-		ok = TRUE;
+	if (ROOM_PRIVATE_OWNER(to_room) != NOBODY) {
+		ok = FALSE;
 	}
-	else if (move_type == MOB_MOVE_FLY || AFF_FLAGGED(mob, AFF_FLY)) {
-		ok = TRUE;
+	else if (ROOM_AFF_FLAGGED(to_room, ROOM_AFF_REPEL_NPCS)) {
+		ok = FALSE;
+	}
+	else if (ROOM_AFF_FLAGGED(to_room, ROOM_AFF_REPEL_ANIMALS) && MOB_FLAGGED(mob, MOB_ANIMAL)) {
+		ok = FALSE;
 	}
 	else if (ROOM_BLD_FLAGGED(to_room, BLD_NO_NPC) && IS_COMPLETE(to_room)) {
 		// nope
 		ok = FALSE;
+	}
+	else if (ROOM_IS_CLOSED(to_room) && !ROOM_IS_CLOSED(IN_ROOM(mob)) && MOB_FLAGGED(mob, MOB_AVOID_BUILDINGS)) {
+		ok = FALSE;	// avoid buildings
+	}
+	else if (SECT_FLAGGED(sect, SECTF_IS_ROAD) && !MOB_FLAGGED(mob, MOB_AQUATIC) && move_type != MOB_MOVE_SWIM) {
+		ok = TRUE;
+	}
+	else if (AFF_FLAGGED(mob, AFF_FLYING)) {
+		ok = TRUE;
 	}
 	else if (SECT_FLAGGED(sect, SECTF_ROUGH)) {
 		if (move_type == MOB_MOVE_CLIMB || MOB_FLAGGED(mob, MOB_MOUNTAINWALK)) {
@@ -452,7 +1078,7 @@ bool mob_can_move_to_sect(char_data *mob, room_data *to_room) {
 		}
 	}
 	else if (SECT_FLAGGED(sect, SECTF_FRESH_WATER | SECTF_OCEAN)) {
-		if (MOB_FLAGGED(mob, MOB_AQUATIC) || move_type == MOB_MOVE_SWIM || move_type == MOB_MOVE_PADDLE) {
+		if (MOB_FLAGGED(mob, MOB_AQUATIC) || HAS_WATERWALKING(mob) || move_type == MOB_MOVE_SWIM || move_type == MOB_MOVE_PADDLE) {
 			ok = TRUE;
 		}
 	}
@@ -465,8 +1091,8 @@ bool mob_can_move_to_sect(char_data *mob, room_data *to_room) {
 	
 	// overrides: things that cancel previous oks
 	
-	// non-humans won't enter buildings
-	if (!MOB_FLAGGED(mob, MOB_HUMAN) && SECT_FLAGGED(sect, SECTF_MAP_BUILDING | SECTF_INSIDE)) {
+	// non-humans won't enter buildings (open buildings only count if finished)
+	if (!MOB_FLAGGED(mob, MOB_HUMAN) && SECT_FLAGGED(sect, SECTF_MAP_BUILDING | SECTF_INSIDE) && ROOM_IS_CLOSED(to_room)) {
 		ok = FALSE;
 	}
 	
@@ -480,13 +1106,11 @@ bool mob_can_move_to_sect(char_data *mob, room_data *to_room) {
 * building or room.
 *
 * @param char_data *ch The mobile
-* @param int dir Which direction (NORTH, etc)
+* @param int dir Which direction (NORTH, etc); may be NO_DIR
 * @param room_data *to_room The destination
 * @return TRUE if the move is valid, FALSE otherwise
 */
 bool validate_mobile_move(char_data *ch, int dir, room_data *to_room) {
-	void empire_skillup(empire_data *emp, any_vnum ability, double amount);
-	
 	empire_data *ch_emp = GET_LOYALTY(ch);
 	empire_data *room_emp = ROOM_OWNER(to_room);
 	bool valid = TRUE;
@@ -505,7 +1129,6 @@ bool validate_mobile_move(char_data *ch, int dir, room_data *to_room) {
 		if (MOB_FLAGGED(ch, MOB_AGGRESSIVE | MOB_CITYGUARD)) {
 			// only locks blocks aggressive/cityguard
 			if (EMPIRE_HAS_TECH(room_emp, TECH_LOCKS)) {
-				empire_skillup(room_emp, ABIL_LOCKS, 10);
 				valid = FALSE;
 			}
 		}
@@ -526,38 +1149,96 @@ bool validate_mobile_move(char_data *ch, int dir, room_data *to_room) {
 * @return bool TRUE if the mobile moved successfully
 */
 bool try_mobile_movement(char_data *ch) {
-	extern const int rev_dir[];
+	bool try_vehicle = FALSE;
+	int dir = -1, count;
+	room_data *to_room, *temp_room, *was_in = IN_ROOM(ch);
+	struct room_direction_data *ex_iter, *use_exit = NULL;
+	vehicle_data *veh;
 	
-	int dir;
-	room_data *to_room, *was_in = IN_ROOM(ch);
-	struct room_direction_data *ex;
-
-	// first if() limits animals to outside movement only -- they won't move once indoors
-	if (!MOB_FLAGGED(ch, MOB_ANIMAL) || IS_ADVENTURE_ROOM(IN_ROOM(ch)) || !ROOM_IS_CLOSED(IN_ROOM(ch))) {
-		// randomly choose a direction (this checks COMPLEX_DATA() because we want the chance of moving slightly higher indoors, as there are fewer exits)
-		if ((dir = number(0, 40 / (COMPLEX_DATA(IN_ROOM(ch)) ? 2 : 1))) < NUM_2D_DIRS) {
-			if (IS_OUTDOORS(ch) && !IS_ADVENTURE_ROOM(IN_ROOM(ch))) {
-				// map movement:
-				to_room = real_shift(IN_ROOM(ch), shift_dir[dir][0], shift_dir[dir][1]);
-				
-				if (to_room && mob_can_move_to_sect(ch, to_room) && ROOM_PRIVATE_OWNER(to_room) == NOBODY) {
-					// this IF comes from act.movement and really needs to be generalized
-					if (!IS_COMPLETE(to_room) || (!IS_ADVENTURE_ROOM(IN_ROOM(ch)) && !IS_INSIDE(IN_ROOM(ch)) && ROOM_IS_CLOSED(to_room) && BUILDING_ENTRANCE(to_room) != dir && (!ROOM_BLD_FLAGGED(to_room, BLD_TWO_ENTRANCES) || BUILDING_ENTRANCE(to_room) != rev_dir[dir]))) {
-						// can't go that way
-					}
-					else if (validate_mobile_move(ch, dir, to_room)) {
-						perform_move(ch, dir, 1, 0);
-					}
+	// animals don't move indoors
+	if (MOB_FLAGGED(ch, MOB_ANIMAL) && ROOM_IS_CLOSED(IN_ROOM(ch)) && !IS_ADVENTURE_ROOM(IN_ROOM(ch))) {
+		return FALSE;
+	}
+	
+	if (number(1, 100) > 20 * (ROOM_IS_CLOSED(IN_ROOM(ch)) ? 1.5 : 1)) {
+		return FALSE;
+	}
+	
+	// pick a random direction
+	if (IS_OUTDOORS(ch) && GET_ROOM_VNUM(IN_ROOM(ch)) < MAP_SIZE) {
+		dir = number(-1, NUM_2D_DIRS-1);
+		try_vehicle = (dir == -1);
+	}
+	else if (COMPLEX_DATA(IN_ROOM(ch))) {
+		if (number(1, 100) <= 10) {
+			try_vehicle = TRUE;
+		}
+		else {
+			count = 0;
+			LL_FOREACH(COMPLEX_DATA(IN_ROOM(ch))->exits, ex_iter) {
+				if (!number(0, count++)) {
+					use_exit = ex_iter;
 				}
 			}
-			else if (COMPLEX_DATA(IN_ROOM(ch)) && (ex = find_exit(IN_ROOM(ch), dir)) && CAN_GO(ch, ex)) {
-				// indoor movement
-				to_room = ex->room_ptr;
-				
-				if (to_room && validate_mobile_move(ch, dir, to_room)) {
-					perform_move(ch, dir, 1, 0);
-				}
+		}
+	}
+	else {
+		// nowhere to go, nothing to do
+		return FALSE;
+	}
+	
+	// vehicle?
+	if (try_vehicle && ROOM_CAN_EXIT(IN_ROOM(ch)) && (!GET_ROOM_VEHICLE(IN_ROOM(ch)) || VEH_FLAGGED(GET_ROOM_VEHICLE(IN_ROOM(ch)), VEH_BUILDING))) {
+		do_exit(ch, "", 0, 0);
+	}
+	else if (try_vehicle) {	// look for a vehicle to enter
+		to_room = NULL;
+		count = 0;
+		DL_FOREACH2(ROOM_VEHICLES(IN_ROOM(ch)), veh, next_in_room) {
+			if (!VEH_IS_COMPLETE(veh)) {
+				continue; // incomplete
 			}
+			if (!VEH_FLAGGED(veh, VEH_BUILDING)) {
+				continue;	// buildings only (not vehicles)
+			}
+			if (!(temp_room = get_vehicle_interior(veh))) {
+				continue; // no interior
+			}
+			if (!mob_can_move_to_sect(ch, temp_room) || !validate_mobile_move(ch, NO_DIR, temp_room)) {
+				continue;	// won't go there
+			}
+			
+			// seems ok: pick one at random
+			if (!number(0, count++)) {
+				to_room = temp_room;
+			}
+		}
+		
+		// did we find one?
+		if (to_room) {
+			perform_move(ch, NO_DIR, to_room, MOVE_ENTER_VEH);
+		}
+	}	// end attempt enter/exit
+	else if (dir != -1 && IS_OUTDOORS(ch) && GET_ROOM_VNUM(IN_ROOM(ch)) < MAP_SIZE) {
+		// map movement:
+		to_room = real_shift(IN_ROOM(ch), shift_dir[dir][0], shift_dir[dir][1]);
+		
+		if (to_room && mob_can_move_to_sect(ch, to_room)) {
+			// check building and entrances
+			if ((!ROOM_BLD_FLAGGED(to_room, BLD_OPEN) && !IS_COMPLETE(to_room)) || (!IS_ADVENTURE_ROOM(IN_ROOM(ch)) && !IS_INSIDE(IN_ROOM(ch)) && ROOM_IS_CLOSED(to_room) && BUILDING_ENTRANCE(to_room) != dir && (!ROOM_BLD_FLAGGED(to_room, BLD_TWO_ENTRANCES) || BUILDING_ENTRANCE(to_room) != rev_dir[dir]))) {
+				// can't go that way
+			}
+			else if (validate_mobile_move(ch, dir, to_room)) {
+				perform_move(ch, dir, to_room, MOVE_WANDER);
+			}
+		}
+	}
+	else if (use_exit && CAN_GO(ch, use_exit)) {
+		// indoor movement
+		to_room = use_exit->room_ptr;
+		
+		if (to_room && mob_can_move_to_sect(ch, to_room) && validate_mobile_move(ch, use_exit->dir, to_room)) {
+			perform_move(ch, use_exit->dir, to_room, MOVE_WANDER);
 		}
 	}
 
@@ -570,235 +1251,133 @@ bool try_mobile_movement(char_data *ch) {
 //// MOB ACTIVITY ////////////////////////////////////////////////////////////
 
 /**
-* Main cycle of mob activity (iterates over character list).
+* Checks if there's anybody here to aggro (AGGRESSIVE or CITYGUARD flags).
+*
+* @param char_data *ch The mob doing the aggroing.
+* @return bool If TRUE, keep checking periodically. If FALSE, there are no valid targets at all.
 */
-void mobile_activity(void) {
-	extern bool catch_up_mobs;
+// return FALSE to cancel event completely, TRUE to continue
+bool check_aggro(char_data *ch) {
+	char_data *vict, *ally, *targ;
+	bool is_hostile, is_enemy;
+	bool acted = FALSE, any = FALSE;
 	
-	register char_data *ch, *next_ch, *vict, *targ, *m;
-	struct track_data *track;
-	struct pursuit_data *purs, *next_purs, *temp;
-	obj_data *obj;
-	int found, dir = NO_DIR;
-	empire_data *chemp, *victemp;
-	bool moved;
-
-	#define CAN_AGGRO(mob, vict)  (!IS_DEAD(vict) && !NOHASSLE(vict) && !IS_GOD(vict) && CAN_SEE(mob, vict) && vict != mob->master && !AFF_FLAGGED(vict, AFF_IMMUNE_PHYSICAL | AFF_NO_TARGET_IN_ROOM | AFF_NO_SEE_IN_ROOM | AFF_NO_ATTACK))
+	#define CAN_AGGRO(mob, vict)  (!IS_DEAD(vict) && !NOHASSLE(vict) && (IS_NPC(vict) || !PRF_FLAGGED(vict, PRF_WIZHIDE)) && vict != GET_LEADER(mob) && !AFF_FLAGGED(vict, AFF_IMMUNE_PHYSICAL | AFF_NO_TARGET_IN_ROOM | AFF_NO_SEE_IN_ROOM | AFF_NO_ATTACK) && CAN_SEE(mob, vict) && can_fight((mob), (vict)))
 	
-	// prevent running multiple mob moves during a catch-up cycle
-	if (!catch_up_mobs) {
-		return;
-	}
-	catch_up_mobs = FALSE;
-
-	for (ch = character_list; ch; ch = next_ch) {
-		next_ch = ch->next;
-		moved = FALSE;
-
-		if (!IS_MOB(ch) || GET_FED_ON_BY(ch) || EXTRACTED(ch) || IS_DEAD(ch) || AFF_FLAGGED(ch, AFF_STUNNED))
-			continue;
-		if (FIGHTING(ch) || !AWAKE(ch) || AFF_FLAGGED(ch, AFF_CHARM) || MOB_FLAGGED(ch, MOB_TIED) || IS_INJURED(ch, INJ_TIED) || GET_LED_BY(ch))
-			continue;
-		
-		// found stops further execution
-		found = FALSE;
-		
-		// pursuit mobs
-		if (MOB_FLAGGED(ch, MOB_PURSUE) && MOB_PURSUIT(ch) && !moved) {
-			// store location to return to, if none is already set
-			if (MOB_PURSUIT_LEASH_LOC(ch) == NOWHERE) {
-				MOB_PURSUIT_LEASH_LOC(ch) = GET_ROOM_VNUM(IN_ROOM(ch));
+	if (!acted && MOB_FLAGGED(ch, MOB_AGGRESSIVE) && (IS_ADVENTURE_ROOM(IN_ROOM(ch)) || !ISLAND_FLAGGED(IN_ROOM(ch), ISLE_NO_AGGRO))) {
+		DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), vict, next_in_room) {
+			if (vict == ch) {
+				continue;	// ignore: self
 			}
 			
-			for (purs = MOB_PURSUIT(ch); !found && purs; purs = next_purs) {
-				next_purs = purs->next;
-				
-				// check pursuit timeout and distance
-				if (time(0) - purs->last_seen > config_get_int("mob_pursuit_timeout") * SECS_PER_REAL_MIN || compute_distance(IN_ROOM(ch), real_room(purs->location)) > config_get_int("mob_pursuit_distance")) {
-					REMOVE_FROM_LIST(purs, MOB_PURSUIT(ch), next);
-					free(purs);
-				}
-				else {
-					// now see if we can track from here
-					found = FALSE;
-
-					// look in this room
-					for (vict = ROOM_PEOPLE(IN_ROOM(ch)); !found && vict; vict = vict->next_in_room) {
-						if (!IS_NPC(vict) && GET_IDNUM(vict) == purs->idnum && CAN_SEE(ch, vict) && CAN_RECOGNIZE(ch, vict) && can_fight(ch, vict)) {
-							found = TRUE;
-							engage_combat(ch, vict, FALSE);
-						}
-					}
-
-					// track to next room
-					for (track = ROOM_TRACKS(IN_ROOM(ch)); !found && track; track = track->next) {
-						if (track->player_id == purs->idnum) {
-							found = TRUE;
-							dir = track->dir;
-						}
-					}
-				}
+			// mark that there's at least 1 non-me here
+			any = TRUE;
+			
+			if (!IS_NPC(vict) && !vict->desc) {
+				continue;	// ignore: linkdead player
+			}
+			if (IS_NPC(vict) && (IS_ADVENTURE_ROOM(IN_ROOM(vict)) || MOB_FLAGGED(vict, MOB_AGGRESSIVE) || !MOB_FLAGGED(vict, MOB_HUMAN))) {
+				continue;	// they will attack humans but not aggro-humans, and not inadventures
+			}
+			if (MOB_FACTION(ch) && has_reputation(vict, FCT_VNUM(MOB_FACTION(ch)), REP_LIKED)) {
+				continue;	// ignore: don't aggro people we like
+			}
+			if (!CAN_AGGRO(ch, vict)) {
+				continue;	// ignore: invalid target
 			}
 			
-			if (dir != NO_DIR && found == TRUE && !AFF_FLAGGED(ch, AFF_CHARM | AFF_ENTANGLED)) {
-				perform_move(ch, dir, 1, 0);
-				moved = TRUE;
+			// ok good to go
+			hit(ch, vict, GET_EQ(ch, WEAR_WIELD), TRUE);
+			acted = TRUE;
+			break;
+		}
+	}	// end aggressive
+	
+	if (!acted && MOB_FLAGGED(ch, MOB_CITYGUARD) && GET_LOYALTY(ch)) {
+		// look for people to assist
+		DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), ally, next_in_room) {
+			if (ally == ch || GET_LOYALTY(ally) != GET_LOYALTY(ch)) {
+				continue;	// ignore: is self or is wrong empire
 			}
 			
-			// look for target again
-			if (moved) {
-				found = FALSE;
-
-				for (purs = MOB_PURSUIT(ch); !found && purs; purs = next_purs) {
-					next_purs = purs->next;
+			// mark that there's someone else here
+			any = TRUE;
+			
+			if (!(targ = FIGHTING(ally)) || targ == ch || targ == GET_LEADER(ch)) {
+				continue;	// ignore: fighting us!
+			}
+			if (!IS_NPC(targ) && GET_LOYALTY(targ) == GET_LOYALTY(ch)) {
+				continue;	// ignore: player in own empire
+			}
+			if (!IS_NPC(targ) && !IS_NPC(ally) && IS_PVP_FLAGGED(ally)) {
+				continue;	// ignore: pvp fight
+			}
+			if (!CAN_AGGRO(ch, targ)) {
+				continue;	// invalid target
+			}
 					
-					for (vict = ROOM_PEOPLE(IN_ROOM(ch)); !found && vict; vict = vict->next_in_room) {
-						if (!IS_NPC(vict) && GET_IDNUM(vict) == purs->idnum && can_fight(ch, vict)) {
-							found = TRUE;
-							engage_combat(ch, vict, FALSE);
-						}
-					}
-				}
-			}
-			
-			// try to go back if unable to move from pursuit
-			if (!moved) {
-				moved = return_to_pursuit_location(ch);
-			}
-		}	// end pursuit
+			// assist ally
+			engage_combat(ch, targ, FALSE);
+			acted = TRUE;
+			break;
+		}	// end cityguard assist
 		
-		if (!moved && !MOB_FLAGGED(ch, MOB_SENTINEL | MOB_TIED) && !AFF_FLAGGED(ch, AFF_CHARM | AFF_ENTANGLED) && GET_POS(ch) == POS_STANDING && (!ch->master || IN_ROOM(ch) != IN_ROOM(ch->master)) && (!MOB_FLAGGED(ch, MOB_PURSUE) || !MOB_PURSUIT(ch))) {
-			moved = try_mobile_movement(ch);
-		}
-		
-		// from here, found stops multiple attacks
-		found = FALSE;
-
-		/* Aggressive Mobs */
-		if (!found && MOB_FLAGGED(ch, MOB_AGGRESSIVE) && (IS_ADVENTURE_ROOM(IN_ROOM(ch)) || !ISLAND_FLAGGED(IN_ROOM(ch), ISLE_NO_AGGRO))) {
-			for (vict = ROOM_PEOPLE(IN_ROOM(ch)); vict && !found; vict = vict->next_in_room) {
-				if (vict == ch) {
-					continue;
+		// look for intruders to aggro
+		if (!acted && !ISLAND_FLAGGED(IN_ROOM(ch), ISLE_NO_AGGRO)) {
+			DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), vict, next_in_room) {
+				if (GET_LOYALTY(vict) == GET_LOYALTY(ch)) {
+					continue;	// ignore: self or same empire
 				}
+				
+				// mark that there's someone here
+				any = TRUE;
+				
 				if (!IS_NPC(vict) && !vict->desc) {
-					// linkdead player
-					continue;
+					continue;	// ignore: linkdead player
 				}
-				if (IS_NPC(vict) && (IS_ADVENTURE_ROOM(IN_ROOM(vict)) || MOB_FLAGGED(vict, MOB_AGGRESSIVE) || !MOB_FLAGGED(vict, MOB_HUMAN))) {
-					// they will attack humans but not aggro-humans, and not inadventures
-					continue;
+				if (GET_LOYALTY(vict) && empire_is_friendly(GET_LOYALTY(ch), GET_LOYALTY(vict))) {
+					continue;	// ignore: friendly empire
 				}
-				if (!CAN_AGGRO(ch, vict) || !can_fight(ch, vict)) {
-					continue;
-				}
-				if (MOB_FACTION(ch) && has_reputation(vict, FCT_VNUM(MOB_FACTION(ch)), REP_LIKED)) {
-					continue;	// don't aggro people we like
+				if (GET_LEADER(vict) && !IS_NPC(GET_LEADER(vict)) && in_same_group(vict, GET_LEADER(vict)) && GET_LOYALTY(GET_LEADER(vict)) == GET_LOYALTY(ch)) {
+					continue;	// ignore: grouped leader is in my empire
 				}
 				
-				// ok good to go
-				if (affected_by_spell(vict, ATYPE_MAJESTY) && !AFF_FLAGGED(ch, AFF_IMMUNE_VAMPIRE) && can_gain_exp_from(vict, ch)) {
-					gain_ability_exp(vict, ABIL_MAJESTY, 10);
+				// further checks:
+				is_hostile = (IS_HOSTILE(vict) || (!IS_DISGUISED(vict) && !IS_NPC(vict) && empire_is_hostile(GET_LOYALTY(ch), GET_LOYALTY(vict), IN_ROOM(ch))));
+				is_enemy = (IS_NPC(vict) && GET_LOYALTY(vict) && empire_is_hostile(GET_LOYALTY(ch), GET_LOYALTY(vict), IN_ROOM(ch)));
+				if (!MOB_FLAGGED(vict, MOB_AGGRESSIVE) && !is_hostile && !is_enemy) {
+					continue;	// ignore: reasons not to attack
 				}
-				if (!CHECK_MAJESTY(vict) || AFF_FLAGGED(ch, AFF_IMMUNE_VAMPIRE)) {
+				if (!CAN_AGGRO(ch, vict)) {
+					// check can-aggro last because it will scale the target
+					continue;	// ignore: invalid target
+				}
+				
+				// ok it's someone we CAN hit: now see why we should
+				if (MOB_FLAGGED(vict, MOB_AGGRESSIVE)) {
+					// attack: aggro mobs
 					hit(ch, vict, GET_EQ(ch, WEAR_WIELD), TRUE);
-					found = TRUE;
+					acted = TRUE;
+					break;
 				}
-			}
-		}
-		
-		// Empire Mobs
-		if (!found && MOB_FLAGGED(ch, MOB_CITYGUARD) && GET_LOYALTY(ch)) {
-			// look for people to assist
-			for (vict = ROOM_PEOPLE(IN_ROOM(ch)); vict && !found; vict = vict->next_in_room) {
-				// in a fight?
-				if (vict != ch && (targ = FIGHTING(vict)) && targ != ch && ch->master != targ && (IS_NPC(targ) || GET_ACCESS_LEVEL(targ) < LVL_GOD) && CAN_SEE(ch, targ)) {
-					// matching empire to rescue?
-					if (CAN_AGGRO(ch, vict) && GET_LOYALTY(vict) == GET_LOYALTY(ch)) {
-						// make sure it's not a PVP-flagged fight
-						if (IS_NPC(targ) || IS_NPC(vict) || !IS_PVP_FLAGGED(vict)) {
-							// make sure targ (vict's fighting) isn't a pc in my empire
-							if (IS_NPC(targ) || GET_LOYALTY(targ) != GET_LOYALTY(ch)) {
-								if (can_fight(ch, targ)) {
-									// assist vict
-									engage_combat(ch, targ, FALSE);
-									found = TRUE;
-								}
-							}
-						}
-					}
+				else if (is_hostile) {
+					// attack: hostile to empire
+					hit(ch, vict, GET_EQ(ch, WEAR_WIELD), TRUE);
+					acted = TRUE;
+					break;
 				}
-			}
-			
-			// look for people to aggro
-			if (!ISLAND_FLAGGED(IN_ROOM(ch), ISLE_NO_AGGRO)) {
-				chemp = NULL;
-				for (vict = ROOM_PEOPLE(IN_ROOM(ch)); vict && !found; vict = vict->next_in_room) {
-					if (vict == ch) {
-						continue;
-					}
-				
-					// aggro players
-					if (!IS_NPC(vict) && vict->desc) {
-						if (GET_LOYALTY(vict) != GET_LOYALTY(ch) && CAN_AGGRO(ch, vict)) {
-							if (!chemp) {
-								chemp = GET_LOYALTY(ch);
-							}
-
-							// check character OR their leader for permission to be here, actually
-							if (!((m = vict->master) && in_same_group(vict, m))) {
-								m = vict;
-							}
-							if (GET_LOYALTY(m) != GET_LOYALTY(ch)) {
-								victemp = GET_LOYALTY(vict);
-							
-								// check friendly first -- so we don't attack someone who's friendly
-								if (!empire_is_friendly(chemp, victemp) && can_fight(ch, vict)) {
-									if (IS_HOSTILE(vict) || (!IS_DISGUISED(vict) && empire_is_hostile(chemp, victemp, IN_ROOM(ch)))) {
-										if (affected_by_spell(vict, ATYPE_MAJESTY) && !AFF_FLAGGED(ch, AFF_IMMUNE_VAMPIRE) && can_gain_exp_from(vict, ch)) {
-											gain_ability_exp(vict, ABIL_MAJESTY, 10);
-										}
-									
-										if (!CHECK_MAJESTY(vict) || AFF_FLAGGED(ch, AFF_IMMUNE_VAMPIRE)) {
-											hit(ch, vict, GET_EQ(ch, WEAR_WIELD), TRUE);
-											found = TRUE;
-										}
-									}
-								}
-							}
-						}
-					}
-					// aggro mobs
-					else if (IS_NPC(vict) && MOB_FLAGGED(vict, MOB_AGGRESSIVE) && GET_LOYALTY(ch) != GET_LOYALTY(vict) && can_fight(ch, vict)) {
-						hit(ch, vict, GET_EQ(ch, WEAR_WIELD), TRUE);
-						found = TRUE;
-					}
-					// hostility against empire mobs
-					else if (IS_NPC(vict) && GET_LOYALTY(vict) && GET_LOYALTY(vict) != GET_LOYALTY(ch) && empire_is_hostile(GET_LOYALTY(ch), GET_LOYALTY(vict), IN_ROOM(ch))) {
-						hit(ch, vict, GET_EQ(ch, WEAR_WIELD), TRUE);
-						found = TRUE;
-					}
-				}
-			}
-		}
-
-		if (MOB_FLAGGED(ch, MOB_SCAVENGER) && !FIGHTING(ch)) {
-			for (obj = ROOM_CONTENTS(IN_ROOM(ch)); obj; obj = obj->next_content) {
-				if (GET_OBJ_TYPE(obj) == ITEM_CORPSE && !number(0, 10)) {
-					act("$n eats $p.", FALSE, ch, obj, NULL, TO_ROOM);
-					empty_obj_before_extract(obj);
-					extract_obj(obj);
+				else if (is_enemy) {
+					// attack: hostility against empire mobs
+					hit(ch, vict, GET_EQ(ch, WEAR_WIELD), TRUE);
+					acted = TRUE;
 					break;
 				}
 			}
-		}
-		
-		// attempt to return to leash point
-		if (!moved) {
-			moved = return_to_pursuit_location(ch);
-		}
-
-		/* Add new mobile actions here */
-	}
+		}	// end cityguard aggro
+	}	// end cityguard
+	
+	// this indicates if there's any reason to keep checking aggro
+	return any;
 }
 
 
@@ -806,12 +1385,10 @@ void mobile_activity(void) {
 * This is called every few seconds to animate mobs in the room with players.
 */
 void run_mob_echoes(void) {
-	ACMD(do_say);
-	
 	struct custom_message *mcm, *found_mcm;
 	char_data *ch, *mob, *found_mob, *chiter;
 	descriptor_data *desc;
-	int count;
+	int count, sun;
 	bool oops;
 	
 	LL_FOREACH(descriptor_list, desc) {
@@ -822,7 +1399,7 @@ void run_mob_echoes(void) {
 		
 		// only the first connected player in the room counts, so multiple players don't lead to spam
 		oops = FALSE;
-		LL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), chiter, next_in_room) {
+		DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), chiter, next_in_room) {
 			if (chiter->desc) {
 				if (chiter != ch) {
 					oops = TRUE;	// not first
@@ -840,21 +1417,41 @@ void run_mob_echoes(void) {
 		}
 		
 		// initialize vars
+		sun = get_sun_status(IN_ROOM(ch));
 		found_mob = NULL;
 		found_mcm = NULL;
 		count = 0;
 		
 		// now find a mob with a valid message
-		LL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), mob, next_in_room) {
+		DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), mob, next_in_room) {
 			// things that disqualify the mob
-			if (mob->desc || !IS_NPC(mob) || FIGHTING(mob) || !AWAKE(mob) || MOB_FLAGGED(mob, MOB_TIED | MOB_SILENT) || IS_INJURED(mob, INJ_TIED) || GET_LED_BY(mob)) {
+			if (mob->desc || !IS_NPC(mob) || IS_DEAD(mob) || EXTRACTED(mob) || FIGHTING(mob) || !AWAKE(mob) || MOB_FLAGGED(mob, MOB_TIED | MOB_SILENT) || IS_INJURED(mob, INJ_TIED) || GET_LED_BY(mob) || GET_FED_ON_BY(mob) || AFF_FLAGGED(mob, AFF_STUNNED | AFF_HARD_STUNNED | AFF_IMMOBILIZED)) {
 				continue;
 			}
 			
 			// ok now find a random message to show?
 			LL_FOREACH(MOB_CUSTOM_MSGS(mob), mcm) {
 				// MOB_CUSTOM_x: types we use here
-				if (mcm->type != MOB_CUSTOM_ECHO && mcm->type != MOB_CUSTOM_SAY) {
+				if (mcm->type == MOB_CUSTOM_ECHO) {
+					// ok = true
+				}
+				else if (mcm->type == MOB_CUSTOM_ECHO_DAY && (sun == SUN_LIGHT || sun == SUN_RISE)) {
+					// day ok
+				}
+				else if (mcm->type == MOB_CUSTOM_ECHO_NIGHT && (sun == SUN_DARK || sun == SUN_SET)) {
+					// night ok
+				}
+				else if (mcm->type == MOB_CUSTOM_SAY && !ROOM_AFF_FLAGGED(IN_ROOM(mob), ROOM_AFF_SILENT)) {
+					// ok = true
+				}
+				else if (mcm->type == MOB_CUSTOM_SAY_DAY && (sun == SUN_LIGHT || sun == SUN_RISE) && !ROOM_AFF_FLAGGED(IN_ROOM(mob), ROOM_AFF_SILENT)) {
+					// day ok
+				}
+				else if (mcm->type == MOB_CUSTOM_SAY_NIGHT && (sun == SUN_DARK || sun == SUN_SET) && !ROOM_AFF_FLAGGED(IN_ROOM(mob), ROOM_AFF_SILENT)) {
+					// night ok
+				}
+				else {
+					// NOT ok
 					continue;
 				}
 				
@@ -870,11 +1467,15 @@ void run_mob_echoes(void) {
 		if (found_mcm) {
 			// MOB_CUSTOM_x
 			switch (found_mcm->type) {
-				case MOB_CUSTOM_ECHO: {
+				case MOB_CUSTOM_ECHO:
+				case MOB_CUSTOM_ECHO_DAY:
+				case MOB_CUSTOM_ECHO_NIGHT: {
 					act(found_mcm->msg, FALSE, found_mob, NULL, NULL, TO_ROOM);
 					break;
 				}
-				case MOB_CUSTOM_SAY: {
+				case MOB_CUSTOM_SAY:
+				case MOB_CUSTOM_SAY_DAY:
+				case MOB_CUSTOM_SAY_NIGHT: {
 					do_say(found_mob, found_mcm->msg, 0, 0);
 					break;
 				}
@@ -896,10 +1497,12 @@ void despawn_mob(char_data *ch) {
 	obj_data *obj, *next_obj;
 	int iter;
 	
+	if (!IS_NPC(ch)) {
+		return;	// safety check
+	}
+	
 	// empty inventory and equipment
-	for (obj = ch->carrying; obj != NULL; obj = next_obj) {
-		next_obj = obj->next_content;
-		
+	DL_FOREACH_SAFE2(ch->carrying, obj, next_obj, next_content) {
 		extract_obj(obj);
 	}
 	
@@ -910,6 +1513,215 @@ void despawn_mob(char_data *ch) {
 	}
 
 	extract_char(ch);
+}
+
+
+EVENTFUNC(mob_despawn_event) {
+	struct mob_event_data *data = (struct mob_event_data*)event_obj;
+	char_data *mob = data->mob, *chiter;
+	int count;
+	
+	// safety first
+	if (!MOB_FLAGGED(mob, MOB_SPAWNED) || MOB_FLAGGED(mob, MOB_TIED)) {
+		delete_stored_event(&GET_STORED_EVENTS(mob), SEV_DESPAWN);
+		free(data);
+		return 0;	// do no re-enqueue
+	}
+	else if (mob->desc) {
+		// switched-- try again later
+		return 60 RL_SEC;
+	}
+	else if (GET_LED_BY(mob) || GET_LEADING_MOB(mob) || GET_LEADING_VEHICLE(mob) || GET_FED_ON_BY(mob) || MOB_FLAGGED(mob, MOB_TIED)) {
+		// try again soon
+		return 60 RL_SEC;
+	}
+	
+	// animal-in-a-stable checks
+	if (MOB_FLAGGED(mob, MOB_ANIMAL) && room_has_function_and_city_ok(NULL, IN_ROOM(mob), FNC_STABLE)) {
+		// check mob crowding
+		count = 0;
+		DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(mob)), chiter, next_in_room) {
+			if (IS_NPC(chiter) && GET_MOB_VNUM(chiter) == GET_MOB_VNUM(mob)) {
+				++count;
+			}
+		}
+		if (count > config_get_int("num_duplicates_in_stable")) {
+			act("$n is feeling overcrowded, and leaves.", TRUE, mob, NULL, NULL, TO_ROOM);
+			delete_stored_event(&GET_STORED_EVENTS(mob), SEV_DESPAWN);
+			free(data);
+			despawn_mob(mob);
+			return 0;	// do no re-enqueue
+		}
+		
+		// otherwise we've hit the stable exception! come back in an hour
+		return SECS_PER_REAL_HOUR RL_SEC;
+	}
+	
+	// last check: players nerby
+	if (distance_to_nearest_player(IN_ROOM(mob)) <= config_get_int("mob_despawn_radius")) {
+		return 60 RL_SEC;	// re-enqueue
+	}
+	
+	// ok: if we got here, we can despawn the mob
+	delete_stored_event(&GET_STORED_EVENTS(mob), SEV_DESPAWN);
+	free(data);
+	despawn_mob(mob);
+	return 0;	// do no re-enqueue
+}
+
+
+/**
+* Call this e.g. if you change the "mob_spawn_interval" config. It will update
+* the despawn schedule for all SPAWNED mobs based on the new interval, and
+* ensure all SPAWNED mobs have despawn events.
+*/
+void reschedule_all_despawns(void) {
+	char_data *iter;
+	
+	DL_FOREACH(character_list, iter) {
+		if (MOB_FLAGGED(iter, MOB_SPAWNED)) {
+			cancel_stored_event(&GET_STORED_EVENTS(iter), SEV_DESPAWN);
+			schedule_despawn_event(iter);
+		}
+	}
+}
+
+
+/**
+* Schedules a DG event for a spawned mob to despawn. It guarantees the despawn
+* time will be in the future. Safe to call on any mob but won't override an
+* existing scheduled event.
+*
+* @param char_data *mob The mob to schedule for.
+*/
+void schedule_despawn_event(char_data *mob) {
+	struct mob_event_data *data;
+	struct dg_event *ev;
+	long when;
+	
+	long interval_mins = config_get_int("mob_spawn_interval");
+	
+	if (mob && MOB_FLAGGED(mob, MOB_SPAWNED) && !MOB_FLAGGED(mob, MOB_TIED) && !find_stored_event(GET_STORED_EVENTS(mob), SEV_DESPAWN) && interval_mins > 0) {
+		CREATE(data, struct mob_event_data, 1);
+		data->mob = mob;
+		
+		// determine seconds-from-now
+		when = MOB_SPAWN_TIME(mob) + (interval_mins * SECS_PER_REAL_MIN) - time(0);
+		if (when <= 0) {
+			// ensure it's in the future to avoid a ton of collisions at once if the mud reboots after being down a while
+			when = number(1, 60);
+		}
+		
+		ev = dg_event_create(mob_despawn_event, data, when RL_SEC);
+		add_stored_event(&GET_STORED_EVENTS(mob), SEV_DESPAWN, ev);
+	}
+}
+
+
+/**
+* Sets (or re-sets) the spawn time for a mob and schedules the despawn event.
+*
+* @param char_data *mob The mob to set a spawn time for.
+* @param long when The timestamp when the mob spawned -- usually time(0).
+*/
+void set_mob_spawn_time(char_data *mob, long when) {
+	if (mob && IS_NPC(mob)) {
+		MOB_SPAWN_TIME(mob) = when;
+		cancel_stored_event(&GET_STORED_EVENTS(mob), SEV_DESPAWN);
+		schedule_despawn_event(mob);
+	}
+}
+
+
+/**
+* Runs a single spawn list on a room. The room is assumed to be pre-validated
+* and ready to receive spawns.
+*
+* @param room_data *room The room to spawn in.
+* @param struct spawn_info *list The spawn list to run (spawns based on flags and percentages).
+* @return int The number of mobs spawned, if any.
+*/
+static int spawn_one_list(room_data *room, struct spawn_info *list) {
+	int count, x_coord, y_coord;
+	struct spawn_info *spawn;
+	bool in_city, junk;
+	room_data *home;
+	char_data *mob, *proto;
+	
+	if (!room || !list) {
+		return 0;	// safety first
+	}
+	
+	home = HOME_ROOM(room);
+	
+	// set up data for faster checking
+	x_coord = X_COORD(room);
+	y_coord = Y_COORD(room);
+	count = 0;
+	in_city = (ROOM_OWNER(home) && is_in_city_for_empire(room, ROOM_OWNER(home), TRUE, &junk)) ? TRUE : FALSE;
+	
+	LL_FOREACH(list, spawn) {
+		// validate flags
+		if (!validate_spawn_location(room, spawn->flags, x_coord, y_coord, in_city)) {
+			continue;
+		}
+		
+		// check percent
+		if (number(1, 10000) > (int)(100 * spawn->percent)) {
+			continue;
+		}
+		
+		// check repel-animals
+		if (ROOM_AFF_FLAGGED(room, ROOM_AFF_REPEL_ANIMALS) && (!(proto = mob_proto(spawn->vnum)) || MOB_FLAGGED(proto, MOB_ANIMAL))) {
+			continue;	// repelled by this flag
+		}
+		
+		// passed! let's spawn
+		mob = read_mobile(spawn->vnum, TRUE);
+		if (!mob) {
+			continue;	// in case of problem
+		}
+		
+		// ensure loyalty
+		if (ROOM_OWNER(home) && MOB_FLAGGED(mob, MOB_HUMAN | MOB_EMPIRE | MOB_CITYGUARD)) {
+			GET_LOYALTY(mob) = ROOM_OWNER(home);
+		}
+		
+		// in case of generic names
+		setup_generic_npc(mob, ROOM_OWNER(home), NOTHING, NOTHING);
+		
+		// enforce spawn data
+		if (!MOB_FLAGGED(mob, MOB_SPAWNED)) {
+			set_mob_flags(mob, MOB_SPAWNED);
+		}
+		
+		// put in the room
+		char_to_room(mob, room);
+		load_mtrigger(mob);
+		++count;
+	}
+	
+	return count;
+}
+
+
+GLB_VALIDATOR(validate_global_map_spawns) {
+	struct glb_map_spawn_bean *data = (struct glb_map_spawn_bean*)other_data;
+	if (!other_data) {
+		return FALSE;
+	}
+	return validate_spawn_location(data->room, GET_GLOBAL_SPARE_BITS(glb), data->x_coord, data->y_coord, data->in_city);
+}
+
+
+GLB_FUNCTION(run_global_map_spawns) {
+	struct glb_map_spawn_bean *data = (struct glb_map_spawn_bean*)other_data;
+	if (data) {
+		return (spawn_one_list(data->room, GET_GLOBAL_SPAWNS(glb)) > 0);
+	}
+	else {
+		return FALSE;
+	}
 }
 
 
@@ -925,18 +1737,16 @@ void despawn_mob(char_data *ch) {
 * @param bool only_artisans If TRUE, the room has respawned too recently and will only spawn artisans
 */
 static void spawn_one_room(room_data *room, bool only_artisans) {
-	extern char *replace_npc_names(const char *str, const char *name, const char *empire_name, const char *empire_adjective);
-	extern char_data *spawn_empire_npc_to_room(empire_data *emp, struct empire_npc_data *npc, room_data *room, mob_vnum override_mob);
-	
 	room_data *iter, *next_iter, *home;
 	struct empire_territory_data *ter;
-	int count, x_coord, y_coord;
-	struct spawn_info *list, *spawn;
+	struct empire_vehicle_data *vter;
+	struct vehicle_room_list *vrl;
+	vehicle_data *veh, *next_veh;
 	struct empire_npc_data *npc;
-	char_data *mob, *ch_iter;
+	char_data *ch_iter;
 	time_t now = time(0);
-	bool in_city, junk;
 	crop_data *cp;
+	int count;
 	mob_vnum artisan = NOTHING;
 	
 	int time_to_empire_emptiness = config_get_int("time_to_empire_emptiness") * SECS_PER_REAL_WEEK;
@@ -944,6 +1754,30 @@ static void spawn_one_room(room_data *room, bool only_artisans) {
 	// safety first
 	if (!room) {
 		return;
+	}
+	
+	// start recursively with vehicles
+	DL_FOREACH_SAFE2(ROOM_VEHICLES(room), veh, next_veh, next_in_room) {
+		if (!VEH_IS_EXTRACTED(veh)) {
+			// vehicle's own npcs?
+			if (VEH_OWNER(veh) && (vter = find_empire_vehicle_entry(VEH_OWNER(veh), veh))) {
+				LL_FOREACH(vter->npcs, npc) {
+					if (npc->mob) {
+						continue;	// check if the mob is already spawned
+					}
+					if (only_artisans && npc->vnum != VEH_ARTISAN(veh)) {
+						continue;	// not spawning this now
+					}
+					
+					spawn_empire_npc_to_room(VEH_OWNER(veh), npc, room, NOTHING);
+				}
+			}
+			
+			// interior
+			LL_FOREACH(VEH_ROOM_LIST(veh), vrl) {
+				spawn_one_room(vrl->room, only_artisans);
+			}
+		}
 	}
 	
 	artisan = (GET_BUILDING(room) ? GET_BLD_ARTISAN(GET_BUILDING(room)) : NOTHING);
@@ -960,106 +1794,76 @@ static void spawn_one_room(room_data *room, bool only_artisans) {
 		return;
 	}
 	
-	// spawn empire npcs who live here first
-	if (ROOM_OWNER(home) && (ter = find_territory_entry(ROOM_OWNER(home), room))) {
-		for (npc = ter->npcs; npc; npc = npc->next) {
-			if (npc->mob) {
-				continue;	// check if the mob is already spawned
-			}
-			if (only_artisans && npc->vnum != artisan) {
-				continue;	// not spawning this now
-			}
-			
-			spawn_empire_npc_to_room(ROOM_OWNER(home), npc, room, NOTHING);
-		}
-	}
 	
-	// count creatures in the room; don't spawn rooms that are already populous
-	count = 0;
-	for (ch_iter = ROOM_PEOPLE(room); ch_iter; ch_iter = ch_iter->next_in_room) {
-		if (IS_NPC(ch_iter)) {
-			++count;
-		}
-	}
+	if (!ROOM_AFF_FLAGGED(room, ROOM_AFF_REPEL_NPCS)) {
+		// spawns not blocked by repel-npcs
 	
-	// normal spawn list
-	if (!only_artisans && count < config_get_int("spawn_limit_per_room")) {
-		// find a spawn list
-		list = NULL;
-		if (GET_BUILDING(room)) {
-			// only find a spawn list here if the building is complete; otherwise no list = no spawn
-			if (IS_COMPLETE(room)) {
-				list = GET_BLD_SPAWNS(GET_BUILDING(room));
-			}
-		}
-		else if (ROOM_SECT_FLAGGED(room, SECTF_CROP) && (cp = ROOM_CROP(room))) {
-			list = GET_CROP_SPAWNS(cp);
-		}
-		else {
-			list = GET_SECT_SPAWNS(SECT(room));
-		}
-	
-		// anything to spawn?
-		if (list) {
-			// set up data for faster checking
-			x_coord = X_COORD(room);
-			y_coord = Y_COORD(room);
-			in_city = (ROOM_OWNER(home) && is_in_city_for_empire(room, ROOM_OWNER(home), TRUE, &junk)) ? TRUE : FALSE;
-	
-			for (spawn = list; spawn; spawn = spawn->next) {
-				// validate flags
-				if (IS_SET(spawn->flags, SPAWN_NOCTURNAL) && weather_info.sunlight != SUN_DARK && weather_info.sunlight != SUN_SET)
-					continue;
-				if (IS_SET(spawn->flags, SPAWN_DIURNAL) && weather_info.sunlight != SUN_LIGHT && weather_info.sunlight != SUN_RISE)
-					continue;
-				if (IS_SET(spawn->flags, SPAWN_CLAIMED) && !ROOM_OWNER(home))
-					continue;
-				if (IS_SET(spawn->flags, SPAWN_UNCLAIMED) && ROOM_OWNER(home))
-					continue;
-				if (IS_SET(spawn->flags, SPAWN_CITY) && !in_city)
-					continue;
-				if (IS_SET(spawn->flags, SPAWN_OUT_OF_CITY) && in_city)
-					continue;
-				if (IS_SET(spawn->flags, SPAWN_NORTHERN) && y_coord < (MAP_HEIGHT / 2))
-					continue;
-				if (IS_SET(spawn->flags, SPAWN_SOUTHERN) && y_coord >= (MAP_HEIGHT / 2))
-					continue;
-				if (IS_SET(spawn->flags, SPAWN_EASTERN) && x_coord < (MAP_WIDTH / 2))
-					continue;
-				if (IS_SET(spawn->flags, SPAWN_WESTERN) && x_coord >= (MAP_WIDTH / 2))
-					continue;
-
-				// check percent
-				if (number(1, 10000) > (int)(100 * spawn->percent)) {
-					continue;
+		// spawn empire npcs who live here first
+		if (ROOM_OWNER(home) && (ter = find_territory_entry(ROOM_OWNER(home), room))) {
+			for (npc = ter->npcs; npc; npc = npc->next) {
+				if (npc->mob) {
+					continue;	// check if the mob is already spawned
 				}
-		
-				// passed! let's spawn
-				mob = read_mobile(spawn->vnum, TRUE);
-		
-				// ensure loyalty
-				if (ROOM_OWNER(home) && MOB_FLAGGED(mob, MOB_HUMAN | MOB_EMPIRE | MOB_CITYGUARD)) {
-					GET_LOYALTY(mob) = ROOM_OWNER(home);
+				if (only_artisans && npc->vnum != artisan) {
+					continue;	// not spawning this now
 				}
-
-				// in case of generic names
-				setup_generic_npc(mob, ROOM_OWNER(home), NOTHING, NOTHING);
-		
-				// enforce spawn data
-				SET_BIT(MOB_FLAGS(mob), MOB_SPAWNED);
-				
-				// put in the room
-				char_to_room(mob, room);
-				load_mtrigger(mob);
+			
+				spawn_empire_npc_to_room(ROOM_OWNER(home), npc, room, NOTHING);
 			}
 		}
-	}
-
-	// spawn interior rooms: recursively
-	if (GET_INSIDE_ROOMS(room) > 0) {
-		for (iter = interior_room_list; iter; iter = next_iter) {
-			next_iter = iter->next_interior;
+	
+		// count creatures in the room; don't spawn rooms that are already populous
+		count = 0;
+		DL_FOREACH2(ROOM_PEOPLE(room), ch_iter, next_in_room) {
+			if (IS_NPC(ch_iter)) {
+				++count;
+			}
+		}
+	
+		// normal spawn list
+		if (!only_artisans && count < config_get_int("spawn_limit_per_room")) {
+			// spawn based on vehicles?
+			DL_FOREACH_SAFE2(ROOM_VEHICLES(room), veh, next_veh, next_in_room) {
+				if (!VEH_IS_EXTRACTED(veh) && VEH_SPAWNS(veh)) {
+					count += spawn_one_list(room, VEH_SPAWNS(veh));
+				}
+			}
+		
+			// spawn based on tile type -- if we're not now over the count
+			if (count < config_get_int("spawn_limit_per_room")) {
+				if (GET_BUILDING(room)) {
+					// only find a spawn list here if the building is complete; otherwise no list = no spawn
+					if (IS_COMPLETE(room)) {
+						count += spawn_one_list(room, GET_BLD_SPAWNS(GET_BUILDING(room)));
+					}
+				}
+				else if (ROOM_SECT_FLAGGED(room, SECTF_CROP) && (cp = ROOM_CROP(room))) {
+					count += spawn_one_list(room, GET_CROP_SPAWNS(cp));
+				}
+				else {
+					count += spawn_one_list(room, GET_SECT_SPAWNS(SECT(room)));
+				}
+			}
+		
+			// global spawn lists
+			if (IS_OUTDOOR_TILE(room) && !ROOM_SECT_FLAGGED(room, SECTF_NO_GLOBAL_SPAWNS) && !ROOM_CROP_FLAGGED(room, CROPF_NO_GLOBAL_SPAWNS) && count < config_get_int("spawn_limit_per_room")) {
+				struct glb_map_spawn_bean *data;
+				bool junk;
 			
+				CREATE(data, struct glb_map_spawn_bean, 1);
+				data->room = room;
+				data->x_coord = X_COORD(room);
+				data->y_coord = Y_COORD(room);
+				data->in_city = (ROOM_OWNER(home) && is_in_city_for_empire(room, ROOM_OWNER(home), TRUE, &junk)) ? TRUE : FALSE;
+				run_globals(GLOBAL_MAP_SPAWNS, run_global_map_spawns, TRUE, get_climate(room), NULL, NULL, 0, validate_global_map_spawns, data);
+				free(data);
+			}
+		}
+	}	// end repel-npcs block
+	
+	// spawn interior rooms recursively (except inside vehicles, which are spawned above)
+	if (GET_INSIDE_ROOMS(room) > 0 && !GET_ROOM_VEHICLE(room)) {
+		DL_FOREACH_SAFE2(interior_room_list, iter, next_iter, next_interior) {
 			if (HOME_ROOM(iter) == room && iter != room) {
 				spawn_one_room(iter, only_artisans);
 			}
@@ -1082,7 +1886,7 @@ void spawn_mobs_from_center(room_data *center) {
 	int mob_spawn_radius = config_get_int("mob_spawn_radius");
 	
 	// always start on the map
-	center = get_map_location_for(center);
+	center = (GET_MAP_LOC(center) ? real_room(GET_MAP_LOC(center)->vnum) : NULL);
 	
 	// skip if we didn't find a map location
 	if (!center || GET_ROOM_VNUM(center) >= MAP_SIZE) {
@@ -1107,8 +1911,183 @@ void spawn_mobs_from_center(room_data *center) {
 }
 
 
+/**
+* Validates 1 location for a spawn_info entry, based on the flags (including
+* time-of-day flags). This does not check spawn percentage or validate the mob.
+* This function takes in-city and coords as parameters because normal uses of
+* the function will call it many many times.
+*
+* @param room_data *room The room to validate.
+* @param bitvector_t spawn_flags The flags to validate for the room.
+* @param int x_coord The x-coordinate of the room (prevents multiple function calls).
+* @param int y_coord The y-coordinate of the room (prevents multiple function calls).
+* @param bool in_city Whether or not the room is in-city (prevents multiple function calls).
+* @return bool TRUE if the spawn matches; FALSE if not.
+*/
+bool validate_spawn_location(room_data *room, bitvector_t spawn_flags, int x_coord, int y_coord, bool in_city) {
+	room_data *home;
+	int season, sun = SUN_LIGHT;
+	
+	if (!room) {
+		return FALSE;	// shortcut
+	}
+	
+	// SPAWN_x: this code validates spawn flags
+	
+	// load sun info if needed
+	if (IS_SET(spawn_flags, SPAWN_NOCTURNAL | SPAWN_DIURNAL)) {
+		sun = get_sun_status(room);
+	}
+	
+	// easy checks
+	if (IS_SET(spawn_flags, SPAWN_NOCTURNAL) && sun != SUN_DARK && sun != SUN_SET) {
+		return FALSE;
+	}
+	if (IS_SET(spawn_flags, SPAWN_DIURNAL) && sun != SUN_LIGHT && sun != SUN_RISE) {
+		return FALSE;
+	}
+	
+	// home room checks
+	home = HOME_ROOM(room);
+	if (IS_SET(spawn_flags, SPAWN_CLAIMED) && !ROOM_OWNER(home)) {
+		return FALSE;
+	}
+	if (IS_SET(spawn_flags, SPAWN_UNCLAIMED) && ROOM_OWNER(home)) {
+		return FALSE;
+	}
+	
+	// in-city checks
+	if (IS_SET(spawn_flags, SPAWN_CITY) && !in_city) {
+		return FALSE;
+	}
+	if (IS_SET(spawn_flags, SPAWN_OUT_OF_CITY) && in_city) {
+		return FALSE;
+	}
+	
+	// validate coords
+	if (IS_SET(spawn_flags, SPAWN_NORTHERN) && (y_coord == -1 || y_coord < (MAP_HEIGHT / 2))) {
+		return FALSE;
+	}
+	if (IS_SET(spawn_flags, SPAWN_SOUTHERN) && (y_coord == -1 || y_coord >= (MAP_HEIGHT / 2))) {
+		return FALSE;
+	}
+	if (IS_SET(spawn_flags, SPAWN_EASTERN) && (x_coord == -1 || x_coord < (MAP_WIDTH / 2))) {
+		return FALSE;
+	}
+	if (IS_SET(spawn_flags, SPAWN_WESTERN) && (x_coord == -1 || x_coord >= (MAP_WIDTH / 2))) {
+		return FALSE;
+	}
+	
+	// validate continent/not
+	if (IS_SET(spawn_flags, SPAWN_CONTINENT_ONLY)) {
+		if (!GET_ISLAND(room) || !IS_SET(GET_ISLAND(room)->flags, ISLE_CONTINENT)) {
+			return FALSE;	// not a continent
+		}
+	}
+	else if (IS_SET(spawn_flags, SPAWN_NO_CONTINENT)) {
+		if (GET_ISLAND(room) && IS_SET(GET_ISLAND(room)->flags, ISLE_CONTINENT)) {
+			return FALSE;	// oops is a continent
+		}
+	}
+	
+	// validate seasons -- if any are set
+	if (IS_SET(spawn_flags, SPAWN_SPRING_ONLY | SPAWN_SUMMER_ONLY | SPAWN_AUTUMN_ONLY | SPAWN_WINTER_ONLY)) {
+		season = GET_SEASON(room);
+		if (!((IS_SET(spawn_flags, SPAWN_SPRING_ONLY) && season == TILESET_SPRING) || (IS_SET(spawn_flags, SPAWN_SUMMER_ONLY) && season == TILESET_SUMMER) || (IS_SET(spawn_flags, SPAWN_AUTUMN_ONLY) && season == TILESET_AUTUMN) || (IS_SET(spawn_flags, SPAWN_WINTER_ONLY) && season == TILESET_WINTER))) {
+			// none of the seasons match (only 1 must match)
+			return FALSE;
+		}
+	}
+	
+	// ok?
+	return TRUE;
+}
+
+
  //////////////////////////////////////////////////////////////////////////////
 //// MOB SCALING /////////////////////////////////////////////////////////////
+
+/**
+* Checks if a mob can be reset due to being out of combat (or when called by
+* a script). This involves healing it and, usually, un-scaling it.
+*
+* @char_data *ch The character to check for a reset/heal.
+* @param bool force If TRUE, will ignore combat and other factors that would otherwise prevent it.
+* @return bool TRUE if it was reset, FALSE if not.
+*/
+bool check_reset_mob(char_data *ch, bool force) {
+	struct instance_data *inst;
+	char_data *ch_iter;
+	bool found;
+	int lev;
+	
+	if (!IS_NPC(ch)) {
+		return FALSE;	// oops
+	}
+	if (AFF_FLAGGED(ch, AFF_POOR_REGENS)) {
+		return FALSE;	// delay due to poor-regen affect
+	}
+	
+	// things to check first (if not forced)
+	if (!force) {
+		if (GET_POS(ch) < POS_STUNNED || FIGHTING(ch) || GET_FED_ON_BY(ch)) {
+			return FALSE;	// do not reset
+		}
+	
+		// verify not fighting at all
+		found = FALSE;
+		DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), ch_iter, next_in_room) {
+			if (FIGHTING(ch_iter) == ch) {
+				found = TRUE;
+				break;
+			}
+		}
+		if (found) {
+			return FALSE;	// do not reset: fighting
+		}
+	}
+	
+	// ok: reset me
+	free_mob_tags(&MOB_TAGGED_BY(ch));
+	set_health(ch, GET_MAX_HEALTH(ch));
+	set_move(ch, GET_MAX_MOVE(ch));
+	set_mana(ch, GET_MAX_MANA(ch));
+	set_blood(ch, GET_MAX_BLOOD(ch));
+	if (GET_POS(ch) < POS_SLEEPING) {
+		GET_POS(ch) = POS_STANDING;
+	}
+	
+	// and reset scaling if possible:
+	if (GET_CURRENT_SCALE_LEVEL(ch) > 0) {
+		// check for instance
+		inst = get_instance_by_id(MOB_INSTANCE_ID(ch));
+		if (!inst && IS_ADVENTURE_ROOM(IN_ROOM(ch))) {
+			inst = find_instance_by_room(IN_ROOM(ch), FALSE, TRUE);
+		}
+	
+		// check for a level we should use
+		if (MOB_FLAGGED(ch, MOB_NO_RESCALE)) {
+			lev = GET_CURRENT_SCALE_LEVEL(ch);
+		}
+		else if (inst && INST_LEVEL(inst) > 0) {
+			lev = INST_LEVEL(inst);
+		}
+		else {
+			lev = 0;
+		}
+	
+		// always reset level to force re-scaling if flags changed
+		GET_CURRENT_SCALE_LEVEL(ch) = 0;
+	
+		// did we get a level to scale back to
+		if (lev > 0) {	
+			scale_mob_to_level(ch, lev);
+		}
+	}
+	
+	return TRUE;	// did reset
+}
+
 
 /**
 * This ensures that mobs are scaled correctly, and can be called any time
@@ -1120,8 +2099,6 @@ void spawn_mobs_from_center(room_data *center) {
 * @return bool TRUE -- always
 */
 bool check_scaling(char_data *mob, char_data *attacker) {
-	void scale_mob_for_character(char_data *mob, char_data *ch);
-
 	// ensure scaling
 	if (attacker != mob && IS_NPC(mob) && GET_CURRENT_SCALE_LEVEL(mob) == 0) {
 		scale_mob_for_character(mob, attacker);
@@ -1136,7 +2113,7 @@ bool check_scaling(char_data *mob, char_data *attacker) {
 
 /**
 * This function figures out what level a mob would be scaled to if it were
-* fighting ch. This is largely based on master/party.
+* fighting ch. This is largely based on leader/party.
 *
 * @param char_data *ch The person we'd scale based on.
 * @param bool check_group if TRUE, considers group members' levels too
@@ -1148,11 +2125,13 @@ int determine_best_scale_level(char_data *ch, bool check_group) {
 	int iter, level = 0;
 	
 	// level caps for sub-100 scaling -- TODO this is very similar to what's done in can_wear_item()
-	int level_ranges[] = { BASIC_SKILL_CAP, SPECIALTY_SKILL_CAP, CLASS_SKILL_CAP, -1 };	// terminate with -1
+	int level_ranges[] = { BASIC_SKILL_CAP, SPECIALTY_SKILL_CAP, MAX_SKILL_CAP, -1 };	// terminate with -1
 	
-	// determine who we're really scaling to
-	while (IS_NPC(scale_to) && scale_to->master) {
-		scale_to = scale_to->master;
+	// determine who we're really scaling to (ONLY if check_group)
+	if (check_group) {
+		while (IS_NPC(scale_to) && GET_LEADER(scale_to)) {
+			scale_to = GET_LEADER(scale_to);
+		}
 	}
 	
 	// now determine the ideal level based on scale_to
@@ -1169,7 +2148,7 @@ int determine_best_scale_level(char_data *ch, bool check_group) {
 		level = GET_COMPUTED_LEVEL(scale_to);
 		
 		// for people under the class cap, also cap scaling on their level range
-		if (GET_SKILL_LEVEL(scale_to) < CLASS_SKILL_CAP) {
+		if (GET_SKILL_LEVEL(scale_to) < MAX_SKILL_CAP) {
 			for (iter = 0; level_ranges[iter] != -1; ++iter) {
 				if (GET_SKILL_LEVEL(scale_to) <= level_ranges[iter]) {
 					level = MIN(level, level_ranges[iter]);
@@ -1191,21 +2170,31 @@ int determine_best_scale_level(char_data *ch, bool check_group) {
 
 
 /**
-* Scales a mob below the master's level like a familiar.
+* Scales a mob below the leader's level like a companion. Companions generally
+* scale 25 levels below the character's level (or the use_level, if you pass
+* one) if the level is over 100. That is, companions scale with the character
+* up to level 100.
 *
 * @param char_data *mob The mob to scale.
-* @param char_data *master The person to base it on.
+* @param char_data *leader The person to base it on.
+* @param int use_level If you are using something other than character's level, e.g. the level of a skill, pass it here (or 0 to detect level here).
 */
-void scale_mob_as_familiar(char_data *mob, char_data *master) {
+void scale_mob_as_companion(char_data *mob, char_data *leader, int use_level) {
 	int scale_level;
 	
-	scale_level = get_approximate_level(master);
-	if (scale_level > CLASS_SKILL_CAP) {
+	if (use_level > 0) {
+		scale_level = use_level;
+	}
+	else {
+		scale_level = get_approximate_level(leader);
+	}
+	
+	if (scale_level > MAX_SKILL_CAP) {
 		// 25 levels lower if over 100
-		scale_level = MAX(CLASS_SKILL_CAP, scale_level - 25);
+		scale_level = MAX(MAX_SKILL_CAP, scale_level - 25);
 	}
 	scale_mob_to_level(mob, scale_level);
-	SET_BIT(MOB_FLAGS(mob), MOB_NO_RESCALE);	// ensure it doesn't rescale itself
+	set_mob_flags(mob, MOB_NO_RESCALE);	// ensure it doesn't rescale itself
 }
 
 
@@ -1229,14 +2218,12 @@ void scale_mob_for_character(char_data *mob, char_data *ch) {
 * @param int level The level to scale it to.
 */
 void scale_mob_to_level(char_data *mob, int level) {
-	extern const int base_player_pools[NUM_POOLS];
-	void get_scale_constraints(room_data *room, char_data *mob, int *scale_level, int *min, int *max);
-	
 	double value, target;
 	int low_level, mid_level, high_level, over_level;
 	int room_lev = 0, room_min = 0, room_max = 0;
 	int pools_down[NUM_POOLS];
 	int iter;
+	attack_message_data *amd;
 	
 	// sanity
 	if (!IS_NPC(mob)) {
@@ -1266,6 +2253,11 @@ void scale_mob_to_level(char_data *mob, int level) {
 		level = MIN(room_max, level);
 	}
 	
+	// rounding?
+	if (round_level_scaling_to_nearest > 1 && level > 1 && (level % round_level_scaling_to_nearest) > 0) {
+		level += (round_level_scaling_to_nearest - (level % round_level_scaling_to_nearest));
+	}
+	
 	// insanity!
 	if (level <= 0) {
 		return;
@@ -1279,16 +2271,26 @@ void scale_mob_to_level(char_data *mob, int level) {
 	// set up: determine how many levels the mob gets in each level range
 	low_level = MAX(0, MIN(level, BASIC_SKILL_CAP));
 	mid_level = MAX(0, MIN(level, SPECIALTY_SKILL_CAP) - BASIC_SKILL_CAP);
-	high_level = MAX(0, MIN(level, CLASS_SKILL_CAP) - SPECIALTY_SKILL_CAP);
-	over_level = MAX(0, level - CLASS_SKILL_CAP);
+	high_level = MAX(0, MIN(level, MAX_SKILL_CAP) - SPECIALTY_SKILL_CAP);
+	over_level = MAX(0, level - MAX_SKILL_CAP);
 	
 	GET_CURRENT_SCALE_LEVEL(mob) = level;
 
 	// health
 	value = (1.5 * low_level) + (3.25 * mid_level) + (5.0 * high_level) + (12 * over_level);
-	value *= MOB_FLAGGED(mob, MOB_TANK) ? 2.0 : 1.0;
-	value *= MOB_FLAGGED(mob, MOB_HARD) ? 4.5 : 1.0;
-	value *= MOB_FLAGGED(mob, MOB_GROUP) ? 5.5 : 1.0;
+	target = 45.0;	// max multiplier of health flags
+	if (MOB_FLAGGED(mob, MOB_GROUP) && MOB_FLAGGED(mob, MOB_HARD)) {	// boss
+		value *= MOB_FLAGGED(mob, MOB_TANK) ? (1.0 * target) : (0.75 * target);
+	}
+	else if (MOB_FLAGGED(mob, MOB_GROUP)) {
+		value *= MOB_FLAGGED(mob, MOB_TANK) ? (0.65 * target) : (0.5 * target);
+	}
+	else if (MOB_FLAGGED(mob, MOB_HARD)) {
+		value *= MOB_FLAGGED(mob, MOB_TANK) ? (0.25 * target) : (0.1 * target);
+	}
+	else if (MOB_FLAGGED(mob, MOB_TANK)) {
+		value *= (0.05 * target);
+	}
 	mob->points.max_pools[HEALTH] = MAX(1, (int) ceil(value));
 	
 	// move
@@ -1306,10 +2308,9 @@ void scale_mob_to_level(char_data *mob, int level) {
 	mob->points.max_pools[MANA] = MAX(0, (int) ceil(value));
 	
 	// blood*
-	value = base_player_pools[BLOOD];
+	value = size_data[GET_SIZE(mob)].max_blood;
 	value += MOB_FLAGGED(mob, MOB_VAMPIRE) ? ((10 * high_level) + (20 * over_level)) : 0;
 	value *= MOB_FLAGGED(mob, MOB_ANIMAL) ? 0.5 : 1.0;
-	value *= (level <= 10) ? 0.1 : 1.0;
 	mob->points.max_pools[BLOOD] = MAX(1, (int) ceil(value));
 	
 	// strength
@@ -1351,12 +2352,16 @@ void scale_mob_to_level(char_data *mob, int level) {
 	
 	// damage
 	target = (low_level / 20.0) + (mid_level / 17.5) + (high_level / 15.0) + (over_level / 9.5);
-	value = target * attack_hit_info[MOB_ATTACK_TYPE(mob)].speed[SPD_NORMAL];
+	amd = real_attack_message(MOB_ATTACK_TYPE(mob));
+	value = target * ((amd && ATTACK_SPEED(amd, SPD_NORMAL) > 0.0) ? ATTACK_SPEED(amd, SPD_NORMAL) : basic_speed);
 	value *= MOB_FLAGGED(mob, MOB_DPS) ? 2.5 : 1.0;
 	value *= MOB_FLAGGED(mob, MOB_HARD) ? 2.5 : 1.0;
 	value *= MOB_FLAGGED(mob, MOB_GROUP) ? 3.5 : 1.0;
-	if (!attack_hit_info[MOB_ATTACK_TYPE(mob)].disarmable) {
+	if (AFF_FLAGGED(mob, AFF_NO_DISARM) || (amd && !ATTACK_FLAGGED(amd, AMDF_DISARMABLE))) {
 		value *= 0.7;	// disarm would cut damage in half; this brings it closer together
+	}
+	if (MOB_FLAGGED(mob, MOB_HARD | MOB_GROUP)) {
+		value *= 1.15;	// 15% more damage from non-Normal mobs
 	}
 	mob->mob_specials.damage = MAX(1, (int) ceil(value));
 	
@@ -1375,11 +2380,20 @@ void scale_mob_to_level(char_data *mob, int level) {
 	
 	// cleanup
 	for (iter = 0; iter < NUM_POOLS; ++iter) {
-		mob->points.current_pools[iter] = mob->points.max_pools[iter] - pools_down[iter];
+		set_current_pool(mob, iter, mob->points.max_pools[iter] - pools_down[iter]);
+		// ensure minimum of 1 after scaling:
+		if (mob->points.current_pools[iter] < 1) {
+			set_current_pool(mob, iter, 1);
+		}
 	}
 	for (iter = 0; iter < NUM_ATTRIBUTES; ++iter) {
 		mob->aff_attributes[iter] = mob->real_attributes[iter];
 	}
 	affect_total(mob);
 	update_pos(mob);
+	
+	// mark for descale if possible
+	if (!MOB_FLAGGED(mob, MOB_NO_RESCALE)) {
+		schedule_reset_mob(mob);
+	}
 }

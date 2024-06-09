@@ -23,15 +23,17 @@ D
 towers above the treetops of the jungle around. Stairs lead down from one
 corner of the platform at the top of the pyramid to a torch-lit chamber below.
 ~
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Large Ruins
 M
 244 20.00 c
 R
-16 1 1 0
+6000 1 1 0
 R
-19 1 1 0
+6790 1 1 0
 R
-3 1 1 0
+6075 1 1 0
 T 18521
+T 18517
 S
 #18502
 Overgrown Chamber~
@@ -137,7 +139,7 @@ S
 Ruined Jungle Temple~
 A Ruined Jungle Temple~
 &y/^&g.\~
-3 4 hiR 0
+3 4 hR 0
 0 0 0 -1
 C
 dedicate~
@@ -149,10 +151,10 @@ pyramid has collapsed, blocking access to the interior.
 M
 244 20.00 c
 R
-16 1 1 0
+6000 1 1 0
 R
-19 1 1 0
+6790 1 1 0
 R
-3 1 1 0
+6075 1 1 0
 S
 $

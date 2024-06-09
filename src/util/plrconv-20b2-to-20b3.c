@@ -23,7 +23,7 @@
 *       It has been tossed around rigorously, if you are going to use     *
 *       it, heed the warning above.                                       *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -166,7 +166,7 @@ struct b2_player_special_data_saved {
 	bool can_get_bonus_skills;	// can buy extra 75's
 	sh_int skill_level;  // levels computed based on class skills
 	sh_int highest_known_level;	// maximum level ever achieved (used for gear restrictions)
-	ubyte class_progression;	// % of the way from SPECIALTY_SKILL_CAP to CLASS_SKILL_CAP
+	ubyte class_progression;	// % of the way from SPECIALTY_SKILL_CAP to MAX_SKILL_CAP
 	ubyte class_role;	// ROLE_x chosen by the player
 	sh_int character_class;  // character's class as determined by top skills
 	
@@ -198,13 +198,13 @@ struct b2_player_special_data_saved {
 	sh_int spare11;
 	sh_int spare12;
 	sh_int spare13;
-	sh_int last_known_level;	// set on save/quit/alt -- TODO next pconvert, move this up with highest_known_level
+	sh_int last_known_level;	// set on save/quit/alt
 	
 	int spare15;
 	int spare16;
 	int spare17;
 	int spare18;
-	int recent_level_time;	// no longer used, but may have data set if you ran b2.9 or earlier -- TODO should be removed in the b2->b3 pconvert
+	int recent_level_time;	// no longer used, but may have data set if you ran b2.9 or earlier
 	
 	double spare20;
 	double spare21;
@@ -212,7 +212,7 @@ struct b2_player_special_data_saved {
 	double spare23;
 	double spare24;
 	
-	// WARNING: in 2.0b1-b2, these were erroneously initialized to -1 -- TODO next pconvert, fix any spares from 25-34 that are misinitialized
+	// WARNING: in 2.0b1-b2, these were erroneously initialized to -1
 	bitvector_t spare25; 
 	bitvector_t spare26;
 	bitvector_t spare27;
@@ -224,7 +224,7 @@ struct b2_player_special_data_saved {
 	any_vnum spare31;
 	any_vnum spare32;
 	any_vnum adventure_summon_return_location;	// where to send a player back to if they're outside an adventure
-	any_vnum adventure_summon_return_map;	// map check location for the return loc -- TODO next pconvert, move both of these up
+	any_vnum adventure_summon_return_map;	// map check location for the return loc
 };
 
 struct b2_affected_type {
@@ -414,7 +414,7 @@ struct b3_player_special_data_saved {
 	sh_int skill_level;  // levels computed based on class skills
 	sh_int highest_known_level;	// maximum level ever achieved (used for gear restrictions)
 	sh_int last_known_level;	// set on save/quit/alt
-	ubyte class_progression;	// % of the way from SPECIALTY_SKILL_CAP to CLASS_SKILL_CAP
+	ubyte class_progression;	// % of the way from SPECIALTY_SKILL_CAP to MAX_SKILL_CAP
 	ubyte class_role;	// ROLE_x chosen by the player
 	sh_int character_class;  // character's class as determined by top skills
 	
@@ -819,7 +819,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	while (!feof(ptOldHndl)) {
-		fread(&stOld, sizeof(struct b2_char_file_u), 1, ptOldHndl);
+		if (fread(&stOld, sizeof(struct b2_char_file_u), 1, ptOldHndl) < 1) {
+			printf("Failure reading file: %s\n", argv[1]);
+			exit(1);
+		}
 		
 		convert_char_file_u(&stNew, &stOld);
 

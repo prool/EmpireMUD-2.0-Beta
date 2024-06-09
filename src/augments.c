@@ -2,7 +2,7 @@
 *   File: augments.c                                      EmpireMUD 2.0b5 *
 *  Usage: DB and OLC for augments (item enchantments)                     *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -21,6 +21,7 @@
 #include "olc.h"
 #include "skills.h"
 #include "handler.h"
+#include "constants.h"
 
 /**
 * Contents:
@@ -32,16 +33,8 @@
 *   Edit Modules
 */
 
-// external consts
-extern const char *apply_types[];
-extern const char *augment_types[];
-extern const struct augment_type_data augment_info[];
-extern const char *augment_flags[];
-extern const char *wear_bits[];
-
-// external funcs
-extern struct resource_data *copy_resource_list(struct resource_data *input);
-void get_resource_display(struct resource_data *list, char *save_buffer);
+// locals
+const char *default_aug_name = "unnamed augment";
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -68,7 +61,7 @@ augment_data *find_augment_by_name(char_data *ch, char *name, int type) {
 		if (GET_AUG_ABILITY(aug) != NO_ABIL && !has_ability(ch, GET_AUG_ABILITY(aug))) {
 			continue;
 		}
-		if (GET_AUG_REQUIRES_OBJ(aug) != NOTHING && !get_obj_in_list_vnum(GET_AUG_REQUIRES_OBJ(aug), ch->carrying)) {
+		if (GET_AUG_REQUIRES_OBJ(aug) != NOTHING && !has_required_object(ch, GET_AUG_REQUIRES_OBJ(aug))) {
 			continue;
 		}
 		
@@ -109,7 +102,7 @@ bool validate_augment_target(char_data *ch, obj_data *obj, augment_data *aug, bo
 	if (partial_wear != NOBITS && !CAN_WEAR(obj, partial_wear)) {
 		if (send_messages) {
 			prettier_sprintbit(partial_wear, wear_bits, part);
-			snprintf(buf, sizeof(buf), "You can only use that %s on items that are worn on: %s.\r\n", augment_info[GET_AUG_TYPE(aug)].noun, part);
+			safe_snprintf(buf, sizeof(buf), "You can only use that %s on items that are worn on: %s.\r\n", augment_info[GET_AUG_TYPE(aug)].noun, part);
 			for (iter = 1; iter < strlen(buf); ++iter) {
 				buf[iter] = LOWER(buf[iter]);	// lowercase both parts of the string
 			}
@@ -132,6 +125,21 @@ bool validate_augment_target(char_data *ch, obj_data *obj, augment_data *aug, bo
 	}
 	
 	return TRUE;
+}
+
+
+/**
+* Counts the words of text in an augment's strings.
+*
+* @param augment_data *aug The augment whose strings to count.
+* @return int The number of words in the augment's strings.
+*/
+int wordcount_augment(augment_data *aug) {
+	int count = 0;
+	
+	count += wordcount_string(GET_AUG_NAME(aug));
+	
+	return count;
 }
 
 
@@ -158,7 +166,7 @@ bool audit_augment(augment_data *aug, char_data *ch) {
 		olc_audit_msg(ch, GET_AUG_VNUM(aug), "Type not set");
 		problem = TRUE;
 	}
-	if (!GET_AUG_NAME(aug) || !*GET_AUG_NAME(aug) || !str_cmp(GET_AUG_NAME(aug), "unnamed augment")) {
+	if (!GET_AUG_NAME(aug) || !*GET_AUG_NAME(aug) || !str_cmp(GET_AUG_NAME(aug), default_aug_name)) {
 		olc_audit_msg(ch, GET_AUG_VNUM(aug), "No name set");
 		problem = TRUE;
 	}
@@ -233,13 +241,119 @@ char *list_one_augment(augment_data *aug, bool detail) {
 			sprintf(applies + strlen(applies), "%s%d to %s", (app == GET_AUG_APPLIES(aug)) ? " " : ", ", app->weight, apply_types[app->location]);
 		}
 		
-		snprintf(output, sizeof(output), "[%5d] %s%s%s", GET_AUG_VNUM(aug), GET_AUG_NAME(aug), part, applies);
+		safe_snprintf(output, sizeof(output), "[%5d] %s%s%s", GET_AUG_VNUM(aug), GET_AUG_NAME(aug), part, applies);
 	}
 	else {
-		snprintf(output, sizeof(output), "[%5d] %s", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
+		safe_snprintf(output, sizeof(output), "[%5d] %s", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
 	}
 		
 	return output;
+}
+
+
+/**
+* Searches properties of augments.
+*
+* @param char_data *ch The person searching.
+* @param char *argument The argument they entered.
+*/
+void olc_fullsearch_augment(char_data *ch, char *argument) {
+	bool requires_obj = FALSE;
+	bitvector_t not_flagged = NOBITS, only_flags = NOBITS;
+	bitvector_t find_applies = NOBITS, found_applies, only_worn = NOBITS, not_worn = NOBITS;
+	char type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], find_keywords[MAX_INPUT_LENGTH];
+	int count, only_type = NOTHING, vmin = NOTHING, vmax = NOTHING;
+	augment_data *aug, *next_aug;
+	struct apply_data *app;
+	
+	if (!*argument) {
+		msg_to_char(ch, "See HELP AUGEDIT FULLSEARCH for syntax.\r\n");
+		return;
+	}
+	
+	// process argument
+	*find_keywords = '\0';
+	while (*argument) {
+		// figure out a type
+		argument = any_one_arg(argument, type_arg);
+		
+		if (!strcmp(type_arg, "-")) {
+			continue;	// just skip stray dashes
+		}
+		
+		FULLSEARCH_FLAGS("apply", find_applies, apply_types)
+		FULLSEARCH_FLAGS("applies", find_applies, apply_types)
+		FULLSEARCH_FLAGS("flags", only_flags, augment_flags)
+		FULLSEARCH_FLAGS("flagged", only_flags, augment_flags)
+		FULLSEARCH_BOOL("requiresobject", requires_obj)
+		FULLSEARCH_LIST("type", only_type, augment_types)
+		FULLSEARCH_FLAGS("unflagged", not_flagged, augment_flags)
+		FULLSEARCH_FLAGS("wear", only_worn, wear_bits)
+		FULLSEARCH_FLAGS("nowear", not_worn, wear_bits)
+		FULLSEARCH_INT("vmin", vmin, 0, INT_MAX)
+		FULLSEARCH_INT("vmax", vmax, 0, INT_MAX)
+		
+		else {	// not sure what to do with it? treat it like a keyword
+			sprintf(find_keywords + strlen(find_keywords), "%s%s", *find_keywords ? " " : "", type_arg);
+		}
+		
+		// prepare for next loop
+		skip_spaces(&argument);
+	}
+	
+	build_page_display(ch, "Augment fullsearch: %s", show_color_codes(find_keywords));
+	count = 0;
+	
+	// okay now look them up
+	HASH_ITER(hh, augment_table, aug, next_aug) {
+		if ((vmin != NOTHING && GET_AUG_VNUM(aug) < vmin) || (vmax != NOTHING && GET_AUG_VNUM(aug) > vmax)) {
+			continue;	// vnum range
+		}
+		
+		if (not_flagged != NOBITS && AUGMENT_FLAGGED(aug, not_flagged)) {
+			continue;
+		}
+		if (only_flags != NOBITS && (GET_AUG_FLAGS(aug) & only_flags) != only_flags) {
+			continue;
+		}
+		if (only_type != NOTHING && GET_AUG_TYPE(aug) != only_type) {
+			continue;
+		}
+		if (only_worn != NOBITS && (GET_AUG_WEAR_FLAGS(aug) & only_worn) != only_worn) {
+			continue;
+		}
+		if (not_worn != NOBITS && IS_SET(GET_AUG_WEAR_FLAGS(aug), not_worn)) {
+			continue;
+		}
+		if (requires_obj && GET_AUG_REQUIRES_OBJ(aug) == NOTHING) {
+			continue;
+		}
+		if (find_applies) {	// look up its applies
+			found_applies = NOBITS;
+			LL_FOREACH(GET_AUG_APPLIES(aug), app) {
+				found_applies |= BIT(app->location);
+			}
+			if ((find_applies & found_applies) != find_applies) {
+				continue;
+			}
+		}
+		if (*find_keywords && !multi_isname(find_keywords, GET_AUG_NAME(aug))) {
+			continue;
+		}
+		
+		// show it
+		build_page_display(ch, "[%5d] %s", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
+		++count;
+	}
+	
+	if (count > 0) {
+		build_page_display(ch, "(%d augments)", count);
+	}
+	else {
+		build_page_display_str(ch, " none");
+	}
+	
+	send_page_display(ch);
 }
 
 
@@ -250,9 +364,8 @@ char *list_one_augment(augment_data *aug, bool detail) {
 * @param any_vnum vnum The augment vnum.
 */
 void olc_search_augment(char_data *ch, any_vnum vnum) {
-	char buf[MAX_STRING_LENGTH];
 	augment_data *aug = augment_proto(vnum);
-	int size, found;
+	int found;
 	
 	if (!aug) {
 		msg_to_char(ch, "There is no augment %d.\r\n", vnum);
@@ -260,18 +373,18 @@ void olc_search_augment(char_data *ch, any_vnum vnum) {
 	}
 	
 	found = 0;
-	size = snprintf(buf, sizeof(buf), "Occurrences of augment %d (%s):\r\n", vnum, GET_AUG_NAME(aug));
+	build_page_display(ch, "Occurrences of augment %d (%s):", vnum, GET_AUG_NAME(aug));
 	
 	// augments are not actually used anywhere else
 	
 	if (found > 0) {
-		size += snprintf(buf + size, sizeof(buf) - size, "%d location%s shown\r\n", found, PLURAL(found));
+		build_page_display(ch, "%d location%s shown", found, PLURAL(found));
 	}
 	else {
-		size += snprintf(buf + size, sizeof(buf) - size, " none\r\n");
+		build_page_display_str(ch, " none");
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -409,9 +522,6 @@ void free_augment(augment_data *aug) {
 * @param any_vnum vnum The augment vnum
 */
 void parse_augment(FILE *fl, any_vnum vnum) {
-	void parse_apply(FILE *fl, struct apply_data **list, char *error_str);
-	void parse_resource(FILE *fl, struct resource_data **list, char *error_str);
-
 	char line[256], error[256], str_in[256], str_in2[256];
 	augment_data *aug, *find;
 	int int_in[4];
@@ -502,9 +612,6 @@ void write_augments_index(FILE *fl) {
 * @param augment_data *aug The thing to save.
 */
 void write_augment_to_file(FILE *fl, augment_data *aug) {
-	void write_applies_to_file(FILE *fl, struct apply_data *list);
-	void write_resources_to_file(FILE *fl, char letter, struct resource_data *list);
-	
 	char temp[256], temp2[256];
 	
 	if (!fl || !aug) {
@@ -555,7 +662,7 @@ augment_data *create_augment_table_entry(any_vnum vnum) {
 	CREATE(aug, augment_data, 1);
 	clear_augment(aug);
 	GET_AUG_VNUM(aug) = vnum;
-	GET_AUG_NAME(aug) = str_dup("unnamed augment");
+	GET_AUG_NAME(aug) = str_dup(default_aug_name);
 	add_augment_to_table(aug);
 
 	// save index and augment file now
@@ -574,11 +681,14 @@ augment_data *create_augment_table_entry(any_vnum vnum) {
 */
 void olc_delete_augment(char_data *ch, any_vnum vnum) {
 	augment_data *aug;
+	char name[256];
 	
 	if (!(aug = augment_proto(vnum))) {
 		msg_to_char(ch, "There is no such augment %d.\r\n", vnum);
 		return;
 	}
+	
+	safe_snprintf(name, sizeof(name), "%s", NULLSAFE(GET_AUG_NAME(aug)));
 	
 	// remove it from the hash table first
 	remove_augment_from_table(aug);
@@ -587,8 +697,8 @@ void olc_delete_augment(char_data *ch, any_vnum vnum) {
 	save_index(DB_BOOT_AUG);
 	save_library_file_for_vnum(DB_BOOT_AUG, vnum);
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted augment %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Augment %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted augment %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Augment %d (%s) deleted.\r\n", vnum, name);
 	
 	free_augment(aug);
 }
@@ -621,7 +731,7 @@ void save_olc_augment(descriptor_data *desc) {
 		if (GET_AUG_NAME(aug)) {
 			free(GET_AUG_NAME(aug));
 		}
-		GET_AUG_NAME(aug) = str_dup("unnamed augment");
+		GET_AUG_NAME(aug) = str_dup(default_aug_name);
 	}
 
 	// save data back over the proto-type
@@ -647,8 +757,6 @@ void save_olc_augment(descriptor_data *desc) {
 * @return augment_data* The copied augment.
 */
 augment_data *setup_olc_augment(augment_data *input) {
-	extern struct apply_data *copy_apply_list(struct apply_data *input);
-	
 	augment_data *new;
 	
 	CREATE(new, augment_data, 1);
@@ -667,7 +775,7 @@ augment_data *setup_olc_augment(augment_data *input) {
 	}
 	else {
 		// brand new: some defaults
-		GET_AUG_NAME(new) = str_dup("unnamed augment");
+		GET_AUG_NAME(new) = str_dup(default_aug_name);
 		GET_AUG_FLAGS(new) = AUG_IN_DEVELOPMENT;
 	}
 	
@@ -686,50 +794,49 @@ augment_data *setup_olc_augment(augment_data *input) {
 * @param augment_data *aug The augment to display.
 */
 void do_stat_augment(char_data *ch, augment_data *aug) {
-	char buf[MAX_STRING_LENGTH], part[MAX_STRING_LENGTH];
+	char part[MAX_STRING_LENGTH];
 	struct apply_data *app;
 	ability_data *abil;
-	size_t size;
 	int num;
+	struct page_display *line;
 	
 	if (!aug) {
 		return;
 	}
 	
 	// first line
-	size = snprintf(buf, sizeof(buf), "VNum: [\tc%d\t0], Name: \tc%s\t0\r\n", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
+	build_page_display(ch, "VNum: [\tc%d\t0], Name: \tc%s\t0", GET_AUG_VNUM(aug), GET_AUG_NAME(aug));
 	
-	snprintf(part, sizeof(part), "%s", (GET_AUG_ABILITY(aug) == NO_ABIL ? "none" : get_ability_name_by_vnum(GET_AUG_ABILITY(aug))));
+	safe_snprintf(part, sizeof(part), "%s", (GET_AUG_ABILITY(aug) == NO_ABIL ? "none" : get_ability_name_by_vnum(GET_AUG_ABILITY(aug))));
 	if ((abil = find_ability_by_vnum(GET_AUG_ABILITY(aug))) && ABIL_ASSIGNED_SKILL(abil) != NULL) {
-		snprintf(part + strlen(part), sizeof(part) - strlen(part), " (%s %d)", SKILL_ABBREV(ABIL_ASSIGNED_SKILL(abil)), ABIL_SKILL_LEVEL(abil));
+		safe_snprintf(part + strlen(part), sizeof(part) - strlen(part), " (%s %d)", SKILL_ABBREV(ABIL_ASSIGNED_SKILL(abil)), ABIL_SKILL_LEVEL(abil));
 	}
-	size += snprintf(buf + size, sizeof(buf) - size, "Type: [\ty%s\t0], Requires Ability: [\ty%s\t0]\r\n", augment_types[GET_AUG_TYPE(aug)], part);
+	build_page_display(ch, "Type: [\ty%s\t0], Requires Ability: [\ty%s\t0]", augment_types[GET_AUG_TYPE(aug)], part);
 	
 	if (GET_AUG_REQUIRES_OBJ(aug) != NOTHING) {
-		size += snprintf(buf + size, sizeof(buf) - size, "Requires item: [%d] \tg%s\t0\r\n", GET_AUG_REQUIRES_OBJ(aug), skip_filler(get_obj_name_by_proto(GET_AUG_REQUIRES_OBJ(aug))));
+		build_page_display(ch, "Requires item: [%d] \tg%s\t0", GET_AUG_REQUIRES_OBJ(aug), skip_filler(get_obj_name_by_proto(GET_AUG_REQUIRES_OBJ(aug))));
 	}
 	
 	sprintbit(GET_AUG_FLAGS(aug), augment_flags, part, TRUE);
-	size += snprintf(buf + size, sizeof(buf) - size, "Flags: \tg%s\t0\r\n", part);
+	build_page_display(ch, "Flags: \tg%s\t0", part);
 	
 	sprintbit(GET_AUG_WEAR_FLAGS(aug), wear_bits, part, TRUE);
-	size += snprintf(buf + size, sizeof(buf) - size, "Targets wear location: \ty%s\t0\r\n", part);
+	build_page_display(ch, "Targets wear location: \ty%s\t0", part);
 	
 	// applies
-	size += snprintf(buf + size, sizeof(buf) - size, "Applies: ");
+	line = build_page_display(ch, "Applies: ");
 	for (app = GET_AUG_APPLIES(aug), num = 0; app; app = app->next, ++num) {
-		size += snprintf(buf + size, sizeof(buf) - size, "%s%d to %s", num ? ", " : "", app->weight, apply_types[app->location]);
+		append_page_display_line(line, "%s%d to %s", num ? ", " : "", app->weight, apply_types[app->location]);
 	}
 	if (!GET_AUG_APPLIES(aug)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "none");
+		append_page_display_line(line, "none");
 	}
-	size += snprintf(buf + size, sizeof(buf) - size, "\r\n");
 	
 	// resources
-	get_resource_display(GET_AUG_RESOURCES(aug), part);
-	size += snprintf(buf + size, sizeof(buf) - size, "Resource cost:\r\n%s", part);
+	build_page_display_str(ch, "Resource cost:");
+	show_resource_display(ch, GET_AUG_RESOURCES(aug), FALSE);
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -741,7 +848,7 @@ void do_stat_augment(char_data *ch, augment_data *aug) {
 */
 void olc_show_augment(char_data *ch) {
 	augment_data *aug = GET_OLC_AUGMENT(ch->desc);
-	char buf[MAX_STRING_LENGTH], lbuf[MAX_STRING_LENGTH];
+	char lbuf[MAX_STRING_LENGTH];
 	struct apply_data *app;
 	ability_data *abil;
 	int num;
@@ -750,18 +857,16 @@ void olc_show_augment(char_data *ch) {
 		return;
 	}
 	
-	*buf = '\0';
+	build_page_display(ch, "[%s%d\t0] %s%s\t0", OLC_LABEL_CHANGED, GET_OLC_VNUM(ch->desc), OLC_LABEL_UNCHANGED, !augment_proto(GET_AUG_VNUM(aug)) ? "new augment" : GET_AUG_NAME(augment_proto(GET_AUG_VNUM(aug))));
+	build_page_display(ch, "<%sname\t0> %s", OLC_LABEL_STR(GET_AUG_NAME(aug), default_aug_name), NULLSAFE(GET_AUG_NAME(aug)));
 	
-	sprintf(buf + strlen(buf), "[\tc%d\t0] \tc%s\t0\r\n", GET_OLC_VNUM(ch->desc), !augment_proto(GET_AUG_VNUM(aug)) ? "new augment" : GET_AUG_NAME(augment_proto(GET_AUG_VNUM(aug))));
-	sprintf(buf + strlen(buf), "<\tyname\t0> %s\r\n", NULLSAFE(GET_AUG_NAME(aug)));
-	
-	sprintf(buf + strlen(buf), "<\tytype\t0> %s\r\n", augment_types[GET_AUG_TYPE(aug)]);
+	build_page_display(ch, "<%stype\t0> %s", OLC_LABEL_VAL(GET_AUG_TYPE(aug), 0), augment_types[GET_AUG_TYPE(aug)]);
 
 	sprintbit(GET_AUG_FLAGS(aug), augment_flags, lbuf, TRUE);
-	sprintf(buf + strlen(buf), "<\tyflags\t0> %s\r\n", lbuf);
+	build_page_display(ch, "<%sflags\t0> %s", OLC_LABEL_VAL(GET_AUG_FLAGS(aug), AUG_IN_DEVELOPMENT), lbuf);
 	
 	sprintbit(GET_AUG_WEAR_FLAGS(aug), wear_bits, lbuf, TRUE);
-	sprintf(buf + strlen(buf), "<\tywear\t0> %s\r\n", lbuf);
+	build_page_display(ch, "<%swear\t0> %s", OLC_LABEL_VAL(GET_AUG_WEAR_FLAGS(aug), NOBITS), lbuf);
 	
 	// ability required
 	if (GET_AUG_ABILITY(aug) == NO_ABIL || !(abil = find_ability_by_vnum(GET_AUG_ABILITY(aug)))) {
@@ -773,24 +878,23 @@ void olc_show_augment(char_data *ch) {
 			sprintf(buf1 + strlen(buf1), " (%s %d)", SKILL_NAME(ABIL_ASSIGNED_SKILL(abil)), ABIL_SKILL_LEVEL(abil));
 		}
 	}
-	sprintf(buf + strlen(buf), "<\tyrequiresability\t0> %s\r\n", buf1);
+	build_page_display(ch, "<%srequiresability\t0> %s", OLC_LABEL_VAL(GET_AUG_ABILITY(aug), NO_ABIL), buf1);
 
-	sprintf(buf + strlen(buf), "<\tyrequiresobject\t0> %d - %s\r\n", GET_AUG_REQUIRES_OBJ(aug), GET_AUG_REQUIRES_OBJ(aug) == NOTHING ? "none" : get_obj_name_by_proto(GET_AUG_REQUIRES_OBJ(aug)));
+	build_page_display(ch, "<%srequiresobject\t0> %d - %s", OLC_LABEL_VAL(GET_AUG_REQUIRES_OBJ(aug), NOTHING), GET_AUG_REQUIRES_OBJ(aug), GET_AUG_REQUIRES_OBJ(aug) == NOTHING ? "none" : get_obj_name_by_proto(GET_AUG_REQUIRES_OBJ(aug)));
 	
 	// applies
-	sprintf(buf + strlen(buf), "Attribute applies: <\tyapply\t0>\r\n");
+	build_page_display(ch, "Attribute applies: <%sapply\t0>", OLC_LABEL_PTR(GET_AUG_APPLIES(aug)));
 	for (app = GET_AUG_APPLIES(aug), num = 1; app; app = app->next, ++num) {
-		sprintf(buf + strlen(buf), " %2d. %d to %s\r\n", num, app->weight, apply_types[app->location]);
+		build_page_display_col(ch, 2, FALSE, " %2d. %d to %s", num, app->weight, apply_types[app->location]);
 	}
 	
 	// resources
-	sprintf(buf + strlen(buf), "Resources required: <\tyresource\t0>\r\n");
+	build_page_display(ch, "Resources required: <%sresource\t0>", OLC_LABEL_PTR(GET_AUG_RESOURCES(aug)));
 	if (GET_AUG_RESOURCES(aug)) {
-		get_resource_display(GET_AUG_RESOURCES(aug), lbuf);
-		strcat(buf, lbuf);
+		show_resource_display(ch, GET_AUG_RESOURCES(aug), FALSE);
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -807,10 +911,11 @@ int vnum_augment(char *searchname, char_data *ch) {
 	
 	HASH_ITER(hh, augment_table, iter, next_iter) {
 		if (multi_isname(searchname, GET_AUG_NAME(iter))) {
-			msg_to_char(ch, "%3d. [%5d] %s (%s)\r\n", ++found, GET_AUG_VNUM(iter), GET_AUG_NAME(iter), augment_types[GET_AUG_TYPE(iter)]);
+			build_page_display(ch, "%3d. [%5d] %s (%s)", ++found, GET_AUG_VNUM(iter), GET_AUG_NAME(iter), augment_types[GET_AUG_TYPE(iter)]);
 		}
 	}
 	
+	send_page_display(ch);
 	return found;
 }
 
@@ -852,7 +957,6 @@ OLC_MODULE(augedit_ability) {
 
 
 OLC_MODULE(augedit_apply) {
-	void olc_process_applies(char_data *ch, char *argument, struct apply_data **list);
 	augment_data *aug = GET_OLC_AUGMENT(ch->desc);
 	olc_process_applies(ch, argument, &GET_AUG_APPLIES(aug));
 }
@@ -905,7 +1009,6 @@ OLC_MODULE(augedit_requiresobject) {
 
 
 OLC_MODULE(augedit_resource) {
-	void olc_process_resources(char_data *ch, char *argument, struct resource_data **list);
 	augment_data *aug = GET_OLC_AUGMENT(ch->desc);
 	olc_process_resources(ch, argument, &GET_AUG_RESOURCES(aug));
 }

@@ -3,8 +3,12 @@ necrovandal vandal cultist~
 the necrovandal~
 A necrovandal cultist skulks about beneath a midnight-blue, hooded robe.
 ~
-50 75 bdovx c
-1 0 0 19
+50 75 bdovxI c 3
+1 0 0 19 -1
+D
+   The necrovandal is cloaked in dark blue, purple, and black. These vandals
+are known to destroy enchanted forests, given the chance.
+~
 T 602
 S
 #610
@@ -12,28 +16,55 @@ horse talking~
 a talking horse~
 A horse looks up from the grass and greets you by name.
 ~
-10 20 dejo 0
-0 0 14 11
-I 0 3012 100.00 1  # BUTCHER: a fillet of raw meat
-I 0 3012 100.00 1  # BUTCHER: a fillet of raw meat
-I 1 607 100.00 2  # SKIN: a shimmering hide
-I 3 611 100.00 1 X  # BARDE: a talking warhorse
-T 610
+10 20 dejo 0 4
+0 0 14 11 -1
+D
+It just looks like an ordinary horse.
+~
+I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
+I 1 607 100.00 2  # SKIN: shimmering hide
+I 3 611 100.00 1 X  # BARDE: talking warhorse
+M
+1
+I've been trying to buy a bamboo harvester, but nobody wants to talk to a horse.~
+M
+1
+Why the short face?~
+M
+1
+Of course, of course.~
+M
+1
+Have you seen Wilbur?~
 S
 #611
 warhorse horse armored talking~
 a talking warhorse~
 An armored warhorse shouts its battle cry.
 ~
-40 80 bdej 0
-0 0 0 11
-I 0 3012 100.00 1  # BUTCHER: a fillet of raw meat
-I 0 3012 100.00 1  # BUTCHER: a fillet of raw meat
-I 1 607 100.00 2  # SKIN: a shimmering hide
-I 4 175 100.00 4  # LOOT: an iron ingot
-I 4 175 75.00 2  # LOOT: an iron ingot
-I 4 175 50.00 2  # LOOT: an iron ingot
-I 4 175 50.00 2  # LOOT: an iron ingot
+40 80 bdej 0 4
+0 0 0 11 -1
+D
+This rather plain-looking horse has been barded with the colors of the empire.
+~
+I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
+I 1 607 100.00 2  # SKIN: shimmering hide
+I 4 175 100.00 4  # LOOT: iron ingot
+I 4 175 75.00 2  # LOOT: iron ingot
+I 4 175 50.00 2  # LOOT: iron ingot
+I 4 175 50.00 2  # LOOT: iron ingot
+M
+1
+I've been trying to buy a bamboo harvester, but nobody wants to talk to a horse.~
+M
+1
+Why the short face?~
+M
+1
+Of course, of course.~
+M
+1
+Have you seen Wilbur?~
 T 611
 S
 #612
@@ -41,10 +72,13 @@ bunny talking~
 a talking bunny~
 A bunny thumps its foot and asks you for the time.
 ~
-1 5 djo 0
-0 0 15 9
-I 0 3012 100.00 1  # BUTCHER: a fillet of raw meat
-I 1 607 100.00 1  # SKIN: a shimmering hide
+1 5 djo 0 1
+0 0 15 9 -1
+D
+It looks like a perfectly ordinary bunny.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 1 607 100.00 1  # SKIN: shimmering hide
 T 612
 S
 #613
@@ -52,22 +86,37 @@ bear singing~
 a singing bear~
 A bear is dancing around and singing a tune.
 ~
-20 40 dgjkoy c
-0 0 0 10
-I 0 3012 100.00 1  # BUTCHER: a fillet of raw meat
-I 0 3012 100.00 1  # BUTCHER: a fillet of raw meat
-I 0 3012 100.00 1  # BUTCHER: a fillet of raw meat
-I 1 607 100.00 2  # SKIN: a shimmering hide
-T 613
+20 40 dgjkoy c 4
+0 0 0 10 -1
+D
+It just looks like a regular bear.
+~
+I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
+I 1 607 100.00 2  # SKIN: shimmering hide
+M
+0
+$n sings, 'Look for the bear necessities, the simple bear necessities. Forget about your worries and your strife...'~
+M
+0
+$n dances around, humming to $mself.~
+M
+0
+$n sings, 'Now when you pick a pawpaw, or a prickly pear, and you prick a raw paw, well, next time beware!'~
+M
+1
+I don't know what all the hullabaloo is about a singing bear.~
 S
 #614
 tree walking~
 a walking tree~
 A tree has uprooted itself and is walking around.
 ~
-20 30 dho 0
-0 0 33 15
-I 4 120 100.00 1  # LOOT: a large tree
+20 30 dhoK G 4
+0 0 33 15 -1
+D
+The tree is using its roots like feet!
+~
+I 4 120 100.00 1  # LOOT: large tree
 T 614
 S
 #615
@@ -75,12 +124,16 @@ pixy pixie feral~
 a feral pixy~
 A feral pixy swoops down at you from the trees.
 ~
-30 50 doxz 0
-0 0 2 9
-I 4 103 20.00 1 g  # LOOT: a yellow lightning stone
-I 4 104 20.00 1 g  # LOOT: a red bloodstone
-I 4 1300 20.00 1 g  # LOOT: a glowing green seashell
-I 4 1206 20.00 1 g  # LOOT: an iridescent blue iris
+30 50 doxz 0 1
+0 0 2 9 -1
+D
+   This vicious little pixy keeps zipping past your ears, perhaps trying to get
+you to leave. You seem to have angered it.
+~
+I 4 103 20.00 1 g  # LOOT: yellow lightning stone
+I 4 104 20.00 1 g  # LOOT: red bloodstone
+I 4 1300 20.00 1 g  # LOOT: glowing green seashell
+I 4 1206 20.00 1 g  # LOOT: iridescent blue iris
 T 615
 S
 #616
@@ -88,12 +141,185 @@ pixy pixie queen~
 a pixy queen~
 A pixy queen is buzzing around your head.
 ~
-30 50 dxzA 0
-2 0 2 9
-I 4 103 20.00 1 g  # LOOT: a yellow lightning stone
-I 4 104 20.00 1 g  # LOOT: a red bloodstone
-I 4 1300 20.00 1 g  # LOOT: a glowing green seashell
-I 4 1206 20.00 1 g  # LOOT: an iridescent blue iris
+30 50 dxzA 0 1
+2 0 2 9 -1
+D
+   This tiny pixy won't seem to leave you alone. She keeps casting spells that
+buzz right past your ear, perhaps as warning shots!
+~
+I 4 103 20.00 1 g  # LOOT: yellow lightning stone
+I 4 104 20.00 1 g  # LOOT: red bloodstone
+I 4 1300 20.00 1 g  # LOOT: glowing green seashell
+I 4 1206 20.00 1 g  # LOOT: iridescent blue iris
 T 616
+S
+#617
+genie~
+the genie~
+A genie hovers around, trailing smoke from his tail.
+~
+200 300 bdhoxzAK cG 3
+1 0 27 21 -1
+D
+   This odd man has a blue tinge to his skin, and his hair is pulled into a
+small tuft on top of his head, but the best indication that he's a genie is
+that his body ends at the waist and everything below that is just a funnel of
+sand and smoke. Since he has no binding cuffs on his wrists, you can also
+assume this is a free genie.
+~
+I 4 620 100.00 1  # LOOT: brass bottle
+M
+1
+Finally free of that itty bitty living space.~
+M
+1
+A man should be his own master.~
+M
+1
+Freedom is being you, without anyone's permission.~
+M
+1
+Freedom means the opportunity to be what we never thought we would be.~
+M
+1
+The secret of happiness is freedom; the secret of freedom is courage.~
+M
+1
+You have to fight for freedom every day.~
+M
+1
+To be free is not merely to cast off one's chains, but to live in a way that respects and enhances the freedom of others.~
+T 617
+T 618
+T 619
+S
+#618
+monkey hat~
+a monkey in a hat~
+A monkey in a little hat is sitting here, staring.
+~
+40 60 djo 0 2
+0 0 1 16 -1
+D
+It looks like a rather plain monkey, except for the fez on its head.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 1 607 100.00 1  # SKIN: shimmering hide
+M
+0
+$n pulls out a pair of brass cymbals and clangs them together repeatedly.~
+M
+0
+$n changes into an elephant, but only for a second.~
+M
+0
+$n seems to be following you.~
+M
+0
+$n crosses $s arms and pouts.~
+M
+0
+You notice $n's tail reaching into your pocket.~
+M
+0
+$n tips $s hat at you.~
+S
+#619
+camel singing~
+a singing camel~
+A camel hums quietly as it lumbers around.
+~
+40 60 dejo 0 4
+0 0 26 9 -1
+D
+It just looks like an ordinary camel.
+~
+I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
+I 1 607 100.00 2  # SKIN: shimmering hide
+M
+0
+$n croons, 'Salome the camel has ten humps. Salome the camel has ten humps. Salome the camel has ten humps, so ride, Salome, ride. Salome the camel has nine humps...'~
+M
+0
+$n croons, 'Salome the camel has no humps. Salome the camel has no humps. Salome the camel has no humps, because Salome is a horse.'~
+M
+0
+$n croons, 'Oh, the sons of the prophet are hardy and grim and quite unaccustomed to fear. But none were so reckless of life or of limb as Abdul Abulbul Amir...'~
+M
+0
+$n clears $s throat...~
+M
+0
+$n clears $s throat...~
+M
+0
+$n clears $s throat...~
+M
+0
+$n croons, 'Oh I come from a land, from a faraway place, where the caravan camels roam...'~
+M
+0
+$n croons, 'Arabian nights, like Arabian days, more often than not are hotter than hot, in a lot of good ways...'~
+M
+0
+$n croons, 'Arabian nights, 'neath Arabian moons... A fool off his guard could fall and fall hard out there on the dunes...'~
+S
+#620
+genie baby blue~
+a baby genie~
+A blue baby genie is rolling around on the ground.
+~
+1 1 bdoDF n 1
+1 0 0 21 -1
+D
+   The little genie looks like a fat, laughing baby, except for the blue tinge
+to his skin and the swirl of sand and smoke where his legs should be. He
+doesn't seem to understand anything you say, so you're not sure if he can grant
+wishes, but he does already seem to be learning to use his powers.
+~
+M
+0
+$n conjures a rattle and begins shaking it.~
+M
+0
+$n picks up rocks in one hand, then the other hand, then several more hands that appear from $s sides.~
+M
+0
+$n finds a bottle on the ground and rubs it, but nothing happens.~
+M
+0
+$n tries to remove the shackles from $s wrists, but can't seem to get them off.~
+M
+0
+$n flies around on an invisible carpet.~
+M
+0
+$n turns a pebble into candy and eats it.~
+S
+#621
+sandstorm storm whirling~
+a whirling sandstorm~
+A sandstorm is whirling around violently!
+~
+0 0 dM n 5
+0 0 36 22 -1
+D
+The sandstorm is huge, and irritating, but doesn't seem to be hurting you.
+~
+M
+0
+$n throws debris everywhere!~
+M
+0
+$n blocks out the light!~
+M
+0
+$n gets in your eyes!~
+M
+0
+$n spins about, apparently without disturbing the trees.~
+M
+0
+$n roars as it turns around you.~
 S
 $

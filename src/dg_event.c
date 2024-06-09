@@ -5,7 +5,7 @@
 *                                                                         *
 *  Event code by Mark A. Heilpern (Sammy@equoria.mud equoria.com:4000)    *
 *  DG Scripts code by Thomas Arp - Welcor - 2002                          *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -22,13 +22,15 @@
 #include "utils.h"
 #include "dg_event.h"
 
-struct queue *event_q;          /* the event queue */
+// local data
+struct queue *event_q = NULL;          /* the event queue */
 
-extern long pulse;
+// external data
+extern unsigned long main_game_pulse;
 
 
 /* initializes the event queue */
-void event_init(void) {
+void dg_event_init(void) {
 	event_q = queue_init();
 }
 
@@ -37,23 +39,26 @@ void event_init(void) {
 ** Add an event to the current list
 */
 /* creates an event and returns it */
-struct event *event_create(EVENTFUNC(*func), void *event_obj, long when) {
-	struct event *new_event;
+struct dg_event *dg_event_create(EVENTFUNC(*func), void *event_obj, long long when) {
+	struct dg_event *new_event;
 
 	if (when < 1) /* make sure its in the future */
 		when = 1;
+	
+	// add to current pulse time
+	SAFE_ADD(when, main_game_pulse, 0, ULONG_MAX, FALSE);
 
-	CREATE(new_event, struct event, 1);
+	CREATE(new_event, struct dg_event, 1);
 	new_event->func = func;
 	new_event->event_obj = event_obj;
-	new_event->q_el = queue_enq(event_q, new_event, when + pulse);
+	new_event->q_el = queue_enq(event_q, new_event, when);
 
 	return new_event;
 }
 
 
 /* removes the event from the system */
-void event_cancel(struct event *event) {
+void dg_event_cancel(struct dg_event *event, EVENT_CANCEL_FUNC(*func)) {
 	if (!event) {
 		log("SYSERR:  Attempted to cancel a NULL event");
 		return;
@@ -65,33 +70,48 @@ void event_cancel(struct event *event) {
 	else
 		queue_deq(event_q, event->q_el);
 
-	if (event->event_obj)
-		free(event->event_obj);
+	if (event->event_obj) {
+		if (func) {
+			// special freeing func
+			(func)(event->event_obj);
+		}
+		else {
+			// attempt to free the void*
+			free(event->event_obj);
+		}
+	}
 	free(event);
 }
 
 
 /* Process any events whose time has come. */
-void event_process(void) {
-	struct event *the_event;
-	long new_time;
+void dg_event_process(void) {
+	struct dg_event *the_event;
+	unsigned long new_time;
 
-	while ((long) pulse >= queue_key(event_q)) {
-		if (!(the_event = (struct event *) queue_head(event_q))) {
+	while (main_game_pulse >= queue_key(event_q)) {
+		if (!(the_event = (struct dg_event *) queue_head(event_q))) {
 			log("SYSERR: Attempt to get a NULL event");
 			return;
 		}
 
 		/*
 		** Set the_event->q_el to NULL so that any functions called beneath
-		** event_process can tell if they're being called beneath the actual
+		** dg_event_process can tell if they're being called beneath the actual
 		** event function.
 		*/
 		the_event->q_el = NULL;
+		
+		if (!the_event->func) {
+			log("SYSERR: Attempt to call an event with a null function.");
+			free(the_event);
+		}
 
 		/* call event func, reenqueue event if retval > 0 */
-		if ((new_time = (the_event->func)(the_event->event_obj)) > 0)
-			the_event->q_el = queue_enq(event_q, the_event, new_time + pulse);
+		if ((new_time = (the_event->func)(the_event, the_event->event_obj)) > 0) {
+			SAFE_ADD(new_time, main_game_pulse, 0, ULONG_MAX, FALSE);
+			the_event->q_el = queue_enq(event_q, the_event, new_time);
+		}
 		else {
 			free(the_event);
 		}
@@ -100,20 +120,21 @@ void event_process(void) {
 
 
 /* returns the time remaining before the event */
-long event_time(struct event *event) {
-	long when;
+unsigned long dg_event_time(struct dg_event *event) {
+	unsigned long when;
 
 	when = queue_elmt_key(event->q_el);
+	SAFE_ADD(when, (-1 * main_game_pulse), 0, ULONG_MAX, FALSE);
 
-	return (when - pulse);
+	return when;
 }
 
 
 /* frees all events in the queue */
-void event_free_all(void) {
-	struct event *the_event;
+void dg_event_free_all(void) {
+	struct dg_event *the_event;
 
-	while ((the_event = (struct event *) queue_head(event_q))) {
+	while ((the_event = (struct dg_event *) queue_head(event_q))) {
 		if (the_event->event_obj)
 			free(the_event->event_obj);
 		free(the_event);
@@ -123,7 +144,7 @@ void event_free_all(void) {
 }
 
 /* boolean function to tell whether an event is queued or not */
-int event_is_queued(struct event *event) {
+int dg_event_is_queued(struct dg_event *event) {
 	if (event->q_el)
 		return 1;
 	else
@@ -147,7 +168,7 @@ struct queue *queue_init(void) {
 
 
 /* add data into the priority queue q with key */
-struct q_element *queue_enq(struct queue *q, void *data, long key) {
+struct q_element *queue_enq(struct queue *q, void *data, unsigned long key) {
 	struct q_element *qe, *i;
 	int bucket;
 
@@ -161,10 +182,16 @@ struct q_element *queue_enq(struct queue *q, void *data, long key) {
 		q->head[bucket] = qe;
 		q->tail[bucket] = qe;
 	}
-
+	else if (key < q->head[bucket]->key) {
+		// shortcut to newest: insert at the front
+		qe->next = q->head[bucket];
+		q->head[bucket] = qe;
+		qe->next->prev = qe;
+	}
 	else {
 		for (i = q->tail[bucket]; i; i = i->prev) {
-			if (i->key < key) { /* found insertion point */
+			// changed < to <= here because queueing a bunch for the same time is laggy otherwise -pc
+			if (i->key <= key) { /* found insertion point */
 				if (i == q->tail[bucket])
 					q->tail[bucket] = qe;
 				else {
@@ -219,7 +246,7 @@ void *queue_head(struct queue *q) {
 	void *data;
 	int i;
 
-	i = pulse % NUM_EVENT_QUEUES;
+	i = main_game_pulse % NUM_EVENT_QUEUES;
 
 	if (!q->head[i])
 		return NULL;
@@ -234,20 +261,20 @@ void *queue_head(struct queue *q) {
 * returns the key of the head element of the priority queue
 * if q is NULL, then return the largest unsigned number
 */
-long queue_key(struct queue *q) {
+unsigned long queue_key(struct queue *q) {
 	int i;
 
-	i = pulse % NUM_EVENT_QUEUES;
+	i = main_game_pulse % NUM_EVENT_QUEUES;
 
 	if (q->head[i])
 		return q->head[i]->key;
 	else
-		return LONG_MAX;
+		return ULONG_MAX;
 }
 
 
 /* returns the key of queue element qe */
-long queue_elmt_key(struct q_element *qe) {
+unsigned long queue_elmt_key(struct q_element *qe) {
 	return qe->key;
 }
 

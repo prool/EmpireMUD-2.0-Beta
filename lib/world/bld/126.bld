@@ -1,0 +1,56 @@
+#12600
+Elemental Rift~
+A Rift Between Worlds~
+&o\()/~
+1000 0 d 0
+0 0 0 -1
+E
+rift elemental~
+   The rift is unstable, and strong winds push you back as you approach it.
+Flames lash out at you as you move closer and closer, and the wind becomes too
+hot to handle. You will not be able to enter this rift.
+~
+S
+#12650
+Grove Portal~
+A Portal in the Forest~
+@.&L()@.~
+50 0 d 0
+0 0 0 -1
+C
+enter portal~
+E
+portal grove forest~
+   The portal crackles and hisses with a strange energy that is at once natural
+and unnatural. You can tell by the way the portal has formed in a tree that
+there are powerful natural forces at work here.
+~
+S
+#12671
+Wood Henge~
+A Wood Henge~
+&t<<>>~
+16 4 dlp 0
+0 0 0 -1
+C
+chant magic~
+E
+henge wood building~
+   Massive timbers have been constructed in a post-and-lintel circle large
+enough to host a rather large party. It seems to be aligned to the winter
+solstice. Close inspection of the wood shows scratch marks, as if wild animals
+have been climbing it.
+~
+I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
+M
+12671 75.00 c
+R
+1001 1 5 0
+R
+6000 1 1 0
+R
+6790 1 1 0
+T 5142
+T 5143
+S
+$

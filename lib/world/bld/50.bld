@@ -2,10 +2,21 @@
 Grave~
 A Lone Grave~
 ..&0x&?.~
-4 0 dip 0
+4 0 dpx 0
 0 0 0 -1
+B0
+&0x&?.~
+B1
+&0x~
 C
 tomb~
+E
+grave tomb headstone~
+   You come amarker a solitary grave, marked only by a plain wooden cross. The
+marker bears a single name, etched in faded letters. The surrounding area is
+peaceful, as if nature has taken it upon itself to guard the final resting
+place of this unknown soul.
+~
 F
 B
 M
@@ -19,13 +30,13 @@ M
 M
 9199 2.00 0
 R
-2 1 5 0
+1002 1 5 0
 S
 #5001
 Tent~
 A Tent~
 .&0/\&?.~
-2 0 ip 0
+2 0 p 0
 0 0 0 -1
 C
 abandon, dismantle, sleep~
@@ -37,13 +48,13 @@ much material as necessary so that it can be taken down and carried in a pack.
 F
 d
 R
-3 1 5 0
+1003 1 5 0
 S
 #5002
 Rock Shelter~
 A Rock Shelter~
 .&0c&?..~
-2 0 ipR 0
+2 0 pR 0
 0 0 0 -1
 A
 d
@@ -57,13 +68,13 @@ fortable, but it's still shelter.
 F
 d
 R
-4 1 5 0
+1004 1 5 0
 S
 #5003
 Tree Shelter~
 A Tree Shelter~
 ^&0T&?^^~
-2 0 ipR 0
+2 0 pR 0
 0 0 0 -1
 A
 d
@@ -77,13 +88,13 @@ fortable, but it's still shelter.
 F
 d
 R
-4 1 5 0
+1004 1 5 0
 S
 #5004
 Cave Shelter~
 A Cave Shelter~
 ^&0O&?/\~
-2 0 ipR 0
+2 0 pR 0
 0 0 0 -1
 A
 d
@@ -98,13 +109,13 @@ a safe place to stay.
 F
 d
 R
-4 1 5 0
+1004 1 5 0
 S
 #5005
 Jungle Shelter~
 A Shelter in the Jungle~
 &G^c^^~
-2 0 ipR 0
+2 0 pR 0
 0 0 0 -1
 A
 d
@@ -118,21 +129,32 @@ ample shade and protection from the elements.
 F
 d
 R
-4 1 5 0
+1004 1 5 0
 S
 #5006
-Small Ruins~
-Some Decaying Ruins~
-&y/&0..&y\~
-3 -1 di 0
+Ruins~
+The Ruins of #n~
+@.&0(\&?@.~
+3 -1 dipx 0
 0 0 0 -1
+B0
+&0(\~
+B1
+&0\~
 C
 dismantle~
+E
+ruins building~
+   Whatever this building used to be, it is in ruins now. The walls no longer
+offer any real protection from the elements, and the piles of debris are
+infested with rats. This is the sort of place that attracts trouble.
+~
+T 5006
 S
 #5007
-Large Ruins~
-Some Decaying Ruins~
-&y/&0..&y\~
+Ruins~
+The Ruins of a #n~
+@.@.&0/]~
 3 -1 eiR 0
 0 0 0 -1
 C
@@ -142,12 +164,13 @@ D
 offer any real protection from the elements, and the piles of debris are
 infested with rats. This is the sort of place that attracts trouble.
 ~
+T 5007
 S
 #5008
 Tunnel~
 A Tunnel~
 /&0OO&?\~
-128 0 befgi 0
+128 0 befgo 0
 0 0 0 -1
 D
    The tunnel is cold and damp, but is the fastest way from one side of the
@@ -166,9 +189,10 @@ M
 M
 9199 2.00 0
 R
-0 1 5 0
+1000 1 5 0
 R
-21 1 1 0
+6015 1 1 0
+Z1 7
 S
 #5009
 City Center~
@@ -176,14 +200,153 @@ The City Center~
 ????~
 1000 0 do 0
 0 0 0 -1
+E
+city center plaza building around~
+   The bustling plaza at the center of the city seems to act as an anchor -- a
+fixed point for people to gather. The city stretches in all directions from
+here, such that you can hardly see the edge. The paved ground beneath your feet
+bustles with activity as people hurry to and fro, chatting and laughing along
+the way.
+~
+I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
 S
 #5010
 Flooded Ruins~
-Some Flooded Ruins~
+The Flooded Ruins of #n~
 &?~&0|\&?~~
-3 -1 diDQ 0
+3 -1 dinxDQ 0
 0 0 0 -1
+B0
+&0|\~
+B1
+&0|~
 C
 dismantle~
+E
+ruins flooded flooding building~
+   As you wade through the water, you realize you're standing in what must have
+been a grand structure, now reduced to ruins. The murky water obscures the
+floor beneath, making it difficult to discern any details about the original
+use of the building. Broken pillars jut up from the water, hinting at the
+building's former grandeur. The only sounds are the lapping of the waves and
+the occasional creaking of timbers, as if the ruins are trying to hold
+themselves together.
+~
+T 5010
+S
+#5011
+Tent~
+A Small Tent~
+[  ]~
+2 0 aR 0
+0 0 0 -1
+C
+sleep~
+D
+   You are inside a tent made of animal hides. It's not large, but it provides
+good shelter from the sun, wind and rain. The tent is sparse, made of only as
+much material as necessary so that it can be taken down and carried in a pack.
+~
+F
+d
+S
+#5012
+Rock Shelter~
+A Rock Shelter~
+.&0c&?..~
+2 0 aR 0
+0 0 0 -1
+C
+sleep~
+D
+   This is a small shelter made from a rock outcropping on the hillside and
+protected from the wind by a mat of debris. It's small and it's not very com-
+fortable, but it's still shelter.
+~
+F
+d
+S
+#5013
+Tree Shelter~
+A Tree Shelter~
+^&0T&?^^~
+2 0 aR 0
+0 0 0 -1
+C
+sleep~
+D
+   You've found shelter high in the branches of a tree, protected from the wind
+and weather by thick branches. It's not a large shelter and it isn't very com-
+fortable, but it's still shelter.
+~
+F
+d
+S
+#5014
+Cave Shelter~
+A Cave Shelter~
+^&0O&?/\~
+2 0 aR 0
+0 0 0 -1
+C
+sleep~
+D
+   This small cave looks like it was originally hollowed out by an animal, but
+it's large enough for you to stand. A fallen rock covers most of the entrance
+and protects you from the elements. The ground isn't comfortable, but it's still
+a safe place to stay.
+~
+F
+d
+S
+#5015
+Jungle Shelter~
+A Shelter in the Jungle~
+&G^c^^~
+2 0 aR 0
+0 0 0 -1
+C
+sleep~
+D
+   This tiny shelter has been scraped together from vines and leaves to provide
+some protection from the hungry animals of the jungle. The trees also give
+ample shade and protection from the elements.
+~
+F
+d
+S
+#5016
+Ruins~
+Some Decaying Ruins~
+&0[  ]~
+1 0 aR 0
+0 0 0 -1
+D
+   Whatever this building used to be, it is in ruins now. The walls no longer
+offer any real protection from the elements, and the piles of debris are
+infested with rats. This is the sort of place that attracts trouble.
+~
+S
+#5017
+Gatehouse Ruins~
+The Ruins of a Gatehouse~
+@.@.&0/]~
+3 -1 dix 0
+0 0 0 -1
+B0
+&0/]~
+B1
+&0/~
+C
+dismantle~
+E
+ruins gatehouse house building around~
+   The ruins of a gatehouse loom over you, its walls and towers broken and
+crumbled. You can see the remnants of a once-sturdy gate, now rusted and
+twisted on its hinges. Moss and vines cling to the crumbling stones, hinting at
+the long passage of time. Despite the destruction, there is a sense of history
+and importance to the place, as if it played a crucial role in the past.
+~
+T 5007
 S
 $

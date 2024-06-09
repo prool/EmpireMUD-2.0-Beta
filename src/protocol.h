@@ -2,7 +2,7 @@
 *   File: protocol.h                                      EmpireMUD 2.0b5 *
 *  Usage: KaVir's protocol snippet header                                 *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -22,7 +22,15 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
+typedef struct char_data char_data_t;
 typedef struct descriptor_data descriptor_t;
+typedef struct empire_data empire_t;
+
+#if defined(__cplusplus)
+	typedef bool bool_type;
+#else
+	typedef char bool_type;
+#endif
 
 
 /******************************************************************************
@@ -130,6 +138,7 @@ typedef enum {
 	eMSDP_SNIPPET_VERSION,
 	
 	// Character
+	eMSDP_GENDER,
 	eMSDP_HEALTH,
 	eMSDP_HEALTH_MAX,
 	eMSDP_HEALTH_REGEN,
@@ -156,6 +165,8 @@ typedef enum {
 	eMSDP_BONUS_EXP,
 	eMSDP_INVENTORY,
 	eMSDP_INVENTORY_MAX,
+	eMSDP_TEMPERATURE,
+	eMSDP_TEMPERATURE_LABEL,
 	
 	eMSDP_STR,
 	eMSDP_DEX,
@@ -188,6 +199,8 @@ typedef enum {
 	eMSDP_EMPIRE_TERRITORY_MAX,
 	eMSDP_EMPIRE_TERRITORY_OUTSIDE,
 	eMSDP_EMPIRE_TERRITORY_OUTSIDE_MAX,
+	eMSDP_EMPIRE_TERRITORY_FRONTIER,
+	eMSDP_EMPIRE_TERRITORY_FRONTIER_MAX,
 	eMSDP_EMPIRE_WEALTH,
 	eMSDP_EMPIRE_SCORE,
 	
@@ -207,7 +220,12 @@ typedef enum {
 	eMSDP_ROOM_NAME,
 	eMSDP_ROOM_VNUM,
 	eMSDP_WORLD_TIME,
+	eMSDP_WORLD_DAY_OF_MONTH,
+	eMSDP_WORLD_MONTH,
+	eMSDP_WORLD_YEAR,
 	eMSDP_WORLD_SEASON,
+	eMSDP_AMBIENT_TEMPERATURE,
+	eMSDP_AMBIENT_TEMPERATURE_LABEL,
 	
 	// Configuration
 	eMSDP_CLIENT_ID,
@@ -595,5 +613,37 @@ char *UnicodeGet(int aValue);
  * string, without adding a NUL character at the end.
  */
 void UnicodeAdd(char **apString, int aValue);
+
+
+/******************************************************************************
+ Additional functions (EmpireMUD)
+ ******************************************************************************/
+
+// helps ensure unnecessary color codes aren't sent
+char *flush_reduced_color_codes(descriptor_t *desc);
+
+// MSDP updaters
+void send_initial_MSDP(descriptor_t *desc);
+void update_MSDP_affects(char_data_t *ch, int send_update);
+void update_MSDP_attributes(char_data_t *ch, int send_update);
+void update_MSDP_bonus_exp(char_data_t *ch, int send_update);
+void update_MSDP_cooldowns(char_data_t *ch, int send_update);
+void update_MSDP_dots(char_data_t *ch, int send_update);
+void update_MSDP_empire_data(char_data_t *ch, int send_update);
+void update_MSDP_empire_claims(char_data_t *ch, int send_update);
+void update_MSDP_empire_data_all(empire_t *emp, int claims_only, int delay);
+void update_MSDP_gender(char_data_t *ch, int send_update);
+void update_MSDP_inventory(char_data_t *ch, int send_update);
+void update_MSDP_level(char_data_t *ch, int send_update);
+void update_MSDP_money(char_data_t *ch, int send_update);
+void update_MSDP_name(char_data_t *ch, int send_update);
+void update_MSDP_skills(char_data_t *ch, int send_update);
+void update_MSDP_temperature(char_data_t *ch, bool_type room_only, int send_update);
+
+// for the updaters
+#define NO_UPDATE  0
+#define UPDATE_NOW  1
+#define UPDATE_SOON  2
+
 
 #endif /* PROTOCOL_H */

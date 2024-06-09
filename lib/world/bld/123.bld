@@ -1,0 +1,115 @@
+#12300
+Enormous Hole~
+An Enormous Hole in the Hillside~
+&t\__/~
+124 0 d 0
+0 0 0 -1
+E
+hole enormous large hillside~
+   There are signs around the hole that it was dug recently. More worrying,
+however, is its size. Whatever dug it is larger than a warhorse. Type
+'adventure' to see more information or 'enter hole' to go in.
+~
+S
+#12301
+Enormous Hole~
+An Enormous Hole Between the Trees~
+&t\__/~
+124 0 d 0
+0 0 0 -1
+A
+d
+E
+hole large enormous trees~
+   There are signs around the hole that it was dug recently. More worrying,
+however, is its size. Whatever dug it is larger than a warhorse. Type
+'adventure' to see more information or 'enter hole' to go in.
+~
+S
+#12302
+Enormous Hole~
+An Enormous Hole in the Desert~
+&t\__/~
+124 0 d 0
+0 0 0 -1
+E
+hole enormous large desert~
+   There are signs around the hole that it was dug recently. More worrying,
+however, is its size. Whatever dug it is larger than a warhorse. Type
+'adventure' to see more information or 'enter hole' to go in.
+~
+S
+#12303
+Enormous Hole~
+An Enormous Hole in the Jungle Floor~
+&t\__/~
+124 0 d 0
+0 0 0 -1
+A
+d
+E
+hole enormous large jungle floor~
+   There are signs around the hole that it was dug recently. More worrying,
+however, is its size. Whatever dug it is larger than a warhorse. Type
+'adventure' to see more information or 'enter hole' to go in.
+~
+S
+#12308
+Enormous Hole~
+An Enormous, Caved-In Hole~
+&t\__/~
+1 0 d 0
+0 0 0 -1
+E
+hole enormous large caved-in~
+   It looks like there was an enormous hole here, but it has completely caved
+in. Tufts of fur stick out of the dirt, but there are no other clues to the
+identity of the hole's former owner.
+~
+E
+fur tufts~
+   There are large tufts of fur sticking out of the dirt, but whatever left
+them -- and whatever dug the whole -- is long gone.
+~
+R
+12313 1 0 0
+S
+#12350
+Frozen Pit~
+A Frozen Pit in the Desert~
+&C.&b__&C.~
+1000 0 d 0
+0 0 0 -1
+C
+adventure~
+E
+pit frozen desert~
+   All around you, the desert is glazed with frosty blue ice. And in the very
+center of it all, an enormous pit has opened up. You step carefully to the
+edge, gripping a frozen shrub as best you can, and look down. Your vision blurs
+and your head spins as you take a full step back from the realization that you
+cannot see the bottom. This pit goes down forever!
+~
+T 12354
+Z1 4
+S
+#12354
+Hoarfrost Serragon Shrine~
+A Shrine to the Hoarfrost Serragon~
+&?\&C[]&?/~
+64 22 0 0
+0 0 0 -1
+D
+   The cold air washes over your skin as you descend the steps into the shrine
+and frost grows like grass on the stone walls as you watch. The shrine is
+otherwise rather plain: the walls are uncarved, raw, even brutal. There is no
+altar here to tell you if this shrine is to the serragon or to the hoarfrost
+itself. But there is a soft tranquility in the coolness of the air.
+~
+H 0 -1
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
+R
+12354 1 5 0
+Z1 8
+S
+$

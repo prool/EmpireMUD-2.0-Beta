@@ -2,13 +2,14 @@
 *   File: olc.adventure.c                                 EmpireMUD 2.0b5 *
 *  Usage: OLC for adventure zones                                         *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
 *  CircleMUD (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+
 #include "conf.h"
 #include "sysdep.h"
 
@@ -21,6 +22,7 @@
 #include "skills.h"
 #include "handler.h"
 #include "dg_scripts.h"
+#include "constants.h"
 
 /**
 * Contents:
@@ -29,17 +31,13 @@
 *   Edit Modules
 */
 
-// external consts
-extern const char *adventure_flags[];
-extern const char *adventure_link_flags[];
-extern const char *adventure_link_types[];
-extern const char *bld_on_flags[];
-extern const char *dirs[];
+// external functions
+OLC_MODULE(olc_audit);
 
-// external funcs
-extern int delete_all_instances(adv_data *adv);
-extern adv_data *get_adventure_for_vnum(rmt_vnum vnum);
-void init_adventure(adv_data *adv);
+// locals
+const char *default_adv_name = "Unnamed Adventure Zone";
+const char *default_adv_author = "Unknown";
+int default_adv_reset = 30;
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -54,27 +52,41 @@ void init_adventure(adv_data *adv);
 * @return bool TRUE if any problems were reported; FALSE if all good.
 */
 bool audit_adventure(adv_data *adv, char_data *ch, bool only_one) {
-	OLC_MODULE(olc_audit);
-	
 	struct adventure_link_rule *link;
 	char buf[MAX_STRING_LENGTH];
 	struct trig_proto_list *tpl;
 	bool found_limit, problem = FALSE;
+	adv_data *adv_iter, *next_adv;
 	trig_data *trig;
 	
 	if (GET_ADV_START_VNUM(adv) == 0 || GET_ADV_END_VNUM(adv) == 0) {
 		olc_audit_msg(ch, GET_ADV_VNUM(adv), "Vnums not set");
 		problem = TRUE;
 	}
+	else {
+		// check overlapping vnums
+		HASH_ITER(hh, adventure_table, adv_iter, next_adv) {
+			if (adv_iter != adv) {
+				if ((GET_ADV_START_VNUM(adv_iter) >= GET_ADV_START_VNUM(adv) && GET_ADV_START_VNUM(adv_iter) <= GET_ADV_END_VNUM(adv)) || (GET_ADV_END_VNUM(adv_iter) >= GET_ADV_START_VNUM(adv) && GET_ADV_END_VNUM(adv_iter) <= GET_ADV_END_VNUM(adv))) {
+					olc_audit_msg(ch, GET_ADV_VNUM(adv), "Adventure %d %s is entirely within its vnum range", GET_ADV_VNUM(adv_iter), GET_ADV_NAME(adv_iter));
+					problem = TRUE;
+				}
+				else if ((GET_ADV_START_VNUM(adv) >= GET_ADV_START_VNUM(adv_iter) && GET_ADV_START_VNUM(adv) <= GET_ADV_END_VNUM(adv_iter)) || (GET_ADV_END_VNUM(adv) >= GET_ADV_START_VNUM(adv_iter) && GET_ADV_END_VNUM(adv) <= GET_ADV_END_VNUM(adv_iter))) {
+					olc_audit_msg(ch, GET_ADV_VNUM(adv), "Entirely with the vnum range of adventure %d %s", GET_ADV_VNUM(adv_iter), GET_ADV_NAME(adv_iter));
+					problem = TRUE;
+				}
+			}
+		}
+	}
 	if (GET_ADV_START_VNUM(adv) > GET_ADV_END_VNUM(adv)) {
 		olc_audit_msg(ch, GET_ADV_VNUM(adv), "Bad vnum set");
 		problem = TRUE;
 	}
-	if (!str_cmp(GET_ADV_NAME(adv), "Unnamed Adventure Zone") || !*GET_ADV_NAME(adv)) {
+	if (!str_cmp(GET_ADV_NAME(adv), default_adv_name) || !*GET_ADV_NAME(adv)) {
 		olc_audit_msg(ch, GET_ADV_VNUM(adv), "Name not set");
 		problem = TRUE;
 	}
-	if (!str_cmp(GET_ADV_AUTHOR(adv), "Unknown") || !*GET_ADV_AUTHOR(adv)) {
+	if (!str_cmp(GET_ADV_AUTHOR(adv), default_adv_author) || !*GET_ADV_AUTHOR(adv)) {
 		olc_audit_msg(ch, GET_ADV_VNUM(adv), "Name not set");
 		problem = TRUE;
 	}
@@ -149,8 +161,10 @@ bool audit_adventure(adv_data *adv, char_data *ch, bool only_one) {
 
 	// sub-audits
 	if (only_one && GET_ADV_START_VNUM(adv) <= GET_ADV_END_VNUM(adv)) {
-		snprintf(buf, sizeof(buf), "%d %d", GET_ADV_START_VNUM(adv), GET_ADV_END_VNUM(adv));
+		safe_snprintf(buf, sizeof(buf), "%d %d", GET_ADV_START_VNUM(adv), GET_ADV_END_VNUM(adv));
 		// OLC_x: auto-auditors
+		msg_to_char(ch, "Attack messages:\r\n");
+		olc_audit(ch, OLC_ATTACK, buf);
 		msg_to_char(ch, "Crafts:\r\n");
 		olc_audit(ch, OLC_CRAFT, buf);
 		msg_to_char(ch, "Mobs:\r\n");
@@ -175,8 +189,12 @@ bool audit_adventure(adv_data *adv, char_data *ch, bool only_one) {
 		olc_audit(ch, OLC_AUGMENT, buf);
 		msg_to_char(ch, "Factions:\r\n");
 		olc_audit(ch, OLC_FACTION, buf);
+		msg_to_char(ch, "Generics:\r\n");
+		olc_audit(ch, OLC_GENERIC, buf);
 		msg_to_char(ch, "Globals:\r\n");
 		olc_audit(ch, OLC_GLOBAL, buf);
+		msg_to_char(ch, "Shops:\r\n");
+		olc_audit(ch, OLC_SHOP, buf);
 		msg_to_char(ch, "Vehicles:\r\n");
 		olc_audit(ch, OLC_VEHICLE, buf);
 		msg_to_char(ch, "Morphs:\r\n");
@@ -194,8 +212,6 @@ bool audit_adventure(adv_data *adv, char_data *ch, bool only_one) {
 * @return adv_data* The new adventure.
 */
 adv_data *create_adventure_table_entry(adv_vnum vnum) {
-	void add_adventure_to_table(adv_data *adv);
-	
 	adv_data *adv;
 	
 	// sanity
@@ -225,7 +241,7 @@ adv_data *create_adventure_table_entry(adv_vnum vnum) {
 * @return bool TRUE if any links were deleted, FALSE if not
 */
 bool delete_link_rule_by_portal(struct adventure_link_rule **list, obj_vnum portal_vnum) {
-	struct adventure_link_rule *link, *next_link, *temp;
+	struct adventure_link_rule *link, *next_link;
 	bool found = FALSE;
 	
 	// nope
@@ -238,7 +254,7 @@ bool delete_link_rule_by_portal(struct adventure_link_rule **list, obj_vnum port
 		if (link->portal_in == portal_vnum || link->portal_out == portal_vnum) {
 			found = TRUE;
 			
-			REMOVE_FROM_LIST(link, *list, next);
+			LL_DELETE(*list, link);
 			free(link);
 		}
 	}
@@ -251,12 +267,12 @@ bool delete_link_rule_by_portal(struct adventure_link_rule **list, obj_vnum port
 * This function is meant to remove link rules when the place they link is deleted.
 *
 * @param struct adventure_link_rule **list The list to remove from.
-* @param int type The ADV_LINK_x to remove.
+* @param int type The ADV_LINK_ to remove.
 * @param any_vnum value The item will only be removed if its type and value match.
 * @return bool TRUE if any links were deleted, FALSE if not
 */
 bool delete_link_rule_by_type_value(struct adventure_link_rule **list, int type, any_vnum value) {
-	struct adventure_link_rule *link, *next_link, *temp;
+	struct adventure_link_rule *link, *next_link;
 	bool found = FALSE;
 
 	for (link = *list; link; link = next_link) {
@@ -264,7 +280,7 @@ bool delete_link_rule_by_type_value(struct adventure_link_rule **list, int type,
 		if (link->type == type && link->value == value) {
 			found = TRUE;
 			
-			REMOVE_FROM_LIST(link, *list, next);
+			LL_DELETE(*list, link);
 			free(link);
 		}
 	}
@@ -277,10 +293,10 @@ bool delete_link_rule_by_type_value(struct adventure_link_rule **list, int type,
 * This function determines which parameters are needed for a bunch of the
 * "linking" options. It is used by ".linking add" and ".linking change"
 *
-* @param int type ADV_LINK_x type.
+* @param int type ADV_LINK_ type.
 * @param ... All other parameters are pointers to variables to set up based on type.
 */
-void get_advedit_linking_params(int type, int *vnum_type, bool *need_vnum, bool *need_dir, bool *need_buildon, bool *need_buildfacing, bool *need_portalin, bool *need_portalout, bool *need_num, bool *no_rooms, bool *restrict_sect) {
+void get_advedit_linking_params(int type, int *vnum_type, bool *need_vnum, bool *need_dir, bool *need_buildon, bool *need_buildfacing, bool *need_portalin, bool *need_portalout, bool *need_num, bool *no_rooms, bool *restrict_sect, bool *need_veh) {
 	// init
 	*vnum_type = OLC_SECTOR;
 	*need_vnum = FALSE;
@@ -292,6 +308,7 @@ void get_advedit_linking_params(int type, int *vnum_type, bool *need_vnum, bool 
 	*need_num = FALSE;
 	*no_rooms = FALSE;
 	*restrict_sect = FALSE;
+	*need_veh = FALSE;
 	
 	// ADV_LINK_x: needed params depend on type
 	switch (type) {
@@ -335,12 +352,100 @@ void get_advedit_linking_params(int type, int *vnum_type, bool *need_vnum, bool 
 			*no_rooms = TRUE;
 			break;
 		}
+		case ADV_LINK_PORTAL_CROP: {
+			*need_vnum = TRUE;
+			*need_portalin = TRUE;
+			*need_portalout = TRUE;
+			*vnum_type = OLC_CROP;
+			break;
+		}
 		case ADV_LINK_TIME_LIMIT: {
 			*need_num = TRUE;
 			break;
 		}
 		case ADV_LINK_NOT_NEAR_SELF: {
 			*need_num = TRUE;
+			break;
+		}
+		case ADV_LINK_EVENT_RUNNING: {
+			*need_vnum = TRUE;
+			*vnum_type = OLC_EVENT;
+			break;
+		}
+		
+		// vehicle types:
+		case ADV_LINK_PORTAL_VEH_EXISTING: {
+			*need_veh = TRUE;
+			*need_portalin = TRUE;
+			*need_portalout = TRUE;
+			break;
+		}
+		case ADV_LINK_PORTAL_VEH_NEW_BUILDING_EXISTING: {
+			*need_veh = TRUE;
+			*need_portalin = TRUE;
+			*need_portalout = TRUE;
+			*need_vnum = TRUE;
+			*vnum_type = OLC_BUILDING;
+			break;
+		}
+		case ADV_LINK_PORTAL_VEH_NEW_BUILDING_NEW: {
+			*need_veh = TRUE;
+			*need_portalin = TRUE;
+			*need_portalout = TRUE;
+			*need_vnum = TRUE;
+			*need_buildon = TRUE;
+			*need_buildfacing = TRUE;
+			*no_rooms = TRUE;
+			*vnum_type = OLC_BUILDING;
+			break;
+		}
+		case ADV_LINK_PORTAL_VEH_NEW_CROP: {
+			*need_veh = TRUE;
+			*need_portalin = TRUE;
+			*need_portalout = TRUE;
+			*need_vnum = TRUE;
+			*vnum_type = OLC_CROP;
+			break;
+		}
+		case ADV_LINK_PORTAL_VEH_NEW_WORLD: {
+			*need_veh = TRUE;
+			*need_portalin = TRUE;
+			*need_portalout = TRUE;
+			*need_vnum = TRUE;
+			*vnum_type = OLC_SECTOR;
+			*restrict_sect = TRUE;
+			break;
+		}
+		case ADV_LINK_IN_VEH_EXISTING: {
+			*need_veh = TRUE;
+			break;
+		}
+		case ADV_LINK_IN_VEH_NEW_BUILDING_EXISTING: {
+			*need_veh = TRUE;
+			*need_vnum = TRUE;
+			*vnum_type = OLC_BUILDING;
+			break;
+		}
+		case ADV_LINK_IN_VEH_NEW_BUILDING_NEW: {
+			*need_veh = TRUE;
+			*need_vnum = TRUE;
+			*need_buildon = TRUE;
+			*need_buildfacing = TRUE;
+			*no_rooms = TRUE;
+			*vnum_type = OLC_BUILDING;
+			break;
+		}
+		case ADV_LINK_IN_VEH_NEW_CROP: {
+			*need_veh = TRUE;
+			*need_vnum = TRUE;
+			*vnum_type = OLC_CROP;
+			break;
+		}
+		case ADV_LINK_IN_VEH_NEW_WORLD: {
+			*need_veh = TRUE;
+			*need_vnum = TRUE;
+			*vnum_type = OLC_SECTOR;
+			*restrict_sect = TRUE;
 			break;
 		}
 	}
@@ -379,10 +484,10 @@ char *list_one_adventure(adv_data *adv, bool detail) {
 			}
 		}
 		
-		snprintf(output, sizeof(output), "[%5d] %s [%d-%d] (%s) %d mob%s, %d obj%s, %d room%s", GET_ADV_VNUM(adv), GET_ADV_NAME(adv), GET_ADV_START_VNUM(adv), GET_ADV_END_VNUM(adv), level_range_string(GET_ADV_MIN_LEVEL(adv), GET_ADV_MAX_LEVEL(adv), 0), count_mobs, PLURAL(count_mobs), count_objs, PLURAL(count_objs), count_rooms, PLURAL(count_rooms));
+		safe_snprintf(output, sizeof(output), "[%5d] %s [%d-%d] (%s) %d mob%s, %d obj%s, %d room%s", GET_ADV_VNUM(adv), GET_ADV_NAME(adv), GET_ADV_START_VNUM(adv), GET_ADV_END_VNUM(adv), level_range_string(GET_ADV_MIN_LEVEL(adv), GET_ADV_MAX_LEVEL(adv), 0), count_mobs, PLURAL(count_mobs), count_objs, PLURAL(count_objs), count_rooms, PLURAL(count_rooms));
 	}
 	else {
-		snprintf(output, sizeof(output), "[%5d] %s", GET_ADV_VNUM(adv), GET_ADV_NAME(adv));
+		safe_snprintf(output, sizeof(output), "[%5d] %s", GET_ADV_VNUM(adv), GET_ADV_NAME(adv));
 	}
 	
 	return output;
@@ -396,15 +501,16 @@ char *list_one_adventure(adv_data *adv, bool detail) {
 * @param adv_vnum vnum The vnum to delete.
 */
 void olc_delete_adventure(char_data *ch, adv_vnum vnum) {
-	void remove_adventure_from_table(adv_data *adv);
-	
 	adv_data *adv;
+	char name[256];
 	int live = 0;
 	
 	if (!(adv = adventure_proto(vnum))) {
 		msg_to_char(ch, "There is no such adventure zone %d.\r\n", vnum);
 		return;
 	}
+	
+	safe_snprintf(name, sizeof(name), "%s", NULLSAFE(GET_ADV_NAME(adv)));
 	
 	if (HASH_COUNT(adventure_table) <= 1) {
 		msg_to_char(ch, "You can't delete the last adventure zone.\r\n");
@@ -421,14 +527,167 @@ void olc_delete_adventure(char_data *ch, adv_vnum vnum) {
 	save_index(DB_BOOT_ADV);
 	save_library_file_for_vnum(DB_BOOT_ADV, vnum);
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted adventure zone %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Adventure zone %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted adventure zone %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Adventure zone %d (%s) deleted.\r\n", vnum, name);
 	
 	if (live > 0) {
 		msg_to_char(ch, "%d live instances removed.\r\n", live);
 	}
 	
 	free_adventure(adv);
+}
+
+
+/**
+* Searches properties of adventures.
+*
+* @param char_data *ch The person searching.
+* @param char *argument The argument they entered.
+*/
+void olc_fullsearch_adventure(char_data *ch, char *argument) {
+	any_vnum only_vnum = NOTHING;
+	char type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], find_keywords[MAX_INPUT_LENGTH];
+	char only_author[MAX_INPUT_LENGTH];
+	bitvector_t not_flagged = NOBITS, only_flags = NOBITS, find_links = NOBITS, found_links = NOBITS;
+	int count, level_over = NOTHING, level_under = NOTHING, only_level = NOTHING, only_temp = NOTHING, vmin = NOTHING, vmax = NOTHING;
+	int limit_over = NOTHING, limit_under = NOTHING, only_limit = NOTHING;
+	int plimit_over = NOTHING, plimit_under = NOTHING, only_plimit = NOTHING;
+	int reset_over = NOTHING, reset_under = NOTHING, only_reset = NOTHING;
+	adv_data *adv, *next_adv;
+	struct adventure_link_rule *link;
+	
+	if (!*argument) {
+		msg_to_char(ch, "See HELP ADVEDIT FULLSEARCH for syntax.\r\n");
+		return;
+	}
+	
+	// process argument
+	*only_author = '\0';
+	*find_keywords = '\0';
+	while (*argument) {
+		// figure out a type
+		argument = any_one_arg(argument, type_arg);
+		
+		if (!strcmp(type_arg, "-")) {
+			continue;	// just skip stray dashes
+		}
+		
+		FULLSEARCH_STRING("author", only_author)
+		FULLSEARCH_FLAGS("flags", only_flags, adventure_flags)
+		FULLSEARCH_FLAGS("flagged", only_flags, adventure_flags)
+		FULLSEARCH_INT("level", only_level, 0, INT_MAX)
+		FULLSEARCH_INT("levelover", level_over, 0, INT_MAX)
+		FULLSEARCH_INT("levelunder", level_under, 0, INT_MAX)
+		FULLSEARCH_INT("limit", only_limit, 0, INT_MAX)
+		FULLSEARCH_INT("limitover", limit_over, 0, INT_MAX)
+		FULLSEARCH_INT("limitunder", limit_under, 0, INT_MAX)
+		FULLSEARCH_FLAGS("link", find_links, adventure_link_types)
+		FULLSEARCH_INT("playerlimit", only_plimit, 0, INT_MAX)
+		FULLSEARCH_INT("playerlimitover", plimit_over, 0, INT_MAX)
+		FULLSEARCH_INT("playerlimitunder", plimit_under, 0, INT_MAX)
+		FULLSEARCH_INT("reset", only_reset, 0, INT_MAX)
+		FULLSEARCH_INT("resetover", reset_over, 0, INT_MAX)
+		FULLSEARCH_INT("resetunder", reset_under, 0, INT_MAX)
+		FULLSEARCH_LIST("temperature", only_temp, temperature_types)
+		FULLSEARCH_FLAGS("unflagged", not_flagged, adventure_flags)
+		FULLSEARCH_INT("vnum", only_vnum, 0, INT_MAX)
+		FULLSEARCH_INT("vmin", vmin, 0, INT_MAX)
+		FULLSEARCH_INT("vmax", vmax, 0, INT_MAX)
+		
+		else {	// not sure what to do with it? treat it like a keyword
+			sprintf(find_keywords + strlen(find_keywords), "%s%s", *find_keywords ? " " : "", type_arg);
+		}
+		
+		// prepare for next loop
+		skip_spaces(&argument);
+	}
+	
+	build_page_display(ch, "Adventure fullsearch: %s", show_color_codes(find_keywords));
+	count = 0;
+	
+	// okay now look them up
+	HASH_ITER(hh, adventure_table, adv, next_adv) {
+		if ((vmin != NOTHING && GET_ADV_VNUM(adv) < vmin) || (vmax != NOTHING && GET_ADV_VNUM(adv) > vmax)) {
+			continue;	// vnum range
+		}
+		
+		if (*only_author && !str_str(GET_ADV_AUTHOR(adv), only_author)) {
+			continue;
+		}
+		if (not_flagged != NOBITS && ADVENTURE_FLAGGED(adv, not_flagged)) {
+			continue;
+		}
+		if (only_flags != NOBITS && (GET_ADV_FLAGS(adv) & only_flags) != only_flags) {
+			continue;
+		}
+		if (only_level != NOTHING && (only_level < GET_ADV_MIN_LEVEL(adv) || only_level > GET_ADV_MAX_LEVEL(adv))) {
+			continue;
+		}
+		if (level_over != NOTHING && GET_ADV_MIN_LEVEL(adv) < level_over && GET_ADV_MAX_LEVEL(adv) < level_over) {
+			continue;
+		}
+		if (level_under != NOTHING && GET_ADV_MIN_LEVEL(adv) > level_under && GET_ADV_MAX_LEVEL(adv) > level_under) {
+			continue;
+		}
+		if (only_limit != NOTHING && GET_ADV_MAX_INSTANCES(adv) != only_limit) {
+			continue;
+		}
+		if (limit_over != NOTHING && GET_ADV_MAX_INSTANCES(adv) < limit_over) {
+			continue;
+		}
+		if (limit_under != NOTHING && (GET_ADV_MAX_INSTANCES(adv) == 0 || GET_ADV_MAX_INSTANCES(adv) > limit_under)) {
+			continue;
+		}
+		if (only_plimit != NOTHING && GET_ADV_PLAYER_LIMIT(adv) != only_plimit) {
+			continue;
+		}
+		if (plimit_over != NOTHING && GET_ADV_PLAYER_LIMIT(adv) < plimit_over) {
+			continue;
+		}
+		if (plimit_under != NOTHING && (GET_ADV_PLAYER_LIMIT(adv) == 0 || GET_ADV_PLAYER_LIMIT(adv) > plimit_under)) {
+			continue;
+		}
+		if (only_reset != NOTHING && GET_ADV_RESET_TIME(adv) != only_reset) {
+			continue;
+		}
+		if (reset_over != NOTHING && GET_ADV_RESET_TIME(adv) < reset_over) {
+			continue;
+		}
+		if (reset_under != NOTHING && (GET_ADV_RESET_TIME(adv) == 0 || GET_ADV_RESET_TIME(adv) > reset_under)) {
+			continue;
+		}
+		if (only_temp != NOTHING && GET_ADV_TEMPERATURE_TYPE(adv) != only_temp) {
+			continue;
+		}
+		if (only_vnum != NOTHING && (only_vnum < GET_ADV_START_VNUM(adv) || only_vnum > GET_ADV_END_VNUM(adv))) {
+			continue;
+		}
+		if (find_links) {	// look up its linking rules
+			found_links = NOBITS;
+			LL_FOREACH(GET_ADV_LINKING(adv), link) {
+				found_links |= BIT(link->type);
+			}
+			if ((find_links & found_links) != find_links) {
+				continue;
+			}
+		}
+		if (*find_keywords && !multi_isname(find_keywords, GET_ADV_NAME(adv)) && !multi_isname(find_keywords, GET_ADV_AUTHOR(adv)) && !multi_isname(find_keywords, GET_ADV_DESCRIPTION(adv))) {
+			continue;
+		}
+		
+		// show it
+		build_page_display(ch, "[%5d] %s", GET_ADV_VNUM(adv), GET_ADV_NAME(adv));
+		++count;
+	}
+	
+	if (count > 0) {
+		build_page_display(ch, "(%d adventures)", count);
+	}
+	else {
+		build_page_display_str(ch, " none");
+	}
+	
+	send_page_display(ch);
 }
 
 
@@ -473,13 +732,13 @@ void save_olc_adventure(descriptor_data *desc) {
 		if (GET_ADV_NAME(adv)) {
 			free(GET_ADV_NAME(adv));
 		}
-		GET_ADV_NAME(adv) = str_dup("Unnamed Adventure Zone");
+		GET_ADV_NAME(adv) = str_dup(default_adv_name);
 	}
 	if (!GET_ADV_AUTHOR(adv) || !*GET_ADV_AUTHOR(adv)) {
 		if (GET_ADV_AUTHOR(adv)) {
 			free(GET_ADV_AUTHOR(adv));
 		}
-		GET_ADV_AUTHOR(adv) = str_dup("Unknown");
+		GET_ADV_AUTHOR(adv) = str_dup(default_adv_author);
 	}
 	if (GET_ADV_DESCRIPTION(adv) && !*GET_ADV_DESCRIPTION(adv)) {
 		if (GET_ADV_DESCRIPTION(adv)) {
@@ -512,7 +771,7 @@ void save_olc_adventure(descriptor_data *desc) {
 */
 adv_data *setup_olc_adventure(adv_data *input) {
 	adv_data *new;
-	struct adventure_link_rule *old_link, *last_link, *new_link;
+	struct adventure_link_rule *old_link, *new_link;
 	
 	CREATE(new, adv_data, 1);
 	init_adventure(new);
@@ -528,19 +787,10 @@ adv_data *setup_olc_adventure(adv_data *input) {
 		
 		// copy linking
 		GET_ADV_LINKING(new) = NULL;
-		last_link = NULL;
 		for (old_link = GET_ADV_LINKING(input); old_link; old_link = old_link->next) {
 			CREATE(new_link, struct adventure_link_rule, 1);
 			*new_link = *old_link;
-			new_link->next = NULL;
-			
-			if (last_link) {
-				last_link->next = new_link;
-			}
-			else {
-				GET_ADV_LINKING(new) = new_link;
-			}
-			last_link = new_link;
+			LL_APPEND(GET_ADV_LINKING(new), new_link);
 		}
 		
 		// scripts
@@ -548,8 +798,9 @@ adv_data *setup_olc_adventure(adv_data *input) {
 	}
 	else {
 		// brand new: some defaults
-		GET_ADV_NAME(new) = str_dup("Unnamed Adventure Zone");
-		GET_ADV_AUTHOR(new) = str_dup("Unknown");
+		GET_ADV_NAME(new) = str_dup(default_adv_name);
+		GET_ADV_AUTHOR(new) = str_dup(default_adv_author);
+		GET_ADV_RESET_TIME(new) = default_adv_reset;
 
 		// ensure
 		GET_ADV_FLAGS(new) |= ADV_IN_DEVELOPMENT;
@@ -560,31 +811,49 @@ adv_data *setup_olc_adventure(adv_data *input) {
 }
 
 
+/**
+* Counts the words of text in an adventure's strings.
+*
+* @param struct adventure_data *adv The adventure whose strings to count.
+* @return int The number of words in the adventure's strings.
+*/
+int wordcount_adventure(struct adventure_data *adv) {
+	int count = 0;
+	
+	count += wordcount_string(GET_ADV_NAME(adv));
+	count += wordcount_string(GET_ADV_AUTHOR(adv));
+	count += wordcount_string(GET_ADV_DESCRIPTION(adv));
+	
+	return count;
+}
+
+
  //////////////////////////////////////////////////////////////////////////////
 //// DISPLAYS ////////////////////////////////////////////////////////////////
 
 /**
 * Displays the linking rules from a given list.
 *
+* @param char_data *ch The person to display it to.
 * @param struct adventure_link_rule *list Pointer to the start of a list of links.
-* @param char *save_buffer A buffer to store the result to.
+* @param bool send_output If TRUE, sends the page_display as text when done. Pass FALSE if you're building a larger page_display for the character.
 */
-void get_adventure_linking_display(struct adventure_link_rule *list, char *save_buffer) {
+void show_adventure_linking_display(char_data *ch, struct adventure_link_rule *list, bool send_output) {
 	struct adventure_link_rule *rule;
 	char lbuf[MAX_STRING_LENGTH], flg[MAX_STRING_LENGTH], bon[MAX_STRING_LENGTH], bfac[MAX_STRING_LENGTH];
 	sector_data *sect;
+	crop_data *crop;
 	bld_data *bld;
 	int count = 0;
-	
-	*save_buffer = '\0';
+	size_t size;
 	
 	for (rule = list; rule; rule = rule->next) {
 		// prepare build on/facing as several types use them
-		sprintbit(rule->bld_on, bld_on_flags, bon, TRUE);
+		ordered_sprintbit(rule->bld_on, bld_on_flags, bld_on_flags_order, FALSE, bon);
 		if (bon[strlen(bon)-1] == ' ') {
 			bon[strlen(bon)-1] = '\0';	// trim
 		}
-		sprintbit(rule->bld_facing, bld_on_flags, bfac, TRUE);
+		ordered_sprintbit(rule->bld_facing, bld_on_flags, bld_on_flags_order, FALSE, bfac);
 		if (bfac[strlen(bfac)-1] == ' ') {
 			bfac[strlen(bfac)-1] = '\0';	// trim
 		}
@@ -594,7 +863,7 @@ void get_adventure_linking_display(struct adventure_link_rule *list, char *save_
 			case ADV_LINK_BUILDING_EXISTING:	// drop-thru
 			case ADV_LINK_BUILDING_NEW: {
 				bld = building_proto(rule->value);
-				sprintf(lbuf, "[&c%d&0] %s (%s)", rule->value, bld ? GET_BLD_NAME(bld) : "UNKNOWN", dirs[rule->dir]);
+				sprintf(lbuf, "[\tc%d\t0] %s (%s)", rule->value, bld ? GET_BLD_NAME(bld) : "UNKNOWN", dirs[rule->dir]);
 				
 				if (rule->type == ADV_LINK_BUILDING_NEW) {
 					sprintf(lbuf + strlen(lbuf), ", built on \"%s\"", bon);
@@ -606,14 +875,19 @@ void get_adventure_linking_display(struct adventure_link_rule *list, char *save_
 			}
 			case ADV_LINK_PORTAL_WORLD:	// drop-thru
 			case ADV_LINK_PORTAL_BUILDING_EXISTING:	// drop-thru
-			case ADV_LINK_PORTAL_BUILDING_NEW: {
+			case ADV_LINK_PORTAL_BUILDING_NEW:	// drop-thru
+			case ADV_LINK_PORTAL_CROP: {
 				if (rule->type == ADV_LINK_PORTAL_WORLD) {
 					sect = sector_proto(rule->value);
-					sprintf(lbuf, "[&c%d&0] %s", rule->value, sect ? GET_SECT_NAME(sect) : "UNKNOWN");
+					sprintf(lbuf, "[\tc%d\t0] %s", rule->value, sect ? GET_SECT_NAME(sect) : "UNKNOWN");
 				}
 				else if (rule->type == ADV_LINK_PORTAL_BUILDING_EXISTING || rule->type == ADV_LINK_PORTAL_BUILDING_NEW) {
 					bld = building_proto(rule->value);
-					sprintf(lbuf, "[&c%d&0] %s", rule->value, bld ? GET_BLD_NAME(bld) : "UNKNOWN");
+					sprintf(lbuf, "[\tc%d\t0] %s", rule->value, bld ? GET_BLD_NAME(bld) : "UNKNOWN");
+				}
+				else if (rule->type == ADV_LINK_PORTAL_CROP) {
+					crop = crop_proto(rule->value);
+					sprintf(lbuf, "[\tc%d\t0] %s", rule->value, crop ? GET_CROP_NAME(crop) : "UNKNOWN");
 				}
 				else {
 					// should never hit this, but want to be thorough
@@ -622,8 +896,8 @@ void get_adventure_linking_display(struct adventure_link_rule *list, char *save_
 				}
 				
 				// portal objs
-				sprintf(lbuf + strlen(lbuf), ", in: [&c%d&0] %s", rule->portal_in, skip_filler(get_obj_name_by_proto(rule->portal_in)));
-				sprintf(lbuf + strlen(lbuf), ", out: [&c%d&0] %s", rule->portal_out, skip_filler(get_obj_name_by_proto(rule->portal_out)));
+				sprintf(lbuf + strlen(lbuf), ", in: [\tc%d\t0] %s", rule->portal_in, skip_filler(get_obj_name_by_proto(rule->portal_in)));
+				sprintf(lbuf + strlen(lbuf), ", out: [\tc%d\t0] %s", rule->portal_out, skip_filler(get_obj_name_by_proto(rule->portal_out)));
 
 				if (rule->type == ADV_LINK_PORTAL_BUILDING_NEW) {
 					sprintf(lbuf + strlen(lbuf), ", built on \"%s\", facing \"%s\"", bon, bfac);
@@ -631,13 +905,65 @@ void get_adventure_linking_display(struct adventure_link_rule *list, char *save_
 				break;
 			}
 			case ADV_LINK_TIME_LIMIT: {
-				sprintf(lbuf, "expires after %d minutes (%d:%02d:%02d)", rule->value, (rule->value / (60 * 24)), ((rule->value % (60 * 24)) / 60), ((rule->value % (60 * 24)) % 60));
+				sprintf(lbuf, "expires after %d minutes (%s)", rule->value, colon_time(rule->value, TRUE, NULL));
 				break;
 			}
 			case ADV_LINK_NOT_NEAR_SELF: {
 				sprintf(lbuf, "not within %d tiles of itself", rule->value);
 				break;
 			}
+			case ADV_LINK_EVENT_RUNNING: {
+				sprintf(lbuf, "[\tc%d\t0] %s", rule->value, get_event_name_by_proto(rule->value));
+				break;
+			}
+			
+			// vehicle types:
+			case ADV_LINK_PORTAL_VEH_EXISTING:	// drop-thru
+			case ADV_LINK_PORTAL_VEH_NEW_BUILDING_EXISTING:	// drop-thru
+			case ADV_LINK_PORTAL_VEH_NEW_BUILDING_NEW:	// drop-thru
+			case ADV_LINK_PORTAL_VEH_NEW_CROP:	// drop-thru
+			case ADV_LINK_PORTAL_VEH_NEW_WORLD:	// drop-thru
+			case ADV_LINK_IN_VEH_EXISTING:	// drop-thru
+			case ADV_LINK_IN_VEH_NEW_BUILDING_EXISTING:	// drop-thru
+			case ADV_LINK_IN_VEH_NEW_BUILDING_NEW:	// drop-thru
+			case ADV_LINK_IN_VEH_NEW_CROP:	// drop-thru
+			case ADV_LINK_IN_VEH_NEW_WORLD: {
+				size = snprintf(lbuf, sizeof(lbuf), "[\tc%d\t0] %s", rule->vehicle_vnum, get_vehicle_name_by_proto(rule->vehicle_vnum));
+				
+				// has portal
+				if (rule->portal_in != NOTHING) {
+					size += snprintf(lbuf + size, sizeof(lbuf) - size, ", in: [\tc%d\t0] %s", rule->portal_in, skip_filler(get_obj_name_by_proto(rule->portal_in)));
+				}
+				if (rule->portal_out != NOTHING) {
+					size += snprintf(lbuf + size, sizeof(lbuf) - size, ", out: [\tc%d\t0] %s", rule->portal_out, skip_filler(get_obj_name_by_proto(rule->portal_out)));
+				}
+				
+				// has building
+				if (rule->type == ADV_LINK_PORTAL_VEH_NEW_BUILDING_EXISTING || rule->type == ADV_LINK_PORTAL_VEH_NEW_BUILDING_NEW || rule->type == ADV_LINK_IN_VEH_NEW_BUILDING_EXISTING || rule->type == ADV_LINK_IN_VEH_NEW_BUILDING_NEW) {
+					size += snprintf(lbuf + size, sizeof(lbuf) - size, ", in building [\tc%d\t0] %s", rule->value, get_bld_name_by_proto(rule->value));
+					
+					if (rule->bld_on) {
+						size += snprintf(lbuf + size, sizeof(lbuf) - size, ", built on \"%s\"", bon);
+					}
+					if (rule->bld_facing) {
+						size += snprintf(lbuf + size, sizeof(lbuf) - size, ", facing \"%s\"", bfac);
+					}
+				}
+				
+				// has sector
+				if (rule->type == ADV_LINK_PORTAL_VEH_NEW_WORLD || rule->type == ADV_LINK_IN_VEH_NEW_WORLD) {
+					sect = sector_proto(rule->value);
+					size += snprintf(lbuf + size, sizeof(lbuf) - size, "[\tc%d\t0] %s", rule->value, sect ? GET_SECT_NAME(sect) : "UNKNOWN");
+				}
+				
+				// has crop
+				if (rule->type == ADV_LINK_PORTAL_VEH_NEW_CROP || rule->type == ADV_LINK_IN_VEH_NEW_CROP) {
+					crop = crop_proto(rule->value);
+					size += snprintf(lbuf + size, sizeof(lbuf) - size, "[\tc%d\t0] %s", rule->value, crop ? GET_CROP_NAME(crop) : "UNKNOWN");
+				}
+				break;
+			}
+			
 			default: {
 				*lbuf = '\0';
 				break;
@@ -645,11 +971,15 @@ void get_adventure_linking_display(struct adventure_link_rule *list, char *save_
 		}
 		
 		sprintbit(rule->flags, adventure_link_flags, flg, TRUE);
-		sprintf(save_buffer + strlen(save_buffer), "%2d. %s: %s%s&g%s&0\r\n", ++count, adventure_link_types[rule->type], lbuf, (rule->flags ? ", " : ""), (rule->flags ? flg : ""));
+		build_page_display(ch, "%2d. %s: %s%s&g%s\t0", ++count, adventure_link_types[rule->type], lbuf, (rule->flags ? ", " : ""), (rule->flags ? flg : ""));
 	}
 	
 	if (count == 0) {
-		strcat(save_buffer, " none\r\n");
+		build_page_display_str(ch, " none");
+	}
+	
+	if (send_output) {
+		send_page_display_as(ch, PD_NO_PAGINATION | PD_FREE_DISPLAY_AFTER);
 	}
 }
 
@@ -661,64 +991,52 @@ void get_adventure_linking_display(struct adventure_link_rule *list, char *save_
 * @param char_data *ch The person who is editing a adventure and will see its display.
 */
 void olc_show_adventure(char_data *ch) {
-	void get_script_display(struct trig_proto_list *list, char *save_buffer);
-
 	adv_data *adv = GET_OLC_ADVENTURE(ch->desc);
 	char lbuf[MAX_STRING_LENGTH];
-	int time;
 	
 	if (!adv) {
 		return;
 	}
-	
-	*buf = '\0';
 
-	sprintf(buf + strlen(buf), "[&c%d&0] &c%s&0\r\n", GET_OLC_VNUM(ch->desc), !adventure_proto(GET_ADV_VNUM(adv)) ? "new adventure zone" : GET_ADV_NAME(adventure_proto(GET_ADV_VNUM(adv))));
-	sprintf(buf + strlen(buf), "<&ystartvnum&0> %d\r\n", GET_ADV_START_VNUM(adv));
-	sprintf(buf + strlen(buf), "<&yendvnum&0> %d\r\n", GET_ADV_END_VNUM(adv));
-	sprintf(buf + strlen(buf), "<&yname&0> %s\r\n", NULLSAFE(GET_ADV_NAME(adv)));
-	sprintf(buf + strlen(buf), "<&yauthor&0> %s\r\n", NULLSAFE(GET_ADV_AUTHOR(adv)));
-	sprintf(buf + strlen(buf), "<&ydescription&0>\r\n%s", NULLSAFE(GET_ADV_DESCRIPTION(adv)));
+	build_page_display(ch, "[%s%d\t0] %s%s\t0", OLC_LABEL_CHANGED, GET_OLC_VNUM(ch->desc), OLC_LABEL_UNCHANGED, !adventure_proto(GET_ADV_VNUM(adv)) ? "new adventure zone" : GET_ADV_NAME(adventure_proto(GET_ADV_VNUM(adv))));
+	build_page_display(ch, "<%sstartvnum\t0> %d", OLC_LABEL_VAL(GET_ADV_START_VNUM(adv), 0), GET_ADV_START_VNUM(adv));
+	build_page_display(ch, "<%sendvnum\t0> %d", OLC_LABEL_VAL(GET_ADV_END_VNUM(adv), 0), GET_ADV_END_VNUM(adv));
+	build_page_display(ch, "<%sname\t0> %s", OLC_LABEL_STR(GET_ADV_NAME(adv), default_adv_name), NULLSAFE(GET_ADV_NAME(adv)));
+	build_page_display(ch, "<%sauthor\t0> %s", OLC_LABEL_STR(GET_ADV_AUTHOR(adv), default_adv_author), NULLSAFE(GET_ADV_AUTHOR(adv)));
+	build_page_display(ch, "<%sdescription\t0>\r\n%s", OLC_LABEL_STR(GET_ADV_DESCRIPTION(adv), ""), NULLSAFE(GET_ADV_DESCRIPTION(adv)));
 	
 	sprintbit(GET_ADV_FLAGS(adv), adventure_flags, lbuf, TRUE);
-	sprintf(buf + strlen(buf), "<&yflags&0> %s\r\n", lbuf);
+	build_page_display(ch, "<%sflags\t0> %s", OLC_LABEL_VAL(GET_ADV_FLAGS(adv), ADV_IN_DEVELOPMENT), lbuf);
 	
-	sprintf(buf + strlen(buf), "<&yminlevel&0> %d\r\n", GET_ADV_MIN_LEVEL(adv));
-	sprintf(buf + strlen(buf), "<&ymaxlevel&0> %d\r\n", GET_ADV_MAX_LEVEL(adv));
+	build_page_display(ch, "<%stemperature\t0> %s", OLC_LABEL_VAL(GET_ADV_TEMPERATURE_TYPE(adv), 0), temperature_types[GET_ADV_TEMPERATURE_TYPE(adv)]);
 	
-	sprintf(buf + strlen(buf), "<&ylimit&0> %d instance%s\r\n", GET_ADV_MAX_INSTANCES(adv), (GET_ADV_MAX_INSTANCES(adv) != 1 ? "s" : ""));
-	sprintf(buf + strlen(buf), "<&yplayerlimit&0> %d\r\n", GET_ADV_PLAYER_LIMIT(adv));
+	build_page_display(ch, "<%sminlevel\t0> %d", OLC_LABEL_VAL(GET_ADV_MIN_LEVEL(adv), 0), GET_ADV_MIN_LEVEL(adv));
+	build_page_display(ch, "<%smaxlevel\t0> %d", OLC_LABEL_VAL(GET_ADV_MAX_LEVEL(adv), 0), GET_ADV_MAX_LEVEL(adv));
+	
+	build_page_display(ch, "<%slimit\t0> %d instance%s (adjusts to %d)", OLC_LABEL_VAL(GET_ADV_MAX_INSTANCES(adv), 1), GET_ADV_MAX_INSTANCES(adv), (GET_ADV_MAX_INSTANCES(adv) != 1 ? "s" : ""), adjusted_instance_limit(adv));
+	build_page_display(ch, "<%splayerlimit\t0> %d", OLC_LABEL_VAL(GET_ADV_PLAYER_LIMIT(adv), 0), GET_ADV_PLAYER_LIMIT(adv));
 	
 	// reset time display helper
-	if (GET_ADV_RESET_TIME(adv) > (60 * 24)) {
-		time = GET_ADV_RESET_TIME(adv) - (GET_ADV_RESET_TIME(adv) / (60 * 24));
-		sprintf(lbuf, " (%2d:%02d:%02d)", (GET_ADV_RESET_TIME(adv) / (60 * 24)), (time / 60), (time % 60));
-	}
-	else if (GET_ADV_RESET_TIME(adv) > 60) {
-		sprintf(lbuf, " (%2d:%02d)", (GET_ADV_RESET_TIME(adv) / 60), (GET_ADV_RESET_TIME(adv) % 60));
-	}
-	else if (GET_ADV_RESET_TIME(adv) <= 0) {
+	if (GET_ADV_RESET_TIME(adv) <= 0) {
 		strcpy(lbuf, " (never)");
 	}
 	else {
-		*lbuf = '\0';
+		strcpy(lbuf, colon_time(GET_ADV_RESET_TIME(adv), TRUE, NULL));
 	}
-	sprintf(buf + strlen(buf), "<&yreset&0> %d minutes%s\r\n", GET_ADV_RESET_TIME(adv), lbuf);
+	build_page_display(ch, "<%sreset\t0> %d minutes %s", OLC_LABEL_VAL(GET_ADV_RESET_TIME(adv), default_adv_reset), GET_ADV_RESET_TIME(adv), lbuf);
 
-	sprintf(buf + strlen(buf), "Linking rules: <&ylinking&0>\r\n");
+	build_page_display(ch, "Linking rules: <%slinking\t0>", OLC_LABEL_PTR(GET_ADV_LINKING(adv)));
 	if (GET_ADV_LINKING(adv)) {
-		get_adventure_linking_display(GET_ADV_LINKING(adv), lbuf);
-		strcat(buf, lbuf);
+		show_adventure_linking_display(ch, GET_ADV_LINKING(adv), FALSE);
 	}
 	
 	// scripts
-	sprintf(buf + strlen(buf), "Adventure Cleanup Scripts: <&yscript&0>\r\n");
+	build_page_display(ch, "Adventure Cleanup Scripts: <%sscript\t0>", OLC_LABEL_PTR(GET_ADV_SCRIPTS(adv)));
 	if (GET_ADV_SCRIPTS(adv)) {
-		get_script_display(GET_ADV_SCRIPTS(adv), lbuf);
-		strcat(buf, lbuf);
+		show_script_display(ch, GET_ADV_SCRIPTS(adv), FALSE);
 	}
 		
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -768,15 +1086,15 @@ OLC_MODULE(advedit_cascade) {
 		*line = '\0';
 		
 		if (GET_MIN_SCALE_LEVEL(mob) > 0 || GET_MAX_SCALE_LEVEL(mob) > 0) {
-			snprintf(line, sizeof(line), "already has levels %d-%d", GET_MIN_SCALE_LEVEL(mob), GET_MAX_SCALE_LEVEL(mob));
+			safe_snprintf(line, sizeof(line), "already has levels %d-%d", GET_MIN_SCALE_LEVEL(mob), GET_MAX_SCALE_LEVEL(mob));
 		}
 		else if (!player_can_olc_edit(ch, OLC_MOBILE, GET_MOB_VNUM(mob))) {
-			snprintf(line, sizeof(line), "no permission");
+			safe_snprintf(line, sizeof(line), "no permission");
 		}
 		else {
 			GET_MIN_SCALE_LEVEL(mob) = GET_ADV_MIN_LEVEL(adv);
 			GET_MAX_SCALE_LEVEL(mob) = GET_ADV_MAX_LEVEL(adv);
-			snprintf(line, sizeof(line), "updated");
+			safe_snprintf(line, sizeof(line), "updated");
 			save_mobs = TRUE;
 		}
 		
@@ -793,19 +1111,19 @@ OLC_MODULE(advedit_cascade) {
 		*line = '\0';
 		
 		if (GET_OBJ_MIN_SCALE_LEVEL(obj) > 0 || GET_OBJ_MAX_SCALE_LEVEL(obj) > 0) {
-			snprintf(line, sizeof(line), "already has levels %d-%d", GET_OBJ_MIN_SCALE_LEVEL(obj), GET_OBJ_MAX_SCALE_LEVEL(obj));
+			safe_snprintf(line, sizeof(line), "already has levels %d-%d", GET_OBJ_MIN_SCALE_LEVEL(obj), GET_OBJ_MAX_SCALE_LEVEL(obj));
 		}
 		else if (!player_can_olc_edit(ch, OLC_OBJECT, GET_OBJ_VNUM(obj))) {
-			snprintf(line, sizeof(line), "no permission");
+			safe_snprintf(line, sizeof(line), "no permission");
 		}
 		else if (!OBJ_FLAGGED(obj, OBJ_SCALABLE)) {
-			snprintf(line, sizeof(line), "not scalable");
+			safe_snprintf(line, sizeof(line), "not scalable");
 		}
 		else {
-			GET_OBJ_MIN_SCALE_LEVEL(obj) = GET_ADV_MIN_LEVEL(adv);
-			GET_OBJ_MAX_SCALE_LEVEL(obj) = GET_ADV_MAX_LEVEL(adv);
+			obj->proto_data->min_scale_level = GET_ADV_MIN_LEVEL(adv);
+			obj->proto_data->max_scale_level = GET_ADV_MAX_LEVEL(adv);
 			OBJ_VERSION(obj) += 1;
-			snprintf(line, sizeof(line), "updated");
+			safe_snprintf(line, sizeof(line), "updated");
 			save_objs = TRUE;
 		}
 		
@@ -858,7 +1176,7 @@ OLC_MODULE(advedit_endvnum) {
 		GET_ADV_END_VNUM(adv) = olc_process_number(ch, argument, "ending vnum", "endvnum", GET_ADV_START_VNUM(adv), MAX_INT, GET_ADV_END_VNUM(adv));
 		temp = get_adventure_for_vnum(GET_ADV_START_VNUM(adv));
 		if (temp && GET_ADV_VNUM(temp) != GET_ADV_VNUM(adv)) {
-			msg_to_char(ch, "New value %d is inside adventure [%d] %s, old value restored.\r\n", GET_ADV_START_VNUM(adv), GET_ADV_VNUM(temp), GET_ADV_NAME(temp));
+			msg_to_char(ch, "New value %d is inside adventure [%d] %s; old value restored.\r\n", GET_ADV_START_VNUM(adv), GET_ADV_VNUM(temp), GET_ADV_NAME(temp));
 			GET_ADV_START_VNUM(adv) = old;
 		}
 	}
@@ -886,15 +1204,15 @@ OLC_MODULE(advedit_limit) {
 
 // warning: linking rules require highly-customized input
 OLC_MODULE(advedit_linking) {
-	bool need_vnum, need_dir, need_buildon, need_buildfacing, need_portalin, need_portalout, need_num, no_rooms, restrict_sect;
-	char type_arg[MAX_INPUT_LENGTH], vnum_arg[MAX_INPUT_LENGTH], dir_arg[MAX_INPUT_LENGTH], buildon_arg[MAX_INPUT_LENGTH], buildfacing_arg[MAX_INPUT_LENGTH], portalin_arg[MAX_INPUT_LENGTH], portalout_arg[MAX_INPUT_LENGTH], num_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH];
+	bool need_vnum, need_dir, need_buildon, need_buildfacing, need_portalin, need_portalout, need_num, no_rooms, restrict_sect, need_veh;
+	char type_arg[MAX_INPUT_LENGTH], vnum_arg[MAX_INPUT_LENGTH], dir_arg[MAX_INPUT_LENGTH], buildon_arg[MAX_INPUT_LENGTH], buildfacing_arg[MAX_INPUT_LENGTH], portalin_arg[MAX_INPUT_LENGTH], portalout_arg[MAX_INPUT_LENGTH], num_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], veh_arg[MAX_INPUT_LENGTH];
 	bitvector_t buildon = NOBITS, buildfacing = NOBITS;
 	char arg1[MAX_INPUT_LENGTH], lbuf[MAX_STRING_LENGTH];
-	struct adventure_link_rule *link, *change, *temp;
+	struct adventure_link_rule *link, *change;
 	obj_data *portalin = NULL, *portalout = NULL;
 	adv_data *adv = GET_OLC_ADVENTURE(ch->desc);
 	int linktype = 0, dir = NO_DIR, vnum_type;
-	any_vnum value = NOTHING;
+	any_vnum value = NOTHING, veh_vnum = NOTHING;
 	int iter, num;
 	bool found;
 	
@@ -923,7 +1241,7 @@ OLC_MODULE(advedit_linking) {
 					found = TRUE;
 					
 					msg_to_char(ch, "You remove rule %d (%s)\r\n", atoi(argument), adventure_link_types[link->type]);
-					REMOVE_FROM_LIST(link, GET_ADV_LINKING(adv), next);
+					LL_DELETE(GET_ADV_LINKING(adv), link);
 					free(link);
 				}
 			}
@@ -935,7 +1253,7 @@ OLC_MODULE(advedit_linking) {
 	}
 	else if (is_abbrev(arg1, "add")) {
 		// defaults
-		*type_arg = *vnum_arg = *dir_arg = *buildon_arg = *buildfacing_arg = *portalin_arg = *portalout_arg = *num_arg = '\0';
+		*type_arg = *vnum_arg = *dir_arg = *buildon_arg = *buildfacing_arg = *portalin_arg = *portalout_arg = *num_arg = *veh_arg = '\0';
 		
 		// pull out type arg
 		argument = any_one_word(argument, type_arg);
@@ -945,7 +1263,7 @@ OLC_MODULE(advedit_linking) {
 		}
 		
 		// determine params
-		get_advedit_linking_params(linktype, &vnum_type, &need_vnum, &need_dir, &need_buildon, &need_buildfacing, &need_portalin, &need_portalout, &need_num, &no_rooms, &restrict_sect);
+		get_advedit_linking_params(linktype, &vnum_type, &need_vnum, &need_dir, &need_buildon, &need_buildfacing, &need_portalin, &need_portalout, &need_num, &no_rooms, &restrict_sect, &need_veh);
 		
 		// ADV_LINK_x: argument order depends on type
 		switch (linktype) {
@@ -981,6 +1299,12 @@ OLC_MODULE(advedit_linking) {
 				argument = any_one_word(argument, buildfacing_arg);
 				break;
 			}
+			case ADV_LINK_PORTAL_CROP: {
+				argument = any_one_word(argument, vnum_arg);
+				argument = any_one_word(argument, portalin_arg);
+				argument = any_one_word(argument, portalout_arg);
+				break;
+			}
 			case ADV_LINK_TIME_LIMIT: {
 				argument = any_one_word(argument, num_arg);
 				break;
@@ -989,12 +1313,82 @@ OLC_MODULE(advedit_linking) {
 				argument = any_one_word(argument, num_arg);
 				break;
 			}
+			case ADV_LINK_EVENT_RUNNING: {
+				argument = any_one_word(argument, vnum_arg);
+				break;
+			}
+			
+			// vehicle types:
+			case ADV_LINK_PORTAL_VEH_EXISTING: {
+				argument = any_one_word(argument, veh_arg);
+				argument = any_one_word(argument, portalin_arg);
+				argument = any_one_word(argument, portalout_arg);
+				break;
+			}
+			case ADV_LINK_PORTAL_VEH_NEW_BUILDING_EXISTING: {
+				argument = any_one_word(argument, veh_arg);
+				argument = any_one_word(argument, vnum_arg);
+				argument = any_one_word(argument, portalin_arg);
+				argument = any_one_word(argument, portalout_arg);
+				break;
+			}
+			case ADV_LINK_PORTAL_VEH_NEW_BUILDING_NEW: {
+				argument = any_one_word(argument, veh_arg);
+				argument = any_one_word(argument, vnum_arg);
+				argument = any_one_word(argument, portalin_arg);
+				argument = any_one_word(argument, portalout_arg);
+				argument = any_one_word(argument, buildon_arg);
+				argument = any_one_word(argument, buildfacing_arg);
+				break;
+			}
+			case ADV_LINK_PORTAL_VEH_NEW_CROP: {
+				argument = any_one_word(argument, veh_arg);
+				argument = any_one_word(argument, vnum_arg);
+				argument = any_one_word(argument, portalin_arg);
+				argument = any_one_word(argument, portalout_arg);
+				break;
+			}
+			case ADV_LINK_PORTAL_VEH_NEW_WORLD: {
+				argument = any_one_word(argument, veh_arg);
+				argument = any_one_word(argument, vnum_arg);
+				argument = any_one_word(argument, portalin_arg);
+				argument = any_one_word(argument, portalout_arg);
+				break;
+			}
+			case ADV_LINK_IN_VEH_EXISTING: {
+				argument = any_one_word(argument, veh_arg);
+				break;
+			}
+			case ADV_LINK_IN_VEH_NEW_BUILDING_EXISTING: {
+				argument = any_one_word(argument, veh_arg);
+				argument = any_one_word(argument, vnum_arg);
+				break;
+			}
+			case ADV_LINK_IN_VEH_NEW_BUILDING_NEW: {
+				argument = any_one_word(argument, veh_arg);
+				argument = any_one_word(argument, vnum_arg);
+				argument = any_one_word(argument, buildon_arg);
+				argument = any_one_word(argument, buildfacing_arg);
+				break;
+			}
+			case ADV_LINK_IN_VEH_NEW_CROP: {
+				argument = any_one_word(argument, veh_arg);
+				argument = any_one_word(argument, vnum_arg);
+				break;
+			}
+			case ADV_LINK_IN_VEH_NEW_WORLD: {
+				argument = any_one_word(argument, veh_arg);
+				argument = any_one_word(argument, vnum_arg);
+				break;
+			}
 		}
 		
 		// anything left is flags
 		skip_spaces(&argument);
 		
-		if (need_vnum && !*vnum_arg) {
+		if (need_veh && !*veh_arg) {
+		}
+		else if (need_vnum && !*vnum_arg) {
 			msg_to_char(ch, "You must specify a vnum.\r\n");
 		}
 		else if (need_dir && !*dir_arg) {
@@ -1026,6 +1420,13 @@ OLC_MODULE(advedit_linking) {
 			if (need_num) {
 				value = atoi(num_arg);
 			}
+			if (need_veh) {
+				veh_vnum = atoi(veh_arg);
+				if (!vehicle_proto(veh_vnum)) {
+					msg_to_char(ch, "Invalid vehicle vnum '%s'.\r\n", vnum_arg);
+					return;
+				}
+			}
 			if (need_vnum) {
 				value = atoi(vnum_arg);
 
@@ -1040,6 +1441,14 @@ OLC_MODULE(advedit_linking) {
 				}
 				if (vnum_type == OLC_SECTOR && !sector_proto(value)) {
 					msg_to_char(ch, "Invalid sector vnum '%s'.\r\n", vnum_arg);
+					return;
+				}
+				if (vnum_type == OLC_CROP && !crop_proto(value)) {
+					msg_to_char(ch, "Invalid crop vnum '%s'.\r\n", vnum_arg);
+					return;
+				}
+				if (vnum_type == OLC_EVENT && !find_event_by_vnum(value)) {
+					msg_to_char(ch, "Invalid event vnum '%s'.\r\n", vnum_arg);
 					return;
 				}
 				if (restrict_sect && SECT_FLAGGED(sector_proto(value), SECTF_ADVENTURE)) {
@@ -1064,19 +1473,13 @@ OLC_MODULE(advedit_linking) {
 			link->dir = dir;
 			link->bld_on = buildon;
 			link->bld_facing = buildfacing;
-			link->next = NULL;
-
-			if ((temp = GET_ADV_LINKING(adv)) != NULL) {
-				while (temp->next) {
-					temp = temp->next;
-				}
-				temp->next = link;
-			}
-			else {
-				GET_ADV_LINKING(adv) = link;
-			}
+			link->vehicle_vnum = veh_vnum;
+			LL_APPEND(GET_ADV_LINKING(adv), link);
 
 			msg_to_char(ch, "You add a linking rule of type: %s\r\n", adventure_link_types[linktype]);
+			if (need_veh) {
+				msg_to_char(ch, " - vehicle: %d %s\r\n", veh_vnum, get_vehicle_name_by_proto(veh_vnum));
+			}
 			if (need_vnum) {
 				msg_to_char(ch, " - vnum: %d\r\n", value);
 			}
@@ -1084,11 +1487,11 @@ OLC_MODULE(advedit_linking) {
 				msg_to_char(ch, " - dir: %s\r\n", dirs[dir]);
 			}
 			if (need_buildon) {
-				sprintbit(buildon, bld_on_flags, lbuf, TRUE);
+				ordered_sprintbit(buildon, bld_on_flags, bld_on_flags_order, TRUE, lbuf);
 				msg_to_char(ch, " - built on: %s\r\n", lbuf);
 			}
 			if (need_buildfacing) {
-				sprintbit(buildfacing, bld_on_flags, lbuf, TRUE);
+				ordered_sprintbit(buildfacing, bld_on_flags, bld_on_flags_order, TRUE, lbuf);
 				msg_to_char(ch, " - built facing: %s\r\n", lbuf);
 			}
 			if (need_portalin) {
@@ -1112,7 +1515,7 @@ OLC_MODULE(advedit_linking) {
 		
 		if (!*num_arg || !isdigit(*num_arg) || !*type_arg) {
 			msg_to_char(ch, "Usage: linking change <number> <field> <value>\r\n");
-			msg_to_char(ch, "Valid fields: vnum, dir, flags, buildon, buildfacing, portalin, portalout, number\r\n");
+			msg_to_char(ch, "Valid fields: vnum, vehicle, dir, flags, buildon, buildfacing, portalin, portalout, number\r\n");
 			return;
 		}
 		
@@ -1132,7 +1535,7 @@ OLC_MODULE(advedit_linking) {
 		}
 		
 		// determine params
-		get_advedit_linking_params(change->type, &vnum_type, &need_vnum, &need_dir, &need_buildon, &need_buildfacing, &need_portalin, &need_portalout, &need_num, &no_rooms, &restrict_sect);
+		get_advedit_linking_params(change->type, &vnum_type, &need_vnum, &need_dir, &need_buildon, &need_buildfacing, &need_portalin, &need_portalout, &need_num, &no_rooms, &restrict_sect, &need_veh);
 		
 		if (is_abbrev(type_arg, "vnum")) {
 			if (!need_vnum) {
@@ -1153,12 +1556,33 @@ OLC_MODULE(advedit_linking) {
 			else if (vnum_type == OLC_SECTOR && !sector_proto(value)) {
 				msg_to_char(ch, "Invalid sector vnum '%s'.\r\n", val_arg);
 			}
+			else if (vnum_type == OLC_CROP && !crop_proto(value)) {
+				msg_to_char(ch, "Invalid crop vnum '%s'.\r\n", val_arg);
+			}
+			else if (vnum_type == OLC_EVENT && !find_event_by_vnum(value)) {
+				msg_to_char(ch, "Invalid event vnum '%s'.\r\n", val_arg);
+			}
 			else if (restrict_sect && SECT_FLAGGED(sector_proto(value), SECTF_ADVENTURE)) {
 				msg_to_char(ch, "You may not use ADVENTURE-type sectors for this.\r\n");
 			}
 			else {
 				change->value = value;
 				msg_to_char(ch, "Linking rule %d changed to vnum %d.\r\n", atoi(num_arg), value);
+			}
+		}
+		else if (is_abbrev(type_arg, "vehicle")) {
+			if (!need_veh) {
+				msg_to_char(ch, "That link has no vehicle.\r\n");
+			}
+			else if (!*val_arg) {
+				msg_to_char(ch, "Set the vehicle to what vnum?\r\n");
+			}
+			else if (!isdigit(*val_arg) || (value = atoi(val_arg)) < 0 || !vehicle_proto(value)) {
+				msg_to_char(ch, "Invalid vehicle vnum '%s'.\r\n", val_arg);
+			}
+			else {
+				change->vehicle_vnum = value;
+				msg_to_char(ch, "Linking rule %d changed to vehicle %d %s.\r\n", atoi(num_arg), value, get_vehicle_name_by_proto(value));
 			}
 		}
 		else if (is_abbrev(type_arg, "direction")) {
@@ -1296,6 +1720,12 @@ OLC_MODULE(advedit_script) {
 }
 
 
+OLC_MODULE(advedit_temperature) {
+	adv_data *adv = GET_OLC_ADVENTURE(ch->desc);
+	GET_ADV_TEMPERATURE_TYPE(adv) = olc_process_type(ch, argument, "temperature", "temperature", temperature_types, GET_ADV_TEMPERATURE_TYPE(adv));
+}
+
+
 OLC_MODULE(advedit_startvnum) {
 	adv_data *temp, *adv = GET_OLC_ADVENTURE(ch->desc);
 	adv_vnum old;
@@ -1308,7 +1738,7 @@ OLC_MODULE(advedit_startvnum) {
 		GET_ADV_START_VNUM(adv) = olc_process_number(ch, argument, "starting vnum", "startvnum", 0, MAX_INT, GET_ADV_START_VNUM(adv));
 		temp = get_adventure_for_vnum(GET_ADV_START_VNUM(adv));
 		if (temp && GET_ADV_VNUM(temp) != GET_ADV_VNUM(adv)) {
-			msg_to_char(ch, "New value %d is inside adventure [%d] %s, old value restored.\r\n", GET_ADV_START_VNUM(adv), GET_ADV_VNUM(temp), GET_ADV_NAME(temp));
+			msg_to_char(ch, "New value %d is inside adventure [%d] %s; old value restored.\r\n", GET_ADV_START_VNUM(adv), GET_ADV_VNUM(temp), GET_ADV_NAME(temp));
 			GET_ADV_START_VNUM(adv) = old;
 		}
 	}
@@ -1352,15 +1782,15 @@ OLC_MODULE(advedit_uncascade) {
 		*line = '\0';
 		
 		if (GET_MIN_SCALE_LEVEL(mob) != GET_ADV_MIN_LEVEL(adv) || GET_MAX_SCALE_LEVEL(mob) != GET_ADV_MAX_LEVEL(adv)) {
-			snprintf(line, sizeof(line), "has levels %d-%d", GET_MIN_SCALE_LEVEL(mob), GET_MAX_SCALE_LEVEL(mob));
+			safe_snprintf(line, sizeof(line), "has levels %d-%d", GET_MIN_SCALE_LEVEL(mob), GET_MAX_SCALE_LEVEL(mob));
 		}
 		else if (!player_can_olc_edit(ch, OLC_MOBILE, GET_MOB_VNUM(mob))) {
-			snprintf(line, sizeof(line), "no permission");
+			safe_snprintf(line, sizeof(line), "no permission");
 		}
 		else {
 			GET_MIN_SCALE_LEVEL(mob) = 0;
 			GET_MAX_SCALE_LEVEL(mob) = 0;
-			snprintf(line, sizeof(line), "removed");
+			safe_snprintf(line, sizeof(line), "removed");
 			save_mobs = TRUE;
 		}
 		
@@ -1377,19 +1807,19 @@ OLC_MODULE(advedit_uncascade) {
 		*line = '\0';
 		
 		if (GET_OBJ_MIN_SCALE_LEVEL(obj) != GET_ADV_MIN_LEVEL(adv) || GET_OBJ_MAX_SCALE_LEVEL(obj) != GET_ADV_MAX_LEVEL(adv)) {
-			snprintf(line, sizeof(line), "has levels %d-%d", GET_OBJ_MIN_SCALE_LEVEL(obj), GET_OBJ_MAX_SCALE_LEVEL(obj));
+			safe_snprintf(line, sizeof(line), "has levels %d-%d", GET_OBJ_MIN_SCALE_LEVEL(obj), GET_OBJ_MAX_SCALE_LEVEL(obj));
 		}
 		else if (!player_can_olc_edit(ch, OLC_OBJECT, GET_OBJ_VNUM(obj))) {
-			snprintf(line, sizeof(line), "no permission");
+			safe_snprintf(line, sizeof(line), "no permission");
 		}
 		else if (!OBJ_FLAGGED(obj, OBJ_SCALABLE)) {
-			snprintf(line, sizeof(line), "not scalable");
+			safe_snprintf(line, sizeof(line), "not scalable");
 		}
 		else {
-			GET_OBJ_MIN_SCALE_LEVEL(obj) = 0;
-			GET_OBJ_MAX_SCALE_LEVEL(obj) = 0;
+			obj->proto_data->min_scale_level = 0;
+			obj->proto_data->max_scale_level = 0;
 			OBJ_VERSION(obj) += 1;
-			snprintf(line, sizeof(line), "updated");
+			safe_snprintf(line, sizeof(line), "updated");
 			save_objs = TRUE;
 		}
 		

@@ -1,10 +1,11 @@
 #9900
-Mini-pet Use~
+Minipet Use~
 1 c 3
 use~
-eval targ %%actor.obj_target(%arg%)%%
-eval test %%self.is_name(%arg%)%%
-if %targ% != %self% && !(%test% && %self.worn_by%)
+* DEPRECATED: This controlled minipets before b5.47 when they got a code-based collection
+return 0
+halt
+if %actor.obj_target(%arg%)% != %self% && !(%self.is_name(%arg%)% && %self.worn_by%)
   return 0
   halt
 end
@@ -12,56 +13,43 @@ if (%actor.position% != Standing)
   %send% %actor% You can't do that right now.
   halt
 end
-eval varname minipet%self.val0%
-eval test %%actor.varexists(%varname%)%%
+set varname minipet%self.val0%
 * once per 30 minutes
-if %test%
-  eval tt %%actor.%varname%%%
-  if (%timestamp% - %tt%) < 1800
-    eval diff (%tt% - %timestamp%) + 1800
-    eval diff2 %diff%/60
-    eval diff %diff%//60
-    if %diff%<10
-      set diff 0%diff%
-    end
-    %send% %actor% You must wait %diff2%:%diff% to use %self.shortdesc% again.
-    halt
-  end
+if %actor.cooldown(%self.val0%)%
+  %send% %actor% @%self% is on cooldown.
+  halt
 end
 * check too many mobs
-eval mobs 0
-eval found 0
-eval found_pet 0
-eval room_var %self.room%
-eval ch %room_var.people%
+set mobs 0
+set found 0
+set found_pet 0
+set ch %self.room.people%
 while %ch% && !%found%
-  if (%ch.is_npc% && %ch.vnum% == %self.val0% && %ch.master% && %ch.master% == %actor%)
-    eval found 1
-  elseif (%ch.is_npc% && %ch.master% && %ch.master% == %actor% && !%ch.mob_flagged(FAMILIAR)%)
-    eval found_pet 1
+  if (%ch.is_npc% && %ch.vnum% == %self.val0% && %ch.leader% && %ch.leader% == %actor%)
+    set found 1
+  elseif (%ch.is_npc% && %ch.leader% && %ch.leader% == %actor% && !%ch.companion%)
+    set found_pet 1
   elseif %ch.is_npc%
     eval mobs %mobs% + 1
   end
-  eval ch %ch.next_in_room%
+  set ch %ch.next_in_room%
 done
 if %found%
-  %send% %actor% You already have this mini-pet.
+  %send% %actor% You already have this minipet.
 elseif %found_pet% then
   %send% %actor% You already have another non-familiar follower.
 elseif %mobs% > 4
   %send% %actor% There are too many mobs here already.
 else
-  %send% %actor% You use %self.shortdesc%...
-  %echoaround% %actor% %actor.name% uses %self.shortdesc%...
-  eval bind %%self.bind(%actor%)%%
-  nop %bind%
+  %send% %actor% You use @%self%...
+  %echoaround% %actor% ~%actor% uses @%self%...
+  nop %self.bind(%actor%)%
   %load% m %self.val0%
-  eval pet %room_var.people%
+  set pet %self.room.people%
   if (%pet% && %pet.vnum% == %self.val0%)
     %force% %pet% mfollow %actor%
-    %echo% %pet.name% appears!
-    eval %varname% %timestamp%
-    remote %varname% %actor.id%
+    %echo% ~%pet% appears!
+    nop %actor.set_cooldown(%self.val0%, 1800)%
     dg_affect %pet% *CHARM on -1
     nop %pet.add_mob_flag(!EXP)%
     nop %pet.unlink_instance%
@@ -72,37 +60,141 @@ end
 Dismissable~
 0 ct 0
 dismiss~
-eval test %%actor.char_target(%arg%)%%
-if %test% != %self%
-  return 0
-  halt
+if %arg% != pet
+  if %actor.char_target(%arg%)% != %self%
+    return 0
+    halt
+  end
 end
-if (%self.master% && %self.master% == %actor%)
-  %send% %actor% You dismiss %self.name%.
-  %echoaround %actor% %actor.name% dismisses %self.name%.
+if (%self.leader% && %self.leader% == %actor%)
+  %send% %actor% You dismiss ~%self%.
+  %echoaround% %actor% ~%actor% dismisses ~%self%.
   %purge% %self%
 else
-  %send% %actor% That's not your pet.
-  return 1
-  halt
+  if %arg% == pet
+    return 0
+    halt
+  else
+    %send% %actor% That's not your pet.
+    return 1
+    halt
+  end
 end
 ~
 #9902
 Lonely Despawn~
 0 abt 5
 ~
-eval count 0
-eval room_var %self.room%
-eval target_char %room_var.people%
+set count 0
+set target_char %self.room.people%
 while %target_char%
   if (%target_char.is_pc%)
     eval count %count% + 1
   end
-  eval target_char %target_char.next_in_room%
+  set target_char %target_char.next_in_room%
 done
 * Despawn if no players present
 if %count% < 1
   %purge% %self%
 end
+~
+#9910
+Use: Summon Mob / Mount Whistle~
+1 c 2
+use~
+* use <self>: loads mob vnum val0 and purges self (single-use)
+if %actor.obj_target(%arg%)% != %self%
+  return 0
+  halt
+end
+if (%actor.position% != Standing)
+  %send% %actor% You can't do that right now.
+  halt
+end
+if !%actor.canuseroom_member%
+  %send% %actor% You can't use @%self% here because someone else owns this location.
+  halt
+end
+%load% m %self.val0%
+set mob %self.room.people%
+if (%mob% && %mob.vnum% == %self.val0%)
+  %send% %actor% You use @%self% and ~%mob% appears!
+  %echoaround% %actor% ~%actor% uses @%self% and ~%mob% appears!
+  nop %mob.unlink_instance%
+else
+  %send% %actor% You use @%self% but nothing happens.
+  %echoaround% %actor% ~%actor% uses @%self% but nothing happens.
+end
+%purge% %self%
+~
+#9926
+Heisenbug!~
+0 btw 25
+~
+set leader %self.leader%
+if !%leader%
+  %purge% %self%
+  halt
+end
+if %self.aff_flagged(!SEE)%
+  dg_affect %self% !SEE off 1
+  dg_affect %self% SNEAK off 1
+  %echo% ~%self% appears out of nowhere and starts following ~%leader%.
+else
+  %echo% ~%self% vanishes into thin air.
+  dg_affect %self% !SEE on -1
+  dg_affect %self% SNEAK on -1
+end
+~
+#9999
+Iterative minipet reward~
+1 c 2
+use~
+* list of vnums granted by this box
+set list 9900 9901 9902 9903 9904 9905 9906 9907 9908 9909 9910 9911 9912 9913 9914 9915 9916 9917 9918 9920 9921 9922 9930 9931 9932 9933 9934 9935
+* length is used to shuffle the start point of the list
+set length 28
+*
+if %actor.obj_target(%arg%)% != %self%
+  return 0
+  halt
+end
+*
+* shuffle the start point
+eval start %%random.%length%%% - 1
+while %start% > 0
+  eval start %start% - 1
+  set list %list.cdr% %list.car%
+done
+* find the first pet the owner doesn't have
+set pet_found 0
+while %list% && !%pet_found%
+  * get next vnum in list
+  set vnum %list.car%
+  set list %list.cdr%
+  if !%actor.has_minipet(%vnum%)%
+    set pet_found %vnum%
+  end
+done
+* Nothing to give
+if !%pet_found%
+  %send% %actor% You already have all the minipets @%self% can provide!
+  halt
+end
+* ok make it so
+%load% mob %pet_found%
+set mob %self.room.people%
+if %mob.vnum% != %pet_found%
+  * Uh-oh.
+  %echo% Something went horribly wrong while granting a minipet. Please bug-report this error.
+  halt
+end
+set mob_string %mob.name%
+%purge% %mob%
+%send% %actor% You open @%self% and find a whistle inside!
+%send% %actor% You gain '%mob_string%' as a minipet. Use the minipets command to summon it.
+%echoaround% %actor% ~%actor% opens @%self% and takes %mob_string% whistle out.
+nop %actor.add_minipet(%vnum%)%
+%purge% %self%
 ~
 $

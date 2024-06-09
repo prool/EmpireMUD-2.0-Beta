@@ -14,9 +14,7 @@ More Empire skill~
 ~
 Ruler~
 Ruler~
-1 b
-K
-1 5
+1 ab
 S
 #1002
 Exploring~
@@ -25,6 +23,8 @@ Better Survival~
 Explorer~
 Explorer~
 1 b
+G
+22 2147  # a simple skinning knife
 K
 5 5
 S
@@ -35,6 +35,10 @@ Trade skill~
 Crafter~
 Crafter~
 1 b
+G
+-1 2145  # feather sewing needles
+G
+22 2148  # a hobby knife
 K
 6 5
 S

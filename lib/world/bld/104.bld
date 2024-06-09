@@ -14,11 +14,58 @@ M
 M
 10417 75.00 0
 S
+#10401
+Ruined Hamlet~
+The Burnt Ruins of a Small Hamlet~
+&?.&0\&?.&0]~
+10 -1 diouw 0
+0 0 0 -1
+C
+dismantle~
+E
+hamlet ruined burnt ruins~
+It looks like the hamlet has burnt down. It smells terrible.
+~
+R
+1002 1 5 0
+S
+#10457
+Rat-Fur Tent~
+Haxaw's Medicine Tent~
+&0[  ]~
+1 0 aq 0
+0 0 0 -1
+D
+   Now that you've climbed into the hanging tent, it seems roomier than you
+expected. The rat-fur walls keep it warm and cozy, albeit at the cost of your
+precious sense of smell. Surprisingly, considering that goblins are known to be
+hoarders, there are no decorations in here. The sole contents are some ratty
+sacks in the corner. A sign hanging from the tent's ceiling says that Haxaw has
+goods for sale.
+~
+E
+ratty sacks corner~
+   The sacks, which are definitely made from rats, seem to contain only
+foul-smelling (and fowl-smelling) herbs and fungi.
+~
+E
+sign list~
+Haxaw sells the following healer gear:
+ Haxaw's poison ring  (finger)
+ goblin neck smile  (neck)
+ flail of many blessings  (magic fire weapon)
+ goose-beak totem  (offhand item)
+ goblin deathshroud  (about body, mage armor)
+ doubleskin gloves  (hands, mage armor)
+
+Use the list, list id, and buy commands to shop from Haxaw.
+~
+S
 #10479
 Goblin War Tent~
 A Goblin War Tent~
 .&0MM&?.~
-64 0 ipR cm
+64 0 pR cm
 2 1 5 -1
 D
    The tent, though magnificent as a feat of goblin engineering, appears to be
@@ -29,13 +76,13 @@ hides, and badly damaged armor. A roaring fire burns in the center of the tent.
 F
 G
 R
-3 1 5 0
+1003 1 5 0
 S
 #10480
 Goblin Message Post~
 A Goblin Message Post~
 @.&0P&?@.@.~
-24 0 dipR 0
+24 0 dnpR 0
 0 0 0 -1
 C
 mail check, mail receive, mail send~
@@ -47,13 +94,13 @@ hawks as letter carriers!
 F
 m
 R
-3 1 5 0
+1003 1 5 0
 S
 #10481
 Goblin Lab Tent~
 A Goblin Lab Tent~
 ..&0M&?.~
-24 0 iR 0
+24 0 R 0
 0 0 0 -1
 C
 brew, mix~
@@ -64,9 +111,11 @@ goblin engineering. The lab seems more portable than most alchemy facilities,
 but only marginally.
 ~
 F
-aG
+aGN
 R
-3 1 5 0
+1003 1 5 0
+U
+1 5130
 S
 #10482
 Goblin Dolmen~
@@ -83,7 +132,44 @@ weeds and rubble cover the surface.
 ~
 F
 B
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
 R
-1 1 5 0
+1001 1 5 0
+S
+#10483
+Goblin War Tent~
+A Goblin War Tent~
+.&0MM&?.~
+64 0 aR 0
+2 1 5 -1
+D
+   The tent, though magnificent as a feat of goblin engineering, appears to be
+made from hundreds of loosely stitched rat skins, and it smells no better than
+it looks. The tent poles are decorated with the spoils of war including skulls,
+hides, and badly damaged armor. A roaring fire burns in the center of the tent.
+~
+F
+G
+Z1 12
+S
+#10484
+Goblin Lab Tent~
+A Goblin Lab Tent~
+..&0M&?.~
+24 0 aR 0
+0 0 0 -1
+C
+brew, mix~
+D
+   This laboratory is little more than a rat-skin tent with a hearth, a fire,
+and some racks for lab supplies. The whole thing has the familiar stench of
+goblin engineering. The lab seems more portable than most alchemy facilities,
+but only marginally.
+~
+F
+aGN
+U
+1 5130
+Z1 12
 S
 $

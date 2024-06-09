@@ -14,7 +14,7 @@ S
 Butcher Tent~
 The Butcher Tent~
 &r{BB}~
-48 1 bR 0
+48 1 bgR 0
 0 0 0 -1
 C
 (functions as a stable with a cooking fire)~
@@ -25,9 +25,12 @@ half in the tent, and half outside. The center of the tent has a roasting pit
 and a cooking fire.
 ~
 F
-wG
+wGL
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
 R
-3 1 5 0
+1003 1 5 0
+U
+1 5119
 S
 #10924
 Dragon Cave~
@@ -43,8 +46,9 @@ large. Someone has built a door just inside, and the landing is decorated like
 a front porch. It looks like someone has made this cave into a house. Colossal
 claw marks just beyond the porch suggest a dragon once called this cave home.
 ~
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
 R
-2 1 5 0
+1002 1 5 0
 S
 #10925
 Dragonslayer Statue~
@@ -54,8 +58,13 @@ A Dragonslayer Statue~
 0 0 0 -1
 C
 dedicate~
+E
+statue dragonslayer slayer~
+It's a statue of an epic hero in a dragonslayer pose.
+~
+I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
 R
-1 1 5 0
+1001 1 5 0
 T 10925
 S
 #10926
@@ -65,9 +74,9 @@ A Dragonstone Library~
 48 15 R 0
 0 0 0 -1
 C
-library, bookedit~
+browse, checkout, shelve, library, bookedit~
 D
-   This magnificent library is build from red-stained stones, and fabulously
+   This magnificent library is built from red-stained stones and fabulously
 decorated with images of dragons and knights. Sturdy masonry shelves hold
 countless books and artifacts, but the centerpiece is a massive dragonquill pen
 posed as if writing in a stone book. The back room appears to be an alchemy
@@ -75,8 +84,229 @@ laboratory.
 ~
 F
 l
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
 R
-2 1 5 0
+1002 1 5 0
 T 10926
+T 5149
+S
+#10927
+Butcher Tent~
+The Butcher Tent~
+&r{BB}~
+48 0 abgR 0
+0 0 0 -1
+C
+(functions as a stable with a cooking fire)~
+D
+   The tent is made from red dragon hides, but it could as easily be red from
+the blood of animals slaughtered here. There's a pen for fresh animals that's
+half in the tent, and half outside. The center of the tent has a roasting pit
+and a cooking fire.
+~
+F
+wGL
+U
+1 5119
+U
+1 5111
+S
+#10950
+Hole~
+A Hole in the Muck~
+&t\__/~
+124 0 d 0
+0 0 0 -1
+C
+adventure~
+E
+hole muck down~
+   Something has left a rather large hole, although the muck has started to
+fill back in and it's impossible to tell exactly what it was. It must have been
+large, though, so let's hope it's not still around.
+~
+I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
+S
+#10965
+Giant Hovel~
+The Remnants of a Giant Hovel~
+&t(--)~
+124 0 dr 0
+0 0 0 -1
+C
+adventure~
+E
+remnants hovel giant building ruins~
+   It looks like someone rather large was living in this hovel, though they
+seem to have destroyed it when they left. Perhaps you can find them nearby...
+~
+S
+#10966
+Giant Hovel~
+The Remnants of a Giant Hovel~
+&t(--)~
+124 0 dr 0
+0 0 0 -1
+C
+adventure~
+E
+remnants hovel giant building ruins~
+   It looks like someone rather large was living in this hovel, though they
+seem to have destroyed it when they left. Perhaps you can find them nearby...
+~
+S
+#10967
+Giant Hovel~
+The Remnants of a Giant Hovel~
+&t(--)~
+124 0 dr 0
+0 0 0 -1
+C
+adventure~
+E
+remnants hovel giant building ruins~
+   It looks like someone rather large was living in this hovel, though they
+seem to have destroyed it when they left. Perhaps you can find them nearby...
+~
+S
+#10972
+Giant's Causeway~
+A Giant's Causeway~
+&wnnnn~
+124 0 dnD 0
+0 0 0 -1
+E
+causeway giants giant's around~
+   The enormous causeway is made mostly of stone blocks, carefully cut into
+hexagons and interlinked to form a safe way across the water.
+~
+I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
+R
+10973 1 5 0
+S
+#10974
+Giant Hovel~
+A Giant Hovel~
+.&0()&?.~
+124 0 rR 0
+0 8 0 -1
+D
+   This hovel, like most of the huts you've seen, is crudely made.
+Nevertheless, This crudely-made hovel looks as if it has been patched and
+re-patched to keep the weather at bay. It's not dissimilar from other hovels
+you've seen, save for the size, which is enormous. A hovel made for a single
+giant can easily sleep a family of eight.
+~
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
+R
+6015 1 1 0
+R
+6422 2 1 0
+S
+#10975
+Giant Stone Head~
+A Giant Stone Head~
+&w(oo)~
+124 1 dn 0
+0 0 0 -1
+E
+head stone giant~
+   The enormous head is carved from solid stone in the likeness of a person --
+or, perhaps, a giant. Either way, it's larger than life.
+~
+I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
+R
+10975 1 5 0
+S
+#10981
+Portal Scar~
+A Portal Scar~
+&?@.&b()&?@.~
+100 0 d 0
+0 0 0 -1
+C
+adventure~
+E
+portal scar~
+   The ground is scorched in the characteristic size and shape of a portal,
+though the portal itself is gone without a trace. The ground around the portal
+is stained bright blue, as if someone overloaded a city portal to open the
+other end here rather than at an established node. The portal must have been
+opened someone with extensive sorcery training.
+~
+S
+#10982
+Portal Scar~
+A Portal Scar~
+&?@.&w()&?@.~
+100 0 d 0
+0 0 0 -1
+C
+adventure~
+E
+portal scar~
+   The ground is scorched in the characteristic size and shape of a portal,
+though the portal itself is gone without a trace. All around the scar, thick,
+brambly, wild weeds are growing. The portal must have come from some place with
+intense natural magic.
+~
+S
+#10983
+Portal Scar~
+A Portal Scar~
+&?@.&o()&?@.~
+100 0 d 0
+0 0 0 -1
+C
+adventure~
+E
+portal scar~
+   The ground is scorched in the characteristic size and shape of a portal,
+though the portal itself is gone without a trace. The ground is torn up around
+the portal, as if the portal was unstable, and the place seems drained of
+magic. This portal must have been opened by overconfident amateurs.
+~
+S
+#10990
+Fractured Tower~
+A Fractured Sorcery Tower~
+.&A||&?.~
+128 2 rR efm
+4 1 0 -1
+C
+inventory, retrieve, store, study~
+D
+   This small sorcery tower is bent in the middle, broken down the center, and
+held together by little more than mana and willpower. Everything from the
+shelves to the books are half-sundered. But on the bright side, the massive
+crack in the wall lets in a lot of light.
+~
+H 0 1
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
+R
+6000 1 1 0
+R
+6790 1 1 0
+R
+6075 1 1 0
+T 5511
+U
+1 5164
+S
+#10991
+Mushroom House~
+A Mushroom House~
+&?.&0&uOO&0&?.~
+64 1 R em
+5 1 0 -1
+D
+   You've found your way into an enormous mushroom. So large is it, in fact,
+that it has been hollowed out to form a beautiful home. The walls and floor are
+spongy white, and the ceiling is red with white spots. The windows let in a
+surprising amount of light.
+~
+I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
+R
+1007 1 5 0
 S
 $

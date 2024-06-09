@@ -1,22 +1,22 @@
 #10700
-Wintery Forest~
-A Wintery Forest~
+Wintry Forest~
+A Wintry Forest~
 &W^^^^~
 1000 0 d 0
 0 0 0 -1
 E
-trees snow~
+trees snow forest wintry winter around~
 The trees are covered in snow that has blown out of the portal!
 ~
 S
 #10701
-Wintery Grove~
-A Wintery Desert Grove~
+Wintry Grove~
+A Wintry Desert Grove~
 &W..^.~
 1000 0 d 0
 0 0 0 -1
 E
-trees snow~
+trees snow wintry grove winter around~
 The trees are covered in snow that has blown out of the portal!
 ~
 S
@@ -39,6 +39,8 @@ A Goblin Mine Shaft~
 /&0[]&?\~
 1000 0 beR 0
 0 0 0 -1
+C
+adventure~
 D
    The small entrance to the mine shaft is poorly made and looks like it's held
 up by cobwebs as much as it is by nails. It looks like the goblins left this
@@ -50,12 +52,94 @@ S
 Goblin Gravesite~
 A Shoddy Goblin Gravesite~
 ..&yx&?.~
-2 -1 dip 0
+2 -1 dnp 0
 0 0 0 -1
+E
+grave gravesite shoddy~
+   It looks like someone has dug their own grave, and quickly! It's not
+elegant, but it will due in a pinch. It's not very deep, though, so it probably
+won't last long.
+~
 F
 B
 R
-1 1 5 0
+1001 1 5 0
 T 10772
+S
+#10775
+Fog Bank~
+A Fog Bank~
+&w****~
+1 0 d 0
+0 0 0 -1
+A
+dk
+E
+fog bank around~
+   You can't see much aside from the fog. You're not sure where it came from --
+it wasn't there a minute ago, but you suddenly find yourself in the midst of
+it. Perhaps if you retrace your steps, you can get back out.
+~
+T 10775
+S
+#10776
+Dust Storm~
+A Dust Storm~
+&T****~
+1 0 d 0
+0 0 0 -1
+A
+dk
+E
+dust storm around~
+   The sudden onset of a dust storm blocks all view! You're not certain where
+it came from -- it certainly wasn't there a minute ago. Now, it's all you can
+see! Perhaps if you carefully retrace your steps, you can get back out.
+~
+T 10776
+S
+#10778
+Tree of Knowledge~
+The Tree of Knowledge~
+&g^&t||&g^~
+4 0 dn 0
+0 0 0 -1
+C
+pick~
+E
+tree trees knowledge around~
+   The twisting, gnarled trees wends its way toward the sky, decorated here and
+there with clumps of vibrant green leaves in ever-rising tiers. An eerie glow
+fills the upper branches, as if they've caught the stars in their boughs. And
+down here, just within your reach, is a single, strange fruit. And you're
+tempted to pick it.
+~
+M
+10776 8.00 0
+R
+10778 1 0 0
+T 10779
+S
+#10779
+Tree of Knowledge~
+The Tree of Knowledge~
+&l^||^~
+4 0 dn 0
+0 0 0 -1
+C
+pick~
+E
+tree trees knowledge around~
+   The twisting, gnarled trees wends its way toward the sky, decorated here and
+there with clumps of vibrant green leaves in ever-rising tiers. An eerie glow
+fills the upper branches, as if they've caught the stars in their boughs. And
+down here, just within your reach, is a single, strange fruit. And you're
+tempted to pick it.
+~
+M
+10778 8.00 0
+R
+10778 1 0 0
+T 10779
 S
 $

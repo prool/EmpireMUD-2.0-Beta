@@ -1,0 +1,160 @@
+#10200
+Goblin Challenge boss attack~
+3 0
+0 0 0 0
+T0
+Your Goblin Challenge boss attack cooldown has ended.~
+S
+#10201
+off-balance~
+4 0
+0 0 0 0
+T0
+You regain your balance.~
+S
+#10202
+powerful blow~
+4 0
+0 0 0 0
+T0
+You are no longer stunned by the powerful blow.~
+T5
+...$e is stunned!~
+S
+#10203
+bleeding wounds~
+4 0
+0 0 0 0
+T0
+Your wounds stop bleeding.~
+S
+#10204
+flanking~
+4 0
+0 0 0 0
+T0
+Your flanking wears off.~
+T1
+$n is no longer flanking.~
+S
+#10205
+goblinfire~
+4 0
+0 0 0 0
+T0
+You are no longer surrounded in goblinfire.~
+S
+#10206
+knockout punch~
+4 0
+0 0 0 0
+T0
+You are no longer stunned by Zelkab's punch.~
+T5
+...$e looks stunned!~
+S
+#10207
+regeneration~
+4 0
+0 0 0 0
+T0
+Your regeneration wears off.~
+T1
+$n stops regenerating.~
+S
+#10208
+poison arrow~
+4 0
+0 0 0 0
+T0
+You are no longer poisoned by the poisoned arrow.~
+S
+#10209
+explosion~
+4 0
+0 0 0 0
+T0
+You are no longer stunned by the explosion.~
+T5
+...$e is stunned!~
+S
+#10210
+shield block~
+4 0
+0 0 0 0
+T0
+Your shield block wears off.~
+T1
+$n lowers $s shield.~
+S
+#10211
+spellstorm~
+4 0
+0 0 0 0
+T0
+The spellstorm fades.~
+S
+#10215
+Zelkab prepares~
+4 0
+0 0 0 0
+T1
+$n taps $s club on the floor -- $e looks ready to fight!~
+T5
+...$e's getting ready to fight.~
+S
+#10216
+Garlgarl prepares~
+4 0
+0 0 0 0
+T1
+$n creates a fireball in $s hand -- looks like $e's ready for a fight!~
+T5
+...$e seems to be casting a spell to prepare.~
+S
+#10217
+Filks prepares~
+4 0
+0 0 0 0
+T1
+$n nocks an arrow and prepares to fight!~
+T5
+...$e is arranging the arrows in $s quiver.~
+S
+#10218
+Walts prepares~
+4 0
+0 0 0 0
+T1
+$n pulls out a bomb and looks ready to fight!~
+T5
+...$e is rummaging through a bag to prepare for the fight.~
+S
+#10219
+Nilbog prepares~
+4 0
+0 0 0 0
+T1
+$n draws $s sword -- $e looks ready to fight!~
+T5
+...$e's polishing $s armor and getting ready to fight.~
+S
+#10220
+Furl prepares~
+4 0
+0 0 0 0
+T1
+$n swirls $s staff in the air and taunts you to fight!~
+T5
+...$e is getting ready to fight.~
+S
+#10250
+Primeval tokens~
+5 c
+0 0 0 0
+T0
+Primeval token~
+T1
+Primeval tokens~
+S
+$

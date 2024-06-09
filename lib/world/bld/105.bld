@@ -6,6 +6,13 @@ An Interdimensional Whirlwind~
 0 0 0 -1
 A
 j
+E
+whirlwind~
+   The magical whirlwind seems to be a portal between this plane and the
+Magiterranean, the secret realm of natural magic. You can't seem to penetrate
+the whirlwind, but it looks like the mages have been using it to spread their
+magi-netically modified crops into our world.
+~
 S
 #10550
 Frozen River Portal~
@@ -13,8 +20,14 @@ A Frozen River~
 &W~&C()&W~~
 1000 0 bd 0
 0 0 0 -1
-I 6 10562 95.00 1 F  # FORAGE: a handful of red and green seeds
-I 6 10563 5.00 1 F  # FORAGE: a seed of pure ice
+E
+frozen river portal around~
+   An arch of ice rises above the frozen river, forming the border of a strange
+portal. Snow blasts through the portal and, as the snow lands on your skin, you
+feel the electric mana of the Magiterranean -- the realm of nature mages.
+~
+I 6 10562 95.00 25 F  # FORAGE: handful of red and green seeds
+I 6 10563 5.00 25 F  # FORAGE: seed of pure ice
 M
 9172 5.00 g
 M
@@ -44,10 +57,10 @@ S
 Aboard the Polar Wind~
 Aboard the Polar Wind~
 ~
-0 0 aHR 0
+0 0 aqHR 0
 0 1 0 -1
 C
-disembark, sail~
+sail~
 D
 You're standing on the deck of the Polar Wind, looking out.
 ~
@@ -58,10 +71,10 @@ S
 Helm of the Polar Wind~
 The Helm of the Polar Wind~
 ~
-0 0 aHR 0
+0 0 aqHR 0
 0 0 0 -1
 C
-disembark, sail~
+sail~
 D
 You are standing at the helm of the majestic Polar Wind.
 ~

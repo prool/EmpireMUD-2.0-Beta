@@ -2,7 +2,7 @@
 *   File: boards.c                                        EmpireMUD 2.0b5 *
 *  Usage: handling of multiple bulletin boards                            *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -86,11 +86,14 @@ int find_slot(void) {
 int find_board(char_data *ch) {
 	obj_data *obj;
 	int i;
-
-	for (obj = ROOM_CONTENTS(IN_ROOM(ch)); obj; obj = obj->next_content)
-		for (i = 0; i < NUM_OF_BOARDS; i++)
-			if (BOARD_VNUM(i) == GET_OBJ_VNUM(obj))
+	
+	DL_FOREACH2(ROOM_CONTENTS(IN_ROOM(ch)), obj, next_content) {
+		for (i = 0; i < NUM_OF_BOARDS; i++) {
+			if (BOARD_VNUM(i) == GET_OBJ_VNUM(obj)) {
 				return (i);
+			}
+		}
+	}
 
 	return (-1);
 }
@@ -132,10 +135,12 @@ ACMD(do_write) {
 	}
 	if (!ch->desc)
 		return;
-
-	for (board = ROOM_CONTENTS(IN_ROOM(ch)); board; board = board->next_content)
-		if (GET_OBJ_TYPE(board) == ITEM_BOARD)
+	
+	DL_FOREACH2(ROOM_CONTENTS(IN_ROOM(ch)), board, next_content) {
+		if (GET_OBJ_TYPE(board) == ITEM_BOARD) {
 			break;
+		}
+	}
 	if (!board)
 		msg_to_char(ch, "There's no board here.\r\n");
 	else if ((board_type = find_board(ch)) == -1) {
@@ -153,9 +158,6 @@ ACMD(do_write) {
 
 
 ACMD(do_read) {
-	void show_obj_to_char(obj_data *obj, char_data *ch, int mode);
-	void read_book(char_data *ch, obj_data *obj);
-	
 	obj_data *board, *obj;
 	int board_type;
 	
@@ -167,13 +169,13 @@ ACMD(do_read) {
 	}
 	
 	// try to find a book or mail in inventory
-	if (*argument && (obj = get_obj_in_list_vis(ch, arg, ch->carrying))) {
+	if (*argument && (obj = get_obj_in_list_vis(ch, arg, NULL, ch->carrying))) {
 		if (IS_BOOK(obj)) {
 			read_book(ch, obj);
 			return;
 		}
-		else if (GET_OBJ_TYPE(obj) == ITEM_MAIL) {
-			show_obj_to_char(obj, ch, OBJ_DESC_LOOK_AT);
+		else if (ch->desc && GET_OBJ_TYPE(obj) == ITEM_MAIL) {
+			page_string(ch->desc, obj_desc_for_char(obj, ch, OBJ_DESC_LOOK_AT), TRUE);
 			return;
 		}
 	}
@@ -184,10 +186,12 @@ ACMD(do_read) {
 	}
 	if (!ch->desc)
 		return;
-
-	for (board = ROOM_CONTENTS(IN_ROOM(ch)); board; board = board->next_content)
-		if (GET_OBJ_TYPE(board) == ITEM_BOARD)
+	
+	DL_FOREACH2(ROOM_CONTENTS(IN_ROOM(ch)), board, next_content) {
+		if (GET_OBJ_TYPE(board) == ITEM_BOARD) {
 			break;
+		}
+	}
 	if (!board)
 		msg_to_char(ch, "You don't have anything like that to read.\r\n");
 	else if ((board_type = find_board(ch)) == -1) {
@@ -209,10 +213,12 @@ ACMD(do_respond) {
 	}
 	if (!ch->desc)
 		return;
-
-	for (board = ROOM_CONTENTS(IN_ROOM(ch)); board; board = board->next_content)
-		if (GET_OBJ_TYPE(board) == ITEM_BOARD)
+	
+	DL_FOREACH2(ROOM_CONTENTS(IN_ROOM(ch)), board, next_content) {
+		if (GET_OBJ_TYPE(board) == ITEM_BOARD) {
 			break;
+		}
+	}
 	if (!board)
 		msg_to_char(ch, "There's no board here.\r\n");
 	else if ((board_type = find_board(ch)) == -1) {

@@ -1,0 +1,43 @@
+#16650
+sleigh red sleek flying~
+the flying sleigh~
+A sleek red sleigh is flying here.~
+   The sleigh is small, but there's a curious red sack in the back that seems
+to hold a great deal. This sleigh appears to be flying! Use the 'pilot' command
+to fly it.
+~
+&r\--|~
+dfgiouxF 2 18 300 2 0 0 0 0 0 -1 0
+B0
+&r\_~
+B1
+&r\~
+P
+2
+R
+6790 1 1 0
+T 16649
+S
+#16660
+goat giant straw~
+the giant straw goat~
+A giant straw goat looms over you.~
+   This enormous goat has been constructed from straw, wood, and rope to
+celebrate the Yule season. Its long, curved horns are dusted with snow at the
+top, well out of reach. The entire goat is decorated with an enormous red
+ribbon, which really brings the whole thing together.
+   It would be a shame if someone were to vandalize the goat... If you see
+any suspicious figures approaching, be sure to 'protect' the goat.
+~
+~
+hmtvxH 19 1 0 0 0 0 0 0 0 -1 0
+C
+1 1
+P
+2
+R
+6880 1 1 0
+T 16660
+T 16661
+S
+$

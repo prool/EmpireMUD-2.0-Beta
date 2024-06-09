@@ -2,7 +2,7 @@
 *   File: skills.c                                        EmpireMUD 2.0b5 *
 *  Usage: code related to skills, including DB and OLC                    *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -23,10 +23,12 @@
 #include "vnums.h"
 #include "dg_scripts.h"
 #include "olc.h"
+#include "constants.h"
 
 /**
 * Contents:
 *   End Affect When Skill Lost -- core code for shutting off effects
+*   Synergy Display Helpers
 *   Core Skill Functions
 *   Core Skill Commands
 *   Helpers
@@ -38,28 +40,22 @@
 *   Edit Modules
 */
 
+// external variables
+extern int master_ability_levels[];
+
 // local data
 const char *default_skill_name = "Unnamed Skill";
 const char *default_skill_abbrev = "???";
 const char *default_skill_desc = "New skill";
 
-// external consts
-extern const char *skill_flags[];
-
-// eternal functions
-void resort_empires(bool force);
-extern bool is_class_ability(ability_data *abil);
-void update_class(char_data *ch);
-
 // local protos
-bool can_gain_skill_from(char_data *ch, ability_data *abil);
-void clear_char_abilities(char_data *ch, any_vnum skill);
 struct skill_ability *find_skill_ability(skill_data *skill, ability_data *abil);
 int get_ability_points_available(any_vnum skill, int level);
 int get_ability_points_spent(char_data *ch, any_vnum skill);
+void get_skill_synergy_display(struct synergy_ability *list, char *save_buffer, char_data *info_ch);
 bool green_skill_deadend(char_data *ch, any_vnum skill);
-void remove_ability_by_set(char_data *ch, ability_data *abil, int skill_set, bool reset_levels);
 int sort_skill_abilities(struct skill_ability *a, struct skill_ability *b);
+int sort_synergies(struct synergy_ability *a, struct synergy_ability *b);
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -72,279 +68,340 @@ int sort_skill_abilities(struct skill_ability *a, struct skill_ability *b);
 * @param ability_data *abil The ability to sell
 */
 void check_skill_sell(char_data *ch, ability_data *abil) {
-	bool despawn_familiar(char_data *ch, mob_vnum vnum);
-	void end_majesty(char_data *ch);
-	void finish_morphing(char_data *ch, morph_data *morph);
-	void remove_armor_by_type(char_data *ch, int armor_type);
-	void remove_honed_gear(char_data *ch);
-	void retract_claws(char_data *ch);
-	void undisguise(char_data *ch);	
-	
+	struct ability_data_list *adl;
+	char_data *mob, *next_mob;
 	obj_data *obj;
-	bool found = TRUE;	// inverted detection, see default below
+	bool need_affect_total = FALSE;
+	int pos;
 	
 	// empire_data *emp = GET_LOYALTY(ch);
 	
 	// un-morph
 	if (IS_MORPHED(ch) && MORPH_ABILITY(GET_MORPH(ch)) == ABIL_VNUM(abil)) {
 		finish_morphing(ch, NULL);
+		need_affect_total = TRUE;
+	}
+	
+	// generic affect abilities
+	if (affected_by_spell_from_caster(ch, ABIL_AFFECT_VNUM(abil), ch)) {
+		affect_from_char_by_caster(ch, ABIL_AFFECT_VNUM(abil), ch, TRUE);
+		need_affect_total = TRUE;
+	}
+	
+	// remove any passives
+	if (IS_SET(ABIL_TYPES(abil), ABILT_PASSIVE_BUFF)) {
+		remove_passive_buff_by_ability(ch, ABIL_VNUM(abil));
+		need_affect_total = TRUE;
+	}
+	
+	// remove readied weapons and companions
+	LL_FOREACH(ABIL_DATA(abil), adl) {
+		switch (adl->type) {
+			case ADL_READY_WEAPON: {
+				// is the player using the item in any slot
+				for (pos = 0; pos < NUM_WEARS; ++pos) {
+					if ((obj = GET_EQ(ch, pos)) && GET_OBJ_VNUM(obj) == adl->vnum) {
+						act("You stop using $p.", FALSE, ch, obj, NULL, TO_CHAR);
+						unequip_char_to_inventory(ch, pos);
+						determine_gear_level(ch);
+						need_affect_total = TRUE;
+					}
+				}
+				break;
+			}
+			case ADL_SUMMON_MOB: {
+				despawn_charmies(ch, adl->vnum);
+				break;
+			}
+		}
+	}
+	
+	// player tech losses
+	if (IS_SET(ABIL_TYPES(abil), ABILT_PLAYER_TECH)) {
+		LL_FOREACH(ABIL_DATA(abil), adl) {
+			if (adl->type != ADL_PLAYER_TECH) {
+				continue;	// wrong type
+			}
+			if (has_player_tech(ch, adl->vnum)) {
+				continue;	// player is still getting this tech from somewhere else
+			}
+			
+			// PTECH_x: what to do when losing the tech
+			switch (adl->vnum) {
+				case PTECH_ARMOR_HEAVY: {
+					remove_armor_by_type(ch, ARMOR_HEAVY);
+					need_affect_total = TRUE;
+					break;
+				}
+				case PTECH_ARMOR_LIGHT: {
+					remove_armor_by_type(ch, ARMOR_LIGHT);
+					need_affect_total = TRUE;
+					break;
+				}
+				case PTECH_ARMOR_MAGE: {
+					remove_armor_by_type(ch, ARMOR_MAGE);
+					need_affect_total = TRUE;
+					break;
+				}
+				case PTECH_ARMOR_MEDIUM: {
+					remove_armor_by_type(ch, ARMOR_MEDIUM);
+					need_affect_total = TRUE;
+					break;
+				}
+				case PTECH_BLOCK: {
+					if ((obj = GET_EQ(ch, WEAR_HOLD)) && IS_SHIELD(obj)) {
+						act("You stop using $p.", FALSE, ch, GET_EQ(ch, WEAR_HOLD), NULL, TO_CHAR);
+						unequip_char_to_inventory(ch, WEAR_HOLD);
+						determine_gear_level(ch);
+						need_affect_total = TRUE;
+					}
+					break;
+				}
+				case PTECH_FISH_COMMAND: {
+					if (GET_ACTION(ch) == ACT_FISHING) {
+						cancel_action(ch);
+					}
+					break;
+				}
+				case PTECH_NAVIGATION: {
+					// avoid spinning the map when they lose navigation
+					GET_CONFUSED_DIR(ch) = NORTH;
+					break;
+				}
+				case PTECH_RANGED_COMBAT: {
+					if (GET_EQ(ch, WEAR_RANGED) && IS_MISSILE_WEAPON(GET_EQ(ch, WEAR_RANGED))) {
+						act("You stop using $p.", FALSE, ch, GET_EQ(ch, WEAR_RANGED), NULL, TO_CHAR);
+						unequip_char_to_inventory(ch, WEAR_RANGED);
+						determine_gear_level(ch);
+						need_affect_total = TRUE;
+					}
+					break;
+				}
+				case PTECH_RIDING: {
+					if (IS_RIDING(ch)) {
+						msg_to_char(ch, "You climb down from your mount.\r\n");
+						perform_dismount(ch);
+						need_affect_total = TRUE;
+					}
+					break;
+				}
+				case PTECH_USE_HONED_GEAR: {
+					remove_honed_gear(ch);
+					need_affect_total = TRUE;
+					break;
+				}
+			}
+		}
 	}
 	
 	switch (ABIL_VNUM(abil)) {
-		case ABIL_ALACRITY: {
-			void end_alacrity(char_data *ch);
-			end_alacrity(ch);
-			break;
-		}
-		case ABIL_ARCHERY: {
-			if (GET_EQ(ch, WEAR_RANGED) && IS_MISSILE_WEAPON(GET_EQ(ch, WEAR_RANGED))) {
-				act("You stop using $p.", FALSE, ch, GET_EQ(ch, WEAR_RANGED), NULL, TO_CHAR);
-				unequip_char_to_inventory(ch, WEAR_RANGED);
-				determine_gear_level(ch);
-			}
-			break;
-		}
-		case ABIL_BANSHEE: {
-			despawn_familiar(ch, FAMILIAR_BANSHEE);
-			break;
-		}
-		case ABIL_BASILISK: {
-			despawn_familiar(ch, FAMILIAR_BASILISK);
-			break;
-		}
-		case ABIL_READY_BLOOD_WEAPONS: {
-			if ((obj = GET_EQ(ch, WEAR_WIELD)) && IS_BLOOD_WEAPON(obj)) {
-				act("You stop using $p.", FALSE, ch, GET_EQ(ch, WEAR_WIELD), NULL, TO_CHAR);
-				unequip_char_to_inventory(ch, WEAR_WIELD);
-				determine_gear_level(ch);
-			}
-			break;
-		}
-		case ABIL_SUMMON_BODYGUARD: {
-			despawn_familiar(ch, BODYGUARD);
-			break;
-		}
 		case ABIL_BOOST: {
 			affect_from_char(ch, ATYPE_BOOST, TRUE);
-			break;
-		}
-		case ABIL_CHANT_OF_NATURE: {
-			if (GET_ACTION(ch) == ACT_CHANTING) {
-				msg_to_char(ch, "You end the chant.\r\n");
-				act("$n ends the chant.", FALSE, ch, NULL, NULL, TO_ROOM);
-				cancel_action(ch);
-			}
-			break;
-		}
-		case ABIL_CLAWS: {
-			retract_claws(ch);
-			break;
-		}
-		case ABIL_MAGE_ARMOR: {
-			remove_armor_by_type(ch, ARMOR_MAGE);
-			break;
-		}
-		case ABIL_COUNTERSPELL: {
-			affect_from_char(ch, ATYPE_COUNTERSPELL, TRUE);
-			break;
-		}
-		case ABIL_DEATHSHROUD: {
-			if (affected_by_spell(ch, ATYPE_DEATHSHROUD)) {
-				void un_deathshroud(char_data *ch);
-				un_deathshroud(ch);
-			}
-			break;
-		}
-		case ABIL_DIRE_WOLF: {
-			despawn_familiar(ch, FAMILIAR_DIRE_WOLF);
+			need_affect_total = TRUE;
 			break;
 		}
 		case ABIL_DISGUISE: {
 			if (IS_DISGUISED(ch)) {
 				undisguise(ch);
+				need_affect_total = TRUE;
 			}
-			break;
-		}
-		case ABIL_EARTHARMOR: {
-			affect_from_char_by_caster(ch, ATYPE_EARTHARMOR, ch, TRUE);
 			break;
 		}
 		case ABIL_EARTHMELD: {
 			if (affected_by_spell(ch, ATYPE_EARTHMELD)) {
-				void un_earthmeld(char_data *ch);
 				un_earthmeld(ch);
+				need_affect_total = TRUE;
 			}
-			break;
-		}
-		case ABIL_FAMILIAR: {
-			despawn_familiar(ch, FAMILIAR_CAT);
-			despawn_familiar(ch, FAMILIAR_SABERTOOTH);
-			despawn_familiar(ch, FAMILIAR_SPHINX);
-			despawn_familiar(ch, FAMILIAR_GIANT_TORTOISE);
-			break;
-		}
-		case ABIL_FISH: {
-			if (GET_ACTION(ch) == ACT_FISHING) {
-				cancel_action(ch);
-			}
-			break;
-		}
-		case ABIL_FLY: {
-			affect_from_char(ch, ATYPE_FLY, TRUE);
-			break;
-		}
-		case ABIL_FORESIGHT: {
-			affect_from_char_by_caster(ch, ATYPE_FORESIGHT, ch, TRUE);
-			break;
-		}
-		case ABIL_GRIFFIN: {
-			despawn_familiar(ch, FAMILIAR_GRIFFIN);
-			break;
-		}
-		case ABIL_HASTEN: {
-			affect_from_char_by_caster(ch, ATYPE_HASTEN, ch, TRUE);
-			break;
-		}
-		case ABIL_HEAVY_ARMOR: {
-			remove_armor_by_type(ch, ARMOR_HEAVY);
-			break;
-		}
-		case ABIL_HONE: {
-			remove_honed_gear(ch);
-			break;
-		}
-		case ABIL_LIGHT_ARMOR: {
-			remove_armor_by_type(ch, ARMOR_LIGHT);
-			break;
-		}
-		case ABIL_MAJESTY: {
-			end_majesty(ch);
-			break;
-		}
-		case ABIL_MANASHIELD: {
-			affect_from_char(ch, ATYPE_MANASHIELD, TRUE);
-			break;
-		}
-		case ABIL_MANTICORE: {
-			despawn_familiar(ch, FAMILIAR_MANTICORE);
-			break;
-		}
-		case ABIL_MEDIUM_ARMOR: {
-			remove_armor_by_type(ch, ARMOR_MEDIUM);
 			break;
 		}
 		case ABIL_MIRRORIMAGE: {
-			despawn_familiar(ch, MIRROR_IMAGE_MOB);
-			break;
-		}
-		case ABIL_MOON_RABBIT: {
-			despawn_familiar(ch, FAMILIAR_MOON_RABBIT);
-			break;
-		}
-		case ABIL_MUMMIFY: {
-			if (affected_by_spell(ch, ATYPE_MUMMIFY)) {
-				void un_mummify(char_data *ch);
-				un_mummify(ch);
-			}
-			break;
-		}
-		case ABIL_NAVIGATION: {
-			GET_CONFUSED_DIR(ch) = NORTH;
-			break;
-		}
-		case ABIL_NIGHTSIGHT: {
-			if (affected_by_spell(ch, ATYPE_NIGHTSIGHT)) {
-				msg_to_char(ch, "You end your nightsight.\r\n");
-				act("The glow in $n's eyes fades.", TRUE, ch, NULL, NULL, TO_ROOM);
-				affect_from_char(ch, ATYPE_NIGHTSIGHT, TRUE);
-			}
-			break;
-		}
-		case ABIL_OWL_SHADOW: {
-			despawn_familiar(ch, FAMILIAR_OWL_SHADOW);
-			break;
-		}
-		case ABIL_PHOENIX: {
-			despawn_familiar(ch, FAMILIAR_PHOENIX);
-			break;
-		}
-		case ABIL_PHOENIX_RITE: {
-			affect_from_char(ch, ATYPE_PHOENIX_RITE, TRUE);
-			break;
-		}
-		case ABIL_RADIANCE: {
-			affect_from_char(ch, ATYPE_RADIANCE, TRUE);
-			break;
-		}
-		case ABIL_READY_FIREBALL: {
-			if ((obj = GET_EQ(ch, WEAR_WIELD))) {
-				if (GET_OBJ_VNUM(obj) == o_FIREBALL) {
-					act("You stop using $p.", FALSE, ch, GET_EQ(ch, WEAR_WIELD), NULL, TO_CHAR);
-					unequip_char_to_inventory(ch, WEAR_WIELD);
-					determine_gear_level(ch);
+			DL_FOREACH_SAFE(character_list, mob, next_mob) {
+				if (GET_LEADER(mob) == ch && IS_NPC(mob) && GET_MOB_VNUM(mob) == MIRROR_IMAGE_MOB) {
+					act("$n vanishes.", TRUE, mob, NULL, NULL, TO_ROOM);
+					extract_char(mob);
 				}
 			}
 			break;
 		}
-		case ABIL_RIDE: {
-			if (IS_RIDING(ch)) {
-				msg_to_char(ch, "You climb down from your mount.\r\n");
-				perform_dismount(ch);
-			}
-			break;
-		}
-		case ABIL_RITUAL_OF_BURDENS: {
-			if (affected_by_spell(ch, ATYPE_UNBURDENED)) {
-				msg_to_char(ch, "Your burdens return.\r\n");
-				affect_from_char(ch, ATYPE_UNBURDENED, TRUE);
-			}
-			break;
-		}
-		case ABIL_SALAMANDER: {
-			despawn_familiar(ch, FAMILIAR_SALAMANDER);
-			break;
-		}
-		case ABIL_SCORPION_SHADOW: {
-			despawn_familiar(ch, FAMILIAR_SCORPION_SHADOW);
-			break;
-		}
-		case ABIL_SHIELD_BLOCK: {
-			if ((obj = GET_EQ(ch, WEAR_HOLD)) && IS_SHIELD(obj)) {
-				act("You stop using $p.", FALSE, ch, GET_EQ(ch, WEAR_HOLD), NULL, TO_CHAR);
-				unequip_char_to_inventory(ch, WEAR_HOLD);
-				determine_gear_level(ch);
-			}
-			break;
-		}
-		case ABIL_SIPHON: {
-			affect_from_char(ch, ATYPE_SIPHON, TRUE);
-			break;
-		}
-		case ABIL_SKELETAL_HULK: {
-			despawn_familiar(ch, FAMILIAR_SKELETAL_HULK);
-			break;
-		}
-		case ABIL_SPIRIT_WOLF: {
-			despawn_familiar(ch, FAMILIAR_SPIRIT_WOLF);
-			break;
-		}
-		case ABIL_SOULMASK: {
-			affect_from_char(ch, ATYPE_SOULMASK, TRUE);
-			break;
-		}
-		default: {
-			found = FALSE;
-		}
 	}
 	
-	if (found) {
+	determine_gear_level(ch);
+	if (need_affect_total) {
 		affect_total(ch);
 	}
 }
 
 
  //////////////////////////////////////////////////////////////////////////////
+//// SYNERGY DISPLAY HELPERS /////////////////////////////////////////////////
+
+// helper types and functions for creating a clean list of synergy abilities
+
+struct synergy_display_ability {
+	any_vnum vnum;	// which abil
+	struct synergy_display_ability *next;
+};
+
+
+struct synergy_display_type {
+	int role;
+	any_vnum skill[2];	// which skills in this display
+	any_vnum level[2];	// which level (corresponding to skills)
+	struct synergy_display_ability *abils;
+	
+	struct synergy_display_type *next;
+};
+
+
+/**
+* Synergy consolidation for display: Add a synergy ability to a list, only if
+* it is not already in the list.
+*
+* @param struct synergy_display_type **list A pointer to the list to add to.
+* @param int role Which role this is fore.
+* @param any_vnum skill_a First skill vnum in the pair.
+* @param int level_a Which level for skill_a.
+* @param any_vnum skill_b Second skill vnum in the pair.
+* @param int level_b Which level for skill_b.
+* @param any_vnum abil Which ability.
+*/
+void add_synergy_display_ability(struct synergy_display_type **list, int role, any_vnum skill_a, int level_a, any_vnum skill_b, int level_b, any_vnum abil) {
+	struct synergy_display_type *sdt, *iter;
+	struct synergy_display_ability *sda;
+	
+	sdt = NULL;
+	
+	LL_FOREACH(*list, iter) {
+		if (iter->role != role) {
+			continue;
+		}
+		
+		if (iter->skill[0] == skill_a && iter->level[0] == level_a && iter->skill[1] == skill_b && iter->level[1] == level_b) {
+			sdt = iter;
+		}
+		else if (iter->skill[1] == skill_a && iter->level[1] == level_a && iter->skill[0] == skill_b && iter->level[0] == level_b) {
+			sdt = iter;
+		}
+		
+		if (sdt) {
+			break;	// found!
+		}
+	}
+	
+	if (!sdt) {	// add skill pair if needed if needed
+		CREATE(sdt, struct synergy_display_type, 1);
+		sdt->role = role;
+		sdt->skill[0] = skill_a;
+		sdt->level[0] = level_a;
+		sdt->skill[1] = skill_b;
+		sdt->level[1] = level_b;
+		LL_PREPEND(*list, sdt);
+	}
+	
+	// find the ability
+	LL_SEARCH_SCALAR(sdt->abils, sda, vnum, abil);
+	if (!sda) {	// add if necessary
+		CREATE(sda, struct synergy_display_ability, 1);
+		sda->vnum = abil;
+		LL_PREPEND(sdt->abils, sda);
+	}
+}
+
+
+/**
+* Frees all the memory from a synergy display list.
+*
+* @param struct synergy_display_type *list The list to free.
+*/
+void free_synergy_display_list(struct synergy_display_type *list) {
+	struct synergy_display_ability *sda, *next_sda;
+	struct synergy_display_type *iter, *next_iter;
+	
+	LL_FOREACH_SAFE(list, iter, next_iter) {
+		LL_FOREACH_SAFE(iter->abils, sda, next_sda) {
+			free(sda);
+		}
+		free(iter);
+	}
+}
+
+
+// Simple sorter for the synergy display
+int sort_sdt_list(struct synergy_display_type *a, struct synergy_display_type *b) {
+	if (a->role != b->role) {
+		return a->role - b->role;
+	}
+	if (a->skill[0] != b->skill[0]) {
+		return a->skill[0] - b->skill[0];
+	}
+	if (a->skill[1] != b->skill[1]) {
+		return a->skill[1] - b->skill[1];
+	}
+	if (a->level[0] != b->level[0]) {
+		return b->level[0] - a->level[0];
+	}
+	if (a->level[1] != b->level[1]) {
+		return b->level[1] - a->level[1];
+	}
+	
+	return 0;	// somehow identical?
+}
+
+// Simple sorter for the synergy display abilities
+int sort_sda_list(struct synergy_display_ability *a, struct synergy_display_ability *b) {
+	char buf1[256], buf2[256];
+	strcpy(buf1, get_ability_name_by_vnum(a->vnum));
+	strcpy(buf2, get_ability_name_by_vnum(b->vnum));
+	return strcmp(buf1, buf2);
+}
+
+
+ //////////////////////////////////////////////////////////////////////////////
 //// CORE SKILL FUNCTIONS ////////////////////////////////////////////////////
+
+// for sorting the skill display
+struct skill_display_t {
+	int level;
+	char *name_ptr;	// DO NOT FREE -- only points to the name
+	char *string;	// must free this, though
+	
+	struct skill_display_t *prev, *next;	// doubly-linked list
+};
+
+
+/**
+* @param struct skill_display_t *list Frees this list of skill display lines.
+*/
+void free_skill_display_t(struct skill_display_t *list) {
+	struct skill_display_t *iter, *next;
+	
+	DL_FOREACH_SAFE(list, iter, next) {
+		if (iter->string) {
+			free(iter->string);
+		}
+		DL_DELETE(list, iter);
+		free(iter);
+	}
+}
+
+
+// level sorter for skill displays
+int sort_skill_display_by_level(struct skill_display_t *a, struct skill_display_t *b) {
+	if (a->level != b->level) {
+		return a->level - b->level;
+	}
+	else {
+		// same level
+		return strcmp(NULLSAFE(a->name_ptr), NULLSAFE(b->name_ptr));
+	}
+}
+
+
+// alpha sorter for skill displays
+int sort_skill_display_by_name(struct skill_display_t *a, struct skill_display_t *b) {
+	return strcmp(NULLSAFE(a->name_ptr), NULLSAFE(b->name_ptr));
+}
+
 
 /**
 * Determines how to color an ability based on its level.
@@ -361,15 +418,15 @@ char *ability_color(char_data *ch, ability_data *abil) {
 	has_maxed = has_bought && (levels_gained_from_ability(ch, abil) >= GAINS_PER_ABILITY || (!ABIL_ASSIGNED_SKILL(abil) || IS_ANY_SKILL_CAP(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) || !can_gain_skill_from(ch, abil)));
 	
 	if (has_bought && has_maxed) {
-		return "&g";
+		return "\tg";
 	}
 	if (has_bought) {
-		return "&y";
+		return "\ty";
 	}
 	if (can_buy) {
-		return "&c";
+		return "\tc";
 	}
-	return "&r";
+	return "\tr";
 }
 
 
@@ -394,7 +451,18 @@ void add_ability_by_set(char_data *ch, ability_data *abil, int skill_set, bool r
 		if (reset_levels) {
 			data->levels_gained = 0;
 		}
+		
+		if (IS_SET(ABIL_TYPES(abil), ABILT_PLAYER_TECH) && skill_set == GET_CURRENT_SKILL_SET(ch)) {
+			apply_ability_techs_to_player(ch, abil);
+		}
 		qt_change_ability(ch, ABIL_VNUM(abil));
+	
+		// attach gain hooks
+		add_ability_gain_hook(ch, abil);
+		
+		if (skill_set == GET_CURRENT_SKILL_SET(ch) && IS_SET(ABIL_TYPES(abil), ABILT_PASSIVE_BUFF)) {
+			apply_one_passive_buff(ch, abil);
+		}
 	}
 }
 
@@ -411,49 +479,6 @@ void add_ability(char_data *ch, ability_data *abil, bool reset_levels) {
 }
 
 
-/**
-* This function reads abilities out of a player and modifies the empire technology.
-*
-* @param char_data *ch
-* @param empire_data *emp The empire
-* @param bool add Adds the abilities if TRUE, or removes them if FALSE
-*/
-void adjust_abilities_to_empire(char_data *ch, empire_data *emp, bool add) {
-	int mod = (add ? 1 : -1);
-	
-	if (has_ability(ch, ABIL_EXARCH_CRAFTS)) {
-		EMPIRE_TECH(emp, TECH_EXARCH_CRAFTS) += mod;
-	}
-	if (has_ability(ch, ABIL_WORKFORCE)) {
-		EMPIRE_TECH(emp, TECH_WORKFORCE) += mod;
-	}
-	if (has_ability(ch, ABIL_SKILLED_LABOR)) {
-		EMPIRE_TECH(emp, TECH_SKILLED_LABOR) += mod;
-	}
-	if (has_ability(ch, ABIL_TRADE_ROUTES)) {
-		EMPIRE_TECH(emp, TECH_TRADE_ROUTES) += mod;
-	}
-	if (has_ability(ch, ABIL_LOCKS)) {
-		EMPIRE_TECH(emp, TECH_LOCKS) += mod;
-	}
-	if (has_ability(ch, ABIL_PROMINENCE)) {
-		EMPIRE_TECH(emp, TECH_PROMINENCE) += mod;
-	}
-	if (has_ability(ch, ABIL_COMMERCE)) {
-		EMPIRE_TECH(emp, TECH_COMMERCE) += mod;
-	}
-	if (has_ability(ch, ABIL_CITY_LIGHTS)) {
-		EMPIRE_TECH(emp, TECH_CITY_LIGHTS) += mod;
-	}
-	if (has_ability(ch, ABIL_PORTAL_MAGIC)) {
-		EMPIRE_TECH(emp, TECH_PORTALS) += mod;
-	}
-	if (has_ability(ch, ABIL_PORTAL_MASTER)) {
-		EMPIRE_TECH(emp, TECH_MASTER_PORTALS) += mod;
-	}
-}
-
-
 /** 
 * @param char_data *ch The player
 * @param ability_data *abil The ability
@@ -465,7 +490,7 @@ bool can_gain_skill_from(char_data *ch, ability_data *abil) {
 		// these limit abilities purchased under each cap to players who are still under that cap
 		if (ABIL_SKILL_LEVEL(abil) >= BASIC_SKILL_CAP || get_skill_level(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) < BASIC_SKILL_CAP) {
 			if (ABIL_SKILL_LEVEL(abil) >= SPECIALTY_SKILL_CAP || get_skill_level(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) < SPECIALTY_SKILL_CAP) {
-				if (ABIL_SKILL_LEVEL(abil) >= CLASS_SKILL_CAP || get_skill_level(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) < CLASS_SKILL_CAP) {
+				if (ABIL_SKILL_LEVEL(abil) >= MAX_SKILL_CAP || get_skill_level(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) < MAX_SKILL_CAP) {
 					return TRUE;
 				}
 			}
@@ -481,21 +506,23 @@ bool can_gain_skill_from(char_data *ch, ability_data *abil) {
 * use any ability. Otherwise, it supports an energy pool cost and/or cooldowns,
 * as well as checking that the player has the ability.
 *
+* This function will also provide its other functionality for non-abilities if
+* you pass NO_ABIL or a negative number to the ability parameter.
+*
 * @param char_data *ch The player or NPC.
-* @param any_vnum ability Any ABIL_ const or vnum.
+* @param any_vnum ability Any ABIL_ const or vnum (optional, may be NO_ABIL or a negative number to skip ability checks).
 * @param int cost_pool HEALTH, MANA, MOVE, BLOOD (NOTHING if no charge).
 * @param int cost_amount Mana (or whatever) amount required, if any.
 * @param int cooldown_type Any COOLDOWN_ const, or NOTHING for no cooldown check.
 * @return bool TRUE if ch can use ability; FALSE if not.
 */
 bool can_use_ability(char_data *ch, any_vnum ability, int cost_pool, int cost_amount, int cooldown_type) {
-	extern const char *pool_types[];
-	
+	ability_data *abil = find_ability_by_vnum(ability);
 	char buf[MAX_STRING_LENGTH];
 	int time, needs_cost;
 	
 	// purchase check first, or the rest don't make sense.
-	if (!IS_NPC(ch) && ability != NO_ABIL && !has_ability(ch, ability)) {
+	if (!IS_NPC(ch) && ability != NO_ABIL && ability >= 0 && !has_ability(ch, ability)) {
 		msg_to_char(ch, "You have not purchased the %s ability.\r\n", get_ability_name_by_vnum(ability));
 		return FALSE;
 	}
@@ -519,8 +546,19 @@ bool can_use_ability(char_data *ch, any_vnum ability, int cost_pool, int cost_am
 		msg_to_char(ch, "You need %d %s point%s to do that.\r\n", cost_amount, pool_types[cost_pool], PLURAL(cost_amount));
 		return FALSE;
 	}
-	if (cooldown_type > COOLDOWN_RESERVED && (time = get_cooldown_time(ch, cooldown_type)) > 0) {
-		snprintf(buf, sizeof(buf), "%s is still on cooldown for %d second%s.\r\n", get_ability_name_by_vnum(ability), time, (time != 1 ? "s" : ""));
+	if (abil && ABIL_REQUIRES_TOOL(abil) && !has_all_tools(ch, ABIL_REQUIRES_TOOL(abil))) {
+		prettier_sprintbit(ABIL_REQUIRES_TOOL(abil), tool_flags, buf);
+		if (count_bits(ABIL_REQUIRES_TOOL(abil)) > 1) {
+			msg_to_char(ch, "You need tools to do that: %s\r\n", buf);
+		}
+		else {
+			msg_to_char(ch, "You need %s %s to do that.\r\n", AN(buf), buf);
+		}
+		return FALSE;
+	}
+
+	if (cooldown_type != NOTHING && (time = get_cooldown_time(ch, cooldown_type)) > 0) {
+		safe_snprintf(buf, sizeof(buf), "Your %s cooldown still has %d second%s.\r\n", get_generic_name_by_vnum(cooldown_type), time, (time != 1 ? "s" : ""));
 		CAP(buf);
 		send_to_char(buf, ch);
 		return FALSE;
@@ -540,15 +578,18 @@ bool can_use_ability(char_data *ch, any_vnum ability, int cost_pool, int cost_am
 * @param int cost_amount Mana (or whatever) amount required, if any.
 * @param int cooldown_type Any COOLDOWN_ const to apply (NOTHING for none).
 * @param int cooldown_time Cooldown duration, if any.
-* @param int wait_type Any WAIT_x const or WAIT_NONE for no command lag.
+* @param int wait_type Any WAIT_ const or WAIT_NONE for no command lag.
 */
 void charge_ability_cost(char_data *ch, int cost_pool, int cost_amount, int cooldown_type, int cooldown_time, int wait_type) {
 	if (cost_pool >= 0 && cost_pool < NUM_POOLS && cost_amount > 0) {
-		GET_CURRENT_POOL(ch, cost_pool) = MAX(0, GET_CURRENT_POOL(ch, cost_pool) - cost_amount);
+		set_current_pool(ch, cost_pool, GET_CURRENT_POOL(ch, cost_pool) - cost_amount);
+		if (GET_CURRENT_POOL(ch, cost_pool) < 0) {
+			set_current_pool(ch, cost_pool, 0);
+		}
 	}
 	
 	// only npcs get cooldowns here
-	if (cooldown_type > COOLDOWN_RESERVED && cooldown_time > 0 && !IS_NPC(ch)) {
+	if (cooldown_time > 0 && !IS_NPC(ch)) {
 		add_cooldown(ch, cooldown_type, cooldown_time);
 	}
 	
@@ -566,7 +607,6 @@ void charge_ability_cost(char_data *ch, int cost_pool, int cost_amount, int cool
 */
 void check_ability_levels(char_data *ch, any_vnum skill) {
 	struct player_ability_data *abil, *next_abil;
-	empire_data *emp = GET_LOYALTY(ch);
 	bool all = (skill == NO_SKILL);
 	ability_data *abd;
 	int iter;
@@ -575,16 +615,11 @@ void check_ability_levels(char_data *ch, any_vnum skill) {
 		return;
 	}
 	
-	// remove ability techs -- only if playing
-	if (emp && ch->desc && STATE(ch->desc) == CON_PLAYING) {
-		adjust_abilities_to_empire(ch, emp, FALSE);
-	}
-	
 	HASH_ITER(hh, GET_ABILITY_HASH(ch), abil, next_abil) {
 		abd = abil->ptr;
 		
 		// is assigned to some skill
-		if (!ABIL_ASSIGNED_SKILL(abd)) {
+		if (!ABIL_IS_PURCHASE(abd) || !ABIL_ASSIGNED_SKILL(abd)) {
 			continue;
 		}
 		// matches requested skill
@@ -596,10 +631,10 @@ void check_ability_levels(char_data *ch, any_vnum skill) {
 			// whoops too low
 			for (iter = 0; iter < NUM_SKILL_SETS; ++iter) {
 				if (abil->purchased[iter]) {
+					remove_ability_by_set(ch, abil->ptr, iter, FALSE);
 					if (iter == GET_CURRENT_SKILL_SET(ch)) {
 						check_skill_sell(REAL_CHAR(ch), abil->ptr);
 					}
-					remove_ability_by_set(ch, abil->ptr, iter, FALSE);
 				}
 			}
 		}
@@ -610,13 +645,20 @@ void check_ability_levels(char_data *ch, any_vnum skill) {
 		clear_char_abilities(ch, skill);
 	}
 	
-	SAVE_CHAR(ch);
-	
-	// add ability techs -- only if playing
-	if (emp && ch->desc && STATE(ch->desc) == CON_PLAYING) {
-		adjust_abilities_to_empire(ch, emp, TRUE);
-		resort_empires(FALSE);
-	}
+	queue_delayed_update(ch, CDU_SAVE);
+}
+
+
+/**
+* Checks if a player is allowed to gain any skill points in a given skill.
+*
+* @param char_data *ch The player.
+* @param any_vnum skill_vnum The skill to check.
+* @return bool TRUE if the player could gain; FALSE if not.
+*/
+bool check_can_gain_skill(char_data *ch, any_vnum skill_vnum) {
+	struct player_skill_data *skdata = get_skill_data(ch, skill_vnum, TRUE);
+	return (skdata && !skdata->noskill && !IS_ANY_SKILL_CAP(ch, skill_vnum) && (skdata->level > 0 || CAN_GAIN_NEW_SKILLS(ch)));
 }
 
 
@@ -628,32 +670,20 @@ void check_ability_levels(char_data *ch, any_vnum skill) {
 */
 void clear_char_abilities(char_data *ch, any_vnum skill) {
 	struct player_ability_data *abil, *next_abil;
-	empire_data *emp = GET_LOYALTY(ch);
 	bool all = (skill == NO_SKILL);
 	ability_data *abd;
 	
 	if (!IS_NPC(ch)) {
-		// remove ability techs -- only if playing
-		if (emp && ch->desc && STATE(ch->desc) == CON_PLAYING) {
-			adjust_abilities_to_empire(ch, emp, FALSE);
-		}
-		
 		HASH_ITER(hh, GET_ABILITY_HASH(ch), abil, next_abil) {
 			abd = abil->ptr;
 			if (all || (ABIL_ASSIGNED_SKILL(abd) && SKILL_VNUM(ABIL_ASSIGNED_SKILL(abd)) == skill)) {
 				if (abil->purchased[GET_CURRENT_SKILL_SET(ch)] && ABIL_SKILL_LEVEL(abd) > 0) {
-					check_skill_sell(REAL_CHAR(ch), abil->ptr);
 					remove_ability(ch, abil->ptr, FALSE);
+					check_skill_sell(REAL_CHAR(ch), abil->ptr);
 				}
 			}
 		}
-		SAVE_CHAR(ch);
-		
-		// add ability techs -- only if playing
-		if (emp && ch->desc && STATE(ch->desc) == CON_PLAYING) {
-			adjust_abilities_to_empire(ch, emp, TRUE);
-			resort_empires(FALSE);
-		}
+		queue_delayed_update(ch, CDU_SAVE);
 	}
 }
 
@@ -675,7 +705,36 @@ int compute_bonus_exp_per_day(char_data *ch) {
 		perdiem += config_get_int("num_bonus_trait_daily_skills");
 	}
 	
+	if (GET_LOYALTY(ch) && EMPIRE_HAS_TECH(GET_LOYALTY(ch), TECH_BONUS_EXPERIENCE)) {
+		perdiem += 5;
+	}
+	
 	return perdiem;
+}
+
+
+/**
+* Basic difficulty roll.
+*
+* @param int level Skill level 0-100.
+* @param int difficulty Any DIFF_ const.
+* @return bool TRUE for success, FALSE for failure.
+*/
+bool difficulty_check(int level, int difficulty) {
+	int chance;
+	
+	// always succeeds
+	if (difficulty == DIFF_TRIVIAL) {
+		return TRUE;
+	}
+	
+	// cap incoming level at 100
+	level = MIN(level, MAX_SKILL_CAP);
+	
+	// apply modifier to level
+	chance = (int) (skill_check_difficulty_modifier[difficulty] * (double) level);
+	
+	return (number(1, 100) <= chance);
 }
 
 
@@ -683,6 +742,7 @@ int compute_bonus_exp_per_day(char_data *ch) {
 * Gives a skillup for anybody in the empire with the ability.
 *
 * @param empire_data *emp the empire to skillup
+* @param any_vnum ability Which ABIL_ to gain
 * @param double amount The amount of experience to gain
 */
 void empire_skillup(empire_data *emp, any_vnum ability, double amount) {
@@ -693,8 +753,73 @@ void empire_skillup(empire_data *emp, any_vnum ability, double amount) {
 		if (STATE(d) == CON_PLAYING && (ch = d->character)) {
 			if (GET_LOYALTY(ch) == emp) {
 				gain_ability_exp(ch, ability, amount);
+				run_ability_hooks(ch, AHOOK_ABILITY, ability, 0, NULL, NULL, NULL, NULL, NOBITS);
 			}
 		}
+	}
+}
+
+
+/**
+* Gives a skillup for anybody in the empire with a player tech.
+*
+* @param empire_data *emp the empire to skillup
+* @param int tech Which PTECH_ to gain on
+* @param double amount The amount of experience to gain
+*/
+void empire_player_tech_skillup(empire_data *emp, int tech, double amount) {
+	descriptor_data *d;
+	char_data *ch;
+	
+	for (d = descriptor_list; d; d = d->next) {
+		if (STATE(d) == CON_PLAYING && (ch = d->character)) {
+			if (GET_LOYALTY(ch) == emp) {
+				gain_player_tech_exp(ch, tech, amount);
+				run_ability_hooks_by_player_tech(ch, tech, NULL, NULL, NULL, NULL);
+			}
+		}
+	}
+}
+
+
+/**
+* Determines which skill or ability is referred to by either arg2 or whole_arg,
+* depending upon whether or not the first word was "info" (which is dropped).
+*
+* This prefers, in order: exact skill, abbreviated skill, exact ability,
+* abbreviated ability.
+*
+* This requires multiple strings which are already available in the command
+* which called it.
+*
+* @param char *arg1 The first word in the argument.
+* @param char *rest_arg The rest of the argument.
+* @param char *whole_arg The original argument ("arg1 rest_arg").
+* @param skill_data **found_skill Will bind any found skill to this pointer.
+* @param ability_data **found_abil Will bind any found ability to this pointer.
+* @return bool TRUE if it found either a skill or ability; FALSE if not.
+*/
+static bool find_skill_or_ability_for_command(char *arg1, char *rest_arg, char *whole_arg, skill_data **found_skill, ability_data **found_abil) {
+	char *use_arg = ((arg1 && !str_cmp(arg1, "info")) ? rest_arg : whole_arg);
+	
+	*found_skill = NULL;
+	*found_abil = NULL;
+	
+	// in order of precedence:
+	if ((*found_skill = find_skill_by_name_exact(use_arg, FALSE))) {
+		return TRUE;
+	}
+	else if ((*found_skill = find_skill_by_name_exact(use_arg, TRUE))) {
+		return TRUE;
+	}
+	else if ((*found_abil = find_ability_by_name_exact(use_arg, FALSE))) {
+		return TRUE;
+	}
+	else if ((*found_abil = find_ability_by_name_exact(use_arg, TRUE))) {
+		return TRUE;
+	}
+	else {
+		return FALSE;
 	}
 }
 
@@ -721,9 +846,32 @@ void gain_ability_exp(char_data *ch, any_vnum ability, double amount) {
 	}
 		
 	// try gain
-	if (skill && gain_skill_exp(ch, SKILL_VNUM(skill), amount)) {
+	if (skill && gain_skill_exp(ch, SKILL_VNUM(skill), amount, abil)) {
 		// increment gains from this
 		mark_level_gained_from_ability(ch, abil);
+	}
+}
+
+
+/**
+* Gains experience based on what's giving a player a certain tech.
+*
+* @param char_data *ch The player gaining exp.
+* @param int tech The PTECH_ type that's triggering.
+* @param double amount How much exp to gain.
+*/
+void gain_player_tech_exp(char_data *ch, int tech, double amount) {
+	struct player_tech *iter;
+	
+	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_TECHS(ch), iter) {
+		if (iter->id == tech && (!iter->check_solo || check_solo_role(ch))) {
+			gain_ability_exp(ch, iter->abil, amount);
+			run_ability_hooks(ch, AHOOK_ABILITY, iter->abil, 0, ch, NULL, NULL, NULL, NOBITS);
+		}
 	}
 }
 
@@ -735,10 +883,12 @@ void gain_ability_exp(char_data *ch, any_vnum ability, double amount) {
 * @param char_data *ch The character who is to gain/lose the skill.
 * @param skill_data *skill The skill to gain/lose.
 * @param int amount The number of skill points to gain/lose (gaining will stop at any cap).
+* @param ability_data *from_abil Optional: Which ability caused this gain, for reporting purposes. (May be NULL.)
 * @param bool Returns TRUE if a skill point was gained or lost.
 */
-bool gain_skill(char_data *ch, skill_data *skill, int amount) {
+bool gain_skill(char_data *ch, skill_data *skill, int amount, ability_data *from_abil) {
 	bool any = FALSE, pos = (amount > 0);
+	char abil_buf[256];
 	struct player_skill_data *skdata;
 	int points;
 	
@@ -778,28 +928,47 @@ bool gain_skill(char_data *ch, skill_data *skill, int amount) {
 	}
 	
 	if (any) {
+		if (from_abil) {
+			// reports 1 gain higher than currently-recorded because it's only incremented after the gain is successful
+			safe_snprintf(abil_buf, sizeof(abil_buf), " using %s (%d/%d)", ABIL_NAME(from_abil), levels_gained_from_ability(ch, from_abil) + 1, GAINS_PER_ABILITY);
+		}
+		else {
+			*abil_buf = '\0';
+		}
+		
 		// messaging
-		if (pos) {
-			msg_to_char(ch, "&yYou improve your %s skill to %d.&0\r\n", SKILL_NAME(skill), skdata->level);
-			
-			points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill));
-			if (points > 0) {
-				msg_to_char(ch, "&yYou have %d ability point%s to spend. Type 'skill %s' to see %s.&0\r\n", points, (points != 1 ? "s" : ""), SKILL_NAME(skill), (points != 1 ? "them" : "it"));
+		if (pos) {	// positive gain
+			// notify if desired
+			if (SHOW_STATUS_MESSAGES(ch, SM_SKILL_GAINS)) {
+				msg_to_char(ch, "\tyYou improve your %s skill to %d%s.\t0\r\n", SKILL_NAME(skill), skdata->level, abil_buf);
+				
+				if (!PRF_FLAGGED(ch, PRF_NO_TUTORIALS) && (points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill))) > 0) {
+					msg_to_char(ch, "\tyYou have %d ability point%s to spend. Type 'skill %s' to see %s.\t0\r\n", points, (points != 1 ? "s" : ""), SKILL_NAME(skill), (points != 1 ? "them" : "it"));
+				}
 			}
-			
+				
 			// did we hit a cap? free reset!
 			if (IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill))) {
 				skdata->resets = MIN(skdata->resets + 1, MAX_SKILL_RESETS);
-				msg_to_char(ch, "&yYou have earned a free skill reset in %s. Type 'skill reset %s' to use it.&0\r\n", SKILL_NAME(skill), SKILL_NAME(skill));
+				if (SHOW_STATUS_MESSAGES(ch, SM_SKILL_GAINS)) {
+					msg_to_char(ch, "\tyYou have earned a free skill reset in %s. Type 'skill reset %s' to use it.\t0\r\n", SKILL_NAME(skill), SKILL_NAME(skill));
+				}
+			}
+			
+			if (!IS_IMMORTAL(ch) && skdata->level == SKILL_MAX_LEVEL(skill)) {
+				log_to_slash_channel_by_name(PLAYER_LOG_CHANNEL, ch, "%s has reached %s %d!", PERS(ch, ch, TRUE), SKILL_NAME(skill), SKILL_MAX_LEVEL(skill));
 			}
 		}
-		else {
-			msg_to_char(ch, "&yYour %s skill drops to %d.&0\r\n", SKILL_NAME(skill), skdata->level);
+		else {	// negative gain
+			if (SHOW_STATUS_MESSAGES(ch, SM_SKILL_GAINS)) {
+				msg_to_char(ch, "\tyYour %s skill drops to %d%s.\t0\r\n", SKILL_NAME(skill), skdata->level, abil_buf);
+			}
 		}
 		
 		// update class and progression
-		update_class(ch);
-		SAVE_CHAR(ch);
+		update_class_and_abilities(ch);
+		
+		queue_delayed_update(ch, CDU_PASSIVE_BUFFS | CDU_SAVE | CDU_MSDP_SKILLS);
 	}
 	
 	return any;
@@ -818,9 +987,10 @@ bool gain_skill(char_data *ch, skill_data *skill, int amount) {
 * @param char_data *ch The player character who will gain.
 * @param any_vnum skill_vnum The skill to gain experience in.
 * @param double amount The amount to gain (0-100).
+* @param ability_data *from_abil Optional: Which ability caused this gain, for reporting purposes. (May be NULL.)
 * @return bool TRUE if the character gained a skill point from the exp.
 */
-bool gain_skill_exp(char_data *ch, any_vnum skill_vnum, double amount) {
+bool gain_skill_exp(char_data *ch, any_vnum skill_vnum, double amount, ability_data *from_abil) {
 	struct player_skill_data *skdata;
 	skill_data *skill;
 	bool gained;
@@ -837,7 +1007,7 @@ bool gain_skill_exp(char_data *ch, any_vnum skill_vnum, double amount) {
 
 	// this allows bonus skillups...
 	if (GET_DAILY_BONUS_EXPERIENCE(ch) <= 0) {
-		amount /= 50.0;
+		amount /= 25.0;
 	}
 	
 	// gain the exp
@@ -853,9 +1023,11 @@ bool gain_skill_exp(char_data *ch, any_vnum skill_vnum, double amount) {
 	
 	if (gained) {
 		GET_DAILY_BONUS_EXPERIENCE(ch) = MAX(0, GET_DAILY_BONUS_EXPERIENCE(ch) - 1);
-		gained = gain_skill(ch, skill, 1);
+		gained = gain_skill(ch, skill, 1, from_abil);
+		update_MSDP_bonus_exp(ch, UPDATE_SOON);
 	}
 	
+	queue_delayed_update(ch, CDU_MSDP_SKILLS);
 	return gained;
 }
 
@@ -900,8 +1072,9 @@ struct player_ability_data *get_ability_data(char_data *ch, any_vnum abil_id, bo
 * @param int Any ABIL_x const.
 * @return int A skill level of 0 to 100.
 */
-int get_ability_level(char_data *ch, any_vnum ability) {
+int get_ability_skill_level(char_data *ch, any_vnum ability) {
 	ability_data *abd;
+	skill_data *sk;
 	
 	if (IS_NPC(ch)) {
 		return get_approximate_level(ch);
@@ -911,11 +1084,11 @@ int get_ability_level(char_data *ch, any_vnum ability) {
 		if (ability != NO_ABIL && !has_ability(ch, ability)) {
 			return 0;
 		}
-		else if (ability != NO_ABIL && (abd = find_ability_by_vnum(ability)) && ABIL_ASSIGNED_SKILL(abd)) {
-			return get_skill_level(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abd)));
+		else if (ability != NO_ABIL && (abd = find_ability_by_vnum(ability)) && (sk = find_assigned_skill(abd, ch))) {
+			return get_skill_level(ch, SKILL_VNUM(sk));
 		}
 		else {
-			return MIN(CLASS_SKILL_CAP, GET_COMPUTED_LEVEL(ch));
+			return MIN(MAX_SKILL_CAP, GET_COMPUTED_LEVEL(ch));
 		}
 	}
 }
@@ -954,13 +1127,11 @@ int get_approximate_level(char_data *ch) {
 
 
 /**
-* @param any_vnum skill which SKILL_x
-* @param int level at what level
-* @return int how many abilities are available by that level
+* @param any_vnum skill Which skill
+* @param int level at What level
+* @return int How many abilities are available by that level
 */
 int get_ability_points_available(any_vnum skill, int level) {
-	extern int master_ability_levels[];
-	
 	int iter, count;
 	
 	count = 0;
@@ -976,7 +1147,7 @@ int get_ability_points_available(any_vnum skill, int level) {
 
 /**
 * @param char_data *ch the person to check
-* @param any_vnum skill Which SKILL_x to check
+* @param any_vnum skill Which skill to check
 * @return int how many ability points ch has available in skill
 */
 int get_ability_points_available_for_char(char_data *ch, any_vnum skill) {
@@ -985,7 +1156,7 @@ int get_ability_points_available_for_char(char_data *ch, any_vnum skill) {
 	int avail = MAX(0, get_ability_points_available(skill, get_skill_level(ch, skill)) - spent);
 	
 	// allow early if they're at a deadend
-	if (avail == 0 && spent < max && get_skill_level(ch, skill) >= EMPIRE_CHORE_SKILL_CAP && green_skill_deadend(ch, skill)) {
+	if (avail == 0 && spent < max && get_skill_level(ch, skill) > 0 && green_skill_deadend(ch, skill)) {
 		return 1;
 	}
 	else {
@@ -996,7 +1167,7 @@ int get_ability_points_available_for_char(char_data *ch, any_vnum skill) {
 
 /**
 * @param char_data *ch the person to check
-* @param any_vnum skill Which SKILL_x to check
+* @param any_vnum skill Which skill to check
 * @return int total abilities bought in a skill
 */
 int get_ability_points_spent(char_data *ch, any_vnum skill) {
@@ -1015,6 +1186,9 @@ int get_ability_points_spent(char_data *ch, any_vnum skill) {
 		if (!has_ability(ch, skab->vnum)) {
 			continue;	// does not have ability
 		}
+		if (has_bonus_ability(ch, skab->vnum)) {
+			continue;	// don't count bonus abilities as real purchases
+		}
 		
 		// found
 		++count;
@@ -1025,20 +1199,31 @@ int get_ability_points_spent(char_data *ch, any_vnum skill) {
 
 
 /**
+* Builds the list of abilities for a skill as a doubly-linked list. The order
+* of this list is essentially alphabetic but with dependencies shown under
+* the parent ability. You can sort these afterwards or just display them in
+* order.
+*
+* @param struct skill_display_t **list Pointer to the list of skills we're building.
 * @param char_data *ch The character whose skills to use, and who to send to.
 * @param skill_data *skill Which skill to show.
 * @param any_vnum prereq Which ability, for dependent abilities (NO_PREREQ for base abils).
-* @param int indent How far to indent (goes up as the list goes deeper).
+* @param int indent How far to indent (goes up as the list goes deeper); use -1 for do-not-indent.
+* @param int min_level Optional: Don't show skills below this level (-1 for no minimum).
+* @param int max_level Optional: Don't show skills above this level (-1 for no maximum).
 * @return string the display
 */
-char *get_skill_abilities_display(char_data *ch, skill_data *skill, any_vnum prereq, int indent) {
+void get_skill_abilities_display(struct skill_display_t **list, char_data *ch, skill_data *skill, any_vnum prereq, int indent, int min_level, int max_level) {
 	char out[MAX_STRING_LENGTH], lbuf[MAX_STRING_LENGTH], colorize[16];
-	static char retval[MAX_STRING_LENGTH];
 	struct skill_ability *skab;
 	int ind, max_skill = 0;
 	ability_data *abil;
+	struct skill_display_t *skdat;
 	
-	*out = '\0';
+	if (!list || !ch || !skill) {
+		// oops no work
+		return;
+	}
 	
 	LL_FOREACH(SKILL_ABILITIES(skill), skab) {
 		if (skab->prerequisite != prereq) {
@@ -1048,13 +1233,17 @@ char *get_skill_abilities_display(char_data *ch, skill_data *skill, any_vnum pre
 			continue;
 		}
 		
-		// indent
-		for (ind = 0; ind < (2 * indent); ++ind) {
-			lbuf[ind] = ' ';
-		}
-		lbuf[2 * indent] = '\0';
+		*out = *lbuf ='\0';
 		
-		if (prereq != NO_PREREQ) {
+		// indent
+		if (indent != -1) {
+			for (ind = 0; ind < (2 * indent); ++ind) {
+				lbuf[ind] = ' ';
+			}
+			lbuf[2 * indent] = '\0';
+		}
+		
+		if (prereq != NO_PREREQ && indent != -1) {
 			strcat(lbuf, "+ ");
 		}
 		
@@ -1064,19 +1253,24 @@ char *get_skill_abilities_display(char_data *ch, skill_data *skill, any_vnum pre
 		else if (skab->level < SPECIALTY_SKILL_CAP) {
 			max_skill = SPECIALTY_SKILL_CAP;
 		}
-		else if (skab->level <= CLASS_SKILL_CAP) {
-			max_skill = CLASS_SKILL_CAP;
+		else if (skab->level <= MAX_SKILL_CAP) {
+			max_skill = MAX_SKILL_CAP;
 		}
 		
 		// get the proper color for this ability
 		strcpy(colorize, ability_color(ch, abil));
 		
-		sprintf(out + strlen(out), "%s(%s) %s%s&0 [%d-%d]", lbuf, (has_ability(ch, ABIL_VNUM(abil)) ? "x" : " "), colorize, ABIL_NAME(abil), skab->level, max_skill);
+		if (PRF_FLAGGED(ch, PRF_SCREEN_READER)) {
+			sprintf(out + strlen(out), "%s%s%s\t0 - %d-%d, %s", lbuf, colorize, ABIL_NAME(abil), skab->level, max_skill, (has_ability(ch, ABIL_VNUM(abil)) ? (skab->level == 0 ? "free" : "purchased") : "unpurchased"));
+		}
+		else {	// non-screenreader
+			sprintf(out + strlen(out), "%s(%s) %s%s\t0 [%d-%d]", lbuf, (has_ability(ch, ABIL_VNUM(abil)) ? "x" : " "), colorize, ABIL_NAME(abil), skab->level, max_skill);
+		}
 		
 		if (has_ability(ch, ABIL_VNUM(abil))) {
 			// this is kind of a hack to quickly make sure you can still use the ability
-			if (levels_gained_from_ability(ch, abil) < GAINS_PER_ABILITY && !strcmp(colorize, "&y")) {
-				sprintf(out + strlen(out), " %d/%d skill points gained", levels_gained_from_ability(ch, abil), GAINS_PER_ABILITY);
+			if (levels_gained_from_ability(ch, abil) < GAINS_PER_ABILITY && !strcmp(colorize, "\ty")) {
+				sprintf(out + strlen(out), "%s %d/%d skill levels gained", (PRF_FLAGGED(ch, PRF_SCREEN_READER) ? "," : ""), levels_gained_from_ability(ch, abil), GAINS_PER_ABILITY);
 			}
 			else {
 				strcat(out, " (max)");
@@ -1087,24 +1281,27 @@ char *get_skill_abilities_display(char_data *ch, skill_data *skill, any_vnum pre
 			// we check that the parent skill exists first, since this reports it
 			
 			if (skab->prerequisite != NO_PREREQ && !has_ability(ch, skab->prerequisite)) {
-				sprintf(out + strlen(out), " requires %s", get_ability_name_by_vnum(skab->prerequisite));
+				sprintf(out + strlen(out), "%s requires %s", (PRF_FLAGGED(ch, PRF_SCREEN_READER) ? "," : ""), get_ability_name_by_vnum(skab->prerequisite));
 			}
 			else if (get_skill_level(ch, SKILL_VNUM(skill)) < skab->level) {
-				sprintf(out + strlen(out), " requires %s %d", SKILL_NAME(skill), skab->level);
+				sprintf(out + strlen(out), "%s requires %s %d", (PRF_FLAGGED(ch, PRF_SCREEN_READER) ? "," : ""), SKILL_NAME(skill), skab->level);
 			}
-			else {
+			else if (!PRF_FLAGGED(ch, PRF_SCREEN_READER)) {
+				// (screenreaders see this elsewhere)
 				strcat(out, " unpurchased");
 			}
 		}
 		
 		strcat(out, "\r\n");
+		CREATE(skdat, struct skill_display_t, 1);
+		skdat->level = skab->level;
+		skdat->name_ptr = ABIL_NAME(abil);
+		skdat->string = str_dup(out);
+		DL_APPEND(*list, skdat);
 
 		// dependencies
-		strcat(out, get_skill_abilities_display(ch, skill, skab->vnum, indent+1));
+		get_skill_abilities_display(list, ch, skill, skab->vnum, indent == -1 ? indent : (indent+1), min_level, max_level);
 	}
-	
-	strcpy(retval, out);
-	return retval;
 }
 
 
@@ -1167,19 +1364,29 @@ char *get_skill_gain_display(char_data *ch) {
 char *get_skill_row_display(char_data *ch, skill_data *skill) {
 	static char out[MAX_STRING_LENGTH];
 	struct player_skill_data *skdata;
-	char exp[256];
+	char experience[256], gain_part[256];
 	int points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill));
 	
 	skdata = get_skill_data(ch, SKILL_VNUM(skill), FALSE);
 	
 	if (skdata && !skdata->noskill && !IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill))) {
-		sprintf(exp, ", %.1f%% exp", skdata->exp);
+		sprintf(experience, ", %.1f%% exp", skdata->exp);
 	}
 	else {
-		*exp = '\0';
+		*experience = '\0';
 	}
 	
-	sprintf(out, "[%3d] %s%s&0%s (%s%s) - %s\r\n", (skdata ? skdata->level : 0), IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill)) ? "&g" : "&y", SKILL_NAME(skill), (points > 0 ? "*" : ""), IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill)) ? "&ymax&0" : ((skdata && skdata->noskill) ? "\trnoskill\t0" : "\tcgaining\t0"), exp, SKILL_DESC(skill));
+	if (IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill))) {
+		safe_snprintf(gain_part, sizeof(gain_part), "\tymax\t0%s", (skdata && skdata->noskill) ? ", \trnoskill\t0" : "");
+	}
+	else if (skdata && skdata->noskill) {
+		safe_snprintf(gain_part, sizeof(gain_part), "\trnoskill\t0");
+	}
+	else {
+		safe_snprintf(gain_part, sizeof(gain_part), "\tcgaining\t0");
+	}
+	
+	sprintf(out, "[%3d] %s%s\t0 (%s%s%s) - %s\r\n", (skdata ? skdata->level : 0), IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill)) ? "\tg" : "\ty", SKILL_NAME(skill), gain_part, experience, (points > 0 ? ", points available" : ""), SKILL_DESC(skill));
 	return out;
 }
 
@@ -1210,6 +1417,34 @@ bool green_skill_deadend(char_data *ch, any_vnum skill) {
 
 
 /**
+* Determines if a player has any skill with a given flag. If so, returns the
+* player's level in that skill. If more than one skill matches, it returns the
+* highest level among them.
+*
+* @param char_data *ch The player to check.
+* @param bitvector_t skill_flag The SKILLF_ to check for (for multiple flags, will return if ANY of them are present).
+* @return int If the player has a matching skill, returns the level of that skill. If not, returns 0.
+*/
+int has_skill_flagged(char_data *ch, bitvector_t skill_flag) {
+	struct player_skill_data *plsk, *next_plsk;
+	int skill_level = 0;
+	
+	// npcs lack skills / shortcuts out
+	if (!ch || IS_NPC(ch) || !skill_flag) {
+		return 0;
+	}
+	
+	HASH_ITER(hh, GET_SKILL_HASH(ch), plsk, next_plsk) {
+		if (plsk->ptr && SKILL_FLAGGED(plsk->ptr, skill_flag)) {
+			skill_level = MAX(skill_level, plsk->level);
+		}
+	}
+	
+	return skill_level;	// or 0 for none
+}
+
+
+/**
 * Adds one to the number of levels ch gained from an ability.
 *
 * @param char_data *ch The player to check.
@@ -1229,8 +1464,6 @@ void mark_level_gained_from_ability(char_data *ch, ability_data *abil) {
 * @param char_data *ch The player to swap.
 */
 void perform_swap_skill_sets(char_data *ch) {
-	void assign_class_abilities(char_data *ch, class_data *cls, int role);
-	
 	struct player_ability_data *plab, *next_plab;
 	int cur_set, old_set;
 	ability_data *abil;
@@ -1243,11 +1476,6 @@ void perform_swap_skill_sets(char_data *ch) {
 	old_set = GET_CURRENT_SKILL_SET(ch);
 	cur_set = (old_set == 1) ? 0 : 1;
 	
-	// remove ability techs
-	if (GET_LOYALTY(ch)) {
-		adjust_abilities_to_empire(ch, GET_LOYALTY(ch), FALSE);
-	}
-	
 	// update skill set
 	GET_CURRENT_SKILL_SET(ch) = cur_set;
 	
@@ -1255,32 +1483,30 @@ void perform_swap_skill_sets(char_data *ch) {
 	HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
 		abil = plab->ptr;
 		
-		if (ABIL_ASSIGNED_SKILL(abil) != NULL) {	// skill ability
+		if (ABIL_IS_PURCHASE(abil)) {	// skill ability
 			if (plab->purchased[cur_set] && !plab->purchased[old_set]) {
 				// added
+				apply_ability_techs_to_player(ch, abil);
 				qt_change_ability(ch, ABIL_VNUM(abil));
 			}
 			else if (plab->purchased[old_set] && !plab->purchased[cur_set]) {
 				// removed
+				remove_player_tech(ch, ABIL_VNUM(abil));
 				check_skill_sell(ch, abil);
 				qt_change_ability(ch, ABIL_VNUM(abil));
 			}
 		}
-		else {	// class ability: just ensure it matches the old one
+		else {	// non-purchased ability: just ensure it matches the old one; updates itself in assign_class_abilites
 			plab->purchased[cur_set] = plab->purchased[old_set];
 			qt_change_ability(ch, ABIL_VNUM(abil));	// in case
 		}
 	}
 	
 	// call this at the end just in case
-	assign_class_abilities(ch, NULL, NOTHING);
+	assign_class_and_extra_abilities(ch, NULL, NOTHING);
 	affect_total(ch);
 	
-	// add ability techs -- only if playing
-	if (GET_LOYALTY(ch)) {
-		adjust_abilities_to_empire(ch, GET_LOYALTY(ch), TRUE);
-		resort_empires(FALSE);
-	}
+	queue_delayed_update(ch, CDU_PASSIVE_BUFFS);
 }
 
 
@@ -1307,6 +1533,10 @@ void remove_ability_by_set(char_data *ch, ability_data *abil, int skill_set, boo
 			data->levels_gained = 0;
 		}
 		
+		if (IS_SET(ABIL_TYPES(abil), ABILT_PLAYER_TECH) && skill_set == GET_CURRENT_SKILL_SET(ch)) {
+			remove_player_tech(ch, ABIL_VNUM(abil));
+		}
+		
 		qt_change_ability(ch, ABIL_VNUM(abil));
 	}
 }
@@ -1325,12 +1555,43 @@ void remove_ability(char_data *ch, ability_data *abil, bool reset_levels) {
 
 
 /**
+* Removes all skills with a given flag/flags from a player.
+*
+* @param char_data *ch The player.
+* @param bitvector_t skill_flag The SKILLF_ flag(s) to match. If you specify more than one, they must all be present.
+* @return bool TRUE if any skills were removed.
+*/
+bool remove_skills_by_flag(char_data *ch, bitvector_t skill_flag) {
+	struct player_skill_data *plsk, *next_plsk;
+	bool any = FALSE;
+	
+	if (IS_NPC(ch)) {
+		return FALSE;	// no skills
+	}
+	
+	HASH_ITER(hh, GET_SKILL_HASH(ch), plsk, next_plsk) {
+		if (plsk->ptr && (SKILL_FLAGS(plsk->ptr) & skill_flag) == skill_flag && plsk->level > 0) {
+			set_skill(ch, plsk->vnum, 0);
+			clear_char_abilities(ch, plsk->vnum);
+			any = TRUE;
+		}
+	}
+	
+	if (any) {
+		update_class_and_abilities(ch);
+	}
+	
+	return any;
+}
+
+
+/**
 * When a character loses skill levels, we clear the "levels_gained" tracker
 * for abilities that are >= their new level, so they can successfully regain
 * those levels later.
 *
 * @param char_data *ch The player.
-* @param any_vnum skill Which SKILL_x.
+* @param any_vnum skill Which skill.
 */
 void reset_skill_gain_tracker_on_abilities_above_level(char_data *ch, any_vnum skill) {
 	struct player_ability_data *abil, *next_abil;
@@ -1351,6 +1612,7 @@ void reset_skill_gain_tracker_on_abilities_above_level(char_data *ch, any_vnum s
 void set_skill(char_data *ch, any_vnum skill, int level) {
 	struct player_skill_data *skdata;
 	bool gain = FALSE;
+	bool was_vampire = IS_VAMPIRE(ch);
 	
 	if ((skdata = get_skill_data(ch, skill, TRUE))) {
 		gain = (level > skdata->level);
@@ -1363,6 +1625,13 @@ void set_skill(char_data *ch, any_vnum skill, int level) {
 		}
 		
 		qt_change_skill_level(ch, skill);
+		
+		// ensure they are a vampire
+		if (!was_vampire && IS_VAMPIRE(ch)) {
+			make_vampire(ch, TRUE, NOTHING);
+		}
+		
+		queue_delayed_update(ch, CDU_MSDP_SKILLS);
 	}
 }
 
@@ -1370,29 +1639,139 @@ void set_skill(char_data *ch, any_vnum skill, int level) {
 /**
 * @param char_data *ch who to check for
 * @param any_vnum ability which ABIL_x
-* @param int difficulty any DIFF_x const
+* @param int difficulty any DIFF_ const
 * @return bool TRUE for success, FALSE for fail
 */
 bool skill_check(char_data *ch, any_vnum ability, int difficulty) {
-	extern double skill_check_difficulty_modifier[NUM_DIFF_TYPES];
-
-	int chance = get_ability_level(ch, ability);
+	int chance = get_ability_skill_level(ch, ability);
+	
+	// always succeeds
+	if (difficulty == DIFF_TRIVIAL) {
+		return TRUE;
+	}
 
 	// players without the ability have no chance	
 	if (!IS_NPC(ch) && !has_ability(ch, ability)) {
 		chance = 0;
 	}
 	
-	// modify chance based on diff
-	chance = (int) (skill_check_difficulty_modifier[difficulty] * (double) chance);
+	return difficulty_check(chance, difficulty);
+}
+
+
+/**
+* Runs a skill check based on a tech (when you don't know the actual ability).
+* Synergy abilities will check solo role status and may not be valid if the
+* player is in solo role but not solo.
+*
+* @param char_data *ch The person doing the skill check.
+* @param int tech Which PTECH_ type.
+* @param int difficulty Any DIFF_ const.
+* @return bool TRUE if passed, FALSE if failed.
+*/
+bool player_tech_skill_check(char_data *ch, int tech, int difficulty) {
+	any_vnum best_abil = NOTHING;
+	struct player_tech *iter;
+	int lev, best_level = 0;
 	
-	// roll
-	return (number(1, 100) <= chance);
+	if (IS_NPC(ch)) {
+		return FALSE;
+	}
+	
+	LL_FOREACH(GET_TECHS(ch), iter) {
+		if (iter->id != tech) {
+			continue;	// wrong tech
+		}
+		if (iter->check_solo && !check_solo_role(ch)) {
+			continue;	// not solo
+		}
+		
+		lev = get_ability_skill_level(ch, iter->abil);
+		
+		if (lev > best_level) {
+			best_level = lev;
+			best_abil = iter->abil;
+		}
+	}
+	
+	if (best_abil != NOTHING) {
+		return skill_check(ch, best_abil, difficulty);
+	}
+	else {
+		return FALSE;	// no abil
+	}
+}
+
+
+/**
+* Runs a skill check based on a tech (when you don't know the actual ability).
+* This uses the ability's own difficulty setting. Synergy abilities will ensure
+* that solo-role characters are solo.
+*
+* @param char_data *ch The person doing the skill check.
+* @param int tech Which PTECH_ type.
+* @return bool TRUE if passed, FALSE if failed.
+*/
+bool player_tech_skill_check_by_ability_difficulty(char_data *ch, int tech) {
+	ability_data *abil;
+	struct player_tech *iter;
+	
+	if (IS_NPC(ch)) {
+		return FALSE;
+	}
+	
+	LL_FOREACH(GET_TECHS(ch), iter) {
+		if (iter->id != tech) {
+			continue;	// wrong tech
+		}
+		if (iter->check_solo && !check_solo_role(ch)) {
+			continue;	// solo role but not solo
+		}
+		if (!(abil = ability_proto(iter->abil))) {
+			continue;	// no data?
+		}
+		
+		if (skill_check(ch, iter->abil, ABIL_DIFFICULTY(abil))) {
+			return TRUE;
+		}
+	}
+	
+	return FALSE;	// no abil or no success
 }
 
 
  //////////////////////////////////////////////////////////////////////////////
 //// CORE SKILL COMMANDS /////////////////////////////////////////////////////
+
+ACMD(do_ability) {
+	ability_data *abil;
+	
+	skip_spaces(&argument);
+	
+	// optional info arg (changes nothing)
+	if (!strn_cmp(argument, "info ", 5)) {
+		argument += 4;
+		skip_spaces(&argument);
+	}
+	
+	if (!*argument) {
+		msg_to_char(ch, "Get info for which ability?\r\n");
+	}
+	else if (!(abil = find_ability_by_name_exact(argument, TRUE))) {
+		// no matching abil
+		if (find_skill_by_name_exact(argument, TRUE)) {
+			msg_to_char(ch, "Invalid ability. Try 'skill %s' instead.\r\n", argument);
+		}
+		else {
+			msg_to_char(ch, "Unknown ability '%s'.\r\n", argument);
+		}
+	}
+	else {
+		// ability details
+		show_ability_info(ch, abil, NULL, TRUE);
+	}
+}
+
 
 ACMD(do_noskill) {
 	struct player_skill_data *skdata;
@@ -1413,71 +1792,265 @@ ACMD(do_noskill) {
 	else {
 		if (skdata->noskill) {
 			skdata->noskill = FALSE;
-			msg_to_char(ch, "You will now &cbe able to gain&0 %s skill.\r\n", SKILL_NAME(skill));
+			msg_to_char(ch, "You will now \tcbe able to gain\t0 %s skill.\r\n", SKILL_NAME(skill));
 		}
 		else {
 			skdata->noskill = TRUE;
-			msg_to_char(ch, "You will &rno longer&0 gain %s skill.\r\n", SKILL_NAME(skill));
+			msg_to_char(ch, "You will \trno longer\t0 gain %s skill.\r\n", SKILL_NAME(skill));
 		}
+		
+		qt_change_skill_level(ch, skdata->vnum);
+		queue_delayed_update(ch, CDU_MSDP_SKILLS);
 	}
 }
 
 
 ACMD(do_skills) {
-	void clear_char_abilities(char_data *ch, any_vnum skill);
-	
-	char arg2[MAX_INPUT_LENGTH], lbuf[MAX_INPUT_LENGTH], outbuf[MAX_STRING_LENGTH];
+	char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], lbuf[MAX_STRING_LENGTH], *ptr;
+	char new_arg[MAX_INPUT_LENGTH], whole_arg[MAX_INPUT_LENGTH];
+	struct skill_display_t *skdat_list = NULL, *skdat;
+	struct synergy_display_type *sdt_list = NULL, *sdt;
+	struct synergy_display_ability *sda;
+	struct player_ability_data *plab, *next_plab;
 	struct player_skill_data *skdata;
-	skill_data *skill, *next_skill;
+	skill_data *skill, *next_skill, *synergy[2];
+	struct synergy_ability *syn;
 	struct skill_ability *skab;
 	ability_data *abil;
-	int points, level;
-	empire_data *emp;
-	bool found;
+	int points, level, iter;
+	bool found, any, line;
+	bool sort_alpha = FALSE, sort_level = FALSE, want_min = FALSE, want_max = FALSE, want_all = FALSE, show_all_info = FALSE;
+	int min_level = -1, max_level = -1;
 	
-	skip_spaces(&argument);
+	// attempt to parse the args first, to get -l [range] or -a
+	if (*argument) {
+		// will remove any requests/flags and leave the rest of the arg in new_arg
+		*new_arg = '\0';
+		while (*argument) {
+			argument = any_one_word(argument, arg);
+			if (want_min && isdigit(*arg)) {
+				min_level = atoi(arg);
+				want_min = FALSE;
+				
+				// look for max, too
+				want_max = FALSE;
+				
+				// look for maximum
+				for (iter = 0; arg[iter]; ++iter) {
+					if (isdigit(arg[iter]) && !want_max) {
+						// skipping levels
+					}
+					else if (isdigit(arg[iter]) && want_max) {
+						max_level = atoi(arg + iter);
+						want_max = FALSE;
+					}
+					else if (arg[iter] == '-' || arg[iter] == ':') {
+						// level divider
+						want_max = TRUE;
+					}
+					else {
+						// found something else?
+						msg_to_char(ch, "Usage: skills [name] -l <level range>\r\n");
+						return;
+					}
+				}
+				
+				// did we find a max? if not, ask for it in the next arg
+				if (max_level == -1) {
+					want_max = TRUE;
+				}
+			}
+			else if (want_max && isdigit(*arg)) {
+				max_level = atoi(arg);
+				want_max = FALSE;
+			}
+			else if (!strn_cmp(arg, "-l", 2)) {
+				sort_level = TRUE;
+				
+				// check for possible min/max level: find start pos
+				if (!strn_cmp(arg, "-level", 6)) {
+					iter = 6;
+				}
+				else if (!strn_cmp(arg, "-lev", 4)) {
+					iter = 4;
+				}
+				else {
+					iter = 2;
+				}
+				
+				// look for levels here
+				if (iter > strlen(arg) || !arg[iter]) {
+					// no level -- free to continue, but look for levels in the next arg
+					want_min = want_max = TRUE;
+				}
+				else if (!isdigit(arg[iter])) {
+					// unexpected
+					msg_to_char(ch, "Usage: skills [name] -l <level range>\r\n");
+					return;
+				}
+				else {
+					// found a probably minimum
+					min_level = atoi(arg+iter);
+					want_min = want_max = FALSE;
+					
+					// look for maximum
+					for (; arg[iter]; ++iter) {
+						if (isdigit(arg[iter]) && !want_max) {
+							// skipping levels
+						}
+						else if (isdigit(arg[iter]) && want_max) {
+							max_level = atoi(arg + iter);
+							want_max = FALSE;
+						}
+						else if (arg[iter] == '-' || arg[iter] == ':') {
+							// level divider
+							want_max = TRUE;
+						}
+						else {
+							// found something else?
+							msg_to_char(ch, "Usage: skills [name] -l <level range>\r\n");
+							return;
+						}
+					}
+					
+					// did we find a max? if not, ask for it in the next arg
+					if (max_level == -1) {
+						want_max = TRUE;
+					}
+				}
+			}
+			else if (is_abbrev(arg, "-all")) {
+				want_all = TRUE;
+			}
+			else if (is_abbrev(arg, "-alphabetical")) {
+				sort_alpha = TRUE;
+			}
+			else {
+				// apply it to new_arg instead: length OK because it cannot get LONGER than max-input-length when removing
+				sprintf(new_arg + strlen(new_arg), "%s%s", (*new_arg ? " " : ""), arg);
+			}
+		}
+		
+		// and keep only new_arg
+		argument = new_arg;
+	}	// end basic argument parsing
+	
+	argument = trim(argument);
+	strcpy(whole_arg, argument);
+	half_chop(argument, arg, arg2);
 	
 	if (IS_NPC(ch)) {
 		msg_to_char(ch, "As an NPC, you have no skills.\r\n");
 		return;
 	}
 	
-	if (!*argument) {
-		*outbuf = '\0';
+	// mode based on args
+	if (!*arg) {
+		// no remaining argument? basic skill list:
 		
-		// no argument? list all
-		sprintf(outbuf + strlen(outbuf), "You know the following skills (skill level %d):\r\n", GET_SKILL_LEVEL(ch));
-		found = FALSE;
+		// level portion
+		if (min_level != -1 && max_level != -1) {
+			sprintf(lbuf, "level %d-%d", min_level, max_level);
+		}
+		else if (min_level != -1) {
+			sprintf(lbuf, "level %d and higher", min_level);
+		}
+		else if (max_level != -1) {
+			sprintf(lbuf, "up to level %d", max_level);
+		}
+		else {
+			sprintf(lbuf, "(skill level %d)", GET_SKILL_LEVEL(ch));
+		}
+		
+		// start string
+		build_page_display(ch, "You know the following skills %s:", lbuf);
+		
 		HASH_ITER(sorted_hh, sorted_skills, skill, next_skill) {
 			if (SKILL_FLAGGED(skill, SKILLF_IN_DEVELOPMENT)) {
 				continue;
 			}
-			
-			strcat(outbuf, get_skill_row_display(ch, skill));
-			if (!found && get_ability_points_available_for_char(ch, SKILL_VNUM(skill)) > 0) {
-				found = TRUE;
+			level = get_skill_level(ch, SKILL_VNUM(skill));
+			if (min_level != -1 && level < min_level) {
+				continue;
 			}
+			if (max_level != -1 && level > max_level) {
+				continue;
+			}
+			if (!SKILL_FLAGGED(skill, SKILLF_BASIC) && level < 1 && get_skill_exp(ch, SKILL_VNUM(skill)) < 0.1) {
+				continue;	// don't show non-basic skills if the player doesn't have them
+			}
+			
+			// add to data
+			CREATE(skdat, struct skill_display_t, 1);
+			skdat->level = level;
+			skdat->name_ptr = SKILL_NAME(skill);
+			skdat->string = str_dup(get_skill_row_display(ch, skill));
+			DL_APPEND(skdat_list, skdat);
 		}
 		
-		if (found) {
-			strcat(outbuf, "* You have ability points available to spend.\r\n");
+		// sort if needed?
+		if (sort_level) {
+			DL_SORT(skdat_list, sort_skill_display_by_level);
 		}
-		strcat(outbuf, get_skill_gain_display(ch));
+		else if (sort_alpha) {
+			DL_SORT(skdat_list, sort_skill_display_by_name);
+		}
 		
-		page_string(ch->desc, outbuf, 1);
+		// build display
+		any = FALSE;
+		DL_FOREACH(skdat_list, skdat) {
+			any = TRUE;
+			build_page_display_str(ch, skdat->string);
+		}
+		
+		free_skill_display_t(skdat_list);
+		skdat_list = NULL;
+		
+		// orphaned abilities (ones with parents), commands only
+		*lbuf = '\0';
+		HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
+			abil = plab->ptr;
+			
+			// ALWAYS use current set for tehse abilities
+			if (!plab->purchased[GET_CURRENT_SKILL_SET(ch)]) {
+				continue;
+			}
+			if (!ABIL_COMMAND(abil)) {
+				continue;	// only showing commands here
+			}
+			if (!has_ability_data_any(abil, ADL_PARENT)) {
+				continue;	// only looking for abilities with parents
+			}
+			
+			safe_snprintf(lbuf + strlen(lbuf), sizeof(lbuf) - strlen(lbuf), "%s%s%s\t0", *lbuf ? ", ": "", ability_color(ch, abil), ABIL_NAME(abil));
+		}
+		if (*lbuf) {
+			build_page_display(ch, "Other abilities: %s\r\n", lbuf);
+		}
+		
+		// footer
+		if (!any) {
+			build_page_display_str(ch, " none");
+		}
+		build_page_display_str(ch, get_skill_gain_display(ch));
+		send_page_display(ch);
 	}
-	else if (!strn_cmp(argument, "buy", 3)) {
+	else if (!str_cmp(arg, "buy")) {
 		// purchase
-		half_chop(argument, arg, lbuf);
-		
-		if (!*lbuf) {
+		if (!*arg2) {
 			msg_to_char(ch, "Usage: skills buy <ability>\r\n");
 			msg_to_char(ch, "You can see a list of abilities for each skill by typing 'skills <skill>'.\r\n");
 			return;
 		}
 		
-		if (!(abil = find_ability_by_name(lbuf))) {
-			msg_to_char(ch, "No such ability '%s'.\r\n", lbuf);
+		if (!(abil = find_ability_by_name(arg2))) {
+			// did they try to skill-buy a skill?
+			if ((skill = find_skill_by_name(arg2))) {
+				msg_to_char(ch, "You can only \"skill buy\" an ability from one of your skill trees, not the whole %s tree.\r\n", skill->name);
+			}
+			else {
+				msg_to_char(ch, "No such ability '%s'.\r\n", arg2);
+			}
 			return;
 		}
 		
@@ -1486,52 +2059,38 @@ ACMD(do_skills) {
 			return;
 		}
 		
-		if (!ABIL_ASSIGNED_SKILL(abil)) {
-			msg_to_char(ch, "You cannot buy that ability.\r\n");
+		if (!ABIL_IS_PURCHASE(abil) && !IS_IMMORTAL(ch)) {
+			msg_to_char(ch, "%s: You cannot buy that ability.\r\n", ABIL_NAME(abil));
 			return;
 		}
 		
-		if (get_ability_points_available_for_char(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) < 1 && !IS_IMMORTAL(ch)) {
+		if (ABIL_ASSIGNED_SKILL(abil) && get_ability_points_available_for_char(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) < 1 && !IS_IMMORTAL(ch)) {
 			msg_to_char(ch, "You have no points available to spend in %s.\r\n", SKILL_NAME(ABIL_ASSIGNED_SKILL(abil)));
 			return;
 		}
 		
 		// check level
-		if (get_skill_level(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) < ABIL_SKILL_LEVEL(abil)) {
+		if (ABIL_ASSIGNED_SKILL(abil) && get_skill_level(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) < ABIL_SKILL_LEVEL(abil)) {
 			msg_to_char(ch, "You need at least %d in %s to buy %s.\r\n", ABIL_SKILL_LEVEL(abil), SKILL_NAME(ABIL_ASSIGNED_SKILL(abil)), ABIL_NAME(abil));
 			return;
 		}
 		
 		// check pre-req
-		if ((skab = find_skill_ability(ABIL_ASSIGNED_SKILL(abil), abil)) && skab->prerequisite != NO_PREREQ && !has_ability(ch, skab->prerequisite)) {
+		if (ABIL_ASSIGNED_SKILL(abil) && (skab = find_skill_ability(ABIL_ASSIGNED_SKILL(abil), abil)) && skab->prerequisite != NO_PREREQ && !has_ability(ch, skab->prerequisite)) {
 			msg_to_char(ch, "You need to buy %s before you can buy %s.\r\n", get_ability_name_by_vnum(skab->prerequisite), ABIL_NAME(abil));
 			return;
 		}
 		
 		// good to go
-		
-		emp = GET_LOYALTY(ch);
-		
-		// remove empire abilities temporarily
-		if (emp) {
-			adjust_abilities_to_empire(ch, emp, FALSE);
-		}
-		
 		add_ability(ch, abil, FALSE);
 		msg_to_char(ch, "You purchase %s.\r\n", ABIL_NAME(abil));
-		SAVE_CHAR(ch);
+		queue_delayed_update(ch, CDU_SAVE);
 		
-		// re-add empire abilities
-		if (emp) {
-			adjust_abilities_to_empire(ch, emp, TRUE);
-			resort_empires(FALSE);
-		}
+		update_class_and_abilities(ch);
 	}
-	else if (!strn_cmp(argument, "reset", 5)) {
+	else if (!str_cmp(arg, "reset")) {
 		// self-clear!
-		half_chop(argument, arg, lbuf);
-		
-		if (!*lbuf) {
+		if (!*arg2) {
 			msg_to_char(ch, "Usage: skills reset <skill>\r\n");
 			msg_to_char(ch, "You have free resets available in: ");
 			
@@ -1557,8 +2116,8 @@ ACMD(do_skills) {
 				msg_to_char(ch, "none\r\n");
 			}
 		}
-		else if (!(skill = find_skill_by_name(lbuf))) {
-			msg_to_char(ch, "No such skill %s.\r\n", lbuf);
+		else if (!(skill = find_skill_by_name(arg2))) {
+			msg_to_char(ch, "No such skill %s.\r\n", arg2);
 		}
 		else if (!IS_IMMORTAL(ch) && get_skill_resets(ch, SKILL_VNUM(skill)) == 0) {
 			msg_to_char(ch, "You do not have a free reset available for %s.\r\n", SKILL_NAME(skill));
@@ -1568,16 +2127,17 @@ ACMD(do_skills) {
 				skdata->resets = MAX(skdata->resets - 1, 0);
 			}
 			clear_char_abilities(ch, SKILL_VNUM(skill));
+			update_class_and_abilities(ch);
 			
 			msg_to_char(ch, "You have reset your %s abilities.\r\n", SKILL_NAME(skill));
-			SAVE_CHAR(ch);
+			queue_delayed_update(ch, CDU_SAVE | CDU_MSDP_SKILLS);
 		}
 		
 		// end "reset"
 		return;
 	}
-	else if (!strn_cmp(argument, "drop", 4)) {
-		half_chop(argument, arg, lbuf);	// "drop" "skill level"
+	else if (!str_cmp(arg, "drop")) {
+		strcpy(lbuf, arg2);
 		half_chop(lbuf, arg, arg2);	// "skill" "level"
 		
 		if (!*arg || !*arg2) {
@@ -1585,9 +2145,14 @@ ACMD(do_skills) {
 			msg_to_char(ch, "Usage: skill drop <skill> <0/%d/%d>\r\n", BASIC_SKILL_CAP, SPECIALTY_SKILL_CAP);
 		}
 		else if (!(skill = find_skill_by_name(arg))) {
-			msg_to_char(ch, "Unknown skill '%s'.\r\n", arg);
+			if (find_ability_by_name(arg)) {
+				msg_to_char(ch, "You cannot drop abilities with this command. Use \"skill reset\" instead.\r\n");
+			}
+			else {
+				msg_to_char(ch, "Unknown skill '%s'.\r\n", arg);
+			}
 		}
-		else if (SKILL_MIN_DROP_LEVEL(skill) >= CLASS_SKILL_CAP) {
+		else if (SKILL_MIN_DROP_LEVEL(skill) >= MAX_SKILL_CAP) {
 			msg_to_char(ch, "You can't drop your skill level in %s.\r\n", SKILL_NAME(skill));
 		}
 		else if (!is_number(arg2)) {
@@ -1614,13 +2179,14 @@ ACMD(do_skills) {
 			// good to go!
 			msg_to_char(ch, "You have dropped your %s skill to %d and reset abilities above that level.\r\n", SKILL_NAME(skill), level);
 			set_skill(ch, SKILL_VNUM(skill), level);
-			update_class(ch);
+			check_un_vampire(ch, FALSE);
+			update_class_and_abilities(ch);
 			check_ability_levels(ch, SKILL_VNUM(skill));
 			
-			SAVE_CHAR(ch);
+			queue_delayed_update(ch, CDU_SAVE | CDU_MSDP_SKILLS);
 		}
 	}
-	else if (!str_cmp(argument, "swap")) {
+	else if (!str_cmp(arg, "swap")) {
 		if (IS_IMMORTAL(ch)) {
 			perform_swap_skill_sets(ch);
 			msg_to_char(ch, "You swap skill sets.\r\n");
@@ -1628,8 +2194,8 @@ ACMD(do_skills) {
 		else if (!config_get_bool("skill_swap_allowed")) {
 			msg_to_char(ch, "This game does not allow skill swap.\r\n");
 		}
-		else if (get_approximate_level(ch) < config_get_int("skill_swap_min_level")) {
-			msg_to_char(ch, "You must be at least level %d to swap skill sets.\r\n", config_get_int("skill_swap_min_level"));
+		else if (GET_SKILL_LEVEL(ch) < config_get_int("skill_swap_min_level")) {
+			msg_to_char(ch, "You require skill level %d to swap skill sets.\r\n", config_get_int("skill_swap_min_level"));
 		}
 		else if (GET_POS(ch) < POS_STANDING) {
 			msg_to_char(ch, "You can't swap skill sets right now.\r\n");
@@ -1646,18 +2212,87 @@ ACMD(do_skills) {
 			act("$n prepares to swap skill sets...", TRUE, ch, NULL, NULL, TO_ROOM);
 		}
 	}
-	else if (IS_IMMORTAL(ch) && !strn_cmp(argument, "sell", 4)) {
-		// purchase
-		half_chop(argument, arg, lbuf);
+	else if (is_abbrev(arg, "synergy") && strlen(arg) >= 3) {
+		strcpy(lbuf, arg2);
+		ptr = one_word(lbuf, arg);	// arg: 1st skill
+		one_word(ptr, arg2);	// arg2: 2nd skill
 		
-		if (!*lbuf) {
+		// validate args
+		if (!*arg || !*arg2) {
+			msg_to_char(ch, "Usage: skill synergy <skill 1> <skill 2>\r\n");
+			return;
+		}
+		if (!(synergy[0] = find_skill(arg)) || SKILL_FLAGGED(synergy[0], SKILLF_IN_DEVELOPMENT)) {
+			msg_to_char(ch, "No such skill '%s'.\r\n", arg);
+			return;
+		}
+		if (!(synergy[1] = find_skill(arg2)) || SKILL_FLAGGED(synergy[1], SKILLF_IN_DEVELOPMENT)) {
+			msg_to_char(ch, "No such skill '%s'.\r\n", arg2);
+			return;
+		}
+		
+		// check if I have the skill, if needed
+		for (iter = 0; iter < 2; ++iter) {
+			if (SKILL_FLAGGED(synergy[iter], SKILLF_NO_PREVIEW) && get_skill_level(ch, SKILL_VNUM(synergy[iter])) < 1 && !IS_IMMORTAL(ch)) {
+				msg_to_char(ch, "You don't know the %s skill.\r\n", SKILL_NAME(synergy[iter]));
+				return;
+			}
+		}
+		
+		// displays: first build the list of abils
+		for (iter = 0; iter < 2; ++iter) {
+			skill_data *first = synergy[iter], *second = synergy[iter ? 0 : 1];
+			
+			LL_FOREACH(SKILL_SYNERGIES(first), syn) {
+				if (syn->skill != SKILL_VNUM(second)) {
+					continue;
+				}
+				
+				add_synergy_display_ability(&sdt_list, syn->role, SKILL_VNUM(first), SKILL_MAX_LEVEL(first), SKILL_VNUM(second), syn->level, syn->ability);
+			}
+		}
+		
+		// and show it...
+		LL_SORT(sdt_list, sort_sdt_list);
+		any = FALSE;
+		
+		msg_to_char(ch, "Synergy abilities:\r\n");
+		LL_FOREACH(sdt_list, sdt) {
+			if (PRF_FLAGGED(ch, PRF_SCREEN_READER)) {
+				msg_to_char(ch, " %d %s/%d %s %s: ", sdt->level[0], get_skill_abbrev_by_vnum(sdt->skill[0]), sdt->level[1], get_skill_abbrev_by_vnum(sdt->skill[1]), sdt->role == NOTHING ? "(all)" : class_role[sdt->role]);
+			}
+			else {	// non-screenreader
+				msg_to_char(ch, " %s%d %s/%d %s %s\t0: ", sdt->role == NOTHING ? "\t0" : class_role_color[sdt->role], sdt->level[0], get_skill_abbrev_by_vnum(sdt->skill[0]), sdt->level[1], get_skill_abbrev_by_vnum(sdt->skill[1]), sdt->role == NOTHING ? "(all)" : class_role[sdt->role]);
+			}
+			
+			LL_SORT(sdt->abils, sort_sda_list);
+			line = FALSE;
+			LL_FOREACH(sdt->abils, sda) {
+				msg_to_char(ch, "%s%s%s\t0", line ? ", " : "", has_ability(ch, sda->vnum) ? "\tg" : "", get_ability_name_by_vnum(sda->vnum));
+				line = TRUE;
+				any = TRUE;
+			}
+			
+			msg_to_char(ch, "\r\n");
+		}
+		
+		// done
+		if (!any) {
+			msg_to_char(ch, " none\r\n");
+		}
+		
+		free_synergy_display_list(sdt_list);
+	}
+	else if (IS_IMMORTAL(ch) && !str_cmp(arg, "sell")) {
+		// purchase		
+		if (!*arg2) {
 			msg_to_char(ch, "Usage: skills sell <ability>\r\n");
 			msg_to_char(ch, "You can see a list of abilities for each skill by typing 'skills <skill>'.\r\n");
 			return;
 		}
 		
-		if (!(abil = find_ability_by_name(lbuf))) {
-			msg_to_char(ch, "No such ability '%s'.\r\n", lbuf);
+		if (!(abil = find_ability_by_name(arg2))) {
+			msg_to_char(ch, "No such ability '%s'.\r\n", arg2);
 			return;
 		}
 		
@@ -1669,41 +2304,76 @@ ACMD(do_skills) {
 		// good to go
 		msg_to_char(ch, "You no longer know %s.\r\n", ABIL_NAME(abil));
 
-		if (GET_LOYALTY(ch)) {
-			adjust_abilities_to_empire(ch, GET_LOYALTY(ch), FALSE);
-		}
-
 		remove_ability(ch, abil, FALSE);
 		check_skill_sell(ch, abil);
-		SAVE_CHAR(ch);
-		
-		if (GET_LOYALTY(ch)) {
-			adjust_abilities_to_empire(ch, GET_LOYALTY(ch), TRUE);
-			resort_empires(FALSE);
-		}
+		queue_delayed_update(ch, CDU_SAVE);
+		update_class_and_abilities(ch);
 	}
-	else {
-		*outbuf = '\0';
+	else if (!find_skill_or_ability_for_command(arg, arg2, whole_arg, &skill, &abil)) {
+		msg_to_char(ch, "No such skill or ability.\r\n");
+	}
+	else if (skill) {
+		// show 1 skill's details
 		
-		// argument: show abilities for 1 skill
-		skill = find_skill_by_name(argument);
-		if (skill) {
-			// header
-			strcat(outbuf, get_skill_row_display(ch, skill));
-			
-			points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill));
-			if (points > 0) {
-				sprintf(outbuf + strlen(outbuf), "You have %d ability point%s to spend. Type 'skill buy <ability>' to purchase a new ability.\r\n", points, (points != 1 ? "s" : ""));
+		// validate
+		if (SKILL_FLAGGED(skill, SKILLF_NO_PREVIEW) && get_skill_level(ch, SKILL_VNUM(skill)) < 1 && !IS_IMMORTAL(ch)) {
+			msg_to_char(ch, "You don't know the %s skill.\r\n", SKILL_NAME(skill));
+			return;
+		}
+		
+		// if no levels were requested, default to only showing up to the next cap
+		if (min_level == -1 && max_level == -1 && !want_all) {
+			max_level = NEXT_CAP_LEVEL(ch, SKILL_VNUM(skill));
+			show_all_info = TRUE;
+		}
+		
+		// header
+		build_page_display_str(ch, get_skill_row_display(ch, skill));
+		
+		points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill));
+		if (points > 0) {
+			build_page_display(ch, "You have %d ability point%s to spend. Type 'skill buy <ability>' to purchase a new ability.", points, (points != 1 ? "s" : ""));
+		}
+		
+		// list
+		get_skill_abilities_display(&skdat_list, ch, skill, NO_PREREQ, (sort_level || sort_alpha || min_level != -1) ? -1 : 1, min_level, max_level);
+		
+		// sort if needed?
+		if (sort_level) {
+			DL_SORT(skdat_list, sort_skill_display_by_level);
+		}
+		else if (sort_alpha) {
+			DL_SORT(skdat_list, sort_skill_display_by_name);
+		}
+		
+		// build display
+		DL_FOREACH(skdat_list, skdat) {
+			if (min_level != -1 && skdat->level < min_level) {
+				continue;
+			}
+			if (max_level != -1 && skdat->level > max_level) {
+				continue;
 			}
 			
-			// list
-			strcat(outbuf, get_skill_abilities_display(ch, skill, NO_PREREQ, 1));
-			
-			page_string(ch->desc, outbuf, 1);
+			// show it
+			build_page_display_str(ch, skdat->string);
 		}
-		else {
-			msg_to_char(ch, "No such skill.\r\n");
+		
+		free_skill_display_t(skdat_list);
+		skdat_list = NULL;
+		
+		if (show_all_info && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS) && max_level < SKILL_MAX_LEVEL(skill)) {
+			build_page_display(ch, "(For higher level abilities, use 'skill %s -all')", SKILL_NAME(skill));
 		}
+		
+		send_page_display(ch);
+	}
+	else if (abil) {
+		// ability details
+		show_ability_info(ch, abil, NULL, TRUE);
+	}
+	else {	// this should be unreachable
+		msg_to_char(ch, "No such skill or ability.\r\n");
 	}
 }
 
@@ -1711,19 +2381,23 @@ ACMD(do_skills) {
 // this is a temporary command for picking skill specs, and will ultimately be replaced by quests or other mechanisms
 ACMD(do_specialize) {
 	struct player_skill_data *plsk, *next_plsk;
-	int count, specialty_allowed;
+	int count, max_level_allowed, specialty_allowed;
 	skill_data *sk;
 	
 	skip_spaces(&argument);
 	
-	// make certain these are up-to-datec
-	specialty_allowed = NUM_SPECIALTY_SKILLS_ALLOWED + (CAN_GET_BONUS_SKILLS(ch) ? BONUS_SPECIALTY_SKILLS_ALLOWED : 0);
+	// make certain these are up-to-date
+	max_level_allowed = config_get_int("skills_at_max_level");
+	specialty_allowed = config_get_int("skills_at_specialty_level") + max_level_allowed;
 	
 	if (!*argument) {
 		msg_to_char(ch, "Specialize in which skill?\r\n");
 	}
 	else if (!(sk = find_skill_by_name(argument))) {
 		msg_to_char(ch, "No such skill.\r\n");
+	}
+	else if (SKILL_FLAGGED(sk, SKILLF_NO_SPECIALIZE)) {
+		msg_to_char(ch, "You can't specialize in that skill using this command.\r\n");
 	}
 	else if (get_skill_level(ch, SKILL_VNUM(sk)) != BASIC_SKILL_CAP && get_skill_level(ch, SKILL_VNUM(sk)) != SPECIALTY_SKILL_CAP) {
 		msg_to_char(ch, "You can only specialize skills which are at %d or %d.\r\n", BASIC_SKILL_CAP, SPECIALTY_SKILL_CAP);
@@ -1754,8 +2428,8 @@ ACMD(do_specialize) {
 					++count;
 				}
 			}
-			if ((count + 1) > NUM_CLASS_SKILLS_ALLOWED) {
-				msg_to_char(ch, "You can only have %d skill%s above level %d.\r\n", NUM_CLASS_SKILLS_ALLOWED, (NUM_CLASS_SKILLS_ALLOWED != 1 ? "s" : ""), SPECIALTY_SKILL_CAP);
+			if ((count + 1) > max_level_allowed) {
+				msg_to_char(ch, "You can only have %d skill%s above level %d.\r\n", max_level_allowed, PLURAL(max_level_allowed), SPECIALTY_SKILL_CAP);
 				return;
 			}
 		}
@@ -1765,7 +2439,7 @@ ACMD(do_specialize) {
 		msg_to_char(ch, "You have specialized in %s.\r\n", SKILL_NAME(sk));
 
 		// check class and skill levels
-		update_class(ch);
+		update_class_and_abilities(ch);
 	}
 }
 
@@ -1810,13 +2484,13 @@ bool can_gain_exp_from(char_data *ch, char_data *vict) {
 */
 bool can_wear_item(char_data *ch, obj_data *item, bool send_messages) {
 	char buf[MAX_STRING_LENGTH];
-	any_vnum abil = NO_ABIL;
+	any_vnum abil = NO_ABIL, tech = NOTHING;
 	struct obj_apply *app;
 	int iter, level_min;
 	bool honed;
 
 	// players won't be able to use gear >= these levels if their skill level is < the level
-	int skill_level_ranges[] = { CLASS_SKILL_CAP, SPECIALTY_SKILL_CAP, BASIC_SKILL_CAP, -1 };	// terminate with -1
+	int skill_level_ranges[] = { MAX_SKILL_CAP, SPECIALTY_SKILL_CAP, BASIC_SKILL_CAP, -1 };	// terminate with -1
 	
 	if (IS_NPC(ch)) {
 		return TRUE;
@@ -1825,37 +2499,40 @@ bool can_wear_item(char_data *ch, obj_data *item, bool send_messages) {
 	if (IS_ARMOR(item)) {
 		switch (GET_ARMOR_TYPE(item)) {
 			case ARMOR_MAGE: {
-				abil = ABIL_MAGE_ARMOR;
+				tech = PTECH_ARMOR_MAGE;
 				break;
 			}
 			case ARMOR_LIGHT: {
-				abil = ABIL_LIGHT_ARMOR;
+				tech = PTECH_ARMOR_LIGHT;
 				break;
 			}
 			case ARMOR_MEDIUM: {
-				abil = ABIL_MEDIUM_ARMOR;
+				tech = PTECH_ARMOR_MEDIUM;
 				break;
 			}
 			case ARMOR_HEAVY: {
-				abil = ABIL_HEAVY_ARMOR;
+				tech = PTECH_ARMOR_HEAVY;
 				break;
 			}
 		}
 	}
-	else if (OBJ_FLAGGED(item, OBJ_TWO_HANDED)) {
-		abil = ABIL_TWO_HANDED_WEAPONS;
-	}
 	else if (IS_MISSILE_WEAPON(item)) {
-		abil = ABIL_ARCHERY;
+		tech = PTECH_RANGED_COMBAT;
 	}
 	else if (IS_SHIELD(item)) {
-		abil = ABIL_SHIELD_BLOCK;
+		tech = PTECH_BLOCK;
 	}
 	
 	if (abil != NO_ABIL && !has_ability(ch, abil)) {
 		if (send_messages) {
-			snprintf(buf, sizeof(buf), "You require the %s ability to use $p.", get_ability_name_by_vnum(abil));
+			safe_snprintf(buf, sizeof(buf), "You require the %s ability to use $p.", get_ability_name_by_vnum(abil));
 			act(buf, FALSE, ch, item, NULL, TO_CHAR);
+		}
+		return FALSE;
+	}
+	if (tech != NOTHING && !has_player_tech(ch, tech)) {
+		if (send_messages) {
+			act("You don't have the correct ability to use $p.", FALSE, ch, item, NULL, TO_CHAR);
 		}
 		return FALSE;
 	}
@@ -1867,21 +2544,20 @@ bool can_wear_item(char_data *ch, obj_data *item, bool send_messages) {
 			honed = TRUE;
 		}
 	}
-	if (honed && !has_ability(ch, ABIL_HONE)) {
+	if (honed && !has_player_tech(ch, PTECH_USE_HONED_GEAR)) {
 		if (send_messages) {
-			snprintf(buf, sizeof(buf), "You require the %s ability to use $p.", get_ability_name_by_vnum(ABIL_HONE));
-			act(buf, FALSE, ch, item, NULL, TO_CHAR);
+			act("You don't have the ability to use honed gear like $p.", FALSE, ch, item, NULL, TO_CHAR);
 		}
 		return FALSE;
 	}
 	
 	// check levels
 	if (!IS_IMMORTAL(ch)) {
-		if (GET_OBJ_CURRENT_SCALE_LEVEL(item) <= CLASS_SKILL_CAP) {
+		if (GET_OBJ_CURRENT_SCALE_LEVEL(item) <= MAX_SKILL_CAP) {
 			for (iter = 0; skill_level_ranges[iter] != -1; ++iter) {
 				if (GET_OBJ_CURRENT_SCALE_LEVEL(item) > skill_level_ranges[iter] && GET_SKILL_LEVEL(ch) < skill_level_ranges[iter]) {
 					if (send_messages) {
-						snprintf(buf, sizeof(buf), "You need to be skill level %d to use $p.", skill_level_ranges[iter]);
+						safe_snprintf(buf, sizeof(buf), "You need to be skill level %d to use $p.", skill_level_ranges[iter]);
 						act(buf, FALSE, ch, item, NULL, TO_CHAR);
 					}
 					return FALSE;
@@ -1895,17 +2571,17 @@ bool can_wear_item(char_data *ch, obj_data *item, bool send_messages) {
 			else {
 				level_min = GET_OBJ_CURRENT_SCALE_LEVEL(item) - 25;
 			}
-			level_min = MAX(level_min, CLASS_SKILL_CAP);
-			if (GET_SKILL_LEVEL(ch) < CLASS_SKILL_CAP) {
+			level_min = MAX(level_min, MAX_SKILL_CAP);
+			if (GET_SKILL_LEVEL(ch) < MAX_SKILL_CAP) {
 				if (send_messages) {
-					snprintf(buf, sizeof(buf), "You need to be skill level %d and total level %d to use $p.", CLASS_SKILL_CAP, level_min);
+					safe_snprintf(buf, sizeof(buf), "You need to be skill level %d and total level %d to use $p.", MAX_SKILL_CAP, level_min);
 					act(buf, FALSE, ch, item, NULL, TO_CHAR);
 				}
 				return FALSE;
 			}
 			if (GET_HIGHEST_KNOWN_LEVEL(ch) < level_min) {
 				if (send_messages) {
-					snprintf(buf, sizeof(buf), "You need to be level %d to use $p.", level_min);
+					safe_snprintf(buf, sizeof(buf), "You need to be level %d to use $p.", level_min);
 					act(buf, FALSE, ch, item, NULL, TO_CHAR);
 				}
 				return FALSE;
@@ -1921,6 +2597,7 @@ bool can_wear_item(char_data *ch, obj_data *item, bool send_messages) {
 * Audits skills on startup. Erroring skills are set IN-DEVELOPMENT
 */
 void check_skills(void) {
+	struct synergy_ability *syn, *next_syn;
 	struct skill_ability *skab, *next_skab;
 	skill_data *skill, *next_skill;
 	bool error;
@@ -1935,6 +2612,14 @@ void check_skills(void) {
 				free(skab);
 			}
 		}
+		LL_FOREACH_SAFE(SKILL_SYNERGIES(skill), syn, next_syn) {
+			if (!find_ability_by_vnum(syn->ability) || !find_skill_by_vnum(syn->skill)) {
+				log("- Skill [%d] %s has invalid synergy skill/ability %d/%d", SKILL_VNUM(skill), SKILL_NAME(skill), syn->skill, syn->ability);
+				error = TRUE;
+				LL_DELETE(SKILL_SYNERGIES(skill), syn);
+				free(syn);
+			}
+		}
 		
 		if (error) {
 			SET_BIT(SKILL_FLAGS(skill), SKILLF_IN_DEVELOPMENT);
@@ -1942,27 +2627,8 @@ void check_skills(void) {
 		
 		// ensure sort
 		LL_SORT(SKILL_ABILITIES(skill), sort_skill_abilities);
+		LL_SORT(SKILL_SYNERGIES(skill), sort_synergies);
 	}
-}
-
-
-/**
-* @param char_data *ch the user
-* @return obj_data *a valid chipper, or NULL if the user has none
-*/
-obj_data *find_chip_weapon(char_data *ch) {
-	obj_data *weapon;
-
-	// find valid weapon
-	weapon = GET_EQ(ch, WEAR_WIELD);
-	if (!weapon || (GET_WEAPON_TYPE(weapon) != TYPE_HAMMER && GET_OBJ_VNUM(weapon) != o_ROCK)) {
-		weapon = GET_EQ(ch, WEAR_HOLD);
-		if (!weapon || (GET_WEAPON_TYPE(weapon) != TYPE_HAMMER && GET_OBJ_VNUM(weapon) != o_ROCK)) {
-			weapon = NULL;
-		}
-	}
-	
-	return weapon;
 }
 
 
@@ -1982,6 +2648,34 @@ struct skill_ability *find_skill_ability(skill_data *skill, ability_data *abil) 
 	
 	LL_SEARCH_SCALAR(SKILL_ABILITIES(skill), find, vnum, ABIL_VNUM(abil));
 	return find;
+}
+
+
+/**
+* Finds an assigned skill for an ability OR one of those ability's parents.
+*
+* @param ability_data *abil Which ability to find a skill for.
+* @param char_data *ch Optional: Only consider abilities possessed by this person (NULL to skip this).
+* @return skill_data* The skill if found, or NULL if not.
+*/
+skill_data *find_assigned_skill(ability_data *abil, char_data *ch) {
+	ability_data *find;
+	struct ability_data_list *adl;
+	
+	// my own skill
+	if (ABIL_ASSIGNED_SKILL(abil)) {
+		return ABIL_ASSIGNED_SKILL(abil);
+	}
+	
+	// check parents
+	LL_FOREACH(ABIL_DATA(abil), adl) {
+		if (adl->type == ADL_PARENT && (!ch || has_ability(ch, adl->vnum)) && (find = ability_proto(adl->vnum)) && ABIL_ASSIGNED_SKILL(find)) {
+			return ABIL_ASSIGNED_SKILL(find);
+		}
+	}
+	
+	// no?
+	return NULL;
 }
 
 
@@ -2010,9 +2704,10 @@ skill_data *find_skill(char *argument) {
 * skills.
 *
 * @param char *name The skill name to look up.
+* @param bool allow_abbrev If TRUE, allows abbreviations.
 * @return skill_data* The skill, or NULL if it doesn't exist.
 */
-skill_data *find_skill_by_name(char *name) {
+skill_data *find_skill_by_name_exact(char *name, bool allow_abbrev) {
 	skill_data *skill, *next_skill, *partial = NULL;
 	
 	if (!*name) {
@@ -2029,7 +2724,7 @@ skill_data *find_skill_by_name(char *name) {
 			// perfect match
 			return skill;
 		}
-		if (!partial && is_multiword_abbrev(name, SKILL_NAME(skill))) {
+		if (allow_abbrev && !partial && is_multiword_abbrev(name, SKILL_NAME(skill))) {
 			// probable match
 			partial = skill;
 		}
@@ -2107,18 +2802,8 @@ void give_level_zero_abilities(char_data *ch) {
 		// check that the player has it
 		for (set = 0; set < NUM_SKILL_SETS; ++set) {
 			if (!has_ability_in_set(ch, ABIL_VNUM(abil), set)) {
-				// if current set, need to update empire abilities
-				if (set == GET_CURRENT_SKILL_SET(ch) && GET_LOYALTY(ch)) {
-					adjust_abilities_to_empire(ch, GET_LOYALTY(ch), FALSE);
-				}
-				
 				// add the ability for this set
 				add_ability_by_set(ch, abil, set, FALSE);
-				
-				// if current set, need to update empire abilities
-				if (set == GET_CURRENT_SKILL_SET(ch) && GET_LOYALTY(ch)) {
-					adjust_abilities_to_empire(ch, GET_LOYALTY(ch), TRUE);
-				}
 			}
 		}
 	}
@@ -2132,16 +2817,24 @@ void give_level_zero_abilities(char_data *ch) {
 bool has_cooking_fire(char_data *ch) {
 	obj_data *obj;
 	
-	if (!IS_NPC(ch) && has_ability(ch, ABIL_TOUCH_OF_FLAME)) {
+	if (has_player_tech(ch, PTECH_LIGHT_FIRE)) {
 		return TRUE;
 	}
 
-	if (room_has_function_and_city_ok(IN_ROOM(ch), FNC_COOKING_FIRE)) {	
+	if (room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_COOKING_FIRE)) {	
 		return TRUE;
 	}
 	
-	for (obj = ROOM_CONTENTS(IN_ROOM(ch)); obj; obj = obj->next_content) {
-		if (OBJ_FLAGGED(obj, OBJ_LIGHT) && !CAN_WEAR(obj, ITEM_WEAR_TAKE)) {
+	// fires in room
+	DL_FOREACH2(ROOM_CONTENTS(IN_ROOM(ch)), obj, next_content) {
+		if (LIGHT_IS_LIT(obj) && LIGHT_FLAGGED(obj, LIGHT_FLAG_COOKING_FIRE)) {
+			return TRUE;
+		}
+	}
+	
+	// fires in inventory
+	DL_FOREACH2(ch->carrying, obj, next_content) {
+		if (LIGHT_IS_LIT(obj) && LIGHT_FLAGGED(obj, LIGHT_FLAG_COOKING_FIRE)) {
 			return TRUE;
 		}
 	}
@@ -2150,32 +2843,9 @@ bool has_cooking_fire(char_data *ch) {
 }
 
 
-/**
-* Checks to see if ch has a sharp tool equipped, and returns it if so
-*
-* char_data *ch the person to check
-* return obj_data *the sharp tool or NULL
-*/
-obj_data *has_sharp_tool(char_data *ch) {
-	obj_data *obj;
-	int iter;
-	
-	// slots to check (ensure a -1 terminator)
-	int slots[] = { WEAR_WIELD, WEAR_HOLD, WEAR_SHEATH_1, WEAR_SHEATH_2, -1 };
-	
-	for (iter = 0; slots[iter] != -1; ++iter) {
-		obj = GET_EQ(ch, slots[iter]);
-		if (obj && IS_WEAPON(obj) && attack_hit_info[GET_WEAPON_TYPE(obj)].weapon_type == WEAPON_SHARP) {
-			return obj;
-		}
-	}
-	
-	return NULL;
-}
-
-
 /* tie/untie an npc */
 void perform_npc_tie(char_data *ch, char_data *victim, int subcmd) {
+	bool kept = FALSE;
 	obj_data *rope;
 
 	if (!subcmd && MOB_FLAGGED(victim, MOB_TIED))
@@ -2186,24 +2856,52 @@ void perform_npc_tie(char_data *ch, char_data *victim, int subcmd) {
 		act("You untie $N.", FALSE, ch, 0, victim, TO_CHAR);
 		act("$n unties you!", FALSE, ch, 0, victim, TO_VICT | TO_SLEEP);
 		act("$n unties $N.", FALSE, ch, 0, victim, TO_NOTVICT);
-		REMOVE_BIT(MOB_FLAGS(victim), MOB_TIED);
-		obj_to_char((rope = read_object(o_ROPE, TRUE)), ch);
-		load_otrigger(rope);
+		remove_mob_flags(victim, MOB_TIED);
+		
+		if (GET_ROPE_VNUM(victim) != NOTHING && (rope = read_object(GET_ROPE_VNUM(victim), TRUE))) {
+			obj_to_char(rope, ch);
+			scale_item_to_level(rope, 1);	// minimum scale
+			if (load_otrigger(rope)) {
+				act("You receive $p.", FALSE, ch, rope, NULL, TO_CHAR);
+			}
+		}
+		GET_ROPE_VNUM(victim) = NOTHING;
+		request_char_save_in_world(victim);
 	}
 	else if (!MOB_FLAGGED(victim, MOB_ANIMAL)) {
 		msg_to_char(ch, "You can only tie animals.\r\n");
 	}
-	else if (!(rope = get_obj_in_list_num(o_ROPE, ch->carrying)))
-		msg_to_char(ch, "You don't have any rope.\r\n");
+	else if (!(rope = get_component_in_list(COMP_ROPE, ch->carrying, &kept))) {
+		msg_to_char(ch, "You don't seem to have any rope%s.\r\n", kept ? " that isn't marked 'keep'" : "");
+	}
 	else if (ROOM_SECT_FLAGGED(IN_ROOM(ch), SECTF_FRESH_WATER | SECTF_OCEAN))
 		msg_to_char(ch, "You can't tie it here.\r\n");
 	else {
 		act("You tie $N up.", FALSE, ch, 0, victim, TO_CHAR);
 		act("$n ties you up.", FALSE, ch, 0, victim, TO_VICT | TO_SLEEP);
 		act("$n ties $N up.", FALSE, ch, 0, victim, TO_NOTVICT);
-		SET_BIT(MOB_FLAGS(victim), MOB_TIED);
+		set_mob_flags(victim, MOB_TIED);
+		GET_ROPE_VNUM(victim) = GET_OBJ_VNUM(rope);
 		extract_obj(rope);
+		request_char_save_in_world(victim);
 	}
+}
+
+
+/**
+* Counts the words of text in a skill's strings.
+*
+* @param skill_data *skill The skill whose strings to count.
+* @return int The number of words in the skill's strings.
+*/
+int wordcount_skill(skill_data *skill) {
+	int count = 0;
+	
+	count += wordcount_string(SKILL_NAME(skill));
+	count += wordcount_string(SKILL_ABBREV(skill));
+	count += wordcount_string(SKILL_DESC(skill));
+	
+	return count;
 }
 
 
@@ -2254,7 +2952,7 @@ bool audit_skill(skill_data *skill, char_data *ch) {
 		}
 		
 		// verify tree
-		if (skab->prerequisite) {
+		if (skab->prerequisite != NO_ABIL) {
 			if (skab->vnum == skab->prerequisite) {
 				olc_audit_msg(ch, SKILL_VNUM(skill), "Ability %d %s is its own prerequisite", ABIL_VNUM(abil), ABIL_NAME(abil));
 				problem = TRUE;
@@ -2274,7 +2972,7 @@ bool audit_skill(skill_data *skill, char_data *ch) {
 	
 	// other skills
 	HASH_ITER(hh, skill_table, iter, next_iter) {
-		if (iter == skill) {
+		if (iter == skill || SKILL_VNUM(iter) == SKILL_VNUM(skill)) {
 			continue;
 		}
 		
@@ -2308,13 +3006,131 @@ char *list_one_skill(skill_data *skill, bool detail) {
 	static char output[MAX_STRING_LENGTH];
 	
 	if (detail) {
-		snprintf(output, sizeof(output), "[%5d] %s - %s", SKILL_VNUM(skill), SKILL_NAME(skill), SKILL_DESC(skill));
+		safe_snprintf(output, sizeof(output), "[%5d] %s - %s", SKILL_VNUM(skill), SKILL_NAME(skill), SKILL_DESC(skill));
 	}
 	else {
-		snprintf(output, sizeof(output), "[%5d] %s", SKILL_VNUM(skill), SKILL_NAME(skill));
+		safe_snprintf(output, sizeof(output), "[%5d] %s", SKILL_VNUM(skill), SKILL_NAME(skill));
 	}
 		
 	return output;
+}
+
+
+/**
+* Searches properties of skills.
+*
+* @param char_data *ch The person searching.
+* @param char *argument The argument they entered.
+*/
+void olc_fullsearch_skill(char_data *ch, char *argument) {
+	bool any;
+	char type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], find_keywords[MAX_INPUT_LENGTH];
+	int count;
+	bitvector_t only_flags = NOBITS, not_flagged = NOBITS;
+	int vmin = NOTHING, vmax = NOTHING, only_level = NOTHING, level_over = NOTHING, level_under = NOTHING;
+	int only_mindrop = NOTHING, mindrop_over = NOTHING, mindrop_under = NOTHING;
+	skill_data *sk, *next_sk;
+	
+	if (!*argument) {
+		msg_to_char(ch, "See HELP QEDIT FULLSEARCH for syntax.\r\n");
+		return;
+	}
+	
+	// process argument
+	*find_keywords = '\0';
+	while (*argument) {
+		// figure out a type
+		argument = any_one_arg(argument, type_arg);
+		
+		if (!strcmp(type_arg, "-")) {
+			continue;	// just skip stray dashes
+		}
+		
+		FULLSEARCH_FLAGS("flags", only_flags, skill_flags)
+		FULLSEARCH_FLAGS("flagged", only_flags, skill_flags)
+		FULLSEARCH_FLAGS("unflagged", not_flagged, skill_flags)
+		FULLSEARCH_INT("vmin", vmin, 0, INT_MAX)
+		FULLSEARCH_INT("vmax", vmax, 0, INT_MAX)
+		FULLSEARCH_INT("maxlevel", only_level, 0, INT_MAX)
+		FULLSEARCH_INT("maxlevelover", level_over, 0, INT_MAX)
+		FULLSEARCH_INT("maxlevelunder", level_under, 0, INT_MAX)
+		FULLSEARCH_INT("mindrop", only_mindrop, 0, INT_MAX)
+		FULLSEARCH_INT("mindropover", mindrop_over, 0, INT_MAX)
+		FULLSEARCH_INT("mindropunder", mindrop_under, 0, INT_MAX)
+		
+		else {	// not sure what to do with it? treat it like a keyword
+			sprintf(find_keywords + strlen(find_keywords), "%s%s", *find_keywords ? " " : "", type_arg);
+		}
+		
+		// prepare for next loop
+		skip_spaces(&argument);
+	}
+	
+	build_page_display(ch, "Skill fullsearch: %s", show_color_codes(find_keywords));
+	count = 0;
+	
+	// okay now look up skills
+	HASH_ITER(hh, skill_table, sk, next_sk) {
+		if ((vmin != NOTHING && SKILL_VNUM(sk) < vmin) || (vmax != NOTHING && SKILL_VNUM(sk) > vmax)) {
+			continue;	// vnum range
+		}
+		if (not_flagged != NOBITS && IS_SET(SKILL_FLAGS(sk), not_flagged)) {
+			continue;
+		}
+		if (only_flags != NOBITS && (SKILL_FLAGS(sk) & only_flags) != only_flags) {
+			continue;
+		}
+		if (only_level != NOTHING && SKILL_MAX_LEVEL(sk) != only_level) {
+			continue;
+		}
+		if (level_over != NOTHING && SKILL_MAX_LEVEL(sk) < level_over) {
+			continue;
+		}
+		if (level_under != NOTHING && SKILL_MAX_LEVEL(sk) > level_over) {
+			continue;
+		}
+		if (only_mindrop != NOTHING && SKILL_MIN_DROP_LEVEL(sk) != only_mindrop) {
+			continue;
+		}
+		if (mindrop_over != NOTHING && SKILL_MIN_DROP_LEVEL(sk) < mindrop_over) {
+			continue;
+		}
+		if (mindrop_under != NOTHING && SKILL_MIN_DROP_LEVEL(sk) > mindrop_over) {
+			continue;
+		}
+		
+		// search strings
+		if (*find_keywords) {
+			any = FALSE;
+			if (multi_isname(find_keywords, SKILL_NAME(sk))) {
+				any = TRUE;
+			}
+			else if (multi_isname(find_keywords, SKILL_DESC(sk))) {
+				any = TRUE;
+			}
+			else if (multi_isname(find_keywords, SKILL_ABBREV(sk))) {
+				any = TRUE;
+			}
+			
+			// did we find a match in any string
+			if (!any) {
+				continue;
+			}
+		}
+		
+		// show it
+		build_page_display(ch, "[%5d] %s", SKILL_VNUM(sk), SKILL_NAME(sk));
+		++count;
+	}
+	
+	if (count > 0) {
+		build_page_display(ch, "(%d skills)", count);
+	}
+	else {
+		build_page_display_str(ch, " none");
+	}
+	
+	send_page_display(ch);
 }
 
 
@@ -2325,18 +3141,16 @@ char *list_one_skill(skill_data *skill, bool detail) {
 * @param any_vnum vnum The skill vnum.
 */
 void olc_search_skill(char_data *ch, any_vnum vnum) {
-	extern bool find_quest_reward_in_list(struct quest_reward *list, int type, any_vnum vnum);
-	extern bool find_requirement_in_list(struct req_data *list, int type, any_vnum vnum);
-	
-	char buf[MAX_STRING_LENGTH];
-	skill_data *skill = find_skill_by_vnum(vnum);
+	skill_data *skill = find_skill_by_vnum(vnum), *sk, *next_sk;
 	archetype_data *arch, *next_arch;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	struct archetype_skill *arsk;
 	struct class_skill_req *clsk;
+	struct synergy_ability *syn;
 	social_data *soc, *next_soc;
 	class_data *cls, *next_cls;
-	int size, found;
+	int found;
 	bool any;
 	
 	if (!skill) {
@@ -2345,14 +3159,14 @@ void olc_search_skill(char_data *ch, any_vnum vnum) {
 	}
 	
 	found = 0;
-	size = snprintf(buf, sizeof(buf), "Occurrences of skill %d (%s):\r\n", vnum, SKILL_NAME(skill));
+	build_page_display(ch, "Occurrences of skill %d (%s):", vnum, SKILL_NAME(skill));
 	
 	// archetypes
 	HASH_ITER(hh, archetype_table, arch, next_arch) {
 		LL_FOREACH(GET_ARCH_SKILLS(arch), arsk) {
 			if (arsk->skill == vnum) {
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "ARCH [%5d] %s\r\n", GET_ARCH_VNUM(arch), GET_ARCH_NAME(arch));
+				build_page_display(ch, "ARCH [%5d] %s", GET_ARCH_VNUM(arch), GET_ARCH_NAME(arch));
 				break;	// only need 1
 			}
 		}
@@ -2363,17 +3177,27 @@ void olc_search_skill(char_data *ch, any_vnum vnum) {
 		LL_FOREACH(CLASS_SKILL_REQUIREMENTS(cls), clsk) {
 			if (clsk->vnum == vnum) {
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "CLS [%5d] %s\r\n", CLASS_VNUM(cls), CLASS_NAME(cls));
+				build_page_display(ch, "CLS [%5d] %s", CLASS_VNUM(cls), CLASS_NAME(cls));
 				break;	// only need 1
 			}
 		}
 	}
 	
+	// progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		// REQ_x: requirement search
+		any = find_requirement_in_list(PRG_TASKS(prg), REQ_SKILL_LEVEL_OVER, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_SKILL_LEVEL_UNDER, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_CAN_GAIN_SKILL, vnum);
+		
+		if (any) {
+			++found;
+			build_page_display(ch, "PRG [%5d] %s", PRG_VNUM(prg), PRG_NAME(prg));
+		}
+	}
+	
 	// quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
-		if (size >= sizeof(buf)) {
-			break;
-		}
 		any = find_quest_reward_in_list(QUEST_REWARDS(quest), QR_SET_SKILL, vnum);
 		any |= find_quest_reward_in_list(QUEST_REWARDS(quest), QR_SKILL_EXP, vnum);
 		any |= find_quest_reward_in_list(QUEST_REWARDS(quest), QR_SKILL_LEVELS, vnum);
@@ -2381,35 +3205,92 @@ void olc_search_skill(char_data *ch, any_vnum vnum) {
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_SKILL_LEVEL_OVER, vnum);
 		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_SKILL_LEVEL_UNDER, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_SKILL_LEVEL_UNDER, vnum);
+		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_CAN_GAIN_SKILL, vnum);
+		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_CAN_GAIN_SKILL, vnum);
 		
 		if (any) {
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "QST [%5d] %s\r\n", QUEST_VNUM(quest), QUEST_NAME(quest));
+			build_page_display(ch, "QST [%5d] %s", QUEST_VNUM(quest), QUEST_NAME(quest));
+		}
+	}
+	
+	// skills
+	HASH_ITER(hh, skill_table, sk, next_sk) {
+		LL_FOREACH(SKILL_SYNERGIES(sk), syn) {
+			if (syn->skill == vnum) {
+				++found;
+				build_page_display(ch, "SKL [%5d] %s", SKILL_VNUM(sk), SKILL_NAME(sk));
+				break;
+			}
 		}
 	}
 	
 	// socials
 	HASH_ITER(hh, social_table, soc, next_soc) {
-		if (size >= sizeof(buf)) {
-			break;
-		}
 		any = find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_SKILL_LEVEL_OVER, vnum);
 		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_SKILL_LEVEL_UNDER, vnum);
+		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_CAN_GAIN_SKILL, vnum);
 		
 		if (any) {
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "SOC [%5d] %s\r\n", SOC_VNUM(soc), SOC_NAME(soc));
+			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
 		}
 	}
 	
 	if (found > 0) {
-		size += snprintf(buf + size, sizeof(buf) - size, "%d location%s shown\r\n", found, PLURAL(found));
+		build_page_display(ch, "%d location%s shown", found, PLURAL(found));
 	}
 	else {
-		size += snprintf(buf + size, sizeof(buf) - size, " none\r\n");
+		build_page_display_str(ch, " none");
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
+}
+
+
+/**
+* Delete by vnum: synergy abilities
+*
+* @param struct synergy_ability **list Pointer to a linked list of synergies.
+* @param any_vnum vnum The vnum to delete from that list.
+* @return bool TRUE if it deleted at least one, FALSE if it wasn't in the list.
+*/
+bool remove_ability_from_synergy_abilities(struct synergy_ability **list, any_vnum abil_vnum) {
+	struct synergy_ability *iter, *next_iter;
+	bool found = FALSE;
+	
+	LL_FOREACH_SAFE(*list, iter, next_iter) {
+		if (iter->ability == abil_vnum) {
+			LL_DELETE(*list, iter);
+			free(iter);
+			found = TRUE;
+		}
+	}
+	
+	return found;
+}
+
+
+/**
+* Delete by vnum: synergy skills
+*
+* @param struct synergy_ability **list Pointer to a linked list of synergies.
+* @param any_vnum vnum The vnum to delete from that list.
+* @return bool TRUE if it deleted at least one, FALSE if it wasn't in the list.
+*/
+bool remove_skill_from_synergy_abilities(struct synergy_ability **list, any_vnum skill_vnum) {
+	struct synergy_ability *iter, *next_iter;
+	bool found = FALSE;
+	
+	LL_FOREACH_SAFE(*list, iter, next_iter) {
+		if (iter->skill == skill_vnum) {
+			LL_DELETE(*list, iter);
+			free(iter);
+			found = TRUE;
+		}
+	}
+	
+	return found;
 }
 
 
@@ -2428,6 +3309,10 @@ bool remove_vnum_from_skill_abilities(struct skill_ability **list, any_vnum vnum
 		if (iter->vnum == vnum) {
 			LL_DELETE(*list, iter);
 			free(iter);
+			found = TRUE;
+		}
+		else if (iter->prerequisite == vnum) {
+			iter->prerequisite = NOTHING;	// drop prereq
 			found = TRUE;
 		}
 	}
@@ -2470,6 +3355,26 @@ int sort_skills(skill_data *a, skill_data *b) {
 // typealphabetic sorter for sorted_skills
 int sort_skills_by_data(skill_data *a, skill_data *b) {
 	return strcmp(NULLSAFE(SKILL_NAME(a)), NULLSAFE(SKILL_NAME(b)));
+}
+
+
+/**
+* Sorts skill synergies by role/skill/level.
+*
+* @param struct synergy_ability *a First element.
+* @param struct synergy_ability *b Second element.
+* @return int sort code
+*/
+int sort_synergies(struct synergy_ability *a, struct synergy_ability *b) {
+	if (a->role != b->role) {
+		return (a->role - b->role);
+	}
+	else if (a->skill != b->skill) {
+		return (a->skill - b->skill);
+	}
+	else {
+		return (b->level - a->level);
+	}
 }
 
 
@@ -2524,7 +3429,7 @@ void clear_skill(skill_data *skill) {
 	memset((char *) skill, 0, sizeof(skill_data));
 	
 	SKILL_VNUM(skill) = NOTHING;
-	SKILL_MAX_LEVEL(skill) = CLASS_SKILL_CAP;
+	SKILL_MAX_LEVEL(skill) = MAX_SKILL_CAP;
 }
 
 
@@ -2540,7 +3445,25 @@ struct skill_ability *copy_skill_abilities(struct skill_ability *input) {
 	LL_FOREACH(input, iter) {
 		CREATE(el, struct skill_ability, 1);
 		*el = *iter;
-		el->next = NULL;
+		LL_APPEND(list, el);
+	}
+	
+	return list;
+}
+
+
+/**
+* Duplicates a list of skill synergies, for editing.
+*
+* @param struct synergy_ability *input The head of the list to copy.
+* @return struct synergy_ability* The copied list.
+*/
+struct synergy_ability *copy_synergy_abilities(struct synergy_ability *input) {
+	struct synergy_ability *el, *iter, *list = NULL;
+	
+	LL_FOREACH(input, iter) {
+		CREATE(el, struct synergy_ability, 1);
+		*el = *iter;
 		LL_APPEND(list, el);
 	}
 	
@@ -2553,6 +3476,18 @@ struct skill_ability *copy_skill_abilities(struct skill_ability *input) {
 */
 void free_skill_abilities(struct skill_ability *list) {
 	struct skill_ability *tmp, *next;
+	
+	LL_FOREACH_SAFE(list, tmp, next) {
+		free(tmp);
+	}
+}
+
+
+/**
+* @param struct synergy_ability *list Frees the memory for this list.
+*/
+void free_synergy_abilities(struct synergy_ability *list) {
+	struct synergy_ability *tmp, *next;
 	
 	LL_FOREACH_SAFE(list, tmp, next) {
 		free(tmp);
@@ -2582,6 +3517,9 @@ void free_skill(skill_data *skill) {
 	if (SKILL_ABILITIES(skill) && (!proto || SKILL_ABILITIES(skill) != SKILL_ABILITIES(proto))) {
 		free_skill_abilities(SKILL_ABILITIES(skill));
 	}
+	if (SKILL_SYNERGIES(skill) && (!proto || SKILL_SYNERGIES(skill) != SKILL_SYNERGIES(proto))) {
+		free_synergy_abilities(SKILL_SYNERGIES(skill));
+	}
 	
 	free(skill);
 }
@@ -2596,8 +3534,9 @@ void free_skill(skill_data *skill) {
 void parse_skill(FILE *fl, any_vnum vnum) {
 	char line[256], error[256], str_in[256];
 	struct skill_ability *skabil;
+	struct synergy_ability *syn;
 	skill_data *skill, *find;
-	int int_in[4];
+	int int_in[5];
 	
 	CREATE(skill, skill_data, 1);
 	clear_skill(skill);
@@ -2659,6 +3598,23 @@ void parse_skill(FILE *fl, any_vnum vnum) {
 				break;
 			}
 			
+			case 'Y': {	// synergies
+				if (sscanf(line, "Y %d %d %d %d %d\n", &int_in[0], &int_in[1], &int_in[2], &int_in[3], &int_in[4]) != 5) {
+					log("SYSERR: Format error in Y line of %s", error);
+					exit(1);
+				}
+				
+				CREATE(syn, struct synergy_ability, 1);
+				syn->role = int_in[0];
+				syn->skill = int_in[1];
+				syn->level = int_in[2];
+				syn->ability = int_in[3];
+				syn->unused = int_in[4];
+				
+				LL_APPEND(SKILL_SYNERGIES(skill), syn);
+				break;
+			}
+			
 			// end
 			case 'S': {
 				return;
@@ -2699,6 +3655,7 @@ void write_skill_index(FILE *fl) {
 * @param skill_data *skill The thing to save.
 */
 void write_skill_to_file(FILE *fl, skill_data *skill) {
+	struct synergy_ability *syn;
 	struct skill_ability *iter;
 	
 	if (!fl || !skill) {
@@ -2723,6 +3680,11 @@ void write_skill_to_file(FILE *fl, skill_data *skill) {
 	
 	// L: additional level data
 	fprintf(fl, "L %d %d\n", SKILL_MAX_LEVEL(skill), SKILL_MIN_DROP_LEVEL(skill));
+	
+	// Y: synergies
+	LL_FOREACH(SKILL_SYNERGIES(skill), syn) {
+		fprintf(fl, "Y %d %d %d %d %d\n", syn->role, syn->skill, syn->level, syn->ability, syn->unused);
+	}
 	
 	// end
 	fprintf(fl, "S\n");
@@ -2771,26 +3733,26 @@ skill_data *create_skill_table_entry(any_vnum vnum) {
 * @param any_vnum vnum The vnum to delete.
 */
 void olc_delete_skill(char_data *ch, any_vnum vnum) {
-	extern bool delete_quest_reward_from_list(struct quest_reward **list, int type, any_vnum vnum);
-	extern bool delete_requirement_from_list(struct req_data **list, int type, any_vnum vnum);
-	extern bool remove_vnum_from_class_skill_reqs(struct class_skill_req **list, any_vnum vnum);
-	
 	struct player_skill_data *plsk, *next_plsk;
 	struct archetype_skill *arsk, *next_arsk;
 	archetype_data *arch, *next_arch;
 	ability_data *abil, *next_abil;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
 	class_data *cls, *next_cls;
 	descriptor_data *desc;
-	skill_data *skill;
+	skill_data *skill, *sk, *next_sk;
 	char_data *chiter;
+	char name[256];
 	bool found;
 	
 	if (!(skill = find_skill_by_vnum(vnum))) {
 		msg_to_char(ch, "There is no such skill %d.\r\n", vnum);
 		return;
 	}
+	
+	safe_snprintf(name, sizeof(name), "%s", NULLSAFE(SKILL_NAME(skill)));
 	
 	// remove it from the hash table first
 	remove_skill_from_table(skill);
@@ -2817,6 +3779,7 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(GET_ARCH_FLAGS(arch), ARCH_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Archetype %d %s set IN-DEV due to deleted skill", GET_ARCH_VNUM(arch), GET_ARCH_NAME(arch));
 			save_library_file_for_vnum(DB_BOOT_ARCH, GET_ARCH_VNUM(arch));
 		}
 	}
@@ -2826,7 +3789,22 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 		found = remove_vnum_from_class_skill_reqs(&CLASS_SKILL_REQUIREMENTS(cls), vnum);
 		if (found) {
 			SET_BIT(CLASS_FLAGS(cls), CLASSF_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Class %d %s set IN-DEV due to deleted skill", CLASS_VNUM(cls), CLASS_NAME(cls));
 			save_library_file_for_vnum(DB_BOOT_CLASS, CLASS_VNUM(cls));
+		}
+	}
+	
+	// update progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_SKILL_LEVEL_OVER, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_SKILL_LEVEL_UNDER, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_CAN_GAIN_SKILL, vnum);
+		
+		if (found) {
+			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Progress %d %s set IN-DEV due to deleted skill", PRG_VNUM(prg), PRG_NAME(prg));
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+			need_progress_refresh = TRUE;
 		}
 	}
 	
@@ -2839,10 +3817,22 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_SKILL_LEVEL_OVER, vnum);
 		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_SKILL_LEVEL_UNDER, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_SKILL_LEVEL_UNDER, vnum);
+		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_CAN_GAIN_SKILL, vnum);
+		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_CAN_GAIN_SKILL, vnum);
 		
 		if (found) {
 			SET_BIT(QUEST_FLAGS(quest), QST_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Quest %d %s set IN-DEV due to deleted skill", QUEST_VNUM(quest), QUEST_NAME(quest));
 			save_library_file_for_vnum(DB_BOOT_QST, QUEST_VNUM(quest));
+		}
+	}
+	
+	// remove from other skills
+	HASH_ITER(hh, skill_table, sk, next_sk) {
+		found = remove_skill_from_synergy_abilities(&SKILL_SYNERGIES(sk), vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Skill %d %s lost deleted synergy skill", SKILL_VNUM(sk), SKILL_NAME(sk));
+			save_library_file_for_vnum(DB_BOOT_SKILL, SKILL_VNUM(sk));
 		}
 	}
 	
@@ -2850,19 +3840,18 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 	HASH_ITER(hh, social_table, soc, next_soc) {
 		found = delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_SKILL_LEVEL_OVER, vnum);
 		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_SKILL_LEVEL_UNDER, vnum);
+		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_CAN_GAIN_SKILL, vnum);
 		
 		if (found) {
 			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Social %d %s set IN-DEV due to deleted skill", SOC_VNUM(soc), SOC_NAME(soc));
 			save_library_file_for_vnum(DB_BOOT_SOC, SOC_VNUM(soc));
 		}
 	}
 	
 	// remove from live players
-	LL_FOREACH(character_list, chiter) {
+	DL_FOREACH2(player_character_list, chiter, next_plr) {
 		found = FALSE;
-		if (IS_NPC(chiter)) {
-			continue;
-		}
 		
 		HASH_ITER(hh, GET_SKILL_HASH(chiter), plsk, next_plsk) {
 			if (plsk->vnum == vnum) {
@@ -2895,6 +3884,16 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 				msg_to_desc(desc, "A skill requirement has been deleted from the class you're editing.\r\n");
 			}
 		}
+		if (GET_OLC_PROGRESS(desc)) {
+			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_SKILL_LEVEL_OVER, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_SKILL_LEVEL_UNDER, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_CAN_GAIN_SKILL, vnum);
+		
+			if (found) {
+				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
+				msg_to_desc(desc, "A skill requirement has been deleted from the progression goal you're editing.\r\n");
+			}
+		}
 		if (GET_OLC_QUEST(desc)) {
 			found = delete_quest_reward_from_list(&QUEST_REWARDS(GET_OLC_QUEST(desc)), QR_SET_SKILL, vnum);
 			found |= delete_quest_reward_from_list(&QUEST_REWARDS(GET_OLC_QUEST(desc)), QR_SKILL_EXP, vnum);
@@ -2903,15 +3902,24 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_SKILL_LEVEL_OVER, vnum);
 			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_SKILL_LEVEL_UNDER, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_SKILL_LEVEL_UNDER, vnum);
+			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_CAN_GAIN_SKILL, vnum);
+			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_CAN_GAIN_SKILL, vnum);
 		
 			if (found) {
 				SET_BIT(QUEST_FLAGS(GET_OLC_QUEST(desc)), QST_IN_DEVELOPMENT);
 				msg_to_desc(desc, "A skill used by the quest you are editing was deleted.\r\n");
 			}
 		}
+		if (GET_OLC_SKILL(desc)) {
+			found = remove_skill_from_synergy_abilities(&SKILL_SYNERGIES(GET_OLC_SKILL(desc)), vnum);
+			if (found) {
+				msg_to_desc(desc, "A synergy skill in the skill you are editing was deleted.\r\n");
+			}
+		}
 		if (GET_OLC_SOCIAL(desc)) {
 			found = delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_SKILL_LEVEL_OVER, vnum);
 			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_SKILL_LEVEL_UNDER, vnum);
+			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_CAN_GAIN_SKILL, vnum);
 		
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
@@ -2924,8 +3932,8 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 	save_index(DB_BOOT_SKILL);
 	save_library_file_for_vnum(DB_BOOT_SKILL, vnum);
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted skill %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Skill %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted skill %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Skill %d (%s) deleted.\r\n", vnum, name);
 	
 	free_skill(skill);
 }
@@ -2937,8 +3945,6 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 * @param descriptor_data *desc The descriptor who is saving.
 */
 void save_olc_skill(descriptor_data *desc) {
-	void read_ability_requirements();
-	
 	skill_data *proto, *skill = GET_OLC_SKILL(desc);
 	any_vnum vnum = GET_OLC_VNUM(desc);
 	UT_hash_handle hh, sorted;
@@ -2960,6 +3966,7 @@ void save_olc_skill(descriptor_data *desc) {
 		free(SKILL_DESC(proto));
 	}
 	free_skill_abilities(SKILL_ABILITIES(proto));
+	free_synergy_abilities(SKILL_SYNERGIES(proto));
 	
 	// sanity
 	if (!SKILL_NAME(skill) || !*SKILL_NAME(skill)) {
@@ -2997,10 +4004,9 @@ void save_olc_skill(descriptor_data *desc) {
 	read_ability_requirements();
 	
 	// update all players in case there are new level-0 abilities
-	LL_FOREACH_SAFE(character_list, ch_iter, next_ch) {
-		if (!IS_NPC(ch_iter)) {
-			give_level_zero_abilities(ch_iter);
-		}
+	DL_FOREACH_SAFE2(player_character_list, ch_iter, next_ch, next_plr) {
+		update_class_and_abilities(ch_iter);
+		give_level_zero_abilities(ch_iter);
 	}
 }
 
@@ -3026,6 +4032,7 @@ skill_data *setup_olc_skill(skill_data *input) {
 		SKILL_ABBREV(new) = SKILL_ABBREV(input) ? str_dup(SKILL_ABBREV(input)) : NULL;
 		SKILL_DESC(new) = SKILL_DESC(input) ? str_dup(SKILL_DESC(input)) : NULL;
 		SKILL_ABILITIES(new) = copy_skill_abilities(SKILL_ABILITIES(input));
+		SKILL_SYNERGIES(new) = copy_synergy_abilities(SKILL_SYNERGIES(input));
 	}
 	else {
 		// brand new: some defaults
@@ -3078,7 +4085,7 @@ void get_skad_partial(struct skill_ability *list, struct skill_ability *parent, 
 			LL_APPEND(*display, skad);
 		}
 		
-		snprintf(buf, sizeof(buf), "%*s%s[%d] %-.17s @ %d", (2 * indent), " ", (parent ? "+ " : ""), abil->vnum, get_ability_name_by_vnum(abil->vnum), abil->level);
+		safe_snprintf(buf, sizeof(buf), "%*s%s[%d] %-.17s @ %d", (2 * indent), " ", (parent ? "+ " : ""), abil->vnum, get_ability_name_by_vnum(abil->vnum), abil->level);
 		
 		// append line
 		if (skad->lines > 0) {
@@ -3138,11 +4145,7 @@ void get_skill_ability_display(struct skill_ability *list, char *save_buffer, si
 	LL_FOREACH(display, skad) {
 		count += skad->lines;
 		
-		if ((double)count == half) {
-			mid = skad;
-			break;
-		}
-		else if (count > half) {
+		if (count >= (int)round(half)) {
 			mid = skad->next;
 			break;
 		}
@@ -3212,9 +4215,9 @@ void get_skill_ability_display(struct skill_ability *list, char *save_buffer, si
 * @param skill_data *skill The skill to display.
 */
 void do_stat_skill(char_data *ch, skill_data *skill) {
-	char buf[MAX_STRING_LENGTH], part[MAX_STRING_LENGTH];
+	char part[MAX_STRING_LENGTH];
+	struct synergy_ability *syn;
 	struct skill_ability *skab;
-	size_t size;
 	int total;
 	
 	if (!skill) {
@@ -3222,23 +4225,30 @@ void do_stat_skill(char_data *ch, skill_data *skill) {
 	}
 	
 	// first line
-	size = snprintf(buf, sizeof(buf), "VNum: [\tc%d\t0], Name: \tc%s\t0, Abbrev: \tc%s\t0\r\n", SKILL_VNUM(skill), SKILL_NAME(skill), SKILL_ABBREV(skill));
+	build_page_display(ch, "VNum: [\tc%d\t0], Name: \tc%s\t0, Abbrev: \tc%s\t0", SKILL_VNUM(skill), SKILL_NAME(skill), SKILL_ABBREV(skill));
 	
-	size += snprintf(buf + size, sizeof(buf) - size, "Description: %s\r\n", SKILL_DESC(skill));
+	build_page_display(ch, "Description: %s", SKILL_DESC(skill));
 	
-	size += snprintf(buf + size, sizeof(buf) - size, "Minimum drop level: [\tc%d\t0], Maximum level: [\tc%d\t0]\r\n", SKILL_MIN_DROP_LEVEL(skill), SKILL_MAX_LEVEL(skill));
+	build_page_display(ch, "Minimum drop level: [\tc%d\t0], Maximum level: [\tc%d\t0]", SKILL_MIN_DROP_LEVEL(skill), SKILL_MAX_LEVEL(skill));
 	
 	sprintbit(SKILL_FLAGS(skill), skill_flags, part, TRUE);
-	size += snprintf(buf + size, sizeof(buf) - size, "Flags: \tg%s\t0\r\n", part);
+	build_page_display(ch, "Flags: \tg%s\t0", part);
 	
 	LL_COUNT(SKILL_ABILITIES(skill), skab, total);
-	size += snprintf(buf + size, sizeof(buf) - size, "Simplified skill tree: (%d total)\r\n", total);
+	build_page_display(ch, "Simplified skill tree: (%d total)", total);
 	get_skill_ability_display(SKILL_ABILITIES(skill), part, sizeof(part));
 	if (*part) {
-		size += snprintf(buf + size, sizeof(buf) - size, "%s", part);
+		build_page_display_str(ch, part);
+	}
+
+	LL_COUNT(SKILL_SYNERGIES(skill), syn, total);
+	build_page_display(ch, "Synergy abilities: (%d total)", total);
+	get_skill_synergy_display(SKILL_SYNERGIES(skill), part, NULL);
+	if (*part) {
+		build_page_display_str(ch, part);
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -3250,7 +4260,8 @@ void do_stat_skill(char_data *ch, skill_data *skill) {
 */
 void olc_show_skill(char_data *ch) {
 	skill_data *skill = GET_OLC_SKILL(ch->desc);
-	char buf[MAX_STRING_LENGTH], lbuf[MAX_STRING_LENGTH];
+	char lbuf[MAX_STRING_LENGTH];
+	struct synergy_ability *syn;
 	struct skill_ability *skab;
 	int total;
 	
@@ -3258,27 +4269,73 @@ void olc_show_skill(char_data *ch) {
 		return;
 	}
 	
-	*buf = '\0';
-	
-	sprintf(buf + strlen(buf), "[\tc%d\t0] \tc%s\t0\r\n", GET_OLC_VNUM(ch->desc), !find_skill_by_vnum(SKILL_VNUM(skill)) ? "new skill" : get_skill_name_by_vnum(SKILL_VNUM(skill)));
-	sprintf(buf + strlen(buf), "<\tyname\t0> %s\r\n", NULLSAFE(SKILL_NAME(skill)));
-	sprintf(buf + strlen(buf), "<\tyabbrev\t0> %s\r\n", NULLSAFE(SKILL_ABBREV(skill)));
-	sprintf(buf + strlen(buf), "<\tydescription\t0> %s\r\n", NULLSAFE(SKILL_DESC(skill)));
+	build_page_display(ch, "[%s%d\t0] %s%s\t0", OLC_LABEL_CHANGED, GET_OLC_VNUM(ch->desc), OLC_LABEL_UNCHANGED, !find_skill_by_vnum(SKILL_VNUM(skill)) ? "new skill" : get_skill_name_by_vnum(SKILL_VNUM(skill)));
+	build_page_display(ch, "<%sname\t0> %s", OLC_LABEL_STR(SKILL_NAME(skill), default_skill_name), NULLSAFE(SKILL_NAME(skill)));
+	build_page_display(ch, "<%sabbrev\t0> %s", OLC_LABEL_STR(SKILL_ABBREV(skill), default_skill_abbrev), NULLSAFE(SKILL_ABBREV(skill)));
+	build_page_display(ch, "<%sdescription\t0> %s", OLC_LABEL_STR(SKILL_DESC(skill), default_skill_desc), NULLSAFE(SKILL_DESC(skill)));
 	
 	sprintbit(SKILL_FLAGS(skill), skill_flags, lbuf, TRUE);
-	sprintf(buf + strlen(buf), "<\tyflags\t0> %s\r\n", lbuf);
+	build_page_display(ch, "<%sflags\t0> %s", OLC_LABEL_VAL(SKILL_FLAGS(skill), SKILLF_IN_DEVELOPMENT), lbuf);
 	
-	sprintf(buf + strlen(buf), "<\tymaxlevel\t0> %d\r\n", SKILL_MAX_LEVEL(skill));
-	sprintf(buf + strlen(buf), "<\tymindrop\t0> %d\r\n", SKILL_MIN_DROP_LEVEL(skill));
+	build_page_display(ch, "<%smaxlevel\t0> %d", OLC_LABEL_VAL(SKILL_MAX_LEVEL(skill), MAX_SKILL_CAP), SKILL_MAX_LEVEL(skill));
+	build_page_display(ch, "<%smindrop\t0> %d", OLC_LABEL_VAL(SKILL_MIN_DROP_LEVEL(skill), 0), SKILL_MIN_DROP_LEVEL(skill));
 	
 	LL_COUNT(SKILL_ABILITIES(skill), skab, total);
-	sprintf(buf + strlen(buf), "<\tytree\t0> %d %s\r\n", total, total == 1 ? "ability" : "abilities");
-	get_skill_ability_display(SKILL_ABILITIES(skill), lbuf, sizeof(lbuf));
-	if (*lbuf) {
-		sprintf(buf + strlen(buf), "%s", lbuf);
+	build_page_display(ch, "<%stree\t0> %d %s (.showtree to toggle display)", OLC_LABEL_PTR(SKILL_ABILITIES(skill)), total, total == 1 ? "ability" : "abilities");
+	if (GET_OLC_SHOW_TREE(ch->desc)) {
+		get_skill_ability_display(SKILL_ABILITIES(skill), lbuf, sizeof(lbuf));
+		if (*lbuf) {
+			build_page_display_str(ch, lbuf);
+		}
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	LL_COUNT(SKILL_SYNERGIES(skill), syn, total);
+	build_page_display(ch, "<%ssynergy\t0> %d %s (.showsynergies to toggle display)", OLC_LABEL_PTR(SKILL_SYNERGIES(skill)), total, total == 1 ? "ability" : "abilities");
+	if (GET_OLC_SHOW_SYNERGIES(ch->desc)) {
+		get_skill_synergy_display(SKILL_SYNERGIES(skill), lbuf, NULL);
+		if (*lbuf) {
+			build_page_display_str(ch, lbuf);
+		}
+	}
+	
+	send_page_display(ch);
+}
+
+
+/**
+* Gets the skill synergy display for olc, stat, or other uses.
+*
+* @param struct synergy_ability *list The list of abilities to display.
+* @param char *save_buffer A buffer to store the display to.
+* @param char_data *info_ch Optional: highlights abilities this player has (or NULL).
+*/
+void get_skill_synergy_display(struct synergy_ability *list, char *save_buffer, char_data *info_ch) {
+	int count = 0, last_role = -2, last_skill = NOTHING, last_level = -1;
+	struct synergy_ability *iter;
+	ability_data *abil;
+	
+	*save_buffer = '\0';
+	
+	LL_FOREACH(list, iter) {
+		if (iter->role != last_role || iter->skill != last_skill || iter->level != last_level) {
+			sprintf(save_buffer + strlen(save_buffer), "%s %s%s: [%d] %s %d\t0: ", last_role != -2 ? "\r\n" : "", iter->role == NOTHING ? "\t0" : class_role_color[iter->role], iter->role == NOTHING ? "All roles" : class_role[iter->role], iter->skill, get_skill_name_by_vnum(iter->skill), iter->level);
+			last_role = iter->role;
+			last_skill = iter->skill;
+			last_level = iter->level;
+			count = 0;
+		}
+		
+		if ((abil = find_ability_by_vnum(iter->ability))) {
+			sprintf(save_buffer + strlen(save_buffer), "%s%s%s\t0", (count++ > 0) ? ", " : "", (info_ch && has_ability(info_ch, iter->ability)) ? "\tg" : "", ABIL_NAME(abil));
+		}
+		else {
+			sprintf(save_buffer + strlen(save_buffer), "%s%d Unknown\t0", (count++ > 0) ? ", " : "", iter->ability);
+		}
+	}
+	
+	if (last_role != -2) {
+		strcat(save_buffer, "\r\n");
+	}
 }
 
 
@@ -3294,11 +4351,12 @@ int vnum_skill(char *searchname, char_data *ch) {
 	int found = 0;
 	
 	HASH_ITER(hh, skill_table, iter, next_iter) {
-		if (multi_isname(searchname, SKILL_NAME(iter)) || is_abbrev(searchname, SKILL_ABBREV(iter)) || multi_isname(searchname, SKILL_DESC(iter))) {
-			msg_to_char(ch, "%3d. [%5d] %s\r\n", ++found, SKILL_VNUM(iter), SKILL_NAME(iter));
+		if (multi_isname(searchname, SKILL_NAME(iter)) || is_abbrev(searchname, SKILL_ABBREV(iter))) {
+			build_page_display(ch, "%3d. [%5d] %s", ++found, SKILL_VNUM(iter), SKILL_NAME(iter));
 		}
 	}
 	
+	send_page_display(ch);
 	return found;
 }
 
@@ -3343,13 +4401,13 @@ OLC_MODULE(skilledit_flags) {
 
 OLC_MODULE(skilledit_maxlevel) {
 	skill_data *skill = GET_OLC_SKILL(ch->desc);
-	SKILL_MAX_LEVEL(skill) = olc_process_number(ch, argument, "maximum level", "maxlevel", 1, CLASS_SKILL_CAP, SKILL_MAX_LEVEL(skill));
+	SKILL_MAX_LEVEL(skill) = olc_process_number(ch, argument, "maximum level", "maxlevel", 1, MAX_SKILL_CAP, SKILL_MAX_LEVEL(skill));
 }
 
 
 OLC_MODULE(skilledit_mindrop) {
 	skill_data *skill = GET_OLC_SKILL(ch->desc);
-	SKILL_MIN_DROP_LEVEL(skill) = olc_process_number(ch, argument, "minimum drop level", "mindrop", 0, CLASS_SKILL_CAP, SKILL_MIN_DROP_LEVEL(skill));
+	SKILL_MIN_DROP_LEVEL(skill) = olc_process_number(ch, argument, "minimum drop level", "mindrop", 0, MAX_SKILL_CAP, SKILL_MIN_DROP_LEVEL(skill));
 }
 
 
@@ -3359,9 +4417,247 @@ OLC_MODULE(skilledit_name) {
 }
 
 
-OLC_MODULE(skilledit_tree) {
-	extern ability_data *find_ability_on_skill(char *name, skill_data *skill);
+OLC_MODULE(skilledit_showsynergies) {
+	if (GET_OLC_SHOW_SYNERGIES(ch->desc)) {
+		GET_OLC_SHOW_SYNERGIES(ch->desc) = FALSE;
+	}
+	else {
+		GET_OLC_SHOW_SYNERGIES(ch->desc) = TRUE;
+	}
+	
+	if (PRF_FLAGGED(ch, PRF_NOREPEAT)) {
+		send_config_msg(ch, "ok_string");
+	}
+	else {
+		msg_to_char(ch, "Your editor will %s show the synergies.\r\n", GET_OLC_SHOW_SYNERGIES(ch->desc) ? "now" : "no longer");
+		olc_show_skill(ch);
+	}
+}
 
+
+OLC_MODULE(skilledit_showtree) {
+	if (GET_OLC_SHOW_TREE(ch->desc)) {
+		GET_OLC_SHOW_TREE(ch->desc) = FALSE;
+	}
+	else {
+		GET_OLC_SHOW_TREE(ch->desc) = TRUE;
+	}
+	
+	if (PRF_FLAGGED(ch, PRF_NOREPEAT)) {
+		send_config_msg(ch, "ok_string");
+	}
+	else {
+		msg_to_char(ch, "Your editor will %s show the skill tree.\r\n", GET_OLC_SHOW_TREE(ch->desc) ? "now" : "no longer");
+		olc_show_skill(ch);
+	}
+}
+
+
+OLC_MODULE(skilledit_synergy) {
+	skill_data *skill = GET_OLC_SKILL(ch->desc), *other, *temp;
+	char cmd_arg[MAX_INPUT_LENGTH], role_arg[MAX_INPUT_LENGTH], skl_arg[MAX_INPUT_LENGTH], lvl_arg[MAX_INPUT_LENGTH], abil_arg[MAX_INPUT_LENGTH];
+	char type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH];
+	struct synergy_ability *syn, *next_syn;
+	int role = ROLE_NONE, level = 1;
+	ability_data *abil;
+	bool all, any, all_roles;
+	
+	argument = any_one_word(argument, role_arg);
+	argument = any_one_arg(argument, cmd_arg);
+	
+	// first args
+	all_roles = !str_cmp(role_arg, "all");
+	role = all_roles ? NOTHING : search_block(role_arg, class_role, FALSE);
+	if (!all_roles && *role_arg && role == NOTHING) {
+		msg_to_char(ch, "Invalid role '%s'.\r\n", role_arg);
+		return;
+	}
+	else if (!*cmd_arg) {
+		msg_to_char(ch, "Usage: synergy <roll | all> add <skill> <level> <ability>\r\n");
+		msg_to_char(ch, "       synergy <role | all> change <ability> <skill | level> <value>\r\n");
+		msg_to_char(ch, "       synergy <role | all> remove <ability | all>\r\n");
+		return;
+	}
+	
+	// actual commands
+	if (is_abbrev(cmd_arg, "add")) {
+		argument = any_one_word(argument, skl_arg);
+		argument = any_one_arg(argument, lvl_arg);
+		skip_spaces(&argument);
+		strcpy(abil_arg, argument);
+		
+		if (!*skl_arg || !*lvl_arg || !*abil_arg) {
+			msg_to_char(ch, "Usage: synergy <roll | all> add <skill> <level> <ability>\r\n");
+			return;
+		}
+		else if (!(other = find_skill(skl_arg))) {
+			msg_to_char(ch, "Unknown skill '%s'.\r\n", skl_arg);
+			return;
+		}
+		else if (!(abil = find_ability(abil_arg))) {
+			msg_to_char(ch, "Unknown ability '%s'.\r\n", abil_arg);
+			return;
+		}
+		else if (ABIL_ASSIGNED_SKILL(abil)) {
+			msg_to_char(ch, "You can't assign an ability that is already assigned to a skill tree (%s).\r\n", SKILL_NAME(ABIL_ASSIGNED_SKILL(abil)));
+			return;
+		}
+		else if (has_ability_data_any(abil, ADL_PARENT)) {
+			msg_to_char(ch, "You can't assign %s as a synergy ability because it has PARENT data.\r\n", ABIL_NAME(abil));
+			return;
+		}
+		else if (!isdigit(*lvl_arg) || (level = atoi(lvl_arg)) < 1 || level > SKILL_MAX_LEVEL(other)) {
+			msg_to_char(ch, "Level must be 1-%d, '%s' given.\r\n", SKILL_MAX_LEVEL(other), lvl_arg);
+			return;
+		}
+		
+		// ensure not already on this role
+		any = FALSE;
+		LL_FOREACH(SKILL_SYNERGIES(skill), syn) {
+			if (syn->role == role && syn->skill == SKILL_VNUM(other) && syn->ability == ABIL_VNUM(abil)) {
+				any = TRUE;
+				break;
+			}
+		}
+		
+		if (any) {
+			msg_to_char(ch, "It already has %s on the %s role.\r\n", ABIL_NAME(abil), all_roles ? "ALL" : class_role[role]);
+		}
+		else {
+			CREATE(syn, struct synergy_ability, 1);
+			syn->role = role;
+			syn->skill = SKILL_VNUM(other);
+			syn->level = level;
+			syn->ability = ABIL_VNUM(abil);
+			LL_APPEND(SKILL_SYNERGIES(skill), syn);
+			msg_to_char(ch, "You add %s to the %s role when paired with %s %d.\r\n", ABIL_NAME(abil), all_roles ? "ALL" : class_role[role], SKILL_NAME(other), level);
+		}
+		
+		// ensure sorting now
+		LL_SORT(SKILL_SYNERGIES(skill), sort_synergies);
+	}
+	else if (is_abbrev(cmd_arg, "change")) {
+		argument = any_one_word(argument, abil_arg);
+		argument = one_argument(argument, type_arg);
+		argument = any_one_word(argument, val_arg);
+		
+		if (!*abil_arg) {
+			msg_to_char(ch, "Usage: synergy <role | all> change <ability> <skill | level> <value>\r\n");
+			return;
+		}
+		
+		abil = find_ability(abil_arg);
+		if (!abil) {
+			msg_to_char(ch, "Invalid ability '%s'.\r\n", abil_arg);
+			return;
+		}
+		
+		// init the data we'll use
+		other = NULL;
+		level = -1;
+		
+		// check valid type
+		if (is_abbrev(type_arg, "skill")) {
+			if (!(other = find_skill(val_arg))) {
+				msg_to_char(ch, "Unknown skill '%s'.\r\n", val_arg);
+				return;
+			}
+		}
+		else if (is_abbrev(type_arg, "level")) {
+			if (!isdigit(*val_arg) || (level = atoi(val_arg)) < 1) {
+				msg_to_char(ch, "Level must be 1-%d, '%s' given.\r\n", MAX_SKILL_CAP, val_arg);
+				return;
+			}
+		}
+		else {
+			msg_to_char(ch, "You can only change the skill or level.\r\n");
+			return;
+		}
+		
+		any = FALSE;
+		LL_FOREACH_SAFE(SKILL_SYNERGIES(skill), syn, next_syn) {
+			if (role != NOTHING && syn->role != role) {
+				continue;
+			}
+			
+			if (syn->ability == ABIL_VNUM(abil)) {
+				if (other) {
+					syn->skill = SKILL_VNUM(other);
+				}
+				else if (level != -1) {
+					if ((temp = find_skill_by_vnum(syn->skill)) && level > SKILL_MAX_LEVEL(temp)) {
+						msg_to_char(ch, "Given level %d is above the max level of %s (%d).\r\n", level, SKILL_NAME(temp), SKILL_MAX_LEVEL(temp));
+						return;
+					}
+					else {
+						syn->level = level;
+					}
+				}
+				any = TRUE;
+			}
+		}
+		
+		if (!any) {
+			msg_to_char(ch, "The %s role didn't have %s.\r\n", all_roles ? "ALL" : class_role[role], "that ability");
+		}
+		else if (other) {
+			msg_to_char(ch, "The %s ability on the %s role now comes from %s.\r\n", ABIL_NAME(abil), all_roles ? "ALL" : class_role[role], SKILL_NAME(other));
+		}
+		else {
+			msg_to_char(ch, "The %s ability on the %s role now comes at level %d in the other skill.\r\n", ABIL_NAME(abil), all_roles ? "ALL" : class_role[role], level);
+		}
+	}
+	else if (is_abbrev(cmd_arg, "remove")) {
+		skip_spaces(&argument);
+		strcpy(abil_arg, argument);
+		
+		if (!*abil_arg) {
+			msg_to_char(ch, "Usage: synergy <role | all> remove <ability | all>\r\n");
+			return;
+		}
+		
+		abil = find_ability(abil_arg);
+		all = !str_cmp(abil_arg, "all");
+		if (!all && !abil) {
+			msg_to_char(ch, "Invalid ability '%s'.\r\n", abil_arg);
+			return;
+		}
+		
+		any = FALSE;
+		LL_FOREACH_SAFE(SKILL_SYNERGIES(skill), syn, next_syn) {
+			if (role != NOTHING && syn->role != role) {
+				continue;
+			}
+			if (all && role == NOTHING && syn->role != role) {
+				continue;	// prevents 'trying to remove abilities from the ALL role' from removing abilities from all others
+			}
+			
+			if (all || (abil && syn->ability == ABIL_VNUM(abil))) {
+				LL_DELETE(SKILL_SYNERGIES(skill), syn);
+				free(syn);
+				any = TRUE;
+			}
+		}
+		
+		if (!any) {
+			msg_to_char(ch, "The %s role didn't have %s.\r\n", all_roles ? "ALL" : class_role[role], all ? "any abilities" : "that ability");
+		}
+		else if (all) {
+			msg_to_char(ch, "You remove all abilities from the %s role.\r\n", all_roles ? "ALL" : class_role[role]);
+		}
+		else {
+			msg_to_char(ch, "You remove %s from the %s role.\r\n", ABIL_NAME(abil), all_roles ? "ALL" : class_role[role]);
+		}
+	}
+	else {
+		msg_to_char(ch, "Usage: synergy <roll | all> add <skill> <level> <ability>\r\n");
+		msg_to_char(ch, "       synergy <role | all> change <ability> <skill | level> <value>\r\n");
+		msg_to_char(ch, "       synergy <role | all> remove <ability | all>\r\n");
+	}
+}
+
+
+OLC_MODULE(skilledit_tree) {
 	skill_data *skill = GET_OLC_SKILL(ch->desc);
 	char cmd_arg[MAX_INPUT_LENGTH], abil_arg[MAX_INPUT_LENGTH], sub_arg[MAX_INPUT_LENGTH], req_arg[MAX_INPUT_LENGTH];
 	struct skill_ability *skab, *next_skab, *change;
@@ -3391,6 +4687,12 @@ OLC_MODULE(skilledit_tree) {
 		}
 		else if (ABIL_ASSIGNED_SKILL(abil) && SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil)) != SKILL_VNUM(skill)) {
 			msg_to_char(ch, "You can't assign %s to this skill because it's already assigned to [%d] %s.\r\n", ABIL_NAME(abil), SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil)), SKILL_NAME(ABIL_ASSIGNED_SKILL(abil)));
+		}
+		else if (ABIL_IS_SYNERGY(abil)) {
+			msg_to_char(ch, "You can't assign %s to this skill because it is a synergy ability.\r\n", ABIL_NAME(abil));
+		}
+		else if (has_ability_data_any(abil, ADL_PARENT)) {
+			msg_to_char(ch, "You can't assign %s to this skill because it has PARENT data.\r\n", ABIL_NAME(abil));
 		}
 		else if (!*sub_arg || !isdigit(*sub_arg) || (level = atoi(sub_arg)) < 0) {
 			msg_to_char(ch, "Add the ability at what level?\r\n");
@@ -3462,8 +4764,7 @@ OLC_MODULE(skilledit_tree) {
 				found = TRUE;
 			}
 			else if (abil && skab->prerequisite == ABIL_VNUM(abil)) {
-				LL_DELETE(SKILL_ABILITIES(skill), skab);
-				free(skab);
+				skab->prerequisite = NO_ABIL;
 				found = found_prq = TRUE;
 			}
 		}
@@ -3475,7 +4776,7 @@ OLC_MODULE(skilledit_tree) {
 			msg_to_char(ch, "You remove all abilities.\r\n");
 		}
 		else {
-			msg_to_char(ch, "You remove the %s ability%s.\r\n", ABIL_NAME(abil), found_prq ? " (and things that required it)" : "");
+			msg_to_char(ch, "You remove the %s ability%s.\r\n", ABIL_NAME(abil), found_prq ? " (and things that required it no longer require anything)" : "");
 		}
 	}
 	else if (is_abbrev(cmd_arg, "change")) {
@@ -3486,7 +4787,7 @@ OLC_MODULE(skilledit_tree) {
 			msg_to_char(ch, "There is no such ability on this skill.\r\n");
 		}
 		else if (is_abbrev(sub_arg, "level")) {
-			if (!*argument || !isdigit(*argument) || (level = atoi(argument)) < 0) {
+			if (!*req_arg || !isdigit(*req_arg) || (level = atoi(req_arg)) < 0) {
 				msg_to_char(ch, "Set it to what level?\r\n");
 				return;
 			}
@@ -3507,11 +4808,11 @@ OLC_MODULE(skilledit_tree) {
 			}
 		}
 		else if (is_abbrev(sub_arg, "requires") || is_abbrev(sub_arg, "requirement") || is_abbrev(sub_arg, "prerequisite")) {
-			if (!*argument) {
+			if (!*req_arg) {
 				msg_to_char(ch, "Require which ability (or none)?\r\n");
 			}
-			else if (str_cmp(argument, "none") && !(requires = find_ability(argument))) {
-				msg_to_char(ch, "Invalid pre-requisite ability '%s'.\r\n", argument);
+			else if (str_cmp(req_arg, "none") && !(requires = find_ability(req_arg))) {
+				msg_to_char(ch, "Invalid pre-requisite ability '%s'.\r\n", req_arg);
 			}
 			else {
 				found = FALSE;

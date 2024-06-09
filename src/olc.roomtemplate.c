@@ -2,13 +2,14 @@
 *   File: olc.roomtemplate.c                              EmpireMUD 2.0b5 *
 *  Usage: OLC for room templates                                          *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
 *  CircleMUD (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
+
 #include "conf.h"
 #include "sysdep.h"
 
@@ -21,6 +22,7 @@
 #include "skills.h"
 #include "handler.h"
 #include "dg_scripts.h"
+#include "constants.h"
 
 /**
 * Contents:
@@ -29,20 +31,8 @@
 *   Edit Modules
 */
 
-// external consts
-extern const char *adventure_spawn_types[];
-extern const char *dirs[];
-extern const char *exit_bits[];
-extern const char *function_flags[];
-extern const char *interact_types[];
-extern const byte interact_vnum_types[NUM_INTERACTS];
-extern const char *room_aff_bits[];
-extern const char *room_template_flags[];
-
-// external funcs
-extern adv_data *get_adventure_for_vnum(rmt_vnum vnum);
-void init_room_template(room_template *rmt);
-void sort_interactions(struct interaction_item **list);
+// locals
+const char *default_rmt_title = "An Unnamed Room";
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -56,9 +46,6 @@ void sort_interactions(struct interaction_item **list);
 * @return bool TRUE if any problems were reported; FALSE if all good.
 */
 bool audit_room_template(room_template *rmt, char_data *ch) {
-	extern bool audit_extra_descs(any_vnum vnum, struct extra_descr_data *list, char_data *ch);
-	extern bool audit_interactions(any_vnum vnum, struct interaction_item *list, int attach_type, char_data *ch);
-	
 	adv_data *my_adv = get_adventure_for_vnum(GET_RMT_VNUM(rmt));
 	struct adventure_spawn *spawn;
 	struct trig_proto_list *tpl;
@@ -71,7 +58,7 @@ bool audit_room_template(room_template *rmt, char_data *ch) {
 		olc_audit_msg(ch, GET_RMT_VNUM(rmt), "Not part of any adventure");
 		problem = TRUE;
 	}
-	if (!strcmp(GET_RMT_TITLE(rmt), "An Unnamed Room")) {
+	if (!strcmp(GET_RMT_TITLE(rmt), default_rmt_title)) {
 		olc_audit_msg(ch, GET_RMT_VNUM(rmt), "Title not set");
 		problem = TRUE;
 	}
@@ -165,8 +152,6 @@ bool audit_room_template(room_template *rmt, char_data *ch) {
 * @return room_template* The new room template's prototype.
 */
 room_template *create_room_template_table_entry(rmt_vnum vnum) {
-	void add_room_template_to_table(room_template *rmt);
-
 	room_template *rmt;
 	
 	// sanity
@@ -197,7 +182,7 @@ room_template *create_room_template_table_entry(rmt_vnum vnum) {
 */
 char *list_one_room_template(room_template *rmt, bool detail) {
 	static char output[MAX_STRING_LENGTH];
-	char flags[MAX_STRING_LENGTH];
+	char flags[MAX_STRING_LENGTH], funcs[MAX_STRING_LENGTH];
 	
 	bitvector_t show_flags = RMT_OUTDOOR | RMT_DARK | RMT_LIGHT | RMT_NO_MOB | RMT_NO_TELEPORT | RMT_LOOK_OUT | RMT_NO_LOCATION;
 	
@@ -209,11 +194,18 @@ char *list_one_room_template(room_template *rmt, bool detail) {
 		else {
 			*flags = '\0';
 		}
+		if (GET_RMT_FUNCTIONS(rmt)) {
+			strcpy(funcs, " - ");
+			sprintbit(GET_RMT_FUNCTIONS(rmt), function_flags, funcs + 3, TRUE);
+		}
+		else {
+			*funcs = '\0';
+		}
 		
-		snprintf(output, sizeof(output), "[%5d] %s%s", GET_RMT_VNUM(rmt), GET_RMT_TITLE(rmt), flags);
+		safe_snprintf(output, sizeof(output), "[%5d] %s%s%s", GET_RMT_VNUM(rmt), GET_RMT_TITLE(rmt), flags, funcs);
 	}
 	else {
-		snprintf(output, sizeof(output), "[%5d] %s", GET_RMT_VNUM(rmt), GET_RMT_TITLE(rmt));
+		safe_snprintf(output, sizeof(output), "[%5d] %s", GET_RMT_VNUM(rmt), GET_RMT_TITLE(rmt));
 	}
 	
 	return output;
@@ -231,8 +223,6 @@ char *list_one_room_template(room_template *rmt, bool detail) {
 * @return bool TRUE if it adds an exit; FALSE if not (no messages sent on FALSE).
 */
 bool match_one_exit(char_data *ch, room_template *add_exit_to, room_template *origin, struct exit_template *ex) {
-	extern int rev_dir[];
-	
 	struct exit_template *new, *temp;
 	int dir = (ex->dir == DIR_RANDOM ? DIR_RANDOM : rev_dir[ex->dir]);
 	bool found = FALSE;
@@ -266,18 +256,7 @@ bool match_one_exit(char_data *ch, room_template *add_exit_to, room_template *or
 	new->target_room = origin->vnum;
 	new->exit_info = ex->exit_info;
 	new->keyword = (ex->keyword ? str_dup(ex->keyword) : NULL);
-	new->next = NULL;
-	
-	// add at end
-	if ((temp = add_exit_to->exits) != NULL) {
-		while (temp->next) {
-			temp = temp->next;
-		}
-		temp->next = new;
-	}
-	else {
-		add_exit_to->exits = new;
-	}
+	LL_APPEND(add_exit_to->exits, new);
 	
 	msg_to_char(ch, "Matched exit %s to %d %s.\r\n", dirs[dir], origin->vnum, origin->title);
 	return TRUE;
@@ -291,15 +270,14 @@ bool match_one_exit(char_data *ch, room_template *add_exit_to, room_template *or
 * @param rmt_vnum vnum The vnum to delete.
 */
 void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
-	extern bool delete_quest_giver_from_list(struct quest_giver **list, int type, any_vnum vnum);
-	extern bool delete_requirement_from_list(struct req_data **list, int type, any_vnum vnum);
-	void remove_room_template_from_table(room_template *rmt);
-	
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	room_data *room, *next_room;
 	social_data *soc, *next_soc;
+	shop_data *shop, *next_shop;
 	descriptor_data *desc;
 	room_template *rmt;
+	char name[256];
 	bool found;
 	int count;
 	
@@ -307,6 +285,8 @@ void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
 		msg_to_char(ch, "There is no such room template %d.\r\n", vnum);
 		return;
 	}
+	
+	safe_snprintf(name, sizeof(name), "%s", NULLSAFE(GET_RMT_TITLE(rmt)));
 	
 	if (HASH_COUNT(room_template_table) <= 1) {
 		msg_to_char(ch, "You can't delete the last room template.\r\n");
@@ -320,6 +300,18 @@ void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
 	save_index(DB_BOOT_RMT);
 	save_library_file_for_vnum(DB_BOOT_RMT, vnum);
 	
+	// update progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_VISIT_ROOM_TEMPLATE, vnum);
+		
+		if (found) {
+			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Progress %d %s set IN-DEV due to deleted room template", PRG_VNUM(prg), PRG_NAME(prg));
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+			need_progress_refresh = TRUE;
+		}
+	}
+	
 	// update quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
 		found = delete_quest_giver_from_list(&QUEST_STARTS_AT(quest), QG_ROOM_TEMPLATE, vnum);
@@ -329,7 +321,19 @@ void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(QUEST_FLAGS(quest), QST_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Quest %d %s set IN-DEV due to deleted room template", QUEST_VNUM(quest), QUEST_NAME(quest));
 			save_library_file_for_vnum(DB_BOOT_QST, QUEST_VNUM(quest));
+		}
+	}
+	
+	// update shops
+	HASH_ITER(hh, shop_table, shop, next_shop) {
+		found = delete_quest_giver_from_list(&SHOP_LOCATIONS(shop), QG_ROOM_TEMPLATE, vnum);
+		
+		if (found) {
+			SET_BIT(SHOP_FLAGS(shop), SHOP_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Shop %d %s set IN-DEV due to deleted room template", SHOP_VNUM(shop), SHOP_NAME(shop));
+			save_library_file_for_vnum(DB_BOOT_SHOP, SHOP_VNUM(shop));
 		}
 	}
 	
@@ -339,15 +343,14 @@ void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Social %d %s set IN-DEV due to deleted room template", SOC_VNUM(soc), SOC_NAME(soc));
 			save_library_file_for_vnum(DB_BOOT_SOC, SOC_VNUM(soc));
 		}
 	}
 	
 	// update world
 	count = 0;
-	for (room = interior_room_list; room; room = next_room) {
-		next_room = room->next_interior;
-		
+	DL_FOREACH_SAFE2(interior_room_list, room, next_room, next_interior) {
 		if (ROOM_TEMPLATE_VNUM(room) == vnum) {
 			delete_room(room, FALSE);	// must call check_all_exits
 			++count;
@@ -360,6 +363,14 @@ void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
 	
 	// remove templates from active editors
 	for (desc = descriptor_list; desc; desc = desc->next) {
+		if (GET_OLC_PROGRESS(desc)) {
+			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_VISIT_ROOM_TEMPLATE, vnum);
+		
+			if (found) {
+				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
+				msg_to_desc(desc, "A room template used by the progression goal you're editing has been deleted.\r\n");
+			}
+		}
 		if (GET_OLC_QUEST(desc)) {
 			found = delete_quest_giver_from_list(&QUEST_STARTS_AT(GET_OLC_QUEST(desc)), QG_ROOM_TEMPLATE, vnum);
 			found |= delete_quest_giver_from_list(&QUEST_ENDS_AT(GET_OLC_QUEST(desc)), QG_ROOM_TEMPLATE, vnum);
@@ -369,6 +380,14 @@ void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
 			if (found) {
 				SET_BIT(QUEST_FLAGS(GET_OLC_QUEST(desc)), QST_IN_DEVELOPMENT);
 				msg_to_desc(desc, "A room template used by the quest you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_SHOP(desc)) {
+			found = delete_quest_giver_from_list(&SHOP_LOCATIONS(GET_OLC_SHOP(desc)), QG_ROOM_TEMPLATE, vnum);
+		
+			if (found) {
+				SET_BIT(SHOP_FLAGS(GET_OLC_SHOP(desc)), SHOP_IN_DEVELOPMENT);
+				msg_to_desc(desc, "A room template used by the shop you are editing was deleted.\r\n");
 			}
 		}
 		if (GET_OLC_SOCIAL(desc)) {
@@ -381,8 +400,8 @@ void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
 		}
 	}
 		
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted room template %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Room template %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted room template %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Room template %d (%s) deleted.\r\n", vnum, name);
 	
 	if (count > 0) {
 		msg_to_char(ch, "%d live rooms deleted.\r\n", count);
@@ -393,22 +412,124 @@ void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
 
 
 /**
+* Searches properties of room templates.
+*
+* @param char_data *ch The person searching.
+* @param char *argument The argument they entered.
+*/
+void olc_fullsearch_room_template(char_data *ch, char *argument) {
+	char type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], find_keywords[MAX_INPUT_LENGTH], extra_search[MAX_INPUT_LENGTH];
+	int count;
+	
+	bitvector_t only_flags = NOBITS, only_functions = NOBITS, only_affs = NOBITS;;
+	bitvector_t find_interacts = NOBITS, not_flagged = NOBITS, found_interacts = NOBITS;
+	int vmin = NOTHING, vmax = NOTHING;
+	
+	struct interaction_item *inter;
+	room_template *rmt, *next_rmt;
+	
+	if (!*argument) {
+		msg_to_char(ch, "See HELP REDIT FULLSEARCH for syntax.\r\n");
+		return;
+	}
+	
+	// process argument
+	*find_keywords = '\0';
+	*extra_search = '\0';
+	while (*argument) {
+		// figure out a type
+		argument = any_one_arg(argument, type_arg);
+		
+		if (!strcmp(type_arg, "-")) {
+			continue;	// just skip stray dashes
+		}
+		
+		FULLSEARCH_FLAGS("affects", only_affs, room_aff_bits)
+		FULLSEARCH_STRING("extradesc", extra_search)
+		FULLSEARCH_FLAGS("flags", only_flags, room_template_flags)
+		FULLSEARCH_FLAGS("flagged", only_flags, room_template_flags)
+		FULLSEARCH_FLAGS("unflagged", not_flagged, room_template_flags)
+		FULLSEARCH_FLAGS("functions", only_functions, function_flags)
+		FULLSEARCH_FLAGS("interaction", find_interacts, interact_types)
+		FULLSEARCH_INT("vmin", vmin, 0, INT_MAX)
+		FULLSEARCH_INT("vmax", vmax, 0, INT_MAX)
+		
+		else {	// not sure what to do with it? treat it like a keyword
+			sprintf(find_keywords + strlen(find_keywords), "%s%s", *find_keywords ? " " : "", type_arg);
+		}
+		
+		// prepare for next loop
+		skip_spaces(&argument);
+	}
+	
+	build_page_display(ch, "Room template fullsearch: %s", show_color_codes(find_keywords));
+	count = 0;
+	
+	// okay now look up templates
+	HASH_ITER(hh, room_template_table, rmt, next_rmt) {
+		if ((vmin != NOTHING && GET_RMT_VNUM(rmt) < vmin) || (vmax != NOTHING && GET_RMT_VNUM(rmt) > vmax)) {
+			continue;	// vnum range
+		}
+		if (only_affs != NOBITS && (GET_RMT_BASE_AFFECTS(rmt) & only_affs) != only_affs) {
+			continue;
+		}
+		if (not_flagged != NOBITS && IS_SET(GET_RMT_FLAGS(rmt), not_flagged)) {
+			continue;
+		}
+		if (only_flags != NOBITS && (GET_RMT_FLAGS(rmt) & only_flags) != only_flags) {
+			continue;
+		}
+		if (only_functions != NOBITS && (GET_RMT_FUNCTIONS(rmt) & only_functions) != only_functions) {
+			continue;
+		}
+		if (*extra_search && !find_exdesc(extra_search, GET_RMT_EX_DESCS(rmt), NULL)) {
+			continue;
+		}
+		if (find_interacts) {	// look up its interactions
+			found_interacts = NOBITS;
+			LL_FOREACH(GET_RMT_INTERACTIONS(rmt), inter) {
+				found_interacts |= BIT(inter->type);
+			}
+			if ((find_interacts & found_interacts) != find_interacts) {
+				continue;
+			}
+		}
+		
+		if (*find_keywords && !multi_isname(find_keywords, GET_RMT_TITLE(rmt)) && !multi_isname(find_keywords, GET_RMT_DESC(rmt)) && !search_extra_descs(find_keywords, GET_RMT_EX_DESCS(rmt))) {
+			continue;
+		}
+		
+		// show it
+		build_page_display(ch, "[%5d] %s", GET_RMT_VNUM(rmt), GET_RMT_TITLE(rmt));
+		++count;
+	}
+	
+	if (count > 0) {
+		build_page_display(ch, "(%d templates)", count);
+	}
+	else {
+		build_page_display_str(ch, " none");
+	}
+	
+	send_page_display(ch);
+}
+
+
+/**
 * Searches for all uses of a crop and displays them.
 *
 * @param char_data *ch The player.
 * @param crop_vnum vnum The crop vnum.
 */
 void olc_search_room_template(char_data *ch, rmt_vnum vnum) {
-	extern bool find_quest_giver_in_list(struct quest_giver *list, int type, any_vnum vnum);
-	extern bool find_requirement_in_list(struct req_data *list, int type, any_vnum vnum);
-	
-	char buf[MAX_STRING_LENGTH];
 	room_template *rmt = room_template_proto(vnum), *iter, *next_iter;
 	quest_data *quest, *next_quest;
+	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
+	shop_data *shop, *next_shop;
 	struct exit_template *ex;
 	obj_data *obj, *next_obj;
-	int size, found;
+	int found;
 	bool any;
 	
 	if (!rmt) {
@@ -417,21 +538,29 @@ void olc_search_room_template(char_data *ch, rmt_vnum vnum) {
 	}
 	
 	found = 0;
-	size = snprintf(buf, sizeof(buf), "Occurrences of room template %d (%s):\r\n", vnum, GET_RMT_TITLE(rmt));
+	build_page_display(ch, "Occurrences of room template %d (%s):", vnum, GET_RMT_TITLE(rmt));
 	
 	// objects
 	HASH_ITER(hh, object_table, obj, next_obj) {
 		if (IS_PORTAL(obj) && GET_PORTAL_TARGET_VNUM(obj) == vnum) {
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "OBJ [%5d] %s\r\n", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
+			build_page_display(ch, "OBJ [%5d] %s", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
+		}
+	}
+	
+	// progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		// REQ_x: requirement search
+		any = find_requirement_in_list(PRG_TASKS(prg), REQ_VISIT_ROOM_TEMPLATE, vnum);
+		
+		if (any) {
+			++found;
+			build_page_display(ch, "PRG [%5d] %s", PRG_VNUM(prg), PRG_NAME(prg));
 		}
 	}
 	
 	// quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
-		if (size >= sizeof(buf)) {
-			break;
-		}
 		any = find_quest_giver_in_list(QUEST_STARTS_AT(quest), QG_ROOM_TEMPLATE, vnum);
 		any |= find_quest_giver_in_list(QUEST_ENDS_AT(quest), QG_ROOM_TEMPLATE, vnum);
 		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_VISIT_ROOM_TEMPLATE, vnum);
@@ -439,7 +568,17 @@ void olc_search_room_template(char_data *ch, rmt_vnum vnum) {
 		
 		if (any) {
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "QST [%5d] %s\r\n", QUEST_VNUM(quest), QUEST_NAME(quest));
+			build_page_display(ch, "QST [%5d] %s", QUEST_VNUM(quest), QUEST_NAME(quest));
+		}
+	}
+	
+	// shops
+	HASH_ITER(hh, shop_table, shop, next_shop) {
+		any = find_quest_giver_in_list(SHOP_LOCATIONS(shop), QG_ROOM_TEMPLATE, vnum);
+		
+		if (any) {
+			++found;
+			build_page_display(ch, "SHOP [%5d] %s", SHOP_VNUM(shop), SHOP_NAME(shop));
 		}
 	}
 
@@ -450,32 +589,29 @@ void olc_search_room_template(char_data *ch, rmt_vnum vnum) {
 			if (ex->target_room == vnum) {
 				any = TRUE;
 				++found;
-				size += snprintf(buf + size, sizeof(buf) - size, "RMT [%5d] %s\r\n", GET_RMT_VNUM(iter), GET_RMT_TITLE(iter));
+				build_page_display(ch, "RMT [%5d] %s", GET_RMT_VNUM(iter), GET_RMT_TITLE(iter));
 			}
 		}
 	}
 	
 	// socials
 	HASH_ITER(hh, social_table, soc, next_soc) {
-		if (size >= sizeof(buf)) {
-			break;
-		}
 		any = find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_VISIT_ROOM_TEMPLATE, vnum);
 		
 		if (any) {
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "SOC [%5d] %s\r\n", SOC_VNUM(soc), SOC_NAME(soc));
+			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
 		}
 	}
 	
 	if (found > 0) {
-		size += snprintf(buf + size, sizeof(buf) - size, "%d location%s shown\r\n", found, PLURAL(found));
+		build_page_display(ch, "%d location%s shown", found, PLURAL(found));
 	}
 	else {
-		size += snprintf(buf + size, sizeof(buf) - size, " none\r\n");
+		build_page_display_str(ch, " none");
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -503,15 +639,13 @@ bool rmt_has_exit(room_template *rmt, int dir) {
 * @param descriptor_data *desc The descriptor who is saving.
 */
 void save_olc_room_template(descriptor_data *desc) {
-	void prune_extra_descs(struct extra_descr_data **list);
-	
 	room_template *proto, *rmt = GET_OLC_ROOM_TEMPLATE(desc);
 	rmt_vnum vnum = GET_OLC_VNUM(desc);
-	struct interaction_item *interact;
 	struct adventure_spawn *spawn;
 	struct trig_proto_list *trig;
 	struct exit_template *ex;
 	struct quest_lookup *ql;
+	struct shop_lookup *sl;
 	UT_hash_handle hh;
 	
 	// have a place to save it?
@@ -535,10 +669,7 @@ void save_olc_room_template(descriptor_data *desc) {
 		free_exit_template(ex);
 	}
 	free_extra_descs(&GET_RMT_EX_DESCS(proto));
-	while ((interact = GET_RMT_INTERACTIONS(proto))) {
-		GET_RMT_INTERACTIONS(proto) = interact->next;
-		free(interact);
-	}
+	free_interactions(&GET_RMT_INTERACTIONS(proto));
 	while ((trig = GET_RMT_SCRIPTS(proto))) {
 		GET_RMT_SCRIPTS(proto) = trig->next;
 		free(trig);
@@ -562,12 +693,14 @@ void save_olc_room_template(descriptor_data *desc) {
 	// save data back over the proto-type
 	hh = proto->hh;	// save old hash handle
 	ql = proto->quest_lookups;	// save lookups
+	sl = proto->shop_lookups;
 	
 	*proto = *rmt;	// copy over all data
 	proto->vnum = vnum;	// ensure correct vnum
 	
 	proto->hh = hh;	// restore old hash handle
 	proto->quest_lookups = ql;	// restore lookups
+	proto->shop_lookups = sl;
 	
 	// and save to file
 	save_library_file_for_vnum(DB_BOOT_RMT, vnum);
@@ -581,11 +714,9 @@ void save_olc_room_template(descriptor_data *desc) {
 * @return room_template* The copied room template.
 */
 room_template *setup_olc_room_template(room_template *input) {
-	extern struct extra_descr_data *copy_extra_descs(struct extra_descr_data *list);
-	
 	room_template *new;
-	struct adventure_spawn *old_spawn, *new_spawn, *last_spawn;
-	struct exit_template *old_ex, *new_ex, *last_ex;
+	struct adventure_spawn *old_spawn, *new_spawn;
+	struct exit_template *old_ex, *new_ex;
 	
 	CREATE(new, room_template, 1);
 	init_room_template(new);
@@ -603,39 +734,21 @@ room_template *setup_olc_room_template(room_template *input) {
 		
 		// copy spawns
 		GET_RMT_SPAWNS(new) = NULL;
-		last_spawn = NULL;
 		for (old_spawn = GET_RMT_SPAWNS(input); old_spawn; old_spawn = old_spawn->next) {
 			CREATE(new_spawn, struct adventure_spawn, 1);
 			*new_spawn = *old_spawn;
-			new_spawn->next = NULL;
-			
-			if (last_spawn) {
-				last_spawn->next = new_spawn;
-			}
-			else {
-				GET_RMT_SPAWNS(new) = new_spawn;
-			}
-			last_spawn = new_spawn;
+			LL_APPEND(GET_RMT_SPAWNS(new), new_spawn);
 		}
 		
 		// copy exits
 		GET_RMT_EXITS(new) = NULL;
-		last_ex = NULL;
 		for (old_ex = GET_RMT_EXITS(input); old_ex; old_ex = old_ex->next) {
 			CREATE(new_ex, struct exit_template, 1);
 			*new_ex = *old_ex;
 			if (old_ex->keyword) {
 				new_ex->keyword = str_dup(old_ex->keyword);
 			}
-			new_ex->next = NULL;
-			
-			if (last_ex) {
-				last_ex->next = new_ex;
-			}
-			else {
-				GET_RMT_EXITS(new) = new_ex;
-			}
-			last_ex = new_ex;
+			LL_APPEND(GET_RMT_EXITS(new), new_ex);
 		}
 		
 		// copy interactions
@@ -646,7 +759,7 @@ room_template *setup_olc_room_template(room_template *input) {
 	}
 	else {
 		// brand new: some defaults
-		GET_RMT_TITLE(new) = str_dup("An Unnamed Room");
+		GET_RMT_TITLE(new) = str_dup(default_rmt_title);
 	}
 	
 	// done
@@ -666,22 +779,38 @@ bool valid_room_template_vnum(rmt_vnum vnum) {
 }
 
 
+/**
+* Counts the words of text in a room template's strings.
+*
+* @param room_template *rmt The room template whose strings to count.
+* @return int The number of words in the room template's strings.
+*/
+int wordcount_room_template(room_template *rmt) {
+	int count = 0;
+	
+	count += wordcount_string(GET_RMT_TITLE(rmt));
+	count += wordcount_string(GET_RMT_DESC(rmt));
+	count += wordcount_extra_descriptions(GET_RMT_EX_DESCS(rmt));
+	
+	return count;
+}
+
+
  //////////////////////////////////////////////////////////////////////////////
 //// DISPLAYS ////////////////////////////////////////////////////////////////
 
 /**
 * Displays the exit templates from a given list.
 *
+* @param char_data *ch The person viewing it.
 * @param struct exit_template *list Pointer to the start of a list of exits.
-* @param char *save_buffer A buffer to store the result to.
+* @param bool send_output If TRUE, sends the page_display as text when done. Pass FALSE if you're building a larger page_display for the character.
 */
-void get_exit_template_display(struct exit_template *list, char *save_buffer) {
+void show_exit_template_display(char_data *ch, struct exit_template *list, bool send_output) {
 	struct exit_template *ex;
 	char lbuf[MAX_STRING_LENGTH], lbuf1[MAX_STRING_LENGTH], lbuf2[MAX_STRING_LENGTH];
 	int count = 0;
 	room_template *rmt;
-	
-	*save_buffer = '\0';
 	
 	for (ex = list; ex; ex = ex->next) {
 		// lbuf: kw
@@ -709,11 +838,15 @@ void get_exit_template_display(struct exit_template *list, char *save_buffer) {
 			strcpy(lbuf2, "UNKNOWN");
 		}
 		
-		sprintf(save_buffer + strlen(save_buffer), "%2d. %s: [%d] %s%s%s\r\n", ++count, dirs[ex->dir], ex->target_room, lbuf2, lbuf1, lbuf);
+		build_page_display(ch, "%2d. %s: [%d] %s%s%s", ++count, dirs[ex->dir], ex->target_room, lbuf2, lbuf1, lbuf);
 	}
 	
 	if (count == 0) {
-		strcat(save_buffer, " none\r\n");
+		build_page_display_str(ch, " none");
+	}
+	
+	if (send_output) {
+		send_page_display_as(ch, PD_NO_PAGINATION | PD_FREE_DISPLAY_AFTER);
 	}
 }
 
@@ -727,7 +860,7 @@ void get_exit_template_display(struct exit_template *list, char *save_buffer) {
 void get_spawn_template_name(struct adventure_spawn *spawn, char *save_buffer) {
 	switch (spawn->type) {
 		case ADV_SPAWN_MOB: {
-			strcpy(save_buffer, skip_filler(get_mob_name_by_proto(spawn->vnum)));
+			strcpy(save_buffer, skip_filler(get_mob_name_by_proto(spawn->vnum, FALSE)));
 			break;
 		}
 		case ADV_SPAWN_OBJ: {
@@ -750,23 +883,26 @@ void get_spawn_template_name(struct adventure_spawn *spawn, char *save_buffer) {
 /**
 * Displays the adventure spawn rules from a given list.
 *
+* @param char_data *ch The person viewing it.
 * @param struct adventure_spawn *list Pointer to the start of a list of spawns.
-* @param char *save_buffer A buffer to store the result to.
+* @param bool send_output If TRUE, sends the page_display as text when done. Pass FALSE if you're building a larger page_display for the character.
 */
-void get_template_spawns_display(struct adventure_spawn *list, char *save_buffer) {
+void show_template_spawns_display(char_data *ch, struct adventure_spawn *list, bool send_output) {
 	struct adventure_spawn *spawn;
 	char lbuf[MAX_STRING_LENGTH];
 	int count = 0;
 	
-	*save_buffer = '\0';
-	
 	for (spawn = list; spawn; spawn = spawn->next) {
 		get_spawn_template_name(spawn, lbuf);	
-		sprintf(save_buffer + strlen(save_buffer), "%2d. [%s] %d %s (%.2f%%, limit %d)\r\n", ++count, adventure_spawn_types[spawn->type], spawn->vnum, lbuf, spawn->percent, spawn->limit);
+		build_page_display(ch, "%2d. [%s] %d %s (%.2f%%, limit %d)", ++count, adventure_spawn_types[spawn->type], spawn->vnum, lbuf, spawn->percent, spawn->limit);
 	}
 	
 	if (count == 0) {
-		strcat(save_buffer, " none\r\n");
+		build_page_display(ch, " none");
+	}
+	
+	if (send_output) {
+		send_page_display_as(ch, PD_NO_PAGINATION | PD_FREE_DISPLAY_AFTER);
 	}
 }
 
@@ -778,12 +914,8 @@ void get_template_spawns_display(struct adventure_spawn *list, char *save_buffer
 * @param char_data *ch The person who is editing a room template and will see its display.
 */
 void olc_show_room_template(char_data *ch) {
-	void get_extra_desc_display(struct extra_descr_data *list, char *save_buffer);
-	void get_interaction_display(struct interaction_item *list, char *save_buffer);
-	void get_script_display(struct trig_proto_list *list, char *save_buffer);
-	
 	room_template *rmt = GET_OLC_ROOM_TEMPLATE(ch->desc);
-	char lbuf[MAX_STRING_LENGTH];
+	char lbuf[MAX_STRING_LENGTH*4];
 	
 	adv_data *adv = get_adventure_for_vnum(GET_OLC_VNUM(ch->desc));
 	
@@ -791,57 +923,60 @@ void olc_show_room_template(char_data *ch) {
 		return;
 	}
 	
-	*buf = '\0';
+	build_page_display(ch, "[%s%d\t0] %s%s\t0", OLC_LABEL_CHANGED, GET_OLC_VNUM(ch->desc), OLC_LABEL_UNCHANGED, !room_template_proto(GET_RMT_VNUM(rmt)) ? "new room template" : GET_RMT_TITLE(room_template_proto(GET_RMT_VNUM(rmt))));
+	build_page_display(ch, "Adventure: %d %s%s\t0", adv ? GET_ADV_VNUM(adv) : NOTHING, OLC_LABEL_CHANGED, adv ? GET_ADV_NAME(adv) : "none");
+	build_page_display(ch, "<%stitle\t0> %s", OLC_LABEL_STR(GET_RMT_TITLE(rmt), default_rmt_title), NULLSAFE(GET_RMT_TITLE(rmt)));
+	build_page_display(ch, "<%sdescription\t0>\r\n%s", OLC_LABEL_STR(GET_RMT_DESC(rmt), ""), NULLSAFE(GET_RMT_DESC(rmt)));
 	
-	sprintf(buf + strlen(buf), "[&c%d&0] &c%s&0\r\n", GET_OLC_VNUM(ch->desc), !room_template_proto(GET_RMT_VNUM(rmt)) ? "new room template" : GET_RMT_TITLE(room_template_proto(GET_RMT_VNUM(rmt))));
-	sprintf(buf + strlen(buf), "Adventure: %d &c%s&0\r\n", adv ? GET_ADV_VNUM(adv) : NOTHING, adv ? GET_ADV_NAME(adv) : "none");
-	sprintf(buf + strlen(buf), "<&ytitle&0> %s\r\n", NULLSAFE(GET_RMT_TITLE(rmt)));
-	sprintf(buf + strlen(buf), "<&ydescription&0>\r\n%s", NULLSAFE(GET_RMT_DESC(rmt)));
+	if (GET_RMT_SUBZONE(rmt) != NOWHERE) {
+		safe_snprintf(lbuf, sizeof(lbuf), "%d", GET_RMT_SUBZONE(rmt));
+	}
+	else {
+		strcpy(lbuf, "none");
+	}
+	build_page_display(ch, "<%ssubzone\t0> %s", OLC_LABEL_VAL(GET_RMT_SUBZONE(rmt), NOWHERE), lbuf);
 	
 	sprintbit(GET_RMT_FLAGS(rmt), room_template_flags, lbuf, TRUE);
-	sprintf(buf + strlen(buf), "<&yflags&0> %s\r\n", lbuf);
+	build_page_display(ch, "<%sflags\t0> %s", OLC_LABEL_VAL(GET_RMT_FLAGS(rmt), NOBITS), lbuf);
 	
 	sprintbit(GET_RMT_FUNCTIONS(rmt), function_flags, lbuf, TRUE);
-	sprintf(buf + strlen(buf), "<&yfunctions&0> %s\r\n", lbuf);
+	build_page_display(ch, "<%sfunctions\t0> %s", OLC_LABEL_VAL(GET_RMT_FUNCTIONS(rmt), NOBITS), lbuf);
 	
 	sprintbit(GET_RMT_BASE_AFFECTS(rmt), room_aff_bits, lbuf, TRUE);
-	sprintf(buf + strlen(buf), "<&yaffects&0> %s\r\n", lbuf);
+	build_page_display(ch, "<%saffects\t0> %s", OLC_LABEL_VAL(GET_RMT_BASE_AFFECTS(rmt), NOBITS), lbuf);
+	
+	build_page_display(ch, "<%stemperature\t0> %s", OLC_LABEL_VAL(GET_RMT_TEMPERATURE_TYPE(rmt), 0), temperature_types[GET_RMT_TEMPERATURE_TYPE(rmt)]);
 	
 	// exits
-	sprintf(buf + strlen(buf), "Exits: <&yexit&0>, <&ymatchexits&0>\r\n");
+	build_page_display(ch, "Exits: <%sexit\t0>, <%smatchexits\t0>", OLC_LABEL_PTR(GET_RMT_EXITS(rmt)), OLC_LABEL_UNCHANGED);
 	if (GET_RMT_EXITS(rmt)) {
-		get_exit_template_display(GET_RMT_EXITS(rmt), lbuf);
-		strcat(buf, lbuf);
+		show_exit_template_display(ch, GET_RMT_EXITS(rmt), FALSE);
 	}
 	
 	// exdesc
-	sprintf(buf + strlen(buf), "Extra descriptions: <&yextra&0>\r\n");
+	build_page_display(ch, "Extra descriptions: <%sextra\t0>", OLC_LABEL_PTR(GET_RMT_EX_DESCS(rmt)));
 	if (GET_RMT_EX_DESCS(rmt)) {
-		get_extra_desc_display(GET_RMT_EX_DESCS(rmt), buf1);
-		strcat(buf, buf1);
+		show_extra_desc_display(ch, GET_RMT_EX_DESCS(rmt), FALSE);
 	}
 	
-	sprintf(buf + strlen(buf), "Interactions: <&yinteraction&0>\r\n");
+	build_page_display(ch, "Interactions: <%sinteraction\t0>", OLC_LABEL_PTR(GET_RMT_INTERACTIONS(rmt)));
 	if (GET_RMT_INTERACTIONS(rmt)) {
-		get_interaction_display(GET_RMT_INTERACTIONS(rmt), buf1);
-		strcat(buf, buf1);
+		show_interaction_display(ch, GET_RMT_INTERACTIONS(rmt), FALSE);
 	}
 	
 	// spawns
-	sprintf(buf + strlen(buf), "Spawns: <&yspawns&0>\r\n");
+	build_page_display(ch, "Spawns: <%sspawns\t0>", OLC_LABEL_PTR(GET_RMT_SPAWNS(rmt)));
 	if (GET_RMT_SPAWNS(rmt)) {
-		get_template_spawns_display(GET_RMT_SPAWNS(rmt), lbuf);
-		strcat(buf, lbuf);
+		show_template_spawns_display(ch, GET_RMT_SPAWNS(rmt), FALSE);
 	}
 	
 	// scripts
-	sprintf(buf + strlen(buf), "Scripts: <&yscript&0>\r\n");
+	build_page_display(ch, "Scripts: <%sscript\t0>", OLC_LABEL_PTR(GET_RMT_SCRIPTS(rmt)));
 	if (GET_RMT_SCRIPTS(rmt)) {
-		get_script_display(GET_RMT_SCRIPTS(rmt), lbuf);
-		strcat(buf, lbuf);
+		show_script_display(ch, GET_RMT_SCRIPTS(rmt), FALSE);
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -873,7 +1008,7 @@ OLC_MODULE(rmedit_exit) {
 	adv_data *adv = get_adventure_for_vnum(GET_OLC_VNUM(ch->desc));
 	int num, vnum, dir;
 	room_template *to_template;
-	struct exit_template *ex, *temp, *change;
+	struct exit_template *ex, *change;
 	bool found;
 	
 	// arg1 argument
@@ -904,7 +1039,7 @@ OLC_MODULE(rmedit_exit) {
 					found = TRUE;
 					
 					msg_to_char(ch, "You remove the %s exit.\r\n", dirs[ex->dir]);
-					REMOVE_FROM_LIST(ex, GET_RMT_EXITS(rmt), next);
+					LL_DELETE(GET_RMT_EXITS(rmt), ex);
 					if (ex->keyword) {
 						free(ex->keyword);
 					}
@@ -930,7 +1065,7 @@ OLC_MODULE(rmedit_exit) {
 			msg_to_char(ch, "Invalid direction '%s'.\r\n", dir_arg);
 		}
 		else if (!isdigit(*room_arg) || (vnum = atoi(room_arg)) < 0 || get_adventure_for_vnum(vnum) != adv) {
-			msg_to_char(ch, "Invalid room template vnum '%s', target room must be part of the same adventure zone.\r\n", room_arg);
+			msg_to_char(ch, "Invalid room template vnum '%s'; target room must be part of the same adventure zone.\r\n", room_arg);
 		}
 		else {
 			CREATE(ex, struct exit_template, 1);
@@ -939,18 +1074,7 @@ OLC_MODULE(rmedit_exit) {
 			ex->target_room = vnum;
 			ex->keyword = *argument ? str_dup(argument) : NULL;
 			ex->exit_info = (*argument ? EX_ISDOOR | EX_CLOSED : NOBITS);
-			ex->next = NULL;
-			
-			// append to end
-			if ((temp = GET_RMT_EXITS(rmt)) != NULL) {
-				while (temp->next) {
-					temp = temp->next;
-				}
-				temp->next = ex;
-			}
-			else {
-				GET_RMT_EXITS(rmt) = ex;
-			}
+			LL_APPEND(GET_RMT_EXITS(rmt), ex);
 			
 			to_template = room_template_proto(vnum);
 			
@@ -991,7 +1115,7 @@ OLC_MODULE(rmedit_exit) {
 		}
 		else if (is_abbrev(field_arg, "room") || is_abbrev(field_arg, "template") || is_abbrev(field_arg, "vnum") || is_abbrev(field_arg, "target")) {
 			if (!isdigit(*argument) || (vnum = atoi(argument)) < 0 || get_adventure_for_vnum(vnum) != adv) {
-				msg_to_char(ch, "Invalid room template vnum '%s', target room must be part of the same adventure zone.\r\n", argument);
+				msg_to_char(ch, "Invalid room template vnum '%s'; target room must be part of the same adventure zone.\r\n", argument);
 			}
 			else {
 				change->target_room = vnum;
@@ -1102,17 +1226,15 @@ OLC_MODULE(rmedit_script) {
 
 
 OLC_MODULE(rmedit_spawns) {
-	extern const char *olc_type_bits[NUM_OLC_TYPES+1];
-
 	room_template *rmt = GET_OLC_ROOM_TEMPLATE(ch->desc);
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
 	char type_arg[MAX_INPUT_LENGTH], num_arg[MAX_INPUT_LENGTH], prc_arg[MAX_INPUT_LENGTH];
 	char lbuf[MAX_STRING_LENGTH];
 	int num, stype, limit, findtype;
-	struct adventure_spawn *spawn, *temp, *change, *copyfrom = NULL;
+	struct adventure_spawn *spawn, *change, *copyfrom = NULL;
 	double prc;
 	any_vnum vnum;
-	bool found;
+	bool found, none;
 	
 	// arg1 argument
 	argument = any_one_arg(argument, arg1);
@@ -1137,12 +1259,14 @@ OLC_MODULE(rmedit_spawns) {
 		}
 		else {
 			sprintbit(findtype, olc_type_bits, buf, FALSE);
+			none = FALSE;
 			
 			switch (findtype) {
 				case OLC_ROOM_TEMPLATE: {
 					room_template *rmt = room_template_proto(vnum);
 					if (rmt) {
 						copyfrom = GET_RMT_SPAWNS(rmt);
+						none = copyfrom ? FALSE : TRUE;
 					}
 					break;
 				}
@@ -1152,7 +1276,10 @@ OLC_MODULE(rmedit_spawns) {
 				}
 			}
 			
-			if (!copyfrom) {
+			if (none) {
+				msg_to_char(ch, "No spawns to copy from that.\r\n");
+			}
+			else if (!copyfrom) {
 				msg_to_char(ch, "Invalid %s vnum '%s'.\r\n", buf, arg3);
 			}
 			else {
@@ -1183,7 +1310,7 @@ OLC_MODULE(rmedit_spawns) {
 					
 					get_spawn_template_name(spawn, lbuf);
 					msg_to_char(ch, "You remove the spawn info for %s.\r\n", lbuf);
-					REMOVE_FROM_LIST(spawn, GET_RMT_SPAWNS(rmt), next);
+					LL_DELETE(GET_RMT_SPAWNS(rmt), spawn);
 					free(spawn);
 				}
 			}
@@ -1218,7 +1345,7 @@ OLC_MODULE(rmedit_spawns) {
 			msg_to_char(ch, "Invalid vehicle vnum '%s'.\r\n", num_arg);
 		}
 		else if ((prc = atof(prc_arg)) < .01 || prc > 100.00) {
-			msg_to_char(ch, "Percentage must be between .01 and 100, '%s' given.\r\n", prc_arg);
+			msg_to_char(ch, "Percentage must be between .01 and 100; '%s' given.\r\n", prc_arg);
 		}
 		else if (!isdigit(*argument) || (limit = atoi(argument)) > MAX_INT || limit < -1) {
 			msg_to_char(ch, "Invalid limit '%s'.\r\n", argument);
@@ -1230,18 +1357,7 @@ OLC_MODULE(rmedit_spawns) {
 			spawn->vnum = vnum;
 			spawn->percent = prc;
 			spawn->limit = limit;
-			spawn->next = NULL;
-			
-			// append to end
-			if ((temp = GET_RMT_SPAWNS(rmt)) != NULL) {
-				while (temp->next) {
-					temp = temp->next;
-				}
-				temp->next = spawn;
-			}
-			else {
-				GET_RMT_SPAWNS(rmt) = spawn;
-			}
+			LL_APPEND(GET_RMT_SPAWNS(rmt), spawn);
 			
 			get_spawn_template_name(spawn, lbuf);
 			msg_to_char(ch, "You add spawn for %s %s (%d) at %.2f%%, limit %d.\r\n", adventure_spawn_types[stype], lbuf, vnum, prc, limit);
@@ -1293,7 +1409,7 @@ OLC_MODULE(rmedit_spawns) {
 			prc = atof(argument);
 			
 			if (prc < .01 || prc > 100.00) {
-				msg_to_char(ch, "Percentage must be between .01 and 100, '%s' given.\r\n", argument);
+				msg_to_char(ch, "Percentage must be between .01 and 100; '%s' given.\r\n", argument);
 			}
 			else {
 				change->percent = prc;
@@ -1319,4 +1435,28 @@ OLC_MODULE(rmedit_spawns) {
 		msg_to_char(ch, "Usage: spawn copy <from type> <from vnum>\r\n");
 		msg_to_char(ch, "Usage: spawn remove <number | all>\r\n");
 	}
+}
+
+
+OLC_MODULE(rmedit_subzone) {
+	room_template *rmt = GET_OLC_ROOM_TEMPLATE(ch->desc);
+	
+	if (!str_cmp(argument, "none")) {
+		GET_RMT_SUBZONE(rmt) = NOWHERE;
+		if (PRF_FLAGGED(ch, PRF_NOREPEAT)) {
+			send_config_msg(ch, "ok_string");
+		}
+		else {
+			msg_to_char(ch, "It no longer has a subzone.\r\n");
+		}
+	}
+	else {
+		GET_RMT_SUBZONE(rmt) = olc_process_number(ch, argument, "subzone vnum", "subzone", 0, MAX_VNUM, GET_RMT_SUBZONE(rmt));
+	}
+}
+
+
+OLC_MODULE(rmedit_temperature) {
+	room_template *rmt = GET_OLC_ROOM_TEMPLATE(ch->desc);
+	GET_RMT_TEMPERATURE_TYPE(rmt) = olc_process_type(ch, argument, "temperature", "temperature", temperature_types, GET_RMT_TEMPERATURE_TYPE(rmt));
 }

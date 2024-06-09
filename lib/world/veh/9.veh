@@ -6,9 +6,11 @@ A wooden cart is parked here.~
 ride on the cart and drive it around.
 ~
 ~
-bfhio 22 5 200 1
+bfhio 22 5 200 1 0 0 0 0 0 -1 0
+P
+0
 R
-19 1 1 0
+6790 1 1 0
 S
 #901
 carriage wooden~
@@ -20,13 +22,15 @@ several people to ride around in style. You must harness an animal to the cart
 and then sit on it to drive it, or board it to get inside.
 ~
 ~
-bfhio 19 16 200 1
+bfhio 19 16 200 1 0 0 0 0 0 -1 0
 D
 5521 0 0
+P
+1
 R
-19 1 1 0
+6790 1 1 0
 R
-20 1 1 0
+6320 1 1 0
 S
 #902
 wagon covered~
@@ -36,11 +40,13 @@ A covered wagon has been parked here.~
 harness two horses to the wagon and then lead it, or ride in it and drive it.
 ~
 ~
-bfhiou 19 24 400 2
+bfhiou 19 24 400 2 0 0 0 0 0 -1 0
+P
+2
 R
-19 1 1 0
+6790 1 1 0
 R
-20 1 1 0
+6320 1 1 0
 S
 #903
 catapult~
@@ -50,15 +56,21 @@ A catapult is poised to strike!~
 will need two horses to pull the catapult.
 ~
 &0o==o~
-bor 19 24 0 2
+or 19 24 0 2 0 0 0 0 0 -1 0
+B0
+&0o=~
+B1
+&0o~
 C
 0 100
+P
+2
 R
-19 1 1 0
+6790 1 1 0
 R
-16 1 1 0
+6000 1 1 0
 R
-20 1 1 0
+6320 1 1 0
 S
 #904
 chair wooden~
@@ -67,7 +79,9 @@ There is a wooden chair here.~
 You can sit on the chair.
 ~
 ~
-fghln 19 1 0 0
+fghlnvO 19 1 0 0 0 0 0 0 0 -1 0
+P
+2
 S
 #905
 bench wooden~
@@ -76,7 +90,9 @@ There is a wooden bench here.~
 You can sit on the bench.
 ~
 ~
-fhln 19 1 0 0
+fhlnvEO 19 1 0 0 0 0 0 0 0 -1 0
+P
+2
 S
 #906
 table long~
@@ -85,7 +101,9 @@ There is a long table here.~
 Tables are merely for decoration.
 ~
 ~
-hln 19 1 0 0
+hlnvO 19 1 0 0 0 0 0 0 0 -1 0
+P
+2
 S
 #907
 stool wooden~
@@ -94,7 +112,27 @@ There is a wooden stool here.~
 You can sit on the stool.
 ~
 ~
-fhln 19 1 0 0
+fhlnvO 19 1 0 0 0 0 0 0 0 -1 0
+P
+2
+S
+#916
+beehive hive~
+a beehive~
+A beehive has been set up here.~
+   The beehive has been carefully constructed from wood, with removable trays
+for harvesting honeycomb and tending the hive.
+Type 'check beehive' to see how much honeycomb is available.
+Type 'harvest beehive' to retrieve honeycomb.
+~
+~
+hlnO 19 2 0 0 0 0 0 0 0 -1 0
+P
+2
+R
+916 1 5 0
+T 916
+T 918
 S
 #917
 throne~
@@ -103,7 +141,9 @@ There is a throne at the head of the room.~
 You can sit on the throne.
 ~
 ~
-fhln 19 1 0 0
+fhlnvO 19 1 0 0 0 0 0 0 0 -1 0
+P
+2
 S
 #920
 canoe wooden~
@@ -113,9 +153,11 @@ There is a wooden canoe here.~
 to the edge of the water, 'sit' in it, and then type 'sail <direction>'.
 ~
 ~
-cfghlnu 3 3 0 0
+cfghlnuxE 3 3 0 0 0 0 0 0 0 -1 0
+P
+0
 R
-3 1 5 0
+1003 1 5 0
 S
 #921
 caravan brightly-painted painted wooden~
@@ -126,15 +168,17 @@ features of a house on the move, but it's not big enough to be a proper home
 for someone as important as you.
 ~
 ~
-bfhiou 19 25 100 4
+bfhiou 19 25 100 4 0 0 0 0 0 -1 0
 D
 5518 1 r
+P
+2
 R
-19 1 1 0
+6790 1 1 0
 R
-26 1 1 0
+6800 1 1 0
 R
-20 1 1 0
+6320 1 1 0
 T 921
 S
 #922
@@ -146,9 +190,25 @@ You can 'drag' the raft to the edge of the water, 'sit' on it, then type 'sail
 <direction>'.
 ~
 ~
-cfhlnu 3 3 0 0
+cfhlnuE 3 3 0 0 0 0 0 0 0 -1 0
+P
+0
 R
-3 1 5 0
+1003 1 5 0
+S
+#923
+raft shoddy poorly-constructed constructed poorlyconstructed~
+a shoddy raft~
+A poorly-constructed raft is floating here.~
+   The raft is in bad shape and probably won't hold together long. But you can
+still 'sit' on it and 'sail' it toward land. You can also 'drag' it on land.
+~
+~
+cfhlnuxE 3 2 0 0 0 0 0 0 0 -1 0
+P
+0
+R
+1003 1 5 0
 S
 #952
 caravel lateen-rigged~
@@ -158,15 +218,21 @@ A lateen-rigged caravel is floating here.~
 everywhere. You can "board" the ship from here.
 ~
 &0<&u44&0>~
-chijktu 20 32 150 0
+chijktu 20 32 150 0 0 0 0 0 0 -1 0
+B0
+&0&u44&0~
+B1
+&0&u4&0~
 D
 5501 2 o
+P
+1
 R
-16 1 1 0
+6000 1 1 0
 R
-19 1 1 0
+6790 1 1 0
 R
-26 1 1 0
+6800 1 1 0
 T 952
 S
 #953
@@ -177,38 +243,50 @@ A cog is floating here, loaded to the top with cargo.~
 can be used for shipping, or to move items manually between islands. You can
 "board" it from here.
 ~
-&0<&u44&0>~
-cijtu 20 32 450 0
+&w<&u44&0&w>~
+cijtu 20 32 450 0 0 0 0 0 0 -1 0
+B0
+&w&u44&0~
+B1
+&w&u4&0~
 D
 5501 1 0
+P
+1
 R
-16 1 1 0
+6000 1 1 0
 R
-19 1 1 0
+6790 1 1 0
 R
-26 1 1 0
+6800 1 1 0
 T 953
 S
 #954
 longship fearsome~
 the longship~
-A fearsome longship floats ominiously on the water.~
+A fearsome longship floats ominously on the water.~
    The longship has a single tall mast, its single sail embroidered with the
-fierce emblem of its master. This longship is armed with cannon, and used to
+fierce emblem of its empire. This longship is armed with cannon, and used to
 raid up and down the coast. You can "board" it from here.
 ~
 &0<&u44&0>~
-ckrtu 20 64 0 0
+ckrtu 20 64 0 0 0 0 0 0 0 -1 0
+B0
+&0&u44&0~
+B1
+&0&u4&0~
 C
 0 100
 D
 5501 2 o
+P
+0
 R
-16 1 1 0
+6000 1 1 0
 R
-19 1 1 0
+6790 1 1 0
 R
-26 1 1 0
+6800 1 1 0
 T 954
 S
 #955
@@ -220,17 +298,23 @@ It has at least ten sails, granting it great speed and control on the high seas
 as it lets the great seafaring empire move weapons over incredible distances.
 ~
 &0<&u44&0>~
-ckpqrtu 20 128 0 0
+ckpqrtu 20 128 0 0 0 0 0 0 0 -1 0
+B0
+&0&u44&0~
+B1
+&0&u4&0~
 C
 0 100
 D
 5501 4 op
+P
+1
 R
-16 2 1 0
+6000 2 1 0
 R
-19 2 1 0
+6790 2 1 0
 R
-26 2 1 0
+6800 2 1 0
 T 955
 S
 #956
@@ -241,15 +325,21 @@ A four-masted carrack looms large on the water.~
 to carry the entire expedition, and fast enough to move between continents.
 ~
 &0<&u44&0>~
-ciktu 20 96 400 0
+ciktu 20 96 400 0 0 0 0 0 0 -1 0
+B0
+&0&u44&0~
+B1
+&0&u4&0~
 D
 5522 8 opq
+P
+2
 R
-16 2 1 0
+6000 2 1 0
 R
-19 2 1 0
+6790 2 1 0
 R
-26 2 1 0
+6800 2 1 0
 T 956
 S
 #957
@@ -259,16 +349,22 @@ A huge cargo hulk is floating here.~
    The hulk is a massive cargo ship, the gold standard for shipping on these
 seas. You can keep items in it, or use it to move goods from dock to dock.
 ~
-&0<&u44&0>~
-cijkpqtu 20 64 1000 0
+&w<&u44&0&w>~
+cijkpqtu 20 64 1000 0 0 0 0 0 0 -1 0
+B0
+&w&u44&0~
+B1
+&w&u4&0~
 D
 5501 4 op
+P
+1
 R
-16 1 1 0
+6000 1 1 0
 R
-19 1 1 0
+6790 1 1 0
 R
-26 1 1 0
+6800 1 1 0
 T 957
 S
 $

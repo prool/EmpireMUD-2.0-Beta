@@ -1,143 +1,144 @@
 #600
 Enchanted Saplings~
 Some Enchanted Saplings~
-',' 35 1 2 0 0
+'.' 35 ij 2 0 p
 C
 chant nature~
-D0
-,,,,~
-&p~
+D1
+..&PY&?.~
+&g~
+D1
+.&PY&?..~
+&g~
+D2
+..&PY&?.~
+&g~
+D2
+.&PY&?..~
+&g~
+D3
+..&PY&?.~
+&g~
+D3
+.&PY&?..~
+&g~
+D4
+..&CY&?.~
+&0~
+D4
+.&CY&?..~
+&0~
 E
-9 0 100.00 604
+9 0 100.00 603
+X
+saplings enchanted woods trees around~
+   Pink saplings have started to germinate on the rolling plains. They're small
+and wiry, but with the right care -- and the Chant of Nature -- they will
+quickly grow into impressive magical trees.
+~
 S
 #601
-Clear-Cut Enchanted Forest~
-A Clear-Cut Enchanted Forest~
-'.' 35 1 2 0 0
+Clear-Cut Starwood Forest~
+A Clear-Cut Starwood Forest~
+'.' 35 ij 2 0 p
 C
 dig~
 D1
-&g.&?.&g..~
-&P~
+.&P.&?..~
+&g~
 D1
-&g..&?.&g.~
-&P~
+..&P.&?.~
+&g~
 D2
-&g.&?.&g..~
-&P~
+.&P.&?..~
+&g~
 D2
-&g..&?.&g.~
-&P~
+..&P.&?.~
+&g~
 D3
-&g.&?.&g..~
-&P~
+.&P.&?..~
+&g~
 D3
-&g..&?.&g.~
-&P~
+..&P.&?.~
+&g~
 D4
-&0.&?.&0..~
-&C~
+.&C.&?..~
+&0~
 D4
-&0..&?.&0.~
-&C~
+..&C.&?.~
+&0~
 E
-4 0 0.20 602
-I 5 103 2.00 1 d  # DIG: a yellow lightning stone
-I 5 104 2.00 1 d  # DIG: a red bloodstone
-I 5 1300 2.00 1 d  # DIG: a glowing green seashell
-I 5 1206 2.00 1 d  # DIG: an iridescent blue iris
-I 5 102 9.00 1 d  # DIG: a flint stone
-I 5 100 83.00 1 d  # DIG: a rock
-I 6 606 100.00 1  # FORAGE: a handful of elderberries
-M
-9109 5.00 ch
-M
-9145 5.00 ach
-M
-9147 5.00 ch
-M
-9007 5.00 cg
-M
-9006 5.00 cg
-M
-9141 5.00 cg
-M
-9146 5.00 acg
-M
-9144 5.00 acg
-M
-9002 5.00 acg
-M
-9136 5.00 cg
-M
-9150 5.00 c
-M
-9149 5.00 c
-M
-9148 5.00 c
-M
-9008 5.00 c
-M
-9133 5.00 ac
-M
-9116 5.00 ac
-M
-9025 5.00 c
-M
-253 10.00 cf
-M
-9154 5.00 c
-M
-9153 5.00 c
-M
-251 15.00 ce
-M
-252 10.00 f
+4 0 0.30 602
+E
+9 0 100.00 606
+E
+22 0 50.00 605
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
 M
 602 100.00 d
+X
+starwood woods forest enchanted clearcut clear-cut cut stumps enchanted trees around~
+   The forest has been reduced to mere stumps here, and the field is full of
+them. It is not completely devoid of life, however, as you can see wisps of
+mana sublimating off of the stumps. Life will return.
+~
+X
+mana wisps~
+Wisps of mana drift from the tops of the enchanted stumps.
+~
 S
 #602
-Enchanted Copse~
-An Enchanted Copse~
-'^' 35 1 4 d 0
+Starwood Copse~
+A Starwood Copse~
+'.' 35 ijqw 4 d np
 C
 chop, dig~
 D1
-&g.&?^&g..~
-&P~
+.&P^&?..~
+&g~
 D1
-&g..&?^&g.~
-&P~
+..&P^&?.~
+&g~
 D2
-&g.&?^&g..~
-&P~
+.&P^&?..~
+&g~
 D2
-&g..&?^&g.~
-&P~
+..&P^&?.~
+&g~
 D3
-&g.&?^&g..~
-&P~
+.&P^&?..~
+&g~
 D3
-&g..&?^&g.~
-&P~
+..&P^&?.~
+&g~
 D4
-&0.&?^&0..~
-&C~
+.&C^&?..~
+&0~
 D4
-&0..&?^&0.~
-&C~
+..&C^&?.~
+&0~
 E
 0 0 100.00 601
 E
-4 0 0.20 603
-I 5 103 2.00 1 d  # DIG: a yellow lightning stone
-I 5 104 2.00 1 d  # DIG: a red bloodstone
-I 5 1300 2.00 1 d  # DIG: a glowing green seashell
-I 5 1206 2.00 1 d  # DIG: an iridescent blue iris
-I 5 102 9.00 1 d  # DIG: a flint stone
-I 5 100 83.00 1 d  # DIG: a rock
-I 6 606 100.00 1  # FORAGE: a handful of elderberries
-I 20 603 100.00 1  # CHOP: an enchanted tree
+4 0 0.30 603
+E
+9 0 100.00 607
+E
+22 0 50.00 605
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 603 100.00 1  # CHOP: starwood tree
 M
 9151 3.33 c
 M
@@ -153,108 +154,73 @@ M
 M
 616 0.33 c
 M
-9040 0.03 c
-M
-9109 5.00 ch
-M
-9145 5.00 ach
-M
-9147 5.00 ch
-M
-9007 5.00 cg
-M
-9006 5.00 cg
-M
-9141 5.00 cg
-M
-9146 5.00 acg
-M
-9144 5.00 acg
-M
-9002 5.00 acg
-M
-9136 5.00 cg
-M
-9150 5.00 c
-M
-9149 5.00 c
-M
-9148 5.00 c
-M
-9008 5.00 c
-M
-9133 5.00 ac
-M
-9116 5.00 ac
-M
-9025 5.00 c
-M
-253 10.00 cf
-M
-9154 5.00 c
-M
-9153 5.00 c
-M
-251 15.00 ce
-M
-252 10.00 f
-M
 602 100.00 d
+X
+starwood forest woods copse enchanted trees around lights boughs blue pink violet~
+   You find yourself in the middle of a forest of towering pink trees. Light
+dances through the canopy in shades of blue and violet, but you can't tell if
+the trees are catching it or making it. There's a strange sense of... You can't
+quite put your finger on it. But whatever it is, this copse is full of it.
+~
 S
 #603
-Enchanted Woods~
-The Enchanted Woods~
-'^' 35 1 6 d 0
+Starwood Stand~
+A Stand of Starwood~
+'.' 35 ijqw 6 d np
 C
 chop, dig~
 D1
-&g.&?^&g.&?^~
-&P~
+.&P^&?.&P^~
+&g~
 D1
-^&g.&?^&g.~
-&P~
+&P^&?.&P^&?.~
+&g~
 D1
-^&g..&?^~
-&P~
+&P^&?..&P^~
+&g~
 D2
-&g.&?^&g.&?^~
-&P~
+.&P^&?.&P^~
+&g~
 D2
-^&g.&?^&g.~
-&P~
+&P^&?.&P^&?.~
+&g~
 D2
-^&g..&?^~
-&P~
+&P^&?..&P^~
+&g~
 D3
-&g.&?^&g.&?^~
-&P~
+.&P^&?.&P^~
+&g~
 D3
-^&g.&?^&g.~
-&P~
+&P^&?.&P^&?.~
+&g~
 D3
-^&g..&?^~
-&P~
+&P^&?..&P^~
+&g~
 D4
-&0.&?^&0.&?^~
-&C~
+.&C^&?.&C^~
+&0~
 D4
-^&0.&?^&0.~
-&C~
+&C^&?.&C^&?.~
+&0~
 D4
-^&0..&?^~
-&C~
+&C^&?..&C^~
+&0~
 E
 0 0 100.00 602
 E
-4 0 0.20 604
-I 5 103 2.00 1 d  # DIG: a yellow lightning stone
-I 5 104 2.00 1 d  # DIG: a red bloodstone
-I 5 1300 2.00 1 d  # DIG: a glowing green seashell
-I 5 1206 2.00 1 d  # DIG: an iridescent blue iris
-I 5 102 9.00 1 d  # DIG: a flint stone
-I 5 100 83.00 1 d  # DIG: a rock
-I 6 606 100.00 1  # FORAGE: a handful of elderberries
-I 20 603 100.00 1  # CHOP: an enchanted tree
+4 0 0.30 604
+E
+9 0 100.00 608
+E
+22 0 50.00 605
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 603 100.00 1  # CHOP: starwood tree
 M
 602 100.00 d
 M
@@ -271,57 +237,21 @@ M
 615 6.66 c
 M
 616 0.66 c
-M
-9040 0.06 c
-M
-9109 5.00 ch
-M
-9145 5.00 ach
-M
-9147 5.00 ch
-M
-9007 5.00 cg
-M
-9006 5.00 cg
-M
-9141 5.00 cg
-M
-9146 5.00 acg
-M
-9144 5.00 acg
-M
-9002 5.00 acg
-M
-9136 5.00 cg
-M
-9150 5.00 c
-M
-9149 5.00 c
-M
-9148 5.00 c
-M
-9008 5.00 c
-M
-9133 5.00 ac
-M
-9116 5.00 ac
-M
-9025 5.00 c
-M
-253 10.00 cf
-M
-9154 5.00 c
-M
-9153 5.00 c
-M
-251 15.00 ce
-M
-252 10.00 f
+U
+0
+The saplings explode upward into beautiful magic trees!~
+X
+starwood forest woods copse enchanted trees around lights boughs blue pink violet~
+   You find yourself in the middle of a forest of towering pink trees. Light
+dances through the canopy in shades of blue and violet, but you can't tell if
+the trees are catching it or making it. There's a strange sense of... You can't
+quite put your finger on it. But whatever it is, these woods are full of it.
+~
 S
 #604
-Enchanted Forest~
-The Enchanted Forest~
-'^' 35 1 8 d 0
+Starwood Forest~
+An Enchanting Starwood Forest~
+'^' 35 ijqw 8 d dnp
 C
 chop, dig~
 D1
@@ -518,14 +448,16 @@ D4
 &C~
 E
 0 0 100.00 603
-I 5 103 2.00 1 d  # DIG: a yellow lightning stone
-I 5 104 2.00 1 d  # DIG: a red bloodstone
-I 5 1300 2.00 1 d  # DIG: a glowing green seashell
-I 5 1206 2.00 1 d  # DIG: an iridescent blue iris
-I 5 102 9.00 1 d  # DIG: a flint stone
-I 5 100 83.00 1 d  # DIG: a rock
-I 6 606 100.00 1  # FORAGE: a handful of elderberries
-I 20 603 100.00 1  # CHOP: an enchanted tree
+E
+22 0 50.00 605
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 603 100.00 1  # CHOP: starwood tree
 M
 602 100.00 d
 M
@@ -542,57 +474,18 @@ M
 615 10.00 c
 M
 616 1.00 c
-M
-9040 0.10 c
-M
-9109 5.00 ch
-M
-9145 5.00 ach
-M
-9147 5.00 ch
-M
-9007 5.00 cg
-M
-9006 5.00 cg
-M
-9141 5.00 cg
-M
-9146 5.00 acg
-M
-9144 5.00 acg
-M
-9002 5.00 acg
-M
-9136 5.00 cg
-M
-9150 5.00 c
-M
-9149 5.00 c
-M
-9148 5.00 c
-M
-9008 5.00 c
-M
-9133 5.00 ac
-M
-9116 5.00 ac
-M
-9025 5.00 c
-M
-253 10.00 cf
-M
-9154 5.00 c
-M
-9153 5.00 c
-M
-251 15.00 ce
-M
-252 10.00 f
+X
+starwood forest woods copse enchanted trees around lights boughs blue pink violet~
+   You find yourself in the middle of a forest of towering pink trees. Light
+dances through the canopy in shades of blue and violet, but you can't tell if
+the trees are catching it or making it. There's a strange sense of... You can't
+quite put your finger on it. But whatever it is, this forest is full of it.
+~
 S
 #605
 Dead Forest~
 The Dead Forest~
-'^' 36 1 8 d 0
+'^' 36 jq 8 d np
 C
 chop, dig~
 D1
@@ -644,32 +537,1586 @@ D4
 ^^^&0.&?~
 &b~
 E
-0 0 100.00 0
+0 0 100.00 36
 E
 4 0 0.80 1
 E
 9 0 50.00 3
-I 5 102 9.00 1 d  # DIG: a flint stone
-I 5 100 91.00 1 d  # DIG: a rock
-I 6 3015 100.00 1  # FORAGE: some red berries
-I 20 605 100.00 3 c  # CHOP: a pile of dead wood
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 91.00 125 d  # DIG: rock
+I 6 3015 75.00 25  # FORAGE: red berries
+I 20 605 100.00 3 c  # CHOP: pile of dead wood
+X
+forest dead trees enchanted woods around~
+   The dead magewood trees have taken on a dim blue tone, far more disman than
+their bright pink signature color.
+~
+S
+#606
+Sprouting Starwood Stumps~
+A Field of Sprouting Starwood Stumps~
+'.' 38 ijqw 4 a p
+C
+dig~
+D1
+.&Vn&?..~
+&g~
+D1
+..&Vn&?.~
+&g~
+D1
+.&An&?..~
+&g~
+D1
+..&An&?.~
+&g~
+D2
+.&Vn&?..~
+&g~
+D2
+..&Vn&?.~
+&g~
+D2
+.&An&?..~
+&g~
+D2
+..&An&?.~
+&g~
+D3
+.&Vn&?..~
+&g~
+D3
+..&Vn&?.~
+&g~
+D3
+.&An&?..~
+&g~
+D3
+..&An&?.~
+&g~
+D4
+.&Vn&?..~
+&0~
+D4
+..&Vn&?.~
+&0~
+D4
+.&An&?..~
+&0~
+D4
+..&An&?.~
+&0~
+E
+0 0 100.00 601
+E
+20 480 100.00 602
+E
+22 0 50.00 605
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 605 100.00 1  # CHOP: pile of dead wood
 M
-9002 5.00 adg
+9151 3.33 c
 M
-9001 10.00 dg
+610 5.00 c
 M
-250 0.10 ad
+612 5.00 c
 M
-248 1.00 bd
+613 5.00 c
 M
-246 0.30 ad
+614 3.33 c
 M
-9017 5.00 d
+615 3.33 c
 M
-9116 5.00 ad
+616 0.33 c
 M
-253 10.00 cf
+602 100.00 d
+U
+0
+Sprouts of blue and violet begin to grow from the stumps!~
+X
+sprouting starwood forest woods copse enchanted trees around lights boughs blue pink violet~
+   All around you, the magical starwood stumps have begun sprouting new growth
+in vibrant shades of blue and violet.
+~
+S
+#607
+Sprouting Starwood Copse~
+A Sprouting Starwood Copse~
+'.' 6 ijqw 4 a p
+C
+dig~
+D1
+.&VW&?.&Vw~
+&g~
+D1
+&Vw&?.&VW&?.~
+&g~
+D1
+&VW&?..&Vw~
+&g~
+D1
+.&AW&?.&Aw~
+&g~
+D1
+&Aw&?.&AW&?.~
+&g~
+D1
+&AW&?..&Aw~
+&g~
+D2
+.&Vw&?.&VW~
+&g~
+D2
+&VW&?.&Vw&?.~
+&g~
+D2
+&Vw&?..&VW~
+&g~
+D2
+.&Aw&?.&AW~
+&g~
+D2
+&AW&?.&Aw&?.~
+&g~
+D2
+&Aw&?..&AW~
+&g~
+D3
+.&VW&?.&Vw~
+&g~
+D3
+&Vw&?.&VW&?.~
+&g~
+D3
+&VW&?..&Vw~
+&g~
+D3
+.&AW&?.&Aw~
+&g~
+D3
+&AW&?.&Aw&?.~
+&g~
+D3
+&Aw&?..&AW~
+&g~
+D4
+.&Vw&?.&VW~
+&0~
+D4
+&Vw&?.&VW&?.~
+&0~
+D4
+&VW&?..&Vw~
+&0~
+D4
+.&AW&?.&Aw~
+&0~
+D4
+&Aw&?.&AW&?.~
+&0~
+D4
+&AW&?..&Aw~
+&0~
+E
+0 0 100.00 602
+E
+20 360 100.00 603
+E
+22 0 50.00 605
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 605 100.00 1  # CHOP: pile of dead wood
 M
-9064 0.90 ad
+9151 3.33 c
+M
+610 5.00 c
+M
+612 5.00 c
+M
+613 5.00 c
+M
+614 3.33 c
+M
+615 3.33 c
+M
+616 0.33 c
+M
+602 100.00 d
+U
+0
+Sprouts of blue and violet begin to appear on the starwood trees!~
+X
+sprouting starwood forest woods copse enchanted trees around lights boughs blue pink violet thicket~
+   The fantastical trees around you have begun sprouting magical branches in
+bright blue and violet colors.
+~
+S
+#608
+Sprouting Starwood Stand~
+A Sprouting Stand of Starwood~
+'w' 38 ijqw 6 a p
+C
+dig~
+D1
+&g.&?WwW~
+&A~
+D1
+w&g.&?WW~
+&V~
+D1
+Ww&g.&?W~
+&A~
+D1
+wWW&g.~
+&V~
+D1
+&g.&?WWw~
+&A~
+D1
+W&g.&?wW~
+&V~
+D1
+wW&g.&?W~
+&A~
+D1
+WwW&g.~
+&V~
+D1
+&g.&?WwW~
+&A~
+D1
+W&g.&?wW~
+&V~
+D1
+wW&g.&?W~
+&A~
+D1
+WWw&g.~
+&V~
+D2
+&g.&?WwW~
+&A~
+D2
+w&g.&?WW~
+&V~
+D2
+Ww&g.&?W~
+&A~
+D2
+wWW&g.~
+&V~
+D2
+&g.&?WWw~
+&A~
+D2
+W&g.&?wW~
+&V~
+D2
+wW&g.&?W~
+&A~
+D2
+WwW&g.~
+&V~
+D2
+&g.&?WwW~
+&A~
+D2
+W&g.&?wW~
+&V~
+D2
+wW&g.&?W~
+&A~
+D2
+WWw&g.~
+&V~
+D3
+&g.&?WwW~
+&A~
+D3
+w&g.&?WW~
+&V~
+D3
+Ww&g.&?W~
+&A~
+D3
+wWW&g.~
+&V~
+D3
+&g.&?WWw~
+&A~
+D3
+W&g.&?wW~
+&V~
+D3
+wW&g.&?W~
+&A~
+D3
+WwW&g.~
+&V~
+D3
+&g.&?WwW~
+&A~
+D3
+W&g.&?wW~
+&V~
+D3
+wW&g.&?W~
+&A~
+D3
+WWw&g.~
+&V~
+D4
+&0.&?WwW~
+&A~
+D4
+w&0.&?WW~
+&V~
+D4
+Ww&0.&?W~
+&A~
+D4
+wWW&0.~
+&V~
+D4
+&0.&?WWw~
+&A~
+D4
+W&0.&?wW~
+&V~
+D4
+wW&0.&?W~
+&A~
+D4
+WwW&0.~
+&V~
+D4
+&0.&?WwW~
+&A~
+D4
+W&0.&?wW~
+&V~
+D4
+wW&0.&?W~
+&A~
+D4
+WWw&0.~
+&V~
+E
+0 0 100.00 603
+E
+20 240 100.00 604
+E
+22 0 50.00 605
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 605 100.00 1  # CHOP: pile of dead wood
+M
+602 100.00 d
+M
+9151 6.66 c
+M
+610 10.00 c
+M
+612 10.00 c
+M
+613 10.00 c
+M
+614 6.66 c
+M
+615 6.66 c
+M
+616 0.66 c
+U
+0
+Sprouts of blue and violet begin to appear on the starwood trees!~
+X
+sprouting starwood forest woods copse enchanted trees around lights boughs blue pink violet~
+   The enchanted trees around you have begun to sprout new branches in shades
+of blue and violet.
+~
+S
+#610
+Weirdwood Saplings~
+Among the Weirdwood Saplings~
+'.' 38 ik 2 0 p
+C
+chant nature~
+D1
+..&Vw&?.~
+&Y~
+D1
+.&Vw&?..~
+&Y~
+D2
+..&Vw&?.~
+&y~
+D2
+.&Vw&?..~
+&y~
+D3
+..&Vw&?.~
+&Y~
+D3
+.&Vw&?..~
+&Y~
+D4
+..&Vw&?.~
+&y~
+D4
+.&Vw&?..~
+&y~
+E
+9 0 100.00 613
+X
+weirdwood saplings woods trees around~
+   Violet saplings have begun to germinate in the desert sands. They're small
+and bushy, but with the right care -- and the Chant of Nature -- they will
+quickly grow into impressive magical trees.
+~
+S
+#611
+Clear-Cut Weirdwood~
+A Clear-Cut Enchanted Grove~
+'.' 38 ik 2 0 p
+C
+dig~
+D1
+..&V.&?.~
+&Y~
+D1
+.&V.&?..~
+&Y~
+D2
+..&V.&?.~
+&y~
+D2
+.&V.&?..~
+&y~
+D3
+..&V.&?.~
+&Y~
+D3
+.&V.&?..~
+&Y~
+D4
+..&V.&?.~
+&y~
+D4
+.&V.&?..~
+&y~
+E
+4 0 0.30 612
+E
+9 0 100.00 621
+E
+22 0 50.00 615
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+M
+602 100.00 d
+X
+weirdwood clearcut clear-cut cut stumps grove enchanted forest trees around~
+   The grove is filled with the violet stumps of weirdwood trees. It is not
+completely devoid of life, however, as you can see wisps of mana sublimating
+off of the stumps. There's still life here; it will return.
+~
+X
+mana wisps~
+Wisps of mana drift from the tops of the weirdwood stumps.
+~
+S
+#612
+Weirdwood Thicket~
+A Weirdwood Thicket~
+'.' 38 ikqw 4 d np
+C
+chop, dig~
+D1
+..&Vw&?.~
+&Y~
+D1
+.&Vw&?..~
+&Y~
+D2
+..&Vw&?.~
+&y~
+D2
+.&Vw&?..~
+&y~
+D3
+..&Vw&?.~
+&Y~
+D3
+.&Vw&?..~
+&Y~
+D4
+..&Vw&?.~
+&y~
+D4
+.&Vw&?..~
+&y~
+E
+0 0 100.00 611
+E
+4 0 0.30 613
+E
+9 0 100.00 622
+E
+22 0 50.00 615
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 618 100.00 1  # CHOP: weirdwood tree
+M
+602 100.00 d
+M
+9151 10.00 c
+M
+612 3.00 c
+M
+613 3.00 c
+M
+614 10.00 c
+M
+615 10.00 c
+M
+616 1.00 c
+M
+619 5.00 c
+M
+618 10.00 c
+M
+621 10.00 c
+X
+weirdwood weald grove thicket woods weirdwoods trees forest around lights boughs blue pink violet~
+   You find yourself in the middle of a forest of twisting, violet trees.
+Light dances in the boughs in shades of pink and blue, but you can't tell if
+the trees are catching it or making it. There's a strange sense of... You can't
+quite put your finger on it. But whatever it is, this thicket is full of it.
+~
+S
+#613
+Weirdwood Grove~
+A Weirdwood Grove~
+'.' 38 ikqw 6 d np
+C
+chop, dig~
+D1
+&VW&?.&Vw&?.~
+&Y~
+D1
+.&VW&?.&Vw~
+&Y~
+D1
+&Vw&?.&VW&?.~
+&Y~
+D1
+.&Vw&?.&VW~
+&Y~
+D1
+&VW&?..&Vw~
+&Y~
+D1
+&VW&?..&Vw~
+&Y~
+D1
+&Vw&?..&VW~
+&Y~
+D1
+&Vw&?..&VW~
+&Y~
+D2
+&VW&?.&Vw&?.~
+&y~
+D2
+.&VW&?.&Vw~
+&y~
+D2
+&Vw&?.&VW&?.~
+&y~
+D2
+.&Vw&?.&VW~
+&y~
+D2
+&VW&?..&Vw~
+&y~
+D2
+&VW&?..&Vw~
+&y~
+D2
+&Vw&?..&VW~
+&y~
+D2
+&Vw&?..&VW~
+&y~
+D3
+&VW&?.&Vw&?.~
+&Y~
+D3
+.&VW&?.&Vw~
+&Y~
+D3
+&Vw&?.&VW&?.~
+&Y~
+D3
+.&Vw&?.&VW~
+&Y~
+D3
+&VW&?..&Vw~
+&Y~
+D3
+&VW&?..&Vw~
+&Y~
+D3
+&Vw&?..&VW~
+&Y~
+D3
+&Vw&?..&VW~
+&Y~
+D4
+&VW&?.&Vw&?.~
+&y~
+D4
+.&VW&?.&Vw~
+&y~
+D4
+&Vw&?.&VW&?.~
+&y~
+D4
+.&Vw&?.&VW~
+&y~
+D4
+&VW&?..&Vw~
+&y~
+D4
+&VW&?..&Vw~
+&y~
+D4
+&Vw&?..&VW~
+&y~
+D4
+&Vw&?..&VW~
+&y~
+E
+0 0 100.00 612
+E
+4 0 0.30 614
+E
+9 0 100.00 623
+E
+22 0 50.00 615
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 618 100.00 1  # CHOP: weirdwood tree
+M
+602 100.00 d
+M
+9151 10.00 c
+M
+612 3.00 c
+M
+613 3.00 c
+M
+614 10.00 c
+M
+615 10.00 c
+M
+616 1.00 c
+M
+619 5.00 c
+M
+618 10.00 c
+M
+621 10.00 c
+U
+0
+The saplings spring up into the air as full-sized violet trees!~
+X
+weirdwood weald grove thicket woods weirdwoods trees forest around lights boughs blue pink violet~
+   You find yourself in the middle of a forest of twisting, violet trees.
+Light dances in the boughs in shades of pink and blue, but you can't tell if
+the trees are catching it or making it. There's a strange sense of... You can't
+quite put your finger on it. But whatever it is, this grove is full of it.
+~
+S
+#614
+Weirdwood Weald~
+A Weirdwood Weald~
+'w' 39 ikqw 8 dl dnp
+C
+chop, dig~
+D1
+&Y.&?WwW~
+&V~
+D1
+W&Y.&?wW~
+&V~
+D1
+Ww&Y.&?W~
+&V~
+D1
+WwW&Y.~
+&V~
+D1
+&Y.&?WwW~
+&V~
+D1
+W&Y.&?wW~
+&V~
+D1
+Ww&Y.&?W~
+&V~
+D1
+WwW&Y.~
+&V~
+D1
+W&P*&?wW~
+&V~
+D1
+Ww&P*&?W~
+&V~
+D1
+W&A*&?wW~
+&V~
+D1
+Ww&A*&?W~
+&V~
+D2
+&y.&?WwW~
+&V~
+D2
+W&y.&?wW~
+&V~
+D2
+Ww&y.&?W~
+&V~
+D2
+WwW&y.~
+&V~
+D2
+&y.&?WwW~
+&V~
+D2
+W&y.&?wW~
+&V~
+D2
+Ww&y.&?W~
+&V~
+D2
+WwW&y.~
+&V~
+D2
+W&P*&?wW~
+&V~
+D2
+Ww&P*&?W~
+&V~
+D2
+W&A*&?wW~
+&V~
+D2
+Ww&A*&?W~
+&V~
+D3
+&Y.&?WwW~
+&V~
+D3
+W&Y.&?wW~
+&V~
+D3
+Ww&Y.&?W~
+&V~
+D3
+WwW&Y.~
+&V~
+D3
+&Y.&?WwW~
+&V~
+D3
+W&Y.&?wW~
+&V~
+D3
+Ww&Y.&?W~
+&V~
+D3
+WwW&Y.~
+&V~
+D3
+W&P*&?wW~
+&V~
+D3
+Ww&P*&?W~
+&V~
+D3
+W&A*&?wW~
+&V~
+D3
+Ww&A*&?W~
+&V~
+D4
+&y.&?WwW~
+&V~
+D4
+W&y.&?wW~
+&V~
+D4
+Ww&y.&?W~
+&V~
+D4
+WwW&y.~
+&V~
+D4
+&y.&?WwW~
+&V~
+D4
+W&y.&?wW~
+&V~
+D4
+Ww&y.&?W~
+&V~
+D4
+WwW&y.~
+&V~
+D4
+W&P*&?wW~
+&V~
+D4
+Ww&P*&?W~
+&V~
+D4
+W&A*&?wW~
+&V~
+D4
+Ww&A*&?W~
+&V~
+E
+0 0 100.00 613
+E
+17 80 0.50 616
+E
+17 81 0.50 616
+E
+17 88 0.50 616
+E
+17 89 0.50 616
+E
+17 82 0.30 616
+E
+17 21 0.50 616
+E
+22 0 50.00 615
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 618 100.00 1  # CHOP: weirdwood tree
+M
+602 100.00 d
+M
+9151 10.00 c
+M
+612 3.00 c
+M
+613 3.00 c
+M
+614 10.00 c
+M
+615 10.00 c
+M
+616 1.00 c
+M
+619 5.00 c
+M
+618 10.00 c
+M
+621 10.00 c
+X
+weirdwood weald grove thicket woods weirdwoods trees forest around lights boughs blue pink violet~
+   You find yourself in the middle of a forest of twisting, violet trees.
+Light dances in the boughs in shades of pink and blue, but you can't tell if
+the trees are catching it or making it. There's a strange sense of... You can't
+quite put your finger on it. But whatever it is, this weald is full of it.
+~
+S
+#615
+Dead Grove~
+A Dead Grove~
+'w' 28 kq 8 d np
+C
+chop, dig~
+D1
+&Y.&?WwW~
+&b~
+D1
+W&Y.&?wW~
+&b~
+D1
+Ww&Y.&?W~
+&b~
+D1
+WwW&Y.~
+&b~
+D2
+&y.&?WwW~
+&b~
+D2
+W&y.&?wW~
+&b~
+D2
+Ww&y.&?W~
+&b~
+D2
+WwW&y.~
+&b~
+D3
+&Y.&?WwW~
+&b~
+D3
+W&Y.&?wW~
+&b~
+D3
+Ww&Y.&?W~
+&b~
+D3
+WwW&Y.~
+&b~
+D4
+&y.&?WwW~
+&b~
+D4
+W&y.&?wW~
+&b~
+D4
+Ww&y.&?W~
+&b~
+D4
+WwW&y.~
+&b~
+E
+0 0 100.00 23
+E
+4 0 0.80 25
+E
+9 0 50.00 26
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 91.00 125 d  # DIG: rock
+I 6 3016 75.00 25  # FORAGE: handful of dates
+I 20 605 100.00 3 c  # CHOP: pile of dead wood
+X
+grove dead trees forest weirdwood woods around~
+   The dead weirdwood trees have taken on a midnight blue tone, far dimmer than
+the bright violet that is their signature color.
+~
+S
+#616
+Enchanted Oasis~
+An Enchanted Oasis~
+'.' 35 ikovw 6 iw jp
+C
+dig, drink, fill, pick~
+D0
+.&P~~&?.~
+&y~
+E
+4 0 0.45 617
+E
+10 623 5.00 21
+E
+10 622 5.00 21
+E
+10 621 5.00 21
+E
+10 611 5.00 21
+E
+10 612 5.00 21
+E
+10 613 5.00 21
+E
+10 614 5.00 21
+E
+22 0 50.00 21
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 101 9.00 125 d  # DIG: lump of clay
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 7 103 2.00 125 p  # PICK: yellow lightning stone
+I 7 104 2.00 125 p  # PICK: red bloodstone
+I 7 1206 2.00 125 p  # PICK: iridescent blue iris
+I 7 1300 2.00 125 p  # PICK: glowing green seashell
+I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+M
+602 100.00 d
+M
+9151 10.00 c
+M
+610 1.00 c
+M
+616 1.00 c
+M
+617 0.99 c
+M
+618 15.00 c
+M
+619 15.00 c
+X
+oasis enchanted weirdwood weald grove thicket weirdwoods trees forest around water~
+   The oasis has taken on an odd pink color, though it's below the surface. The
+water is still crystal clear and unusually refreshing. The desert has begun
+sprouting plants in shades of bright violet. Truly this is a magical place.
+~
+S
+#617
+Lush Enchanted Oasis~
+A Lush Enchanted Oasis~
+'.' 35 ikoqvw 6 adiw jp
+C
+chop, dig, drink, fill, pick~
+D0
+.&P~~&VW~
+&y~
+D0
+&VW&P~~&?.~
+&y~
+D0
+.&P~~&Vw~
+&y~
+D0
+&Vw&P~~&?.~
+&y~
+E
+0 0 100.00 616
+E
+4 0 0.45 618
+E
+10 623 5.00 80
+E
+10 622 5.00 80
+E
+10 621 5.00 80
+E
+10 611 5.00 80
+E
+10 612 5.00 80
+E
+10 613 5.00 80
+E
+10 614 5.00 80
+E
+22 0 50.00 80
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 101 9.00 125 d  # DIG: lump of clay
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 7 103 2.00 125 p  # PICK: yellow lightning stone
+I 7 104 2.00 125 p  # PICK: red bloodstone
+I 7 1206 2.00 125 p  # PICK: iridescent blue iris
+I 7 1300 2.00 125 p  # PICK: glowing green seashell
+I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 20 618 100.00 1  # CHOP: weirdwood tree
+M
+602 100.00 d
+M
+9151 10.00 c
+M
+610 1.00 c
+M
+616 1.00 c
+M
+617 0.99 c
+M
+618 15.00 c
+M
+619 15.00 c
+X
+oasis enchanted weirdwood weald grove thicket weirdwoods trees forest around water~
+   The little pink oasis is surrounded by violet weirdwood trees with twisting,
+gnarled trunks. Magic hangs freely in the air, almost untethered, as it wafts
+from the blooms on the trees.
+~
+S
+#618
+Shady Enchanted Oasis~
+A Shady Enchanted Oasis~
+'.' 35 ikoqvw 6 adiw jp
+C
+chop, dig, drink, fill, pick~
+D0
+&VW&P~~&VW~
+&y~
+D0
+&Vw&P~~&VW~
+&y~
+D0
+&VW&P~~&Vw~
+&y~
+D0
+&Vw&P~~&Vw~
+&y~
+E
+0 0 100.00 617
+E
+10 623 5.00 81
+E
+10 622 5.00 81
+E
+10 621 5.00 81
+E
+10 611 5.00 81
+E
+10 612 5.00 81
+E
+10 613 5.00 81
+E
+10 614 5.00 81
+E
+22 0 50.00 81
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 101 9.00 125 d  # DIG: lump of clay
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 7 103 2.00 125 p  # PICK: yellow lightning stone
+I 7 104 2.00 125 p  # PICK: red bloodstone
+I 7 1206 2.00 125 p  # PICK: iridescent blue iris
+I 7 1300 2.00 125 p  # PICK: glowing green seashell
+I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+I 20 618 100.00 1  # CHOP: weirdwood tree
+M
+602 100.00 d
+M
+9151 10.00 c
+M
+610 1.00 c
+M
+616 1.00 c
+M
+617 0.99 c
+M
+618 15.00 c
+M
+619 15.00 c
+X
+oasis enchanted weirdwood weald grove thicket weirdwoods trees forest around water~
+   Gnarly violet trees shade this little pink oasis -- a sure sign that magic
+is afoot. The shallow water is crystal clear and has the purest taste. Its pink
+tone comes from something living at the bottom.
+~
+S
+#621
+Sprouting Weirdwood Stumps~
+A Grove of Sprouting Weirdwood Stumps~
+'.' 6 ikw 2 a p
+C
+dig~
+D1
+..&Pn&?.~
+&Y~
+D1
+.&Pn&?..~
+&Y~
+D1
+..&An&?.~
+&Y~
+D1
+.&An&?..~
+&Y~
+D2
+..&Pn&?.~
+&y~
+D2
+.&Pn&?..~
+&y~
+D2
+..&An&?.~
+&y~
+D2
+.&An&?..~
+&y~
+D3
+..&Pn&?.~
+&Y~
+D3
+.&Pn&?..~
+&Y~
+D3
+..&An&?.~
+&Y~
+D3
+.&An&?..~
+&Y~
+D4
+..&Pn&?.~
+&y~
+D4
+.&Pn&?..~
+&y~
+D4
+..&An&?.~
+&y~
+D4
+.&An&?..~
+&y~
+E
+0 0 100.00 611
+E
+20 480 100.00 612
+E
+22 0 50.00 615
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 605 100.00 1  # CHOP: pile of dead wood
+M
+602 100.00 d
+U
+0
+Pink and blue sprouts rise out of the stumps!~
+X
+weirdwood sprouting sprouts stumps grove enchanted forest trees around~
+   The violet stumps of the weirdwood trees have started to sprout new pink and
+blue branches, which twiste and writhe as they reach toward the sky.
+~
+S
+#622
+Sprouting Weirdwood Thicket~
+A Sprouting Thicket of Weirdwood~
+'.' 36 ikqw 4 a p
+C
+dig~
+D1
+&PY&?.&Pn&?.~
+&Y~
+D1
+.&AY&?.&An~
+&Y~
+D1
+&Pn&?.&PY&?.~
+&Y~
+D1
+.&An&?.&AY~
+&Y~
+D1
+&PY&?..&Pn~
+&Y~
+D1
+&AY&?..&An~
+&Y~
+D1
+&Pn&?..&PY~
+&Y~
+D1
+&An&?..&AY~
+&Y~
+D2
+&PY&?.&Pn&?.~
+&y~
+D2
+.&AY&?.&An~
+&y~
+D2
+&Pn&?.&PY&?.~
+&y~
+D2
+.&An&?.&AY~
+&y~
+D2
+&PY&?..&Pn~
+&y~
+D2
+&AY&?..&An~
+&y~
+D2
+&Pn&?..&PY~
+&y~
+D2
+&An&?..&AY~
+&y~
+D3
+&PY&?.&Pn&?.~
+&Y~
+D3
+.&AY&?.&An~
+&Y~
+D3
+&Pn&?.&PY&?.~
+&Y~
+D3
+.&An&?.&AY~
+&Y~
+D3
+&PY&?..&Pn~
+&Y~
+D3
+&AY&?..&An~
+&Y~
+D3
+&Pn&?..&PY~
+&Y~
+D3
+&An&?..&AY~
+&Y~
+D4
+&PY&?.&Pn&?.~
+&y~
+D4
+.&AY&?.&An~
+&y~
+D4
+&Pn&?.&PY&?.~
+&y~
+D4
+.&An&?.&AY~
+&y~
+D4
+&PY&?..&Pn~
+&y~
+D4
+&AY&?..&An~
+&y~
+D4
+&Pn&?..&PY~
+&y~
+D4
+&An&?..&AY~
+&y~
+E
+0 0 100.00 612
+E
+20 360 100.00 613
+E
+22 0 50.00 615
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 605 100.00 1  # CHOP: pile of dead wood
+M
+602 100.00 d
+M
+9151 10.00 c
+M
+612 3.00 c
+M
+613 3.00 c
+M
+614 10.00 c
+M
+615 10.00 c
+M
+616 1.00 c
+M
+619 5.00 c
+M
+618 10.00 c
+M
+621 10.00 c
+U
+0
+Pink and blue sprouts spring out of the weirdwood trees!~
+X
+weirdwood stand trees sprouting weirdwoods woods forest around~
+   The violet trees around you seem to twist and contort themselves as they
+pull mana from the air. All over them, new branches sprout and grow before your
+eyes.
+~
+S
+#623
+Sprouting Weirdwood Grove~
+A Sprouting Grove of Weirdwood~
+'n' 35 ikqw 6 a p
+C
+dig~
+D1
+&Y.&?YnY~
+&P~
+D1
+Y&Y.&?nY~
+&A~
+D1
+Yn&Y.&?Y~
+&P~
+D1
+YnY&Y.~
+&A~
+D1
+&Y.&?YnY~
+&P~
+D1
+Y&Y.&?nY~
+&A~
+D1
+Yn&Y.&?Y~
+&P~
+D1
+YnY&Y.~
+&A~
+D2
+&y.&?YnY~
+&P~
+D2
+Y&y.&?nY~
+&A~
+D2
+Yn&y.&?Y~
+&P~
+D2
+YnY&y.~
+&A~
+D2
+&y.&?YnY~
+&P~
+D2
+Y&y.&?nY~
+&A~
+D2
+Yn&y.&?Y~
+&P~
+D2
+YnY&y.~
+&A~
+D3
+&Y.&?YnY~
+&P~
+D3
+Y&Y.&?nY~
+&A~
+D3
+Yn&Y.&?Y~
+&P~
+D3
+YnY&Y.~
+&A~
+D3
+&Y.&?YnY~
+&P~
+D3
+Y&Y.&?nY~
+&A~
+D3
+Yn&Y.&?Y~
+&P~
+D3
+YnY&Y.~
+&A~
+D4
+&y.&?YnY~
+&P~
+D4
+Y&y.&?nY~
+&A~
+D4
+Yn&y.&?Y~
+&P~
+D4
+YnY&y.~
+&A~
+D4
+&y.&?YnY~
+&P~
+D4
+Y&y.&?nY~
+&A~
+D4
+Yn&y.&?Y~
+&P~
+D4
+YnY&y.~
+&A~
+E
+0 0 100.00 613
+E
+20 240 100.00 614
+E
+22 0 50.00 615
+I 5 103 2.00 125 d  # DIG: yellow lightning stone
+I 5 104 2.00 125 d  # DIG: red bloodstone
+I 5 1300 2.00 125 d  # DIG: glowing green seashell
+I 5 1206 2.00 125 d  # DIG: iridescent blue iris
+I 5 102 9.00 125 d  # DIG: flint stone
+I 5 100 83.00 125 d  # DIG: rock
+I 6 606 100.00 25  # FORAGE: handful of elderberries
+I 20 605 100.00 1  # CHOP: pile of dead wood
+M
+602 100.00 d
+M
+9151 10.00 c
+M
+612 3.00 c
+M
+613 3.00 c
+M
+614 10.00 c
+M
+615 10.00 c
+M
+616 1.00 c
+M
+619 5.00 c
+M
+618 10.00 c
+M
+621 10.00 c
+U
+0
+Pink and blue sprouts spring out of the weirdwood trees!~
+X
+weirdwood weirdwoods weald grove thicket forest trees around~
+   All over, the violet weirdwood trees are covered in pink and blue sprouts.
+The forest grows so fast, you can almost hear it creaking.
+~
 S
 $

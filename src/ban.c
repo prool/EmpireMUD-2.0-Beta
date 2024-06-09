@@ -2,7 +2,7 @@
 *   File: ban.c                                           EmpireMUD 2.0b5 *
 *  Usage: banning/unbanning/checking sites and player names               *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
@@ -60,8 +60,7 @@ void load_banned(void) {
 			if (!str_cmp(ban_type, ban_types[i]))
 				next_node->type = i;
 
-		next_node->next = ban_list;
-		ban_list = next_node;
+		LL_PREPEND(ban_list, next_node);
 	}
 
 	fclose(fl);
@@ -98,6 +97,10 @@ void _write_one_node(FILE * fp, struct ban_list_element * node) {
 
 void write_ban_list(void) {
 	FILE *fl;
+	
+	if (block_all_saves_due_to_shutdown) {
+		return;
+	}
 
 	if (!(fl = fopen(BAN_FILE, "w"))) {
 		perror("SYSERR: Unable to open '" BAN_FILE "' for writing");
@@ -121,7 +124,7 @@ ACMD(do_ban) {
 			send_to_char("No sites are banned.\r\n", ch);
 			return;
 		}
-		strcpy(format, "%-25.25s  %-8.8s  %-10.10s  %-16.16s\r\n");
+		strcpy(format, "%-25s  %-8.8s  %-10.10s  %-16.16s\r\n");
 		msg_to_char(ch, format, "Banned Site Name", "Ban Type", "Banned On", "Banned By");
 		msg_to_char(ch, format, "---------------------------------", "---------------------------------", "---------------------------------", "---------------------------------");
 
@@ -155,9 +158,10 @@ ACMD(do_ban) {
 
 	CREATE(ban_node, struct ban_list_element, 1);
 	strncpy(ban_node->site, site, BANNED_SITE_LENGTH);
-	for (nextchar = ban_node->site; *nextchar; nextchar++)
-		*nextchar = LOWER(*nextchar);
 	ban_node->site[BANNED_SITE_LENGTH] = '\0';
+	for (nextchar = ban_node->site; *nextchar; nextchar++) {
+		*nextchar = LOWER(*nextchar);
+	}
 	strncpy(ban_node->name, GET_NAME(ch), MAX_NAME_LENGTH);
 	ban_node->name[MAX_NAME_LENGTH] = '\0';
 	ban_node->date = time(0);
@@ -166,10 +170,9 @@ ACMD(do_ban) {
 		if (!str_cmp(flag, ban_types[i]))
 			ban_node->type = i;
 
-	ban_node->next = ban_list;
-	ban_list = ban_node;
+	LL_PREPEND(ban_list, ban_node);
 
-	syslog(SYS_GC, GET_INVIS_LEV(ch), TRUE, "BAN: %s has banned %s for %s players.", GET_NAME(ch), site, ban_types[ban_node->type]);
+	syslog(SYS_GC, GET_INVIS_LEV(ch), TRUE, "BAN: %s has banned %s for %s players", GET_NAME(ch), site, ban_types[ban_node->type]);
 	send_to_char("Site banned.\r\n", ch);
 	write_ban_list();
 }
@@ -177,7 +180,7 @@ ACMD(do_ban) {
 
 ACMD(do_unban) {
 	char site[MAX_INPUT_LENGTH];
-	struct ban_list_element *ban_node, *temp;
+	struct ban_list_element *ban_node;
 	int found = 0;
 
 	one_argument(argument, site);
@@ -197,9 +200,9 @@ ACMD(do_unban) {
 		send_to_char("That site is not currently banned.\r\n", ch);
 		return;
 	}
-	REMOVE_FROM_LIST(ban_node, ban_list, next);
+	LL_DELETE(ban_list, ban_node);
 	send_to_char("Site unbanned.\r\n", ch);
-	syslog(SYS_GC, GET_INVIS_LEV(ch), TRUE, "BAN: %s removed the %s-player ban on %s.", GET_NAME(ch), ban_types[ban_node->type], ban_node->site);
+	syslog(SYS_GC, GET_INVIS_LEV(ch), TRUE, "BAN: %s removed the %s-player ban on %s", GET_NAME(ch), ban_types[ban_node->type], ban_node->site);
 
 	free(ban_node);
 	write_ban_list();
@@ -240,7 +243,7 @@ int Valid_Name(char *newname) {
 
 	/* Does the desired name contain a string in the invalid list? */
 	for (i = 0; i < num_invalid; i++) {
-		if (*invalid_list[i] == '%') {	// leading * means substr
+		if (*invalid_list[i] == '%') {	// leading % means substr
 			if (strstr(tempname, invalid_list[i] + 1)) {
 				return (0);
 			}
@@ -275,4 +278,19 @@ void Read_Invalid_List(void) {
 	}
 
 	fclose(fp);
+}
+
+
+/**
+* Frees the memory for the invalid name list during 'shutdown complete'.
+*/
+void free_invalid_list(void) {
+	int iter;
+	
+	for (iter = 0; iter < num_invalid; ++iter) {
+		if (invalid_list[iter]) {
+			free(invalid_list[iter]);
+		}
+	}
+	num_invalid = 0;
 }

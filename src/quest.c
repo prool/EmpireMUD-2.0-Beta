@@ -2,15 +2,13 @@
 *   File: quest.c                                         EmpireMUD 2.0b5 *
 *  Usage: quest loading, saving, OLC, and processing                      *
 *                                                                         *
-*  EmpireMUD code base by Paul Clarke, (C) 2000-2015                      *
+*  EmpireMUD code base by Paul Clarke, (C) 2000-2024                      *
 *  All rights reserved.  See license.doc for complete information.        *
 *                                                                         *
 *  EmpireMUD based upon CircleMUD 3.0, bpl 17, by Jeremy Elson.           *
 *  CircleMUD (C) 1993, 94 by the Trustees of the Johns Hopkins University *
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
-
-#include <math.h>
 
 #include "conf.h"
 #include "sysdep.h"
@@ -25,6 +23,7 @@
 #include "handler.h"
 #include "dg_scripts.h"
 #include "vnums.h"
+#include "constants.h"
 
 /**
 * Contents:
@@ -43,47 +42,12 @@ const char *default_quest_name = "Unnamed Quest";
 const char *default_quest_description = "This quest has no description.\r\n";
 const char *default_quest_complete_msg = "You have completed the quest.\r\n";
 
-// external consts
-extern const char *action_bits[];
-extern const char *quest_flags[];
-extern const char *quest_giver_types[];
-extern const char *quest_reward_types[];
-extern const bool requirement_amt_type[];
-extern const char *requirement_types[];
-extern const char *olc_type_bits[NUM_OLC_TYPES+1];
-
-// external funcs
-extern struct req_data *copy_requirements(struct req_data *from);
-extern int count_owned_buildings(empire_data *emp, bld_vnum vnum);
-extern int count_owned_vehicles(empire_data *emp, any_vnum vnum);
-void count_quest_tasks(struct player_quest *pq, int *complete, int *total);
-extern bool delete_requirement_from_list(struct req_data **list, int type, any_vnum vnum);
-void drop_quest(char_data *ch, struct player_quest *pq);
-extern struct instance_data *find_instance_by_room(room_data *room, bool check_homeroom);
-extern bool find_requirement_in_list(struct req_data *list, int type, any_vnum vnum);
-extern struct instance_data *get_instance_by_id(any_vnum instance_id);
-void get_requirement_display(struct req_data *list, char *save_buffer);
-void get_script_display(struct trig_proto_list *list, char *save_buffer);
-extern room_data *obj_room(obj_data *obj);
-void olc_process_requirements(char_data *ch, char *argument, struct req_data **list, char *command, bool allow_tracker_types);
-extern char *requirement_string(struct req_data *req, bool show_vnums);
-
-// external vars
-
 // local protos
 void add_quest_lookup(struct quest_lookup **list, quest_data *quest);
 void add_to_quest_temp_list(struct quest_temp_list **list, quest_data *quest, struct instance_data *instance);
-bool char_meets_prereqs(char_data *ch, quest_data *quest, struct instance_data *instance);
-bool find_quest_giver_in_list(struct quest_giver *list, int type, any_vnum vnum);
-void free_player_quests(struct player_quest *list);
-void free_quest_givers(struct quest_giver *list);
-void free_quest_temp_list(struct quest_temp_list *list);
-struct player_completed_quest *has_completed_quest_any(char_data *ch, any_vnum quest);
-struct player_completed_quest *has_completed_quest(char_data *ch, any_vnum quest, int instance_id);
-struct player_quest *is_on_quest(char_data *ch, any_vnum quest);
 bool remove_quest_lookup(struct quest_lookup **list, quest_data *quest);
 void update_mob_quest_lookups(mob_vnum vnum);
-void update_obj_quest_lookups(obj_vnum vnum);
+void update_veh_quest_lookups(any_vnum vnum);
 void write_daily_quest_file();
 
 
@@ -102,6 +66,7 @@ void write_daily_quest_file();
 */
 bool can_turn_in_quest_at(char_data *ch, room_data *loc, quest_data *quest, empire_data **giver_emp) {
 	struct quest_giver *giver;
+	vehicle_data *veh;
 	char_data *mob;
 	obj_data *obj;
 	
@@ -111,15 +76,15 @@ bool can_turn_in_quest_at(char_data *ch, room_data *loc, quest_data *quest, empi
 		// QG_x: find quest giver here
 		switch (giver->type) {
 			case QG_BUILDING: {
-				if (GET_BUILDING(loc) && GET_BLD_VNUM(GET_BUILDING(loc)) == giver->vnum) {
+				if (GET_BUILDING(loc) && GET_BLD_VNUM(GET_BUILDING(loc)) == giver->vnum && IS_COMPLETE(loc)) {
 					*giver_emp = ROOM_OWNER(loc);
 					return TRUE;
 				}
 				break;
 			}
 			case QG_MOBILE: {
-				LL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), mob, next_in_room) {
-					if (IS_NPC(mob) && GET_MOB_VNUM(mob) == giver->vnum && CAN_SEE(ch, mob)) {
+				DL_FOREACH2(ROOM_PEOPLE(IN_ROOM(ch)), mob, next_in_room) {
+					if (IS_NPC(mob) && GET_MOB_VNUM(mob) == giver->vnum && CAN_SEE(ch, mob) && !AFF_FLAGGED(mob, AFF_NO_SEE_IN_ROOM)) {
 						*giver_emp = GET_LOYALTY(mob);
 						return TRUE;
 					}
@@ -127,23 +92,33 @@ bool can_turn_in_quest_at(char_data *ch, room_data *loc, quest_data *quest, empi
 				break;
 			}
 			case QG_OBJECT: {
-				LL_FOREACH2(ch->carrying, obj, next_content) {
+				DL_FOREACH2(ch->carrying, obj, next_content) {
 					if (GET_OBJ_VNUM(obj) == giver->vnum && CAN_SEE_OBJ(ch, obj)) {
 						*giver_emp = GET_LOYALTY(ch);
 						return TRUE;
 					}
 				}
-				LL_FOREACH2(ROOM_CONTENTS(loc), obj, next_content) {
+				DL_FOREACH2(ROOM_CONTENTS(loc), obj, next_content) {
 					if (GET_OBJ_VNUM(obj) == giver->vnum && CAN_SEE_OBJ(ch, obj)) {
 						*giver_emp = CAN_WEAR(obj, ITEM_WEAR_TAKE) ? GET_LOYALTY(ch) : ROOM_OWNER(loc);
 						return TRUE;
 					}
 				}
+				break;
 			}
 			case QG_ROOM_TEMPLATE: {
 				if (GET_ROOM_TEMPLATE(loc) && GET_RMT_VNUM(GET_ROOM_TEMPLATE(loc)) == giver->vnum) {
 					*giver_emp = ROOM_OWNER(loc);
 					return TRUE;
+				}
+				break;
+			}
+			case QG_VEHICLE: {
+				DL_FOREACH2(ROOM_VEHICLES(IN_ROOM(ch)), veh, next_in_room) {
+					if (VEH_VNUM(veh) == giver->vnum && !VEH_IS_EXTRACTED(veh) && VEH_IS_COMPLETE(veh) && CAN_SEE_VEHICLE(ch, veh)) {
+						*giver_emp = VEH_OWNER(veh);
+						return TRUE;
+					}
 				}
 				break;
 			}
@@ -188,6 +163,50 @@ void copy_quest_progress(struct req_data *to_list, struct req_data *from_list) {
 
 
 /**
+* Counts how many different crops a list of items has, based on the <plants>
+* field and the PLANTABLE flag.
+*
+* @param obj_data *list The set of items to search for crops.
+*/
+int count_crop_variety_in_list(obj_data *list) {
+	obj_data *obj;
+	any_vnum vnum;
+	int count = 0;
+	
+	// helper type
+	struct tmp_crop_data {
+		any_vnum crop;
+		UT_hash_handle hh;
+	};
+	struct tmp_crop_data *tcd, *next_tcd, *hash = NULL;
+	
+	DL_FOREACH2(list, obj, next_content) {
+		if (!OBJ_FLAGGED(obj, OBJ_PLANTABLE)) {
+			continue;
+		}
+		
+		vnum = GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE);
+		HASH_FIND_INT(hash, &vnum, tcd);
+		if (!tcd) {
+			++count;	// found a unique
+			CREATE(tcd, struct tmp_crop_data, 1);
+			tcd->crop = vnum;
+			HASH_ADD_INT(hash, crop, tcd);
+		}
+		// else: not unique
+	}
+	
+	// free temporary data
+	HASH_ITER(hh, hash, tcd, next_tcd) {
+		HASH_DEL(hash, tcd);
+		free(tcd);
+	}
+	
+	return count;
+}
+
+
+/**
 * Number of buildings owned by an empire.
 *
 * @param empire_data *emp Any empire.
@@ -195,23 +214,208 @@ void copy_quest_progress(struct req_data *to_list, struct req_data *from_list) {
 * @return int The number of completed buildings with that vnum, owned by emp.
 */
 int count_owned_buildings(empire_data *emp, bld_vnum vnum) {
-	struct empire_territory_data *ter;
+	struct bld_relation *relat;
+	struct empire_territory_data *ter, *next_ter;
+	struct empire_vehicle_data *vter, *next_vter;
 	int count = 0;	// ah ah ah
 	
 	if (!emp || vnum == NOTHING) {
 		return count;
 	}
 	
-	LL_FOREACH(EMPIRE_TERRITORY_LIST(emp), ter) {
+	// check buildings
+	HASH_ITER(hh, EMPIRE_TERRITORY_LIST(emp), ter, next_ter) {
 		if (!IS_COMPLETE(ter->room) || !GET_BUILDING(ter->room)) {
 			continue;
 		}
-		if (GET_BLD_VNUM(GET_BUILDING(ter->room)) != vnum) {
+		
+		// counts 2 ways:
+		if (GET_BLD_VNUM(GET_BUILDING(ter->room)) == vnum) {
+			++count;
+		}
+		else {
+			LL_FOREACH(GET_BLD_RELATIONS(GET_BUILDING(ter->room)), relat) {
+				if (relat->type == BLD_REL_COUNTS_AS_BLD && relat->vnum == vnum) {
+					++count;
+					break;
+				}
+			}
+		}
+	}
+	
+	// also check vehicle counts-as
+	HASH_ITER(hh, EMPIRE_VEHICLE_LIST(emp), vter, next_vter) {
+		if (!vter->veh || !VEH_IS_COMPLETE(vter->veh)) {
+			continue;
+		}
+		
+		// only checking counts-as
+		LL_FOREACH(VEH_RELATIONS(vter->veh), relat) {
+			if (relat->type == BLD_REL_COUNTS_AS_BLD && relat->vnum == vnum) {
+				++count;
+				break;	// only need 1
+			}
+		}
+	}
+	
+	return count;
+}
+
+
+/**
+* Number of buildings owned by an empire that have a specific set of function flag(s).
+*
+* @param empire_data *emp Any empire.
+* @param bitvector_t flags One or more flags to check for (if there's more than one flag, it has to have ALL of them).
+* @return int The number of completed buildings with the flag(s), owned by emp.
+*/
+int count_owned_buildings_by_function(empire_data *emp, bitvector_t flags) {
+	struct empire_territory_data *ter, *next_ter;
+	struct empire_vehicle_data *vter, *next_vter;
+	int count = 0;	// ah ah ah
+	
+	if (!emp || flags == NOBITS) {
+		return count;
+	}
+	
+	HASH_ITER(hh, EMPIRE_TERRITORY_LIST(emp), ter, next_ter) {
+		if (!IS_COMPLETE(ter->room) || !GET_BUILDING(ter->room)) {
+			continue;
+		}
+		if ((GET_BLD_FUNCTIONS(GET_BUILDING(ter->room)) & flags) != flags) {
 			continue;
 		}
 		
 		// found
 		++count;
+	}
+
+	// also count building-vehicles
+	HASH_ITER(hh, EMPIRE_VEHICLE_LIST(emp), vter, next_vter) {
+		if (!vter->veh || !VEH_IS_COMPLETE(vter->veh)) {
+			continue;
+		}
+		if (!VEH_FLAGGED(vter->veh, VEH_BUILDING)) {
+			continue;	// only count buildings
+		}
+		if ((VEH_FUNCTIONS(vter->veh) & flags) != flags) {
+			continue;
+		}
+		
+		// found
+		++count;
+	}
+	
+	return count;
+}
+
+
+/**
+* Number of citizen homes owned by an empire.
+*
+* @param empire_data *emp Any empire.
+* @return int The number of completed homes owned by emp.
+*/
+int count_owned_homes(empire_data *emp) {
+	struct empire_territory_data *ter, *next_ter;
+	struct empire_vehicle_data *vter, *next_vter;
+	int count = 0;	// ah ah ah
+	
+	if (!emp) {
+		return count;
+	}
+	
+	HASH_ITER(hh, EMPIRE_TERRITORY_LIST(emp), ter, next_ter) {
+		if (!IS_COMPLETE(ter->room) || !GET_BUILDING(ter->room)) {
+			continue;	// must be a completed building
+		}
+		if (ROOM_BLD_FLAGGED(ter->room, BLD_ROOM)) {
+			continue;	// don't count interiors
+		}
+		if (GET_BLD_CITIZENS(GET_BUILDING(ter->room)) < 1) {
+			continue;	// must have a citizen
+		}
+		
+		// found
+		++count;
+	}
+	
+	// check vehicles too
+	HASH_ITER(hh, EMPIRE_VEHICLE_LIST(emp), vter, next_vter) {
+		if (!vter->veh || !VEH_IS_COMPLETE(vter->veh)) {
+			continue;
+		}
+		if (!VEH_FLAGGED(vter->veh, VEH_BUILDING)) {
+			continue;	// only count buildings
+		}
+		
+		// two ways to count here:
+		if (VEH_CITIZENS(vter->veh) > 0) {
+			// direct citizens
+			++count;
+		}
+		else if (VEH_INTERIOR_HOME_ROOM(vter->veh) && GET_BUILDING(VEH_INTERIOR_HOME_ROOM(vter->veh)) && GET_BLD_CITIZENS(GET_BUILDING(VEH_INTERIOR_HOME_ROOM(vter->veh))) > 0) {
+			// citizen on immediate inside room
+			++count;
+		}
+	}
+	
+	return count;
+}
+
+
+/**
+* Number of roads or road-like buildings owned by an empire.
+*
+* @param empire_data *emp Any empire.
+* @return int The number of tiles of roads owned by emp.
+*/
+int count_owned_roads(empire_data *emp) {
+	room_data *room, *next_room;
+	int count = 0;	// ah ah ah
+	
+	if (!emp) {
+		return count;
+	}
+	
+	HASH_ITER(hh, world_table, room, next_room) {
+		if (ROOM_OWNER(room) == emp) {
+			if (ROOM_SECT_FLAGGED(room, SECTF_IS_ROAD)) {
+				// road sect
+				++count;
+			}
+			else if (ROOM_BLD_FLAGGED(room, BLD_ROAD_ICON | BLD_ROAD_ICON_WIDE) && IS_COMPLETE(room)) {
+				// road-icon building
+				++count;
+			}
+		}
+	}
+	
+	return count;
+}
+
+
+/**
+* Number of sector tiles owned by an empire.
+*
+* @param empire_data *emp Any empire.
+* @param sector_vnum vnum The sector to search for.
+* @return int The number of tiles with that sector vnum, owned by emp.
+*/
+int count_owned_sector(empire_data *emp, sector_vnum vnum) {
+	struct sector_index_type *idx;
+	struct map_data *map;
+	int count = 0;	// ah ah ah
+	
+	if (!emp || vnum == NOTHING) {
+		return count;
+	}
+	
+	idx = find_sector_index(vnum);
+	LL_FOREACH2(idx->sect_rooms, map, next_in_sect) {
+		if (map->room && ROOM_OWNER(map->room) == emp) {
+			++count;
+		}
 	}
 	
 	return count;
@@ -226,18 +430,108 @@ int count_owned_buildings(empire_data *emp, bld_vnum vnum) {
 * @return int The number of completed vehicles with that vnum, owned by emp.
 */
 int count_owned_vehicles(empire_data *emp, any_vnum vnum) {
-	vehicle_data *veh;
 	int count = 0;
+	struct bld_relation *relat;
+	struct empire_territory_data *ter, *next_ter;
+	struct empire_vehicle_data *vter, *next_vter;
 	
 	if (!emp || vnum == NOTHING) {
 		return count;
 	}
 	
-	LL_FOREACH(vehicle_list, veh) {
-		if (!VEH_IS_COMPLETE(veh) || VEH_OWNER(veh) != emp) {
+	// count vehicles
+	HASH_ITER(hh, EMPIRE_VEHICLE_LIST(emp), vter, next_vter) {
+		if (!vter->veh || !VEH_IS_COMPLETE(vter->veh)) {
 			continue;
 		}
-		if (VEH_VNUM(veh) != vnum) {
+		
+		// count 2 ways
+		if (VEH_VNUM(vter->veh) == vnum) {
+			++count;
+		}
+		else {
+			LL_FOREACH(VEH_RELATIONS(vter->veh), relat) {
+				if (relat->type == BLD_REL_COUNTS_AS_VEH && relat->vnum == vnum) {
+					++count;
+					break;	// only need 1
+				}
+			}
+		}
+	}
+	
+	// check building counts-as
+	HASH_ITER(hh, EMPIRE_TERRITORY_LIST(emp), ter, next_ter) {
+		if (!IS_COMPLETE(ter->room) || !GET_BUILDING(ter->room)) {
+			continue;
+		}
+		
+		LL_FOREACH(GET_BLD_RELATIONS(GET_BUILDING(ter->room)), relat) {
+			if (relat->type == BLD_REL_COUNTS_AS_VEH && relat->vnum == vnum) {
+				++count;
+				break;
+			}
+		}
+	}
+	
+	return count;
+}
+
+
+/**
+* Number of vehicles with specific flag(s) owned by an empire.
+*
+* @param empire_data *emp Any empire.
+* @param bitvector_t flags The flag(s) to match (all flags must be present).
+* @return int The number of completed vehicles that match, owned by emp.
+*/
+int count_owned_vehicles_by_flags(empire_data *emp, bitvector_t flags) {
+	int count = 0;
+	struct empire_vehicle_data *vter, *next_vter;
+	
+	if (!emp || flags == NOBITS) {
+		return count;
+	}
+	
+	HASH_ITER(hh, EMPIRE_VEHICLE_LIST(emp), vter, next_vter) {
+		if (!vter->veh || !VEH_IS_COMPLETE(vter->veh)) {
+			continue;
+		}
+		if ((VEH_FLAGS(vter->veh) & flags) != flags) {
+			continue;
+		}
+		
+		// found
+		++count;
+	}
+	
+	return count;
+}
+
+
+/**
+* Number of vehicles with specific flag(s) owned by an empire. This does not
+* count BUILDING vehicles.
+*
+* @param empire_data *emp Any empire.
+* @param bitvector_t funcs The function flag(s) to match (all flags must be present).
+* @return int The number of completed vehicles that match, owned by emp.
+*/
+int count_owned_vehicles_by_function(empire_data *emp, bitvector_t funcs) {
+	int count = 0;
+	struct empire_vehicle_data *vter, *next_vter;
+	
+	if (!emp || funcs == NOBITS) {
+		return count;
+	}
+	
+	HASH_ITER(hh, EMPIRE_VEHICLE_LIST(emp), vter, next_vter) {
+		if (!vter->veh || !VEH_IS_COMPLETE(vter->veh)) {
+			continue;
+		}
+		if (VEH_FLAGGED(vter->veh, VEH_BUILDING)) {
+			continue;	// does not count buildings
+		}
+		if ((VEH_FUNCTIONS(vter->veh) & funcs) != funcs) {
 			continue;
 		}
 		
@@ -253,23 +547,24 @@ int count_owned_vehicles(empire_data *emp, any_vnum vnum) {
 * Counts how many components a player has available for a quest.
 *
 * @param char_data *ch The player.
-* @param int type CMP_ type
-* @param bitvector_t flags CMPF_ flags to match
+* @param any_vnum cmp_vnum The generic component to count.
 * @param bool skip_keep If TRUE, skips items marked (keep) because they can't be taken.
 * @return int The number of matching component items.
 */
-int count_quest_components(char_data *ch, int type, bitvector_t flags, bool skip_keep) {
+int count_quest_components(char_data *ch, any_vnum cmp_vnum, bool skip_keep) {
+	generic_data *cmp = real_generic(cmp_vnum);
 	obj_data *obj;
 	int count = 0;
 	
-	LL_FOREACH2(ch->carrying, obj, next_content) {
-		if (GET_OBJ_CMP_TYPE(obj) != type) {
-			continue;
-		}
-		if ((GET_OBJ_CMP_FLAGS(obj) & flags) != flags) {
-			continue;
-		}
+	if (!cmp) {
+		return 0;	// no component = nothing to count
+	}
+	
+	DL_FOREACH2(ch->carrying, obj, next_content) {
 		if (skip_keep && OBJ_FLAGGED(obj, OBJ_KEEP)) {
+			continue;
+		}
+		if (!is_component(obj, cmp)) {
 			continue;
 		}
 		
@@ -292,7 +587,7 @@ int count_quest_objects(char_data *ch, obj_vnum vnum, bool skip_keep) {
 	obj_data *obj;
 	int count = 0;
 	
-	LL_FOREACH2(ch->carrying, obj, next_content) {
+	DL_FOREACH2(ch->carrying, obj, next_content) {
 		if (GET_OBJ_VNUM(obj) != vnum) {
 			continue;
 		}
@@ -313,7 +608,7 @@ int count_quest_objects(char_data *ch, obj_vnum vnum, bool skip_keep) {
 * @param struct instance_data *inst The instance to check quests for.
 */
 void expire_instance_quests(struct instance_data *inst) {
-	struct player_quest *pq, *next_pq;
+	struct player_quest *pq;
 	descriptor_data *desc;
 	quest_data *quest;
 	char_data *ch;
@@ -323,8 +618,8 @@ void expire_instance_quests(struct instance_data *inst) {
 			continue;
 		}
 		
-		LL_FOREACH_SAFE(GET_QUESTS(ch), pq, next_pq) {
-			if (pq->instance_id != inst->id || pq->adventure != GET_ADV_VNUM(inst->adventure)) {
+		LL_FOREACH_SAFE(GET_QUESTS(ch), pq, global_next_player_quest) {
+			if (pq->instance_id != INST_ID(inst) || pq->adventure != GET_ADV_VNUM(INST_ADVENTURE(inst))) {
 				continue;
 			}
 			if (!(quest = quest_proto(pq->vnum))) {
@@ -338,6 +633,55 @@ void expire_instance_quests(struct instance_data *inst) {
 			drop_quest(ch, pq);
 		}
 	}
+	global_next_player_quest = NULL;
+}
+
+
+/**
+* For REQ_CROP_VARIETY on quest tasks, takes away 1 of each crop.
+*
+* @param char_data *ch The person whose inventory has the crops.
+* @param int amount How many unique crops are needed.
+*/
+void extract_crop_variety(char_data *ch, int amount) {
+	obj_data *obj, *next_obj;
+	any_vnum vnum;
+	int count = 0;
+	
+	// helper type
+	struct tmp_crop_data {
+		any_vnum crop;
+		UT_hash_handle hh;
+	};
+	struct tmp_crop_data *tcd, *next_tcd, *hash = NULL;
+	
+	DL_FOREACH_SAFE2(ch->carrying, obj, next_obj, next_content) {
+		if (!OBJ_FLAGGED(obj, OBJ_PLANTABLE)) {
+			continue;
+		}
+		
+		vnum = GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE);
+		HASH_FIND_INT(hash, &vnum, tcd);
+		if (!tcd) {
+			++count;	// found a unique
+			CREATE(tcd, struct tmp_crop_data, 1);
+			tcd->crop = vnum;
+			HASH_ADD_INT(hash, crop, tcd);
+			
+			extract_obj(obj);
+		}
+		// else: not unique
+		
+		if (count >= amount) {
+			break;	// done!
+		}
+	}
+	
+	// free temporary data
+	HASH_ITER(hh, hash, tcd, next_tcd) {
+		HASH_DEL(hash, tcd);
+		free(tcd);
+	}
 }
 
 
@@ -350,6 +694,268 @@ void expire_instance_quests(struct instance_data *inst) {
 char *get_quest_name_by_proto(any_vnum vnum) {
 	quest_data *proto = quest_proto(vnum);
 	return proto ? QUEST_NAME(proto) : "UNKNOWN";
+}
+
+
+/**
+* The tracker display for quest/progress requirements.
+*
+* @param char_data *ch The person viewing it.
+* @param struct req_data *tracker The tracker to show.
+* @param bool send_output If TRUE, sends the page_display as text when done. Pass FALSE if you're building a larger page_display for the character.
+*/
+void show_tracker_display(char_data *ch, struct req_data *tracker, bool send_output) {
+	int lefthand, count = 0, sub = 0;
+	char buf[256];
+	struct req_data *task;
+	char last_group = 0;
+	
+	LL_FOREACH(tracker, task) {
+		if (last_group != task->group) {
+			if (task->group) {
+				build_page_display(ch, "  %s:", (count > 0 ? "Or all of" : "All of"));
+			}
+			last_group = task->group;
+			sub = 0;
+		}
+		
+		++count;	// total iterations
+		++sub;	// iterations inside this sub-group
+		
+		// REQ_AMT_x: display based on amount type
+		switch (requirement_amt_type[task->type]) {
+			case REQ_AMT_NUMBER: {
+				lefthand = task->current;
+				lefthand = MIN(lefthand, task->needed);	// may be above the amount needed
+				lefthand = MAX(0, lefthand);	// in some cases, current may be negative
+				safe_snprintf(buf, sizeof(buf), " (%d/%d)", lefthand, task->needed);
+				break;
+			}
+			case REQ_AMT_REPUTATION:
+			case REQ_AMT_THRESHOLD:
+			case REQ_AMT_NONE: {
+				if (task->current >= task->needed) {
+					strcpy(buf, " (complete)");
+				}
+				else {
+					strcpy(buf, " (not complete)");
+				}
+				break;
+			}
+			default: {
+				*buf = '\0';
+				break;
+			}
+		}
+		build_page_display(ch, "  %s%s%s%s", (task->group ? "  " : ""), ((sub > 1 && !task->group) ? "or " : ""), requirement_string(task, FALSE, TRUE), buf);
+	}
+	
+	if (send_output) {
+		send_page_display_as(ch, PD_NO_PAGINATION | PD_FREE_DISPLAY_AFTER);
+	}
+}
+
+
+/**
+* Gives out the actual quest rewards. This is also used by the event system.
+*
+* @param char_data *ch The person receiving the reward.
+* @param struct quest_reward *list The list of 0 or more quest rewards.
+* @param int reward_level The scale level of any rewards (pass get_approximate_level(ch) if you're not sure what to pass).
+* @param empire_data *quest_giver_emp Optional: If applicable, the empire that gave the quest. (For events, this can be the player's own empire.)
+* @param int instance_id Optional: If the quest is associated with an instance, pass its id. Otherwise, 0 is fine.
+*/
+void give_quest_rewards(char_data *ch, struct quest_reward *list, int reward_level, empire_data *quest_giver_emp, int instance_id) {
+	char buf[MAX_STRING_LENGTH];
+	int sub;
+	archetype_data *arch;
+	struct quest_reward *reward;
+	struct empire_goal *goal;
+	progress_data *prog;
+	
+	LL_FOREACH(list, reward) {
+		// QR_x: reward the rewards
+		switch (reward->type) {
+			case QR_BONUS_EXP: {
+				msg_to_char(ch, "\tyYou gain %d bonus experience point%s!\t0\r\n", reward->amount, PLURAL(reward->amount));
+				SAFE_ADD(GET_DAILY_BONUS_EXPERIENCE(ch), reward->amount, 0, UCHAR_MAX, FALSE);
+				update_MSDP_bonus_exp(ch, UPDATE_SOON);
+				break;
+			}
+			case QR_COINS: {
+				empire_data *coin_emp = (reward->vnum == OTHER_COIN ? NULL : quest_giver_emp);
+				msg_to_char(ch, "\tyYou receive %s!\t0\r\n", money_amount(coin_emp, reward->amount));
+				increase_coins(ch, coin_emp, reward->amount);
+				break;
+			}
+			case QR_CURRENCY: {
+				generic_data *gen;
+				if ((gen = find_generic(reward->vnum, GENERIC_CURRENCY))) {
+					msg_to_char(ch, "\tyYou receive %d %s!\t0\r\n", reward->amount, reward->amount != 1 ? GET_CURRENCY_PLURAL(gen) : GET_CURRENCY_SINGULAR(gen));
+					add_currency(ch, reward->vnum, reward->amount);
+				}
+				break;
+			}
+			case QR_OBJECT: {
+				obj_data *obj = NULL;
+				int iter, obj_ok = 0;
+				
+				for (iter = 0; iter < reward->amount; ++iter) {
+					obj = read_object(reward->vnum, TRUE);
+					scale_item_to_level(obj, reward_level);
+					if (CAN_WEAR(obj, ITEM_WEAR_TAKE)) {
+						obj_to_char(obj, ch);
+					}
+					else {
+						obj_to_room(obj, IN_ROOM(ch));
+					}
+					
+					// ensure binding
+					if (!IS_NPC(ch) && OBJ_FLAGGED(obj, OBJ_BIND_FLAGS)) {
+						bind_obj_to_player(obj, ch);
+						reduce_obj_binding(obj, ch);
+					}
+					
+					obj_ok = load_otrigger(obj);
+				}
+				
+				// mark gained
+				if (GET_LOYALTY(ch)) {
+					add_production_total(GET_LOYALTY(ch), reward->vnum, reward->amount);
+				}
+				
+				if (reward->amount > 1) {
+					safe_snprintf(buf, sizeof(buf), "\tyYou receive $p (x%d)!\t0", reward->amount);
+				}
+				else {
+					safe_snprintf(buf, sizeof(buf), "\tyYou receive $p!\t0");
+				}
+				
+				if (obj_ok && obj) {
+					act(buf, FALSE, ch, obj, NULL, TO_CHAR);
+				}
+				break;
+			}
+			case QR_SET_SKILL: {
+				int val = MAX(0, MIN(MAX_SKILL_CAP, reward->amount));
+				bool loss;
+				
+				loss = (val < get_skill_level(ch, reward->vnum));
+				set_skill(ch, reward->vnum, val);
+				
+				msg_to_char(ch, "\tyYour %s is now level %d!\t0\r\n", get_skill_name_by_vnum(reward->vnum), val);
+				
+				if (loss) {
+					clear_char_abilities(ch, reward->vnum);
+				}
+				
+				break;
+			}
+			case QR_SKILL_EXP: {
+				msg_to_char(ch, "\tyYou gain %s skill experience!\t0\r\n", get_skill_name_by_vnum(reward->vnum));
+				gain_skill_exp(ch, reward->vnum, reward->amount, NULL);
+				break;
+			}
+			case QR_SKILL_LEVELS: {
+				if (gain_skill(ch, find_skill_by_vnum(reward->vnum), reward->amount, NULL)) {
+					// sends its own message
+					// msg_to_char(ch, "Your %s is now level %d!\r\n", get_skill_name_by_vnum(reward->vnum), get_skill_level(ch, reward->vnum));
+				}
+				break;
+			}
+			case QR_QUEST_CHAIN: {
+				quest_data *start = quest_proto(reward->vnum);
+				struct instance_data *inst = get_instance_by_id(instance_id);
+				
+				if (start && QUEST_FLAGGED(start, QST_TUTORIAL) && PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+					break;	// player does not want tutorials to auto-chain
+				}
+				
+				// shows nothing if the player doesn't qualify
+				if (start && !is_on_quest(ch, reward->vnum) && char_meets_prereqs(ch, start, inst)) {
+					if (!PRF_FLAGGED(ch, PRF_COMPACT)) {
+						msg_to_char(ch, "\r\n");	// add some spacing
+					}
+					start_quest(ch, start, inst);
+				}
+				
+				break;
+			}
+			case QR_REPUTATION: {
+				gain_reputation(ch, reward->vnum, reward->amount, FALSE, TRUE);
+				break;
+			}
+			case QR_EVENT_POINTS: {
+				gain_event_points(ch, reward->vnum, reward->amount);
+				break;
+			}
+			case QR_SPEAK_LANGUAGE: {
+				if (speaks_language(ch, reward->vnum) != LANG_SPEAK && real_generic(reward->vnum)) {
+					add_language(ch, reward->vnum, LANG_SPEAK);
+					msg_to_char(ch, "\tyYou can now speak %s!\t0\r\n", get_generic_name_by_vnum(reward->vnum));
+				}
+				break;
+			}
+			case QR_RECOGNIZE_LANGUAGE: {
+				if (speaks_language(ch, reward->vnum) == LANG_UNKNOWN && real_generic(reward->vnum)) {
+					add_language(ch, reward->vnum, LANG_RECOGNIZE);
+					msg_to_char(ch, "\tyYou can now recognize %s!\t0\r\n", get_generic_name_by_vnum(reward->vnum));
+				}
+				break;
+			}
+			case QR_GRANT_PROGRESS: {
+				if (GET_LOYALTY(ch) && (prog = real_progress(reward->vnum)) && !empire_has_completed_goal(GET_LOYALTY(ch), reward->vnum)) {
+					script_reward_goal(GET_LOYALTY(ch), prog);
+					check_for_eligible_goals(GET_LOYALTY(ch));
+				}
+				break;
+			}
+			case QR_START_PROGRESS: {
+				if (GET_LOYALTY(ch) && (prog = real_progress(reward->vnum))) {
+					if (!empire_has_completed_goal(GET_LOYALTY(ch), reward->vnum) && !get_current_goal(GET_LOYALTY(ch), reward->vnum) && empire_meets_goal_prereqs(GET_LOYALTY(ch), prog)) {
+						// ok to start
+						if ((goal = start_empire_goal(GET_LOYALTY(ch), prog))) {
+							msg_to_char(ch, "\tyYour empire starts the progress goal: %s\t0\r\n", PRG_NAME(prog));
+							refresh_one_goal_tracker(GET_LOYALTY(ch), goal);
+						}
+					}
+				}
+				break;
+			}
+			case QR_UNLOCK_ARCHETYPE: {
+				if ((arch = archetype_proto(reward->vnum))) {
+					// look up name
+					for (sub = 0; archetype_menu[sub].type != NOTHING; ++sub) {
+						if (archetype_menu[sub].type == GET_ARCH_TYPE(arch)) {
+							break;
+						}
+					}
+					
+					if (!has_unlocked_archetype(ch, reward->vnum)) {
+						msg_to_char(ch, "\tyYou have unlocked the starting %s '%s' for your account (available on new characters)!\t0\r\n", archetype_menu[sub].name, GET_ARCH_NAME(arch));
+						add_unlocked_archetype(ch, reward->vnum);
+					}
+				}
+				break;
+			}
+			case QR_BONUS_ABILITY: {
+				if (ability_proto(reward->vnum) && !has_bonus_ability(ch, reward->vnum)) {
+					msg_to_char(ch, "\tyYou gain the %s ability!\t0\r\n", get_ability_name_by_vnum(reward->vnum));
+					add_bonus_ability(ch, reward->vnum);
+					assign_class_and_extra_abilities(ch, NULL, ROLE_NONE);
+				}
+				break;
+			}
+			case QR_REMOVE_ABILITY: {
+				if (ability_proto(reward->vnum) && has_bonus_ability(ch, reward->vnum)) {
+					msg_to_char(ch, "\tyYou lose the %s ability.\t0\r\n", get_ability_name_by_vnum(reward->vnum));
+					remove_bonus_ability(ch, reward->vnum);
+					assign_class_and_extra_abilities(ch, NULL, ROLE_NONE);
+				}
+				break;
+			}
+		}
+	}
 }
 
 
@@ -371,7 +977,7 @@ char *quest_giver_string(struct quest_giver *giver, bool show_vnums) {
 	}
 	
 	if (show_vnums) {
-		snprintf(vnum, sizeof(vnum), "%s [%d] ", quest_giver_types[giver->type], giver->vnum);
+		safe_snprintf(vnum, sizeof(vnum), "%s [%d] ", quest_giver_types[giver->type], giver->vnum);
 	}
 	else {
 		*vnum = '\0';
@@ -381,34 +987,38 @@ char *quest_giver_string(struct quest_giver *giver, bool show_vnums) {
 	switch (giver->type) {
 		case QG_BUILDING: {
 			bld_data *bld = building_proto(giver->vnum);
-			snprintf(output, sizeof(output), "%s%s", vnum, bld ? GET_BLD_NAME(bld) : "UNKNOWN");
+			safe_snprintf(output, sizeof(output), "%s%s", vnum, bld ? GET_BLD_NAME(bld) : "UNKNOWN");
 			break;
 		}
 		case QG_MOBILE: {
-			snprintf(output, sizeof(output), "%s%s", vnum, skip_filler(get_mob_name_by_proto(giver->vnum)));
+			safe_snprintf(output, sizeof(output), "%s%s", vnum, skip_filler(get_mob_name_by_proto(giver->vnum, FALSE)));
 			break;
 		}
 		case QG_OBJECT: {
-			snprintf(output, sizeof(output), "%s%s", vnum, skip_filler(get_obj_name_by_proto(giver->vnum)));
+			safe_snprintf(output, sizeof(output), "%s%s", vnum, skip_filler(get_obj_name_by_proto(giver->vnum)));
 			break;
 		}
 		case QG_ROOM_TEMPLATE: {
 			room_template *rmt = room_template_proto(giver->vnum);
-			snprintf(output, sizeof(output), "%s%s", vnum, rmt ? skip_filler(GET_RMT_TITLE(rmt)) : "UNKNOWN");
+			safe_snprintf(output, sizeof(output), "%s%s", vnum, rmt ? skip_filler(GET_RMT_TITLE(rmt)) : "UNKNOWN");
 			break;
 		}
 		case QG_TRIGGER: {
 			trig_data *trig = real_trigger(giver->vnum);
-			snprintf(output, sizeof(output), "%s%s", vnum, trig ? skip_filler(GET_TRIG_NAME(trig)) : "UNKNOWN");
+			safe_snprintf(output, sizeof(output), "%s%s", vnum, trig ? skip_filler(GET_TRIG_NAME(trig)) : "UNKNOWN");
 			break;
 		}
 		case QG_QUEST: {
 			quest_data *qq = quest_proto(giver->vnum);
-			snprintf(output, sizeof(output), "%s%s", vnum, qq ? skip_filler(QUEST_NAME(qq)) : "UNKNOWN");
+			safe_snprintf(output, sizeof(output), "%s%s", vnum, qq ? skip_filler(QUEST_NAME(qq)) : "UNKNOWN");
+			break;
+		}
+		case QG_VEHICLE: {
+			safe_snprintf(output, sizeof(output), "%s%s", vnum, skip_filler(get_vehicle_name_by_proto(giver->vnum)));
 			break;
 		}
 		default: {
-			snprintf(output, sizeof(output), "%d %sUNKNOWN", giver->type, vnum);
+			safe_snprintf(output, sizeof(output), "%d %sUNKNOWN", giver->type, vnum);
 			break;
 		}
 	}
@@ -434,7 +1044,7 @@ char *quest_reward_string(struct quest_reward *reward, bool show_vnums) {
 	}
 	
 	if (show_vnums) {
-		snprintf(vnum, sizeof(vnum), "[%d] ", reward->vnum);
+		safe_snprintf(vnum, sizeof(vnum), "[%d] ", reward->vnum);
 	}
 	else {
 		*vnum = '\0';
@@ -444,41 +1054,79 @@ char *quest_reward_string(struct quest_reward *reward, bool show_vnums) {
 	switch (reward->type) {
 		case QR_BONUS_EXP: {
 			// has no vnum
-			snprintf(output, sizeof(output), "%d bonus exp", reward->amount);
+			safe_snprintf(output, sizeof(output), "%d bonus experience", reward->amount);
 			break;
 		}
 		case QR_COINS: {
 			// vnum not relevant
-			snprintf(output, sizeof(output), "%d %s coin%s", reward->amount, reward->vnum == OTHER_COIN ? "misc" : "empire", PLURAL(reward->amount));
+			safe_snprintf(output, sizeof(output), "%d %s coin%s", reward->amount, reward->vnum == OTHER_COIN ? "misc" : "empire", PLURAL(reward->amount));
+			break;
+		}
+		case QR_CURRENCY: {
+			safe_snprintf(output, sizeof(output), "%s%d %s", vnum, reward->amount, get_generic_string_by_vnum(reward->vnum, GENERIC_CURRENCY, WHICH_CURRENCY(reward->amount)));
 			break;
 		}
 		case QR_OBJECT: {
-			snprintf(output, sizeof(output), "%s%dx %s", vnum, reward->amount, skip_filler(get_obj_name_by_proto(reward->vnum)));
+			safe_snprintf(output, sizeof(output), "%s%dx %s", vnum, reward->amount, skip_filler(get_obj_name_by_proto(reward->vnum)));
 			break;
 		}
 		case QR_SET_SKILL: {
-			snprintf(output, sizeof(output), "%s%d %s", vnum, reward->amount, get_skill_name_by_vnum(reward->vnum));
+			safe_snprintf(output, sizeof(output), "%sGives level %d %s", vnum, reward->amount, get_skill_name_by_vnum(reward->vnum));
 			break;
 		}
 		case QR_SKILL_EXP: {
-			snprintf(output, sizeof(output), "%s%d%% %s", vnum, reward->amount, get_skill_name_by_vnum(reward->vnum));
+			safe_snprintf(output, sizeof(output), "%s%+d%% %s", vnum, reward->amount, get_skill_name_by_vnum(reward->vnum));
 			break;
 		}
 		case QR_SKILL_LEVELS: {
-			snprintf(output, sizeof(output), "%s%dx %s", vnum, reward->amount, get_skill_name_by_vnum(reward->vnum));
+			safe_snprintf(output, sizeof(output), "%s%+d %s", vnum, reward->amount, get_skill_name_by_vnum(reward->vnum));
 			break;
 		}
 		case QR_QUEST_CHAIN: {
-			snprintf(output, sizeof(output), "%s%s", vnum, get_quest_name_by_proto(reward->vnum));
+			safe_snprintf(output, sizeof(output), "%sLeads to %s", vnum, get_quest_name_by_proto(reward->vnum));
 			break;
 		}
 		case QR_REPUTATION: {
 			faction_data *fct = find_faction_by_vnum(reward->vnum);
-			snprintf(output, sizeof(output), "%s%+d rep to %s", vnum, reward->amount, (fct ? FCT_NAME(fct) : "UNKNOWN"));
+			safe_snprintf(output, sizeof(output), "%s%+d reputation to %s", vnum, reward->amount, (fct ? FCT_NAME(fct) : "UNKNOWN"));
+			break;
+		}
+		case QR_EVENT_POINTS: {
+			event_data *event = find_event_by_vnum(reward->vnum);
+			safe_snprintf(output, sizeof(output), "%+d event point%s to %s%s", reward->amount, PLURAL(reward->amount), vnum, (event ? EVT_NAME(event) : "UNKNOWN"));
+			break;
+		}
+		case QR_SPEAK_LANGUAGE: {
+			safe_snprintf(output, sizeof(output), "%sSpeak %s", vnum, get_generic_name_by_vnum(reward->vnum));
+			break;
+		}
+		case QR_RECOGNIZE_LANGUAGE: {
+			safe_snprintf(output, sizeof(output), "%sRecognize %s", vnum, get_generic_name_by_vnum(reward->vnum));
+			break;
+		}
+		case QR_GRANT_PROGRESS: {
+			safe_snprintf(output, sizeof(output), "Grants progress: %s%s", vnum, get_progress_name_by_proto(reward->vnum));
+			break;
+		}
+		case QR_START_PROGRESS: {
+			safe_snprintf(output, sizeof(output), "Starts progress: %s%s", vnum, get_progress_name_by_proto(reward->vnum));
+			break;
+		}
+		case QR_UNLOCK_ARCHETYPE: {
+			archetype_data *arch = archetype_proto(reward->vnum);
+			safe_snprintf(output, sizeof(output), "Unlocks archetype: %s%s", vnum, (arch ? GET_ARCH_NAME(arch) : "UNKNOWN"));
+			break;
+		}
+		case QR_BONUS_ABILITY: {
+			safe_snprintf(output, sizeof(output), "Grants bonus ability: %s%s", vnum, get_ability_name_by_vnum(reward->vnum));
+			break;
+		}
+		case QR_REMOVE_ABILITY: {
+			safe_snprintf(output, sizeof(output), "Removes bonus ability: %s%s", vnum, get_ability_name_by_vnum(reward->vnum));
 			break;
 		}
 		default: {
-			snprintf(output, sizeof(output), "%s%dx UNKNOWN", vnum, reward->amount);
+			safe_snprintf(output, sizeof(output), "%s%dx Unknown", vnum, reward->amount);
 			break;
 		}
 	}
@@ -506,8 +1154,12 @@ void refresh_one_quest_tracker(char_data *ch, struct player_quest *pq) {
 				task->current = has_completed_quest(ch, task->vnum, pq->instance_id) ? task->needed : 0;
 				break;
 			}
+			case REQ_COMPLETED_QUEST_EVER: {
+				task->current = has_completed_quest_any(ch, task->vnum) ? task->needed : 0;
+				break;
+			}
 			case REQ_GET_COMPONENT: {
-				task->current = count_quest_components(ch, task->vnum, task->misc, QUEST_FLAGGED(quest, QST_EXTRACT_TASK_OBJECTS));
+				task->current = count_quest_components(ch, task->vnum, QUEST_FLAGGED(quest, QST_EXTRACT_TASK_OBJECTS));
 				break;
 			}
 			case REQ_GET_OBJECT: {
@@ -526,8 +1178,20 @@ void refresh_one_quest_tracker(char_data *ch, struct player_quest *pq) {
 				task->current = count_owned_buildings(GET_LOYALTY(ch), task->vnum);
 				break;
 			}
+			case REQ_OWN_BUILDING_FUNCTION: {
+				task->current = count_owned_buildings_by_function(GET_LOYALTY(ch), task->misc);
+				break;
+			}
 			case REQ_OWN_VEHICLE: {
 				task->current = count_owned_vehicles(GET_LOYALTY(ch), task->vnum);
+				break;
+			}
+			case REQ_OWN_VEHICLE_FLAGGED: {
+				task->current = count_owned_vehicles_by_flags(GET_LOYALTY(ch), task->misc);
+				break;
+			}
+			case REQ_OWN_VEHICLE_FUNCTION: {
+				task->current = count_owned_vehicles_by_function(GET_LOYALTY(ch), task->misc);
 				break;
 			}
 			case REQ_SKILL_LEVEL_OVER: {
@@ -607,6 +1271,103 @@ void refresh_one_quest_tracker(char_data *ch, struct player_quest *pq) {
 				task->current += count_quest_objects(ch, task->vnum, FALSE);
 				break;
 			}
+			case REQ_GET_CURRENCY: {
+				task->current = get_currency(ch, task->vnum);
+				break;
+			}
+			case REQ_GET_COINS: {
+				task->current = count_total_coins_as(ch, REAL_OTHER_COIN);
+				break;
+			}
+			case REQ_CAN_GAIN_SKILL: {
+				task->current = check_can_gain_skill(ch, task->vnum) ? task->needed : 0;
+				break;
+			}
+			case REQ_CROP_VARIETY: {
+				task->current = count_crop_variety_in_list(ch->carrying);
+				break;
+			}
+			case REQ_OWN_HOMES: {
+				task->current = count_owned_homes(GET_LOYALTY(ch));
+				break;
+			}
+			case REQ_OWN_SECTOR: {
+				task->current = count_owned_sector(GET_LOYALTY(ch), task->vnum);
+				break;
+			}
+			case REQ_EMPIRE_WEALTH: {
+				task->current = GET_LOYALTY(ch) ? GET_TOTAL_WEALTH(GET_LOYALTY(ch)) : 0;
+				break;
+			}
+			case REQ_EMPIRE_FAME: {
+				task->current = GET_LOYALTY(ch) ? EMPIRE_FAME(GET_LOYALTY(ch)) : 0;
+				break;
+			}
+			case REQ_EMPIRE_MILITARY: {
+				task->current = GET_LOYALTY(ch) ? EMPIRE_MILITARY(GET_LOYALTY(ch)) : 0;
+				break;
+			}
+			case REQ_EMPIRE_GREATNESS: {
+				task->current = GET_LOYALTY(ch) ? EMPIRE_GREATNESS(GET_LOYALTY(ch)) : 0;
+				break;
+			}
+			case REQ_DIPLOMACY: {
+				task->current = GET_LOYALTY(ch) ? count_diplomacy(GET_LOYALTY(ch), task->misc) : 0;
+				break;
+			}
+			case REQ_DIPLOMACY_OVER: {
+				task->current = GET_LOYALTY(ch) ? count_diplomacy_over(GET_LOYALTY(ch), task->misc) : 0;
+				break;
+			}
+			case REQ_HAVE_CITY: {
+				task->current = GET_LOYALTY(ch) ? count_cities(GET_LOYALTY(ch)) : 0;
+				break;
+			}
+			case REQ_EMPIRE_PRODUCED_OBJECT: {
+				task->current = GET_LOYALTY(ch) ? get_production_total(GET_LOYALTY(ch), task->vnum) : 0;
+				break;
+			}
+			case REQ_EMPIRE_PRODUCED_COMPONENT: {
+				task->current = GET_LOYALTY(ch) ? get_production_total_component(GET_LOYALTY(ch), task->vnum) : 0;
+				break;
+			}
+			case REQ_EVENT_RUNNING: {
+				task->current = find_running_event_by_vnum(task->vnum) ? task->needed : 0;
+				break;
+			}
+			case REQ_EVENT_NOT_RUNNING: {
+				task->current = find_running_event_by_vnum(task->vnum) ? 0 : task->needed;
+				break;
+			}
+			case REQ_LEVEL_UNDER: {
+				task->current = (get_approximate_level(ch) <= task->needed) ? task->needed : -1; // -1 because 0 is a valid 'needed'
+				break;
+			}
+			case REQ_LEVEL_OVER: {
+				task->current = (get_approximate_level(ch) >= task->needed) ? task->needed : 0;
+				break;
+			}
+			case REQ_SPEAK_LANGUAGE: {
+				task->current = (speaks_language(ch, task->vnum) == LANG_SPEAK) ? task->needed : 0;
+				break;
+			}
+			case REQ_RECOGNIZE_LANGUAGE: {
+				int mode = speaks_language(ch, task->vnum);
+				task->current = (mode == LANG_RECOGNIZE || mode == LANG_SPEAK) ? task->needed : 0;
+				break;
+			}
+			case REQ_DAYTIME: {
+				task->current = (IN_ROOM(ch) && get_sun_status(IN_ROOM(ch)) == SUN_LIGHT) ? task->needed : 0;
+				break;
+			}
+			case REQ_NIGHTTIME: {
+				task->current = (IN_ROOM(ch) && get_sun_status(IN_ROOM(ch)) != SUN_LIGHT) ? task->needed : 0;
+				break;
+			}
+			case REQ_OWN_ROADS: {
+				task->current = GET_LOYALTY(ch) ? count_owned_roads(GET_LOYALTY(ch)) : 0;
+				break;
+			}
 		}
 	}
 }
@@ -620,7 +1381,7 @@ void refresh_one_quest_tracker(char_data *ch, struct player_quest *pq) {
 */
 void refresh_all_quests(char_data *ch) {
 	struct player_completed_quest *pcq, *next_pcq;
-	struct player_quest *pq, *next_pq;
+	struct player_quest *pq;
 	struct instance_data *inst;
 	struct req_data *old;
 	quest_data *quest;
@@ -630,14 +1391,14 @@ void refresh_all_quests(char_data *ch) {
 	}
 	
 	// current quests
-	LL_FOREACH_SAFE(GET_QUESTS(ch), pq, next_pq) {
+	LL_FOREACH_SAFE(GET_QUESTS(ch), pq, global_next_player_quest) {
 		// remove entirely
 		if (!(quest = quest_proto(pq->vnum)) || (QUEST_FLAGGED(quest, QST_IN_DEVELOPMENT) && !IS_IMMORTAL(ch))) {
 			drop_quest(ch, pq);
 			continue;
 		}
 		// check instance expiry
-		if (QUEST_FLAGGED(quest, QST_EXPIRES_AFTER_INSTANCE) && (!(inst = get_instance_by_id(pq->instance_id)) || GET_ADV_VNUM(inst->adventure) != pq->adventure)) {
+		if (QUEST_FLAGGED(quest, QST_EXPIRES_AFTER_INSTANCE) && (!(inst = get_instance_by_id(pq->instance_id)) || GET_ADV_VNUM(INST_ADVENTURE(inst)) != pq->adventure)) {
 			drop_quest(ch, pq);
 			continue;
 		}
@@ -653,6 +1414,7 @@ void refresh_all_quests(char_data *ch) {
 		// check tracker tasks now
 		refresh_one_quest_tracker(ch, pq);
 	}
+	global_next_player_quest = NULL;
 	
 	// completed quests
 	HASH_ITER(hh, GET_COMPLETED_QUESTS(ch), pcq, next_pcq) {
@@ -686,7 +1448,7 @@ void remove_quest_items(char_data *ch) {
 		}
 	}
 	
-	LL_FOREACH_SAFE2(ch->carrying, obj, next_obj, next_content) {
+	DL_FOREACH_SAFE2(ch->carrying, obj, next_obj, next_content) {
 		if (GET_OBJ_REQUIRES_QUEST(obj) != NOTHING && !is_on_quest(ch, GET_OBJ_REQUIRES_QUEST(obj))) {
 			act("You lose $p because you are not on the right quest.", FALSE, ch, obj, NULL, TO_CHAR);
 			extract_obj(obj);
@@ -708,13 +1470,18 @@ void remove_quest_items_by_quest(char_data *ch, any_vnum vnum) {
 	obj_data *obj, *next_obj;
 	int iter;
 	
+	if (vnum == NOTHING) {
+		syslog(SYS_ERROR, LVL_CIMPL, TRUE, "SYSERR: remove_quest_items_by_quest called with NOTHING vnum, which would remove ALL non-quest items (%s)", GET_NAME(ch));
+		return;
+	}
+	
 	for (iter = 0; iter < NUM_WEARS; ++iter) {
 		if ((obj = GET_EQ(ch, iter)) && GET_OBJ_REQUIRES_QUEST(obj) == vnum) {
 			extract_obj(obj);
 		}
 	}
 	
-	LL_FOREACH_SAFE2(ch->carrying, obj, next_obj, next_content) {
+	DL_FOREACH_SAFE2(ch->carrying, obj, next_obj, next_content) {
 		if (GET_OBJ_REQUIRES_QUEST(obj) == vnum) {
 			extract_obj(obj);
 		}
@@ -750,7 +1517,7 @@ void setup_daily_quest_cycles(int only_cycle) {
 		if (QUEST_FLAGGED(qst, QST_IN_DEVELOPMENT)) {
 			continue;	// not active
 		}
-		if (!QUEST_FLAGGED(qst, QST_DAILY) || QUEST_DAILY_CYCLE(qst) == NOTHING) {
+		if (!IS_DAILY_QUEST(qst) || QUEST_DAILY_CYCLE(qst) == NOTHING) {
 			continue;	// not a cycling daily
 		}
 		
@@ -779,6 +1546,7 @@ void setup_daily_quest_cycles(int only_cycle) {
 	
 	// free data
 	HASH_ITER(hh, list, entry, next_entry) {
+		HASH_DEL(list, entry);
 		free(entry);
 	}
 	
@@ -852,6 +1620,59 @@ void smart_copy_quest_rewards(struct quest_reward **to_list, struct quest_reward
 }
 
 
+/**
+* Verifies all cycling daily quests (ones with the QST_DAILY flag and a
+* QUEST_DAILY_CYCLE() id). All cycling dailies will have 1 active quest in the
+* cycle after this.
+*/
+void verify_daily_quest_cycles(void) {
+	quest_data *qst, *next_qst, *iter, *next_iter;
+	bool any;
+	
+	HASH_ITER(hh, quest_table, qst, next_qst) {
+		if (QUEST_FLAGGED(qst, QST_IN_DEVELOPMENT) || !IS_DAILY_QUEST(qst) || QUEST_DAILY_CYCLE(qst) == NOTHING) {
+			continue;	// not a cycling daily
+		}
+		if (QUEST_DAILY_ACTIVE(qst)) {
+			continue;	// if it's active the cycle has already been set up
+		}
+		
+		// if we have an inactive daily then see if something else on the same cycle is active yet
+		any = FALSE;
+		HASH_ITER(hh, quest_table, iter, next_iter) {
+			if (iter != qst && QUEST_DAILY_ACTIVE(iter) && QUEST_DAILY_CYCLE(iter) == QUEST_DAILY_CYCLE(qst) && !QUEST_FLAGGED(iter, QST_IN_DEVELOPMENT)) {
+				any = TRUE;
+				break;
+			}
+		}
+		
+		// did we find any?
+		if (!any) {
+			setup_daily_quest_cycles(QUEST_DAILY_CYCLE(qst));
+		}
+	}
+}
+
+
+/**
+* Counts the words of text in a quest's strings.
+*
+* @param quest_data *quest The quest whose strings to count.
+* @return int The number of words in the quest's strings.
+*/
+int wordcount_quest(quest_data *quest) {
+	int count = 0;
+	
+	count += wordcount_string(QUEST_NAME(quest));
+	count += wordcount_string(QUEST_DESCRIPTION(quest));
+	count += wordcount_string(QUEST_COMPLETE_MSG(quest));
+	count += wordcount_requirements(QUEST_PREREQS(quest));
+	count += wordcount_requirements(QUEST_TASKS(quest));
+		
+	return count;
+}
+
+
  //////////////////////////////////////////////////////////////////////////////
 //// LOOKUP HANDLERS /////////////////////////////////////////////////////////
 
@@ -865,6 +1686,7 @@ void smart_copy_quest_rewards(struct quest_reward **to_list, struct quest_reward
 void add_or_remove_all_quest_lookups_for(quest_data *quest, bool add) {
 	struct quest_giver *list[2], *giver;
 	room_template *rmt;
+	vehicle_data *veh;
 	char_data *mob;
 	bld_data *bld;
 	obj_data *obj;
@@ -909,12 +1731,11 @@ void add_or_remove_all_quest_lookups_for(quest_data *quest, bool add) {
 				case QG_OBJECT: {
 					if ((obj = obj_proto(giver->vnum))) {
 						if (add) {
-							add_quest_lookup(&GET_OBJ_QUEST_LOOKUPS(obj), quest);
+							add_quest_lookup(&obj->proto_data->quest_lookups, quest);
 						}
 						else {
-							remove_quest_lookup(&GET_OBJ_QUEST_LOOKUPS(obj), quest);
+							remove_quest_lookup(&obj->proto_data->quest_lookups, quest);
 						}
-						update_obj_quest_lookups(GET_OBJ_VNUM(obj));
 					}
 					break;
 				}
@@ -930,6 +1751,18 @@ void add_or_remove_all_quest_lookups_for(quest_data *quest, bool add) {
 					}
 					break;
 				}
+				case QG_VEHICLE: {
+					if ((veh = vehicle_proto(giver->vnum))) {
+						if (add) {
+							add_quest_lookup(&VEH_QUEST_LOOKUPS(veh), quest);
+						}
+						else {
+							remove_quest_lookup(&VEH_QUEST_LOOKUPS(veh), quest);
+						}
+						update_veh_quest_lookups(VEH_VNUM(veh));
+					}
+					break;
+				}
 			}
 		}
 	}
@@ -939,8 +1772,7 @@ void add_or_remove_all_quest_lookups_for(quest_data *quest, bool add) {
 /**
 * Adds a quest lookup hint to a list (e.g. on a mob).
 *
-* Note: For mob/obj quests, run update_mob_quest_lookups() or
-* update_obj_quest_lookups() after this.
+* Note: For mob/obj/veh quests, run update_mob_quest_lookups() etc after this.
 *
 * @param struct quest_lookup **list A pointer to the list to add to.
 * @param quest_data *quest The quest to add.
@@ -978,10 +1810,23 @@ void build_all_quest_lookups(void) {
 
 
 /**
+* Frees a list of quest lookups. This is normally only called on 'shutdown
+* complete'.
+*
+* @param struct quest_lookup *list The list of lookups to free.
+*/
+void free_quest_lookups(struct quest_lookup *list) {
+	struct quest_lookup *ql, *next_ql;
+	LL_FOREACH_SAFE(list, ql, next_ql) {
+		free(ql);
+	}
+}
+
+
+/**
 * Adds a quest lookup hint to a list (e.g. on a mob).
 *
-* Note: For mob/obj quests, run update_mob_quest_lookups() or
-* update_obj_quest_lookups() after this.
+* Note: For mob/obj/veh quests, run update_mob_quest_lookups() etc after this.
 *
 * @param struct quest_lookup **list A pointer to the list to add to.
 * @param quest_data *quest The quest to add.
@@ -1016,7 +1861,7 @@ void update_mob_quest_lookups(mob_vnum vnum) {
 		return;
 	}
 	
-	LL_FOREACH(character_list, mob) {
+	DL_FOREACH(character_list, mob) {
 		if (IS_NPC(mob) && GET_MOB_VNUM(mob) == vnum) {
 			// re-set the pointer
 			MOB_QUEST_LOOKUPS(mob) = MOB_QUEST_LOOKUPS(proto);
@@ -1026,20 +1871,20 @@ void update_mob_quest_lookups(mob_vnum vnum) {
 
 
 /**
-* Fixes quest lookup pointers on live copies of objs -- this should ALWAYS
+* Fixes quest lookup pointers on live copies of vehicles -- this should ALWAYS
 * point to the proto.
 */
-void update_obj_quest_lookups(obj_vnum vnum) {
-	obj_data *proto, *obj;
+void update_veh_quest_lookups(any_vnum vnum) {
+	vehicle_data *proto, *veh;
 	
-	if (!(proto = obj_proto(vnum))) {
+	if (!(proto = vehicle_proto(vnum))) {
 		return;
 	}
 	
-	LL_FOREACH(object_list, obj) {
-		if (GET_OBJ_VNUM(obj) == vnum) {
+	DL_FOREACH(vehicle_list, veh) {
+		if (VEH_VNUM(veh) == vnum) {
 			// re-set the pointer
-			GET_OBJ_QUEST_LOOKUPS(obj) = GET_OBJ_QUEST_LOOKUPS(proto);
+			VEH_QUEST_LOOKUPS(veh) = VEH_QUEST_LOOKUPS(proto);
 		}
 	}
 }
@@ -1058,21 +1903,29 @@ bool can_get_quest_from_mob(char_data *ch, char_data *mob, struct quest_temp_lis
 	struct instance_data *inst;
 	struct quest_lookup *ql;
 	bool any = FALSE;
-	bool dailies;
+	bool dailies, event_dailies;
 	
-	if (IS_NPC(ch) || !MOB_QUEST_LOOKUPS(mob) || !CAN_SEE(ch, mob)) {
+	if (IS_NPC(ch) || !MOB_QUEST_LOOKUPS(mob) || !CAN_SEE(ch, mob) || AFF_FLAGGED(mob, AFF_NO_SEE_IN_ROOM)) {
 		return FALSE;
 	}
 	
 	dailies = GET_DAILY_QUESTS(ch) < config_get_int("dailies_per_day");
+	event_dailies = GET_EVENT_DAILY_QUESTS(ch) < config_get_int("dailies_per_day");
 	
 	LL_FOREACH(MOB_QUEST_LOOKUPS(mob), ql) {
 		// make sure they're a giver
 		if (!find_quest_giver_in_list(QUEST_STARTS_AT(ql->quest), QG_MOBILE, GET_MOB_VNUM(mob))) {
 			continue;
 		}
+		// hide tutorials
+		if (QUEST_FLAGGED(ql->quest, QST_TUTORIAL) && PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+			continue;
+		}
 		// hide dailies
-		if (QUEST_FLAGGED(ql->quest, QST_DAILY) && !dailies) {
+		if (IS_NON_EVENT_DAILY(ql->quest) && !dailies) {
+			continue;
+		}
+		if (IS_EVENT_DAILY(ql->quest) && !event_dailies) {
 			continue;
 		}
 		// matching empire
@@ -1081,6 +1934,9 @@ bool can_get_quest_from_mob(char_data *ch, char_data *mob, struct quest_temp_lis
 		}
 		if (!can_use_room(ch, IN_ROOM(ch), QUEST_FLAGGED(ql->quest, QST_NO_GUESTS) ? MEMBERS_ONLY : GUESTS_ALLOWED)) {
 			continue;	// room permissions
+		}
+		if (QUEST_FLAGGED(ql->quest, QST_IN_CITY_ONLY) && (!ROOM_OWNER(IN_ROOM(mob)) || !is_in_city_for_empire(IN_ROOM(mob), ROOM_OWNER(IN_ROOM(mob)), TRUE, NULL))) {
+			continue;	// not in-city
 		}
 		// already on quest?
 		if (is_on_quest(ch, QUEST_VNUM(ql->quest))) {
@@ -1119,21 +1975,29 @@ bool can_get_quest_from_obj(char_data *ch, obj_data *obj, struct quest_temp_list
 	struct quest_lookup *ql;
 	bool any = FALSE;
 	room_data *room;
-	bool dailies;
+	bool dailies, event_dailies;
 	
 	if (IS_NPC(ch) || !GET_OBJ_QUEST_LOOKUPS(obj) || !CAN_SEE_OBJ(ch, obj) || !bind_ok(obj, ch)) {
 		return FALSE;
 	}
 	
 	dailies = GET_DAILY_QUESTS(ch) < config_get_int("dailies_per_day");
+	event_dailies = GET_EVENT_DAILY_QUESTS(ch) < config_get_int("dailies_per_day");
 	
 	LL_FOREACH(GET_OBJ_QUEST_LOOKUPS(obj), ql) {
 		// make sure they're a giver
 		if (!find_quest_giver_in_list(QUEST_STARTS_AT(ql->quest), QG_OBJECT, GET_OBJ_VNUM(obj))) {
 			continue;
 		}
+		// hide tutorials
+		if (QUEST_FLAGGED(ql->quest, QST_TUTORIAL) && PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+			continue;
+		}
 		// hide dailies
-		if (QUEST_FLAGGED(ql->quest, QST_DAILY) && !dailies) {
+		if (IS_NON_EVENT_DAILY(ql->quest) && !dailies) {
+			continue;
+		}
+		if (IS_EVENT_DAILY(ql->quest) && !event_dailies) {
 			continue;
 		}
 		// already on quest?
@@ -1147,9 +2011,12 @@ bool can_get_quest_from_obj(char_data *ch, obj_data *obj, struct quest_temp_list
 		if (room && !obj->carried_by && !can_use_room(ch, room, QUEST_FLAGGED(ql->quest, QST_NO_GUESTS) ? MEMBERS_ONLY : GUESTS_ALLOWED)) {
 			continue;	// room permissions
 		}
+		if (QUEST_FLAGGED(ql->quest, QST_IN_CITY_ONLY) && (!ROOM_OWNER(IN_ROOM(ch)) || !is_in_city_for_empire(IN_ROOM(ch), ROOM_OWNER(IN_ROOM(ch)), TRUE, NULL))) {
+			continue;	// not in-city
+		}
 		
 		// success
-		inst = (room ? find_instance_by_room(room, FALSE) : NULL);
+		inst = (room ? find_instance_by_room(room, FALSE, TRUE) : NULL);
 		
 		// pre-reqs?
 		if (char_meets_prereqs(ch, ql->quest, inst)) {
@@ -1179,14 +2046,15 @@ bool can_get_quest_from_room(char_data *ch, room_data *room, struct quest_temp_l
 	struct quest_lookup *ql, *list[2];
 	struct instance_data *inst;
 	bool any = FALSE;
-	bool dailies;
+	bool dailies, event_dailies;
 	int iter;
 	
-	if (IS_NPC(ch)) {
+	if (IS_NPC(ch) || !IS_COMPLETE(room)) {
 		return FALSE;
 	}
 	
 	dailies = GET_DAILY_QUESTS(ch) < config_get_int("dailies_per_day");
+	event_dailies = GET_EVENT_DAILY_QUESTS(ch) < config_get_int("dailies_per_day");
 	
 	// two places to look
 	list[0] = GET_BUILDING(room) ? GET_BLD_QUEST_LOOKUPS(GET_BUILDING(room)) : NULL;
@@ -1198,11 +2066,18 @@ bool can_get_quest_from_room(char_data *ch, room_data *room, struct quest_temp_l
 			if (iter == 0 && !find_quest_giver_in_list(QUEST_STARTS_AT(ql->quest), QG_BUILDING, GET_BLD_VNUM(GET_BUILDING(room)))) {
 				continue;
 			}
+			// hide tutorials
+			if (QUEST_FLAGGED(ql->quest, QST_TUTORIAL) && PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+				continue;
+			}
 			if (iter == 1 && !find_quest_giver_in_list(QUEST_STARTS_AT(ql->quest), QG_ROOM_TEMPLATE, GET_RMT_VNUM(GET_ROOM_TEMPLATE(room)))) {
 				continue;
 			}
 			// hide dailies
-			if (QUEST_FLAGGED(ql->quest, QST_DAILY) && !dailies) {
+			if (IS_NON_EVENT_DAILY(ql->quest) && !dailies) {
+				continue;
+			}
+			if (IS_EVENT_DAILY(ql->quest) && !event_dailies) {
 				continue;
 			}
 			// matching empire
@@ -1212,13 +2087,16 @@ bool can_get_quest_from_room(char_data *ch, room_data *room, struct quest_temp_l
 			if (!can_use_room(ch, room, QUEST_FLAGGED(ql->quest, QST_NO_GUESTS) ? MEMBERS_ONLY : GUESTS_ALLOWED)) {
 				continue;	// room permissions
 			}
+			if (QUEST_FLAGGED(ql->quest, QST_IN_CITY_ONLY) && (!ROOM_OWNER(room) || !is_in_city_for_empire(room, ROOM_OWNER(room), TRUE, NULL))) {
+				continue;	// not in-city
+			}
 			// already on quest?
 			if (is_on_quest(ch, QUEST_VNUM(ql->quest))) {
 				continue;
 			}
 			
 			// success
-			inst = (room ? find_instance_by_room(room, FALSE) : NULL);
+			inst = (room ? find_instance_by_room(room, FALSE, TRUE) : NULL);
 			
 			// pre-reqs?
 			if (char_meets_prereqs(ch, ql->quest, inst)) {
@@ -1241,6 +2119,77 @@ bool can_get_quest_from_room(char_data *ch, room_data *room, struct quest_temp_l
 
 /**
 * @param char_data *ch Any player playing.
+* @param vehicle_data *veh Any vehicle.
+* @param struct quest_temp_list **build_list Optional: Builds a temp list of quests available.
+* @return bool TRUE if the vehicle has a quest the character can get; FALSE otherwise.
+*/
+bool can_get_quest_from_vehicle(char_data *ch, vehicle_data *veh, struct quest_temp_list **build_list) {
+	struct instance_data *inst;
+	struct quest_lookup *ql;
+	bool any = FALSE;
+	bool dailies, event_dailies;
+	
+	if (IS_NPC(ch) || !VEH_IS_COMPLETE(veh) || !VEH_QUEST_LOOKUPS(veh) || !CAN_SEE_VEHICLE(ch, veh)) {
+		return FALSE;
+	}
+	
+	dailies = GET_DAILY_QUESTS(ch) < config_get_int("dailies_per_day");
+	event_dailies = GET_EVENT_DAILY_QUESTS(ch) < config_get_int("dailies_per_day");
+	
+	LL_FOREACH(VEH_QUEST_LOOKUPS(veh), ql) {
+		// make sure they're a giver
+		if (!find_quest_giver_in_list(QUEST_STARTS_AT(ql->quest), QG_VEHICLE, VEH_VNUM(veh))) {
+			continue;
+		}
+		// hide tutorials
+		if (QUEST_FLAGGED(ql->quest, QST_TUTORIAL) && PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+			continue;
+		}
+		// hide dailies
+		if (IS_NON_EVENT_DAILY(ql->quest) && !dailies) {
+			continue;
+		}
+		if (IS_EVENT_DAILY(ql->quest) && !event_dailies) {
+			continue;
+		}
+		// matching empire
+		if (QUEST_FLAGGED(ql->quest, QST_EMPIRE_ONLY) && VEH_OWNER(veh) != GET_LOYALTY(ch)) {
+			continue;
+		}
+		if (!can_use_vehicle(ch, veh, QUEST_FLAGGED(ql->quest, QST_NO_GUESTS) ? MEMBERS_ONLY : GUESTS_ALLOWED)) {
+			continue;	// vehicle permissions
+		}
+		if (QUEST_FLAGGED(ql->quest, QST_IN_CITY_ONLY) && (!ROOM_OWNER(IN_ROOM(veh)) || !is_in_city_for_empire(IN_ROOM(veh), ROOM_OWNER(IN_ROOM(veh)), TRUE, NULL))) {
+			continue;	// not in-city
+		}
+		// already on quest?
+		if (is_on_quest(ch, QUEST_VNUM(ql->quest))) {
+			continue;
+		}
+		
+		// success
+		inst = (VEH_INSTANCE_ID(veh) != NOTHING ? get_instance_by_id(VEH_INSTANCE_ID(veh)) : NULL);
+		
+		// pre-reqs?
+		if (char_meets_prereqs(ch, ql->quest, inst)) {
+			if (build_list) {
+				any = TRUE;
+				add_to_quest_temp_list(build_list, ql->quest, inst);
+			}
+			else {
+				// only need 1
+				return TRUE;
+			}
+		}
+	}
+	
+	// nope
+	return any;
+}
+
+
+/**
+* @param char_data *ch Any player playing.
 * @param char_data *mob Any mob.
 * @param struct quest_temp_list **build_list Optional: Builds a temp list of quests available.
 * @return bool TRUE if the player has finished a quest that the mob accepts; FALSE otherwise.
@@ -1251,7 +2200,7 @@ bool can_turn_quest_in_to_mob(char_data *ch, char_data *mob, struct quest_temp_l
 	int complete, total;
 	bool any = FALSE;
 	
-	if (IS_NPC(ch) || !MOB_QUEST_LOOKUPS(mob) || !CAN_SEE(ch, mob)) {
+	if (IS_NPC(ch) || !MOB_QUEST_LOOKUPS(mob) || !CAN_SEE(ch, mob) || AFF_FLAGGED(mob, AFF_NO_SEE_IN_ROOM)) {
 		return FALSE;
 	}
 	
@@ -1267,12 +2216,15 @@ bool can_turn_quest_in_to_mob(char_data *ch, char_data *mob, struct quest_temp_l
 		if (!can_use_room(ch, IN_ROOM(ch), QUEST_FLAGGED(ql->quest, QST_NO_GUESTS) ? MEMBERS_ONLY : GUESTS_ALLOWED)) {
 			continue;	// room permissions
 		}
+		if (QUEST_FLAGGED(ql->quest, QST_IN_CITY_ONLY) && (!ROOM_OWNER(IN_ROOM(mob)) || !is_in_city_for_empire(IN_ROOM(mob), ROOM_OWNER(IN_ROOM(mob)), TRUE, NULL))) {
+			continue;	// not in-city
+		}
 		// are they on quest?
 		if (!(pq = is_on_quest(ch, QUEST_VNUM(ql->quest)))) {
 			continue;
 		}
 		
-		count_quest_tasks(pq, &complete, &total);
+		count_quest_tasks(pq->tracker, &complete, &total);
 		if (complete < total) {
 			continue;
 		}
@@ -1325,8 +2277,11 @@ bool can_turn_quest_in_to_obj(char_data *ch, obj_data *obj, struct quest_temp_li
 		if (room && !obj->carried_by && !can_use_room(ch, room, QUEST_FLAGGED(ql->quest, QST_NO_GUESTS) ? MEMBERS_ONLY : GUESTS_ALLOWED)) {
 			continue;	// room permissions
 		}
+		if (QUEST_FLAGGED(ql->quest, QST_IN_CITY_ONLY) && (!ROOM_OWNER(IN_ROOM(ch)) || !is_in_city_for_empire(IN_ROOM(ch), ROOM_OWNER(IN_ROOM(ch)), TRUE, NULL))) {
+			continue;	// not in-city
+		}
 		
-		count_quest_tasks(pq, &complete, &total);
+		count_quest_tasks(pq->tracker, &complete, &total);
 		if (complete < total) {
 			continue;
 		}
@@ -1358,7 +2313,7 @@ bool can_turn_quest_in_to_room(char_data *ch, room_data *room, struct quest_temp
 	struct player_quest *pq;
 	bool any = FALSE;
 	
-	if (IS_NPC(ch)) {
+	if (IS_NPC(ch) || !IS_COMPLETE(room)) {
 		return FALSE;
 	}
 	
@@ -1382,12 +2337,15 @@ bool can_turn_quest_in_to_room(char_data *ch, room_data *room, struct quest_temp
 			if (!can_use_room(ch, room, QUEST_FLAGGED(ql->quest, QST_NO_GUESTS) ? MEMBERS_ONLY : GUESTS_ALLOWED)) {
 				continue;	// room permissions
 			}
+			if (QUEST_FLAGGED(ql->quest, QST_IN_CITY_ONLY) && (!ROOM_OWNER(room) || !is_in_city_for_empire(room, ROOM_OWNER(room), TRUE, NULL))) {
+				continue;	// not in-city
+			}
 			// are they on quest?
 			if (!(pq = is_on_quest(ch, QUEST_VNUM(ql->quest)))) {
 				continue;
 			}
 		
-			count_quest_tasks(pq, &complete, &total);
+			count_quest_tasks(pq->tracker, &complete, &total);
 			if (complete < total) {
 				continue;
 			}
@@ -1409,15 +2367,69 @@ bool can_turn_quest_in_to_room(char_data *ch, room_data *room, struct quest_temp
 
 
 /**
+* @param char_data *ch Any player playing.
+* @param vehicle_data *veh Any vehicle.
+* @param struct quest_temp_list **build_list Optional: Builds a temp list of quests available.
+* @return bool TRUE if the player has finished a quest that the vehicle accepts; FALSE otherwise.
+*/
+bool can_turn_quest_in_to_vehicle(char_data *ch, vehicle_data *veh, struct quest_temp_list **build_list) {
+	struct player_quest *pq;
+	struct quest_lookup *ql;
+	int complete, total;
+	bool any = FALSE;
+	
+	if (IS_NPC(ch) || !VEH_QUEST_LOOKUPS(veh) || !VEH_IS_COMPLETE(veh) || !CAN_SEE_VEHICLE(ch, veh)) {
+		return FALSE;
+	}
+	
+	LL_FOREACH(VEH_QUEST_LOOKUPS(veh), ql) {
+		// make sure they're a giver
+		if (!find_quest_giver_in_list(QUEST_ENDS_AT(ql->quest), QG_VEHICLE, VEH_VNUM(veh))) {
+			continue;
+		}
+		// matching empire
+		if (QUEST_FLAGGED(ql->quest, QST_EMPIRE_ONLY) && VEH_OWNER(veh) != GET_LOYALTY(ch)) {
+			continue;
+		}
+		if (!can_use_vehicle(ch, veh, QUEST_FLAGGED(ql->quest, QST_NO_GUESTS) ? MEMBERS_ONLY : GUESTS_ALLOWED)) {
+			continue;	// vehicle
+		}
+		if (QUEST_FLAGGED(ql->quest, QST_IN_CITY_ONLY) && (!ROOM_OWNER(IN_ROOM(veh)) || !is_in_city_for_empire(IN_ROOM(veh), ROOM_OWNER(IN_ROOM(veh)), TRUE, NULL))) {
+			continue;	// not in-city
+		}
+		// are they on quest?
+		if (!(pq = is_on_quest(ch, QUEST_VNUM(ql->quest)))) {
+			continue;
+		}
+		
+		count_quest_tasks(pq->tracker, &complete, &total);
+		if (complete < total) {
+			continue;
+		}
+		
+		// success!
+		if (build_list) {
+			any = TRUE;
+			add_to_quest_temp_list(build_list, ql->quest, NULL);
+		}
+		else {
+			return TRUE;
+		}
+	}
+	
+	// nope
+	return any;
+}
+
+
+/**
 * @param char_data *ch Any player.
 * @param quest_data *quest The quest to check.
 * @param struct instance_data *instance Optional; If the quest is offered in/from an instance.
 * @return bool TRUE if the player can get the quest.
 */
 bool char_meets_prereqs(char_data *ch, quest_data *quest, struct instance_data *instance) {
-	extern bool meets_requirements(char_data *ch, struct req_data *list, struct instance_data *instance);
-	
-	bool daily = QUEST_FLAGGED(quest, QST_DAILY);
+	bool daily;
 	struct player_completed_quest *completed;
 	bool ok = TRUE;
 	// needs to know instance/adventure
@@ -1427,25 +2439,28 @@ bool char_meets_prereqs(char_data *ch, quest_data *quest, struct instance_data *
 		return FALSE;
 	}
 	
+	daily = IS_DAILY_QUEST(quest) ? TRUE : FALSE;
+	// no need to check event dailies here
+	
 	// only immortals see in-dev quests
 	if (QUEST_FLAGGED(quest, QST_IN_DEVELOPMENT) && !IS_IMMORTAL(ch)) {
 		return FALSE;
 	}
 	
 	// some daily quests are off
-	if (QUEST_FLAGGED(quest, QST_DAILY) && !QUEST_DAILY_ACTIVE(quest)) {
+	if (IS_DAILY_QUEST(quest) && !QUEST_DAILY_ACTIVE(quest)) {
 		return FALSE;
 	}
 	
 	// check repeatability
-	if ((completed = has_completed_quest(ch, QUEST_VNUM(quest), instance ? instance->id : NOTHING))) {
+	if ((completed = has_completed_quest(ch, QUEST_VNUM(quest), instance ? INST_ID(instance) : NOTHING))) {
 		if (daily && QUEST_REPEATABLE_AFTER(quest) <= 0) {
 			// daily quest allows immediate/never: ok
 		}
 		else if (QUEST_REPEATABLE_AFTER(quest) >= 0 && completed->last_completed + (QUEST_REPEATABLE_AFTER(quest) * SECS_PER_REAL_MIN) <= time(0)) {
 			// repeat time: ok
 		}
-		else if (QUEST_FLAGGED(quest, QST_REPEAT_PER_INSTANCE) && (completed->last_adventure != (instance ? GET_ADV_VNUM(instance->adventure) : NOTHING) || completed->last_instance_id != (instance ? instance->id : NOTHING))) {
+		else if (QUEST_FLAGGED(quest, QST_REPEAT_PER_INSTANCE) && (completed->last_adventure != (instance ? GET_ADV_VNUM(INST_ADVENTURE(instance)) : NOTHING) || completed->last_instance_id != (instance ? INST_ID(instance) : NOTHING))) {
 			// repeat per instance: ok (different instance)
 		}
 		else {
@@ -1532,6 +2547,40 @@ struct player_quest *is_on_quest(char_data *ch, any_vnum quest) {
 }
 
 
+/**
+* Used to determine if the character is on a quest with the given name, e.g.
+* to give a better error message when they try to start/drop a quest. Prefers
+* an exact match
+*
+* @param char_data *ch The person to check.
+* @param char *argument What was typed.
+* @return struct player_quest* The player's quest data if on the quest, NULL (FALSE) if not.
+*/
+struct player_quest *is_on_quest_by_name(char_data *ch, char *argument) {
+	struct player_quest *pq, *abbrev = NULL;
+	quest_data *quest;
+	
+	if (IS_NPC(ch) || !*argument) {
+		return NULL;	// shortcut
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		if (!(quest = quest_proto(pq->vnum))) {
+			continue;	// missing data
+		}
+		
+		if (!str_cmp(argument, QUEST_NAME(quest))) {
+			return pq; // exact match
+		}
+		else if (!abbrev && multi_isname(argument, QUEST_NAME(quest))) {
+			abbrev = pq;
+		}
+	}
+	
+	return abbrev;	// if any
+}
+
+
  //////////////////////////////////////////////////////////////////////////////
 //// QUEST TRACKERS //////////////////////////////////////////////////////////
 
@@ -1553,6 +2602,33 @@ void qt_change_ability(char_data *ch, any_vnum abil) {
 		LL_FOREACH(pq->tracker, task) {
 			if (task->type == REQ_HAVE_ABILITY && task->vnum == abil) {
 				task->current = (has_ability(ch, abil) ? task->needed : 0);
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: ch gains or loses levels (total levels)
+*
+* @param char_data *ch The player.
+* @param int level The new level.
+*/
+void qt_change_level(char_data *ch, int level) {
+	struct player_quest *pq;
+	struct req_data *task;
+	
+	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_LEVEL_OVER) {
+				task->current = (level >= task->needed ? task->needed : 0);
+			}
+			else if (task->type == REQ_LEVEL_UNDER) {
+				task->current = (level <= task->needed ? task->needed : -1);	// must set below 0 because 0 is a valid needed
 			}
 		}
 	}
@@ -1610,6 +2686,42 @@ void qt_change_skill_level(char_data *ch, any_vnum skl) {
 			else if (task->type == REQ_SKILL_LEVEL_UNDER && task->vnum == skl) {
 				task->current = (get_skill_level(ch, skl) <= task->needed ? task->needed : -1);	// must set below 0 because 0 is a valid needed
 			}
+			else if (task->type == REQ_CAN_GAIN_SKILL) {
+				task->current = check_can_gain_skill(ch, task->vnum) ? task->needed : 0;
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: Check sun status for player
+*
+* @param char_data *ch The player.
+*/
+void qt_check_day_and_night(char_data *ch) {
+	struct player_quest *pq;
+	struct req_data *task;
+	int status = NOTHING;
+	
+	if (IS_NPC(ch) || !IN_ROOM(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_DAYTIME) {
+				if (status == NOTHING) {
+					status = get_sun_status(IN_ROOM(ch));
+				}
+				task->current = (status == SUN_LIGHT ? TRUE : FALSE);
+			}
+			else if (task->type == REQ_NIGHTTIME) {
+				if (status == NOTHING) {
+					status = get_sun_status(IN_ROOM(ch));
+				}
+				task->current = (status != SUN_LIGHT ? TRUE : FALSE);
+			}
 		}
 	}
 }
@@ -1626,6 +2738,7 @@ void qt_change_skill_level(char_data *ch, any_vnum skl) {
 void qt_drop_obj(char_data *ch, obj_data *obj) {
 	struct player_quest *pq;
 	struct req_data *task;
+	int crop_var = -1;
 	
 	if (IS_NPC(ch)) {
 		return;
@@ -1633,7 +2746,7 @@ void qt_drop_obj(char_data *ch, obj_data *obj) {
 	
 	LL_FOREACH(GET_QUESTS(ch), pq) {
 		LL_FOREACH(pq->tracker, task) {
-			if (task->type == REQ_GET_COMPONENT && GET_OBJ_CMP_TYPE(obj) == task->vnum && (GET_OBJ_CMP_FLAGS(obj) & task->misc) == task->misc) {
+			if (task->type == REQ_GET_COMPONENT &&  GET_OBJ_COMPONENT(obj) != NOTHING && is_component_vnum(obj, task->vnum)) {
 				--task->current;
 			}
 			else if (task->type == REQ_GET_OBJECT && GET_OBJ_VNUM(obj) == task->vnum) {
@@ -1641,6 +2754,13 @@ void qt_drop_obj(char_data *ch, obj_data *obj) {
 			}
 			else if (task->type == REQ_WEARING_OR_HAS && GET_OBJ_VNUM(obj) == task->vnum) {
 				--task->current;
+			}
+			else if (task->type == REQ_CROP_VARIETY && OBJ_FLAGGED(obj, OBJ_PLANTABLE)) {
+				if (crop_var == -1) {
+					// update look this up once
+					crop_var = count_crop_variety_in_list(ch->carrying);
+				}
+				task->current = crop_var;
 			}
 			
 			// check min
@@ -1651,8 +2771,83 @@ void qt_drop_obj(char_data *ch, obj_data *obj) {
 
 
 /**
+* Quest Tracker: empire cities change
+*
+* @param char_data *ch The player.
+* @param any_vnum amount (ignored, required by function pointer call).
+*/
+void qt_empire_cities(char_data *ch, any_vnum amount) {
+	struct player_quest *pq;
+	struct req_data *task;
+	
+	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_HAVE_CITY) {
+				task->current = GET_LOYALTY(ch) ? count_cities(GET_LOYALTY(ch)) : 0;
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: empire diplomacy changes
+*
+* @param char_data *ch The player.
+* @param any_vnum amount (ignored, required by function pointer call).
+*/
+void qt_empire_diplomacy(char_data *ch, any_vnum amount) {
+	struct player_quest *pq;
+	struct req_data *task;
+	
+	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_DIPLOMACY) {
+				task->current = GET_LOYALTY(ch) ? count_diplomacy(GET_LOYALTY(ch), task->misc) : 0;
+			}
+			else if (task->type == REQ_DIPLOMACY_OVER) {
+				task->current = GET_LOYALTY(ch) ? count_diplomacy_over(GET_LOYALTY(ch), task->misc) : 0;
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: empire greatness changes
+*
+* @param char_data *ch The player.
+* @param any_vnum amount Change in greatness (usually 0, but this parameter is required -- we rescan the empire instead).
+*/
+void qt_empire_greatness(char_data *ch, any_vnum amount) {
+	struct player_quest *pq;
+	struct req_data *task;
+	
+	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_EMPIRE_GREATNESS) {
+				task->current = GET_LOYALTY(ch) ? EMPIRE_GREATNESS(GET_LOYALTY(ch)) : 0;
+			}
+		}
+	}
+}
+
+
+/**
 * This can be used to call several different qt functions on all members of
-* an empire online.
+* an empire online, for types that need a vnum.
 *
 * @param empire_data *emp The empire to call the function on.
 * @param void (*func)(char_data *ch, any_vnum vnum) The function to call.
@@ -1681,12 +2876,41 @@ void qt_empire_players(empire_data *emp, void (*func)(char_data *ch, any_vnum vn
 
 
 /**
-* Quest Tracker: ch gets a building
+* This can be used to call several different qt functions on all members of
+* an empire online, for types that need a vehicle.
+*
+* @param empire_data *emp The empire to call the function on.
+* @param void (*func)(char_data *ch, vehicle_data *veh) The function to call.
+* @param vehicle_data *veh The vehicle to pass to the function.
+*/
+void qt_empire_players_vehicle(empire_data *emp, void (*func)(char_data *ch, vehicle_data *veh), vehicle_data *veh) {
+	descriptor_data *desc;
+	char_data *ch;
+	
+	if (!emp || !func || !veh) {
+		return;
+	}
+	
+	LL_FOREACH(descriptor_list, desc) {
+		if (STATE(desc) != CON_PLAYING || !(ch = desc->character)) {
+			continue;
+		}
+		if (GET_LOYALTY(ch) != emp) {
+			continue;
+		}
+		
+		// call it
+		(func)(ch, veh);
+	}
+}
+
+
+/**
+* Quest Tracker: ch gains/loses coins
 *
 * @param char_data *ch The player.
-* @param any_vnum vnum The building vnum.
 */
-void qt_gain_building(char_data *ch, any_vnum vnum) {
+void qt_change_coins(char_data *ch) {
 	struct player_quest *pq;
 	struct req_data *task;
 	
@@ -1696,7 +2920,209 @@ void qt_gain_building(char_data *ch, any_vnum vnum) {
 	
 	LL_FOREACH(GET_QUESTS(ch), pq) {
 		LL_FOREACH(pq->tracker, task) {
-			if (task->type == REQ_OWN_BUILDING && task->vnum == vnum) {
+			if (task->type == REQ_GET_COINS) {
+				task->current = count_total_coins_as(ch, REAL_OTHER_COIN);
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: ch gains/loses currency
+*
+* @param char_data *ch The player.
+* @param any_vnum vnum The generic currency vnum.
+* @param int total The new value of the currency.
+*/
+void qt_change_currency(char_data *ch, any_vnum vnum, int total) {
+	struct player_quest *pq;
+	struct req_data *task;
+	
+	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_GET_CURRENCY && task->vnum == vnum) {
+				task->current = total;
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: ch gains/loses a language
+*
+* @param char_data *ch The player.
+* @param any_vnum vnum The generic language vnum.
+* @param int mode The new LANG_ constant.
+*/
+void qt_change_language(char_data *ch, any_vnum vnum, int level) {
+	struct player_quest *pq;
+	struct req_data *task;
+	
+	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_SPEAK_LANGUAGE && task->vnum == vnum) {
+				task->current = (level == LANG_SPEAK) ? task->needed : 0;
+			}
+			else if (task->type == REQ_RECOGNIZE_LANGUAGE && task->vnum == vnum) {
+				task->current = (level == LANG_RECOGNIZE || level == LANG_SPEAK) ? task->needed : 0;
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: empire changes production-total
+*
+* @param char_data *ch The player.
+* @param obj_vnum vnum Which object vnum.
+* @param int amount How much was gained (or lost).
+*/
+void qt_change_production_total(char_data *ch, any_vnum vnum, int amount) {
+	obj_data *proto = obj_proto(vnum);
+	struct player_quest *pq;
+	struct req_data *task;
+	
+	if (IS_NPC(ch) || !proto) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_EMPIRE_PRODUCED_OBJECT && task->vnum == vnum) {
+				SAFE_ADD(task->current, amount, 0, INT_MAX, FALSE);
+			}
+			else if (task->type == REQ_EMPIRE_PRODUCED_COMPONENT && GET_OBJ_COMPONENT(proto) != NOTHING && is_component_vnum(proto, task->vnum)) {
+				SAFE_ADD(task->current, amount, 0, INT_MAX, FALSE);
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: empire wealth changes
+*
+* @param char_data *ch The player.
+* @param any_vnum amount Change in wealth (may be 0; reread anyway).
+*/
+void qt_empire_wealth(char_data *ch, any_vnum amount) {
+	struct player_quest *pq;
+	struct req_data *task;
+	
+	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_EMPIRE_WEALTH) {
+				task->current = GET_LOYALTY(ch) ? GET_TOTAL_WEALTH(GET_LOYALTY(ch)) : 0;
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: an event starts or stops (updates all players in-game)
+*
+* @param any_vnum event_vnum Which event has started or stopped.
+*/
+void qt_event_start_stop(any_vnum event_vnum) {
+	struct player_quest *pq;
+	struct req_data *task;
+	char_data *ch;
+	
+	DL_FOREACH2(player_character_list, ch, next_plr) {
+		LL_FOREACH(GET_QUESTS(ch), pq) {
+			LL_FOREACH(pq->tracker, task) {
+				if (task->type == REQ_EVENT_RUNNING && task->vnum == event_vnum) {
+					task->current = find_running_event_by_vnum(task->vnum) ? task->needed : 0;
+				}
+				else if (task->type == REQ_EVENT_NOT_RUNNING && task->vnum == event_vnum) {
+					task->current = find_running_event_by_vnum(task->vnum) ? 0 : task->needed;
+				}
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: ch gets a building
+*
+* @param char_data *ch The player.
+* @param any_vnum vnum The building vnum.
+*/
+void qt_gain_building(char_data *ch, any_vnum vnum) {
+	struct player_quest *pq;
+	struct req_data *task;
+	bld_data *bld = building_proto(vnum);
+	
+	if (IS_NPC(ch) || !bld) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_OWN_BUILDING && building_counts_as(bld, task->vnum, NOTHING)) {
+				++task->current;
+			}
+			else if (task->type == REQ_OWN_VEHICLE && building_counts_as(bld, NOTHING, task->vnum)) {
+				++task->current;
+			}
+			else if (task->type == REQ_OWN_BUILDING_FUNCTION && (GET_BLD_FUNCTIONS(bld) & task->misc) == task->misc) {
+				++task->current;
+			}
+			else if (task->type == REQ_OWN_HOMES && !IS_SET(GET_BLD_FLAGS(bld), BLD_ROOM) && GET_BLD_CITIZENS(bld) > 0) {
+				++task->current;
+			}
+			else if (task->type == REQ_EMPIRE_FAME && GET_BLD_FAME(bld) != 0) {
+				task->current += GET_BLD_FAME(bld);
+			}
+			else if (task->type == REQ_EMPIRE_MILITARY && GET_BLD_MILITARY(bld) != 0) {
+				task->current += GET_BLD_MILITARY(bld);
+			}
+			else if (task->type == REQ_OWN_ROADS && BLD_FLAGGED(bld, BLD_ROAD_ICON | BLD_ROAD_ICON_WIDE)) {
+				++task->current;
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: ch gets a new tile, by sector
+*
+* @param char_data *ch The player.
+* @param sector_vnum vnum The sector vnum.
+*/
+void qt_gain_tile_sector(char_data *ch, sector_vnum vnum) {
+	sector_data *sect = sector_proto(vnum);
+	struct player_quest *pq;
+	struct req_data *task;
+	
+	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_OWN_SECTOR && task->vnum == vnum) {
+				++task->current;
+			}
+			else if (task->type == REQ_OWN_ROADS && SECT_FLAGGED(sect, SECTF_IS_ROAD)) {
 				++task->current;
 			}
 		}
@@ -1708,9 +3134,9 @@ void qt_gain_building(char_data *ch, any_vnum vnum) {
 * Quest Tracker: ch gets a vehicle
 *
 * @param char_data *ch The player.
-* @param any_vnum vnum The vehicle vnum.
+* @param vehicle_data *veh The vehicle to gain.
 */
-void qt_gain_vehicle(char_data *ch, any_vnum vnum) {
+void qt_gain_vehicle(char_data *ch, vehicle_data *veh) {
 	struct player_quest *pq;
 	struct req_data *task;
 	
@@ -1720,7 +3146,24 @@ void qt_gain_vehicle(char_data *ch, any_vnum vnum) {
 	
 	LL_FOREACH(GET_QUESTS(ch), pq) {
 		LL_FOREACH(pq->tracker, task) {
-			if (task->type == REQ_OWN_VEHICLE && task->vnum == vnum) {
+			if (task->type == REQ_OWN_VEHICLE && vehicle_counts_as(veh, NOTHING, task->vnum)) {
+				++task->current;
+			}
+			else if (task->type == REQ_OWN_BUILDING && vehicle_counts_as(veh, task->vnum, NOTHING)) {
+				++task->current;
+			}
+			else if (task->type == REQ_OWN_VEHICLE_FLAGGED && (VEH_FLAGS(veh) & task->misc) == task->misc) {
+				++task->current;
+			}
+			else if (task->type == REQ_OWN_VEHICLE_FUNCTION && !VEH_FLAGGED(veh, VEH_BUILDING) && (VEH_FUNCTIONS(veh) & task->misc) == task->misc) {
+				// non-building vehicle
+				++task->current;
+			}
+			else if (task->type == REQ_OWN_BUILDING_FUNCTION && VEH_FLAGGED(veh, VEH_BUILDING) && (VEH_FUNCTIONS(veh) & task->misc) == task->misc) {
+				// building vehicle
+				++task->current;
+			}
+			else if (task->type == REQ_OWN_HOMES && VEH_FLAGGED(veh, VEH_BUILDING) && VEH_INTERIOR_HOME_ROOM(veh) && GET_BUILDING(VEH_INTERIOR_HOME_ROOM(veh)) && GET_BLD_CITIZENS(GET_BUILDING(VEH_INTERIOR_HOME_ROOM(veh))) > 0) {
 				++task->current;
 			}
 		}
@@ -1737,6 +3180,7 @@ void qt_gain_vehicle(char_data *ch, any_vnum vnum) {
 void qt_get_obj(char_data *ch, obj_data *obj) {
 	struct player_quest *pq;
 	struct req_data *task;
+	int crop_var = -1;
 	
 	if (IS_NPC(ch)) {
 		return;
@@ -1744,7 +3188,7 @@ void qt_get_obj(char_data *ch, obj_data *obj) {
 	
 	LL_FOREACH(GET_QUESTS(ch), pq) {
 		LL_FOREACH(pq->tracker, task) {
-			if (task->type == REQ_GET_COMPONENT && GET_OBJ_CMP_TYPE(obj) == task->vnum && (GET_OBJ_CMP_FLAGS(obj) & task->misc) == task->misc) {
+			if (task->type == REQ_GET_COMPONENT && GET_OBJ_COMPONENT(obj) != NOTHING && is_component_vnum(obj, task->vnum)) {
 				++task->current;
 			}
 			else if (task->type == REQ_GET_OBJECT && GET_OBJ_VNUM(obj) == task->vnum) {
@@ -1753,6 +3197,53 @@ void qt_get_obj(char_data *ch, obj_data *obj) {
 			else if (task->type == REQ_WEARING_OR_HAS && GET_OBJ_VNUM(obj) == task->vnum) {
 				++task->current;
 			}
+			else if (task->type == REQ_CROP_VARIETY && OBJ_FLAGGED(obj, OBJ_PLANTABLE)) {
+				if (crop_var == -1) {
+					// update look this up once
+					crop_var = count_crop_variety_in_list(ch->carrying);
+				}
+				task->current = crop_var;
+			}
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: ch keeps or unkeeps an item (updates quests where it would be
+* extracted.
+*
+* @param char_data *ch The player.
+* @param obj_data *obj The item.
+* @param bool true_for_keep Keeping if TRUE, un-keeping if FALSE.
+*/
+void qt_keep_obj(char_data *ch, obj_data *obj, bool true_for_keep) {
+	struct player_quest *pq;
+	struct req_data *task;
+	quest_data *qst;
+	
+	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		if (!(qst = quest_proto(pq->vnum)) || !QUEST_FLAGGED(qst, QST_EXTRACT_TASK_OBJECTS)) {
+			continue;	// only interested in quests that extract items
+		}
+		
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_GET_COMPONENT && GET_OBJ_COMPONENT(obj) != NOTHING && is_component_vnum(obj, task->vnum)) {
+				task->current += (true_for_keep ? -1 : 1);
+			}
+			else if (task->type == REQ_GET_OBJECT && GET_OBJ_VNUM(obj) == task->vnum) {
+				task->current += (true_for_keep ? -1 : 1);
+			}
+			else if (task->type == REQ_WEARING_OR_HAS && GET_OBJ_VNUM(obj) == task->vnum) {
+				task->current += (true_for_keep ? -1 : 1);
+			}
+			
+			// check min
+			task->current = MAX(task->current, 0);
 		}
 	}
 }
@@ -1772,6 +3263,7 @@ void qt_kill_mob(char_data *ch, char_data *mob) {
 		return;
 	}
 	
+	// player trackers
 	LL_FOREACH(GET_QUESTS(ch), pq) {
 		LL_FOREACH(pq->tracker, task) {
 			if (task->type == REQ_KILL_MOB_FLAGGED && (MOB_FLAGS(mob) & task->misc) == task->misc) {
@@ -1779,6 +3271,25 @@ void qt_kill_mob(char_data *ch, char_data *mob) {
 			}
 			else if (task->type == REQ_KILL_MOB && GET_MOB_VNUM(mob) == task->vnum) {
 				++task->current;
+			}
+		}
+	}
+	
+	// empire trackers
+	if (GET_LOYALTY(ch)) {
+		struct empire_goal *goal, *next_goal;
+		HASH_ITER(hh, EMPIRE_GOALS(GET_LOYALTY(ch)), goal, next_goal) {
+			LL_FOREACH(goal->tracker, task) {
+				if (task->type == REQ_KILL_MOB_FLAGGED && (MOB_FLAGS(mob) & task->misc) == task->misc) {
+					++task->current;
+					EMPIRE_NEEDS_SAVE(GET_LOYALTY(ch)) = TRUE;
+					TRIGGER_DELAYED_REFRESH(GET_LOYALTY(ch), DELAY_REFRESH_GOAL_COMPLETE);
+				}
+				else if (task->type == REQ_KILL_MOB && GET_MOB_VNUM(mob) == task->vnum) {
+					++task->current;
+					EMPIRE_NEEDS_SAVE(GET_LOYALTY(ch)) = TRUE;
+					TRIGGER_DELAYED_REFRESH(GET_LOYALTY(ch), DELAY_REFRESH_GOAL_COMPLETE);
+				}
 			}
 		}
 	}
@@ -1794,14 +3305,33 @@ void qt_kill_mob(char_data *ch, char_data *mob) {
 void qt_lose_building(char_data *ch, any_vnum vnum) {
 	struct player_quest *pq;
 	struct req_data *task;
+	bld_data *bld = building_proto(vnum);
 	
-	if (IS_NPC(ch)) {
+	if (IS_NPC(ch) || !bld) {
 		return;
 	}
 	
 	LL_FOREACH(GET_QUESTS(ch), pq) {
 		LL_FOREACH(pq->tracker, task) {
-			if (task->type == REQ_OWN_BUILDING && task->vnum == vnum) {
+			if (task->type == REQ_OWN_BUILDING && building_counts_as(bld, task->vnum, NOTHING)) {
+				--task->current;
+			}
+			else if (task->type == REQ_OWN_VEHICLE && building_counts_as(bld, NOTHING, task->vnum)) {
+				--task->current;
+			}
+			else if (task->type == REQ_OWN_BUILDING_FUNCTION && (GET_BLD_FUNCTIONS(bld) & task->misc) == task->misc) {
+				--task->current;
+			}
+			else if (task->type == REQ_OWN_HOMES && !IS_SET(GET_BLD_FLAGS(bld), BLD_ROOM) && GET_BLD_CITIZENS(bld) > 0) {
+				--task->current;
+			}
+			else if (task->type == REQ_EMPIRE_FAME && GET_BLD_FAME(bld) != 0) {
+				task->current -= GET_BLD_FAME(bld);
+			}
+			else if (task->type == REQ_EMPIRE_MILITARY && GET_BLD_MILITARY(bld) != 0) {
+				task->current -= GET_BLD_MILITARY(bld);
+			}
+			else if (task->type == REQ_OWN_ROADS && BLD_FLAGGED(bld, BLD_ROAD_ICON | BLD_ROAD_ICON_WIDE)) {
 				--task->current;
 			}
 			
@@ -1837,12 +3367,13 @@ void qt_lose_quest(char_data *ch, any_vnum vnum) {
 
 
 /**
-* Quest Tracker: ch loses a vehicle
+* Quest Tracker: ch loses a tile, by sector
 *
 * @param char_data *ch The player.
-* @param any_vnum vnum The vehicle vnum.
+* @param sector_vnum vnum The sector vnum.
 */
-void qt_lose_vehicle(char_data *ch, any_vnum vnum) {
+void qt_lose_tile_sector(char_data *ch, sector_vnum vnum) {
+	sector_data *sect = sector_proto(vnum);
 	struct player_quest *pq;
 	struct req_data *task;
 	
@@ -1852,7 +3383,54 @@ void qt_lose_vehicle(char_data *ch, any_vnum vnum) {
 	
 	LL_FOREACH(GET_QUESTS(ch), pq) {
 		LL_FOREACH(pq->tracker, task) {
-			if (task->type == REQ_OWN_VEHICLE && task->vnum == vnum) {
+			if (task->type == REQ_OWN_SECTOR && task->vnum == vnum) {
+				--task->current;
+			}
+			else if (task->type == REQ_OWN_ROADS && SECT_FLAGGED(sect, SECTF_IS_ROAD)) {
+				--task->current;
+			}
+			
+			// check min
+			task->current = MAX(task->current, 0);
+		}
+	}
+}
+
+
+/**
+* Quest Tracker: ch loses a vehicle
+*
+* @param char_data *ch The player.
+* @param vehicle_data *veh The vehicle to lose.
+*/
+void qt_lose_vehicle(char_data *ch, vehicle_data *veh) {
+	struct player_quest *pq;
+	struct req_data *task;
+	
+	if (IS_NPC(ch)) {
+		return;
+	}
+	
+	LL_FOREACH(GET_QUESTS(ch), pq) {
+		LL_FOREACH(pq->tracker, task) {
+			if (task->type == REQ_OWN_VEHICLE && vehicle_counts_as(veh, NOTHING, task->vnum)) {
+				--task->current;
+			}
+			else if (task->type == REQ_OWN_BUILDING && vehicle_counts_as(veh, task->vnum, NOTHING)) {
+				--task->current;
+			}
+			else if (task->type == REQ_OWN_VEHICLE_FLAGGED && (VEH_FLAGS(veh) & task->misc) == task->misc) {
+				--task->current;
+			}
+			else if (task->type == REQ_OWN_VEHICLE_FUNCTION && !VEH_FLAGGED(veh, VEH_BUILDING) && (VEH_FUNCTIONS(veh) & task->misc) == task->misc) {
+				// non-building vehicle
+				--task->current;
+			}
+			else if (task->type == REQ_OWN_BUILDING_FUNCTION && VEH_FLAGGED(veh, VEH_BUILDING) && (VEH_FUNCTIONS(veh) & task->misc) == task->misc) {
+				// building vehicle
+				--task->current;
+			}
+			else if (task->type == REQ_OWN_HOMES && VEH_FLAGGED(veh, VEH_BUILDING) && VEH_INTERIOR_HOME_ROOM(veh) && GET_BUILDING(VEH_INTERIOR_HOME_ROOM(veh)) && GET_BLD_CITIZENS(GET_BUILDING(VEH_INTERIOR_HOME_ROOM(veh))) > 0) {
 				--task->current;
 			}
 			
@@ -1880,6 +3458,9 @@ void qt_quest_completed(char_data *ch, any_vnum vnum) {
 	LL_FOREACH(GET_QUESTS(ch), pq) {
 		LL_FOREACH(pq->tracker, task) {
 			if (task->type == REQ_COMPLETED_QUEST && task->vnum == vnum) {
+				task->current = task->needed;
+			}
+			else if (task->type == REQ_COMPLETED_QUEST_EVER && task->vnum == vnum) {
 				task->current = task->needed;
 			}
 			else if (task->type == REQ_NOT_COMPLETED_QUEST && task->vnum == vnum) {
@@ -1945,12 +3526,13 @@ void qt_start_quest(char_data *ch, any_vnum vnum) {
 
 
 /**
-* Quest Tracker: mark a triggered condition for 1 quest
+* Quest Tracker: increase a triggered condition for a quest by 1
 *
 * @param char_data *ch The player.
 * @param any_vnum vnum The quest to mark.
+* @param int specific_val Optional: Sets it to this value (pass 0 to just add 1 instead).
 */
-void qt_triggered_task(char_data *ch, any_vnum vnum) {
+void qt_triggered_task(char_data *ch, any_vnum vnum, int specific_val) {
 	struct player_quest *pq;
 	struct req_data *task;
 	
@@ -1962,7 +3544,14 @@ void qt_triggered_task(char_data *ch, any_vnum vnum) {
 		if (pq->vnum == vnum) {
 			LL_FOREACH(pq->tracker, task) {
 				if (task->type == REQ_TRIGGERED) {
-					task->current = task->needed;
+					if (specific_val > 0) {
+						// specific value
+						task->current = MIN(specific_val, task->needed);
+					}
+					else {
+						// add instead
+						task->current = MIN(task->current+1, task->needed);
+					}
 				}
 			}
 		}
@@ -1971,12 +3560,13 @@ void qt_triggered_task(char_data *ch, any_vnum vnum) {
 
 
 /**
-* Quest Tracker: cancel a triggered condition for the quest
+* Quest Tracker: reduce a triggered condition for the quest by 1 (or all)
 *
 * @param char_data *ch The player.
 * @param any_vnum vnum The quest to un-mark.
+* @param bool remove_all If TRUE, removes ALL triggers.
 */
-void qt_untrigger_task(char_data *ch, any_vnum vnum) {
+void qt_untrigger_task(char_data *ch, any_vnum vnum, bool remove_all) {
 	struct player_quest *pq;
 	struct req_data *task;
 	
@@ -1988,7 +3578,13 @@ void qt_untrigger_task(char_data *ch, any_vnum vnum) {
 		if (pq->vnum == vnum) {
 			LL_FOREACH(pq->tracker, task) {
 				if (task->type == REQ_TRIGGERED) {
-					task->current = 0;
+					// remove all OR 1
+					if (remove_all) {
+						task->current = 0;
+					}
+					else {
+						task->current = MAX(task->current-1, 0);
+					}
 				}
 			}
 		}
@@ -2127,12 +3723,16 @@ void qt_wear_obj(char_data *ch, obj_data *obj) {
 * @return bool TRUE if any problems were reported; FALSE if all good.
 */
 bool audit_quest(quest_data *quest, char_data *ch) {
-	extern const bool requirement_needs_tracker[];
-	
+	archetype_data *arch;
 	struct trig_proto_list *tpl;
+	struct quest_reward *rew;
+	progress_data *prog;
 	struct req_data *task;
+	generic_data *gen;
 	trig_data *trig;
 	bool problem = FALSE;
+	int max_q = 0;
+	ability_data *abil;
 	
 	if (QUEST_FLAGGED(quest, QST_IN_DEVELOPMENT)) {
 		olc_audit_msg(ch, QUEST_VNUM(quest), "IN-DEVELOPMENT");
@@ -2188,6 +3788,91 @@ bool audit_quest(quest_data *quest, char_data *ch) {
 			problem = TRUE;
 			break;
 		}
+	}
+	
+	if (!QUEST_TASKS(quest)) {
+		olc_audit_msg(ch, QUEST_VNUM(quest), "No tasks");
+		problem = TRUE;
+	}
+	
+	// QR_x: audit rewards
+	LL_FOREACH(QUEST_REWARDS(quest), rew) {
+		switch (rew->type) {
+			case QR_BONUS_EXP:
+			case QR_OBJECT: {
+				max_q = MAX(max_q, rew->amount);
+				break;
+			}
+			case QR_SPEAK_LANGUAGE:
+			case QR_RECOGNIZE_LANGUAGE: {
+				if (!(gen = real_generic(rew->vnum))) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards non-existent language");
+					problem = TRUE;
+				}
+				else if (GEN_TYPE(gen) != GENERIC_LANGUAGE) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards non-language generic");
+					problem = TRUE;
+				}
+				else if (GEN_FLAGGED(gen, GEN_BASIC | GEN_IN_DEVELOPMENT)) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards language with BASIC or IN-DEV");
+					problem = TRUE;
+				}
+				break;
+			}
+			case QR_GRANT_PROGRESS:
+			case QR_START_PROGRESS: {
+				if (!(prog = real_progress(rew->vnum))) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards non-existent progress goal");
+					problem = TRUE;
+				}
+				else if (PRG_FLAGGED(prog, PRG_IN_DEVELOPMENT)) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards IN-DEV progress goal");
+					problem = TRUE;
+				}
+				else if (!PRG_FLAGGED(prog, PRG_NO_AUTOSTART)) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards progress goal without NO-AUTOSTART");
+					problem = TRUE;
+				}
+				break;
+			}
+			case QR_UNLOCK_ARCHETYPE: {
+				if (!(arch = archetype_proto(rew->vnum))) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards non-existent archetype unlock");
+					problem = TRUE;
+				}
+				else if (!ARCHETYPE_FLAGGED(arch, ARCH_LOCKED)) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards archetype without LOCKED flag: %d %s", rew->vnum, GET_ARCH_NAME(arch));
+					problem = TRUE;
+				}
+				break;
+			}
+			case QR_BONUS_ABILITY: {
+				if (!(abil = ability_proto(rew->vnum))) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards non-existent ability");
+					problem = TRUE;
+				}
+				else if (ABIL_IS_PURCHASE(abil)) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards bonus ability '%s' that is assigned to a skill tree", ABIL_NAME(abil));
+					problem = TRUE;
+				}
+				else if (ABIL_IS_CLASS(abil)) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards bonus ability '%s' that is assigned to a class", ABIL_NAME(abil));
+					problem = TRUE;
+				}
+				else if (ABIL_IS_SYNERGY(abil)) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards bonus ability '%s' that is assigned to a skill synergy", ABIL_NAME(abil));
+					problem = TRUE;
+				}
+				break;
+			}
+			case QR_REMOVE_ABILITY: {
+				break;
+			}
+		}
+	}
+	if (max_q > 10) {
+		olc_audit_msg(ch, QUEST_VNUM(quest), "Unusual reward quantity: %d", max_q);
+		problem = TRUE;
 	}
 	
 	return problem;
@@ -2285,15 +3970,243 @@ bool find_quest_reward_in_list(struct quest_reward *list, int type, any_vnum vnu
 */
 char *list_one_quest(quest_data *quest, bool detail) {
 	static char output[MAX_STRING_LENGTH];
+	char typestr[128], levels[128];
+	
+	// if it's detailed view
+	bitvector_t show_flags = QST_IN_DEVELOPMENT | QST_DAILY | QST_EVENT | QST_TUTORIAL | QST_GROUP_COMPLETION;
 	
 	if (detail) {
-		snprintf(output, sizeof(output), "[%5d] %s%s", QUEST_VNUM(quest), QUEST_NAME(quest), (QUEST_FLAGGED(quest, QST_DAILY) ? " (daily)" : ""));
+		if (QUEST_MIN_LEVEL(quest) > 0 || QUEST_MAX_LEVEL(quest) > 0) {
+			safe_snprintf(levels, sizeof(levels), " [%d-%d]", QUEST_MIN_LEVEL(quest), QUEST_MAX_LEVEL(quest));
+		}
+		else {
+			*levels = '\0';
+		}
+		
+		if (IS_SET(QUEST_FLAGS(quest), show_flags)) {
+			sprintbit(QUEST_FLAGS(quest) & show_flags, quest_flags, typestr, TRUE);
+		}
+		else {
+			*typestr = '\0';
+		}
+		safe_snprintf(output, sizeof(output), "[%5d] %s%s %s", QUEST_VNUM(quest), QUEST_NAME(quest), levels, typestr);
 	}
 	else {
-		snprintf(output, sizeof(output), "[%5d] %s%s", QUEST_VNUM(quest), QUEST_NAME(quest), (QUEST_FLAGGED(quest, QST_DAILY) ? " (daily)" : ""));
+		if (IS_EVENT_DAILY(quest)) {
+			if (QUEST_DAILY_CYCLE(quest) == NOTHING) {
+				safe_snprintf(typestr, sizeof(typestr), " (event daily)");
+			}
+			else {
+				safe_snprintf(typestr, sizeof(typestr), " (event daily, %s)", QUEST_DAILY_ACTIVE(quest) ? "active" : "inactive");
+			}
+		}
+		else if (IS_DAILY_QUEST(quest) && QUEST_DAILY_CYCLE(quest) == NOTHING) {
+			safe_snprintf(typestr, sizeof(typestr), " (daily)");
+		}
+		else if (IS_DAILY_QUEST(quest) && QUEST_DAILY_ACTIVE(quest)) {
+			safe_snprintf(typestr, sizeof(typestr), " (daily, active)");
+		}
+		else if (IS_DAILY_QUEST(quest)) {
+			safe_snprintf(typestr, sizeof(typestr), " (daily, inactive)");
+		}
+		else if (IS_EVENT_QUEST(quest)) {
+			safe_snprintf(typestr, sizeof(typestr), " (event)");
+		}
+		else {
+			*typestr = '\0';
+		}
+		
+		safe_snprintf(output, sizeof(output), "[%5d] %s%s", QUEST_VNUM(quest), QUEST_NAME(quest), typestr);
 	}
 		
 	return output;
+}
+
+
+/**
+* Searches properties of quests.
+*
+* @param char_data *ch The person searching.
+* @param char *argument The argument they entered.
+*/
+void olc_fullsearch_quest(char_data *ch, char *argument) {
+	bool any;
+	char type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], find_keywords[MAX_INPUT_LENGTH];
+	int count;
+	struct quest_reward *qreward;
+	struct req_data *req;
+	
+	bitvector_t only_flags = NOBITS, not_flagged = NOBITS;
+	bool no_daily_cycle = FALSE, active_daily_cycle = FALSE, inactive_daily_cycle = FALSE;
+	int vmin = NOTHING, vmax = NOTHING, only_level = NOTHING, level_over = NOTHING, level_under = NOTHING;
+	int only_daily_cycle = NOTHING, only_repeat = NOTHING, repeat_over = NOTHING, repeat_under = NOTHING;
+	int only_reward = NOTHING, only_prereq = NOTHING, only_task = NOTHING;
+	
+	quest_data *quest, *next_quest;
+	
+	if (!*argument) {
+		msg_to_char(ch, "See HELP QEDIT FULLSEARCH for syntax.\r\n");
+		return;
+	}
+	
+	// process argument
+	*find_keywords = '\0';
+	while (*argument) {
+		// figure out a type
+		argument = any_one_arg(argument, type_arg);
+		
+		if (!strcmp(type_arg, "-")) {
+			continue;	// just skip stray dashes
+		}
+		
+		FULLSEARCH_FLAGS("flags", only_flags, quest_flags)
+		FULLSEARCH_FLAGS("flagged", only_flags, quest_flags)
+		FULLSEARCH_FLAGS("unflagged", not_flagged, quest_flags)
+		FULLSEARCH_INT("vmin", vmin, 0, INT_MAX)
+		FULLSEARCH_INT("vmax", vmax, 0, INT_MAX)
+		FULLSEARCH_INT("level", only_level, 0, INT_MAX)
+		FULLSEARCH_INT("levelover", level_over, 0, INT_MAX)
+		FULLSEARCH_INT("levelunder", level_under, 0, INT_MAX)
+		FULLSEARCH_INT("dailycycle", only_daily_cycle, 0, INT_MAX)
+		FULLSEARCH_BOOL("nodailycycle", no_daily_cycle)
+		FULLSEARCH_BOOL("activedailycycle", active_daily_cycle)
+		FULLSEARCH_BOOL("inactivedailycycle", inactive_daily_cycle)
+		FULLSEARCH_INT("repeat", only_repeat, 0, INT_MAX)
+		FULLSEARCH_INT("repeatover", repeat_over, 0, INT_MAX)
+		FULLSEARCH_INT("repeatunder", repeat_under, 0, INT_MAX)
+		FULLSEARCH_LIST("rewards", only_reward, quest_reward_types)
+		FULLSEARCH_LIST("prereqs", only_prereq, requirement_types)
+		FULLSEARCH_LIST("prerequisite", only_prereq, requirement_types)
+		FULLSEARCH_LIST("tasks", only_task, requirement_types)
+		
+		else {	// not sure what to do with it? treat it like a keyword
+			sprintf(find_keywords + strlen(find_keywords), "%s%s", *find_keywords ? " " : "", type_arg);
+		}
+		
+		// prepare for next loop
+		skip_spaces(&argument);
+	}
+	
+	build_page_display(ch, "Quest fullsearch: %s", show_color_codes(find_keywords));
+	count = 0;
+	
+	// okay now look up quests
+	HASH_ITER(hh, quest_table, quest, next_quest) {
+		if ((vmin != NOTHING && QUEST_VNUM(quest) < vmin) || (vmax != NOTHING && QUEST_VNUM(quest) > vmax)) {
+			continue;	// vnum range
+		}
+		if (not_flagged != NOBITS && IS_SET(QUEST_FLAGS(quest), not_flagged)) {
+			continue;
+		}
+		if (only_flags != NOBITS && (QUEST_FLAGS(quest) & only_flags) != only_flags) {
+			continue;
+		}
+		if (only_level != NOTHING && (QUEST_MIN_LEVEL(quest) > only_level || QUEST_MAX_LEVEL(quest) < only_level)) {
+			continue;
+		}
+		if (level_over != NOTHING && QUEST_MAX_LEVEL(quest) < level_over && QUEST_MIN_LEVEL(quest) < level_over) {
+			continue;
+		}
+		if (level_under != NOTHING && QUEST_MAX_LEVEL(quest) > level_over && QUEST_MIN_LEVEL(quest) > level_over) {
+			continue;
+		}
+		if (only_daily_cycle != NOTHING && (!IS_DAILY_QUEST(quest) || QUEST_DAILY_CYCLE(quest) != only_daily_cycle)) {
+			continue;
+		}
+		if (no_daily_cycle && (!IS_DAILY_QUEST(quest) || QUEST_DAILY_CYCLE(quest) != NOTHING)) {
+			continue;
+		}
+		if (active_daily_cycle && (!IS_DAILY_QUEST(quest) || !QUEST_DAILY_ACTIVE(quest))) {
+			continue;
+		}
+		if (inactive_daily_cycle && (!IS_DAILY_QUEST(quest) || QUEST_DAILY_ACTIVE(quest))) {
+			continue;
+		}
+		if (only_repeat != NOTHING && QUEST_REPEATABLE_AFTER(quest) != only_repeat) {
+			continue;
+		}
+		if (repeat_over != NOTHING && QUEST_REPEATABLE_AFTER(quest) < repeat_over) {
+			continue;
+		}
+		if (repeat_under != NOTHING && (QUEST_REPEATABLE_AFTER(quest) == 0 || QUEST_REPEATABLE_AFTER(quest) > repeat_under)) {
+			continue;
+		}
+		if (only_reward != NOTHING) {
+			any = FALSE;
+			LL_FOREACH(QUEST_REWARDS(quest), qreward) {
+				if (qreward->type == only_reward) {
+					any = TRUE;
+					break;
+				}
+			}
+			if (!any) {
+				continue;	// reward type not found
+			}
+		}
+		if (only_prereq != NOTHING) {
+			any = FALSE;
+			LL_FOREACH(QUEST_PREREQS(quest), req) {
+				if (req->type == only_prereq) {
+					any = TRUE;
+					break;
+				}
+			}
+			if (!any) {
+				continue;	// prereq type not found
+			}
+		}
+		if (only_task != NOTHING) {
+			any = FALSE;
+			LL_FOREACH(QUEST_TASKS(quest), req) {
+				if (req->type == only_task) {
+					any = TRUE;
+					break;
+				}
+			}
+			if (!any) {
+				continue;	// task type not found
+			}
+		}
+		
+		// search strings
+		if (*find_keywords) {
+			any = FALSE;
+			if (multi_isname(find_keywords, QUEST_NAME(quest))) {
+				any = TRUE;
+			}
+			else if (multi_isname(find_keywords, QUEST_DESCRIPTION(quest))) {
+				any = TRUE;
+			}
+			else if (multi_isname(find_keywords, QUEST_COMPLETE_MSG(quest))) {
+				any = TRUE;
+			}
+			
+			// task customs text
+			LL_FOREACH(QUEST_TASKS(quest), req) {
+				if (!any && req->custom && multi_isname(find_keywords, req->custom)) {
+					any = TRUE;
+				}
+			}
+			
+			// did we find a match in any string
+			if (!any) {
+				continue;
+			}
+		}
+		
+		// show it
+		build_page_display(ch, "[%5d] %s", QUEST_VNUM(quest), QUEST_NAME(quest));
+		++count;
+	}
+	
+	if (count > 0) {
+		build_page_display(ch, "(%d quests)", count);
+	}
+	else {
+		build_page_display_str(ch, " none");
+	}
+	
+	send_page_display(ch);
 }
 
 
@@ -2304,11 +4217,13 @@ char *list_one_quest(quest_data *quest, bool detail) {
 * @param any_vnum vnum The quest vnum.
 */
 void olc_search_quest(char_data *ch, any_vnum vnum) {
-	char buf[MAX_STRING_LENGTH];
 	quest_data *quest = quest_proto(vnum);
+	event_data *event, *next_event;
 	quest_data *qiter, *next_qiter;
+	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
-	int size, found;
+	shop_data *shop, *next_shop;
+	int found;
 	bool any;
 	
 	if (!quest) {
@@ -2317,16 +4232,41 @@ void olc_search_quest(char_data *ch, any_vnum vnum) {
 	}
 	
 	found = 0;
-	size = snprintf(buf, sizeof(buf), "Occurrences of quest %d (%s):\r\n", vnum, QUEST_NAME(quest));
+	build_page_display(ch, "Occurrences of quest %d (%s):", vnum, QUEST_NAME(quest));
+	
+	// events
+	HASH_ITER(hh, event_table, event, next_event) {
+		// QR_x: event rewards
+		any = find_event_reward_in_list(EVT_RANK_REWARDS(event), QR_QUEST_CHAIN, vnum);
+		any |= find_event_reward_in_list(EVT_THRESHOLD_REWARDS(event), QR_QUEST_CHAIN, vnum);
+		
+		if (any) {
+			++found;
+			build_page_display(ch, "EVT [%5d] %s", EVT_VNUM(event), EVT_NAME(event));
+		}
+	}
+	
+	// progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		// REQ_x: requirement search
+		any = find_requirement_in_list(PRG_TASKS(prg), REQ_COMPLETED_QUEST, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_COMPLETED_QUEST_EVER, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_NOT_COMPLETED_QUEST, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_NOT_ON_QUEST, vnum);
+		
+		if (any) {
+			++found;
+			build_page_display(ch, "PRG [%5d] %s", PRG_VNUM(prg), PRG_NAME(prg));
+		}
+	}
 	
 	// on other quests
 	HASH_ITER(hh, quest_table, qiter, next_qiter) {
-		if (size >= sizeof(buf)) {
-			break;
-		}
 		// QR_x, REQ_x: quest types
 		any = find_requirement_in_list(QUEST_TASKS(qiter), REQ_COMPLETED_QUEST, vnum);
+		any |= find_requirement_in_list(QUEST_TASKS(qiter), REQ_COMPLETED_QUEST_EVER, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(qiter), REQ_COMPLETED_QUEST, vnum);
+		any |= find_requirement_in_list(QUEST_PREREQS(qiter), REQ_COMPLETED_QUEST_EVER, vnum);
 		any |= find_requirement_in_list(QUEST_TASKS(qiter), REQ_NOT_COMPLETED_QUEST, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(qiter), REQ_NOT_COMPLETED_QUEST, vnum);
 		any |= find_requirement_in_list(QUEST_TASKS(qiter), REQ_NOT_ON_QUEST, vnum);
@@ -2337,34 +4277,243 @@ void olc_search_quest(char_data *ch, any_vnum vnum) {
 		
 		if (any) {
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "QST [%5d] %s\r\n", QUEST_VNUM(qiter), QUEST_NAME(qiter));
+			build_page_display(ch, "QST [%5d] %s", QUEST_VNUM(qiter), QUEST_NAME(qiter));
+		}
+	}
+	
+	// on shops
+	HASH_ITER(hh, shop_table, shop, next_shop) {
+		// QG_x: shop types
+		any = find_quest_giver_in_list(SHOP_LOCATIONS(shop), QG_QUEST, vnum);
+		
+		if (any) {
+			++found;
+			build_page_display(ch, "SHOP [%5d] %s", SHOP_VNUM(shop), SHOP_NAME(shop));
 		}
 	}
 	
 	// on socials
 	HASH_ITER(hh, social_table, soc, next_soc) {
-		if (size >= sizeof(buf)) {
-			break;
-		}
 		// REQ_x: quest types
 		any = find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_COMPLETED_QUEST, vnum);
+		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_COMPLETED_QUEST_EVER, vnum);
 		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_NOT_COMPLETED_QUEST, vnum);
 		any |= find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_NOT_ON_QUEST, vnum);
 		
 		if (any) {
 			++found;
-			size += snprintf(buf + size, sizeof(buf) - size, "SOC [%5d] %s\r\n", SOC_VNUM(soc), SOC_NAME(soc));
+			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
 		}
 	}
 	
 	if (found > 0) {
-		size += snprintf(buf + size, sizeof(buf) - size, "%d location%s shown\r\n", found, PLURAL(found));
+		build_page_display(ch, "%d location%s shown", found, PLURAL(found));
 	}
 	else {
-		size += snprintf(buf + size, sizeof(buf) - size, " none\r\n");
+		build_page_display_str(ch, " none");
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
+}
+
+
+/**
+* Parses the <vnum> arg for a quest/event reward add/change.
+*
+* @param char_data *ch The person editing.
+* @param int type The QR_ reward type.
+* @param char *vnum_arg The argument which the player supplied.
+* @param char *prev_arg The argument right BEFORE that one (if it's the quantity arg, because types that don't use quantity will want that instead).
+* @return any_vnum The 'vnum' field for the reward, or -999 if it failed (because -1 is a VALID result).
+*/
+any_vnum parse_quest_reward_vnum(char_data *ch, int type, char *vnum_arg, char *prev_arg) {
+	faction_data *fct;
+	generic_data *gen;
+	event_data *event;
+	any_vnum vnum = 0;
+	bool ok = FALSE;
+	
+	// QR_x: validate vnum
+	switch (type) {
+		case QR_BONUS_EXP: {
+			// vnum not required
+			ok = TRUE;
+			break;
+		}
+		case QR_COINS: {
+			if (is_abbrev(vnum_arg, "miscellaneous") || is_abbrev(vnum_arg, "simple") || is_abbrev(vnum_arg, "other")) {
+				vnum = OTHER_COIN;
+				ok = TRUE;
+			}
+			else if (is_abbrev(vnum_arg, "empire")) {
+				vnum = REWARD_EMPIRE_COIN;
+				ok = TRUE;
+			}
+			else {
+				msg_to_char(ch, "You must choose misc or empire coins.\r\n");
+				return PARSE_QRV_FAILED;
+			}
+			break;	
+		}
+		case QR_CURRENCY: {
+			if (!*vnum_arg) {
+				msg_to_char(ch, "You must specify a currency (generic) vnum.\r\n");
+				return PARSE_QRV_FAILED;
+			}
+			if (!isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
+				msg_to_char(ch, "Invalid generic vnum '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			if (find_generic(vnum, GENERIC_CURRENCY)) {
+				ok = TRUE;
+			}
+			break;
+		}
+		case QR_OBJECT: {
+			if (!*vnum_arg) {
+				msg_to_char(ch, "You must specify an object vnum.\r\n");
+				return PARSE_QRV_FAILED;
+			}
+			if (!isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
+				msg_to_char(ch, "Invalid obj vnum '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			if (obj_proto(vnum)) {
+				ok = TRUE;
+			}
+			break;
+		}
+		case QR_SET_SKILL:
+		case QR_SKILL_EXP:
+		case QR_SKILL_LEVELS: {
+			if (!*vnum_arg) {
+				msg_to_char(ch, "You must specify a skill vnum.\r\n");
+				return PARSE_QRV_FAILED;
+			}
+			if (!isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
+				msg_to_char(ch, "Invalid skill vnum '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			if (find_skill_by_vnum(vnum)) {
+				ok = TRUE;
+			}
+			break;
+		}
+		case QR_QUEST_CHAIN: {
+			if (!*vnum_arg) {
+				strcpy(vnum_arg, prev_arg);	// does not generally need 2 args
+			}
+			if (!*vnum_arg || !isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
+				msg_to_char(ch, "Invalid quest vnum '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			if (quest_proto(vnum)) {
+				ok = TRUE;
+			}
+			break;
+		}
+		case QR_REPUTATION: {
+			if (!*vnum_arg) {
+				msg_to_char(ch, "You must specify a faction name or vnum.\r\n");
+				return PARSE_QRV_FAILED;
+			}
+			if (!(fct = find_faction(vnum_arg))) {
+				msg_to_char(ch, "Invalid faction '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			vnum = FCT_VNUM(fct);
+			ok = TRUE;
+			break;
+		}
+		case QR_EVENT_POINTS: {
+			if (!*vnum_arg || !isdigit(*vnum_arg)) {
+				msg_to_char(ch, "You must specify an event vnum.\r\n");
+				return PARSE_QRV_FAILED;
+			}
+			if (!(event = find_event_by_vnum(atoi(vnum_arg)))) {
+				msg_to_char(ch, "Invalid event vnum '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			vnum = EVT_VNUM(event);
+			ok = TRUE;
+			break;
+		}
+		case QR_SPEAK_LANGUAGE:
+		case QR_RECOGNIZE_LANGUAGE: {
+			if (!*vnum_arg) {
+				strcpy(vnum_arg, prev_arg);	// does not generally need 2 args
+			}
+			if (!*vnum_arg || !isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
+				msg_to_char(ch, "Invalid generic language vnum '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			if ((gen = real_generic(vnum)) && GEN_TYPE(gen) == GENERIC_LANGUAGE) {
+				ok = TRUE;
+			}
+			break;
+		}
+		case QR_GRANT_PROGRESS:
+		case QR_START_PROGRESS: {
+			if (!*vnum_arg) {
+				strcpy(vnum_arg, prev_arg);	// does not generally need 2 args
+			}
+			if (!*vnum_arg || !isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
+				msg_to_char(ch, "Invalid progress vnum '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			if (real_progress(vnum)) {
+				ok = TRUE;
+			}
+			break;
+		}
+		case QR_UNLOCK_ARCHETYPE: {
+			if (!*vnum_arg) {
+				strcpy(vnum_arg, prev_arg);	// does not generally need 2 args
+			}
+			if (!*vnum_arg || !isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
+				msg_to_char(ch, "Invalid archetype vnum '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			if (archetype_proto(vnum)) {
+				ok = TRUE;
+			}
+			break;
+		}
+		case QR_BONUS_ABILITY: {
+			if (!*vnum_arg) {
+				strcpy(vnum_arg, prev_arg);	// does not generally need 2 args
+			}
+			if (!find_ability(vnum_arg)) {
+				msg_to_char(ch, "Invalid ability '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			else {
+				ok = TRUE;
+			}
+			break;
+		}
+		case QR_REMOVE_ABILITY: {
+			if (!*vnum_arg) {
+				strcpy(vnum_arg, prev_arg);	// does not generally need 2 args
+			}
+			if (!find_ability(vnum_arg)) {
+				msg_to_char(ch, "Invalid ability '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			else {
+				ok = TRUE;
+			}
+			break;
+		}
+	}
+	
+	// did we find one?
+	if (!ok) {
+		msg_to_char(ch, "Unable to find %s %d.\r\n", quest_reward_types[type], vnum);
+		return PARSE_QRV_FAILED;
+	}
+	
+	return vnum;
 }
 
 
@@ -2382,7 +4531,7 @@ void qedit_process_quest_givers(char_data *ch, char *argument, struct quest_give
 	char vnum_arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
 	struct quest_giver *giver, *iter, *change, *copyfrom;
 	int findtype, num, type;
-	bool found, ok;
+	bool found, ok, none;
 	any_vnum vnum;
 	
 	argument = any_one_arg(argument, cmd_arg);	// add/remove/change/copy
@@ -2409,6 +4558,7 @@ void qedit_process_quest_givers(char_data *ch, char *argument, struct quest_give
 		else {
 			sprintbit(findtype, olc_type_bits, buf, FALSE);
 			copyfrom = NULL;
+			none = FALSE;
 			
 			switch (findtype) {
 				case OLC_QUEST: {
@@ -2420,6 +4570,15 @@ void qedit_process_quest_givers(char_data *ch, char *argument, struct quest_give
 					quest_data *from_qst = quest_proto(vnum);
 					if (from_qst) {
 						copyfrom = (is_abbrev(field_arg, "starts") ? QUEST_STARTS_AT(from_qst) : QUEST_ENDS_AT(from_qst));
+						none = copyfrom ? FALSE : TRUE;
+					}
+					break;
+				}
+				case OLC_SHOP: {
+					shop_data *from_shp = real_shop(vnum);
+					if (from_shp) {
+						copyfrom = SHOP_LOCATIONS(from_shp);
+						none = copyfrom ? FALSE : TRUE;
 					}
 					break;
 				}
@@ -2429,7 +4588,10 @@ void qedit_process_quest_givers(char_data *ch, char *argument, struct quest_give
 				}
 			}
 			
-			if (!copyfrom) {
+			if (none) {
+				msg_to_char(ch, "No %s to copy from that.\r\n", command);
+			}
+			else if (!copyfrom) {
 				msg_to_char(ch, "Invalid %s vnum '%s'.\r\n", buf, vnum_arg);
 			}
 			else {
@@ -2525,6 +4687,12 @@ void qedit_process_quest_givers(char_data *ch, char *argument, struct quest_give
 					}
 					break;
 				}
+				case QG_VEHICLE: {
+					if (vehicle_proto(vnum)) {
+						ok = TRUE;
+					}
+					break;
+				}
 			}
 			
 			// did we find one? if so, buf is set
@@ -2611,6 +4779,12 @@ void qedit_process_quest_givers(char_data *ch, char *argument, struct quest_give
 					}
 					break;
 				}
+				case QG_VEHICLE: {
+					if (vehicle_proto(vnum)) {
+						ok = TRUE;
+					}
+					break;
+				}
 			}
 			
 			// did we find one? if so, buf is set
@@ -2632,6 +4806,12 @@ void qedit_process_quest_givers(char_data *ch, char *argument, struct quest_give
 		msg_to_char(ch, "Usage: %s copy <from type> <from vnum> [starts/ends]\r\n", command);
 		msg_to_char(ch, "Usage: %s remove <number | all>\r\n", command);
 	}
+}
+
+
+// Simple time sorter for player completed quests
+int sort_completed_quests_by_timestamp(struct player_completed_quest *a, struct player_completed_quest *b) {
+	return a->last_completed - b->last_completed;
 }
 
 
@@ -2737,20 +4917,12 @@ void clear_quest(quest_data *quest) {
 * @return struct quest_giver* The copy of the list.
 */
 struct quest_giver *copy_quest_givers(struct quest_giver *from) {
-	struct quest_giver *el, *iter, *list = NULL, *end = NULL;
+	struct quest_giver *el, *iter, *list = NULL;
 	
 	LL_FOREACH(from, iter) {
 		CREATE(el, struct quest_giver, 1);
 		*el = *iter;
-		el->next = NULL;
-		
-		if (end) {
-			end->next = el;
-		}
-		else {
-			list = el;
-		}
-		end = el;
+		LL_APPEND(list, el);
 	}
 	
 	return list;
@@ -2762,20 +4934,12 @@ struct quest_giver *copy_quest_givers(struct quest_giver *from) {
 * @return struct quest_reward* The copy of the list.
 */
 struct quest_reward *copy_quest_rewards(struct quest_reward *from) {
-	struct quest_reward *el, *iter, *list = NULL, *end = NULL;
+	struct quest_reward *el, *iter, *list = NULL;
 	
 	LL_FOREACH(from, iter) {
 		CREATE(el, struct quest_reward, 1);
 		*el = *iter;
-		el->next = NULL;
-		
-		if (end) {
-			end->next = el;
-		}
-		else {
-			list = el;
-		}
-		end = el;
+		LL_APPEND(list, el);
 	}
 	
 	return list;
@@ -2790,6 +4954,7 @@ struct quest_reward *copy_quest_rewards(struct quest_reward *from) {
 void free_player_completed_quests(struct player_completed_quest **hash) {
 	struct player_completed_quest *pcq, *next_pcq;
 	HASH_ITER(hh, *hash, pcq, next_pcq) {
+		HASH_DEL(*hash, pcq);
 		free(pcq);
 	}
 	*hash = NULL;
@@ -3006,8 +5171,6 @@ void parse_quest_reward(FILE *fl, struct quest_reward **list, char *error_str) {
 * @param any_vnum vnum The quest vnum
 */
 void parse_quest(FILE *fl, any_vnum vnum) {
-	void parse_requirement(FILE *fl, struct req_data **list, char *error_str);
-	
 	char line[256], error[256], str_in[256];
 	quest_data *quest, *find;
 	int int_in[4];
@@ -3064,7 +5227,7 @@ void parse_quest(FILE *fl, any_vnum vnum) {
 				break;
 			}
 			case 'P': {	// preq-requisites
-				parse_requirement(fl, &QUEST_PREREQS(quest), error);
+				parse_requirement(fl, &QUEST_PREREQS(quest), (*(line+1) == '+' ? TRUE : FALSE), error);
 				break;
 			}
 			case 'R': {	// rewards
@@ -3076,7 +5239,7 @@ void parse_quest(FILE *fl, any_vnum vnum) {
 				break;
 			}
 			case 'W': {	// tasks / work
-				parse_requirement(fl, &QUEST_TASKS(quest), error);
+				parse_requirement(fl, &QUEST_TASKS(quest), (*(line+1) == '+' ? TRUE : FALSE), error);
 				break;
 			}
 			case 'Z': {	// ends at
@@ -3104,6 +5267,10 @@ void parse_quest(FILE *fl, any_vnum vnum) {
 void write_daily_quest_file(void) {
 	quest_data *qst, *next_qst;
 	FILE *fl;
+	
+	if (block_all_saves_due_to_shutdown) {
+		return;
+	}
 	
 	if (!(fl = fopen(DAILY_QUEST_FILE TEMP_SUFFIX, "w"))) {
 		log("SYSERR: Unable to write %s", DAILY_QUEST_FILE TEMP_SUFFIX);
@@ -3185,9 +5352,6 @@ void write_quest_rewards_to_file(FILE *fl, char letter, struct quest_reward *lis
 * @param quest_data *quest The thing to save.
 */
 void write_quest_to_file(FILE *fl, quest_data *quest) {
-	void write_requirements_to_file(FILE *fl, char letter, struct req_data *list);
-	void write_trig_protos_to_file(FILE *fl, char letter, struct trig_proto_list *list);
-	
 	char temp[MAX_STRING_LENGTH];
 	
 	if (!fl || !quest) {
@@ -3285,9 +5449,13 @@ quest_data *create_quest_table_entry(any_vnum vnum) {
 */
 void olc_delete_quest(char_data *ch, any_vnum vnum) {
 	quest_data *quest, *qiter, *next_qiter;
+	event_data *event, *next_event;
+	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
+	shop_data *shop, *next_shop;
 	descriptor_data *desc;
 	char_data *chiter;
+	char name[256];
 	bool found;
 	
 	if (!(quest = quest_proto(vnum))) {
@@ -3295,14 +5463,13 @@ void olc_delete_quest(char_data *ch, any_vnum vnum) {
 		return;
 	}
 	
+	safe_snprintf(name, sizeof(name), "%s", NULLSAFE(QUEST_NAME(quest)));
+	
 	// remove it from the hash table first
 	remove_quest_from_table(quest);
 	
 	// look for people on the quest and force a refresh
-	LL_FOREACH(character_list, chiter) {
-		if (IS_NPC(chiter)) {
-			continue;
-		}
+	DL_FOREACH2(player_character_list, chiter, next_plr) {
 		if (!is_on_quest(chiter, vnum)) {
 			continue;
 		}
@@ -3316,11 +5483,41 @@ void olc_delete_quest(char_data *ch, any_vnum vnum) {
 	// delete from lookups
 	add_or_remove_all_quest_lookups_for(quest, FALSE);
 	
+	// update events
+	HASH_ITER(hh, event_table, event, next_event) {
+		// QR_x: event reward types
+		found = delete_event_reward_from_list(&EVT_RANK_REWARDS(event), QR_QUEST_CHAIN, vnum);
+		found |= delete_event_reward_from_list(&EVT_THRESHOLD_REWARDS(event), QR_QUEST_CHAIN, vnum);
+		
+		if (found) {
+			// SET_BIT(EVT_FLAGS(event), EVTF_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Event %d %s had rewards for a deleted quest (removed rewards but did not set IN-DEV)", EVT_VNUM(event), EVT_NAME(event));
+			save_library_file_for_vnum(DB_BOOT_EVT, EVT_VNUM(event));
+		}
+	}
+	
+	// update progress
+	HASH_ITER(hh, progress_table, prg, next_prg) {
+		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_COMPLETED_QUEST, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_COMPLETED_QUEST_EVER, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_NOT_COMPLETED_QUEST, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_NOT_ON_QUEST, vnum);
+		
+		if (found) {
+			SET_BIT(PRG_FLAGS(prg), PRG_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Progress %d %s set IN-DEV due to deleted quest", PRG_VNUM(prg), PRG_NAME(prg));
+			save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(prg));
+			need_progress_refresh = TRUE;
+		}
+	}
+	
 	// update other quests
 	HASH_ITER(hh, quest_table, qiter, next_qiter) {
 		// REQ_x, QR_x: quest types
 		found = delete_requirement_from_list(&QUEST_TASKS(qiter), REQ_COMPLETED_QUEST, vnum);
+		found |= delete_requirement_from_list(&QUEST_TASKS(qiter), REQ_COMPLETED_QUEST_EVER, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(qiter), REQ_COMPLETED_QUEST, vnum);
+		found |= delete_requirement_from_list(&QUEST_PREREQS(qiter), REQ_COMPLETED_QUEST_EVER, vnum);
 		found |= delete_requirement_from_list(&QUEST_TASKS(qiter), REQ_NOT_COMPLETED_QUEST, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(qiter), REQ_NOT_COMPLETED_QUEST, vnum);
 		found |= delete_requirement_from_list(&QUEST_TASKS(qiter), REQ_NOT_ON_QUEST, vnum);
@@ -3331,7 +5528,20 @@ void olc_delete_quest(char_data *ch, any_vnum vnum) {
 		
 		if (found) {
 			SET_BIT(QUEST_FLAGS(qiter), QST_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Quest %d %s set IN-DEV due to other deleted quest", QUEST_VNUM(qiter), QUEST_NAME(qiter));
 			save_library_file_for_vnum(DB_BOOT_QST, QUEST_VNUM(qiter));
+		}
+	}
+	
+	// update shops
+	HASH_ITER(hh, shop_table, shop, next_shop) {
+		// QG_x: quest types
+		found = delete_quest_giver_from_list(&SHOP_LOCATIONS(shop), QG_QUEST, vnum);
+		
+		if (found) {
+			SET_BIT(SHOP_FLAGS(shop), SHOP_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Shop %d %s set IN-DEV due to deleted quest", SHOP_VNUM(shop), SHOP_NAME(shop));
+			save_library_file_for_vnum(DB_BOOT_SHOP, SHOP_VNUM(shop));
 		}
 	}
 	
@@ -3339,21 +5549,46 @@ void olc_delete_quest(char_data *ch, any_vnum vnum) {
 	HASH_ITER(hh, social_table, soc, next_soc) {
 		// REQ_x: quest types
 		found = delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_COMPLETED_QUEST, vnum);
+		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_COMPLETED_QUEST_EVER, vnum);
 		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_NOT_COMPLETED_QUEST, vnum);
 		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_NOT_ON_QUEST, vnum);
 		
 		if (found) {
 			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Social %d %s set IN-DEV due to deleted quest", SOC_VNUM(soc), SOC_NAME(soc));
 			save_library_file_for_vnum(DB_BOOT_SOC, SOC_VNUM(soc));
 		}
 	}
 	
 	// remove from from active editors
 	for (desc = descriptor_list; desc; desc = desc->next) {
+		if (GET_OLC_EVENT(desc)) {
+			// QR_x: event reward types
+			found = delete_event_reward_from_list(&EVT_RANK_REWARDS(GET_OLC_EVENT(desc)), QR_QUEST_CHAIN, vnum);
+			found |= delete_event_reward_from_list(&EVT_THRESHOLD_REWARDS(GET_OLC_EVENT(desc)), QR_QUEST_CHAIN, vnum);
+		
+			if (found) {
+				// SET_BIT(EVT_FLAGS(GET_OLC_EVENT(desc)), EVTF_IN_DEVELOPMENT);
+				msg_to_desc(desc, "A quest used as a reward by the event you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_PROGRESS(desc)) {
+			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_COMPLETED_QUEST, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_COMPLETED_QUEST_EVER, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_NOT_COMPLETED_QUEST, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_NOT_ON_QUEST, vnum);
+		
+			if (found) {
+				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
+				msg_to_desc(desc, "A quest used by the progression goal you're editing has been deleted.\r\n");
+			}
+		}
 		if (GET_OLC_QUEST(desc)) {
 			// REQ_x, QR_x: quest types
 			found = delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_COMPLETED_QUEST, vnum);
+			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_COMPLETED_QUEST_EVER, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_COMPLETED_QUEST, vnum);
+			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_COMPLETED_QUEST_EVER, vnum);
 			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_NOT_COMPLETED_QUEST, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_NOT_COMPLETED_QUEST, vnum);
 			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_NOT_ON_QUEST, vnum);
@@ -3367,9 +5602,19 @@ void olc_delete_quest(char_data *ch, any_vnum vnum) {
 				msg_to_desc(desc, "Another quest used by the quest you are editing was deleted.\r\n");
 			}
 		}
+		if (GET_OLC_SHOP(desc)) {
+			// QG_x: quest types
+			found = delete_quest_giver_from_list(&SHOP_LOCATIONS(GET_OLC_SHOP(desc)), QG_QUEST, vnum);
+		
+			if (found) {
+				SET_BIT(SHOP_FLAGS(GET_OLC_SHOP(desc)), SHOP_IN_DEVELOPMENT);
+				msg_to_desc(desc, "A quest used by the shop you are editing was deleted.\r\n");
+			}
+		}
 		if (GET_OLC_SOCIAL(desc)) {
 			// REQ_x: quest types
 			found = delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_COMPLETED_QUEST, vnum);
+			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_COMPLETED_QUEST_EVER, vnum);
 			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_NOT_COMPLETED_QUEST, vnum);
 			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_NOT_ON_QUEST, vnum);
 			
@@ -3380,8 +5625,8 @@ void olc_delete_quest(char_data *ch, any_vnum vnum) {
 		}
 	}
 	
-	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted quest %d", GET_NAME(ch), vnum);
-	msg_to_char(ch, "Quest %d deleted.\r\n", vnum);
+	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted quest %d %s", GET_NAME(ch), vnum, name);
+	msg_to_char(ch, "Quest %d (%s) deleted.\r\n", vnum, name);
 	
 	free_quest(quest);
 }
@@ -3406,6 +5651,9 @@ void save_olc_quest(descriptor_data *desc) {
 	
 	// store for later
 	old_cycle = QUEST_DAILY_CYCLE(proto);
+	
+	// delete from lookups FIRST
+	add_or_remove_all_quest_lookups_for(proto, FALSE);
 	
 	// free prototype strings and pointers
 	if (QUEST_NAME(proto)) {
@@ -3444,9 +5692,6 @@ void save_olc_quest(descriptor_data *desc) {
 		QUEST_COMPLETE_MSG(quest) = str_dup(default_quest_complete_msg);
 	}
 	
-	// delete from lookups
-	add_or_remove_all_quest_lookups_for(proto, FALSE);
-	
 	// save data back over the proto-type
 	hh = proto->hh;	// save old hash handle
 	*proto = *quest;	// copy over all data
@@ -3471,11 +5716,16 @@ void save_olc_quest(descriptor_data *desc) {
 	}
 	
 	// update daily cycles
-	if (old_cycle != NOTHING) {
-		setup_daily_quest_cycles(old_cycle);
-	}
-	if (QUEST_DAILY_CYCLE(proto) != NOTHING && QUEST_DAILY_CYCLE(proto) != old_cycle) {
-		setup_daily_quest_cycles(QUEST_DAILY_CYCLE(proto));
+	if (QUEST_DAILY_CYCLE(proto) != old_cycle) {
+		if (old_cycle != NOTHING) {
+			setup_daily_quest_cycles(old_cycle);
+		}
+		if (QUEST_DAILY_CYCLE(proto) != NOTHING) {
+			setup_daily_quest_cycles(QUEST_DAILY_CYCLE(proto));
+		}
+		if (QUEST_DAILY_CYCLE(proto) == NOTHING) {
+			QUEST_DAILY_ACTIVE(proto) = TRUE;
+		}
 	}
 }
 
@@ -3487,8 +5737,6 @@ void save_olc_quest(descriptor_data *desc) {
 * @return quest_data* The copied quest.
 */
 quest_data *setup_olc_quest(quest_data *input) {
-	extern struct apply_data *copy_apply_list(struct apply_data *input);
-	
 	quest_data *new;
 	
 	CREATE(new, quest_data, 1);
@@ -3531,40 +5779,59 @@ quest_data *setup_olc_quest(quest_data *input) {
 //// DISPLAYS ////////////////////////////////////////////////////////////////
 
 /**
-* Gets the display for a set of quest givers.
+* Display a set of quest givers.
 *
+* @param char_data *ch The person viewing it.
 * @param struct quest_giver *list Pointer to the start of a list of quest givers.
-* @param char *save_buffer A buffer to store the result to.
+* @param bool send_output If TRUE, sends the page_display as text when done. Pass FALSE if you're building a larger page_display for the character.
 */
-void get_quest_giver_display(struct quest_giver *list, char *save_buffer) {
+void show_quest_giver_display(char_data *ch, struct quest_giver *list, bool send_output) {
 	struct quest_giver *giver;
 	int count = 0;
 	
-	*save_buffer = '\0';
 	LL_FOREACH(list, giver) {		
-		sprintf(save_buffer + strlen(save_buffer), "%2d. %s\r\n", ++count, quest_giver_string(giver, TRUE));
+		build_page_display(ch, "%2d. %s", ++count, quest_giver_string(giver, TRUE));
 	}
 	
-	// empty list not shown
+	if (!list) {
+		build_page_display_str(ch, " nowhere");
+	}
+	
+	if (send_output) {
+		send_page_display_as(ch, PD_NO_PAGINATION | PD_FREE_DISPLAY_AFTER);
+	}
 }
 
 
 /**
-* Gets the display for a set of quest rewards.
+* Display a set of quest rewards.
 *
+* @param char_data *ch The person viewing it.
 * @param struct quest_reward *list Pointer to the start of a list of quest rewards.
-* @param char *save_buffer A buffer to store the result to.
+* @param bool show_vnums If TRUE, shows vnums with any applicable rewards. If FALSE, does not.
+* @param bool send_output If TRUE, sends the page_display as text when done. Pass FALSE if you're building a larger page_display for the character.
 */
-void get_quest_reward_display(struct quest_reward *list, char *save_buffer) {
+void show_quest_reward_display(char_data *ch, struct quest_reward *list, bool show_vnums, bool send_output) {
 	struct quest_reward *reward;
 	int count = 0;
 	
-	*save_buffer = '\0';
-	LL_FOREACH(list, reward) {		
-		sprintf(save_buffer + strlen(save_buffer), "%2d. %s: %s\r\n", ++count, quest_reward_types[reward->type], quest_reward_string(reward, TRUE));
+	LL_FOREACH(list, reward) {
+		if (show_vnums) {
+			build_page_display(ch, "%2d. %s: %s", ++count, quest_reward_types[reward->type], quest_reward_string(reward, show_vnums));
+		}
+		else {
+			++count;
+			build_page_display(ch, " %s", quest_reward_string(reward, show_vnums));
+		}
 	}
 	
-	// empty list not shown
+	if (!list) {
+		build_page_display_str(ch, " none");
+	}
+	
+	if (send_output) {
+		send_page_display_as(ch, PD_NO_PAGINATION | PD_FREE_DISPLAY_AFTER);
+	}
 }
 
 
@@ -3575,28 +5842,27 @@ void get_quest_reward_display(struct quest_reward *list, char *save_buffer) {
 * @param quest_data *quest The quest to display.
 */
 void do_stat_quest(char_data *ch, quest_data *quest) {
-	char buf[MAX_STRING_LENGTH], part[MAX_STRING_LENGTH];
-	size_t size;
+	char part[MAX_STRING_LENGTH];
 	
 	if (!quest) {
 		return;
 	}
 	
 	// first line
-	size = snprintf(buf, sizeof(buf), "VNum: [\tc%d\t0], Name: \tc%s\t0\r\n", QUEST_VNUM(quest), QUEST_NAME(quest));
-	size += snprintf(buf + size, sizeof(buf) - size, "%s", QUEST_DESCRIPTION(quest));
-	size += snprintf(buf + size, sizeof(buf) - size, "-------------------------------------------------\r\n");
-	size += snprintf(buf + size, sizeof(buf) - size, "%s", QUEST_COMPLETE_MSG(quest));
+	build_page_display(ch, "VNum: [\tc%d\t0], Name: \tc%s\t0", QUEST_VNUM(quest), QUEST_NAME(quest));
+	build_page_display(ch, "%s", QUEST_DESCRIPTION(quest));
+	build_page_display(ch, "-------------------------------------------------");
+	build_page_display(ch, "%s", QUEST_COMPLETE_MSG(quest));
 	
 	sprintbit(QUEST_FLAGS(quest), quest_flags, part, TRUE);
-	size += snprintf(buf + size, sizeof(buf) - size, "Flags: \tg%s\t0\r\n", part);
+	build_page_display(ch, "Flags: \tg%s\t0", part);
 	
 	if (QUEST_FLAGGED(quest, QST_DAILY)) {
 		if (QUEST_DAILY_CYCLE(quest) != NOTHING) {
-			size += snprintf(buf + size, sizeof(buf) - size, "Daily cycle id: \tc%d\t0\r\n", QUEST_DAILY_CYCLE(quest));
+			build_page_display(ch, "Daily cycle id: \tc%d\t0", QUEST_DAILY_CYCLE(quest));
 		}
 		else {
-			size += snprintf(buf + size, sizeof(buf) - size, "Daily cycle id: \tcnone\t0\r\n");
+			build_page_display(ch, "Daily cycle id: \tcnone\t0");
 		}
 	}
 	
@@ -3607,30 +5873,30 @@ void do_stat_quest(char_data *ch, quest_data *quest) {
 		strcpy(part, "immediate");
 	}
 	else {
-		sprintf(part, "%d minutes (%d:%02d:%02d)", QUEST_REPEATABLE_AFTER(quest), (QUEST_REPEATABLE_AFTER(quest) / (60 * 24)), ((QUEST_REPEATABLE_AFTER(quest) % (60 * 24)) / 60), ((QUEST_REPEATABLE_AFTER(quest) % (60 * 24)) % 60));
+		sprintf(part, "%d minutes (%s)", QUEST_REPEATABLE_AFTER(quest), colon_time(QUEST_REPEATABLE_AFTER(quest), TRUE, NULL));
 	}
-	size += snprintf(buf + size, sizeof(buf) - size, "Level limits: [\tc%s\t0], Repeatable: [\tc%s\t0]\r\n", level_range_string(QUEST_MIN_LEVEL(quest), QUEST_MAX_LEVEL(quest), 0), part);
+	build_page_display(ch, "Level limits: [\tc%s\t0], Repeatable: [\tc%s\t0]", level_range_string(QUEST_MIN_LEVEL(quest), QUEST_MAX_LEVEL(quest), 0), part);
 		
-	get_requirement_display(QUEST_PREREQS(quest), part);
-	size += snprintf(buf + size, sizeof(buf) - size, "Pre-requisites:\r\n%s", *part ? part : " none\r\n");
+	build_page_display_str(ch, "Pre-requisites:");
+	show_requirement_display(ch, QUEST_PREREQS(quest), FALSE);
 	
-	get_quest_giver_display(QUEST_STARTS_AT(quest), part);
-	size += snprintf(buf + size, sizeof(buf) - size, "Starts at:\r\n%s", *part ? part : " nowhere\r\n");
+	build_page_display_str(ch, "Starts at:");
+	show_quest_giver_display(ch, QUEST_STARTS_AT(quest), FALSE);
 	
-	get_quest_giver_display(QUEST_ENDS_AT(quest), part);
-	size += snprintf(buf + size, sizeof(buf) - size, "Ends at:\r\n%s", *part ? part : " nowhere\r\n");
+	build_page_display_str(ch, "Ends at:");
+	show_quest_giver_display(ch, QUEST_ENDS_AT(quest), FALSE);
 	
-	get_requirement_display(QUEST_TASKS(quest), part);
-	size += snprintf(buf + size, sizeof(buf) - size, "Tasks:\r\n%s", *part ? part : " none\r\n");
+	build_page_display_str(ch, "Tasks:");
+	show_requirement_display(ch, QUEST_TASKS(quest), FALSE);
 	
-	get_quest_reward_display(QUEST_REWARDS(quest), part);
-	size += snprintf(buf + size, sizeof(buf) - size, "Rewards:\r\n%s", *part ? part : " none\r\n");
+	build_page_display_str(ch, "Rewards:");
+	show_quest_reward_display(ch, QUEST_REWARDS(quest), TRUE, FALSE);
 	
 	// scripts
-	get_script_display(QUEST_SCRIPTS(quest), part);
-	size += snprintf(buf + size, sizeof(buf) - size, "Scripts:\r\n%s", QUEST_SCRIPTS(quest) ? part : " none\r\n");
+	build_page_display_str(ch, "Scripts:");
+	show_script_display(ch, QUEST_SCRIPTS(quest), FALSE);
 	
-	page_string(ch->desc, buf, TRUE);
+	send_page_display(ch);
 }
 
 
@@ -3642,77 +5908,84 @@ void do_stat_quest(char_data *ch, quest_data *quest) {
 */
 void olc_show_quest(char_data *ch) {
 	quest_data *quest = GET_OLC_QUEST(ch->desc);
-	char buf[MAX_STRING_LENGTH], lbuf[MAX_STRING_LENGTH];
+	char lbuf[MAX_STRING_LENGTH];
 	
 	if (!quest) {
 		return;
 	}
 	
-	*buf = '\0';
-	
-	sprintf(buf + strlen(buf), "[\tc%d\t0] \tc%s\t0\r\n", GET_OLC_VNUM(ch->desc), !quest_proto(QUEST_VNUM(quest)) ? "new quest" : get_quest_name_by_proto(QUEST_VNUM(quest)));
-	sprintf(buf + strlen(buf), "<\tyname\t0> %s\r\n", NULLSAFE(QUEST_NAME(quest)));
-	sprintf(buf + strlen(buf), "<\tydescription\t0>\r\n%s", NULLSAFE(QUEST_DESCRIPTION(quest)));
-	sprintf(buf + strlen(buf), "<\tycompletemessage\t0>\r\n%s", NULLSAFE(QUEST_COMPLETE_MSG(quest)));
+	build_page_display(ch, "[%s%d\t0] %s%s\t0", OLC_LABEL_CHANGED, GET_OLC_VNUM(ch->desc), OLC_LABEL_UNCHANGED, !quest_proto(QUEST_VNUM(quest)) ? "new quest" : get_quest_name_by_proto(QUEST_VNUM(quest)));
+	build_page_display(ch, "<%sname\t0> %s", OLC_LABEL_STR(QUEST_NAME(quest), default_quest_name), NULLSAFE(QUEST_NAME(quest)));
+	build_page_display(ch, "<%sdescription\t0>\r\n%s", OLC_LABEL_STR(QUEST_DESCRIPTION(quest), default_quest_description), NULLSAFE(QUEST_DESCRIPTION(quest)));
+	build_page_display(ch, "<%scompletemessage\t0>\r\n%s", OLC_LABEL_STR(QUEST_COMPLETE_MSG(quest), default_quest_complete_msg), NULLSAFE(QUEST_COMPLETE_MSG(quest)));
 	
 	sprintbit(QUEST_FLAGS(quest), quest_flags, lbuf, TRUE);
-	sprintf(buf + strlen(buf), "<\tyflags\t0> %s\r\n", lbuf);
+	build_page_display(ch, "<%sflags\t0> %s", OLC_LABEL_VAL(QUEST_FLAGS(quest), QST_IN_DEVELOPMENT), lbuf);
 	
 	if (QUEST_MIN_LEVEL(quest) > 0) {
-		sprintf(buf + strlen(buf), "<\tyminlevel\t0> %d\r\n", QUEST_MIN_LEVEL(quest));
+		build_page_display(ch, "<%sminlevel\t0> %d", OLC_LABEL_CHANGED, QUEST_MIN_LEVEL(quest));
 	}
 	else {
-		sprintf(buf + strlen(buf), "<\tyminlevel\t0> none\r\n");
+		build_page_display(ch, "<%sminlevel\t0> none", OLC_LABEL_UNCHANGED);
 	}
 	if (QUEST_MAX_LEVEL(quest) > 0) {
-		sprintf(buf + strlen(buf), "<\tymaxlevel\t0> %d\r\n", QUEST_MAX_LEVEL(quest));
+		build_page_display(ch, "<%smaxlevel\t0> %d", OLC_LABEL_CHANGED, QUEST_MAX_LEVEL(quest));
 	}
 	else {
-		sprintf(buf + strlen(buf), "<\tymaxlevel\t0> none\r\n");
+		build_page_display(ch, "<%smaxlevel\t0> none", OLC_LABEL_UNCHANGED);
 	}
 	
-	get_requirement_display(QUEST_PREREQS(quest), lbuf);
-	sprintf(buf + strlen(buf), "Pre-requisites: <\typrereqs\t0>\r\n%s", lbuf);
+	build_page_display(ch, "Pre-requisites: <%sprereqs\t0>", OLC_LABEL_PTR(QUEST_PREREQS(quest)));
+	if (QUEST_PREREQS(quest)) {
+		show_requirement_display(ch, QUEST_PREREQS(quest), FALSE);
+	}
 	
 	if (QUEST_REPEATABLE_AFTER(quest) == NOT_REPEATABLE) {
-		sprintf(buf + strlen(buf), "<\tyrepeat\t0> never\r\n");
+		build_page_display(ch, "<%srepeat\t0> never", OLC_LABEL_VAL(QUEST_REPEATABLE_AFTER(quest), 0));
 	}
 	else if (QUEST_REPEATABLE_AFTER(quest) > 0) {
-		sprintf(buf + strlen(buf), "<\tyrepeat\t0> %d minutes (%d:%02d:%02d)\r\n", QUEST_REPEATABLE_AFTER(quest), (QUEST_REPEATABLE_AFTER(quest) / (60 * 24)), ((QUEST_REPEATABLE_AFTER(quest) % (60 * 24)) / 60), ((QUEST_REPEATABLE_AFTER(quest) % (60 * 24)) % 60));
+		build_page_display(ch, "<%srepeat\t0> %d minutes (%s)", OLC_LABEL_VAL(QUEST_REPEATABLE_AFTER(quest), 0), QUEST_REPEATABLE_AFTER(quest), colon_time(QUEST_REPEATABLE_AFTER(quest), TRUE, NULL));
 	}
 	else if (QUEST_REPEATABLE_AFTER(quest) == 0) {
-		sprintf(buf + strlen(buf), "<\tyrepeat\t0> immediately\r\n");
+		build_page_display(ch, "<%srepeat\t0> immediately", OLC_LABEL_VAL(QUEST_REPEATABLE_AFTER(quest), 0));
 	}
 	
 	if (QUEST_FLAGGED(quest, QST_DAILY)) {
 		if (QUEST_DAILY_CYCLE(quest) != NOTHING) {
-			sprintf(buf + strlen(buf), "<\tydailycycle\t0> %d\r\n", QUEST_DAILY_CYCLE(quest));
+			build_page_display(ch, "<%sdailycycle\t0> %d", OLC_LABEL_CHANGED, QUEST_DAILY_CYCLE(quest));
 		}
 		else {
-			sprintf(buf + strlen(buf), "<\tydailycycle\t0> none\r\n");
+			build_page_display(ch, "<%sdailycycle\t0> none", OLC_LABEL_UNCHANGED);
 		}
 	}
 	
-	get_quest_giver_display(QUEST_STARTS_AT(quest), lbuf);
-	sprintf(buf + strlen(buf), "Starts at: <\tystarts\t0>\r\n%s", lbuf);
-	
-	get_quest_giver_display(QUEST_ENDS_AT(quest), lbuf);
-	sprintf(buf + strlen(buf), "Ends at: <\tyends\t0>\r\n%s", lbuf);
-	
-	get_requirement_display(QUEST_TASKS(quest), lbuf);
-	sprintf(buf + strlen(buf), "Tasks: <\tytasks\t0>\r\n%s", lbuf);
-	
-	get_quest_reward_display(QUEST_REWARDS(quest), lbuf);
-	sprintf(buf + strlen(buf), "Rewards: <\tyrewards\t0>\r\n%s", lbuf);
-	
-	// scripts
-	sprintf(buf + strlen(buf), "Scripts: <\tyscript\t0>\r\n");
-	if (QUEST_SCRIPTS(quest)) {
-		get_script_display(QUEST_SCRIPTS(quest), lbuf);
-		strcat(buf, lbuf);
+	build_page_display(ch, "Starts at: <%sstarts\t0>", OLC_LABEL_PTR(QUEST_STARTS_AT(quest)));
+	if (QUEST_STARTS_AT(quest)) {
+		show_quest_giver_display(ch, QUEST_STARTS_AT(quest), FALSE);
 	}
 	
-	page_string(ch->desc, buf, TRUE);
+	build_page_display(ch, "Ends at: <%sends\t0>", OLC_LABEL_PTR(QUEST_ENDS_AT(quest)));
+	if (QUEST_ENDS_AT(quest)) {
+		show_quest_giver_display(ch, QUEST_ENDS_AT(quest), FALSE);
+	}
+	
+	build_page_display(ch, "Tasks: <%stasks\t0>", OLC_LABEL_PTR(QUEST_TASKS(quest)));
+	if (QUEST_TASKS(quest)) {
+		show_requirement_display(ch, QUEST_TASKS(quest), FALSE);
+	}
+	
+	build_page_display(ch, "Rewards: <%srewards\t0>", OLC_LABEL_PTR(QUEST_REWARDS(quest)));
+	if (QUEST_REWARDS(quest)) {
+		show_quest_reward_display(ch, QUEST_REWARDS(quest), TRUE, FALSE);
+	}
+	
+	// scripts
+	build_page_display(ch, "Scripts: <%sscript\t0>", OLC_LABEL_PTR(QUEST_SCRIPTS(quest)));
+	if (QUEST_SCRIPTS(quest)) {
+		show_script_display(ch, QUEST_SCRIPTS(quest), FALSE);
+	}
+	
+	send_page_display(ch);
 }
 
 
@@ -3729,10 +6002,11 @@ int vnum_quest(char *searchname, char_data *ch) {
 	
 	HASH_ITER(hh, quest_table, iter, next_iter) {
 		if (multi_isname(searchname, QUEST_NAME(iter))) {
-			msg_to_char(ch, "%3d. [%5d] %s\r\n", ++found, QUEST_VNUM(iter), QUEST_NAME(iter));
+			build_page_display(ch, "%3d. [%5d] %s", ++found, QUEST_VNUM(iter), QUEST_NAME(iter));
 		}
 	}
 	
+	send_page_display(ch);
 	return found;
 }
 
@@ -3847,7 +6121,7 @@ OLC_MODULE(qedit_repeat) {
 	}
 	else if (isdigit(*argument)) {
 		QUEST_REPEATABLE_AFTER(quest) = olc_process_number(ch, argument, "repeatable after", "repeat", 0, MAX_INT, QUEST_REPEATABLE_AFTER(quest));
-		msg_to_char(ch, "It now repeats after %d minutes (%d:%02d:%02d).\r\n", QUEST_REPEATABLE_AFTER(quest), (QUEST_REPEATABLE_AFTER(quest) / (60 * 24)), ((QUEST_REPEATABLE_AFTER(quest) % (60 * 24)) / 60), ((QUEST_REPEATABLE_AFTER(quest) % (60 * 24)) % 60));
+		msg_to_char(ch, "It now repeats after %d minutes (%s).\r\n", QUEST_REPEATABLE_AFTER(quest), colon_time(QUEST_REPEATABLE_AFTER(quest), TRUE, NULL));
 	}
 	else {
 		msg_to_char(ch, "Invalid repeat interval.\r\n");
@@ -3863,8 +6137,7 @@ OLC_MODULE(qedit_rewards) {
 	struct quest_reward *reward, *iter, *change, *copyfrom;
 	struct quest_reward **list = &QUEST_REWARDS(quest);
 	int findtype, num, stype;
-	faction_data *fct;
-	bool found, ok;
+	bool found, none;
 	any_vnum vnum;
 	
 	argument = any_one_arg(argument, cmd_arg);	// add/remove/change/copy
@@ -3890,12 +6163,14 @@ OLC_MODULE(qedit_rewards) {
 		else {
 			sprintbit(findtype, olc_type_bits, buf, FALSE);
 			copyfrom = NULL;
+			none = FALSE;
 			
 			switch (findtype) {
 				case OLC_QUEST: {
 					quest_data *from_qst = quest_proto(vnum);
 					if (from_qst) {
 						copyfrom = QUEST_REWARDS(from_qst);
+						none = copyfrom ? FALSE : TRUE;
 					}
 					break;
 				}
@@ -3905,7 +6180,10 @@ OLC_MODULE(qedit_rewards) {
 				}
 			}
 			
-			if (!copyfrom) {
+			if (none) {
+				msg_to_char(ch, "No rewards to copy from that.\r\n");
+			}
+			else if (!copyfrom) {
 				msg_to_char(ch, "Invalid %s vnum '%s'.\r\n", buf, vnum_arg);
 			}
 			else {
@@ -3967,98 +6245,10 @@ OLC_MODULE(qedit_rewards) {
 		else if ((num = atoi(num_arg)) < 1) {
 			msg_to_char(ch, "Invalid amount '%s'.\r\n", num_arg);
 		}
-		else {		
-			// QR_x: validate vnum
-			vnum = 0;
-			ok = FALSE;
-			switch (stype) {
-				case QR_BONUS_EXP: {
-					// vnum not required
-					ok = TRUE;
-					break;
-				}
-				case QR_COINS: {
-					if (is_abbrev(vnum_arg, "miscellaneous") || is_abbrev(vnum_arg, "simple") || is_abbrev(vnum_arg, "other")) {
-						vnum = OTHER_COIN;
-						ok = TRUE;
-					}
-					else if (is_abbrev(vnum_arg, "empire")) {
-						vnum = REWARD_EMPIRE_COIN;
-						ok = TRUE;
-					}
-					else {
-						msg_to_char(ch, "You must choose misc or empire coins.\r\n");
-						return;
-					}
-					break;	
-				}
-				case QR_OBJECT: {
-					if (!*vnum_arg) {
-						msg_to_char(ch, "Usage: rewards add object <amount> <object vnum>\r\n");
-						return;
-					}
-					if (!isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
-						msg_to_char(ch, "Invalid obj vnum '%s'.\r\n", vnum_arg);
-						return;
-					}
-					if (obj_proto(vnum)) {
-						ok = TRUE;
-					}
-					break;
-				}
-				case QR_SET_SKILL:
-				case QR_SKILL_EXP:
-				case QR_SKILL_LEVELS: {
-					if (!*vnum_arg) {
-						msg_to_char(ch, "Usage: rewards add <set-skill | skill-exp | skill-levels> <level> <skill vnum>\r\n");
-						return;
-					}
-					if (!isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
-						msg_to_char(ch, "Invalid skill vnum '%s'.\r\n", vnum_arg);
-						return;
-					}
-					if (find_skill_by_vnum(vnum)) {
-						ok = TRUE;
-					}
-					break;
-				}
-				case QR_QUEST_CHAIN: {
-					if (!*vnum_arg) {
-						strcpy(vnum_arg, num_arg);	// they may have omitted amount
-					}
-					if (!*vnum_arg || !isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
-						msg_to_char(ch, "Invalid quest vnum '%s'.\r\n", vnum_arg);
-						return;
-					}
-					if (quest_proto(vnum)) {
-						ok = TRUE;
-					}
-					// amount is not used here
-					num = 1;
-					break;
-				}
-				case QR_REPUTATION: {
-					if (!*vnum_arg) {
-						msg_to_char(ch, "Usage: rewards add reputation <amount> <faction>\r\n");
-						return;
-					}
-					if (!(fct = find_faction(vnum_arg))) {
-						msg_to_char(ch, "Invalid faction '%s'.\r\n", vnum_arg);
-						return;
-					}
-					vnum = FCT_VNUM(fct);
-					ok = TRUE;
-					break;
-				}
-			}
-			
-			// did we find one?
-			if (!ok) {
-				msg_to_char(ch, "Unable to find %s %d.\r\n", quest_reward_types[stype], vnum);
-				return;
-			}
-			
-			// success
+		else if ((vnum = parse_quest_reward_vnum(ch, stype, vnum_arg, num_arg)) == PARSE_QRV_FAILED) {
+			// sends own error
+		}
+		else {	// success
 			CREATE(reward, struct quest_reward, 1);
 			reward->type = stype;
 			reward->amount = num;
@@ -4092,7 +6282,7 @@ OLC_MODULE(qedit_rewards) {
 		if (!change) {
 			msg_to_char(ch, "Invalid reward number.\r\n");
 		}
-		else if (is_abbrev(field_arg, "amount")) {
+		else if (is_abbrev(field_arg, "amount") || is_abbrev(field_arg, "quantity")) {
 			if (!isdigit(*vnum_arg) || (num = atoi(vnum_arg)) < 0) {
 				msg_to_char(ch, "Invalid amount '%s'.\r\n", vnum_arg);
 				return;
@@ -4103,87 +6293,20 @@ OLC_MODULE(qedit_rewards) {
 			}
 		}
 		else if (is_abbrev(field_arg, "vnum")) {
-			// QR_x: validate vnum
-			vnum = 0;
-			ok = FALSE;
-			switch (change->type) {
-				case QR_BONUS_EXP: {
-					msg_to_char(ch, "You can't change the vnum on that.\r\n");
-					break;
-				}
-				case QR_COINS: {
-					if (is_abbrev(vnum_arg, "miscellaneous") || is_abbrev(vnum_arg, "simple") || is_abbrev(vnum_arg, "other")) {
-						vnum = OTHER_COIN;
-						ok = TRUE;
-					}
-					else if (is_abbrev(vnum_arg, "empire")) {
-						vnum = REWARD_EMPIRE_COIN;
-						ok = TRUE;
-					}
-					else {
-						msg_to_char(ch, "You must choose misc or empire coins.\r\n");
-						return;
-					}
-					break;	
-				}
-				case QR_OBJECT: {
-					if (!*vnum_arg || !isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
-						msg_to_char(ch, "Invalid obj vnum '%s'.\r\n", vnum_arg);
-						return;
-					}
-					if (obj_proto(vnum)) {
-						ok = TRUE;
-					}
-					break;
-				}
-				case QR_SET_SKILL:
-				case QR_SKILL_EXP:
-				case QR_SKILL_LEVELS: {
-					if (!*vnum_arg || !isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
-						msg_to_char(ch, "Invalid skill vnum '%s'.\r\n", vnum_arg);
-						return;
-					}
-					if (find_skill_by_vnum(vnum)) {
-						ok = TRUE;
-					}
-					break;
-				}
-				case QR_QUEST_CHAIN: {
-					if (!*vnum_arg || !isdigit(*vnum_arg) || (vnum = atoi(vnum_arg)) < 0) {
-						msg_to_char(ch, "Invalid quest vnum '%s'.\r\n", vnum_arg);
-						return;
-					}
-					if (quest_proto(vnum)) {
-						ok = TRUE;
-					}
-					break;
-				}
-				case QR_REPUTATION: {
-					if (!*vnum_arg || !(fct = find_faction(vnum_arg))) {
-						msg_to_char(ch, "Invalid faction '%s'.\r\n", vnum_arg);
-						return;
-					}
-					vnum = FCT_VNUM(fct);
-					ok = TRUE;
-					break;
-				}
+			if ((vnum = parse_quest_reward_vnum(ch, change->type, vnum_arg, NULL)) == PARSE_QRV_FAILED) {
+				// sends own error
 			}
-			
-			// did we find one?
-			if (!ok) {
-				msg_to_char(ch, "Unable to find %s %d.\r\n", quest_giver_types[change->type], vnum);
-				return;
+			else {
+				change->vnum = vnum;
+				msg_to_char(ch, "Changed reward %d to: %s\r\n", atoi(num_arg), quest_reward_string(change, TRUE));
 			}
-			
-			change->vnum = vnum;
-			msg_to_char(ch, "Changed reward %d to: %s\r\n", atoi(num_arg), quest_reward_string(change, TRUE));
 		}
 		else {
 			msg_to_char(ch, "You can only change the amount or vnum.\r\n");
 		}
 	}	// end 'change'
 	else if (is_abbrev(cmd_arg, "move")) {
-		struct quest_reward *to_move, *prev, *a, *b, *a_next, *b_next, iitem;
+		struct quest_reward *to_move, *prev;
 		bool up;
 		
 		// usage: rewards move <number> <up | down>
@@ -4201,14 +6324,15 @@ OLC_MODULE(qedit_rewards) {
 			msg_to_char(ch, "You must specify whether you're moving it up or down in the list.\r\n");
 		}
 		else if (up && num == 1) {
-			msg_to_char(ch, "You can't move it up, it's already at the top of the list.\r\n");
+			msg_to_char(ch, "You can't move it up; it's already at the top of the list.\r\n");
 		}
 		else {
 			// find the one to move
 			to_move = prev = NULL;
-			for (reward = *list; reward && !to_move; reward = reward->next) {
+			LL_FOREACH(*list, reward) {
 				if (--num == 0) {
 					to_move = reward;
+					break;	// found
 				}
 				else {
 					// store for next iteration
@@ -4220,31 +6344,20 @@ OLC_MODULE(qedit_rewards) {
 				msg_to_char(ch, "Invalid reward number.\r\n");
 			}
 			else if (!up && !to_move->next) {
-				msg_to_char(ch, "You can't move it down, it's already at the bottom of the list.\r\n");
+				msg_to_char(ch, "You can't move it down; it's already at the bottom of the list.\r\n");
 			}
 			else {
-				// SUCCESS: "move" them by swapping data
-				if (up) {
-					a = prev;
-					b = to_move;
+				// SUCCESS: attempt to move
+				if (up && prev) {
+					// can move up
+					LL_DELETE(*list, to_move);
+					LL_PREPEND_ELEM(*list, prev, to_move);
 				}
-				else {
-					a = to_move;
-					b = to_move->next;
+				else if (!up && (prev = to_move->next)) {
+					// can move down
+					LL_DELETE(*list, to_move);
+					LL_APPEND_ELEM(*list, prev, to_move);
 				}
-				
-				// store next pointers
-				a_next = a->next;
-				b_next = b->next;
-				
-				// swap data
-				iitem = *a;
-				*a = *b;
-				*b = iitem;
-				
-				// restore next pointers
-				a->next = a_next;
-				b->next = b_next;
 				
 				// message: re-atoi(num_arg) because we destroyed num finding our target
 				msg_to_char(ch, "You move reward %d %s.\r\n", atoi(num_arg), (up ? "up" : "down"));
@@ -4253,7 +6366,7 @@ OLC_MODULE(qedit_rewards) {
 	}	// end 'move'
 	else {
 		msg_to_char(ch, "Usage: rewards add <type> <amount> <vnum/type>\r\n");
-		msg_to_char(ch, "Usage: rewards change <number> vnum <value>\r\n");
+		msg_to_char(ch, "Usage: rewards change <number> <amount | vnum> <value>\r\n");
 		msg_to_char(ch, "Usage: rewards copy <from type> <from vnum>\r\n");
 		msg_to_char(ch, "Usage: rewards remove <number | all>\r\n");
 		msg_to_char(ch, "Usage: rewards move <number> <up | down>\r\n");

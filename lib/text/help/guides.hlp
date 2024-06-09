@@ -4,7 +4,8 @@ New here? There's a few things you should read as you go:
 
 - The INFO command shows a really good newbie guide.
 - Typing HELP by itself lists a bunch of suggested commands and topics.
-- Use the QUEST command and try the tutorial quests in the newbie area.
+- Use the QUEST command and try the tutorial quests in the newbie area. You
+  can also get tutorial quests from many common items.
 - HELP EMPIRE GUIDE for help starting an empire.
 - HELP HOUSING GUIDE will help you build your first house.
 - HELP IRON GUIDE will guide you through mining and forging.
@@ -15,7 +16,7 @@ Are you a vampire? Try HELP VAMPIRE GUIDE.
 Are you using a screen reader? There's more info on HELP SCREEN READERS.
 Having trouble finding help on a topic? Try HELPSEARCH.
 
-See also: DEPLETION, LEVELS, SKILL CAPS, DAILY BONUS EXPERIENCE
+See also: DEPLETION, LEVELS, SKILL CAPS, DAILY BONUS EXPERIENCE, TUTORIAL
 #
 "EMPIRE GUIDE"
 
@@ -39,7 +40,7 @@ a distance.
 You don't need to found a city yet, but you will be limited on how much land
 you can claim that isn't in a city. To find out what your claim limits are,
 type "empire <name>" (using the name of your character or empire). There is a
-line on that display that says "Territory: XXX in cities, YYY/ZZZ outside".
+line on that display that says "Territory: XXX/YYY" (with breakdowns by type).
 If you reach your claim limit, you won't be able to claim more land. The
 TERRITORY help file has more information on gaining territory. It can also be
 used to find places you claimed that you might not want any more.
@@ -63,7 +64,8 @@ set PRIVILEGE levels to restrict some actions to certain ranks in your empire.
 When you're ready to found your first city, find a good location with nothing
 around it on the NEARBY display. You'll want to be at least 30 tiles from any
 other city or starting location. CITY FOUND will start a city at your current
-location.
+location. When you found your very first city, items you stored on a newbie
+island will be transferred automatically.
 
 You can recruit additional members for your empire on the /recruit channel,
 but you may still want to roleplay the introduction and invitation when you
@@ -96,13 +98,13 @@ entrance to face. If you want to place your building in the woods, you can
 clear out the necessary space during the next phase.
 
 Once you've picked a nice spot, you will need your building materials. Typing
-HELP CABIN reveals that you will need a total of 6 logs for construction. That
-means you will need to find some trees, which are hopefully not too far away.
-You will want to make sure to WIELD your trusty axe and proceed to CHOP while
-in a forest tile. A fully grown forest tile will provide 4 trees, so you will
-have to clear out 2 map tiles of dense forest for all of the material. If you
-are building your CABIN in the woods, these two tiles can be for placement of
-the building.
+BUILD INFO CABIN reveals that you will need a total of 6 logs for construction.
+That means you will need to find some trees, which are hopefully not too far
+away. You will want to make sure to WIELD your trusty axe and proceed to CHOP
+while in a forest tile. A fully grown forest tile will provide 4 trees, so you
+will have to clear out 2 map tiles of dense forest for all of the material. If
+you are building your CABIN in the woods, these two tiles can be for placement
+of the building.
 
 After chopping down 6 trees, you will want to SCRAPE TREE to convert the trees
 into logs and sticks. After all the scraping, you will end up with six logs
@@ -118,7 +120,8 @@ action will also CLAIM the tile where you stand.
 
 Once all the logs have been put in place, your construction will be complete
 and you will have your very first house! Use the HOME command to set this as
-your home, and you'll be able to use a HESTIAN TRINKET to teleport back.
+your home, and you'll be able to use a HESTIAN TRINKET to teleport back. You
+can also STORE some items, like BOUND items, in your home.
 
 Try the INFO command for more getting-started tips.
 #
@@ -140,38 +143,42 @@ must BUILD MINE to get at it.
 
 {FF}
 Before that, you'll want to make sure you've got a place to smelt all that iron
-ore you plan on mining. BUILD FOUNDRY requires 20 sticks (type HELP FOUNDRY)
-and this building will let you store your iron ore, as well as melt it down
-to ingots. This means that, if your MINE will be quite a distance from your
-main settlement, you can build a second FOUNDRY in which to deposit the mined
-ore and it will be accessible from the first. Typing INVENTORY in the FOUNDRY
-will let you see your empire's ore and ingot supply. RETRIEVE and STORE will
-let you take and deposit ore, respectively. SMELT ORE will let you turn two
-iron ore into one iron ingot.
+ore you plan on mining. BUILD FOUNDRY requires 4 wood poles and 20 stiff plant
+fibers (sticks) and this building will let you store your iron ore, as well as
+melt it down to ingots (see HELP FOUNDRY). This means that, if your MINE will
+be quite a distance from your main settlement, you can build a second FOUNDRY
+in which to deposit the mined ore and it will be accessible from the first.
+Typing INVENTORY in the FOUNDRY will let you see your empire's ore and ingot
+supply. RETRIEVE and STORE will let you take and deposit ore, respectively.
+SMELT ORE will let you turn two iron ore into one iron ingot.
 
 &y/&0[]&y\&0
-When you are ready to BUILD MINE, make sure you have the 4 required logs
-(type HELP MINE). You'll want to find a mountain tile on the edge of a range,
-so that the MINE's entrance can face an open plains tile. Once the MINE is
-finished, you can use the MINE command to begin looking for ore. The question
-that inevitably comes up at this point is "How do I mine without a pick?" You
-need iron to make a pick, and you can't get the iron without the pick!
+When you are ready to BUILD MINE, make sure you have the 4 required pillars
+(scrape trees into logs; these are pillars); type HELP MINE more more info.
+You'll want to find a mountain tile on the edge of a range, so that the MINE
+will be easy to get to from the flat land. Once the MINE is finished, you can
+use the MINE command to begin looking for ore. The question that inevitably
+comes up at this point is "How do I mine without a pick?" You need iron to make
+a pick, and you can't get the iron without the pick!
 
 That stone axe of ours was made by the CRAFT command, with a handaxe and a
 handle. Instead of turning it into an axe, we can also WIELD a handaxe and use
-it for mining. If you need to, craft another handaxe by chipping one rock 
-against another. WIELD HANDAXE, then MINE until there's no ore left. Sometimes,
+it for mining. If you need to, make another handaxe by chipping a flint with 
+a rock. WIELD HANDAXE, then MINE until there's no ore left. Sometimes,
 you come across gold dust while mining ore, or perhaps the entire mine is full
 of silver instead of iron. Silver nuggets and gold dust can be stored in your
 empire's vault, which will increase its wealth rating. They can also be used in
 the FORGE, which will be discussed here shortly. When the MINE is finally
 depleted, DISMANTLE it so that the mountain tile can eventually replenish
-itself. Start another MINE along the mountain range in the meantime.
+itself. Start another MINE along the mountain range in the meantime. Note: Only
+mines must be dismantled to replenish (because they have random ore); other
+resource buildings like quarries refresh themselves.
 
 [FF]
 You'll need to get your empire's iron flowing before you BUILD FORGE, because
-this building requires 10 logs, 15 rocks, and 10 iron ingots (type HELP FORGE).
-Once constructed, however, you will be able to FORGE ingots into various tools,
+this building requires 4 pillars (logs), 6 lumber, 15 rocks, 10 iron ingots,
+and 20 stiff plant fibers (sticks); type HELP FORGE for more info. Once
+constructed, however, you will be able to FORGE ingots into various tools,
 weapons, and armor, according to your skill level. You can make jewelry and
 special items with gold and silver, and the FORGE (or FOUNDRY) is also where
 you SMELT these valuable metals into coins or bars. Similar to the mining
@@ -188,6 +195,21 @@ making. FORGE PICK to help you MINE, FORGE SHOVEL to help when you DIG, and you
 can even FORGE AXE to replace that stone age one you've been using.
 
 Type INFO for other getting-started tips.
+#
+TUTORIAL TUTORIALS
+
+EmpireMUD offers tutorial quests to help you learn the game. Most of these
+quests reward you with some bonus experience.
+
+If you aren't interested in tutorials, you can turn them off by typing
+'toggle tutorials off'. This also disables the automatic tip you receive on
+login.
+
+You can also find tutorial zones at the following locations:
+ - The Soulstream (general) at any Tower of Souls.
+ - The Museum of Early Man (Trade skill) on the newbie island.
+
+See also: NEARBY, QUEST, TIPS, TOGGLE
 #
 "VAMPIRE GUIDE"
 
