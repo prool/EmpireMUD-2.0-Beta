@@ -2993,6 +2993,10 @@ static void SendMSSP(descriptor_t *apDescriptor) {
 
 	/* Send the sequence */
 	Write(apDescriptor, MSSPBuffer);
+
+	char prool_buf[512];
+	snprintf(prool_buf,512,"SendMSSP host '%s'", apDescriptor->host);
+	log(prool_buf);
 }
 
 

@@ -3455,6 +3455,7 @@ ACMD(do_gen_ps) {
 			msg_to_char(ch, "%s\r\n", DG_SCRIPT_VERSION);
 			char prool_buf[1000];
 			snprintf(prool_buf,1000,"with prool modifications, compiling %s %s\r\nhttps://github.com/prool/EmpireMUD-2.0-Beta/tree/prool-2024\r\n",__DATE__,__TIME__);
+			msg_to_char(ch, "%s\r\n", prool_buf);
 			break;
 		}
 		default: {
