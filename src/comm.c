@@ -1929,7 +1929,7 @@ void close_socket(descriptor_data *d) {
 			d->character->desc = NULL;
 		}
 		else {
-			if (GET_NAME(d->character)) syslog(SYS_LOGIN, 0, TRUE, "Losing player: %s", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>"); // prool
+			syslog(SYS_LOGIN, 0, TRUE, "Losing player: %s", GET_NAME(d->character) ? GET_NAME(d->character) : "<null>");
 			free_char(d->character);
 		}
 	}
@@ -2480,14 +2480,12 @@ int new_descriptor(int s) {
 		/* resolution failed */
 		if (!slow_ip) {
 			char buf[MAX_STRING_LENGTH];
-#if 0 // prool
 			safe_snprintf(buf, sizeof(buf), "Warning: gethostbyaddr [%s]", inet_ntoa(peer.sin_addr));
 			perror(buf);
-#endif
 			
 			// did it take longer than 3 seconds to look up?
 			if (when + 3 < time(0)) {
-				//log("- added %s to slow IP list", inet_ntoa(peer.sin_addr)); // prool
+				log("- added %s to slow IP list", inet_ntoa(peer.sin_addr));
 				add_slow_ip(inet_ntoa(peer.sin_addr));
 			}
 		}
@@ -2602,7 +2600,7 @@ ssize_t perform_socket_read(socket_t desc, char *read_point, size_t space_left) 
 	 * We don't know what happened, cut them off. This qualifies for
 	 * a SYSERR because we have no idea what happened at this point.
 	 */
-	//perror("perform_socket_read: about to lose connection"); // prool
+	perror("perform_socket_read: about to lose connection");
 	return (-1);
 }
 
@@ -3115,7 +3113,7 @@ int write_to_descriptor(socket_t desc, const char *txt) {
 
 		if (bytes_written < 0) {
 			/* Fatal error.  Disconnect the player. */
-			//prool perror("SYSERR: Write to socket");
+			perror("SYSERR: Write to socket");
 			return (-1);
 		}
 		else if (bytes_written == 0) {
