@@ -342,6 +342,8 @@ void evolve_map(void) {
 int main(int argc, char **argv) {
 	struct map_t *tile;
 	int num, pid = 0;
+
+	printf("prool debug: evolve\n"); // prool
 	
 	if (argc < 4 || argc > 5) {
 		printf("Format: %s <nearby distance> <day of year> <water crop distance> [pid to signal]\n", argv[0]);

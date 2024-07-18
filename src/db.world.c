@@ -3006,6 +3006,8 @@ void process_import_evolutions(void) {
 */
 void run_external_evolutions(void) {
 	char buf[MAX_STRING_LENGTH];
+
+	log("prool debug: run_external_evolutions()"); // prool
 	
 	if (evolutions_pending) {
 		log("SYSERR: Unable to import map evolutions: bin/evolve program does not respond");
