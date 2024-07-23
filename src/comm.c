@@ -934,7 +934,8 @@ void heartbeat(unsigned long heart_pulse) {
 	}
 	
 	if (HEARTBEAT(30 * SECS_PER_REAL_MIN)) {
-		run_external_evolutions();
+		//run_external_evolutions();
+		evolve_int(); // prool
 		HEARTBEAT_LOG("22.5")
 		
 		reduce_outside_territory();

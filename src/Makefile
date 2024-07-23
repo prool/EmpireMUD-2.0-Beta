@@ -39,6 +39,7 @@ OBJFILES = abilities.o act.action.o act.battle.o act.comm.o act.empire.o \
 	olc.attack.o olc.craft.o olc.crop.o olc.global.o olc.map.o olc.mobile.o \
 	olc.object.o olc.roomtemplate.o olc.sector.o olc.trigger.o pathfind.o \
 	progress.o protocol.o quest.o random.o shop.o skills.o social.o spells.o \
+	evolve2.o \
 	statistics.o updates.o utils.o vehicles.o weather.o workforce.o
 
 CXREF_FILES = abilities.c act.action.c act.battle.c act.comm.c act.empire.c \
@@ -55,6 +56,7 @@ CXREF_FILES = abilities.c act.action.c act.battle.c act.comm.c act.empire.c \
 	olc.attack.c olc.craft.c olc.crop.c olc.global.c olc.map.c olc.mobile.c \
 	olc.object.c olc.roomtemplate.c olc.sector.c olc.trigger.c pathfind.c \
 	progress.c protocol.c quest.c random.c shop.c skills.c social.c spells.c \
+	evolve2.c \
 	statistics.c updates.c utils.c vehicles.c weather.c workforce.c
 
 default: all
@@ -102,7 +104,8 @@ ref:
 
 # Dependencies for the object files (automagically generated with
 # gcc -MM)
-
+evolve2.o: evolve2.c
+	$(CC) -c $(CFLAGS) evolve2.c
 abilities.o: abilities.c conf.h sysdep.h structs.h protocol.h uthash.h \
   utils.h interpreter.h db.h comm.h olc.h skills.h handler.h dg_scripts.h \
   vnums.h constants.h

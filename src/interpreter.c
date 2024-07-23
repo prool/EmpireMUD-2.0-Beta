@@ -25,6 +25,11 @@
 #include "dg_scripts.h"
 #include "constants.h"
 
+int evolve_int(); // by prool
+extern int nearby_distance_prool;	// for nearby evos
+extern int day_of_year_prool;	// for seasons
+extern int water_crop_distance_prool;	// for crops that require water
+
 /**
 * Contents:
 *   Command Prototypes

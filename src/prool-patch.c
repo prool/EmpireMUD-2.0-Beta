@@ -14,6 +14,15 @@
 			msg_to_char(ch,"\b&YПерша кирилична команда Пруля. Слава Україні! Grüß Gott!&0\n");
 			return;
 			}
+		else if (!strcmp(arg,"proole"))
+			{
+			msg_to_char(ch, "Start Prool's internal evolve\n");
+
+			nearby_distance_prool = config_get_int("nearby_sector_distance");
+			day_of_year_prool = DAY_OF_YEAR(main_time_info);
+			water_crop_distance_prool = config_get_int("water_crop_distance"); // may be 0 to ignore unwatered crops
+			evolve_int();
+			}
 		else if (!strcmp(arg,"duhmada"))
 			{int number;
 			obj_data *obj;
