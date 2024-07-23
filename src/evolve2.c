@@ -15,6 +15,10 @@
 
 /* prool: try to insert evolve to MUD */
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "conf.h"
 #include "sysdep.h"
 #include <signal.h>
@@ -115,6 +119,51 @@ void write_tile(struct map_t_prool *tile, sector_vnum old);
 // this allows the inclusion of utils.h
 void basic_mud_log_prool(const char *format, ...) { }
 
+
+#define SECTOR_SIZE 512
+int prool_copy(char *path1, char *path2) // code from OS Proolix
+{int h1, h2, i1, i2; long n, m;
+char buf [SECTOR_SIZE];
+
+if((h1=open(path1,O_RDONLY))==-1)
+  {
+  printf("cp: can't open source\n");
+  return -1;
+  }
+
+if (access(path2,2)==0)
+  if (unlink(path2))
+    {printf("cp: can't unlink target\n"); return -1; }
+
+if((h2=open(path2,O_WRONLY|O_CREAT|O_EXCL, 00600))==-1)
+  {
+  printf("cp: can't open target\n");
+  close(h1);
+  return -1;
+  }
+while(1)
+  {
+  if((n=read(h1,buf,SECTOR_SIZE))==-1) break;
+  if(n==0) {m=0; break;}
+  if((m=write(h2,buf,n))==-1) break;
+  if (m!=n) break;
+  }
+i1=close(h1);
+i2=close(h2);
+if (n==-1) {printf("cp: can't read source\n"); return -1;}
+if (m==-1) {printf("cp: can't write target\n"); return -1;}
+if (m!=n)  {printf("cp: write error (device full or not ready?)\n");
+            return -1;}
+if (i1==-1) {printf("cp: can't close source\n");return -1;}
+if (i2==-1)
+{
+printf(
+"cp: can't close target (device or directory full or device not ready)\n"
+);
+return -1;
+}
+return 0; /* OK! */
+}
 
  //////////////////////////////////////////////////////////////////////////////
 //// EVOLUTIONS //////////////////////////////////////////////////////////////
@@ -983,8 +1032,14 @@ void load_base_map(void) {
 	}
 	
 	// first create a duplicate...
+	/*
 	sprintf(sys, "cp %s %s.copy", BINARY_MAP_FILE, BINARY_MAP_FILE);
-	system(sys);
+	system(sys);*/
+
+	char proolfile2[512];
+	snprintf(proolfile2, sizeof (proolfile2), "%s.copy", BINARY_MAP_FILE);
+	prool_copy(BINARY_MAP_FILE, proolfile2);
+
 	if (!(fl = fopen(BINARY_MAP_FILE ".copy", "r+b"))) {
 		printf("ERROR: No binary map file '%s.copy' to evolve\n", BINARY_MAP_FILE);
 		exit(0);
