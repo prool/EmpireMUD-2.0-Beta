@@ -429,7 +429,7 @@ outfl_prool = NULL;	// file for saving data
 	
 	if (DEBUG_MODE) {
 		LL_COUNT(land_prool, tile, num); 
-		printf("prool int evolve: Loaded: %d land_prool tiles\n", num);
+		printf("prool int evolve: Loaded: %d land tiles\n", num);
 	}
 	
 	// open file for writing
