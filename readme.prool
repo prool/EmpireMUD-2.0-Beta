@@ -1,0 +1,3 @@
+For build in cygwin/Windows uncomment #define CYGWIN in util/map.c file
+
+Prool
