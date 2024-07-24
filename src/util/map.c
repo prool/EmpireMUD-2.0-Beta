@@ -10,7 +10,7 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
-#define CYGWIN // uncomment this line if you compiling in cygwin/Windows. prool
+//#define CYGWIN // uncomment this line if you compiling in cygwin/Windows. prool
 
 /**
 * WARNING: Running this program will overwrite your world files. You should
