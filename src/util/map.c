@@ -478,7 +478,9 @@ void create_map(void) {
 
 // main game execution
 int main(int argc, char **argv) {
+#ifdef CYGWIN
 	printf("EmpireMUD map generator, compiling by Prool in cygwin/Windows 11 %s %s\nhttp://mud.virtustan.net\n\n", __DATE__, __TIME__);
+#endif
 	empire_srandom(time(0));
 	
 	if (argc > 1 && !strcmp(argv[1], "shift")) {
