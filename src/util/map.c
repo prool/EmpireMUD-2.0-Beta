@@ -10,6 +10,8 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#define CYGWIN // uncomment this line if you compiling in cygwin/Windows. prool
+
 /**
 * WARNING: Running this program will overwrite your world files. You should
 * only do this when the mud is down, or shutting it down will overwrite the
@@ -367,8 +369,11 @@ int sort_real_islands(struct real_island *a, struct real_island *b) {
 
 
 // relative path to the 'lib' dir
+#ifdef CYGWIN
+#define LIB_PATH  "..\\..\\" // prool for cygwin
+#else
 #define LIB_PATH  "../../"
-
+#endif
 
 // locals
 struct grid_type grid[USE_SIZE];	// main working grid
@@ -473,6 +478,7 @@ void create_map(void) {
 
 // main game execution
 int main(int argc, char **argv) {
+	printf("EmpireMUD map generator, compiling by Prool in cygwin/Windows 11 %s %s\nhttp://mud.virtustan.net\n\n", __DATE__, __TIME__);
 	empire_srandom(time(0));
 	
 	if (argc > 1 && !strcmp(argv[1], "shift")) {
@@ -904,8 +910,8 @@ void print_map_to_files(void) {
 	map_file_data store;
 	int pos;
 	
-	if (!(binary_map_fl = fopen(LIB_PATH BINARY_MAP_FILE, "w+b"))) {
-		printf("Unable to write %s file!\n", BINARY_MAP_FILE);
+	if (!(binary_map_fl = fopen("binary_map", "w+b"))) { // prool for cygwin
+		printf("Error 1. Unable to write binary map file!\n");
 		exit(0);
 	}
 	
