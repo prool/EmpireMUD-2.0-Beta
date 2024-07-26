@@ -1,0 +1,11 @@
+https://github.com/EmpireMUD/EmpireMUD-2.0-Beta
+
+Prool modifications of orig. EmpireMUD is in branch prool-2024.
+This modif. is working in address mud.virtustan.net:5000
+
+For compiling in cygwin/Windows uncomment #define CYGWIN in util/map.c file
+
+For your local server don't forget to create world! (See chapter 5 in
+original README file)
+
+Prool
