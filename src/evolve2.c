@@ -394,7 +394,7 @@ int evolve_int() {
 	struct map_t_prool *tile;
 	int num = 0;
 
-	printf("prool debug: evolve2 internal\n"); // prool
+	log("prool debug: internal evolve"); // prool
 	
 	empire_srandom_prool(time(0));
 
@@ -412,7 +412,7 @@ outfl_prool = NULL;	// file for saving data
 	//water_crop_distance_prool = atoi(argv[3]);	// may be 0 to ignore unwatered crops
 	
 	if (DEBUG_MODE) {
-		printf("prool int evolve: Using nearby distance of: %d\n", nearby_distance_prool);
+		printf("Using nearby distance of: %d\n", nearby_distance_prool);
 		printf("Using day of year: %d\n", day_of_year_prool);
 		printf("Using water crop distance: %d\n", water_crop_distance_prool);
 	}
@@ -421,7 +421,7 @@ outfl_prool = NULL;	// file for saving data
 	index_boot_crops();
 	index_boot_sectors();
 	if (DEBUG_MODE) {
-		printf("prool int evolve: Loaded: %d crops\n", HASH_COUNT(crop_table_prool));
+		printf("Loaded: %d crops\n", HASH_COUNT(crop_table_prool));
 		printf("Loaded: %d sectors\n", HASH_COUNT(sector_table_prool));
 	}
 	
@@ -429,12 +429,12 @@ outfl_prool = NULL;	// file for saving data
 	
 	if (DEBUG_MODE) {
 		LL_COUNT(land_prool, tile, num); 
-		printf("prool int evolve: Loaded: %d land tiles\n", num);
+		printf("Loaded: %d land tiles\n", num);
 	}
 	
 	// open file for writing
 	if (!(outfl_prool = fopen(EVOLUTION_FILE TEMP_SUFFIX, "wb"))) {
-		printf("prool int evolve: ERROR: Unable to open evolution file %s\n", EVOLUTION_FILE);
+		printf("prool int evolve: error: Unable to open evolution file %s\n", EVOLUTION_FILE);
 		exit(1);
 	}
 	
