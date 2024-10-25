@@ -751,6 +751,11 @@ OFFER_VALIDATE(oval_quest) {
 		msg_to_char(ch, "You don't meet the prerequisites for that quest.\r\n");
 		return FALSE;
 	}
+	if (!CAN_START_QUEST(ch, qst, inst)) {
+		// any other reason
+		msg_to_char(ch, "You can't accept that quest.\r\n");
+		return FALSE;
+	}
 	
 	return TRUE;
 }
@@ -760,7 +765,7 @@ OFFER_FINISH(ofin_quest) {
 	struct instance_data *inst = find_matching_instance_for_shared_quest(ch, offer->data);
 	quest_data *qst = quest_proto(offer->data);
 	
-	if (qst) {
+	if (qst && CAN_START_QUEST(ch, qst, inst)) {
 		start_quest(ch, qst, inst);
 	}
 	

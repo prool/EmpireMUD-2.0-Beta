@@ -1043,10 +1043,7 @@ QCMD(qcmd_share) {
 	any = same_room = FALSE;
 	LL_FOREACH(GROUP(ch)->members, mem) {
 		friend = mem->member;
-		if (IS_NPC(friend) || is_on_quest(friend, QUEST_VNUM(qst))) {
-			continue;
-		}
-		if (!char_meets_prereqs(friend, qst, inst)) {
+		if (IS_NPC(friend) || !CAN_START_QUEST(friend, qst, inst)) {
 			continue;
 		}
 		
@@ -1150,22 +1147,17 @@ QCMD(qcmd_start) {
 				level_fail = TRUE;
 				continue;	// must validate level
 			}
-			if (IS_NON_EVENT_DAILY(qtl->quest) && GET_DAILY_QUESTS(ch) >= config_get_int("dailies_per_day")) {
-				continue;	// too many dailies
-			}
-			if (IS_EVENT_DAILY(qtl->quest) && GET_EVENT_DAILY_QUESTS(ch) >= config_get_int("dailies_per_day")) {
-				continue;	// too many event dailies
+			if (!CAN_START_QUEST(ch, qtl->quest, qtl->instance)) {
+				continue;	// daily check, prereqs, etc
 			}
 			
-			// must re-check prereqs
-			if (!is_on_quest(ch, QUEST_VNUM(qtl->quest)) && char_meets_prereqs(ch, qtl->quest, qtl->instance)) {
-				if (any) {
-					// spacing
-					msg_to_char(ch, "\r\n");
-				}
-				start_quest(ch, qtl->quest, qtl->instance);
-				any = TRUE;
+			// ok:
+			if (any) {
+				// spacing
+				msg_to_char(ch, "\r\n");
 			}
+			start_quest(ch, qtl->quest, qtl->instance);
+			any = TRUE;
 		}
 		
 		if (!any) {
