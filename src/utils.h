@@ -1465,7 +1465,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define IS_EVENT_DAILY(quest) (QUEST_FLAGGED((quest), QST_DAILY) && QUEST_FLAGGED((quest), QST_EVENT))
 #define IS_NON_EVENT_DAILY(quest) (QUEST_FLAGGED((quest), QST_DAILY) && !QUEST_FLAGGED((quest), QST_EVENT))
 
-#define CAN_START_QUEST(ch, qst, inst)  (!is_on_quest(ch, QUEST_VNUM(qst)) && (get_approximate_level(ch) + 50) >= QUEST_MIN_LEVEL(qst) && (IS_NON_EVENT_DAILY(qst) && GET_DAILY_QUESTS(ch) < config_get_int("dailies_per_day")) && (IS_EVENT_DAILY(qst) && GET_EVENT_DAILY_QUESTS(ch) < config_get_int("dailies_per_day")) && char_meets_prereqs(ch, qst, inst))
+#define CAN_START_QUEST(ch, qst, inst)  (!is_on_quest(ch, QUEST_VNUM(qst)) && (get_approximate_level(ch) + 50) >= QUEST_MIN_LEVEL(qst) && (!IS_NON_EVENT_DAILY(qst) || GET_DAILY_QUESTS(ch) < config_get_int("dailies_per_day")) && (!IS_EVENT_DAILY(qst) || GET_EVENT_DAILY_QUESTS(ch) < config_get_int("dailies_per_day")) && char_meets_prereqs(ch, qst, inst))
 
 
  //////////////////////////////////////////////////////////////////////////////
