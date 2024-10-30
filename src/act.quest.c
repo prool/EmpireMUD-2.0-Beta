@@ -1043,7 +1043,7 @@ QCMD(qcmd_share) {
 	any = same_room = FALSE;
 	LL_FOREACH(GROUP(ch)->members, mem) {
 		friend = mem->member;
-		if (IS_NPC(friend)) {
+		if (friend == ch || IS_NPC(friend)) {
 			continue;
 		}
 		if (IN_ROOM(ch) != IN_ROOM(friend)) {
