@@ -69,6 +69,21 @@ struct einv_type {
 };
 
 
+// roster helper
+struct roster_helper_t {
+	int level;
+	char *text;
+	
+	struct roster_helper_t *prev, *next;	// DLL
+};
+
+
+// simple sorter for do_roster
+int sort_roster(struct roster_helper_t *a, struct roster_helper_t *b) {
+	return b->level - a->level;
+}
+
+
 // scan helper
 struct _organize_general_dirs_t {
 	char dir[80];
@@ -7796,14 +7811,14 @@ ACMD(do_reclaim) {
 
 
 ACMD(do_roster) {
-	char part[MAX_STRING_LENGTH];
+	char entry[MAX_STRING_LENGTH], ago_str[MAX_STRING_LENGTH], skill_str[MAX_STRING_LENGTH];
 	player_index_data *index, *next_index;
 	empire_data *e = GET_LOYALTY(ch);
 	bool timed_out, is_file = FALSE;
-	int days, hours;
+	int days, hours, level;
 	char_data *member;
 	bool all = FALSE, imm_access = (GET_ACCESS_LEVEL(ch) >= LVL_CIMPL || IS_GRANTED(ch, GRANT_EMPIRES));
-	struct page_display *line;
+	struct roster_helper_t *rh, *next_rh, *online_list = NULL, *offline_list = NULL;
 	
 	skip_spaces(&argument);
 	
@@ -7862,33 +7877,67 @@ ACMD(do_roster) {
 			continue;
 		}
 		
-		// display:
-		get_player_skill_string(member, part, TRUE);
-		if (PRF_FLAGGED(ch, PRF_SCREEN_READER)) {
-			line = build_page_display(ch, "[%d %s %s] <%s&0> %s%s&0", !is_file ? GET_COMPUTED_LEVEL(member) : GET_LAST_KNOWN_LEVEL(member), part, class_role[GET_CLASS_ROLE(member)], EMPIRE_RANK(e, GET_RANK(member) - 1), (timed_out ? "&r" : ""), PERS(member, member, TRUE));
-		}
-		else {	// not screenreader
-			line = build_page_display(ch, "[%d %s%s\t0] <%s&0> %s%s&0", !is_file ? GET_COMPUTED_LEVEL(member) : GET_LAST_KNOWN_LEVEL(member), class_role_color[GET_CLASS_ROLE(member)], part, EMPIRE_RANK(e, GET_RANK(member) - 1), (timed_out ? "&r" : ""), PERS(member, member, TRUE));
-		}
-						
+		// gather data
+		level = (!is_file ? GET_COMPUTED_LEVEL(member) : GET_LAST_KNOWN_LEVEL(member));
+		
 		// online/not
 		if (!is_file) {
-			append_page_display_line(line, "  - &conline&0%s", IS_AFK(member) ? " - &rafk&0" : "");
+			safe_snprintf(ago_str, sizeof(ago_str), "  - &conline&0%s", IS_AFK(member) ? " - &rafk&0" : "");
 		}
 		else if ((time(0) - GET_PREV_LOGON(member)) < SECS_PER_REAL_DAY) {
 			hours = (time(0) - GET_PREV_LOGON(member)) / SECS_PER_REAL_HOUR;
-			append_page_display_line(line, "  - %d hour%s ago%s", hours, PLURAL(hours), (timed_out ? ", &rtimed-out&0" : ""));
+			safe_snprintf(ago_str, sizeof(ago_str), "  - %d hour%s ago%s", hours, PLURAL(hours), (timed_out ? ", &rtimed-out&0" : ""));
 		}
 		else {	// more than a day
 			days = (time(0) - GET_PREV_LOGON(member)) / SECS_PER_REAL_DAY;
-			append_page_display_line(line, "  - %d day%s ago%s", days, PLURAL(days), (timed_out ? ", &rtimed-out&0" : ""));
+			safe_snprintf(ago_str, sizeof(ago_str), "  - %d day%s ago%s", days, PLURAL(days), (timed_out ? ", &rtimed-out&0" : ""));
+		}
+		
+		// build line:
+		get_player_skill_string(member, skill_str, TRUE);
+		if (PRF_FLAGGED(ch, PRF_SCREEN_READER)) {
+			safe_snprintf(entry, sizeof(entry), "[%d %s %s] <%s&0> %s%s&0%s", level, skill_str, class_role[GET_CLASS_ROLE(member)], EMPIRE_RANK(e, GET_RANK(member) - 1), (timed_out ? "&r" : ""), PERS(member, member, TRUE), ago_str);
+		}
+		else {	// not screenreader
+			safe_snprintf(entry, sizeof(entry), "[%d %s%s\t0] <%s&0> %s%s&0%s", level, class_role_color[GET_CLASS_ROLE(member)], skill_str, EMPIRE_RANK(e, GET_RANK(member) - 1), (timed_out ? "&r" : ""), PERS(member, member, TRUE), ago_str);
+		}
+		
+		// create temporary helper
+		CREATE(rh, struct roster_helper_t, 1);
+		rh->level = level;
+		rh->text = str_dup(entry);
+		
+		// append
+		if (is_file) {
+			DL_APPEND(offline_list, rh);
+		}
+		else {
+			DL_APPEND(online_list, rh);
 		}
 		
 		if (member && is_file) {
 			free_char(member);
 		}
 	}
-
+	
+	// sort both
+	DL_SORT(online_list, sort_roster);
+	DL_SORT(offline_list, sort_roster);
+	
+	// merge into online_list
+	DL_CONCAT(online_list, offline_list);
+	
+	// and build page display
+	DL_FOREACH_SAFE(online_list, rh, next_rh) {
+		build_page_display_str(ch, rh->text);
+		
+		if (rh->text) {
+			free(rh->text);
+		}
+		DL_DELETE(online_list, rh);
+		free(rh);
+	}
+	
 	send_page_display(ch);
 }
 
