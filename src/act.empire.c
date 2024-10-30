@@ -80,7 +80,7 @@ struct roster_helper_t {
 
 // simple sorter for do_roster
 int sort_roster(struct roster_helper_t *a, struct roster_helper_t *b) {
-	return b->level - a->level;
+	return a->level - b->level;
 }
 
 
