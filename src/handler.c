@@ -8596,6 +8596,28 @@ void clean_offers(char_data *ch) {
 
 
 /**
+* Finds a matching offer of a given type.
+*
+* @param char_data *ch The person to check.
+* @param int type Any OFFER_ type.
+* @return struct offer_data* A pointer to the existing offer of that type, or NULL if not found.
+*/
+struct offer_data *has_offer(char_data *ch, int type) {
+	struct offer_data *offer;
+	
+	if (!IS_NPC(ch)) {
+		LL_FOREACH(GET_OFFERS(ch), offer) {
+			if (offer->type == type) {
+				return offer;
+			}
+		}
+	}
+	
+	return NULL;	// not found
+}
+
+
+/**
 * Removes all offers of a given type.
 *
 * @param char_data *ch The person whose offers to remove.

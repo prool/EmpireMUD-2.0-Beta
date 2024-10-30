@@ -1055,7 +1055,10 @@ QCMD(qcmd_share) {
 			act("$O cannot accept that quest.", FALSE, ch, NULL, friend, TO_CHAR);
 			continue;
 		}
-		
+		if (has_offer(friend, OFFER_QUEST)) {
+			act("You cannot offer $O another quest while one is still pending.", FALSE, ch, NULL, friend, TO_CHAR);
+			continue;
+		}
 		
 		any = TRUE;
 		add_offer(friend, ch, OFFER_QUEST, pq->vnum);
