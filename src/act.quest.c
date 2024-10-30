@@ -1043,15 +1043,19 @@ QCMD(qcmd_share) {
 	any = same_room = FALSE;
 	LL_FOREACH(GROUP(ch)->members, mem) {
 		friend = mem->member;
-		if (IS_NPC(friend) || !CAN_START_QUEST(friend, qst, inst)) {
+		if (IS_NPC(friend)) {
 			continue;
 		}
-		
-		// character qualifies... but are they in the same room?
 		if (IN_ROOM(ch) != IN_ROOM(friend)) {
+			// group member is in another location
 			same_room = TRUE;
 			continue;
 		}
+		if (!CAN_START_QUEST(friend, qst, inst)) {
+			act("$O cannot accept that quest.", FALSE, ch, NULL, friend, TO_CHAR);
+			continue;
+		}
+		
 		
 		any = TRUE;
 		add_offer(friend, ch, OFFER_QUEST, pq->vnum);
@@ -1061,7 +1065,7 @@ QCMD(qcmd_share) {
 	}
 	
 	if (!any && same_room) {
-		msg_to_char(ch, "You can only share quests with group members in the same room as you.\r\n");
+		msg_to_char(ch, "You can't share quests with group members who aren't here.\r\n");
 	}
 	else if (!any) {
 		msg_to_char(ch, "Nobody in your group can accept that quest.\r\n");
