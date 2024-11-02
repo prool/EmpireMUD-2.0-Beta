@@ -222,7 +222,7 @@ elseif %shape% == badger
   %mod% %item% shortdesc a chocolate badger
   %mod% %item% keywords chocolate badger
   %mod% %item% longdesc A chocolate badger looks to be industriously digging.
-  %mod% %item% lookdesc A block of chocolate has been molded to resemble a digging badger,.
+  %mod% %item% lookdesc A block of chocolate has been molded to resemble a digging badger.
 elseif %shape% == sorcerer
   %mod% %item% shortdesc a chocolate sorcerer
   %mod% %item% keywords chocolate sorcerer
