@@ -536,16 +536,20 @@ A block of creamy milk chocolate sits here temptingly.~
 it. Its sweet scent infuses the air immediately around it if you lean close
 enough.
 ~
-6 gC a 0 0 4
-48 0 0
+6 gmE a 0 0 8
+24 0 0
 0 1200
 A
 11 1 0
 A
 16 1 0
+C
+75 75
 O+ 1 6340
 R
 4 5619 0
+R
+4 5606 0
 S
 #12130
 cocoa powder small pouch~
@@ -574,15 +578,15 @@ A dense block of dark chocolate sits here invitingly.~
    This dense dark brown piece of chocolate sits temptingly before you, its
 intense, slightly bitter aroma infusing the air if you lean close enough.
 ~
-6 gC a 0 0 5
-48 0 0
+6 gmE a 0 0 7
+24 0 0
 0 1200
 A
-6 3 0
+6 1 0
 A
-14 1 0
+7 1 0
 C
-1 100
+75 75
 O+ 1 6340
 R
 4 5619 0
@@ -642,7 +646,7 @@ A golden-brown chicken pot pie with a flaky crust sits here steaming invitingly.
 vegetables swimming in a savory gravy containing herbs and spices. It won a
 recent cook-off and now you get a slice, too.
 ~
-6 0 a 0 0 2
+6 gmE a 0 0 3
 96 0 0
 7 24
 A
@@ -662,9 +666,11 @@ A small onion has been dropped here.~
 petal-like layers. You could use it in some small recipe or combine it with a
 few more of its kind and plant it somewhere.
 ~
-6 gC a 0 0 4
+6 gC a 0 0 5
 2 0 0
 0 2160
+C
+1 1
 I 14 12136 100.00 4  # COMBINE: basket of onions
 O+ 1 6142
 R
@@ -695,13 +701,15 @@ goodness in a pot and cooking it slowly, this particular recipe recently won a
 cooking contest and promises to be a very filling meal. Its scent is a savory
 mix of meats, veggies and spices.
 ~
-6 E a 0 0 3
+6 mE a 0 0 4
 96 0 0
 0 336
 A
 23 1 0
 A
 19 1 0
+C
+75 75
 S
 #12138
 leggings master chef's pocketed leather~
