@@ -213,12 +213,12 @@ elseif %shape% == bull
   %mod% %item% shortdesc a chocolate bull
   %mod% %item% longdesc A chocolate bull looks ready to charge.
   %mod% %item% lookdesc This bull has been molded from a solid piece of cho
-elseif %shape% === jaguar
+elseif %shape% == jaguar
   %mod% %item% shortdesc a chocolate jaguar
   %mod% %item% keywords chocolate jaguar
   %mod% %item% longdesc A chocolate jaguar looks poised to pounce.
   %mod% %item% lookdesc This block of chocolate has been molded to resemble a jaguar in mid pounce, claws out and ready to shred flesh.
-elseif %shape% === badger
+elseif %shape% == badger
   %mod% %item% shortdesc a chocolate badger
   %mod% %item% keywords chocolate badger
   %mod% %item% longdesc A chocolate badger looks to be industriously digging.
