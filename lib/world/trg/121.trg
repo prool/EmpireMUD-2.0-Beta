@@ -247,6 +247,9 @@ else
   %send% %actor% You don't have a mold for that.
   halt
 end
+if !%item.is_flagged(NO-BASIC-STORAGE)%
+  nop %item.flag(NO-BASIC-STORAGE)%
+end
 %send% %actor% You pour the chocolate into the mold and retrieve %shape.ana% %shape% when it cools.
 %echoaround% %actor% ~%actor% molds %shape.ana% %shape%.
 ~
@@ -269,43 +272,44 @@ makeuid empire empire %shape%
 if %empire%
   set empire_name %empire.name%
 end
-if %shape% == witch's hat
+if %shape% == witch's hat || %shape% == witchs hat || %shape% == hat
   %mod% %item% shortdesc a chocolate witch's hat
-  %mod% %item% keywords hat witch witch's chocolate
+  %mod% %item% keywords chocolate hat witchs witch's
   %mod% %item% longdesc A chocolate witch's hat stands here.
   %mod% %item% lookdesc A block of chocolate has been shaped into a witch's hat, held open as if it contained someone's head.
 elseif %shape% == ghost
-  %mod% %item% keywords ghost hollow chocolate
+  %mod% %item% keywords chocolate ghost hollow
   %mod% %item% shortdesc a chocolate ghost
   %mod% %item% longdesc A chocolate ghost is here.
   %mod% %item% lookdesc A chocolate block has been hollowed out into the shape of a ghost.
 elseif %shape% == banshee
-  %mod% %item% keywords banshee chocolate
+  %mod% %item% keywords chocolate banshee
   %mod% %item% shortdesc a chocolate banshee
   %mod% %item% longdesc A chocolate banshee lies here.
   %mod% %item% lookdesc A block of chocolate has been hollowed out into the shape of a banshee with mouth open as if screaming.
 elseif %shape% == werewolf
-  %mod% %item% keywords werewolf chocolate
+  %mod% %item% keywords chocolate werewolf
   %mod% %item% shortdesc a chocolate werewolf
   %mod% %item% longdesc A chocolate wolf is half transformed here, neither fully human nor wolf.
   %mod% %item% lookdesc This solid block of chocoate is molded into a muscular werewolf, caught between human and wolf form.
 elseif %shape% == pumpkin
+  %mod% %item% keywords chocolate pumpkin
   %mod% %item% shortdesc a chocolate pumpkin
   %mod% %item% longdesc A chocolate pumpkin has been left here.
   %mod% %item% lookdesc A hollow chocolate pumpkin has been molded as if someone is just starting to carve it, with only the barest suggestion of a distorted face on one side.
 elseif %shape% == skull
-  %mod% %item% keywords skull chocolate
+  %mod% %item% keywords chocolate skull
   %mod% %item% shortdesc a chocolate skull
   %mod% %item% longdesc A chocolate skull is lying here.
   %mod% %item% lookdesc A block of chocolate has been hollowed out and molded into the shape of a skull.
 elseif %shape% == cat
-  %mod% %item% keywords cat chocolate
+  %mod% %item% keywords chocolate cat
   %mod% %item% shortdesc a chocolate cat
   %mod% %item% longdesc A chocolate cat has been dropped here.
   %mod% %item% lookdesc A block of chocolate has been hollowed out and molded into the shape of a cat.
 elseif %shape% == spider
+  %mod% %item% keywords chocolate spider
   %mod% %item% shortdesc a chocolate spider
-  %mod% %item% keywords spider chocolate
   %mod% %item% longdesc A chocolate spider has been dropped here, its delicate web spread around it.
   %mod% %item% lookdesc A block of chocolate has been hollowed out into the shape of a spider with delicate webbing around it.
 elseif %shape% == broom
@@ -314,14 +318,17 @@ elseif %shape% == broom
   %mod% %item% longdesc A chocolate broom is balanced on its bristles.
   %mod% %item% lookdesc This block of chocolate is molded to resemble a broom, its de
 elseif %empire%
-  %mod% %item% shortdesc a chocolate memorial to %empire_name%
   %mod% %item% keywords memorial chocolate %empire_name%
+  %mod% %item% shortdesc a chocolate memorial to %empire_name%
   %mod% %item% longdesc A chocolate memorial to %empire_name% lies here.
   %mod% %item% lookdesc An intricate map of %empire_name% has been molded from this solid block of chocolate, with locations of key cities marked by tombstones indicating mass death.
   set shape memorial to %empire_name%
 else
   %send% %actor% You don't have a mold for that.
   halt
+end
+if !%item.is_flagged(NO-BASIC-STORAGE)%
+  nop %item.flag(NO-BASIC-STORAGE)%
 end
 %send% %actor% You pour the chocolate into the mold and hear an eerie cackle in the air before %shape.ana% %shape% emerges, seemingly of its own accord.
 %echoaround% %actor% ~%actor% pours some chocolate and %shape.ana% %shape% seems to pop briskly out of the mold all by itself.
