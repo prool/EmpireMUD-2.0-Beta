@@ -46,4 +46,17 @@ P 12102
 W
 35 6183 0 1000 -
 S
+#12104
+The Sweet Life~
+   Your empire has learned the secrets of the most indulgent food item known to
+man -- chocolate -- and begins producing it.
+~
+5 2 0 20 cf
+K 7 5
+P 12103
+W
+34 12129 0 20 a
+W
+34 12131 0 20 a
+S
 $
