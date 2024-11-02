@@ -314,10 +314,30 @@ elseif %shape% == spider
   %mod% %item% longdesc A chocolate spider has been dropped here, its delicate web spread around it.
   %mod% %item% lookdesc A block of chocolate has been hollowed out into the shape of a spider with delicate webbing around it.
 elseif %shape% == broom
-  %mod% %item% keywords broom chocolate
+  %mod% %item% keywords chocolate broom
   %mod% %item% shortdesc a chocolate broom
   %mod% %item% longdesc A chocolate broom is balanced on its bristles.
-  %mod% %item% lookdesc This block of chocolate is molded to resemble a broom, its de
+  %mod% %item% lookdesc This block of chocolate is molded to resemble a broom, its delicate bristles fluttering slightly as if it's flying.
+elseif %shape% == demon
+  %mod% %item% keywords chocolate demon
+  %mod% %item% shortdesc a chocolate demon
+  %mod% %item% longdesc A chocolate demon has its claws stretched to full length.
+  %mod% %item% lookdesc This block of chocolate has been molded to resemble a horned demon stalking toward the viewer with claws out and ready to shred flesh.
+elseif %shape% == scarecrow
+  %mod% %item% keywords chocolate scarecrow
+  %mod% %item% shortdesc a chocolate scarecrow
+  %mod% %item% longdesc A chocolate scarecrow stands here on a chocolate stick.
+  %mod% %item% lookdesc A block of chocolate has been hollowed out and molded into the shape of a scarecrow.
+elseif %shape% == skeleton
+  %mod% %item% keywords chocolate skeleton
+  %mod% %item% shortdesc a chocolate skeleton
+  %mod% %item% longdesc A chocolate skeleton stands here loosely.
+  %mod% %item% lookdesc A block of chocolate has been hollowed into the form of a skeleton, the joints looking loose and easy to snap.
+elseif %shape% == necromancer
+  %mod% %item% keywords chocolate necromancer
+  %mod% %item% shortdesc a chocolate necromancer
+  %mod% %item% longdesc A chocolate necromancer stands here drawing runes.
+  %mod% %item% lookdesc A block of chocolate has been hollowed to resemble a thin, nearly skeletal necromancer with tiny runes at his feet showing the beginnings of a summoning.
 elseif %empire%
   %mod% %item% keywords memorial chocolate %empire_name%
   %mod% %item% shortdesc a chocolate memorial to %empire_name%
