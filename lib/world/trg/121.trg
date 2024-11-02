@@ -212,7 +212,7 @@ elseif %shape% == bull
   %mod% %item% keywords chocolate bull
   %mod% %item% shortdesc a chocolate bull
   %mod% %item% longdesc A chocolate bull looks ready to charge.
-  %mod% %item% lookdesc This bull has been molded from a solid piece of choelseif %shape% == jaguar
+  %mod% %item% lookdesc This bull has been molded from a solid piece of cho
 elseif %shape% === jaguar
   %mod% %item% shortdesc a chocolate jaguar
   %mod% %item% keywords chocolate jaguar
