@@ -238,6 +238,16 @@ elseif %shape% == hulk
   %mod% %item% keywords chocolate hulk
   %mod% %item% longdesc A chocolate hulk is here.
   %mod% %item% lookdesc This block of chocolate resembles a hulk at full sail, with a hint of secured parcels and crates visible in its hold if you look through the top.
+elseif %shape% == bull
+  %mod% %item% shortdesc a chocolate bull
+  %mod% %item% keywords chocolate bull
+  %mod% %item% longdesc A chocolate bull looks ready to charge.
+  %mod% %item% lookdesc This bull has been molded from a solid piece of chocolate, its long, curling horn thrust out inviting a delicious chomp.
+elseif %shape% == anaconda
+  %mod% %item% shortdesc a chocolate anaconda
+  %mod% %item% keywords chocolate anaconda
+  %mod% %item% longdesc A chocolate anaconda is curled here.
+  %mod% %item% lookdesc Molded to appear to be constricting around something, this block of chocolate now resembles an anaconda with enough texture for scales.
 elseif %empire%
   %mod% %item% shortdesc a chocolate map of %empire_name%
   %mod% %item% keywords map chocolate %empire_name%
@@ -274,6 +284,7 @@ if %empire%
   set empire_name %empire.name%
 end
 if %shape% == witch's hat || %shape% == witchs hat || %shape% == hat
+  set shape witch's hat
   %mod% %item% shortdesc a chocolate witch's hat
   %mod% %item% keywords chocolate hat witchs witch's
   %mod% %item% longdesc A chocolate witch's hat stands here.
