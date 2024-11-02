@@ -3360,7 +3360,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							else {
 								// maybe
 								struct instance_data *inst = get_instance_for_script(type, go);
-								if (char_meets_prereqs(c, qst, inst)) {
+								if (CAN_START_QUEST(c, qst, inst)) {
 									strcpy(str, "1");
 								}
 								else {

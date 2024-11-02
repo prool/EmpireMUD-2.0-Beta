@@ -131,4 +131,43 @@ Make all five feasts in front of the baker~
 Z
 1 214
 S
+#12103
+Divinely Tasty~
+   Your spicery manager knows the secret to lifting anyone's mood, and swears
+that it's legal no matter what kind of empire you run! Return with 12 baskets
+of cocoa beans, 8 sacks of sugar, a little milk, plus the skills of a true
+Gourmet, and the manager will teach it to you.
+~
+   You watch as the spicer takes the supplies you provided and combines them in
+a couple different ways, carefully explaining the processes required to you and
+giving you the first samples. You also notice some wooden chocolate molds on
+the table and take note of the design.
+~
+4 0 75 0 -1
+A
+1 12100
+P
+7 12102 0 1 a
+P
+9 6 0 76 a
+R
+2 12129 1
+R
+2 12131 1
+R
+2 12145 1
+R
+2 12146 1
+R
+13 12104 12104
+T 12103
+W
+2 12128 0 12 a
+W
+2 3370 0 8 a
+W
+15 271 0 1 a
+Z
+1 12100
+S
 $

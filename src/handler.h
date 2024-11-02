@@ -354,6 +354,7 @@ obj_data *has_required_object(char_data *ch, obj_vnum vnum);
 
 // offer handlers
 struct offer_data *add_offer(char_data *ch, char_data *from, int type, int data);
+struct offer_data *has_offer(char_data *ch, int type);
 void remove_offers_by_type(char_data *ch, int type);
 
 // player list handlers

@@ -1946,8 +1946,8 @@ bool can_get_quest_from_mob(char_data *ch, char_data *mob, struct quest_temp_lis
 		// success
 		inst = (MOB_INSTANCE_ID(mob) != NOTHING ? get_instance_by_id(MOB_INSTANCE_ID(mob)) : NULL);
 		
-		// pre-reqs?
-		if (char_meets_prereqs(ch, ql->quest, inst)) {
+		// pre-reqs and final checks
+		if (CAN_START_QUEST(ch, ql->quest, inst)) {
 			if (build_list) {
 				any = TRUE;
 				add_to_quest_temp_list(build_list, ql->quest, inst);
@@ -2018,8 +2018,8 @@ bool can_get_quest_from_obj(char_data *ch, obj_data *obj, struct quest_temp_list
 		// success
 		inst = (room ? find_instance_by_room(room, FALSE, TRUE) : NULL);
 		
-		// pre-reqs?
-		if (char_meets_prereqs(ch, ql->quest, inst)) {
+		// pre-reqs and final checks
+		if (CAN_START_QUEST(ch, ql->quest, inst)) {
 			if (build_list) {
 				any = TRUE;
 				add_to_quest_temp_list(build_list, ql->quest, inst);
@@ -2098,8 +2098,8 @@ bool can_get_quest_from_room(char_data *ch, room_data *room, struct quest_temp_l
 			// success
 			inst = (room ? find_instance_by_room(room, FALSE, TRUE) : NULL);
 			
-			// pre-reqs?
-			if (char_meets_prereqs(ch, ql->quest, inst)) {
+			// pre-reqs and final checks
+			if (CAN_START_QUEST(ch, ql->quest, inst)) {
 				if (build_list) {
 					any = TRUE;
 					add_to_quest_temp_list(build_list, ql->quest, inst);
@@ -2170,8 +2170,8 @@ bool can_get_quest_from_vehicle(char_data *ch, vehicle_data *veh, struct quest_t
 		// success
 		inst = (VEH_INSTANCE_ID(veh) != NOTHING ? get_instance_by_id(VEH_INSTANCE_ID(veh)) : NULL);
 		
-		// pre-reqs?
-		if (char_meets_prereqs(ch, ql->quest, inst)) {
+		// pre-reqs and final checks
+		if (CAN_START_QUEST(ch, ql->quest, inst)) {
 			if (build_list) {
 				any = TRUE;
 				add_to_quest_temp_list(build_list, ql->quest, inst);

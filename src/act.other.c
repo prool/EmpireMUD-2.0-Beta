@@ -751,6 +751,11 @@ OFFER_VALIDATE(oval_quest) {
 		msg_to_char(ch, "You don't meet the prerequisites for that quest.\r\n");
 		return FALSE;
 	}
+	if (!CAN_START_QUEST(ch, qst, inst)) {
+		// any other reason
+		msg_to_char(ch, "You can't accept that quest.\r\n");
+		return FALSE;
+	}
 	
 	return TRUE;
 }
@@ -760,7 +765,7 @@ OFFER_FINISH(ofin_quest) {
 	struct instance_data *inst = find_matching_instance_for_shared_quest(ch, offer->data);
 	quest_data *qst = quest_proto(offer->data);
 	
-	if (qst) {
+	if (qst && CAN_START_QUEST(ch, qst, inst)) {
 		start_quest(ch, qst, inst);
 	}
 	
@@ -1345,17 +1350,18 @@ ACMD(do_accept) {
 	
 	// OFFER_x - Data for the offer system, for do_accept/reject
 	struct {
-		char *name;
+		char *name;	// basic string to match and show
+		char *long_name;	// used in sentence building like "offer for <long_name>"
 		int min_pos;
 		OFFER_VALIDATE(*validate_func);	// returns TRUE to allow, FALSE to prevent accept
 		OFFER_FINISH(*finish_func);	// returns TRUE if it's ok to delete the offer, FALSE if not
 	} offer_types[] = {
-		{ "resurrection", POS_DEAD, oval_rez, ofin_rez },	// OFFER_RESURRECTION: uses offer->data for ability
-		{ "summon", POS_STANDING, oval_summon, ofin_summon },	// OFFER_SUMMON: uses offer->data for SUMMON_x
-		{ "quest", POS_RESTING, oval_quest, ofin_quest},	// OFFER_QUEST: uses offer->data for quest vnum
+		{ "resurrection", "resurrection", POS_DEAD, oval_rez, ofin_rez },	// OFFER_RESURRECTION: uses offer->data for ability
+		{ "summon", "summoning", POS_STANDING, oval_summon, ofin_summon },	// OFFER_SUMMON: uses offer->data for SUMMON_x
+		{ "quest", "a quest", POS_RESTING, oval_quest, ofin_quest},	// OFFER_QUEST: uses offer->data for quest vnum
 		
 		// end
-		{ "\n", POS_DEAD, NULL, NULL }
+		{ "\n", "\n", POS_DEAD, NULL, NULL }
 	};
 
 	two_arguments(argument, type_arg, name_arg);
@@ -1439,7 +1445,7 @@ ACMD(do_accept) {
 		return;
 	}
 	if (dupe) {
-		msg_to_char(ch, "You have more than one offer for %s. Please specify a name too.\r\n", offer_types[type].name);
+		msg_to_char(ch, "You have more than one offer for %s. Please specify a name too.\r\n", offer_types[type].long_name);
 		return;
 	}
 	if (GET_POS(ch) < offer_types[type].min_pos) {
@@ -1457,9 +1463,9 @@ ACMD(do_accept) {
 		delete = (offer_types[type].finish_func)(ch, offer);
 	}
 	else {
-		msg_to_char(ch, "You reject the offer for %s.\r\n", offer_types[type].name);
+		msg_to_char(ch, "You reject the offer for %s.\r\n", offer_types[type].long_name);
 		if ((from = is_playing(offer->from))) {
-			safe_snprintf(buf, sizeof(buf), "$N has rejected your offer for %s.", offer_types[type].name);
+			safe_snprintf(buf, sizeof(buf), "$N has rejected your offer for %s.", offer_types[type].long_name);
 			act(buf, FALSE, from, NULL, ch, TO_CHAR);
 		}
 		delete = TRUE;

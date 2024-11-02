@@ -231,8 +231,8 @@ dish if properly prepared. You can process these buds into cloves.
 0 1444
 C
 75 75
-I 25 12111 100.00 1  # SEED: nail-shaped seeds
-I 26 12111 100.00 1  # DECAYS-TO: nail-shaped seeds
+I 25 12111 100.00 1  # SEED: oval-shaped green seeds
+I 26 12111 100.00 1  # DECAYS-TO: oval-shaped green seeds
 O+ 1 6180
 R
 4 12102 0
@@ -536,16 +536,20 @@ A block of creamy milk chocolate sits here temptingly.~
 it. Its sweet scent infuses the air immediately around it if you lean close
 enough.
 ~
-6 gC a 0 0 4
-48 0 0
+6 gmE a 0 0 8
+24 0 0
 0 1200
 A
 11 1 0
 A
 16 1 0
+C
+75 75
 O+ 1 6340
 R
 4 5619 0
+R
+4 5606 0
 S
 #12130
 cocoa powder small pouch~
@@ -554,7 +558,7 @@ A small pouch of cocoa powder sits here.~
    This pouch of cocoa is ready to be used in any number of desserts, or as a
 drink.
 ~
-3 g a 0 0 11
+3 g a 0 0 12
 0 0 0
 0 0
 C
@@ -574,15 +578,15 @@ A dense block of dark chocolate sits here invitingly.~
    This dense dark brown piece of chocolate sits temptingly before you, its
 intense, slightly bitter aroma infusing the air if you lean close enough.
 ~
-6 gC a 0 0 5
-48 0 0
+6 gmE a 0 0 7
+24 0 0
 0 1200
 A
-6 3 0
+6 1 0
 A
-14 1 0
+7 1 0
 C
-1 100
+75 75
 O+ 1 6340
 R
 4 5619 0
@@ -642,7 +646,7 @@ A golden-brown chicken pot pie with a flaky crust sits here steaming invitingly.
 vegetables swimming in a savory gravy containing herbs and spices. It won a
 recent cook-off and now you get a slice, too.
 ~
-6 0 a 0 0 2
+6 gmE a 0 0 3
 96 0 0
 7 24
 A
@@ -662,9 +666,11 @@ A small onion has been dropped here.~
 petal-like layers. You could use it in some small recipe or combine it with a
 few more of its kind and plant it somewhere.
 ~
-6 gC a 0 0 4
+6 gC a 0 0 5
 2 0 0
 0 2160
+C
+1 1
 I 14 12136 100.00 4  # COMBINE: basket of onions
 O+ 1 6142
 R
@@ -695,13 +701,15 @@ goodness in a pot and cooking it slowly, this particular recipe recently won a
 cooking contest and promises to be a very filling meal. Its scent is a savory
 mix of meats, veggies and spices.
 ~
-6 E a 0 0 3
+6 mE a 0 0 4
 96 0 0
 0 336
 A
 23 1 0
 A
 19 1 0
+C
+75 75
 S
 #12138
 leggings master chef's pocketed leather~
@@ -780,7 +788,7 @@ M
 You might have intended to only take one small thing from one small table, but you find yourself sampling all of them!~
 M
 5
-%n wanders the tables and picks something from each of them, looking replete afterword.~
+$n wanders the tables and picks something from each of them, looking replete afterword.~
 M
 17
 Alas you failed to set out the feast in time and many of the foods are starting to turn strange colors and grow things they weren't intended to grow. You have to toss it all.~
@@ -805,5 +813,81 @@ in. Embroidered on the outer layer is the title "The Imperial Chef".
 C
 100 100
 T 12141
+S
+#12142
+molds wooden set basic~
+a set of basic wooden molds~
+A set of basic wooden molds is arranged here.~
+   Intended for use in molding chocolate, this set of molds includes: dove,
+bunny, fish, wolf, bear, deer, sheep, goat, fox, bull, anaconda, jaguar,
+badger, longship, hulk and sorcerer. There's also an especially intricate mold
+with a map of your favorite empire. Note that molds might be difficult to use
+if you have more than one different set in your inventory.
+Usage: mold <chocolate> <shape>
+~
+3 0 a 0 0 7
+0 0 0
+0 0
+R
+4 5134 0
+R
+4 5606 0
+T 12142
+S
+#12143
+molds wooden Halloween-themed themed set~
+a set of Halloween-themed wooden molds~
+A set of wooden molds in traditional Halloween shapes lies here.~
+   Intend for use in molding chocolate, this set of molds includes shapes for:
+witch's hat, ghost, banshee, werewolf, skeleton, pumpkin, skull, cat, spider,
+broom, scarecrow, demon, necromancer, and of course, the ability to make a
+memorial to your favorite empire. Note that molds might be difficult to use
+if you have more than one different set in your inventory.
+Usage: mold <chocolate> <shape>
+~
+3 0 a 0 0 9
+0 0 0
+0 0
+R
+4 5134 0
+R
+4 5606 0
+T 12143
+S
+#12144
+design mold set wooden halloween-themed~
+a design for a set of halloween-themed wooden molds~
+A design for crafting wooden Halloween-themed molds lies here.~
+You can make: a set of Halloween-themed wooden molds.
+~
+7 p a 0 0 9
+12143 0 0
+0 0
+C
+1 1
+S
+#12145
+recipe milk chocolate blocks~
+the milk chocolate recipe~
+A recipe for milk chocolate blocks has been dropped here.~
+You can cook: milk chocolate.
+~
+7 p a 0 0 3
+12129 0 0
+0 0
+C
+100 100
+S
+#12146
+recipe dark chocolate blocks~
+the recipe for dark chocolate~
+A recipe for making dark chocolate blocks has been dropped here.~
+You can cook: dark chocolate.
+~
+7 p a 0 0 3
+12131 0 0
+0 0
+C
+100 100
 S
 $
