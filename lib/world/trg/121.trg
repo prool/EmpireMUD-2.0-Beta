@@ -165,76 +165,77 @@ else
 end
 if %shape% == dove
   %mod% %item% shortdesc a chocolate dove
-  %mod% %item% keywords dove chocolate
+  %mod% %item% keywords chocolate dove
   %mod% %item% longdesc A chocolate dove has been dropped here.
   %mod% %item% append-lookdesc A solid piece of chocolate has been shaped in the likeness of a dove.
 elseif %shape% == bunny
-  %mod% %item% keywords bunny chocolate
+  %mod% %item% keywords chocolate bunny
   %mod% %item% shortdesc a chocolate bunny
   %mod% %item% longdesc An entire chocolate bunny has been dropped here.
   %mod% %item% append-lookdesc A solid piece of chocolate has been molded into the likeness of a bunny.
 elseif %shape% == fish
-  %mod% %item% keywords fish chocolate
+  %mod% %item% keywords chocolate fish
   %mod% %item% shortdesc a chocolate fish
   %mod% %item% longdesc A chocolate fish lies here.
   %mod% %item% append-lookdesc Solid chocolate has been molded into the shape of a fish.
 elseif %shape% == wolf
-  %mod% %item% keywords wolf chocolate
+  %mod% %item% keywords chocolate wolf
   %mod% %item% shortdesc a chocolate wolf
   %mod% %item% longdesc A chocolate wolf is lying here, tongue lolling and tail curved as if in mid wag.
   %mod% %item% append-lookdesc This chocolate wolf has been molded from a solid block of chocolate to look like it's been playing and is happily exhausted.
 elseif %shape% == bear
-  %mod% %item% keywords bear chocolate
+  %mod% %item% keywords chocolate bear
   %mod% %item% shortdesc a chocolate bear
   %mod% %item% longdesc A chocolate bear has been left here.
   %mod% %item% append-lookdesc A solid chocolate bear is formed to look as if it's snarling and daring you to eat it.
 elseif %shape% == deer
-  %mod% %item% keywords deer chocolate
+  %mod% %item% keywords chocolate deer
   %mod% %item% shortdesc a chocolate deer
   %mod% %item% longdesc A chocolate deer has been left here.
   %mod% %item% append-lookdesc A chocolate deer has been molded to look like it's grazing on some leaves.
 elseif %shape% == sheep
-  %mod% %item% keywords sheep chocolate
+  %mod% %item% keywords chocolate sheep
   %mod% %item% shortdesc a chocolate sheep
   %mod% %item% longdesc A chocolate sheep is lying here.
   %mod% %item% append-lookdesc A solid piece of chocolate has been molded to look like a sheep.
 elseif %shape% == goat
-  %mod% %item% keywords goat chocolate
+  %mod% %item% keywords chocolate goat
   %mod% %item% shortdesc a chocolate goat
   %mod% %item% longdesc A chocolate goat has been dropped here.
   %mod% %item% append-lookdesc A solid piece of chocolate has been molded to resemble a goat.
 elseif %shape% == fox
   %mod% %item% shortdesc a chocolate fox
-  %mod% %item% keywords fox chocolate
+  %mod% %item% keywords chocolate fox
   %mod% %item% longdesc A chocolate fox has been dropped here.
   %mod% %item% append-lookdesc A block of chocolate has been molded to look like a fox.
 elseif %shape% == bull
-  %mod% %item% keywords bull chocolate
+  %mod% %item% keywords chocolate bull
   %mod% %item% shortdesc a chocolate bull
   %mod% %item% longdesc A chocolate bull looks ready to charge.
   %mod% %item% append-lookdesc This bull has been molded from a solid piece of choelseif %shape% == jaguar
+elseif %shape% === jaguar
   %mod% %item% shortdesc a chocolate jaguar
-  %mod% %item% keywords jaguar chocolate
+  %mod% %item% keywords chocolate jaguar
   %mod% %item% longdesc A chocolate jaguar looks poised to pounce.
   %mod% %item% append-lookdesc This block of chocolate has been molded to resemble a jaguar in mid pounce, claws out and ready to shred flesh.
 elseif %shape% === badger
   %mod% %item% shortdesc a chocolate badger
-  %mod% %item% keywords badger chocolate
+  %mod% %item% keywords chocolate badger
   %mod% %item% longdesc A chocolate badger looks to be industriously digging.
   %mod% %item% append-lookdesc A block of chocolate has been molded to resemble a digging badger,.
 elseif %shape% == sorcerer
   %mod% %item% shortdesc a chocolate sorcerer
-  %mod% %item% keywords sorcerer chocolate
+  %mod% %item% keywords chocolate sorcerer
   %mod% %item% longdesc A chocolate sorcerer stands here leaning on his staff.
   %mod% %item% append-lookdesc A block of chocolate has been molded to resemble a robed sorcerer bearing a contemplative expression and leaning on a stout staff.
 elseif %shape% == longship
   %mod% %item% shortdesc a chocolate longship
-  %mod% %item% keywords longship chocolate
+  %mod% %item% keywords chocolate longship
   %mod% %item% longdesc A chocolate longship is here.
   %mod% %item% append-lookdesc This block of chocolate is molded to look like a ship of war at full sail, its cannon raised to fire.
 elseif %shape% == hulk
   %mod% %item% shortdesc a chocolate hulk
-  %mod% %item% keywords hulk chocolate
+  %mod% %item% keywords chocolate hulk
   %mod% %item% longdesc A chocolate hulk is here.
   %mod% %item% append-lookdesc This block of chocolate resembles a hulk at full sail, with a hint of secured parcels and crates visible in its hold if you look through the top.
 elseif %empire%
@@ -291,7 +292,7 @@ elseif %shape% == werewolf
   %mod% %item% keywords chocolate werewolf
   %mod% %item% shortdesc a chocolate werewolf
   %mod% %item% longdesc A chocolate wolf is half transformed here, neither fully human nor wolf.
-  %mod% %item% lookdesc This solid block of chocoate is molded into a muscular werewolf, caught between human and wolf form.
+  %mod% %item% lookdesc This solid block of chocolate is molded into a muscular werewolf, caught between human and wolf form.
 elseif %shape% == pumpkin
   %mod% %item% keywords chocolate pumpkin
   %mod% %item% shortdesc a chocolate pumpkin
