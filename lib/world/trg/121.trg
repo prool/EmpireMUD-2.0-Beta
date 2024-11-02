@@ -78,6 +78,7 @@ if !%found%
   end
   * block
   return 0
+  halt
 end
 * otherwise, we are ok
 eval amt %found.val1% - %milk_needed%
