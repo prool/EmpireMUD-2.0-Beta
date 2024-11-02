@@ -212,7 +212,7 @@ elseif %shape% == bull
   %mod% %item% keywords chocolate bull
   %mod% %item% shortdesc a chocolate bull
   %mod% %item% longdesc A chocolate bull looks ready to charge.
-  %mod% %item% lookdesc This bull has been molded from a solid piece of cho
+  %mod% %item% lookdesc This bull has been molded from a solid piece of chocolate, its long, curling horn thrust out inviting a delicious chomp.
 elseif %shape% == jaguar
   %mod% %item% shortdesc a chocolate jaguar
   %mod% %item% keywords chocolate jaguar
@@ -238,11 +238,6 @@ elseif %shape% == hulk
   %mod% %item% keywords chocolate hulk
   %mod% %item% longdesc A chocolate hulk is here.
   %mod% %item% lookdesc This block of chocolate resembles a hulk at full sail, with a hint of secured parcels and crates visible in its hold if you look through the top.
-elseif %shape% == bull
-  %mod% %item% shortdesc a chocolate bull
-  %mod% %item% keywords chocolate bull
-  %mod% %item% longdesc A chocolate bull looks ready to charge.
-  %mod% %item% lookdesc This bull has been molded from a solid piece of chocolate, its long, curling horn thrust out inviting a delicious chomp.
 elseif %shape% == anaconda
   %mod% %item% shortdesc a chocolate anaconda
   %mod% %item% keywords chocolate anaconda
