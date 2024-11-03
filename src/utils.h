@@ -821,8 +821,10 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 // GENERIC_CURRENCY
 #define GSTR_CURRENCY_SINGULAR  0
 #define GSTR_CURRENCY_PLURAL  1
+#define GSTR_CURRENCY_CUSTOM_ORIGIN  2
 #define GET_CURRENCY_SINGULAR(gen)  (GEN_TYPE(gen) == GENERIC_CURRENCY ? GEN_STRING((gen), GSTR_CURRENCY_SINGULAR) : NULL)
 #define GET_CURRENCY_PLURAL(gen)  (GEN_TYPE(gen) == GENERIC_CURRENCY ? GEN_STRING((gen), GSTR_CURRENCY_PLURAL) : NULL)
+#define GET_CURRENCY_CUSTOM_ORIGIN(gen)  (GEN_TYPE(gen) == GENERIC_CURRENCY ? GEN_STRING((gen), GSTR_CURRENCY_CUSTOM_ORIGIN) : NULL)
 #define WHICH_CURRENCY(amt)  (((amt) == 1) ? GSTR_CURRENCY_SINGULAR : GSTR_CURRENCY_PLURAL)
 
 // GENERIC_COMPONENT
@@ -1256,6 +1258,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define GET_AUTOMESSAGES(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->automessages))
 #define GET_BAD_PWS(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->bad_pws))
 #define GET_BECKONED_BY(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->beckoned_by))
+#define GET_BONUS_ABILITIES(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->bonus_abilities))
 #define GET_BONUS_TRAITS(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->bonus_traits))
 #define GET_CLASS(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->character_class))
 #define GET_CLASS_PROGRESSION(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->class_progression))
@@ -1461,6 +1464,8 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define IS_EVENT_QUEST(quest) (QUEST_FLAGGED((quest), QST_EVENT))
 #define IS_EVENT_DAILY(quest) (QUEST_FLAGGED((quest), QST_DAILY) && QUEST_FLAGGED((quest), QST_EVENT))
 #define IS_NON_EVENT_DAILY(quest) (QUEST_FLAGGED((quest), QST_DAILY) && !QUEST_FLAGGED((quest), QST_EVENT))
+
+#define CAN_START_QUEST(ch, qst, inst)  (!is_on_quest(ch, QUEST_VNUM(qst)) && (get_approximate_level(ch) + 50) >= QUEST_MIN_LEVEL(qst) && (!IS_NON_EVENT_DAILY(qst) || GET_DAILY_QUESTS(ch) < config_get_int("dailies_per_day")) && (!IS_EVENT_DAILY(qst) || GET_EVENT_DAILY_QUESTS(ch) < config_get_int("dailies_per_day")) && char_meets_prereqs(ch, qst, inst))
 
 
  //////////////////////////////////////////////////////////////////////////////

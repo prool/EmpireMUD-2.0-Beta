@@ -700,7 +700,7 @@ typedef struct vehicle_data vehicle_data;
 #define BLD_NO_CUSTOMIZE  BIT(21)	// cannot be customized
 #define BLD_NO_ABANDON_WHEN_RUINED  BIT(22)	// won't auto-abandon when it becomes ruins
 #define BLD_SHOW_VEHICLES  BIT(23)	// can show vehicle icons in the room rather than overriding the building icon (only if OPEN)
-// #define BLD_UNUSED12  BIT(24)
+#define BLD_IMMUNE_DAMAGE  BIT(24)	// building cannot be damaged
 // #define BLD_UNUSED13  BIT(25)
 // #define BLD_UNUSED14  BIT(26)
 // #define BLD_UNUSED15  BIT(27)
@@ -1607,6 +1607,7 @@ typedef struct vehicle_data vehicle_data;
 #define MOB_CUSTOM_SCRIPT_4  10	// called by scripts
 #define MOB_CUSTOM_SCRIPT_5  11	// called by scripts
 #define MOB_CUSTOM_SCAVENGE_CORPSE  12	// mob eats a corpse due to SCAVENGER flag
+#define MOB_CUSTOM_CONSIDER_INFO  13	// shown on the 'consider' command
 
 
 // MOB_MOVE_x: mob/vehicle movement types
@@ -1943,6 +1944,7 @@ typedef enum {
 #define OBJ_CUSTOM_ENTER_PORTAL_TO_CHAR  30
 #define OBJ_CUSTOM_ENTER_PORTAL_TO_ROOM  31
 #define OBJ_CUSTOM_EXIT_PORTAL_TO_ROOM  32
+#define OBJ_CUSTOM_IDENTIFY_INFO  33
 
 
 // RES_x: resource requirement types
@@ -2690,6 +2692,8 @@ typedef enum {
 #define QR_GRANT_PROGRESS  12
 #define QR_START_PROGRESS  13
 #define QR_UNLOCK_ARCHETYPE  14
+#define QR_BONUS_ABILITY  15
+#define QR_REMOVE_ABILITY  16
 
 
 // indicates empire (rather than misc) coins for a reward
@@ -2817,6 +2821,7 @@ typedef enum {
 #define VEH_CUSTOM_ENTER_TO_OUTSIDE  3	// sent outside a vehicle when a player enters
 #define VEH_CUSTOM_EXIT_TO_INSIDE  4	// sent inside a vehicle when a player exits
 #define VEH_CUSTOM_EXIT_TO_OUTSIDE  5	// sent outside a vehicle when a player exits
+#define VEH_CUSTOM_IDENTIFY_INFO  6	// shown when a player identifies the vehicle
 
 
 // VSPEED_x: indicates the number of speed bonuses this vehicle gives to driving.
@@ -4723,6 +4728,13 @@ struct player_ability_data {
 };
 
 
+// extra abilities granted by quests, archetypes, and scripts
+struct player_bonus_ability {
+	any_vnum vnum;	// ability vnum
+	UT_hash_handle hh;	// player special data hash
+};
+
+
 // languages a player knows -- also used for empires
 struct player_language {
 	any_vnum vnum;	// vnum of the language (generic)
@@ -4896,6 +4908,7 @@ struct player_special_data {
 	any_vnum creation_archetype[NUM_ARCHETYPE_TYPES];	// array of creation choices
 	struct player_skill_data *skill_hash;
 	struct player_ability_data *ability_hash;
+	struct player_bonus_ability *bonus_abilities;	// additional abilities granted to the player
 	int current_skill_set;	// which skill set a player is currently in
 	bool can_gain_new_skills;	// not required to keep skills at zero
 	sh_int skill_level;  // levels computed based on skills above level 75

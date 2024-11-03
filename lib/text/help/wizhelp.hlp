@@ -1017,6 +1017,7 @@ account        PC      NAME         Sets account to match another character
 age            BOTH    NUMBER       Player age (and creation time)
 bonustrait     PC      MISC         Set bonus traits for player
 bonusexp       PC      NUMBER       Set daily bonus exp for the player
+bonusability   PC      MISC         Adds or removes bonus abilities
 coins          PC      MISC         Sets coins on-hand for player
 companion      PC      MISC         Sets a companion NPC on/off
 currency       PC      MISC         Sets amounts of adventure currencies
@@ -1165,6 +1166,7 @@ Mode         Level    Description
 ------       ------   -------------
 &c ammotypes&0   Immort   The 'ammo type' setting for all bows and ammo.
 &c author&0      Immort   All books from a given author idnum.
+&c bonusabilities&0  Imm  The bonus abilities a player has acquired.
 &c buildings&0   Immort   Locations of buildings (vnum/name optional).
 &c commons&0     Immort   Players currently connected from duplicate sites.
 &c companions&0  Immort   A player's available companions.
@@ -1263,6 +1265,14 @@ These three show commands help manage the book system.
    Scripts can load a random lost book with "%load% book lost".
 
 See also: LOAD, %LOAD%
+#e
+"SHOW BONUSABILITIES" "SHOW BONUS ABILITIES"
+
+Usage:  show bonusabilities <player> [search phrase]
+
+Shows bonus abilities a player has acquired.
+
+See also: BONUS ABILITIES
 #e
 "SHOW COMPANIONS"
 
@@ -1692,6 +1702,9 @@ same week, blue for same year, and red if it's over a year.
 
 If the account is not currently online, the most recent login time for the
 whole account is displayed at the bottom.
+
+This display also shows which empires the account's characters are in, and will
+indicate if they are the leader of any of those empires.
 #e
 "SHOW QUESTS"
 

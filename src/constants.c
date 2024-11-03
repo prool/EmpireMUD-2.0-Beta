@@ -63,8 +63,8 @@ void tog_pvp(char_data *ch);
 //// EMPIREMUD CONSTANTS /////////////////////////////////////////////////////
 
 // Shown on the "version" command and sent over MSSP
-const char *version = "EmpireMUD 2.0 beta 5.187";
-const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.7";
+const char *version = "EmpireMUD 2.0 beta 5.188";
+const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.8";
 
 
 // data for the built-in game levels -- this adapts itself if you reduce the number of immortal levels
@@ -2887,6 +2887,7 @@ const char *mob_custom_types[] = {
 	"script4",	// 10
 	"script5",
 	"scavenge-corpse",
+	"consider-info",
 	"\n"
 };
 
@@ -2898,7 +2899,8 @@ const char *mob_custom_type_help =
 " Speak text: say say-day say-night\r\n"
 "&w Varying lond descriptions: long-desc&0\r\n"
 " Shown when a scavenger mob eats a corpse: scavenge-corpse\r\n"
-"&w Available for scripts: script1 script2 script3 script4 script5&0\r\n";
+"&w Shown when the player considers the mob: consider-info&0\r\n"
+" Available for scripts: script1 script2 script3 script4 script5\r\n";
 
 
 // MOB_MOVE_x: mob/vehicle move types
@@ -3505,6 +3507,7 @@ const char *obj_custom_types[] = {
 	"enter-portal-to-char",	// 30
 	"enter-portal-to-room",
 	"exit-portal-to-room",
+	"identify-info",
 	"\n"
 };
 
@@ -3527,7 +3530,8 @@ const char *obj_custom_type_help =
 "&w Shown in order when playing it: instrument-to-char instrument-to-room&0\r\n"
 " Shown when using portals: enter-portal-to-char, enter-portal-to-room,\r\n"
 "   exit-portal-to-room\r\n"
-"&w Available for scripts: script1 script2 script3 script4 script5&0\r\n";
+"&w Shown when item is identified: identify-info&0\r\n"
+" Available for scripts: script1 script2 script3 script4 script5\r\n";
 
 
 // basic speed is the theoretical average weapon speed without wits/haste,
@@ -3755,6 +3759,8 @@ const char *quest_reward_types[] = {
 	"GRANT-PROGRESS",
 	"START-PROGRESS",
 	"UNLOCK-ARCHETYPE",
+	"BONUS-ABILITY",	// 15
+	"REMOVE-ABILITY",
 	"\n",
 };
 
@@ -3856,7 +3862,7 @@ const char *bld_flags[] = {
 	"NO-CUSTOMIZE",
 	"NO-ABANDON-WHEN-RUINED",
 	"SHOW-VEHICLES",
-	"*",
+	"IMMUNE-DAMAGE",
 	"*",	// 25
 	"*",
 	"*",
@@ -5590,6 +5596,7 @@ const char *veh_custom_types[] = {
 	"enter-to-outside",
 	"exit-to-inside",
 	"exit-to-outside",	// 5
+	"identify-info",
 	"\n"
 };
 

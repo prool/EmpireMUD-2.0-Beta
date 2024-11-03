@@ -1043,16 +1043,20 @@ QCMD(qcmd_share) {
 	any = same_room = FALSE;
 	LL_FOREACH(GROUP(ch)->members, mem) {
 		friend = mem->member;
-		if (IS_NPC(friend) || is_on_quest(friend, QUEST_VNUM(qst))) {
+		if (friend == ch || IS_NPC(friend)) {
 			continue;
 		}
-		if (!char_meets_prereqs(friend, qst, inst)) {
-			continue;
-		}
-		
-		// character qualifies... but are they in the same room?
 		if (IN_ROOM(ch) != IN_ROOM(friend)) {
+			// group member is in another location
 			same_room = TRUE;
+			continue;
+		}
+		if (!CAN_START_QUEST(friend, qst, inst)) {
+			act("$O cannot accept that quest.", FALSE, ch, NULL, friend, TO_CHAR);
+			continue;
+		}
+		if (has_offer(friend, OFFER_QUEST)) {
+			act("You cannot offer $O another quest while one is still pending.", FALSE, ch, NULL, friend, TO_CHAR);
 			continue;
 		}
 		
@@ -1064,7 +1068,7 @@ QCMD(qcmd_share) {
 	}
 	
 	if (!any && same_room) {
-		msg_to_char(ch, "You can only share quests with group members in the same room as you.\r\n");
+		msg_to_char(ch, "You can't share quests with group members who aren't here.\r\n");
 	}
 	else if (!any) {
 		msg_to_char(ch, "Nobody in your group can accept that quest.\r\n");
@@ -1150,22 +1154,17 @@ QCMD(qcmd_start) {
 				level_fail = TRUE;
 				continue;	// must validate level
 			}
-			if (IS_NON_EVENT_DAILY(qtl->quest) && GET_DAILY_QUESTS(ch) >= config_get_int("dailies_per_day")) {
-				continue;	// too many dailies
-			}
-			if (IS_EVENT_DAILY(qtl->quest) && GET_EVENT_DAILY_QUESTS(ch) >= config_get_int("dailies_per_day")) {
-				continue;	// too many event dailies
+			if (!CAN_START_QUEST(ch, qtl->quest, qtl->instance)) {
+				continue;	// daily check, prereqs, etc
 			}
 			
-			// must re-check prereqs
-			if (!is_on_quest(ch, QUEST_VNUM(qtl->quest)) && char_meets_prereqs(ch, qtl->quest, qtl->instance)) {
-				if (any) {
-					// spacing
-					msg_to_char(ch, "\r\n");
-				}
-				start_quest(ch, qtl->quest, qtl->instance);
-				any = TRUE;
+			// ok:
+			if (any) {
+				// spacing
+				msg_to_char(ch, "\r\n");
 			}
+			start_quest(ch, qtl->quest, qtl->instance);
+			any = TRUE;
 		}
 		
 		if (!any) {

@@ -938,6 +938,22 @@ void give_quest_rewards(char_data *ch, struct quest_reward *list, int reward_lev
 				}
 				break;
 			}
+			case QR_BONUS_ABILITY: {
+				if (ability_proto(reward->vnum) && !has_bonus_ability(ch, reward->vnum)) {
+					msg_to_char(ch, "\tyYou gain the %s ability!\t0\r\n", get_ability_name_by_vnum(reward->vnum));
+					add_bonus_ability(ch, reward->vnum);
+					assign_class_and_extra_abilities(ch, NULL, ROLE_NONE);
+				}
+				break;
+			}
+			case QR_REMOVE_ABILITY: {
+				if (ability_proto(reward->vnum) && has_bonus_ability(ch, reward->vnum)) {
+					msg_to_char(ch, "\tyYou lose the %s ability.\t0\r\n", get_ability_name_by_vnum(reward->vnum));
+					remove_bonus_ability(ch, reward->vnum);
+					assign_class_and_extra_abilities(ch, NULL, ROLE_NONE);
+				}
+				break;
+			}
 		}
 	}
 }
@@ -1099,6 +1115,14 @@ char *quest_reward_string(struct quest_reward *reward, bool show_vnums) {
 		case QR_UNLOCK_ARCHETYPE: {
 			archetype_data *arch = archetype_proto(reward->vnum);
 			safe_snprintf(output, sizeof(output), "Unlocks archetype: %s%s", vnum, (arch ? GET_ARCH_NAME(arch) : "UNKNOWN"));
+			break;
+		}
+		case QR_BONUS_ABILITY: {
+			safe_snprintf(output, sizeof(output), "Grants bonus ability: %s%s", vnum, get_ability_name_by_vnum(reward->vnum));
+			break;
+		}
+		case QR_REMOVE_ABILITY: {
+			safe_snprintf(output, sizeof(output), "Removes bonus ability: %s%s", vnum, get_ability_name_by_vnum(reward->vnum));
 			break;
 		}
 		default: {
@@ -1922,8 +1946,8 @@ bool can_get_quest_from_mob(char_data *ch, char_data *mob, struct quest_temp_lis
 		// success
 		inst = (MOB_INSTANCE_ID(mob) != NOTHING ? get_instance_by_id(MOB_INSTANCE_ID(mob)) : NULL);
 		
-		// pre-reqs?
-		if (char_meets_prereqs(ch, ql->quest, inst)) {
+		// pre-reqs and final checks
+		if (CAN_START_QUEST(ch, ql->quest, inst)) {
 			if (build_list) {
 				any = TRUE;
 				add_to_quest_temp_list(build_list, ql->quest, inst);
@@ -1994,8 +2018,8 @@ bool can_get_quest_from_obj(char_data *ch, obj_data *obj, struct quest_temp_list
 		// success
 		inst = (room ? find_instance_by_room(room, FALSE, TRUE) : NULL);
 		
-		// pre-reqs?
-		if (char_meets_prereqs(ch, ql->quest, inst)) {
+		// pre-reqs and final checks
+		if (CAN_START_QUEST(ch, ql->quest, inst)) {
 			if (build_list) {
 				any = TRUE;
 				add_to_quest_temp_list(build_list, ql->quest, inst);
@@ -2074,8 +2098,8 @@ bool can_get_quest_from_room(char_data *ch, room_data *room, struct quest_temp_l
 			// success
 			inst = (room ? find_instance_by_room(room, FALSE, TRUE) : NULL);
 			
-			// pre-reqs?
-			if (char_meets_prereqs(ch, ql->quest, inst)) {
+			// pre-reqs and final checks
+			if (CAN_START_QUEST(ch, ql->quest, inst)) {
 				if (build_list) {
 					any = TRUE;
 					add_to_quest_temp_list(build_list, ql->quest, inst);
@@ -2146,8 +2170,8 @@ bool can_get_quest_from_vehicle(char_data *ch, vehicle_data *veh, struct quest_t
 		// success
 		inst = (VEH_INSTANCE_ID(veh) != NOTHING ? get_instance_by_id(VEH_INSTANCE_ID(veh)) : NULL);
 		
-		// pre-reqs?
-		if (char_meets_prereqs(ch, ql->quest, inst)) {
+		// pre-reqs and final checks
+		if (CAN_START_QUEST(ch, ql->quest, inst)) {
 			if (build_list) {
 				any = TRUE;
 				add_to_quest_temp_list(build_list, ql->quest, inst);
@@ -3708,6 +3732,7 @@ bool audit_quest(quest_data *quest, char_data *ch) {
 	trig_data *trig;
 	bool problem = FALSE;
 	int max_q = 0;
+	ability_data *abil;
 	
 	if (QUEST_FLAGGED(quest, QST_IN_DEVELOPMENT)) {
 		olc_audit_msg(ch, QUEST_VNUM(quest), "IN-DEVELOPMENT");
@@ -3819,6 +3844,28 @@ bool audit_quest(quest_data *quest, char_data *ch) {
 					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards archetype without LOCKED flag: %d %s", rew->vnum, GET_ARCH_NAME(arch));
 					problem = TRUE;
 				}
+				break;
+			}
+			case QR_BONUS_ABILITY: {
+				if (!(abil = ability_proto(rew->vnum))) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards non-existent ability");
+					problem = TRUE;
+				}
+				else if (ABIL_IS_PURCHASE(abil)) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards bonus ability '%s' that is assigned to a skill tree", ABIL_NAME(abil));
+					problem = TRUE;
+				}
+				else if (ABIL_IS_CLASS(abil)) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards bonus ability '%s' that is assigned to a class", ABIL_NAME(abil));
+					problem = TRUE;
+				}
+				else if (ABIL_IS_SYNERGY(abil)) {
+					olc_audit_msg(ch, QUEST_VNUM(quest), "Rewards bonus ability '%s' that is assigned to a skill synergy", ABIL_NAME(abil));
+					problem = TRUE;
+				}
+				break;
+			}
+			case QR_REMOVE_ABILITY: {
 				break;
 			}
 		}
@@ -4428,6 +4475,32 @@ any_vnum parse_quest_reward_vnum(char_data *ch, int type, char *vnum_arg, char *
 				return PARSE_QRV_FAILED;
 			}
 			if (archetype_proto(vnum)) {
+				ok = TRUE;
+			}
+			break;
+		}
+		case QR_BONUS_ABILITY: {
+			if (!*vnum_arg) {
+				strcpy(vnum_arg, prev_arg);	// does not generally need 2 args
+			}
+			if (!find_ability(vnum_arg)) {
+				msg_to_char(ch, "Invalid ability '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			else {
+				ok = TRUE;
+			}
+			break;
+		}
+		case QR_REMOVE_ABILITY: {
+			if (!*vnum_arg) {
+				strcpy(vnum_arg, prev_arg);	// does not generally need 2 args
+			}
+			if (!find_ability(vnum_arg)) {
+				msg_to_char(ch, "Invalid ability '%s'.\r\n", vnum_arg);
+				return PARSE_QRV_FAILED;
+			}
+			else {
 				ok = TRUE;
 			}
 			break;

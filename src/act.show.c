@@ -318,7 +318,7 @@ SHOW(show_resource) {
 SHOW(show_account) {
 	player_index_data *plr_index = NULL, *index, *next_index;
 	bool file = FALSE, loaded_file = FALSE;
-	char skills[MAX_STRING_LENGTH], ago_buf[256], *ago_ptr, color;
+	char empart[MAX_STRING_LENGTH], skills[MAX_STRING_LENGTH], ago_buf[256], *ago_ptr, color;
 	char_data *plr = NULL, *loaded;
 	int acc_id = NOTHING;
 	time_t last_online = -1;	// -1 here will indicate no data, -2 will indicate online now
@@ -377,8 +377,16 @@ SHOW(show_account) {
 		get_player_skill_string(loaded, skills, TRUE);
 		
 		if (GET_ACCOUNT(loaded)->id == acc_id) {
+			// empire portion
+			if (GET_LOYALTY(loaded)) {
+				safe_snprintf(empart, sizeof(empart), " - %s%s&0%s", EMPIRE_BANNER(GET_LOYALTY(loaded)), EMPIRE_NAME(GET_LOYALTY(loaded)), (GET_IDNUM(loaded) == EMPIRE_LEADER(GET_LOYALTY(loaded))) ? " (leader)" : "");
+			}
+			else {
+				*empart = '\0';
+			}
+			
 			if (!loaded_file) {
-				msg_to_char(ch, " &c[%d %s] %s  (online)&0\r\n", GET_COMPUTED_LEVEL(loaded), skills, GET_PC_NAME(loaded));
+				msg_to_char(ch, " &c[%d %s] %s  (online)&0%s\r\n", GET_COMPUTED_LEVEL(loaded), skills, GET_PC_NAME(loaded), empart);
 				last_online = ONLINE_NOW;
 			}
 			else {
@@ -399,7 +407,7 @@ SHOW(show_account) {
 					color = 'G';
 				}
 				
-				msg_to_char(ch, " [%d %s] %s - \t%c%s ago\t0\r\n", GET_LAST_KNOWN_LEVEL(loaded), skills, GET_PC_NAME(loaded), color, ago_ptr);
+				msg_to_char(ch, " [%d %s] %s - \t%c%s ago\t0%s\r\n", GET_LAST_KNOWN_LEVEL(loaded), skills, GET_PC_NAME(loaded), color, ago_ptr, empart);
 				if (last_online != ONLINE_NOW) {
 					last_online = MAX(last_online, GET_PREV_LOGON(loaded));
 				}
@@ -483,6 +491,57 @@ SHOW(show_author) {
 		}
 		
 		send_page_display(ch);
+	}
+}
+
+
+SHOW(show_bonus_abilities) {
+	ability_data *abil;
+	char_data *plr = NULL;
+	size_t count;
+	bool file = FALSE;
+	struct player_bonus_ability *bonus_abil, *next_bonus_abil;
+	
+	argument = one_word(argument, arg);
+	skip_spaces(&argument);
+	
+	if (!*arg) {
+		msg_to_char(ch, "Usage: show bonusabilities <player> [keywords]\r\n");
+	}
+	else if (!(plr = find_or_load_player(arg, &file))) {
+		send_to_char("Show bonusabilities: There is no such player.\r\n", ch);
+	}
+	else {
+		if (*argument) {
+			build_page_display(ch, "Bonus abilities matching '%s' for %s:", argument, GET_NAME(plr));
+		}
+		else {
+			build_page_display(ch, "Bonus abilities for %s:", GET_NAME(plr));
+		}
+		
+		count = 0;
+		HASH_ITER(hh, GET_BONUS_ABILITIES(plr), bonus_abil, next_bonus_abil) {
+			if (!(abil = ability_proto(bonus_abil->vnum))) {
+				continue;	// no ability?
+			}
+			if (*argument && !multi_isname(argument, ABIL_NAME(abil))) {
+				continue;	// searched
+			}
+		
+			// show it
+			build_page_display(ch, " [%5d] %s", ABIL_VNUM(abil), ABIL_NAME(abil));
+			++count;
+		}
+	
+		if (!count) {
+			build_page_display_str(ch, "  none");
+		}
+	
+		send_page_display(ch);
+	}
+	
+	if (plr && file) {
+		free_char(plr);
 	}
 }
 
@@ -3261,6 +3320,7 @@ struct show_struct {
 	// basic options
 	{ "ammotypes",		LVL_START_IMM,		show_ammotypes },
 	{ "author",			LVL_START_IMM,		show_author },
+	{ "bonusabilities",	LVL_START_IMM,		show_bonus_abilities },
 	{ "buildings",		LVL_START_IMM,		show_buildings },
 	{ "commons",		LVL_START_IMM,		show_commons },
 	{ "companions",		LVL_START_IMM,		show_companions },

@@ -517,6 +517,82 @@ void show_ability_info(char_data *ch, ability_data *abil, ability_data *parent, 
 
 
 /**
+* Creates a list of available abilities that provide a given ptech, e.g. to
+* tell a player what ability they might need to do something.
+*
+* @param char_data *for_char Optional: Will filter the results for a particular player (may be NULL).
+* @param any_vnum tech The ptech number.
+* @param char *buffer A string to store the results in (as a comma-separated list).
+* @param size_t buffer_size The max size of the "buffer" parameter.
+* @return int The number of abilities found (0 for no matches).
+*/
+int ability_string_for_player_tech(char_data *for_char, any_vnum tech, char *buffer, size_t buffer_size) {
+	bool found;
+	int count = 0, total;
+	ability_data *abil, *next_abil;
+	struct ability_data_list *adl;
+	struct string_hash *str_iter, *next_str, *has_hash = NULL, *other_hash = NULL;
+	
+	*buffer = '\0';
+	
+	HASH_ITER(hh, ability_table, abil, next_abil) {
+		if (ABIL_ASSIGNED_SKILL(abil) && SKILL_FLAGGED(ABIL_ASSIGNED_SKILL(abil), SKILLF_IN_DEVELOPMENT)) {
+			continue;	// skip due to in-dev skill assignment
+		}
+		
+		// does it provide the tech
+		found = FALSE;
+		LL_FOREACH(ABIL_DATA(abil), adl) {
+			if (adl->type == ADL_PLAYER_TECH && adl->vnum == tech) {
+				found = TRUE;
+				break;
+			}
+		}
+		
+		// did it provide the tech?
+		if (found) {
+			// pick correct hash to add to
+			if (for_char && ABIL_ASSIGNED_SKILL(abil) && get_skill_level(for_char, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) > 0) {
+				// have skill
+				add_string_hash(&has_hash, ABIL_NAME(abil), 1);
+			}
+			else if (find_ability_in_class(GET_CLASS(for_char), ABIL_VNUM(abil))) {
+				// assigned to player's class?
+				add_string_hash(&has_hash, ABIL_NAME(abil), 1);
+			}
+			else if (FALSE) {
+				// TODO: is it reasonable to check the player's currently-inactive synergies?
+			}
+			else {
+				add_string_hash(&other_hash, ABIL_NAME(abil), 1);
+			}
+			
+			++count;
+		}
+	}
+	
+	// build string
+	total = 0;
+	
+	HASH_ITER(hh, has_hash, str_iter, next_str) {
+		++total;	// always add has-hash
+		safe_snprintf(buffer + strlen(buffer), buffer_size - strlen(buffer), "%s%s", (*buffer ? ", " : ""), str_iter->str);
+	}
+	HASH_ITER(hh, other_hash, str_iter, next_str) {
+		if (total < 3) {
+			++total;
+			safe_snprintf(buffer + strlen(buffer), buffer_size - strlen(buffer), "%s%s", (*buffer ? ", " : ""), str_iter->str);
+		}
+	}
+	
+	free_string_hash(&has_hash);
+	free_string_hash(&other_hash);
+	
+	return count;
+}
+
+
+/**
 * Builds the bit set for all hooks on the ability.
 *
 * @param ability_data *abil The ability to compile hooks for.
@@ -8755,7 +8831,6 @@ void olc_search_ability(char_data *ch, any_vnum vnum) {
 	social_data *soc, *next_soc;
 	vehicle_data *veh, *next_veh;
 	struct synergy_ability *syn;
-	struct class_ability *clab;
 	struct skill_ability *skab;
 	
 	if (!abil) {
@@ -8800,12 +8875,9 @@ void olc_search_ability(char_data *ch, any_vnum vnum) {
 	
 	// classes
 	HASH_ITER(hh, class_table, cls, next_cls) {
-		LL_FOREACH(CLASS_ABILITIES(cls), clab) {
-			if (clab->vnum == vnum) {
-				++found;
-				build_page_display(ch, "CLS [%5d] %s", CLASS_VNUM(cls), CLASS_NAME(cls));
-				break;	// only need 1
-			}
+		if (find_ability_in_class(cls, vnum)) {
+			++found;
+			build_page_display(ch, "CLS [%5d] %s", CLASS_VNUM(cls), CLASS_NAME(cls));
 		}
 	}
 	
@@ -8879,6 +8951,8 @@ void olc_search_ability(char_data *ch, any_vnum vnum) {
 		// REQ_x: requirement search
 		any = find_requirement_in_list(QUEST_TASKS(quest), REQ_HAVE_ABILITY, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_HAVE_ABILITY, vnum);
+		any |= find_quest_reward_in_list(QUEST_REWARDS(quest), QR_BONUS_ABILITY, vnum);
+		any |= find_quest_reward_in_list(QUEST_REWARDS(quest), QR_REMOVE_ABILITY, vnum);
 		
 		if (any) {
 			++found;
@@ -10059,8 +10133,12 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 	
 	// update quests
 	HASH_ITER(hh, quest_table, quest, next_quest) {
+		// REQ_x:
 		found = delete_requirement_from_list(&QUEST_TASKS(quest), REQ_HAVE_ABILITY, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_HAVE_ABILITY, vnum);
+		// QR_x:
+		found |= delete_quest_reward_from_list(&QUEST_REWARDS(quest), QR_BONUS_ABILITY, vnum);
+		found |= delete_quest_reward_from_list(&QUEST_REWARDS(quest), QR_REMOVE_ABILITY, vnum);
 		
 		if (found) {
 			SET_BIT(QUEST_FLAGS(quest), QST_IN_DEVELOPMENT);
@@ -10132,7 +10210,8 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 			}
 		}
 		
-		remove_player_tech(chiter, vnum);
+		remove_bonus_ability(chiter, vnum);	// if any
+		remove_player_tech(chiter, vnum);	// remove tech by ability
 	}
 	
 	// update olc editors
@@ -10216,13 +10295,17 @@ void olc_delete_ability(char_data *ch, any_vnum vnum) {
 			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_HAVE_ABILITY, vnum);
 		
 			if (found) {
-				SET_BIT(QUEST_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
+				SET_BIT(PRG_FLAGS(GET_OLC_PROGRESS(desc)), PRG_IN_DEVELOPMENT);
 				msg_to_desc(desc, "An ability used by the progression goal you're editing has been deleted.\r\n");
 			}
 		}
 		if (GET_OLC_QUEST(desc)) {
+			// REQ_x:
 			found = delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_HAVE_ABILITY, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_HAVE_ABILITY, vnum);
+			// QR_x:
+			found |= delete_quest_reward_from_list(&QUEST_REWARDS(GET_OLC_QUEST(desc)), QR_BONUS_ABILITY, vnum);
+			found |= delete_quest_reward_from_list(&QUEST_REWARDS(GET_OLC_QUEST(desc)), QR_REMOVE_ABILITY, vnum);
 		
 			if (found) {
 				SET_BIT(QUEST_FLAGS(GET_OLC_QUEST(desc)), QST_IN_DEVELOPMENT);

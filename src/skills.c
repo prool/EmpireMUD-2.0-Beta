@@ -558,9 +558,12 @@ bool can_use_ability(char_data *ch, any_vnum ability, int cost_pool, int cost_am
 	}
 
 	if (cooldown_type != NOTHING && (time = get_cooldown_time(ch, cooldown_type)) > 0) {
-		safe_snprintf(buf, sizeof(buf), "Your %s cooldown still has %d second%s.\r\n", get_generic_name_by_vnum(cooldown_type), time, (time != 1 ? "s" : ""));
-		CAP(buf);
-		send_to_char(buf, ch);
+		if (time > 60) {
+			msg_to_char(ch, "Your %s cooldown still has %s left.\r\n", get_generic_name_by_vnum(cooldown_type), colon_time(time, FALSE, NULL));
+		}
+		else {
+			msg_to_char(ch, "Your %s cooldown still has %d second%s.\r\n", get_generic_name_by_vnum(cooldown_type), time, (time != 1 ? "s" : ""));
+		}
 		return FALSE;
 	}
 
@@ -1185,6 +1188,9 @@ int get_ability_points_spent(char_data *ch, any_vnum skill) {
 		}
 		if (!has_ability(ch, skab->vnum)) {
 			continue;	// does not have ability
+		}
+		if (has_bonus_ability(ch, skab->vnum)) {
+			continue;	// don't count bonus abilities as real purchases
 		}
 		
 		// found
@@ -2480,7 +2486,7 @@ bool can_gain_exp_from(char_data *ch, char_data *vict) {
 * @return bool TRUE if ch can use the item, or FALSE.
 */
 bool can_wear_item(char_data *ch, obj_data *item, bool send_messages) {
-	char buf[MAX_STRING_LENGTH];
+	char buf[MAX_STRING_LENGTH], part[MAX_STRING_LENGTH];
 	any_vnum abil = NO_ABIL, tech = NOTHING;
 	struct obj_apply *app;
 	int iter, level_min;
@@ -2529,7 +2535,14 @@ bool can_wear_item(char_data *ch, obj_data *item, bool send_messages) {
 	}
 	if (tech != NOTHING && !has_player_tech(ch, tech)) {
 		if (send_messages) {
-			act("You don't have the correct ability to use $p.", FALSE, ch, item, NULL, TO_CHAR);
+			// build a list of abilities that offer this tech
+			if (ability_string_for_player_tech(ch, tech, part, sizeof(part))) {
+				safe_snprintf(buf, sizeof(buf), "You don't have the correct ability to use $p (%s).", part);
+				act(buf, FALSE, ch, item, NULL, TO_CHAR);
+			}
+			else {
+				act("You don't have the correct ability to use $p.", FALSE, ch, item, NULL, TO_CHAR);
+			}
 		}
 		return FALSE;
 	}

@@ -391,7 +391,11 @@ void show_coins_and_currency(char_data *ch, char_data *to, char *argument, bool 
 				continue; // no keyword match
 			}
 			
-			if ((gen = real_generic(cur->vnum)) && GEN_FLAGGED(gen, GEN_SHOW_ADVENTURE) && (adv = get_adventure_for_vnum(cur->vnum))) {
+			gen = real_generic(cur->vnum);
+			if (gen && GET_CURRENCY_CUSTOM_ORIGIN(gen)) {
+				safe_snprintf(adv_part, sizeof(adv_part), " (%s)", GET_CURRENCY_CUSTOM_ORIGIN(gen));
+			}
+			else if (gen && GEN_FLAGGED(gen, GEN_SHOW_ADVENTURE) && (adv = get_adventure_for_vnum(cur->vnum))) {
 				safe_snprintf(adv_part, sizeof(adv_part), " (%s)", GET_ADV_NAME(adv));
 			}
 			else {
@@ -2838,7 +2842,7 @@ int partial_who(char_data *ch, char *name_search, int low, int high, empire_data
 			}
 			
 			// divider
-			for (iter = 0; iter < sizeof(part) && iter < strlen(line->text); ++iter) {
+			for (iter = 0; line && iter < sizeof(part) && iter < strlen(line->text); ++iter) {
 				part[iter] = '-';
 			}
 			part[iter] = '\0';
@@ -5023,6 +5027,10 @@ ACMD(do_who) {
 	bool rp = FALSE;
 	bool shortlist = FALSE;
 	empire_data *show_emp = NULL;
+	
+	if (REAL_NPC(ch)) {
+		return;
+	}
 
 	skip_spaces(&argument);
 	strcpy(buf, argument);

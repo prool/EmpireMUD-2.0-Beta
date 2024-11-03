@@ -3709,6 +3709,8 @@ Available flags:
     the building (or in addition to, they have half or quarter icons); ONLY if
     the building is open or incomplete. Normally a building icon hides vehicle
     icons on the tile.
+ &cIMMUNE-DAMAGE&0 - building cannot be damaged normally (can still be burned
+    if BURNABLE is set; only takes yearly decay if resources are set)
  &cSAIL&0 - can enter this building with a boat
  &cITEM-LIMIT&0 - only a certain number of items can be dropped here
  &cLONG-AUTOSTORE&0 - autostore takes 72 hours instead of 3 here
@@ -5239,8 +5241,9 @@ currency included in stock content is adventure-specific tokens.
 You must set 2 properties on currency:
   <&ysingular&0> the money's name (e.g. dragon token)
   <&yplural&0> a name to show when there's more than one (e.g. dragon tokens)
+  <&yorigin&0> optional source of this currency (overrides SHOW-ADVENTURE flag)
 
-See also: OLC GENERICS, GENEDIT PLURAL
+See also: OLC GENERICS, GENEDIT PLURAL, GENEDIT ORIGIN
 #d
 "GENEDIT DOTATTACK" "GENEDIT DOT ATTACK"
 
@@ -5381,6 +5384,21 @@ such as actions do appear to the player.
 Action and component names should be lowercase unless they are proper nouns.
 
 See also: OLC GENERICS
+#d
+"GENEDIT ORIGIN" "GENEDIT CUSTOM ORIGIN"
+
+Usage:  .origin <text>
+
+This optional field shows a custom origin for the currency. It overrides the
+SHOW-ADVENTURE flag.
+
+A currency with a custom origin might look like:
+  1 weight of the old gods (Binding Circle adventures)
+
+A currency with SHOW-ADVENTURE might look like:
+ 18 permafrost tokens (Magiterranean: Permafrost)
+
+See also: CURRENCY GENERICS
 #d
 "GENEDIT PLURAL"
 
@@ -6214,6 +6232,7 @@ Message types:
  &cscript1&0 - &cscript5&0 - Can be referenced in scripts as
    %mob.custom(script1)%, %mob.custom(script1,0)%, etc.
  &cscavenge-corpse&0 - Shown when a SCAVENGER mob eats a corpse ($p is the corpse).
+ &cconsider-info&0 - Shown to a player when they 'consider' the mob.
 
 Note: The 'echo' and 'say' types share the same random interval, and the mob
 will only do one or the other each time.
@@ -7137,6 +7156,7 @@ Message types:
  &center-portal-to-char&0 - Shown to the character when entering a portal ($p).
  &center-portal-to-room&0 - Shown to the room when char enters a portal ($p).
  &cexit-portal-to-room&0 - Shown to the room when char exits a portal ($p).
+ &cidentify-info&0 - Shown when the item is identified.
 
 Resource messages are shown when received from: butcher, chop, dig, fish,
 forage, harvest, mine, pick, quarry, scrape, shear, or skin. These use $p for
@@ -8853,6 +8873,8 @@ Available reward types:
  &cGRANT-PROGRESS&0 - Player's empire completes a progress goal.
  &cSTART-PROGRESS&0 - Player's empire starts a NO-AUTOSTART progress goal.
  &cUNLOCK-ARCHETYPE&0 - Grants the player/account a locked archetype for new chars.
+ &cBONUS-ABILITY&0 - Grants the player a bonus ability.
+ &cREMOVE-ABILITY&0 - Revokes a bonus ability from a player.
 
 Note: If you set empire coins as the reward, but the mob is not part of an
 empire, the player will receive misc coins instead.
@@ -10515,7 +10537,7 @@ Object values:
 
 See also: OEDIT QUICKRECIPE
 #d
-"RERFESH COMPANIONS" REFRESHCOMPANIONS "OLC REFRESHCOMPANIONS" "OLC REFRESH COMPANIONS" "REFRESH COMPANION TRIGGERS"
+"REFRESH COMPANIONS" REFRESHCOMPANIONS "OLC REFRESHCOMPANIONS" "OLC REFRESH COMPANIONS" "REFRESH COMPANION TRIGGERS"
 
 Usage: .refreshcompanions <mob vnum | all> [script vnum | all]
 
@@ -10672,6 +10694,9 @@ Player entering/exiting messages:
  &center-to-outside&0 - Shown to people outside a vehicle when a player goes in.
  &cexit-to-inside&0 - Shown to people inside a vehicle as a player exits.
  &cexit-to-outside&0 - Shown to people outside a vehicle as a player exits.
+
+Other messages:
+ &cidentify-info&0 - Shown when the vehicle is identified.
 
 See also: OLC VEHICLES, DOLLAR SIGN CODES
 #d
