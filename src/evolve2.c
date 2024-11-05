@@ -41,7 +41,7 @@
 *  RANDOM GENERATOR
 */
 
-#define DEBUG_MODE  TRUE // prool: set TRUE
+#define DEBUG_MODE  FALSE
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -384,6 +384,7 @@ void evolve_map(void) {
 	if (DEBUG_MODE) {
 		printf("Changed %d tile%s\n", changed, PLURAL(changed));
 	}
+	log("prool's internal evolve: changes %i tiles", changed);
 }
 
 
@@ -394,7 +395,7 @@ int evolve_int() {
 	struct map_t_prool *tile;
 	int num = 0;
 
-	log("prool debug: internal evolve"); // prool
+	//log("prool debug: internal evolve"); // prool
 	
 	empire_srandom_prool(time(0));
 

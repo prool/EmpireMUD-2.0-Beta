@@ -2481,8 +2481,10 @@ int new_descriptor(int s) {
 		/* resolution failed */
 		if (!slow_ip) {
 			char buf[MAX_STRING_LENGTH];
+#if 0 // prool
 			safe_snprintf(buf, sizeof(buf), "Warning: gethostbyaddr [%s]", inet_ntoa(peer.sin_addr));
 			perror(buf);
+#endif
 			
 			// did it take longer than 3 seconds to look up?
 			if (when + 3 < time(0)) {
@@ -2601,7 +2603,7 @@ ssize_t perform_socket_read(socket_t desc, char *read_point, size_t space_left) 
 	 * We don't know what happened, cut them off. This qualifies for
 	 * a SYSERR because we have no idea what happened at this point.
 	 */
-	perror("perform_socket_read: about to lose connection");
+	//perror("perform_socket_read: about to lose connection"); // prool
 	return (-1);
 }
 
@@ -4203,7 +4205,7 @@ void init_game(ush_int port) {
 	if (reboot_recovery)
 		reboot_recover();
 
-	log("Entering game loop.");
+	log("Empire MUD: Entering game loop.");
 	game_loop(mother_desc);
 
 	save_all_players(FALSE);
