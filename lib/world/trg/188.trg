@@ -1315,7 +1315,7 @@ Macabre Menagerie: Unleash animal~
 unleash~
 return 1
 * word list for adjectives
-set adj_list horrifying monstrous terrifying gargantuan dreadful nightmarish eldritch spectral otherworldly ghastly unearthly macabre sinister diabolical phantom hulking savage beastly grim cursed accursed demonic infernal
+set adj_list horrifying monstrous terrifying gargantuan dreadful nightmarish eldritch spectral otherworldly ghastly unearthly macabre sinister diabolical phantom hulking beastly grim cursed accursed demonic infernal
 set adj_size 23
 * basics
 if !%arg%
