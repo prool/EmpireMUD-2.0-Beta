@@ -2247,9 +2247,9 @@ void dam_message(int dam, char_data *ch, char_data *victim, int w_type) {
 		"$n #W $N ferociously." },
 
 		{ 50,
-		"You savagely #w $N!",
-		"$n savagely #W you!",
-		"$n savagely #W $N!" },
+		"You ruthlessly #w $N!",
+		"$n ruthlessly #W you!",
+		"$n ruthlessly #W $N!" },
 
 		{ 55,
 		"You maul $N with your #x!",
