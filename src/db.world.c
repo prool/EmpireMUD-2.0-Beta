@@ -3489,7 +3489,6 @@ int get_main_island(empire_data *emp) {
 crop_data *get_potential_crop_for_location(room_data *location, int must_have_interact) {
 	int x = X_COORD(location), y = Y_COORD(location);
 	bool water = find_flagged_sect_within_distance_from_room(location, SECTF_FRESH_WATER, NOBITS, config_get_int("water_crop_distance"));
-	bool x_min_ok, x_max_ok, y_min_ok, y_max_ok;
 	struct island_info *isle = NULL;
 	crop_data *found, *crop, *next_crop;
 	int num_found = 0;
@@ -3522,6 +3521,9 @@ crop_data *get_potential_crop_for_location(room_data *location, int must_have_in
 		if (must_have_interact != NOTHING && !has_interaction(GET_CROP_INTERACTIONS(crop), must_have_interact)) {
 			continue;
 		}
+		if (!MATCH_CROP_XY(crop, x, y)) {
+			continue;	// out of bounds
+		}
 
 		if (CROP_FLAGGED(crop, CROPF_NO_NEWBIE | CROPF_NEWBIE_ONLY)) {
 			if (!isle) {
@@ -3535,19 +3537,9 @@ crop_data *get_potential_crop_for_location(room_data *location, int must_have_in
 			}
 		}
 		
-		// check bounds
-		x_min_ok = (x >= (GET_CROP_X_MIN(crop) * MAP_WIDTH / 100));
-		x_max_ok = (x <= (GET_CROP_X_MAX(crop) * MAP_WIDTH / 100));
-		y_min_ok = (y >= (GET_CROP_Y_MIN(crop) * MAP_HEIGHT / 100));
-		y_max_ok = (y <= (GET_CROP_Y_MAX(crop) * MAP_HEIGHT / 100));
-		
-		if ((x_min_ok && x_max_ok) || (GET_CROP_X_MIN(crop) > GET_CROP_X_MAX(crop) && (x_min_ok || x_max_ok))) {
-			if ((y_min_ok && y_max_ok) || (GET_CROP_Y_MIN(crop) > GET_CROP_Y_MAX(crop) && (y_min_ok || y_max_ok))) {
-				// valid
-				if (!number(0, num_found++) || !found) {
-					found = crop;
-				}
-			}
+		// valid: choose at random
+		if (!number(0, num_found++) || !found) {
+			found = crop;
 		}
 	}
 	

@@ -6539,6 +6539,32 @@ bitvector_t get_climate(room_data *room) {
 
 
 /**
+* Determines full climate type for a map location.
+*/
+bitvector_t get_climate_map(struct map_data *map) {
+	bitvector_t flags;
+	
+	if (!map || !map->sector_type) {
+		return NOBITS;	// for safety
+	}
+	if (map->room) {
+		// prefer this
+		return get_climate(map->room);
+	}
+	
+	// start with sector
+	flags = GET_SECT_CLIMATE(map->sector_type);
+	
+	// base sect?
+	if (SECT_FLAGGED(map->sector_type, SECTF_INHERIT_BASE_CLIMATE) && map->base_sector) {
+		flags |= GET_SECT_CLIMATE(map->base_sector);
+	}
+	
+	return flags;
+}
+
+
+/**
 * Determines the maximum depletion amount the interactions in a given room
 * allow.
 *

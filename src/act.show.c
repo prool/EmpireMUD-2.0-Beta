@@ -800,6 +800,105 @@ SHOW(show_crops) {
 }
 
 
+SHOW(show_crop_regions) {
+	any_vnum vnum;
+	bool any;
+	int total, x, y;
+	crop_data *crop, *next_crop;
+	struct island_info *isle;
+	struct map_data *map;
+	
+	struct cra_helper {
+		any_vnum vnum;
+		crop_data *crop;
+		bool found;
+		UT_hash_handle hh;
+	} *cra, *next_cra, *hash = NULL;
+	
+	// build wild crop list
+	HASH_ITER(hh, crop_table, crop, next_crop) {
+		if (CROP_FLAGGED(crop, CROPF_NOT_WILD)) {
+			continue;
+		}
+		
+		// double-check
+		vnum = GET_CROP_VNUM(crop);
+		HASH_FIND_INT(hash, &vnum, cra);
+		
+		if (!cra) {
+			CREATE(cra, struct cra_helper, 1);
+			cra->vnum = vnum;
+			cra->crop = crop;
+			cra->found = FALSE;
+			HASH_ADD_INT(hash, vnum, cra);
+		}
+	}
+	
+	total = HASH_COUNT(hash);
+	
+	// search
+	LL_FOREACH(land_map, map) {
+		if (total <= 0) {
+			break;	// done
+		}
+		
+		x = MAP_X_COORD(map->vnum);
+		y = MAP_Y_COORD(map->vnum);
+		
+		HASH_ITER(hh, hash, cra, next_cra) {
+			if (cra->found) {
+				continue;	// already found
+			}
+			if (!MATCH_CROP_XY(cra->crop, x, y)) {
+				continue;	// out of bounds
+			}
+			if (!MATCH_CROP_SECTOR_CLIMATE(cra->crop, get_climate_map(map))) {
+				continue;	// bad climate
+			}
+			if (CROP_FLAGGED(cra->crop, CROPF_NO_NEWBIE | CROPF_NEWBIE_ONLY)) {
+				isle = map->room ? GET_ISLAND(map->room) : map->shared->island_ptr;
+			
+				if (CROP_FLAGGED(cra->crop, CROPF_NO_NEWBIE) && (!isle || IS_SET(isle->flags, ISLE_NEWBIE))) {
+					continue;	// can't be newbie
+				}
+				if (CROP_FLAGGED(cra->crop, CROPF_NEWBIE_ONLY) && (!isle || !IS_SET(isle->flags, ISLE_NEWBIE))) {
+					continue;	// newbie only
+				}
+			}
+			
+			// ignores CROPF_REQUIRES_WATER because players can generally add water
+			
+			// ok: valid location
+			cra->found = TRUE;
+			--total;
+		}
+	}
+	
+	// anything to show?
+	build_page_display_str(ch, "Wild crops with no available region:");
+	
+	HASH_ITER(hh, hash, cra, next_cra) {
+		if (!cra->found) {
+			build_page_display(ch, " [%5d] %s%s%s\r\n", GET_CROP_VNUM(cra->crop), GET_CROP_NAME(cra->crop), (CROP_FLAGGED(cra->crop, CROPF_NO_NEWBIE) ? " (NO-NEWBIE)" : ""), (CROP_FLAGGED(cra->crop, CROPF_NEWBIE_ONLY) ? " (NEWBIE_ONLY)" : ""));
+			any = TRUE;
+		}
+		
+		// cleanup
+		HASH_DEL(hash, cra);
+		free(cra);
+	}
+	
+	if (any) {
+		build_page_display_str(ch, " (Changing the X and Y limits of those crops could make them available to players.)");
+	}
+	else {
+		build_page_display_str(ch, " none");
+	}
+	
+	send_page_display(ch);
+}
+
+
 SHOW(show_currency) {
 	char_data *plr = NULL;
 	bool file = FALSE;
@@ -3313,9 +3412,10 @@ struct show_struct {
 	
 	// privileged options
 	{ "account",		LVL_TO_SEE_ACCOUNTS,	show_account },
+	{ "cropregions",	LVL_CIMPL,				show_crop_regions },
 	{ "data",			LVL_CIMPL,				show_data },
 	{ "piles",			LVL_CIMPL,				show_piles },
-	{ "stats",			LVL_GOD,			show_stats },
+	{ "stats",			LVL_GOD,				show_stats },
 	
 	// basic options
 	{ "ammotypes",		LVL_START_IMM,		show_ammotypes },
