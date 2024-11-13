@@ -877,6 +877,7 @@ SHOW(show_crop_regions) {
 	// anything to show?
 	build_page_display_str(ch, "Wild crops with no available region:");
 	
+	any = FALSE;
 	HASH_ITER(hh, hash, cra, next_cra) {
 		if (!cra->found) {
 			build_page_display(ch, " [%5d] %s%s%s\r\n", GET_CROP_VNUM(cra->crop), GET_CROP_NAME(cra->crop), (CROP_FLAGGED(cra->crop, CROPF_NO_NEWBIE) ? " (NO-NEWBIE)" : ""), (CROP_FLAGGED(cra->crop, CROPF_NEWBIE_ONLY) ? " (NEWBIE_ONLY)" : ""));
