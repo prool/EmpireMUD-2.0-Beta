@@ -22,7 +22,7 @@
 * You can get three different maps with this tool:
 *   Normal map:  php map.php
 *   Political map:  php map.php political
-*   Generated map:  php map.php generator
+*   Generated map:  php map.php generated
 *
 * See constants.c mapout_color_names and mapout_color_tokens when adding
 * colors to this system.

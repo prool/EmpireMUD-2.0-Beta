@@ -33,8 +33,8 @@ switch %type%
   break
   case 12303
     * jungle
-    %mod% %self% keywords dragon fur savage enormous
-    %mod% %self% shortdesc the savage fur dragon
+    %mod% %self% keywords dragon fur ferocious enormous
+    %mod% %self% shortdesc the ferocious fur dragon
     %mod% %self% longdesc An enormous fur dragon stalks through the jungle. (adventure)
   break
 done
@@ -178,7 +178,7 @@ if %loc% && %self.room% != %loc%
       break
       case 12303
         * jungle
-        %mod% %self% longdesc The savage fur dragon has trapped you and is blocking the entrance!
+        %mod% %self% longdesc The ferocious fur dragon has trapped you and is blocking the entrance!
       break
     done
   end

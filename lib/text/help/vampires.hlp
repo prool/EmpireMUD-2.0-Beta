@@ -82,7 +82,7 @@ you could always stop before your victim dies.
 You can also bite as a melee attack in combat. This deals damage based on your
 Strength, but briefly reduces your Dodge by 100%. It also has a 33% chance
 to cause the target to change its focus to you, if it was attacking someone
-else. The Savage Bite ability changes some of these behaviors.
+else. The Brutal Bite ability changes some of these behaviors.
 
 You can use "toggle bother" to turn on and off no-bother. If you are no-bother,
 vampires cannot bite you unless you are in a situation where they could attack
@@ -93,7 +93,7 @@ Non-vampires can use this command, too, but will only pretend to bite.
 Example:
   > bite wolf
 
-See also: SAVAGE BITE, ANCIENT BLOOD, SANGUINE RESTORATION, TOGGLE,
+See also: BRUTAL BITE, ANCIENT BLOOD, SANGUINE RESTORATION, TOGGLE,
    UNNATURAL THIRST, SIRE
 #
 "BLOOD FORTITUDE" FORTITUDE
@@ -440,9 +440,9 @@ You will gain experience with this ability when drinking blood.
 
 See also: BITE, PASSIVES
 #
-"SAVAGE BITE"
+"BRUTAL BITE"
 
-Savage Bite (Vampire ability)
+Brutal Bite (Vampire ability)
 
 Usage:  bite [target]
 

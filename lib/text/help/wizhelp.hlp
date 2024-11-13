@@ -1225,6 +1225,7 @@ Mode         Level    Description
 &y stats&0       God      Game stats including prototypes.
 
 &o account&0     Co-Impl  All the alts associated with a given player.
+&o cropregions&0 Co-Impl  Determines if any wild crops are missing a region.
 &o data&0        Co-Impl  Data stored in the global data system.
 &o piles&0       Co-Impl  Rooms with too many items piled up.
 
@@ -1291,6 +1292,21 @@ Components are 'generics'; you can search them with 'vnum generic'.
 
 See also: VNUM, GENERIC COMPONENTS
 #e
+"SHOW CROPREGIONS" "SHOW CROP REGIONS" "CROP REGIONS"
+
+Usage:  show cropregions
+
+This command finds wild crops that do not appear to have a map region where
+players could find them. If any crops appear in this list, consider changing
+their X and Y limits so they can be found somewhere on your current map.
+
+You should run this command any time you generate a new map.
+
+This command does not check for nearby water, such as Rice, because players can
+add water tiles by excavating.
+
+See also: SHOW CROPS
+#b
 "SHOW CURRENCY" "SHOW CURRENCIES"
 
 Usage:  show currency <player>
@@ -1613,6 +1629,8 @@ see as many as fit in the text buffer.
 
 "Show sectors" was formerly called "show terrain", which is also included for
 immortals who still use the old version.
+
+See also: SHOW CROPREGIONS (Co-Implementor)
 #e
 "SHOW TOMB"
 
