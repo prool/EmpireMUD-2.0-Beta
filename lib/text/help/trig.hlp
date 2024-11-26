@@ -707,6 +707,11 @@ Special Variables When using field - The variable returns:
 &cweather&0 - One of: sunny, cloudy, raining, lightning
    Note that in cold weather, raining and lightning represent snow instead.
 
+Additional data helpers:
+&c_obj.exists(VNUM)&0 - Whether or not this vnum exists.
+&c_obj.name(VNUM)&0 - The name of the one with this vnum.
+(Also available for %_mob%.)
+
 Names and pronouns:
 &c~%var%&0 - name, someone, you
 &c|%var%&0 - name's, someone's, your

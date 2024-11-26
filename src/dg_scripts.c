@@ -2922,6 +2922,40 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 				
 				return;
 			}
+			
+			// type helpers
+			else if (!str_cmp(var, "_mob")) {
+				char_data *find_mob = NULL;
+				
+				// may still be NULL after this
+				if (subfield && *subfield && isdigit(*subfield)) {
+					find_mob = mob_proto(atoi(subfield));
+				}
+				
+				if (!str_cmp(field, "exists")) {
+					safe_snprintf(str, slen, "%d", find_mob ? 1 : 0);
+				}
+				else if (!str_cmp(field, "name")) {
+					safe_snprintf(str, slen, "%s", find_mob ? GET_SHORT_DESC(find_mob) : "");
+				}
+				return;
+			}
+			else if (!str_cmp(var, "_obj")) {
+				obj_data *find_obj = NULL;
+				
+				// may still be NULL after this
+				if (subfield && *subfield && isdigit(*subfield)) {
+					find_obj = obj_proto(atoi(subfield));
+				}
+				
+				if (!str_cmp(field, "exists")) {
+					safe_snprintf(str, slen, "%d", find_obj ? 1 : 0);
+				}
+				else if (!str_cmp(field, "name")) {
+					safe_snprintf(str, slen, "%s", find_obj ? GET_OBJ_SHORT_DESC(find_obj) : "");
+				}
+				return;
+			}
 			// no else
 		}
 
