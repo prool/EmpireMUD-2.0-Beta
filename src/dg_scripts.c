@@ -2938,6 +2938,9 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 				else if (!str_cmp(field, "name")) {
 					safe_snprintf(str, slen, "%s", find_mob ? GET_SHORT_DESC(find_mob) : "");
 				}
+				else {
+					strcpy(str, "");
+				}
 				return;
 			}
 			else if (!str_cmp(var, "_obj")) {
@@ -2953,6 +2956,9 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 				}
 				else if (!str_cmp(field, "name")) {
 					safe_snprintf(str, slen, "%s", find_obj ? GET_OBJ_SHORT_DESC(find_obj) : "");
+				}
+				else {
+					strcpy(str, "");
 				}
 				return;
 			}
