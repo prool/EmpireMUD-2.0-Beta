@@ -2924,6 +2924,25 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 			}
 			
 			// type helpers
+			else if (!str_cmp(var, "_adv")) {
+				adv_data *find_adv;
+				
+				// may still be NULL after this
+				if (subfield && *subfield && isdigit(*subfield)) {
+					find_adv = adventure_proto(atoi(subfield));
+				}
+				
+				if (!str_cmp(field, "exists")) {
+					safe_snprintf(str, slen, "%d", (find_adv && !ADVENTURE_FLAGGED(find_adv, ADV_IN_DEVELOPMENT)) ? 1 : 0);
+				}
+				else if (!str_cmp(field, "name")) {
+					safe_snprintf(str, slen, "%s", find_adv ? GET_ADV_NAME(find_adv) : "");
+				}
+				else {
+					strcpy(str, "");
+				}
+				return;
+			}
 			else if (!str_cmp(var, "_mob")) {
 				char_data *find_mob = NULL;
 				
