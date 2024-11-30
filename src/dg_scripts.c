@@ -2925,7 +2925,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 			
 			// type helpers
 			else if (!str_cmp(var, "_adv")) {
-				adv_data *find_adv;
+				adv_data *find_adv = NULL;
 				
 				// may still be NULL after this
 				if (subfield && *subfield && isdigit(*subfield)) {
