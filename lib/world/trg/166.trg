@@ -3254,6 +3254,56 @@ end
 %send% %actor% ~%self% refuses to be harnessed to anything.
 return 1
 ~
+#16672
+Aurora Cub twin interactions~
+0 bt 25
+~
+set room %self.room%
+set ch %room.people%
+set any 0
+while %ch% && !%any%
+  if %ch% != %self% && %ch.vnum% == %self.vnum%
+    set any 1
+    switch %random.9%
+      case 1
+        %echo% A flurry of snowflakes explodes into the air as an aurora cub tackles the other one!
+      break
+      case 2
+        %echo% You feel an icy frost against your legs as two aurora cubs race around your feet.
+      break
+      case 3
+        %echo% A pair of aurora cubs alternate glowing bursts of light, each one brighter than the last!
+      break
+      case 4
+        %echo% Two aurora cubs roll past you.
+      break
+      case 5
+        %echo% There's a sharp yelp and a blinding green light as an aurora cub bites another one on the tail!
+      break
+      case 6
+        %echo% An aurora cub climbs up onto another one and shakes wildly to fill the air with soft snow.
+      break
+      case 7
+        %echo% One of the aurora cubs licks the other one and then stands, dumbfounded, as its tongue begins to change color, too.
+      break
+      case 8
+        %echo% Two aurora cubs nuzzle each other as their glowing colors intertwine in a dazzling light show.
+      break
+      case 9
+        %echo% A soft hum fills the air as two aurora cubs touch noses and begin to pulse in perfect harmony.
+      break
+    done
+  end
+  set ch %ch.next_in_room%
+done
+if %any%
+  nop %self.add_mob_flag(SILENT)%
+else
+  nop %self.remove_mob_flag(SILENT)%
+end
+* short delay
+wait 30 s
+~
 #16675
 Citizen dances~
 0 bw 50
@@ -3387,7 +3437,7 @@ if %actor.quest_finished(%questid%)%
 end
 ~
 #16678
-Open Stocking (winter wonderland dailies) 2021-2022~
+Open Stocking (winter wonderland dailies) 2021-2024~
 1 c 2
 open~
 if !%arg% || %actor.obj_target(%arg.argument1%)% != %self%
@@ -3405,18 +3455,26 @@ if %roll% <= 5
   * 0.5% chance: a strange crystal seed
   set vnum 600
 elseif %roll% <= 20
+  * 1.5% chance: candy cane crop
+  if %_obj.exists(12147)%
+    set vnum 12147
+  else
+    * doesn't exist? bonus jar instead
+    set vnum 16696
+  end
+elseif %roll% <= 35
   * 1.5% chance: a shimmering magewood jar (nordlys forest)
   set vnum 16696
-elseif %roll% <= 120
-  * 6% chance: minipet whistle
+elseif %roll% <= 85
+  * 5% chance: minipet whistle
   set vnum 10729
-elseif %roll% <= 370
+elseif %roll% <= 335
   * 25% chance: some chocolate coins (+stats)
   set vnum 16660
-elseif %roll% <= 620
+elseif %roll% <= 585
   * 25% chance: some snowball cookies (+inventory)
   set vnum 16661
-elseif %roll% <= 870
+elseif %roll% <= 835
   * 25% chance: some thumbprint cookies (+move regen)
   set vnum 16662
 else

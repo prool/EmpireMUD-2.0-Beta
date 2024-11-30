@@ -467,11 +467,11 @@ if (%mob% && %mob.vnum% == %self.val0%)
 end
 ~
 #10729
-Winter Wonderland minipet whistle (random order) 2021-2022~
+Winter Wonderland minipet whistle (random order) 2021-2024~
 1 c 2
 use~
 * List of vnums granted by this whistle (minipet mobs)
-set list 10709 16657 16658 10723 10724 10725 10726 16653 16654 16655 16656 16666 16667 16668 16669 10706 16670
+set list 10709 16657 16658 10723 10724 10725 10726 16653 16654 16655 16656 16666 16667 16668 16669 10706 16670 16671
 * length is used to shuffle the start point of the list
 set length 17
 *

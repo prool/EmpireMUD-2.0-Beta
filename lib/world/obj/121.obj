@@ -821,18 +821,278 @@ A set of basic wooden molds is arranged here.~
    Intended for use in molding chocolate, this set of molds includes: dove,
 bunny, fish, wolf, bear, deer, sheep, goat, fox, bull, anaconda, jaguar,
 badger, longship, hulk and sorcerer. There's also an especially intricate mold
-with a map of your favorite empire. Note that molds might be difficult to use
-if you have more than one different set in your inventory.
+with a map of your favorite empire (use the empire name as the shape).
 Usage: mold <chocolate> <shape>
 ~
-3 0 a 0 0 7
+3 0 a 0 0 9
 0 0 0
 0 0
+M
+21
+dove~
+M
+21
+a chocolate dove~
+M
+21
+chocolate dove~
+M
+21
+A chocolate dove has been dropped here.~
+M
+21
+A solid piece of chocolate has been shaped in the likeness of a dove.~
+M
+21
+bunny~
+M
+21
+a chocolate bunny~
+M
+21
+chocolate bunny~
+M
+21
+An entire chocolate bunny has been dropped here.~
+M
+21
+A solid piece of chocolate has been molded into the likeness of a bunny.~
+M
+21
+fish~
+M
+21
+a chocolate fish~
+M
+21
+chocolate fish~
+M
+21
+A chocolate fish lies here.~
+M
+21
+Solid chocolate has been molded into the shape of a fish.~
+M
+21
+wolf~
+M
+21
+a chocolate wolf~
+M
+21
+chocolate wolf~
+M
+21
+A chocolate wolf is lying here, tongue lolling and tail curved as if in mid wag.~
+M
+21
+This chocolate wolf has been molded from a solid block of chocolate to look like it's been playing and is happily exhausted.~
+M
+21
+bear~
+M
+21
+a chocolate bear~
+M
+21
+chocolate bear~
+M
+21
+A chocolate bear has been left here.~
+M
+21
+A solid chocolate bear is formed to look as if it's snarling and daring you to eat it.~
+M
+21
+deer~
+M
+21
+a chocolate deer~
+M
+21
+chocolate deer~
+M
+21
+A chocolate deer has been left here.~
+M
+21
+A chocolate deer has been molded to look like it's grazing on some leaves.~
+M
+21
+sheep~
+M
+21
+a chocolate sheep~
+M
+21
+chocolate sheep~
+M
+21
+A chocolate sheep is lying here.~
+M
+21
+A solid piece of chocolate has been molded to look like a sheep.~
+M
+21
+goat~
+M
+21
+a chocolate goat~
+M
+21
+chocolate goat~
+M
+21
+A chocolate goat has been dropped here.~
+M
+21
+A solid piece of chocolate has been molded to resemble a goat.~
+M
+21
+fox~
+M
+21
+a chocolate fox~
+M
+21
+chocolate fox~
+M
+21
+A chocolate fox has been dropped here.~
+M
+21
+A block of chocolate has been molded to look like a fox.~
+M
+21
+bull~
+M
+21
+a chocolate bull~
+M
+21
+chocolate bull~
+M
+21
+A chocolate bull looks ready to charge.~
+M
+21
+This bull has been molded from a solid piece of chocolate, its long, curling horn thrust out inviting a delicious chomp.~
+M
+21
+jaguar~
+M
+21
+a chocolate jaguar~
+M
+21
+chocolate jaguar~
+M
+21
+A chocolate jaguar looks poised to pounce.~
+M
+21
+This block of chocolate has been molded to resemble a jaguar in mid pounce, claws out and ready to shred flesh.~
+M
+21
+badger~
+M
+21
+a chocolate badger~
+M
+21
+chocolate badger~
+M
+21
+A chocolate badger looks to be industriously digging.~
+M
+21
+A block of chocolate has been molded to resemble a digging badger.~
+M
+21
+sorcerer~
+M
+21
+a chocolate sorcerer~
+M
+21
+chocolate sorcerer~
+M
+21
+A chocolate sorcerer stands here leaning on his staff.~
+M
+21
+A block of chocolate has been molded to resemble a robed sorcerer bearing a contemplative expression and leaning on a stout staff.~
+M
+21
+longship~
+M
+21
+a chocolate longship~
+M
+21
+chocolate longship~
+M
+21
+A chocolate longship is here.~
+M
+21
+This block of chocolate is molded to look like a ship of war at full sail, its cannon raised to fire.~
+M
+21
+hulk~
+M
+21
+a chocolate hulk~
+M
+21
+chocolate hulk~
+M
+21
+A chocolate hulk is here.~
+M
+21
+This block of chocolate resembles a hulk at full sail, with a hint of secured parcels and crates visible in its hold if you look through the top.~
+M
+21
+anaconda~
+M
+21
+a chocolate anaconda~
+M
+21
+chocolate anaconda~
+M
+21
+A chocolate anaconda is curled here.~
+M
+21
+Molded to appear to be constricting around something, this block of chocolate now resembles an anaconda with enough texture for scales.~
+M
+22
+map of %empire_name%~
+M
+22
+a chocolate map of %empire_name%~
+M
+22
+map chocolate %empire_name%~
+M
+22
+A chocolate map of %empire_name% lies here.~
+M
+22
+An intricate chocolate map of %empire_name% has been molded from this solid block of chocolate, with key locations and terrain features marked.~
+M
+23
+You pour the chocolate into the mold and retrieve %shape.ana% %shape% when it cools.~
+M
+23
+~%actor% molds %shape.ana% %shape%.~
 R
 4 5134 0
 R
 4 5606 0
-T 12142
+T 12144
 S
 #12143
 molds wooden Halloween-themed themed set~
@@ -841,18 +1101,233 @@ A set of wooden molds in traditional Halloween shapes lies here.~
    Intend for use in molding chocolate, this set of molds includes shapes for:
 witch's hat, ghost, banshee, werewolf, skeleton, pumpkin, skull, cat, spider,
 broom, scarecrow, demon, necromancer, and of course, the ability to make a
-memorial to your favorite empire. Note that molds might be difficult to use
-if you have more than one different set in your inventory.
+memorial to your favorite empire (use the empire name as the shape).
 Usage: mold <chocolate> <shape>
 ~
-3 0 a 0 0 9
+3 0 a 0 0 11
 0 0 0
 0 0
+M
+21
+witch's hat~
+M
+21
+a chocolate witch's hat~
+M
+21
+chocolate hat witchs witch's~
+M
+21
+A chocolate witch's hat stands here.~
+M
+21
+A block of chocolate has been shaped into a witch's hat, held open as if it contained someone's head.~
+M
+21
+ghost~
+M
+21
+a chocolate ghost~
+M
+21
+chocolate ghost hollow~
+M
+21
+A chocolate ghost is here.~
+M
+21
+A chocolate block has been hollowed out into the shape of a ghost.~
+M
+21
+banshee~
+M
+21
+a chocolate banshee~
+M
+21
+chocolate banshee~
+M
+21
+A chocolate banshee lies here.~
+M
+21
+A block of chocolate has been hollowed out into the shape of a banshee with mouth open as if screaming.~
+M
+21
+werewolf~
+M
+21
+a chocolate werewolf~
+M
+21
+chocolate werewolf~
+M
+21
+A chocolate wolf is half transformed here, neither fully human nor wolf.~
+M
+21
+This solid block of chocolate is molded into a muscular werewolf, caught between human and wolf form.~
+M
+21
+pumpkin~
+M
+21
+a chocolate pumpkin~
+M
+21
+chocolate pumpkin~
+M
+21
+A chocolate pumpkin has been left here.~
+M
+21
+A hollow chocolate pumpkin has been molded as if someone is just starting to carve it, with only the barest suggestion of a distorted face on one side.~
+M
+21
+skull~
+M
+21
+a chocolate skull~
+M
+21
+chocolate skull~
+M
+21
+A chocolate skull is lying here.~
+M
+21
+A block of chocolate has been hollowed out and molded into the shape of a skull.~
+M
+21
+cat~
+M
+21
+a chocolate cat~
+M
+21
+chocolate cat~
+M
+21
+A chocolate cat has been dropped here.~
+M
+21
+A block of chocolate has been hollowed out and molded into the shape of a cat.~
+M
+21
+spider~
+M
+21
+a chocolate spider~
+M
+21
+chocolate spider~
+M
+21
+A chocolate spider has been dropped here, its delicate web spread around it.~
+M
+21
+A block of chocolate has been hollowed out into the shape of a spider with delicate webbing around it.~
+M
+21
+broom~
+M
+21
+a chocolate broom~
+M
+21
+chocolate broom~
+M
+21
+A chocolate broom is balanced on its bristles.~
+M
+21
+This block of chocolate is molded to resemble a broom, its delicate bristles fluttering slightly as if it's flying.~
+M
+21
+demon~
+M
+21
+a chocolate demon~
+M
+21
+chocolate demon~
+M
+21
+A chocolate demon has its claws stretched to full length.~
+M
+21
+This block of chocolate has been molded to resemble a horned demon stalking toward the viewer with claws out and ready to shred flesh.~
+M
+21
+scarecrow~
+M
+21
+a chocolate scarecrow~
+M
+21
+chocolate scarecrow~
+M
+21
+A chocolate scarecrow stands here on a chocolate stick.~
+M
+21
+A block of chocolate has been hollowed out and molded into the shape of a scarecrow.~
+M
+21
+skeleton~
+M
+21
+a chocolate skeleton~
+M
+21
+chocolate skeleton~
+M
+21
+A chocolate skeleton stands here loosely.~
+M
+21
+A block of chocolate has been hollowed into the form of a skeleton, the joints looking loose and easy to snap.~
+M
+21
+necromancer~
+M
+21
+a chocolate necromancer~
+M
+21
+chocolate necromancer~
+M
+21
+A chocolate necromancer stands here drawing runes.~
+M
+21
+A block of chocolate has been hollowed to resemble a thin, nearly skeletal necromancer with tiny runes at his feet showing the beginnings of a summoning.~
+M
+22
+memorial to %empire_name%~
+M
+22
+a chocolate memorial to %empire_name%~
+M
+22
+memorial chocolate %empire_name%~
+M
+22
+A chocolate memorial to %empire_name% lies here.~
+M
+22
+An intricate map of %empire_name% has been molded from this solid block of chocolate, with locations of key cities marked by tombstones indicating mass death.~
+M
+23
+You pour the chocolate into the mold and hear an eerie cackle in the air before %shape.ana% %shape% emerges, seemingly of its own accord.~
+M
+23
+~%actor% pours some chocolate and %shape.ana% %shape% seems to pop briskly out of the mold all by itself.~
 R
 4 5134 0
 R
 4 5606 0
-T 12143
+T 12144
 S
 #12144
 design mold set wooden halloween-themed~
@@ -889,5 +1364,447 @@ You can cook: dark chocolate.
 0 0
 C
 100 100
+S
+#12147
+seeds minty smelling red white striped white-striped handful~
+a handful of minty smelling red and white-striped seeds~
+A handful of minty-smelling red and white-striped seeds has been scattered here.~
+   These seeds smell of a mix of wintergreen and peppermint and are striped in
+swirling red and white patterns. A very close look at them shows that each one
+resembles a tiny shepherd's crook. The mages in the Magiterranean have clearly
+been at it again.
+~
+3 bC a 0 0 6
+0 12147 0
+0 8760
+C
+1 1
+R
+4 5210 0
+R
+4 5621 0
+R
+4 5193 0
+S
+#12148
+bundle candy canes~
+a bundle of candy canes~
+A bundle of candy canes has been tied together and dropped here.~
+   Someone has tied several candy canes together with a festive silver ribbon.
+They smell strongly of mint and have red and white stripes. You can plant them
+and grow your own. If you want to eat one, though, you should untie (separate)
+it.
+~
+3 bC a 0 0 7
+0 12147 0
+10 4320
+C
+1 1
+I 15 12149 100.00 4  # SEPARATE: single candy cane
+R
+4 5621 0
+R
+4 5193 0
+R
+4 5619 0
+S
+#12149
+candy cane single~
+a single candy cane~
+A single candy cane lies here.~
+   Striped in red and white and smelling strongly of mint, this looks like a
+good snack that also promises to freshen your breath.
+~
+6 gC a 0 0 7
+2 0 0
+0 168
+A
+4 1 0
+C
+1 1
+I 14 12148 100.00 1  # COMBINE: bundle of candy canes
+M
+4
+You slowly munch on the candy cane and it leaves a cool minty aftertaste.~
+M
+5
+A miniature cloud of frost lingers in front of $n as $e eats a candy cane.~
+R
+4 5619 0
+S
+#12150
+molds set molds wintry wooden chocolate~
+a set of wintry wooden chocolate molds~
+A set of wintry wooden chocolate molds have been set out here.~
+   Made for the holiday season, both religious and secular symbols are
+represented. This set includes roughly two dozen shapes: santa claus, Mrs.
+Claus, elf, reindeer, icicle, snowflake, snowman, jinglebell, Christmas tree,
+stuffed stocking, pinecone, holly, fir branches, menorah, dreidel, nutcracker,
+sleigh, igloo, pentagram, krampus, Sami drum, mistletoe, and of course a
+festively enchanted map of your favorite empire. Rumor has it the products from
+this mold have some sort of magic about them, but there's nothing about the
+candy molds themselves to suggest it.
+~
+3 0 a 0 0 12
+0 0 0
+0 0
+C
+1 1
+M
+21
+Santa Clause~
+M
+21
+a chocolate Santa Claus~
+M
+21
+chocolate Santa Claus~
+M
+21
+A chocolate santa claus has been dropped here.~
+M
+21
+Chocolate has been shaped into the shape of a fat, round-faced, cheery man with a long white beard and red hat. Magic alone can have filled the inside with puffy marshmallow, since you didn't.~
+M
+21
+Mrs. Claus~
+M
+21
+a chocolate Mrs. Claus~
+M
+21
+chocolate Mrs. Claus~
+M
+21
+A chocolate Mrs. Claus has been dropped here.~
+M
+21
+Chocolate has been molded into the shape of a plump matron in festive garb. Only magic could have filled the inside with chewy caramel, since you didn't.~
+M
+21
+elf~
+M
+21
+a chocolate elf~
+M
+21
+chocolate elf~
+M
+21
+A chocolate elf lies here.~
+M
+21
+Chocolate has been molded into a tiny humanoid with pointed ears and a festive outfit, holding a small knife and a piece of what appears to be pine wood. You could swear you hear a tiny jingle from the bells on his hat or shoes, though you never catch him moving. The longer you watch, the more the carving resembles your favorite childhood toy. Magic is clearly at work. The inside of this chocolate is surprisingly filled with sunflower seeds.~
+M
+21
+reindeer~
+M
+21
+a chocolate reindeer~
+M
+21
+chocolate reindeer~
+M
+21
+A chocolate reindeer lies here.~
+M
+21
+This chocolate reindeer is outfitted with a harness, the straps meant to attach it to a sleigh dangling free without the sleigh present. The nose is definitely glowing red, clear evidence of the presence of magic. The inside is filled with a warm, chewy caramel that mimics the actual body temperature of a living organism and yet it does not melt in your hand from the internal warmth or from the warmth you provide as you hold it.~
+M
+21
+icicle~
+M
+21
+a chocolate icicle~
+M
+21
+chocolate icicle~
+M
+21
+A chocolate icicle dangles here.~
+M
+21
+This long, thin, delicate piece of chocolate is clearly an icicle, starting thicker up top and tapering to a needle thin point. The presence of magic is indicated by the fact that it's dangling before you in midair rather than lying on anything, a translucent white in color, cold to the touch, and seems to chime slightly in a passing breeze. Its chill gives the chocolate a crisp snap when bitten and there is a lingering aftertaste of wintergreen.~
+M
+21
+snowflake~
+M
+21
+a chocolate snowflake~
+M
+21
+chocolate snowflake~
+M
+21
+A chocolate snowflake drifts in the air here.~
+M
+21
+This lacey chocolate is in the shape of a snowflake, delicately pointed in all directions and appearing thin enough to shatter if touched.  Magic has clearly had a hand in its formation as it seems to drift on a breeze, floating languidly toward the ground, but never reaching it, always stopping wherever your hand is.  Though it is cold to the touch, it does not melt in the warmth of your hand. It is too thin for a filling, but the cold chocolate snaps crisply and leaves behind the faint aftertaste of coconut.~
+M
+21
+snowman~
+M
+21
+a chocolate snowman~
+M
+21
+chocolate snowman~
+M
+21
+A chocolate snowman has somehow been erected here.~
+M
+21
+Packed firmly into three balls, this bit of chocolate is clearly a snowman. Magic seems to be at work on it as it is filled with fluffy white nougat even though you didn't add it.~
+M
+21
+jingle bell~
+M
+21
+a chocolate jingle bell~
+M
+21
+chocolate jingle bell~
+M
+21
+A chocolate jingle bell is jingling here.~
+M
+21
+Though clearly made of chocolate, this round, closed bell must be enchanted as it glows silver and jingles cheerfully when moved. Peering through to its insides, you can see a shelled walnut acting as its clapper.~
+M
+21
+Christmas tree~
+M
+21
+a chocolate Christmas tree~
+M
+21
+chocolate Christmas tree~
+M
+21
+A chocolate Christmas tree seems to have grown here.~
+M
+21
+This bit of chocolate looks like a Christmas tree, complete with ornaments, tinsel, lights and garland. The lights actually glow and the tree seems to have roots digging into the floor, showing that illusionary magic is at work, as the treat is actually easy to lift. It looks to be solid chocolate, but leaves a surprise aftertaste of warm maple on the tongue when eaten.~
+M
+21
+stuffed stocking~
+M
+21
+a chocolate stuffed stocking~
+M
+21
+chocolate stuffed stocking~
+M
+21
+A chocolate stuffed stocking hangs here.~
+M
+21
+This chocolate has the bulging boot shape of a well-stuffed stocking, its hanger stiff and upright, slightly open as if hanging on a nail by a hearth. Alas, when you try to reach in and pluck out whatever's attached to the bright red bow poking out of the stocking's mouth, it dissolves into bright blue sparkles of pure mana. The inside of the stocking is actually full of hazelnut nougat.~
+M
+21
+pinecone~
+M
+21
+a chocolate pinecone~
+M
+21
+chocolate pinecone~
+M
+21
+A chocolate pinecone is here.~
+M
+21
+This chocolate looks like a pinecone. It also is lightly scented of pine, which indicates a definite enchantment. Despite the smell of pine, the treat tastes delicious and chocolatey enough, filled with persipan you have no memory of adding. Clearly the enchantment is multi-layered.~
+M
+21
+holly bush~
+M
+21
+a chocolate holly bush~
+M
+21
+chocolate holly bush~
+M
+21
+A chocolate holly bush is here.~
+M
+21
+This chocolate has been formed into the shape of a holly bush, complete with pointed leaves and berries. It has the unexpected scent of cinnamon coming especially from the berries, but you don't recall using any. The sharp spines are tipped with little bits of chestnut for extra flavor and holiday flare, but you don't recall adding that, either.~
+M
+21
+fir branches~
+M
+21
+a couple of chocolate fir branches~
+M
+21
+couple chocolate fir branches~
+M
+21
+A couple of Chocolate fir branches shiver in a breeze here.~
+M
+21
+Complete with feathery needles and the faint scent of fir, this chocolate is clearly enchanted. The feathery needles, appearing to be lightly covered in snow, shiver slightly as if in a breeze, sending the flakes off in shimmering sparkles.  The inside of the branch is curiously filled with slightly hardened torrone, giving a satisfying crunch to the treat.~
+M
+21
+menorah~
+M
+21
+a chocolate menorah~
+M
+21
+chocolate menorah~
+M
+21
+A chocolate menorah glows here.~
+M
+21
+The nine branches of this chocolate menorah each hold a tiny candle. In this arrangement, the shamash, the candle that would be used to light all the others, is in the center and raised slightly. It is already glowing warmly, indicating an enchantment at work. If you watch long enough, the other candles slowly light, one at a time. When you bight into this treat, the creamy, nutty flavors of halva you don't recall preparing fill the insides of the chocolate.~
+M
+21
+dreidel~
+M
+21
+a chocolate dreidel~
+M
+21
+chocolate dreidel~
+M
+21
+A chocolate dreidel is spinning here.~
+M
+21
+This chocolate has been shaped into a dreidel. It is clearly enchanted as it stands on its end spinning so rapidly that its letters, formed of almond slivvers you don't recall pressing into the chocolate, are a blur.  When your hand reaches toward it, it stops spinning. Somehow this one always lands on "gimel" and you get to eat the whole delicious thing, which turns out to be filled with marzipan.~
+M
+21
+nutcracker~
+M
+21
+a chocolate nutcracker~
+M
+21
+chocolate nutcracker~
+M
+21
+A chocolate nutcracker stands here.~
+M
+21
+This chocolate nutcracker is dressed like a soldier from your favorite empire. His mouth grips a nut you didn't add and cracks it with a loud *snap* as you watch. The shell disintegrates into bright blue mana and the nut's softer insides go down into the chocolate, ready to be eaten.~
+M
+21
+sleigh~
+M
+21
+a chocolate sleigh~
+M
+21
+chocolate sleigh~
+M
+21
+A chocolate sleigh sits here on its runners.~
+M
+21
+A sleigh sits here on its runners, its cargo area full of festive packages, all of which seem to bear your name, but when you reach for one of them, it disintegrates into sparkling mana. When one package disintegrates, another forms in its place when you withdraw your hand. A tasting reveals the inside of the sleigh to be full of cool peppermint cream you don't recall adding.~
+M
+21
+igloo~
+M
+21
+a chocolate igloo~
+M
+21
+chocolate igloo~
+M
+21
+A chocolate igloo sits here, nearly transparent.~
+M
+21
+This tiny igloo is made of chocolate, but is clearly enchanted as it has the translucent look and cold feel of ice to it. Looking inside there appears to be an even smaller family visible, carved from nuts and bound together with caramel that forms the filling for the treat.~
+M
+21
+pentagram~
+M
+21
+a chocolate pentagram~
+M
+21
+chocolate pentagram~
+M
+21
+A chocolate pentagram lies here.~
+M
+21
+Perhaps the only piece in the collection that appears completely ordinary, this piece of chocolate is molded into a five-pointed star with a circle around it. It lies there innocently, perfectly ordinary in color and scent. Only when you  take a bite does the magic reveal itself. It is filled with a sweet and spicy mix of pumpkin, ginger, nutmeg and cloves -- a pumpkin pie fully enclosed in a chocolate shell rather than an open pastry one.~
+M
+21
+krampus~
+M
+21
+a chocolate crampus~
+M
+21
+chocolate krampus~
+M
+21
+A chocolate krampus stands here sticking his tongue out.~
+M
+21
+This chocolate is made to look like a krampus demon, complete with horns and an extended tongue, all colored a bright orange. He seems to scowl and grumble, clearly enchanted, but despite his sour grumping, he tastes like chocolate coated gingerbread.~
+M
+21
+Sami drum~
+M
+21
+a chocolate sami drum~
+M
+21
+sami drum~
+M
+21
+A chocolate sami drum, intricately decorated,  is here with its pulk.~
+M
+21
+Tiny and round, this chocolate sami drum is intricately decorated with spiritual motifs you didn't add to the molds. Clearly enchantment is at work as the pulk rises and hits the drum by itself, producing a resonant and compelling sound that is out of all proportion with the actual materials and size of what is, after all, a piece of hollow chocolate candy.~
+M
+21
+mistletoe~
+M
+21
+a piece of chocolate mistletoe~
+M
+21
+chocolate mistletoe~
+M
+21
+A piece of chocolate mistletoe rises to dangle over your head.~
+M
+21
+This is clearly a piece of chocolate, but it has just as clearly been enchanted for playful mischief.  It floats in the air just over your head until you become aware of its presence. When you do, it allows you to grasp and eat it, leaving the warm sensation of a kiss on your cheek as the sweet texture and taste of cream-filled chocolate coats your tongue.~
+M
+22
+enchanted map of %empire_name%~
+M
+22
+a chocolate map of %empire_name% festivities~
+M
+22
+enchanted map chocolate %empire_name% festivities~
+M
+22
+A chocolate map of %empire_name% lies here, showing the places where the most enthusiastic festivities are taking place.~
+M
+22
+An intricate chocolate map of %empire_name% has been molded from solid chocolate, with key locations and terrain features marked. This one is definitely enchanted as it seems to glow from within, showing not only the largest gatherings, but also those with the most genuine enthusiasm for the season. In fact, smaller but more heartfelt festivities are more brightly colored than large ones that might be attended out of obligation. Each section of the map is differently flavored according to the tastes of the citizenry, clearly another sign of enchantment rather than using ingredients you recall adding.~
+M
+23
+You pour the chocolate into the mold and hear happy giggling in the air before %shape.ana% %shape% forms in a cloud of silver and gold sparkles.~
+M
+23
+~%actor% pours some chocolate and is obscured by a cloud of brilliant sparkles. After a moment, %shape.ana% %shape% seems to pop briskly out of the mold all by itself.~
+R
+4 5134 0
+R
+4 5606 0
+T 12144
 S
 $
