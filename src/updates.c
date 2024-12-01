@@ -4331,6 +4331,7 @@ void b5_189_molds_update(void) {
 		if (search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
 			free_proto_scripts(&obj->proto_script);
 			obj->proto_script = copy_trig_protos(objpr->proto_script);
+			remove_all_triggers(obj, OBJ_TRIGGER);
 			assign_triggers(obj, OBJ_TRIGGER);
 		}
 	}
@@ -4341,6 +4342,7 @@ void b5_189_molds_update(void) {
 			if ((obj = eus->obj) && search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
 				free_proto_scripts(&obj->proto_script);
 				obj->proto_script = copy_trig_protos(objpr->proto_script);
+				remove_all_triggers(obj, OBJ_TRIGGER);
 				assign_triggers(obj, OBJ_TRIGGER);
 			}
 		}
@@ -4351,6 +4353,7 @@ void b5_189_molds_update(void) {
 		if ((obj = tpd->obj) && search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
 			free_proto_scripts(&obj->proto_script);
 			obj->proto_script = copy_trig_protos(objpr->proto_script);
+			remove_all_triggers(obj, OBJ_TRIGGER);
 			assign_triggers(obj, OBJ_TRIGGER);
 		}
 	}
@@ -4376,6 +4379,7 @@ PLAYER_UPDATE_FUNC(b5_189_molds_update_plr) {
 		if ((obj = GET_EQ(ch, pos)) && search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
 			free_proto_scripts(&obj->proto_script);
 			obj->proto_script = copy_trig_protos(objpr->proto_script);
+			remove_all_triggers(obj, OBJ_TRIGGER);
 			assign_triggers(obj, OBJ_TRIGGER);
 		}
 	}
@@ -4385,6 +4389,7 @@ PLAYER_UPDATE_FUNC(b5_189_molds_update_plr) {
 		if (search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
 			free_proto_scripts(&obj->proto_script);
 			obj->proto_script = copy_trig_protos(objpr->proto_script);
+			remove_all_triggers(obj, OBJ_TRIGGER);
 			assign_triggers(obj, OBJ_TRIGGER);
 		}
 	}
@@ -4394,6 +4399,7 @@ PLAYER_UPDATE_FUNC(b5_189_molds_update_plr) {
 		if ((obj = eus->obj) && search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
 			free_proto_scripts(&obj->proto_script);
 			obj->proto_script = copy_trig_protos(objpr->proto_script);
+			remove_all_triggers(obj, OBJ_TRIGGER);
 			assign_triggers(obj, OBJ_TRIGGER);
 		}
 	}
