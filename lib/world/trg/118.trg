@@ -4787,7 +4787,7 @@ elseif %move% == 3
   * Complete Darkness
   skyfight clear interrupt
   if %diff% == 1
-    * normal: prevent his attack      -> TODO change this to a debuff?
+    * normal: prevent his attack
     nop %self.add_mob_flag(NO-ATTACK)%
   end
   skyfight setup interrupt all

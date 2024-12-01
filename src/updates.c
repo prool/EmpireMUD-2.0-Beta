@@ -4317,6 +4317,95 @@ void b5_183_molten_fiend_update(void) {
 }
 
 
+// b5.189 Changes triggers used by chocolate molds
+void b5_189_molds_update(void) {
+	struct empire_unique_storage *eus;
+	struct trading_post_data *tpd;
+	empire_data *emp, *next_emp;
+	obj_data *obj, *objpr;
+	
+	const obj_vnum vnum_list[] = { 12142, 12143, NOTHING };
+	
+	log(" - assigning triggers to object list...");
+	DL_FOREACH(object_list, obj) {
+		if (search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
+			free_proto_scripts(&obj->proto_script);
+			obj->proto_script = copy_trig_protos(objpr->proto_script);
+			remove_all_triggers(obj, OBJ_TRIGGER);
+			assign_triggers(obj, OBJ_TRIGGER);
+		}
+	}
+
+	log(" - assigning triggers to warehouse objects...");
+	HASH_ITER(hh, empire_table, emp, next_emp) {
+		DL_FOREACH(EMPIRE_UNIQUE_STORAGE(emp), eus) {
+			if ((obj = eus->obj) && search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
+				free_proto_scripts(&obj->proto_script);
+				obj->proto_script = copy_trig_protos(objpr->proto_script);
+				remove_all_triggers(obj, OBJ_TRIGGER);
+				assign_triggers(obj, OBJ_TRIGGER);
+			}
+		}
+	}
+
+	log(" - assigning triggers to trading post objects...");
+	DL_FOREACH(trading_list, tpd) {
+		if ((obj = tpd->obj) && search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
+			free_proto_scripts(&obj->proto_script);
+			obj->proto_script = copy_trig_protos(objpr->proto_script);
+			remove_all_triggers(obj, OBJ_TRIGGER);
+			assign_triggers(obj, OBJ_TRIGGER);
+		}
+	}
+
+	// ensure everything gets saved this way since we won't do this again
+	save_all_empires();
+	save_trading_post();
+}
+
+
+// b5.189 updates the triggers on chocolate molds
+PLAYER_UPDATE_FUNC(b5_189_molds_update_plr) {
+	int pos;
+	obj_data *obj, *objpr;
+	struct empire_unique_storage *eus;
+	
+	const obj_vnum vnum_list[] = { 12142, 12143, NOTHING };
+	
+	check_delayed_load(ch);
+	
+	// equipment
+	for (pos = 0; pos < NUM_WEARS; ++pos) {
+		if ((obj = GET_EQ(ch, pos)) && search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
+			free_proto_scripts(&obj->proto_script);
+			obj->proto_script = copy_trig_protos(objpr->proto_script);
+			remove_all_triggers(obj, OBJ_TRIGGER);
+			assign_triggers(obj, OBJ_TRIGGER);
+		}
+	}
+	
+	// inventory
+	DL_FOREACH2(ch->carrying, obj, next_content) {
+		if (search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
+			free_proto_scripts(&obj->proto_script);
+			obj->proto_script = copy_trig_protos(objpr->proto_script);
+			remove_all_triggers(obj, OBJ_TRIGGER);
+			assign_triggers(obj, OBJ_TRIGGER);
+		}
+	}
+	
+	// home items
+	DL_FOREACH(GET_HOME_STORAGE(ch), eus) {
+		if ((obj = eus->obj) && search_block_int(GET_OBJ_VNUM(obj), vnum_list) != NOTHING && (objpr = obj_proto(GET_OBJ_VNUM(obj)))) {
+			free_proto_scripts(&obj->proto_script);
+			obj->proto_script = copy_trig_protos(objpr->proto_script);
+			remove_all_triggers(obj, OBJ_TRIGGER);
+			assign_triggers(obj, OBJ_TRIGGER);
+		}
+	}
+}
+
+
 // ADD HERE, above: more beta 5 update functions
 
 
@@ -4433,6 +4522,7 @@ const struct {
 	{ "b5.182", b5_182_empire_update, NULL, "Updating empire admin flags (HELP EEDIT ADMIN FLAGS)..." },
 	{ "b5.183", b5_183_trigger_update, b5_183_trigger_update_plr, "Applying new triggers to water bottles and molten essence" },
 	{ "b5.183a", b5_183_molten_fiend_update, NULL, "Updating Molten Fiend adventure from 281 to 18000" },
+	{ "b5.189", b5_189_molds_update, b5_189_molds_update_plr, "Updating old molds to use trigger 12144" },
 	
 	// ADD HERE, above: more beta 5 update lines
 	

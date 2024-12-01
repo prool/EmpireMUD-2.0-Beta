@@ -4897,7 +4897,6 @@ OLC_MODULE(vedit_custom) {
 
 
 OLC_MODULE(vedit_speed) {
-	// TODO: move this into alphabetic order on some future major version
 	vehicle_data *veh = GET_OLC_VEHICLE(ch->desc);
 	VEH_SPEED_BONUSES(veh) = olc_process_type(ch, argument, "speed", "speed", vehicle_speed_types, VEH_SPEED_BONUSES(veh));
 }

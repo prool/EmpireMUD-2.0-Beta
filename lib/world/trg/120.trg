@@ -520,7 +520,7 @@ end
 %echo% (Type 'enter storm')
 set phase 2
 remote phase %self.id%
-* todo: make him invincible and not just insanely hard to kill
+* make him invincible
 dg_affect #12031 %self% IMMUNE-DAMAGE on -1
 if !%self.mob_flagged(GROUP)%
   nop %self.add_mob_flag(NO-ATTACK)%

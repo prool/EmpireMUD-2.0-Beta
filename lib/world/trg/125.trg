@@ -1256,7 +1256,7 @@ else
 end
 if %actor%
   if 0
-    * TODO superboss?
+    * superboss rewards?
   elseif %actor.mob_flagged(GROUP)% && %actor.mob_flagged(HARD)%
     set scraps 4
     set basic 1

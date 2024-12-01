@@ -144,9 +144,13 @@ done
 %purge% %self%
 ~
 #12142
-a set of wooden molds~
+DEPRECATED set of wooden molds~
 1 c 6
 mold~
+* this script is deprecated and replaced by 12144
+*
+halt
+*
 set target %arg.car%
 set shape %arg.cdr%
 set item %actor.obj_target(%target%)%
@@ -260,9 +264,13 @@ end
 %echoaround% %actor% ~%actor% molds %shape.ana% %shape%.
 ~
 #12143
-a set of halloween-themed wooden molds~
+DEPRECATED set of halloween-themed wooden molds~
 1 c 6
 mold~
+* this script is deprecated and replaced by 12144
+*
+halt
+*
 set target %arg.car%
 set shape %arg.cdr%
 set item %actor.obj_target(%target%)%
@@ -359,5 +367,127 @@ if !%item.is_flagged(NO-BASIC-STORAGE)%
 end
 %send% %actor% You pour the chocolate into the mold and hear an eerie cackle in the air before %shape.ana% %shape% emerges, seemingly of its own accord.
 %echoaround% %actor% ~%actor% pours some chocolate and %shape.ana% %shape% seems to pop briskly out of the mold all by itself.
+~
+#12144
+Chocolate Molds reusable script~
+1 c 6
+mold~
+* Handles molding various chocolates.
+* This item should may have unlimited sets of 5 custom messages in script1. For
+* each set of 5 messages, they should be in this order: shape name, short
+* description, keywords, long description, look description.
+*
+* Additionally, if this mold supports an empire shape, script2 should have
+* exactly 5 custom messages in this order: shape name, short description,
+* keywords, long description, look description. The string %empire_name% will
+* also be replaced with the actual name of the empire.
+*
+* You can also specify the messages shown when the player molds chocolate. For
+* this, script3 may have exactly 2 entries. First, the message shown to the
+* player; and second, the message shown to the room. You can use normal script
+* variables like %actor% and %shape% in these messages.
+*
+* Config vnums of chocolate that can be molded
+set chocolate_vnums 12129 12131
+* Basic targeting
+set target %arg.car%
+set shape %arg.cdr%
+set item %actor.obj_target(%target%)%
+if !%arg%
+  %send% %actor% Mold what into what?
+  halt
+elseif !%item%
+  %send% %actor% You don't seem to have a '%target%'.
+  halt
+elseif !(%chocolate_vnums% ~= %item.vnum%)
+  %send% %actor% You can't mold @%item%.
+  halt
+elseif !%shape
+  %send% %actor% Mold it into what?
+  halt
+end
+*
+* Check for empire
+makeuid empire empire %shape%
+if %empire%
+  set empire_name %empire.name%
+end
+*
+* Check shapes on mold object
+set found -1
+set pos 0
+set match 1
+while %found% < 0 && %match%
+  set match %self.custom(script1,%pos%)%
+  if %match% && %shape% == %match%
+    set found %pos%
+  end
+  eval pos %pos% + 5
+done
+* verify and error
+if %found% < 0 && !%empire%
+  * only send error if we are the LAST mold in the list
+  set any 0
+  set obj %self.next_in_list%
+  while %obj% && !%any%
+    if %obj.vnum% != %self.vnum% && %obj.has_trigger(12144)%
+      set any 1
+    else
+      set obj %obj.next_in_list%
+    end
+  done
+  if !%any%
+    %send% %actor% You don't have a mold for that.
+    return 1
+  else
+    return 0
+  end
+  halt
+end
+* prepare strings
+if %found% < 0
+  * empire
+  set shape %self.custom(script2,0).process%
+  set shortstr %self.custom(script2,1).process%
+  set keystr %self.custom(script2,2).process%
+  set longstr %self.custom(script2,3).process%
+  set lookstr %self.custom(script2,4).process%
+else
+  * shape
+  eval shortpos %found% + 1
+  eval keypos %found% + 2
+  eval longpos %found% + 3
+  eval lookpos %found% + 4
+  set shortstr %self.custom(script1,%shortpos%)%
+  set keystr %self.custom(script1,%keypos%)%
+  set longstr %self.custom(script1,%longpos%)%
+  set lookstr %self.custom(script1,%lookpos%)%
+end
+* one last check
+if !%shortstr% || !%keystr% || !%longstr% || !%lookstr%
+  %send% %actor% You don't have a working mold for that.
+  halt
+end
+* and apply
+%mod% %item% shortdesc %shortstr%
+%mod% %item% keywords %keystr%
+%mod% %item% longdesc %longstr%
+%mod% %item% lookdesc %lookstr%
+if !%item.is_flagged(NO-BASIC-STORAGE)%
+  nop %item.flag(NO-BASIC-STORAGE)%
+end
+* messaging
+set to_char %self.custom(script3,0)%
+set to_room %self.custom(script3,1)%
+if %to_char%
+  %send% %actor% %to_char.process%
+else
+  %send% %actor% You pour the chocolate into the mold and retrieve %shape.ana% %shape% when it cools.
+end
+if %to_room%
+  %echoaround% %actor% %to_room.process%
+else
+  %echoaround% %actor% ~%actor% molds %shape.ana% %shape%.
+end
 ~
 $

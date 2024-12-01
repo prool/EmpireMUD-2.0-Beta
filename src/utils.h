@@ -541,6 +541,7 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 
 // helpers
 #define CROP_FLAGGED(crp, flg)  (IS_SET(GET_CROP_FLAGS(crp), (flg)))
+#define MATCH_CROP_XY(crop, x, y)  ((((x >= (GET_CROP_X_MIN(crop) * MAP_WIDTH / 100)) && (x <= (GET_CROP_X_MAX(crop) * MAP_WIDTH / 100))) || (GET_CROP_X_MIN(crop) > GET_CROP_X_MAX(crop) && ((x >= (GET_CROP_X_MIN(crop) * MAP_WIDTH / 100)) || (x <= (GET_CROP_X_MAX(crop) * MAP_WIDTH / 100))))) && (((y >= (GET_CROP_Y_MIN(crop) * MAP_HEIGHT / 100)) && (y <= (GET_CROP_Y_MAX(crop) * MAP_HEIGHT / 100))) || (GET_CROP_Y_MIN(crop) > GET_CROP_Y_MAX(crop) && ((y >= (GET_CROP_Y_MIN(crop) * MAP_HEIGHT / 100)) || (y <= (GET_CROP_Y_MAX(crop) * MAP_HEIGHT / 100))))))
 #define MATCH_CROP_SECTOR_CLIMATE(crop, climate)  (!GET_CROP_CLIMATE(crop) || (GET_CROP_CLIMATE(crop) & (climate)) == GET_CROP_CLIMATE(crop) || (CROP_FLAGGED((crop), CROPF_ANY_LISTED_CLIMATE) && (GET_CROP_CLIMATE(crop) & (climate))))
 
 
@@ -2106,6 +2107,7 @@ room_data *find_other_starting_location(room_data *current_room);
 bool find_sect_within_distance_from_char(char_data *ch, sector_vnum sect, int distance);
 bool find_sect_within_distance_from_room(room_data *room, sector_vnum sect, int distance);
 bitvector_t get_climate(room_data *room);
+bitvector_t get_climate_map(struct map_data *map);
 bool get_coord_shift(int start_x, int start_y, int x_shift, int y_shift, int *new_x, int *new_y);
 int get_depletion_max(room_data *room, int depletion_type);
 int get_direction_to(room_data *from, room_data *to);
