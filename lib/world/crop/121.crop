@@ -100,7 +100,7 @@ D0
 D0
 WWW&P<~
 &L~
-I 6 12111 100.00 10  # FORAGE: nail-shaped seeds
+I 6 12111 100.00 10  # FORAGE: oval-shaped green seeds
 I 7 12112 100.00 25  # PICK: basket of pink clove buds
 I 20 128 100.00 1  # CHOP: massive jungle tree
 U
@@ -277,6 +277,42 @@ bed onions around crop plants~
    The field is filled with plants whose green leaves are long, hollow, tubular
 and waxy. Several layers of them stick up from each plant and some of the
 plants have flowering stalks in the center.
+~
+S
+#12147
+candy canes~
+A Field of Candy Canes~
+3 jkl cfh
+0 100 0 100
+D0
+?&R?&W?&R?~
+&W~
+D0
+&R?&W?&R?&W?~
+&W~
+D0
+??&R??~
+&W~
+D0
+&R??&W??~
+&W~
+I 6 12147 100.00 10  # FORAGE: handful of minty smelling red and white-striped seeds
+I 8 12148 25.00 3  # HARVEST: bundle of candy cane
+I 8 12148 25.00 4  # HARVEST: bundle of candy cane
+I 8 12148 25.00 5  # HARVEST: bundle of candy cane
+I 8 12148 25.00 6  # HARVEST: bundle of candy cane
+U
+0
+The air is suddenly filled with rattling an the scent of mint as candy canes burst from the ground!~
+X
+field canes candy candies grove mint around crop~
+   The air smells of at least two different types of mint. You stand in a field
+of curiously straight crops that rise in slender stalks a foot or so from the
+ground, then curve at the top smoothly into hooks that point back down toward
+the roots. The magineers have clearly discovered how to bring another treat
+into the world, this time in the form of candy canes. When the wind blows
+through the field, the scent grows stronger and some that have grown close
+together rattle slightly.
 ~
 S
 $

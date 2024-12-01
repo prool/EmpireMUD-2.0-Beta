@@ -638,11 +638,19 @@ int get_craft_scale_level(char_data *ch, craft_data *craft) {
 */
 obj_data *has_required_obj_for_craft(char_data *ch, obj_vnum vnum) {
 	obj_data *obj;
+	int pos;
 	
 	// inv
 	DL_FOREACH2(ch->carrying, obj, next_content) {
 		if (GET_OBJ_VNUM(obj) == vnum) {
 			return obj;
+		}
+	}
+	
+	// equipment
+	for (pos = 0; pos < NUM_WEARS; ++pos) {
+		if (GET_EQ(ch, pos) && GET_OBJ_VNUM(GET_EQ(ch, pos)) == vnum) {
+			return GET_EQ(ch, pos);
 		}
 	}
 	
