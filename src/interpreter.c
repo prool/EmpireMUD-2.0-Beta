@@ -10,6 +10,8 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+#define BIG_BROTHER // prool: logging all command for debugging purpose
+
 #include "conf.h"
 #include "sysdep.h"
 
@@ -1080,6 +1082,12 @@ void command_interpreter(char_data *ch, char *argument) {
 	if (!*argument)
 		return;
 
+#ifdef BIG_BROTHER
+	if (!IS_NPC(ch)) {
+		printf("prool debug: '%s' '%s'\n", GET_NAME(ch), argument);
+		fflush(0);
+	}
+#endif
 	/*
 	 * special case to handle one-character, non-alphanumeric commands;
 	 * requested by many people so "'hi" or ";godnet test" is possible.
