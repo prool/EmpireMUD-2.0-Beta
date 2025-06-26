@@ -41,6 +41,19 @@
 #include "telnet.h"
 #endif
 
+char *ptime(void) // by prool: Возвращаемое значение: ссылка на текстовую строку с текущим временем
+	{
+	char *tmstr;
+	time_t mytime;
+
+	mytime = time(0);
+
+	tmstr = (char *) asctime(localtime(&mytime));
+	*(tmstr + strlen(tmstr) - 1) = '\0';
+
+	return tmstr;
+
+	}
 
 static void Write(descriptor_t *apDescriptor, const char *apData) {
 	if (apDescriptor != NULL && apDescriptor->has_prompt) {
@@ -2993,8 +3006,9 @@ static void SendMSSP(descriptor_t *apDescriptor) {
 
 	/* Send the sequence */
 	Write(apDescriptor, MSSPBuffer);
-}
 
+	//printf("%s prool debug SendMSSP() host '%s'\n", ptime(), apDescriptor->host); // prool
+}
 
 /******************************************************************************
  Local MXP functions.

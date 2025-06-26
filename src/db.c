@@ -371,9 +371,9 @@ const char *global_history_files[] = {
 * world (objs, mobs, etc) has its own function.
 */
 void boot_db(void) {
-	log("Boot db -- BEGIN.");
+	//log("Boot db -- BEGIN.");
 	
-	log("Loading game config system.");
+	//log("Loading game config system.");
 	init_config_system();
 	init_inherent_player_techs();
 	
@@ -381,51 +381,51 @@ void boot_db(void) {
 	assert(SECS_PER_MUD_HOUR >= SECS_PER_REAL_UPDATE);
 	assert((SECS_PER_MUD_HOUR % SECS_PER_REAL_UPDATE) == 0);
 	
-	log("Loading game data system.");
+	//log("Loading game data system.");
 	load_data_table();
 	
-	log("Resetting the game time:");
+	//log("Resetting the game time:");
 	reset_time();
 
-	log("Reading credits, help, info, motds, etc.");
+	//log("Reading credits, help, info, motds, etc.");
 	init_text_file_strings();
 	load_intro_screens();
 
 	// Load the world!
 	boot_world();
 	
-	log("Loading automessages.");
+	//log("Loading automessages.");
 	load_automessages();
 
-	log("Loading help entries.");
+	//log("Loading help entries.");
 	index_boot_help();
 	
 	// log their own messages
 	load_global_history();
 	load_slash_channels();
 	
-	log("Loading player accounts.");
+	//log("Loading player accounts.");
 	index_boot(DB_BOOT_ACCT);
 
-	log("Generating player index.");
+	//log("Generating player index.");
 	build_player_index();
 
-	log("Loading fight messages.");
+	//log("Loading fight messages.");
 	load_fight_messages();
 	
-	log("Loading book libraries.");
+	//log("Loading book libraries.");
 	load_book_library_file();
 	
-	log("Loading trading post.");
+	//log("Loading trading post.");
 	load_trading_post();
 
-	log("Sorting command list.");
+	//log("Sorting command list.");
 	sort_commands();
 	
 	// sends own log
 	load_tips_of_the_day();
 	
-	log("Reading banned site and invalid-name list.");
+	//log("Reading banned site and invalid-name list.");
 	load_banned();
 	Read_Invalid_List();
 
@@ -434,42 +434,42 @@ void boot_db(void) {
 	}
 	
 	// this loads objs and mobs back into the world
-	log("Resetting all rooms.");
+	//log("Resetting all rooms.");
 	startup_room_reset();
 	
-	log("Linking and checking vehicles.");
+	//log("Linking and checking vehicles.");
 	link_and_check_vehicles();
 
 	// NOTE: check_version() updates many things that change from version to
 	// version. See the function itself for a list of one-time updates it runs
 	// on the game. This should run as late in boot_db() as possible.
-	log("Checking game version...");
+	//log("Checking game version...");
 	check_version();
 	
 	// Some things runs AFTER check_version() because they rely on all version
 	// updates having been run on this EmpireMUD:
 	
-	log("Verifying world sectors.");
+	//log("Verifying world sectors.");
 	verify_sectors();
 	check_sector_times(NOTHING);
 	
-	log("Checking for orphaned rooms...");
+	//log("Checking for orphaned rooms...");
 	delete_orphaned_rooms();
 	
-	log("Building quest lookup hints.");
+	//log("Building quest lookup hints.");
 	build_all_quest_lookups();
 	
-	log("Building shop lookup hints.");
+	//log("Building shop lookup hints.");
 	build_all_shop_lookups();
 	
-	log("Updating island descriptions.");
+	//log("Updating island descriptions.");
 	generate_island_descriptions();
 	
 	// final things...
-	log("Running reboot triggers.");
+	//log("Running reboot triggers.");
 	run_reboot_triggers();
 	
-	log("Calculating empire data.");
+	//log("Calculating empire data.");
 	reread_empire_tech(NULL);
 	check_for_new_map();
 	setup_island_levels();
@@ -479,37 +479,37 @@ void boot_db(void) {
 	check_languages_all_empires();
 	verify_empire_goals();
 	
-	log("Updating progress goals.");
+	//log("Updating progress goals.");
 	need_progress_refresh = TRUE;
 	check_progress_refresh();
 	
-	log("Checking for ruined cities...");
+	//log("Checking for ruined cities...");
 	check_ruined_cities(NULL);
 	
-	log("Abandoning lost vehicles...");
+	//log("Abandoning lost vehicles...");
 	abandon_lost_vehicles();
 	
-	log("Managing world memory.");
+	//log("Managing world memory.");
 	schedule_map_unloads();
 	update_instance_world_size();
 	
-	log("Activating workforce.");
+	//log("Activating workforce.");
 	chore_update();
 	
 	check_for_player_wipe();
 	
-	log("Final startup...");
+	//log("Final startup...");
 	write_whole_mapout();
 	if (save_world_after_startup) {
-		log(" writing fresh binary map file...");
+		//log(" writing fresh binary map file...");
 		write_fresh_binary_map_file();
-		log(" writing fresh wld files...");
+		//log(" writing fresh wld files...");
 		write_all_wld_files();
-		log(" writing fresh binary world index...");
+		//log(" writing fresh binary world index...");
 		write_whole_binary_world_index();
 	}
 	else {	// not doing a whole save but it's good to do a partial
-		log(" writing pending saves...");
+		//log(" writing pending saves...");
 		perform_requested_world_saves();
 		write_binary_world_index_updates();
 	}
@@ -526,7 +526,7 @@ void boot_db(void) {
 	
 	// END
 	block_world_save_requests = FALSE;	// in case
-	log("Boot db -- DONE.");
+	//log("Boot db -- DONE."); // by prool
 	boot_time = time(0);
 }
 
@@ -540,40 +540,40 @@ void boot_world(void) {
 	// DB_BOOT_x search: boot new types in this function
 	// TODO: could load them sequentially fromm the array (need to order the array)
 	
-	log("Loading generics.");
+	//log("Loading generics.");
 	index_boot(DB_BOOT_GEN);
 	
-	log("Loading abilities.");
+	//log("Loading abilities.");
 	index_boot(DB_BOOT_ABIL);
 	
-	log("Loading classes.");
+	//log("Loading classes.");
 	index_boot(DB_BOOT_CLASS);
 	
-	log("Loading skills.");
+	//log("Loading skills.");
 	index_boot(DB_BOOT_SKILL);
 	
-	log("Loading name lists.");
+	//log("Loading name lists.");
 	index_boot(DB_BOOT_NAMES);
 
-	log("Loading triggers and generating index.");
+	//log("Loading triggers and generating index.");
 	index_boot(DB_BOOT_TRG);
 	
-	log("Loading room templates.");
+	//log("Loading room templates.");
 	index_boot(DB_BOOT_RMT);
 	
-	log("Loading buildings.");
+	//log("Loading buildings.");
 	index_boot(DB_BOOT_BLD);
 	
-	log("Loading sectors.");
+	//log("Loading sectors.");
 	index_boot(DB_BOOT_SECTOR);
 	
-	log("Loading crops.");
+	//log("Loading crops.");
 	index_boot(DB_BOOT_CROP);
 	
-	log("Loading vehicles.");
+	//log("Loading vehicles.");
 	index_boot(DB_BOOT_VEH);
 	
-	log("Loading factions.");
+	//log("Loading factions.");
 	index_boot(DB_BOOT_FCT);
 	init_reputation();
 	
@@ -585,79 +585,79 @@ void boot_world(void) {
 	build_land_map();	// determine which parts are land
 	
 	// requires rooms
-	log("Loading empires.");
+	//log("Loading empires.");
 	index_boot(DB_BOOT_EMP);
 	clean_empire_offenses();
 	
 	// requires empires
-	log("  Renumbering rooms.");
+	//log("  Renumbering rooms.");
 	renum_world();
 	
-	log("  Finding islands.");
+	//log("  Finding islands.");
 	load_islands();
 	number_and_count_islands(FALSE);
 
-	log("  Initializing start locations.");
+	//log("  Initializing start locations.");
 	setup_start_locations();
 
-	log("Loading mobs and generating index.");
+	//log("Loading mobs and generating index.");
 	index_boot(DB_BOOT_MOB);
 
-	log("Loading objs and generating index.");
+	//log("Loading objs and generating index.");
 	index_boot(DB_BOOT_OBJ);
 	
-	log("Loading global tables.");
+	//log("Loading global tables.");
 	index_boot(DB_BOOT_GLB);
 	
-	log("Loading craft recipes.");
+	//log("Loading craft recipes.");
 	index_boot(DB_BOOT_CRAFT);
 	
-	log("Loading shops.");
+	//log("Loading shops.");
 	index_boot(DB_BOOT_SHOP);
 	
-	log("Loading quests.");
+	//log("Loading quests.");
 	index_boot(DB_BOOT_QST);
 	
-	log("Loading books.");
+	//log("Loading books.");
 	index_boot(DB_BOOT_BOOKS);
 	
-	log("Loading adventures.");
+	//log("Loading adventures.");
 	index_boot(DB_BOOT_ADV);
 	
-	log("Loading archetypes.");
+	//log("Loading archetypes.");
 	index_boot(DB_BOOT_ARCH);
 	
-	log("Loading augments.");
+	//log("Loading augments.");
 	index_boot(DB_BOOT_AUG);
 	
-	log("Loading morphs.");
+	//log("Loading morphs.");
 	index_boot(DB_BOOT_MORPH);
 	
-	log("Loading empire progression.");
+	//log("Loading empire progression.");
 	index_boot(DB_BOOT_PRG);
 	
-	log("Loading events.");
+	//log("Loading events.");
 	index_boot(DB_BOOT_EVT);
 	
-	log("Loading socials.");
+	//log("Loading socials.");
 	index_boot(DB_BOOT_SOC);
 	
-	log("Loading instances.");
+	//log("Loading instances.");
 	load_instances();
 	
-	log("Loading empire storage and logs.");
+	//log("Loading empire storage and logs.");
 	load_empire_storage();
 	ensure_storage_timers(NOTHING);
 	clean_empire_logs();
 	
-	log("Loading daily quest cycles.");
+	//log("Loading daily quest cycles.");
 	load_daily_quest_file();
 	
-	log("Loading active events.");
+	//log("Loading active events.");
 	load_running_events_file();
 	
 	// check for bad data
-	log("Verifying data.");
+	//log("Verifying data.");
 	check_abilities_on_startup();
 	check_and_link_faction_relations();
 	check_archetypes();
@@ -672,7 +672,7 @@ void boot_world(void) {
 	check_triggers();
 	compute_generic_relations();
 	
-	log("Sorting data.");
+	//log("Sorting data.");
 	HASH_SRT(sorted_hh, sorted_abilities, sort_abilities_by_data);
 	HASH_SRT(sorted_hh, sorted_archetypes, sort_archetypes_by_data);
 	HASH_SRT(sorted_hh, sorted_augments, sort_augments_by_data);
@@ -681,10 +681,10 @@ void boot_world(void) {
 	HASH_SRT(sorted_hh, sorted_skills, sort_skills_by_data);
 	HASH_SRT(sorted_hh, sorted_socials, sort_socials_by_data);
 	
-	log("Checking newbie islands.");
+	//log("Checking newbie islands.");
 	check_newbie_islands();
 	
-	log("Assigning dummy mob traits.");
+	//log("Assigning dummy mob traits.");
 	dummy_mob.rank = 1;	// prevents random crashes when IS_NPC isn't checked correctly in new code
 }
 

@@ -335,7 +335,7 @@ void evolve_map(void) {
 	}
 }
 
-char *ptime(void) // Возвращаемое значение: ссылка на текстовую строку с текущим временем
+char *ptime(void) // by prool: Возвращаемое значение: ссылка на текстовую строку с текущим временем
 	{
 	char *tmstr;
 	time_t mytime;
@@ -356,7 +356,7 @@ int main(int argc, char **argv) {
 	struct map_t *tile;
 	int num, pid = 0;
 
-	printf("%s prool debug: evolve\n", ptime()); // prool
+	//printf("%s prool debug: evolve\n", ptime()); // prool
 	
 	if (argc < 4 || argc > 5) {
 		printf("Format: %s <nearby distance> <day of year> <water crop distance> [pid to signal]\n", argv[0]);

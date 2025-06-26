@@ -567,7 +567,7 @@ void load_book_library_file(void) {
 	
 	// open library file? not fatal if missing -- just no existing libraries
 	if (!(fl = fopen(LIBRARY_FILE, "r"))) {
-		log("No existing libraries found");
+		//log("No existing libraries found");
 		return;
 	}
 	
