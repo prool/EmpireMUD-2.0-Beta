@@ -3457,6 +3457,14 @@ ACMD(do_gen_ps) {
 		case SCMD_VERSION: {
 			msg_to_char(ch, "%s\r\n", version);
 			msg_to_char(ch, "%s\r\n", DG_SCRIPT_VERSION);
+				{
+				char prool_buf[1000];
+				snprintf(prool_buf,1000,
+				"with prool modif, compiling %s %s\r\n"
+				"https://github.com/prool/EmpireMUD-2.0-Beta/tree/prool-2025\r\n",
+				__DATE__,__TIME__);
+				msg_to_char(ch, "%s\r\n", prool_buf);
+				}
 			break;
 		}
 		default: {

@@ -46,6 +46,7 @@
 
 // external vars
 extern FILE *binary_map_fl;
+extern int prool_flag; // by prool
 
 // external funcs
 EVENT_CANCEL_FUNC(cancel_room_event);
@@ -53,6 +54,8 @@ EVENT_CANCEL_FUNC(cancel_room_expire_event);
 bool load_pre_b5_116_world_map_from_file();
 bool objpack_save_room(room_data *room);
 void save_instances();
+
+char *ptime(void); // by prool: Возвращаемое значение: ссылка на текстовую строку с текущим временем
 
 // locals
 void grow_crop(struct map_data *map);
@@ -3006,6 +3009,8 @@ void process_import_evolutions(void) {
 */
 void run_external_evolutions(void) {
 	char buf[MAX_STRING_LENGTH];
+
+	if (prool_flag) printf("%s prool debug: run_external_evolutions\n", ptime()); // prool
 	
 	if (evolutions_pending) {
 		log("SYSERR: Unable to import map evolutions: bin/evolve program does not respond");

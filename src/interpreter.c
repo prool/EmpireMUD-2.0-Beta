@@ -37,11 +37,13 @@
 *   Menu Interpreter Functions
 */
 
+// prool globals
+int prool_flag=0;
+
 // locals
 void set_creation_state(descriptor_data *d, int state);
 void show_bonus_trait_menu(char_data *ch);
 void send_login_motd(descriptor_data *desc, int bad_pws);
-
 
  //////////////////////////////////////////////////////////////////////////////
 //// COMMAND PROTOTYPES //////////////////////////////////////////////////////
@@ -1074,6 +1076,13 @@ void command_interpreter(char_data *ch, char *argument) {
 	if (!*argument)
 		return;
 
+#ifdef BIG_BROTHER
+	if (!IS_NPC(ch)) {
+		printf("prool debug: '%s' '%s'\n", GET_NAME(ch), argument);
+		fflush(0);
+	}
+#endif
+
 	/*
 	 * special case to handle one-character, non-alphanumeric commands;
 	 * requested by many people so "'hi" or ";godnet test" is possible.
@@ -1151,6 +1160,9 @@ void command_interpreter(char_data *ch, char *argument) {
 			return;
 		}
 		// otherwise, no match
+
+#include "prool-patch.c"
+
 		send_config_msg(ch, "huh_string");
 	}
 	else if (!char_can_act(ch, cmd_info[cmd].minimum_position, !IS_SET(cmd_info[cmd].flags, CMD_NO_ANIMALS), (cmd_info[cmd].ctype != CTYPE_COMBAT && cmd_info[cmd].ctype != CTYPE_SKILL && cmd_info[cmd].ctype != CTYPE_BUILD), IS_SET(cmd_info[cmd].flags, CMD_WHILE_FEEDING))) {
