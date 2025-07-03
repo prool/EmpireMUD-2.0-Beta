@@ -16,6 +16,8 @@
 #define MAX_FILESIZE	8192
 #define LINEBUF_SIZE	128
 
+#include <stdlib.h> // prool for macOS
+
 #include "conf.h"
 #include "sysdep.h"
 
