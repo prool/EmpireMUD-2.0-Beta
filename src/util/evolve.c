@@ -370,16 +370,17 @@ int main(int argc, char **argv) {
 	water_crop_distance = atoi(argv[3]);	// may be 0 to ignore unwatered crops
 	
 	if (DEBUG_MODE) {
-		printf("Using nearby distance of: %d\n", nearby_distance);
-		printf("Using day of year: %d\n", day_of_year);
-		printf("Using water crop distance: %d\n", water_crop_distance);
+		printf("%s prool debug evolve. ", ptime()+4);
+		printf("Using nearby distance of: %d. ", nearby_distance);
+		printf("Using day of year: %d. ", day_of_year);
+		printf("Using water crop distance: %d. ", water_crop_distance);
 	}
 	
 	// determines if we will send a signal back to the mud
 	if (argc == 5) {
 		pid = atoi(argv[4]);
 		if (DEBUG_MODE) {
-			printf("Will signal pid: %d\n", pid);
+			printf("Will signal pid: %d. ", pid);
 		}
 	}
 	
@@ -387,15 +388,15 @@ int main(int argc, char **argv) {
 	index_boot_crops();
 	index_boot_sectors();
 	if (DEBUG_MODE) {
-		printf("Loaded: %d crops\n", HASH_COUNT(crop_table));
-		printf("Loaded: %d sectors\n", HASH_COUNT(sector_table));
+		printf("Loaded: %d crops. ", HASH_COUNT(crop_table));
+		printf("Loaded: %d sectors. ", HASH_COUNT(sector_table));
 	}
 	
 	load_base_map();
 	
 	if (DEBUG_MODE) {
 		LL_COUNT(land, tile, num); 
-		printf("Loaded: %d land tiles\n", num);
+		printf("Loaded: %d land tiles. ", num);
 	}
 	
 	// open file for writing
