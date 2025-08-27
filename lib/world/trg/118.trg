@@ -4585,11 +4585,11 @@ elseif %move% == 3
       eval pain %pain% + 1
       if %cycle% == 1
         %echo% &&m~%self% chants, 'Sun meets rain, illuminates the air...'&&0
-      elseif %which% == 2
+      elseif %cycle% == 2
         %echo% &&m~%self% chants, 'Thus is shown your countenance fair...'&&0
-      elseif %which% == 3
+      elseif %cycle% == 3
         %echo% &&m~%self% chants, 'Iris of the rainbow, I implore thee...'&&0
-      elseif %which% == 4
+      elseif %cycle% == 4
         %echo% &&m~%self% chants, 'Annihilate all who stand before me!'&&0
       else
         %echo% &&m**** ~%self% shouts, 'Victory is mine at last... RAINBOW BEAM!' ****&&0
