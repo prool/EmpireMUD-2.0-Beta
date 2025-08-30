@@ -208,7 +208,6 @@ while %vnum% <= 12202
     nop %mob.unscale_and_reset%
     %scale% %mob% %self.level%
     if %self.fighting%
-      %echo% AGGRO %self.fighting% %self.fighting.name%
       %force% %mob% maggro %self.fighting%
     end
     if !%mob.fighting%
