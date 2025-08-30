@@ -643,10 +643,6 @@ Goblin Outpost attack info~
 0 B 0
 ~
 if %self.aff_flagged(!ATTACK)%
-  if %actor.char_target(%arg%)% != %self%
-    return 1
-    halt
-  end
   %send% %actor% You need to choose a difficulty before you can challenge ~%self%.
   %send% %actor% Usage: difficulty <normal \| hard \| group>
   %echoaround% %actor% ~%actor% considers attacking ~%self%.
