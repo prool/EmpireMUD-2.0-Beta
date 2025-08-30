@@ -195,10 +195,6 @@ Fur Dragon: attack info before difficulty selection~
 0 B 0
 ~
 if %self.aff_flagged(!ATTACK)%
-  if %actor.char_target(%arg%)% != %self%
-    return 1
-    halt
-  end
   %send% %actor% You need to choose a difficulty before you can attack ~%self%.
   %send% %actor% Usage: difficulty <hard \| group \| boss>
   %echoaround% %actor% ~%actor% considers attacking ~%self%.
