@@ -3,8 +3,8 @@ serragon ribbons tremendous~
 the ribbon serragon~
 A tremendous ribbon serragon glimmers as it coils through the trees!
 ~
-25 125 bdhxyADJKL cEGL 6
-0 0 51 25 -1 -1
+25 125 bdhxyADJKL cEGL 5
+0 0 51 12200 -1 -1
 D
    The sinuous form winds through the trees, flattening the undergrowth beneath
 its coils. Its body is strangely split -- two long ribbons twisting and
@@ -22,6 +22,8 @@ in on you from both sides, salivating from its gaping maw -- or maws.
    Type 'adventure' for more information.
 ~
 F 12200
+I 4 12218 100.00 1  # LOOT: tremendous corpse of the vermilion serragon
+I 4 12219 100.00 1  # LOOT: twisted corpse of the veridian serragon
 T 9620
 T 9600
 T 9601
@@ -40,8 +42,8 @@ serragon ribbon vermilion~
 the vermilion serragon~
 A ribbon serragon gleams with vermilion bands as it twists and coils.
 ~
-25 125 abdhxyDJKL cEGL 6
-0 0 51 25 -1 -1
+25 125 abdhxyJKL cEGL 5
+0 0 51 12201 -1 -1
 D
    The serragon's body flattens into a wide ribbon of scarlet edged in black,
 like silk fraying to knives. Its serrated scales screech as they scrape against
@@ -52,6 +54,7 @@ revealing curved teeth that hook like thorns.
    Type 'adventure' for more information.
 ~
 F 12200
+I 4 12218 100.00 1 c  # LOOT: tremendous corpse of the vermilion serragon
 M
 0
 You cover your ears as the serragon's scales scrape against each other.~
@@ -87,8 +90,8 @@ serragon ribbon veridian~
 the veridian serragon~
 A ribbon serragon glints in shades of veridian in the soft light.
 ~
-25 125 abdhxDJKL cEGL 6
-0 0 51 25 -1 -1
+25 125 abdhxJKL cEGL 5
+0 0 51 12202 -1 -1
 D
    The serragon shimmers in waves of green streaked with pale gold, its immense
 but relatively flat body moving like a great banner twisting in the wind. The
@@ -100,6 +103,7 @@ you with an eager stream of saliva.
    Type 'adventure' for more information.
 ~
 F 12200
+I 4 12219 100.00 1 c  # LOOT: twisted corpse of the veridian serragon
 M
 0
 The serragon coils restlessly, rasping its scales like sawblades.~

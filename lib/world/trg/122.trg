@@ -170,10 +170,7 @@ remote scaled %self.id%
 Ribbon Serragon: Instruction to diff-sel~
 0 B 0
 ~
-if %actor.char_target(%arg%)% != %self%
-  return 1
-  halt
-elseif %self.affect(12200)%
+if %self.affect(12200)%
   %send% %actor% You need to choose a difficulty before you can attack ~%self%.
   %send% %actor% Usage: difficulty <normal \| hard \| group \| boss>
   %echoaround% %actor% ~%actor% considers attacking ~%self%.
@@ -316,7 +313,7 @@ end
 Ribbon Serragons: Recombine if out of combat~
 0 ab 33
 ~
-wait 8 s
+wait 30 s
 if %self.fighting% || %self.disabled%
   halt
 end

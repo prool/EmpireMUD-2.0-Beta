@@ -34,4 +34,33 @@ M
 $n carefully descends into the pit.~
 T 12201
 S
+#12218
+corpse tremendous vermilion serragon~
+the tremendous corpse of the vermilion serragon~
+The vermilion ribbon serragon sprawls around you, dim and lifeless.~
+   The vermilion serragon's length sprawls across the ground in broken coils,
+its fiery red scales darkened with cracks and streaks of dust. The once-proud
+jaws now lie twisted and limp. Its eyes, once sharp and unblinking rubies, are
+glazed with a black, lifeless sheen. The rows of hooked teeth glint faintly, as
+if waiting for a breath that will never come.
+~
+10 m 0 0 0 6
+12201 5 0
+7 72
+S
+#12219
+corpse twisted veridian serragon scales~
+the twisted corpse of the veridian serragon~
+The viridian ribbon serragon lies in a twisted heap atop fallen scales.~
+   The viridian serragon's body lies slack in a loose coil, like a flattened
+worm collapsed into the earth. The once-glossy scales now look like they're
+covered in verdigris, dull, chipped, and cracked where blows struck deep. The
+creature's wide, leaflike crest sags against the soil, torn in places and
+drained of its shimmer. Its needled teeth are mostly broken, piled below the
+slackened jaw and glassy, absent gaze.
+~
+10 m 0 0 0 7
+12202 5 0
+7 72
+S
 $
