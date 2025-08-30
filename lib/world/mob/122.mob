@@ -1,0 +1,130 @@
+#12200
+serragon ribbons tremendous~
+the ribbon serragon~
+A tremendous ribbon serragon glimmers as it coils through the trees!
+~
+25 125 bdhxyADJKL cEGL 6
+0 0 51 25 -1 -1
+D
+   The sinuous form winds through the trees, flattening the undergrowth beneath
+its coils. Its body is strangely split -- two long ribbons twisting and
+braiding into one another, bright bands of green and red gleaming like silk in
+the dappled forest light. The ribbons never separate, always coiling close,
+twisting around one another in a dizzying dance.
+   The ribbons are as long as the tallest trees, and thick as the length of a
+horse, but no wider than the horse's shoulders. Sparks crackle in the air as
+the jagged, saw-toothed scales of the two sides of the ribbon grind together,
+and woodchips are left in the creature's wake as the scales rasp the bark from
+trees.
+   The creature's head moves so fast in the tangle of ribbons that you could
+easily mistake it for having two. The ribbon serragon slithers nearer, closing
+in on you from both sides, salivating from its gaping maw -- or maws.
+   Type 'adventure' for more information.
+~
+F 12200
+T 9620
+T 9600
+T 9601
+T 9604
+T 12200
+T 12206
+T 12207
+T 12212
+T 12205
+T 12202
+T 12213
+T 12208
+S
+#12201
+serragon ribbon vermilion~
+the vermilion serragon~
+A ribbon serragon gleams with vermilion bands as it twists and coils.
+~
+25 125 abdhxyDJKL cEGL 6
+0 0 51 25 -1 -1
+D
+   The serragon's body flattens into a wide ribbon of scarlet edged in black,
+like silk fraying to knives. Its serrated scales screech as they scrape against
+each other while the creature writhes. The frill crowning its head spreads in
+jagged points, sharp as broken glass, and it flicks forward with sudden,
+whip-like motions. Its narrow eyes gleam like rubies as it gapes its jaws,
+revealing curved teeth that hook like thorns.
+   Type 'adventure' for more information.
+~
+F 12200
+M
+0
+You cover your ears as the serragon's scales scrape against each other.~
+M
+14
+The serragon cleans its wounds.~
+M
+0
+The serragon clacks its jaws at you.~
+M
+14
+You cover your eyes as bright red light glints off the serragon's writing scales.~
+M
+14
+The serragon lashes its coils, leaving fresh scars in the earth.~
+M
+14
+A flare of fiery scales glimmers red-orange as the serragon twists past.~
+M
+14
+Ruby eyes glare from the shadows, clear and unblinking.~
+T 9620
+T 9600
+T 9601
+T 9604
+T 12212
+T 12205
+T 12202
+T 12214
+S
+#12202
+serragon ribbon veridian~
+the veridian serragon~
+A ribbon serragon glints in shades of veridian in the soft light.
+~
+25 125 abdhxDJKL cEGL 6
+0 0 51 25 -1 -1
+D
+   The serragon shimmers in waves of green streaked with pale gold, its immense
+but relatively flat body moving like a great banner twisting in the wind. The
+margins of its scales jut outward like the teth of a saw, leaving ragged scars
+on the land and tearing roots from the soil. A wide, leaflike crest runs the
+length of its head and neck, rippling as it moves. Its cold silver eyes flicker
+in the light, and when it opens its maw, a forest of fine, needled teeth greet
+you with an eager stream of saliva.
+   Type 'adventure' for more information.
+~
+F 12200
+M
+0
+The serragon coils restlessly, rasping its scales like sawblades.~
+M
+14
+A pale shimmer of verdigris gleams as the serragon slides past.~
+M
+0
+The air shudders faintly with each grinding twist of the serrgon's jagged body.~
+M
+14
+Silver eyes flash in the shadows.~
+M
+14
+The serragon's frilled crest ripples like a banner caught in a storm.~
+M
+0
+Dust rises with each coil as the ground quivers under the serragon's weight.~
+T 9620
+T 9600
+T 9601
+T 9604
+T 12212
+T 12205
+T 12202
+T 12214
+S
+$

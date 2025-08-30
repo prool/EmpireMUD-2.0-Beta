@@ -1,0 +1,37 @@
+#12200
+blood pit walls~
+all the blood~
+A tremendous amount of blood is spattered across the pit.~
+   Blood in two different colors paint a grim scene across the earthen walls
+and woodchip floor of the pit. In the low light, it forms a grim artwork of
+verdigris and vermillion. Something great died here.
+~
+3 B 0 0 0 5
+0 0 0
+12 72
+M
+18
+The blood soaks in and dries up.~
+T 12203
+S
+#12201
+pit~
+the pit~
+There's a pit in the middle of the forest.~
+   The forest floor ends at the mouth of a wide pit, scoured clean by something
+vast and relentless. The wlls of the pit are lined with gouges and slashes
+where the soil has been scraped raw in a spiraling pattern, leaving roots
+dangling with frayed ends.
+~
+8 0 0 0 0 3
+-1 0 0
+1 0
+M
+30
+You grab onto some roots and carefully descend into the pit...~
+M
+31
+$n carefully descends into the pit.~
+T 12201
+S
+$
