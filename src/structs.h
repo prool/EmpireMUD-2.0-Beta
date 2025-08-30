@@ -1608,6 +1608,7 @@ typedef struct vehicle_data vehicle_data;
 #define MOB_CUSTOM_SCRIPT_5  11	// called by scripts
 #define MOB_CUSTOM_SCAVENGE_CORPSE  12	// mob eats a corpse due to SCAVENGER flag
 #define MOB_CUSTOM_CONSIDER_INFO  13	// shown on the 'consider' command
+#define MOB_CUSTOM_ECHO_VISIBLE  14	// only shows if player can see it
 
 
 // MOB_MOVE_x: mob/vehicle movement types

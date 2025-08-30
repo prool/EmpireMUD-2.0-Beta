@@ -2888,6 +2888,7 @@ const char *mob_custom_types[] = {
 	"script5",
 	"scavenge-corpse",
 	"consider-info",
+	"echo-visible",
 	"\n"
 };
 
@@ -2895,7 +2896,7 @@ const char *mob_custom_types[] = {
 // MOB_CUSTOM_x (2/2): how they're shown in olc
 const char *mob_custom_type_help =
 "Types of messages:\r\n"
-"&w Echo messages: echo echo-day echo-night&0\r\n"
+"&w Echo messages: echo echo-visible echo-day echo-night&0\r\n"
 " Speak text: say say-day say-night\r\n"
 "&w Varying lond descriptions: long-desc&0\r\n"
 " Shown when a scavenger mob eats a corpse: scavenge-corpse\r\n"
