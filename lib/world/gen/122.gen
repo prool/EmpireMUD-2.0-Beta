@@ -34,11 +34,11 @@ T0
 Your legs are starting to feel better.~
 S
 #12207
-rage spiral~
+leafblade sweep~
 4 0
 0 0 0 0
 T5
-...$e is spiraling around in a rage!~
+...$e's sweeping $s crest around in a vicious arc!~
 S
 #12208
 timely dodge~
@@ -46,10 +46,32 @@ timely dodge~
 0 0 0 0
 S
 #12209
-crushed~
+serragon spines~
 4 0
 0 0 0 0
 T0
-You manage to get back up.~
+You manage to remove some of the spines.~
+S
+#12211
+jagged wounds~
+4 0
+12211 0 0 0
+T0
+Your jagged wounds stop bleeding.~
+T2
+You're bleeding from the jagged wounds!~
+T5
+...$e's bleeding from jagged, saw-toothed wounds!~
+S
+#12212
+punctured~
+4 0
+12212 0 0 0
+T0
+Your punctured wounds stop bleeding.~
+T2
+You're bleeding from so many punctures!~
+T5
+...$e is bleeding from many puncture wounds.~
 S
 $

@@ -2589,4 +2589,68 @@ You sweep your frill, but only stir dust and leaves.
 $n sweeps $s frill, but only stirs dust and leaves.
 $n sweeps $s frill, but only stirs dust and leaves around.
 
+M12211 e 0 
+jagged wounds DoT~
+~
+$N stumbles, then collapses, red and still.
+The saw-edged gouges bleed slower with every breath, until you can no longer stand... or see.
+$N stumbles, then collapses, red and still.
+#
+#
+#
+Blood runs freely from the deep gouges in $N's skin.
+Blood runs freely from the deep gouges in your flesh.
+Blood runs freely from the deep gouges in $N's skin.
+#
+#
+#
+
+M12211 e 0 
+jagged wounds DoT~
+~
+$N staggers, then collapses lifelessly in a spreading pool of red.
+Your vision blurs for the final time as the dripping blood from your wounds slows and the world goes dark.
+$N staggers, then collapses lifelessly in a spreading pool of red.
+#
+#
+#
+Streams of blood run down $N's body.
+With each breath, a hot stream of blood runs down your body.
+Streams of blood run down $N's body.
+#
+#
+#
+
+M12212 e 0 
+puncture wounds DoT~
+~
+$N collapses, unmoving, as the puncture wounds overtake $M.
+Darkness closes in around you as the hot flow of blood from your puncture wounds slows to a drizzle.
+$N collapses, unmoving, as the puncture wounds overtake $M.
+#
+#
+#
+Blood wells from $N's puncture wounds.
+Blood wells from the puncture wounds with each heartbeat sending a hot trickle down your skin.
+Blood wells from $N's puncture wounds.
+#
+#
+#
+
+M12212 e 0 
+puncture wounds DoT~
+~
+$N shuddles and collapses as the blood from $S puncture wounds ebbs.
+Everything seems so cold as blood drizzles ffrom your puncture wounds...
+$N shuddles and collapses as the blood from $S puncture wounds ebbs.
+#
+#
+#
+Blood wells from $N's puncture wounds.
+Blood wells from your puncture wounds.
+Blood wells from $N's puncture wounds.
+#
+#
+#
+
 $
