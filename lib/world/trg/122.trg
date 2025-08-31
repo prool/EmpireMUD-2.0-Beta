@@ -215,6 +215,234 @@ while %vnum% <= 12202
 done
 %purge% %self%
 ~
+#12210
+Vermilion Serragon combat: Flaming Maw, Crushing Coils, Tail Pin, Rage Spiral~
+0 k 100
+~
+if %self.cooldown(12202)% || %self.disabled%
+  halt
+end
+set room %self.room%
+set diff %self.var(difficulty,1)%
+set ml %self.var(ml,1 2 3 4)%
+set nl %self.var(nl,4)%
+eval wh %%random.%nl%%%
+set old %ml%
+set ml
+set mv 0
+while %wh% > 0
+  set mv %old.car%
+  if %wh% != 1
+    set ml %ml% %mv%
+  end
+  set old %old.cdr%
+  eval wh %wh% - 1
+done
+set ml %ml% %old%
+eval nl %nl% - 1
+remote ml %self.id%
+remote nl %self.id%
+scfight lockout 12202 25 32
+if %mv% == 1
+  scfight clear dodge
+  %echo% &&l~%self% inhales deeply, jaws glowing faintly with inner fire...&&0
+  wait 3 s
+  if %self.disabled% || %self.aff_flagged(BLIND)%
+    halt
+  end
+  set targ %random.enemy%
+  if !%targ%
+    halt
+  end
+  set targ_id %targ.id%
+  if %diff% == 1
+    dg_affect #12203 %self% HARD-STUNNED on 20
+  end
+  %send% %targ% &&l**** Heat shimmers in the air around |%self% mouth as the glow brightens... ****&&0 (dodge)
+  %echoaround% %targ% &&lHeat shimmers in the air around |%self% mouth as the glow brightens...&&0
+  scfight setup dodge %targ%
+  set cycle 0
+  eval times %diff% * 2
+  eval when 9 - %diff%
+  set done 0
+  while %cycle% < %times% && !%done%
+    wait %when% s
+    if %targ.id% != %targ_id%
+      set done 1
+    elseif %targ.var(did_scfdodge)%
+      %send% %targ% &&lYou hurl yourself aside just as a torrent of fire erupts where you stood!&&0
+      %echoaround% %targ% &&l~%targ% hurls *%targ%self aside just as a torrent of fire erupts where &%targ% stood!&&0
+    else
+      %echo% &&lFire engulfs ~%targ% in an instant -- the searing heat scorches flesh and armor alike!&&0
+      %send% %targ% That really hurts!
+      %damage% %targ% 100 fire
+    end
+    eval cycle %cycle% + 1
+    if %cycle% < %times% && !%done%
+      wait 1
+      if %targ.id% == %targ_id%
+        %send% %targ% &&l**** &&Z|%self% gaping maw blazes with fire -- it's about to strike again! ****&&0 (dodge)
+        %echoaround% %targ% &&l|%self% gaping maw blazes with fire -- it's about to strike!&&0
+        scfight clear dodge
+        scfight setup dodge %targ%
+      end
+    elseif %done% && %targ.id% == %targ_id% && %diff% == 1
+      dg_affect #12208 %targ% TO-HIT 25 20
+    end
+  done
+  scfight clear dodge
+  dg_affect #12203 %self% off
+elseif %mv% == 2
+  scfight clear struggle
+  if %room.players_present% > 1
+    %echo% &&l**** &&Z~%self% whips around you, its coils locking tight and pinning everyone's arms to their sides! ****&&0 (struggle)
+  else
+    %echo% &&l**** &&Z~%self% whips around you, its coils locking tight and pinning your arms to your sides! ****&&0 (struggle)
+  end
+  if %diff% == 1
+    dg_affect #12203 %self% HARD-STUNNED on 20
+  end
+  scfight setup struggle all 20
+  set ch %room.people%
+  while %ch%
+    if %ch.affect(9602)%
+      set scf_strug_char You thrash and strain, but the coils only squeeze tighter...
+      set scf_strug_room ~%%actor%% thrashes and strains in the coils, but the serragon only squeezes tighter.
+      set scf_free_char You wrench an arm free and twist violently, slipping loose from the crushing coils!
+      set scf_free_room ~%%actor%% bursts free of the serragon's coils, staggering from the crushing grip!
+      remote scf_strug_char %ch.id%
+      remote scf_strug_room %ch.id%
+      remote scf_free_char %ch.id%
+      remote scf_free_room %ch.id%
+    end
+    set ch %ch.next_in_room%
+  done
+  set cycle 0
+  set ongoing 1
+  while %cycle% < 5 && %ongoing%
+    wait 4 s
+    set ongoing 0
+    set ch %room.people%
+    while %ch%
+      if %ch.affect(9602)%
+        set ongoing 1
+        if %diff% > 1
+          %send% %ch% &&l**** The coils tighten mercilessly, bones creaking as the air is driven from your lungs! ****&&0 (struggle)
+          %dot% #12205 %ch% 100 30 physical 5
+        else
+          %send% %ch% &&l**** The coils tighten mercilessly, bones creaking as the air is driven from your lungs! ****&&0 (struggle)
+        end
+      end
+      set ch %ch.next_in_room%
+    done
+    eval cycle %cycle% + 1
+  done
+  scfight clear struggle
+  dg_affect #12203 %self% off
+elseif %mv% == 3
+  scfight clear struggle
+  set targ %random.enemy%
+  if !%targ%
+    halt
+  end
+  set targ_id %targ.id%
+  %send% %targ% &&l**** &&Z~%self% slams its tail down across your legs, pinning you hard against the ground! ****&&0 (struggle)
+  %echoaround% %targ% &&l~%self% slams its tail down across |%targ% legs, pinning *%targ% against the ground!&&0
+  if %diff% == 1
+    dg_affect #12203 %self% HARD-STUNNED on 20
+  end
+  scfight setup struggle %targ% 20
+  if %targ.affect(9602)%
+    set scf_strug_char You strain to push the tail away, but it presses down even harder!
+    set scf_strug_room ~%%actor%% struggles under the serragon's tail, but it presses down even harder, crushing *%%actor%% into the ground!
+    set scf_free_char You twist violently, slipping free just as the tail crashes down again!
+    set scf_free_room ~%%actor%% twists violently, slipping free just as the serragon's tail crashes down again!
+    remote scf_strug_char %targ.id%
+    remote scf_strug_room %targ.id%
+    remote scf_free_char %targ.id%
+    remote scf_free_room %targ.id%
+  end
+  eval punish -1 * %diff%
+  set cycle 0
+  set ongoing 1
+  while %cycle% < 5 && %ongoing%
+    wait 4 s
+    set ongoing 0
+    if %targ.id% != %targ_id%
+      set done 1
+    else
+      if %targ.affect(9602)%
+        set ongoing 1
+        if %diff% > 1
+          %send% %targ% &&l**** The heavy tail grinds into your legs, crushing muscle and bone beneath its weight! ****&&0 (struggle)
+          %echoaround% %targ% &&lThe serragon's massive tail grinds into |%targ% legs, holding *%targ% helpless!&&0
+          dg_affect #12206 %targ% BONUS-PHYSICAL %punish% 20
+          dg_affect #12206 %targ% BONUS-MAGICAL %punish% 20
+        else
+          %send% %targ% &&l**** You're still trapped under the tail! ****&&0 (struggle)
+        end
+      end
+    end
+    eval cycle %cycle% + 1
+  done
+  scfight clear struggle
+  dg_affect #12203 %self% off
+elseif %mv% == 4
+  scfight clear dodge
+  %echo% &&l~%self% coils into a tight spiral as it trembles with violent energy...&&0
+  eval dodge %diff% * 40
+  dg_affect #12207 %self% DODGE %dodge% 20
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  scfight setup dodge all
+  wait 5 s
+  if %self.disabled%
+    dg_affect #12207 %self% off
+    nop %self.remove_mob_flag(NO-ATTACK)%
+    halt
+  end
+  %echo% &&l**** &&Z~%self% blurs into a raging crimson spiral -- it's about to unleash a devastating strike! ****&&0 (dodge)
+  set cycle 1
+  set hit 0
+  eval wait 9 - %diff%
+  while %cycle% <= %diff%
+    scfight setup dodge all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfdodge)%
+          set hit 1
+          %echo% &&lThe spiraling coil slams into ~%ch% with crushing force -- scales rake deep as it hurls *%ch% across the ground!&&0
+          %send% %ch% That really hurt!
+          dg_affect #12209 %ch% IMMOBILIZED on 10
+          %damage% %ch% 100 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&lYou throw yourself aside as the spinning mass corkscrews past!&&0
+          if %diff% == 1
+            dg_affect #12208 %ch% TO-HIT 25 10
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&l**** The blazing spiral whips past and wheels around -- it's coming back again! ****&&0 (dodge)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear dodge
+    eval cycle %cycle% + 1
+  done
+  dg_affect #12207 %self% off
+  if !%hit% && %diff% == 1
+    %echo% &&l~%self% trashes weakly as it stumbles out of its spin and struggles to regain control.&&0
+    dg_affect #12203 %self% HARD-STUNNED on 10
+  end
+  wait 8 s
+end
+nop %self.remove_mob_flag(NO-ATTACK)%
+~
 #12212
 Ribbon Serragon: Pickpocket rejection strings~
 0 p 100

@@ -7,4 +7,49 @@ Type 'difficulty <normal | hard | group | boss>' to fight it.~
 T5
 ...type 'difficulty' to prepare to fight $m!~
 S
+#12202
+serragon combat~
+3 0
+0 0 0 0
+S
+#12203
+ribbon serragon~
+4 0
+0 0 0 0
+T5
+...$e's not looking -- now is the time to strike!~
+S
+#12205
+crushing coils~
+4 0
+0 0 0 0
+T5
+...$e's struggling to breath as $s body is crushed!~
+S
+#12206
+crushed legs~
+4 0
+0 0 0 0
+T0
+Your legs are starting to feel better.~
+S
+#12207
+rage spiral~
+4 0
+0 0 0 0
+T5
+...$e is spiraling around in a rage!~
+S
+#12208
+timely dodge~
+4 0
+0 0 0 0
+S
+#12209
+crushed~
+4 0
+0 0 0 0
+T0
+You manage to get back up.~
+S
 $
