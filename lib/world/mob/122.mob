@@ -3,7 +3,7 @@ serragon ribbons tremendous~
 the ribbon serragon~
 A tremendous ribbon serragon glimmers as it coils through the trees!
 ~
-25 125 bdghxyADJKL cEGL 5
+25 125 bdghxyADJKL choEGL 5
 0 0 5 12200 -1 -1
 D
    The sinuous form winds through the trees, flattening the undergrowth beneath
@@ -24,7 +24,6 @@ in on you from both sides, salivating from its gaping maw -- or maws.
 F 12200
 I 4 12218 100.00 1  # LOOT: tremendous corpse of the vermilion serragon
 I 4 12219 100.00 1  # LOOT: twisted corpse of the veridian serragon
-T 9620
 T 9600
 T 9601
 T 9604
@@ -42,7 +41,7 @@ serragon ribbon vermilion~
 the vermilion serragon~
 A ribbon serragon gleams with vermilion bands as it twists and coils.
 ~
-25 125 abdghxyJKL cEGL 5
+25 125 abdghxyJKL chEGL 5
 0 0 5 12201 -1 -1
 D
    The serragon's body flattens into a wide ribbon of scarlet edged in black,
@@ -57,6 +56,8 @@ F 12200
 I 0 3012 20.00 2 b  # BUTCHER: fillet of raw meat
 I 0 3012 40.00 4 b  # BUTCHER: fillet of raw meat
 I 0 3012 40.00 8 b  # BUTCHER: fillet of raw meat
+I 0 12213 20.00 1 u  # BUTCHER: body of a hapless adventurer
+I 0 12212 20.00 1 u  # BUTCHER: half-digested corpse of a large bear
 I 1 1351 20.00 2 k  # SKIN: large skin
 I 1 1351 40.00 4 k  # SKIN: large skin
 I 1 1351 40.00 8 k  # SKIN: large skin
@@ -96,7 +97,7 @@ serragon ribbon veridian~
 the veridian serragon~
 A ribbon serragon glints in shades of veridian in the soft light.
 ~
-25 125 abdghxJKL cEGL 5
+25 125 abdghxJKL coEGL 5
 0 0 5 12202 -1 -1
 D
    The serragon shimmers in waves of green streaked with pale gold, its immense
@@ -112,6 +113,8 @@ F 12200
 I 0 3012 20.00 2 b  # BUTCHER: fillet of raw meat
 I 0 3012 40.00 4 b  # BUTCHER: fillet of raw meat
 I 0 3012 40.00 8 b  # BUTCHER: fillet of raw meat
+I 0 12212 20.00 1 u  # BUTCHER: half-digested corpse of a large bear
+I 0 12213 20.00 1 u  # BUTCHER: body of a hapless adventurer
 I 1 1351 20.00 2 k  # SKIN: large skin
 I 1 1351 40.00 4 k  # SKIN: large skin
 I 1 1351 40.00 8 k  # SKIN: large skin
@@ -187,5 +190,63 @@ wormlike and covered in soft green fuzz, with leafy shoots poking out along its
 back. When it wiggles, the shoots sway as though stirred by a breeze. It chirps
 in a soft, rustling way as it moves.
 ~
+S
+#12212
+bear large~
+a large bear~
+A large bear is pawing at the ground.
+~
+30 60 dgjkoy c 4
+0 0 0 10 -1 -1
+D
+This bear looks like it was eaten by a serragon.
+~
+I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
+T 9118
+S
+#12213
+adventurer hapless fellow~
+some hapless fellow~
+A hapless adventurer is here.
+~
+100 150 dqvI 0 3
+1 0 0 1 -1 -1
+D
+This adventurer suffered a fate.
+~
+S
+#12221
+lizard spine small green spiny~
+a spine lizard~
+A small green spine lizard darts about.
+~
+20 50 djo 0 1
+0 0 0 9 -1 -1
+D
+   The spine lizard is no longer than your forearm, with bright green mottled
+skin and darker bands running down its length. A line of sharp, bony spines
+runs down its back, like the frills of a serragon. It's quick and restless,
+skittering between roots and rocks, vanishing into cover at the slightest
+sound.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+M
+0
+$n flicks its tongue.~
+M
+0
+$n flicks its tongue.~
+M
+0
+$n flicks its tongue.~
+M
+0
+$n flicks its tongue out.~
+M
+0
+$n darts past you.~
+M
+0
+$n skitters around.~
 S
 $

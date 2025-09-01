@@ -38,7 +38,7 @@ down~
 %force% %actor% enter pit
 ~
 #12202
-Ribbon Serragon: Death trigger~
+Ribbon Serragon: Death trigger and loot~
 0 f 100
 ~
 if %self.vnum% != 12200
@@ -80,6 +80,108 @@ if %inside%
     set loot 1
     remote loot %inside.id%
     nop %self.remove_mob_flag(!LOOT)%
+    *
+    * LOOT: build list of vnums to load
+    set load_list 0
+    *
+    set difficulty %self.var(difficulty,1)%
+    *
+    * MAIN ITEM
+    eval chance %random.10000%
+    if %chance% <= 2000
+      * heart / building 20%
+      set load_list 12220 %load_list%
+    elseif %chance% <= 4000
+      * dung / crop 20%
+      set load_list 12203 %load_list%
+    elseif %chance% <= 6000
+      * pocket pants / lung 20%
+      set load_list 12216 %load_list%
+    elseif %chance% <= 8000
+      * greatness cloak / tooth 20%
+      set load_list 12214 %load_list%
+    else
+      * bonus scales, final 20%
+      set load_list 12207 %load_list%
+    end
+    *
+    * MOUNT?
+    eval chance %random.10000%
+    if %difficulty% >= 3
+      * better chance on group+
+      eval chance %chance% / 2
+    end
+    if %chance% <= 500
+      * earthworm 5% / 10% group+
+      set load_list 12204 %load_list%
+    elseif %chance% <= 1000
+      * caterpillar 5% / 10%
+      set load_list 12205 %load_list%
+    elseif %chance% <= 1500
+      * sproutling 5% / 10%
+      set load_list 12206 %load_list%
+    end
+    *
+    * WEALTH
+    eval chance %random.10000%
+    if %difficulty% >= 3
+      * group/boss
+      if %chance% <= 1000
+        * skull 10%
+        set load_list 12209 %load_list%
+      elseif %chance% <= 4000
+        * coilstone 30%
+        set load_list 12208 %load_list%
+      else
+        * scales 60%
+        set load_list 12207 %load_list%
+      end
+    else
+      * normal/hard
+      if %chance% <= 4000
+        * skull 40%
+        set load_list 12209 %load_list%
+      elseif %chance% <= 8000
+        * coilstone 40%
+        set load_list 12208 %load_list%
+      else
+        * scales 20%
+        set load_list 12207 %load_list%
+      end
+    end
+    *
+    * SEED
+    if %random.10000% <= 500
+      set load_list 600 %load_list%
+    end
+    *
+    * RUN LOAD LIST
+    while %load_list%
+      set vnum %load_list.car%
+      set load_list %load_list.cdr%
+      *
+      %load% obj %vnum% %self% inv
+      set loaded %self.inventory%
+      * check it
+      if !%loaded% || %loaded.vnum% != %vnum%
+        %echo% [Ribbon Serragon] Error loading loot: %vnum%
+      else
+        * flags/binding
+        if %loaded.is_flagged(BOP)%
+          nop %loaded.bind(%self%)%
+        end
+        if %loaded.is_flagged(SCALABLE)%
+          * hard/group flags
+          if %self.mob_flagged(HARD)% && !%loaded.is_flagged(HARD-DROP)%
+            nop %loaded.flag(HARD-DROP)%
+          end
+          if %self.mob_flagged(GROUP)% && !%loaded.is_flagged(GROUP-DROP)%
+            nop %loaded.flag(GROUP-DROP)%
+          end
+        end
+        %scale% %loaded% %self.level%
+      end
+    done
   end
 end
 ~
@@ -88,6 +190,14 @@ Ribbon Serragon: Delayed completion~
 1 f 0
 ~
 %adventurecomplete%
+~
+#12204
+Ribbon Serragon: Start progress goal~
+2 g 100
+~
+if %actor.is_pc% && %actor.empire%
+  nop %actor.empire.start_progress(12200)%
+end
 ~
 #12205
 Ribbon Serragon: Wander~

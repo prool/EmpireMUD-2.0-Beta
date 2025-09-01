@@ -38,17 +38,19 @@ S
 dung serragon twisted pile great~
 a pile of twisted serragon dung~
 A great pile of twisted serragon dung is steaming a little too close to you.~
-   The massive pile of dung is still warm and, certainly, quite pungent. 
+   The massive pile of dung is still warm and, certainly, quite pungent.
 Hidden amongst small bones and rocks are a few remnants of twigs and,
 surprisingly frilled seeds still whole and intact.
    You could try planting the dung somewhere.
+   Ribbon serragons are known to swallow anything that will fit between its
+jaws. Their trails are scraped raw, leaving no plant, beast, or rock behind.
+The inedible parts churn and roil to break up the rest.
 ~
-3 be a 0 0 12
+3 be a 0 0 13
 0 12221 0
 0 0
 C
 1 1
-O+ 1 6180
 S
 #12204
 whistle earthworm worm giant mount~
@@ -149,9 +151,9 @@ R
 4 5611 a
 S
 #12209
-skull serragon serrated~
-a serrated serragon skull~
-The serrated skull of a serragon looms here.~
+skull serragon frilled~
+a frilled serragon skull~
+The frilled skull of a serragon looms here.~
    This enormous skull once crowned a ribbon serragon, and finding one unbroken
 is a prize beyond measure. Its long, narrow form is crowned with a frilled
 crest of spines that splay outward like a jagged fan, sharp as broken obsidian.
@@ -168,6 +170,134 @@ C
 100 100
 R
 4 5611 a
+S
+#12212
+corpse body half-digested halfdigested digested large bear~
+the half-digested corpse of a large bear~
+The half-digested corpse of a large bear is lying on the ground.~
+   Most of the fur from the corpse has been eaten away by the foul-smelling
+stomach acid or beaten away by the churning rocks in whatever stomach this bear
+found itself in. The upper torso is riddled with needle-like puncture marks and
+most of the claws are missing. You turn away before the smell overtakes you.
+~
+10 gk a 0 0 8
+12212 4 0
+7 36
+M
+0
+You bury $p.~
+M
+1
+$n buries $p.~
+S
+#12213
+body adventurer half-digested halfdigested digested corpse hapless~
+the body of a hapless adventurer~
+The body of a hapless adventurer is lying here, half-digested.~
+   What remains of this poor adventurer -- and it isn't much -- doesn't look
+good. Little remains of his clothing; littler still remains of his skin. You
+can't make out who this was. Unfortunately, it looks a little late for a
+resurrection spell, too.
+~
+10 gk a 0 0 11
+12213 4 0
+7 360
+M
+0
+You bury $p.~
+M
+1
+$n buries $p.~
+S
+#12214
+tooth serragon ribbon intact~
+an intact ribbon serragon tooth~
+An intact ribbon serragon tooth is staked into the ground.~
+   The needle-like fang, knocked loose in a great struggle, is nearly flawless.
+It's also nearly the length of your forearm. Its surface is glassy and faintly
+striated, translucent when it catches the light.
+   Those skilled in jewelry can sew a needle tooth cloak with this fang as its
+clasp.
+   Hunters prize such fangs as rare ornaments, since few survive intact when
+the beast is slain. They're known to adorn their clothes with these fangs to
+show off their greatness in battle.
+~
+3 e a 0 0 6
+0 0 0
+14 0
+C
+100 100
+R
+4 5193 0
+S
+#12215
+cloak clasped needle tooth serragon~
+a cloak clasped with the needle tooth of a serragon~
+A cloak clasped with a tooth is lying here.~
+   Though the cloak is elegant enough on its own, it is the large clasp at the
+cloak's throat that truly makes it unique. The clasp is made from the polished
+needle fang of a ribbon serragon, translucent nd gleaming faintly in the light.
+   Hunters say such clasps mark those who have braved the coils and lived; that
+the fang a sign that the forest's deadliest predator could not defeat them.
+~
+2 mo ak 0 0 4
+0 0 0
+7 0
+A
+5 1 0
+A
+11 1 3
+A
+16 1 3
+A
+15 1 3
+C
+50 150
+S
+#12216
+lung lobed many-lobed manylobed massive serragon~
+a many-lobed serragon lung~
+A massive, many-lobed lung lies flattened on the ground.~
+   The enormous lung stretches longer than a man is tall. Its rubbery flesh
+branches into a maze of small lobes and chambers. Though heavy, the lung is
+surprisingly elastic, and when pressed it releases faint wheezes from its
+countless pockets.
+   With this lung, you can sew lunghide trousers, provided you have the
+Leatherworking ability.
+   Hunters sometimes complain of ribbon serragon flesh being tough and stringy,
+though it's rich with fat and keeps for weeks if dried, so desperate camps have
+lived on it after a lucky kill.
+~
+3 e a 0 0 8
+0 0 0
+7 0
+C
+100 100
+R
+4 5193 0
+S
+#12217
+pants lunghide hide pair~
+a pair of lunghide pants~
+A pair of lunghide pants is folded up on the ground.~
+   These trousers are fashioned from the elastic hide of a ribbon serragon's
+enormous lung. The many branching lobes are cleverly stitched into place as
+natural pouches, resulting in dozens of tiny pockets hidden across the surface.
+   The rasp of ribbon serragon scales is often mistaken for saws in the
+distance. All the more tragic for the lost woodsman thinking he's heading back
+
+~
+2 emo af 0 0 5
+0 0 0
+7 0
+A
+5 1 3
+A
+19 3 0
+A
+11 1 0
+C
+50 150
 S
 #12218
 corpse tremendous vermilion serragon ribbon~
