@@ -19,6 +19,19 @@ ribbon serragon~
 T5
 ...$e's not looking -- now is the time to strike!~
 S
+#12204
+invoke the ribbon serragon~
+2 0
+0 0 0 0
+T0
+The trees whisper and the braided pillars shiver as you invoke the sacred name of the ribbon serragon.~
+T1
+The trees whisper and the braided pillars shiver as $n invokes the name of the ribbon serragon.~
+T4
+The trees whisper and the braided pillars shiver as you invoke the sacred name of the ribbon serragon.~
+T5
+The trees whisper and the braided pillars shiver as $n invokes the name of the ribbon serragon.~
+S
 #12205
 crushing coils~
 4 0
@@ -73,5 +86,57 @@ T2
 You're bleeding from so many punctures!~
 T5
 ...$e is bleeding from many puncture wounds.~
+S
+#12213
+chop~
+2 0
+0 0 0 0
+T0
+You chop and clear trees.~
+T1
+$n chops and clears trees.~
+T4
+You chop and clear trees.~
+T5
+$n chops and clears trees.~
+S
+#12214
+craft leaves~
+2 0
+0 0 0 0
+T0
+You hammer leaves from the bronze.~
+T1
+$n hammers leaves from the bronze.~
+T4
+You hammer leaves from the bronze.~
+T5
+$n hammers leaves from the bronze.~
+S
+#12215
+carve basin~
+2 0
+0 0 0 0
+T0
+You carve a wooden basin from a massive trunk.~
+T1
+$n carves a wooden basin from a massive trunk.~
+T4
+You carve a wooden basin from a massive trunk.~
+T5
+$n carves a wooden basin from a massive trunk.~
+S
+#12216
+annoint~
+2 0
+0 0 0 0
+T0
+You spread blood from the serragon heart across the basic.~
+T1
+$n spreads blood from the serragon heart across the basin.~
+T4
+You spread blood from the serragon heart across the basic.~
+T5
+$n spreads blood from the serragon heart across the basin.~
 S
 $

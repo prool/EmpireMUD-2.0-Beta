@@ -4,7 +4,7 @@ the ribbon serragon~
 A tremendous ribbon serragon glimmers as it coils through the trees!
 ~
 25 125 bdghxyADJKL cEGL 5
-0 0 51 12200 -1 -1
+0 0 5 12200 -1 -1
 D
    The sinuous form winds through the trees, flattening the undergrowth beneath
 its coils. Its body is strangely split -- two long ribbons twisting and
@@ -43,7 +43,7 @@ the vermilion serragon~
 A ribbon serragon gleams with vermilion bands as it twists and coils.
 ~
 25 125 abdghxyJKL cEGL 5
-0 0 51 12201 -1 -1
+0 0 5 12201 -1 -1
 D
    The serragon's body flattens into a wide ribbon of scarlet edged in black,
 like silk fraying to knives. Its serrated scales screech as they scrape against
@@ -54,6 +54,12 @@ revealing curved teeth that hook like thorns.
    Type 'adventure' for more information.
 ~
 F 12200
+I 0 3012 20.00 2 b  # BUTCHER: fillet of raw meat
+I 0 3012 40.00 4 b  # BUTCHER: fillet of raw meat
+I 0 3012 40.00 8 b  # BUTCHER: fillet of raw meat
+I 1 1351 20.00 2 k  # SKIN: large skin
+I 1 1351 40.00 4 k  # SKIN: large skin
+I 1 1351 40.00 8 k  # SKIN: large skin
 I 4 12218 100.00 1 c  # LOOT: tremendous corpse of the vermilion serragon
 M
 0
@@ -91,7 +97,7 @@ the veridian serragon~
 A ribbon serragon glints in shades of veridian in the soft light.
 ~
 25 125 abdghxJKL cEGL 5
-0 0 51 12202 -1 -1
+0 0 5 12202 -1 -1
 D
    The serragon shimmers in waves of green streaked with pale gold, its immense
 but relatively flat body moving like a great banner twisting in the wind. The
@@ -103,6 +109,12 @@ you with an eager stream of saliva.
    Type 'adventure' for more information.
 ~
 F 12200
+I 0 3012 20.00 2 b  # BUTCHER: fillet of raw meat
+I 0 3012 40.00 4 b  # BUTCHER: fillet of raw meat
+I 0 3012 40.00 8 b  # BUTCHER: fillet of raw meat
+I 1 1351 20.00 2 k  # SKIN: large skin
+I 1 1351 40.00 4 k  # SKIN: large skin
+I 1 1351 40.00 8 k  # SKIN: large skin
 I 4 12219 100.00 1 c  # LOOT: twisted corpse of the veridian serragon
 M
 0
@@ -130,5 +142,50 @@ T 12205
 T 12202
 T 12214
 T 12211
+S
+#12204
+earthworm worm giant~
+a giant earthworm~
+A giant earthworm ripples slowly along the ground.
+~
+100 100 dehj 0 4
+0 0 9 25 -1 -1
+D
+   It is a massive, pale earthworm, thick as a tree trunk and several yards
+long. Its segmented body glistens with the faint sheen of moisture, ridged with
+rings that flex and contract in steady waves. Though blind, it moves
+confidently, sensing vibrations in the ground. Its flattened back offers a
+stable serface where riders can sit astride.
+~
+S
+#12205
+caterpillar giant~
+a giant caterpillar~
+A giant caterpillar inches along, adorned with leafy frills.
+~
+100 100 dehj 0 4
+0 0 9 9 -1 -1
+D
+   The enormous caterpillar has a body of soft, mossy green, banded with darker
+ridges that undulate as it inches forward. Along its back sprout leafy frills
+that resemble sprigs of foliage, allowing it to blend into the forest canopy --
+if it can climb a tree. Its many stubby legs grip firmly to the ground, each
+movement slow but steady. The leaflike pads across its body form a natural
+perch for a rider.
+~
+S
+#12206
+sproutling mossy tiny tuft~
+a mossy sproutling~
+A tiny tuft of moss wiggles along the ground.
+~
+1 1 bdo dn 3
+0 0 34 9 -1 -1
+D
+   It looks like a living patch of forest floor come to life. Its body is
+wormlike and covered in soft green fuzz, with leafy shoots poking out along its
+back. When it wiggles, the shoots sway as though stirred by a breeze. It chirps
+in a soft, rustling way as it moves.
+~
 S
 $

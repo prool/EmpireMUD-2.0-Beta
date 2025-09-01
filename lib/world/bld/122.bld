@@ -19,4 +19,26 @@ trees~
 this side.
 ~
 S
+#12220
+Ribbon Serragon Shrine~
+A Shrine to the Ribbon Serragon~
+@.&G><@.~
+64 16 d 0
+0 0 0 -1
+E
+desc shrine around building monument ribbon serragon~
+   Two great pillars twist upward in a braided spiral, meeting at an arch
+crowned with serrated leaves of hammered bronze. At its base rests a basin
+carved from oak, stained where the first offering of blood was poured. Above
+you, ribbons of cloth flutter from the branches.
+~
+E
+basin offering blood~
+   Streaks of deep vermillion and viridian stain the basic, which is carved
+from a single block of oak.
+~
+I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
+R
+12204 1 5 0
+S
 $
