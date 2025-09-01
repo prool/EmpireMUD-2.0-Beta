@@ -34,6 +34,22 @@ M
 $n carefully descends into the pit.~
 T 12201
 S
+#12203
+dung serragon twisted pile great~
+a pile of twisted serragon dung~
+A great pile of twisted serragon dung is steaming a little too close to you.~
+   The massive pile of dung is still warm and, certainly, quite pungent. 
+Hidden amongst small bones and rocks are a few remnants of twigs and,
+surprisingly frilled seeds still whole and intact.
+   You could try planting the dung somewhere.
+~
+3 be a 0 0 12
+0 12221 0
+0 0
+C
+1 1
+O+ 1 6180
+S
 #12204
 whistle earthworm worm giant mount~
 a giant earthworm mount whistle~
@@ -209,12 +225,14 @@ length. The skins are smooth and cool to the touch, mottled with green stripes.
 When you split one open, the flesh within is pale and moist, with a sweet
 scent. A strip of vine bundles the gourds together.
 ~
-6 gC a 0 0 15
+6 gC a 0 0 16
 12 0 0
 7 120
 C
 1 1
 I 15 12222 100.00 4  # SEPARATE: fresh snake gourd
+I 25 12223 50.00 1 s  # SEED: handful of snake gourd seeds
+I 25 12223 50.00 2 s  # SEED: handful of snake gourd seeds
 O+ 1 6152
 R
 4 5215 0
@@ -235,5 +253,22 @@ I 14 12221 100.00 4 e  # COMBINE: bundle of coiled snake gourds
 O+ 1 6142
 R
 4 5619 0
+S
+#12223
+seeds handful snake gourd frilled~
+a handful of snake gourd seeds~
+A handful of frilled snake gourd seeds is scattered here.~
+   The seeds are flat and oval, beige or light tan in color, some of them
+striped. The edges are ringed with a delicate, frilled margin that gives them a
+scalloped look. They rattle softly when shaken in the palm.
+~
+3 bC a 0 0 11
+0 12221 0
+0 8760
+C
+1 1
+O+ 1 6180
+R
+4 5210 0
 S
 $
