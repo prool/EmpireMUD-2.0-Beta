@@ -3337,6 +3337,7 @@ const char *corpse_flags[] = {
 	"SKINNED",
 	"HUMAN",
 	"NO-LOOT"
+	"BUTCHERED",
 	"\n"
 };
 
