@@ -195,10 +195,6 @@ Fur Dragon: attack info before difficulty selection~
 0 B 0
 ~
 if %self.aff_flagged(!ATTACK)%
-  if %actor.char_target(%arg%)% != %self%
-    return 1
-    halt
-  end
   %send% %actor% You need to choose a difficulty before you can attack ~%self%.
   %send% %actor% Usage: difficulty <hard \| group \| boss>
   %echoaround% %actor% ~%actor% considers attacking ~%self%.
@@ -1100,7 +1096,7 @@ Hoarfrost Serragon: Instruction to diff-sel~
 if %self.affect(12360)%
   %send% %actor% You can't attack ~%self% while it's in its death throes!
   return 0
-elseif %self.affect(12350)% && %actor.char_target(%arg%)% == %self%
+elseif %self.affect(12350)%
   %send% %actor% You need to choose a difficulty before you can attack ~%self%.
   %send% %actor% Usage: difficulty <normal \| hard \| group \| boss>
   %echoaround% %actor% ~%actor% considers attacking ~%self%.

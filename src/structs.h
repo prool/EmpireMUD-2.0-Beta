@@ -1608,6 +1608,7 @@ typedef struct vehicle_data vehicle_data;
 #define MOB_CUSTOM_SCRIPT_5  11	// called by scripts
 #define MOB_CUSTOM_SCAVENGE_CORPSE  12	// mob eats a corpse due to SCAVENGER flag
 #define MOB_CUSTOM_CONSIDER_INFO  13	// shown on the 'consider' command
+#define MOB_CUSTOM_ECHO_VISIBLE  14	// only shows if player can see it
 
 
 // MOB_MOVE_x: mob/vehicle movement types
@@ -1782,6 +1783,7 @@ typedef enum {
 #define CORPSE_SKINNED  BIT(1)	// The corpse has been skinned
 #define CORPSE_HUMAN  BIT(2)	// a person
 #define CORPSE_NO_LOOT  BIT(3)	// cannot butcher/skin due to !LOOT flag
+#define CORPSE_BUTCHERED  BIT(4)	// for larger corpses, butcher won't consume
 
 
 // ITEM_x: Item types

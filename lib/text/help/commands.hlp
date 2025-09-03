@@ -436,6 +436,9 @@ with the Huntsman ability -- at least, when there's something to be butchered
 from the corpse. Not all corpses can be butchered, and some corpses only have
 rare results even with Huntsman.
 
+Smaller corpses are butchered away to nothing. Larger corpses remain, but can
+still only be butchered one time.
+
 See also: HUNTSMAN, SKIN COMMAND
 #
 BUY LIST SHOP SHOPS
