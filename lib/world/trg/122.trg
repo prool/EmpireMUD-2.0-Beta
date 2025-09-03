@@ -325,6 +325,19 @@ while %vnum% <= 12202
 done
 %purge% %self%
 ~
+#12209
+Ribbon Serragon: Simple fight script for pair~
+0 k 10
+~
+* Paired serragon has simpler combat scripts as its difficulty is higher
+if !%self.aff_flagged(HASTE)% || !%self.aff_flagged(SLOW)%
+  dg_affect %self% HASTE on 30
+  %echo% &&l~%self% whirls faster and faster!&&0
+elseif %self.aff_flagged(BLIND)%
+  dg_affect %self% BLIND off silent
+  %echo% &&l~%self% shakes off the blindness!&&0
+end
+~
 #12210
 Vermilion Serragon combat: Flaming Maw, Crushing Coils, Tail Pin~
 0 k 100

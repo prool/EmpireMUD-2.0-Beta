@@ -3,7 +3,7 @@ serragon ribbons tremendous~
 the ribbon serragon~
 A tremendous ribbon serragon glimmers as it coils through the trees!
 ~
-25 125 bdghxyADJKL choEGL 5
+25 125 bdghxyADJKL cEGL 5
 0 0 5 12200 -1 -1
 D
    The sinuous form winds through the trees, flattening the undergrowth beneath
@@ -35,13 +35,14 @@ T 12205
 T 12202
 T 12213
 T 12208
+T 12209
 S
 #12201
 serragon ribbon vermilion~
 the vermilion serragon~
 A ribbon serragon gleams with vermilion bands as it twists and coils.
 ~
-25 125 abdghxyJKL chEGL 5
+25 125 abdghxyJKL cEGL 5
 0 0 5 12201 -1 -1
 D
    The serragon's body flattens into a wide ribbon of scarlet edged in black,
@@ -97,7 +98,7 @@ serragon ribbon veridian~
 the veridian serragon~
 A ribbon serragon glints in shades of veridian in the soft light.
 ~
-25 125 abdghxJKL coEGL 5
+25 125 abdghxJKL cEGL 5
 0 0 5 12202 -1 -1
 D
    The serragon shimmers in waves of green streaked with pale gold, its immense

@@ -19,6 +19,8 @@ I 6 12222 100.00 25  # FORAGE: fresh snake gourd
 I 8 12221 50.00 2 h  # HARVEST: bundle of coiled snake gourds
 I 8 12221 40.00 3 h  # HARVEST: bundle of coiled snake gourds
 I 8 12221 10.00 4 h  # HARVEST: bundle of coiled snake gourds
+M
+12221 20.00 b
 U
 0
 Vines coil up from the soil, twisting and writhing as they stretch out broad leaves and gourds snake out from underneath.~
