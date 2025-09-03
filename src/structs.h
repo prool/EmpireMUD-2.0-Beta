@@ -1783,6 +1783,7 @@ typedef enum {
 #define CORPSE_SKINNED  BIT(1)	// The corpse has been skinned
 #define CORPSE_HUMAN  BIT(2)	// a person
 #define CORPSE_NO_LOOT  BIT(3)	// cannot butcher/skin due to !LOOT flag
+#define CORPSE_BUTCHERED  BIT(4)	// for larger corpses, butcher won't consume
 
 
 // ITEM_x: Item types
