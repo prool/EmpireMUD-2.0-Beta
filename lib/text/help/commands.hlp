@@ -1057,6 +1057,7 @@ See also: DIRECTIONS, DISEMBARK, ENTER, EXIT
 FACTION FACTIONS REPUTATIONS REP "FACTION REP"
 
 Usage:  factions [name]
+        reputations [name]
 
 Factions are groups of NPCs and adventures with whom players can gain or lose
 reputation. The consequences of higher or lower reputation depend on the
