@@ -97,7 +97,7 @@ Included Adventure Zones
 [  170] Hamlet of the Undead (replaced by 10400) [0-0] DEPRECATED
 [  180] Misplaced Mother Goose [10730-10749] (1-25) 10 mobs, 19 objs, 1 room
 [  181] Goblin Mines [10750-10774] (1-25) 9 mobs, 23 objs, 6 rooms
-[  200] Burrow Canyons [11100-11129] (75-100) 14 mobs, 27 objs, 24 rooms
+[  200] Burrow Canyons [11100-11129] (75-175) 14 mobs, 28 objs, 24 rooms
 [  201] The Cursed Chalice of Mill Manor [11130-11159] (100-150) 10 mobs, 20 objs, 19 rooms
 [  281] Mountain Valley: Molten Fiend [18075-18099] (200-250) 5 mobs, 23 objs, 2 rooms
 [  282] Goblin Logging Camp [18100-18124] (10-50) 1 mob, 7 objs, 1 room

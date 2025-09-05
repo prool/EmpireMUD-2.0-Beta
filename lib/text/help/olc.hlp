@@ -2807,7 +2807,7 @@ The following affect flags are available:
  &c!SEE&0 - Cannot be seen in the room at all -- do not use this on items.
  &cFLYING&0 - Is flying.
  &c!ATTACK&0 - Cannot be attacked -- do not use this on items.
- &cIMMUNE-MAGICAL-DEBUFFS- Immune to any 'magical' debuffs.
+ &cIMMUNE-MAGICAL-DEBUFFS&0 - Immune to any 'magical' debuffs.
  &cDISARMED&0 - Has lost their weapon -- do not use this on items.
  &cHASTE&0 - Has the effect of the Hasten ability.
  &cIMMOBILIZED&0 - Cannot move -- do not use this on items.

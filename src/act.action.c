@@ -224,7 +224,7 @@ const struct gen_interact_data_t gen_interact_data[] = {
 	{ INTERACT_GATHER, ACT_GATHERING, "gather", "gathering", "gather_base_timer", 4,
 		PTECH_GATHER_COMMAND, "gather_approval",
 		NO_TOOL, GI_NO_SPEC, NOBITS,
-		{ /* start msg */ { "You begin looking around for material.", "$n starts looking for something to on the ground." },
+		{ /* start msg */ { "You begin looking around for material.", "$n starts looking for something on the ground." },
 		/* pre-finish */ NULL,
 		/* finish msg */ { "You gather $p!", "$n gathers $p!" },
 		/* empty msg */ "There's no good material left for you to gather here.",
