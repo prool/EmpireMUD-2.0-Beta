@@ -3510,6 +3510,7 @@ const char *obj_custom_types[] = {
 	"enter-portal-to-room",
 	"exit-portal-to-room",
 	"identify-info",
+	"identify-tutorial",
 	"\n"
 };
 
@@ -3530,9 +3531,9 @@ const char *obj_custom_type_help =
 "&w Shown when you use it to mine ore: mine-to-char mine-to-room&0\r\n"
 " Shown when you use it to chop trees: chop-to-char chop-to-room\r\n"
 "&w Shown in order when playing it: instrument-to-char instrument-to-room&0\r\n"
-" Shown when using portals: enter-portal-to-char, enter-portal-to-room,\r\n"
+" Shown when using portals: enter-portal-to-char enter-portal-to-room,\r\n"
 "   exit-portal-to-room\r\n"
-"&w Shown when item is identified: identify-info&0\r\n"
+"&w Shown when item is identified: identify-info identify-tutorial&0\r\n"
 " Available for scripts: script1 script2 script3 script4 script5\r\n";
 
 
@@ -5599,6 +5600,7 @@ const char *veh_custom_types[] = {
 	"exit-to-inside",
 	"exit-to-outside",	// 5
 	"identify-info",
+	"identify-tutorial",
 	"\n"
 };
 

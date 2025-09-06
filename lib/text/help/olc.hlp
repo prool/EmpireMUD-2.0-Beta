@@ -7158,6 +7158,7 @@ Message types:
  &center-portal-to-room&0 - Shown to the room when char enters a portal ($p).
  &cexit-portal-to-room&0 - Shown to the room when char exits a portal ($p).
  &cidentify-info&0 - Shown when the item is identified.
+ &cidentify-tutorial&0 - Shown when the item is identified if tutorials are on.
 
 Resource messages are shown when received from: butcher, chop, dig, fish,
 forage, harvest, mine, pick, quarry, scrape, shear, or skin. These use $p for
@@ -10698,6 +10699,7 @@ Player entering/exiting messages:
 
 Other messages:
  &cidentify-info&0 - Shown when the vehicle is identified.
+ &cidentify-tutorial&0 - Shown when the vehicle is identified.
 
 See also: OLC VEHICLES, DOLLAR SIGN CODES
 #d
