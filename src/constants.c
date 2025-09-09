@@ -63,8 +63,8 @@ void tog_pvp(char_data *ch);
 //// EMPIREMUD CONSTANTS /////////////////////////////////////////////////////
 
 // Shown on the "version" command and sent over MSSP
-const char *version = "EmpireMUD 2.0 beta 5.189";
-const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.9";
+const char *version = "EmpireMUD 2.0 beta 5.191";
+const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.10";
 
 
 // data for the built-in game levels -- this adapts itself if you reduce the number of immortal levels
@@ -2888,6 +2888,7 @@ const char *mob_custom_types[] = {
 	"script5",
 	"scavenge-corpse",
 	"consider-info",
+	"echo-visible",
 	"\n"
 };
 
@@ -2895,7 +2896,7 @@ const char *mob_custom_types[] = {
 // MOB_CUSTOM_x (2/2): how they're shown in olc
 const char *mob_custom_type_help =
 "Types of messages:\r\n"
-"&w Echo messages: echo echo-day echo-night&0\r\n"
+"&w Echo messages: echo echo-visible echo-day echo-night&0\r\n"
 " Speak text: say say-day say-night\r\n"
 "&w Varying lond descriptions: long-desc&0\r\n"
 " Shown when a scavenger mob eats a corpse: scavenge-corpse\r\n"
@@ -3335,7 +3336,8 @@ const char *corpse_flags[] = {
 	"EATEN",	// 0
 	"SKINNED",
 	"HUMAN",
-	"NO-LOOT"
+	"NO-LOOT",
+	"BUTCHERED",
 	"\n"
 };
 
@@ -3508,6 +3510,7 @@ const char *obj_custom_types[] = {
 	"enter-portal-to-room",
 	"exit-portal-to-room",
 	"identify-info",
+	"identify-tutorial",
 	"\n"
 };
 
@@ -3528,9 +3531,9 @@ const char *obj_custom_type_help =
 "&w Shown when you use it to mine ore: mine-to-char mine-to-room&0\r\n"
 " Shown when you use it to chop trees: chop-to-char chop-to-room\r\n"
 "&w Shown in order when playing it: instrument-to-char instrument-to-room&0\r\n"
-" Shown when using portals: enter-portal-to-char, enter-portal-to-room,\r\n"
+" Shown when using portals: enter-portal-to-char enter-portal-to-room,\r\n"
 "   exit-portal-to-room\r\n"
-"&w Shown when item is identified: identify-info&0\r\n"
+"&w Shown when item is identified: identify-info identify-tutorial&0\r\n"
 " Available for scripts: script1 script2 script3 script4 script5\r\n";
 
 
@@ -5597,6 +5600,7 @@ const char *veh_custom_types[] = {
 	"exit-to-inside",
 	"exit-to-outside",	// 5
 	"identify-info",
+	"identify-tutorial",
 	"\n"
 };
 

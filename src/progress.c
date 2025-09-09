@@ -3003,7 +3003,7 @@ OLC_MODULE(progedit_name) {
 
 OLC_MODULE(progedit_tasks) {
 	progress_data *prg = GET_OLC_PROGRESS(ch->desc);
-	olc_process_requirements(ch, argument, &PRG_TASKS(prg), "tasks", TRUE);
+	olc_process_requirements(ch, argument, &PRG_TASKS(prg), "task", TRUE);
 }
 
 

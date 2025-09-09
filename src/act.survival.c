@@ -568,6 +568,9 @@ ACMD(do_butcher) {
 	else if (GET_CORPSE_NPC_VNUM(corpse) == NOTHING || !(proto = mob_proto(GET_CORPSE_NPC_VNUM(corpse))) || !has_interaction(proto->interactions, INTERACT_BUTCHER)) {
 		msg_to_char(ch, "You can't get any good meat out of that.\r\n");
 	}
+	else if (IS_SET(GET_CORPSE_FLAGS(corpse), CORPSE_BUTCHERED)) {
+		msg_to_char(ch, "It has already been butchered.\r\n");
+	}
 	else if (!has_tool(ch, TOOL_KNIFE)) {
 		msg_to_char(ch, "You need to equip a good knife to butcher with.\r\n");
 	}
@@ -585,8 +588,16 @@ ACMD(do_butcher) {
 			act("$n butchers $p but gets no useful meat.", FALSE, ch, corpse, NULL, TO_ROOM);
 		}
 		
-		empty_obj_before_extract(corpse);
-		extract_obj(corpse);
+		if (GET_CORPSE_SIZE(corpse) <= SIZE_NORMAL) {
+			// small corpse: extract
+			empty_obj_before_extract(corpse);
+			extract_obj(corpse);
+		}
+		else {
+			// large corpse: flag
+			set_obj_val(corpse, VAL_CORPSE_FLAGS, GET_CORPSE_FLAGS(corpse) | CORPSE_BUTCHERED);
+		}
+		
 		command_lag(ch, WAIT_OTHER);
 	}
 }

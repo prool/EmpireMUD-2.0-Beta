@@ -586,7 +586,7 @@ Example:
 
 See also: APPROACH, USE
 #
-SKILL SKILLS "SKILL BUY" "SKILL RESET" "SKILL LEVELS"
+SKILL SKILLS "SKILL BUY" "SKILL LEVELS"
 
 Usage:  skills -- list all skills
         skill <name> [-all] -- see a skill's details and abilities 
@@ -658,7 +658,7 @@ Some skills cannot be dropped all the way to zero voluntarily.
 
 See also: SKILL
 #
-"SKILL RESET" "ABILITY RESET" "RESET ABILITY" "RESET ABILITIES"
+"SKILL RESET" "ABILITY RESET" "RESET ABILITY" "RESET ABILITIES" "RESET SKILL"
 
 Usage:  skill reset [skill]
 
@@ -668,8 +668,9 @@ refunded.
 
 You can reset in order to buy a different set of abilities, because you bought
 the wrong ability, or because you were using a certain set of abilities to
-level up and are ready for a longterm set. Resetting a skill only resets your
-current set (see SKILL SWAP).
+level up and are ready for a longterm set.
+
+Resetting a skill only resets it on your active skill set (see SKILL SWAP).
 
 Using "skill reset" without a skill name will display how many resets you have
 available in each skill tree. You get a free reset in each skill when you hit

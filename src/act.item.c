@@ -1166,6 +1166,9 @@ void identify_obj_to_char(obj_data *obj, char_data *ch, bool simple) {
 		msg_to_char(ch, "This item has a chance to become something else when identified in your inventory.\r\n");
 	}
 	
+	if (obj_has_custom_message(obj, OBJ_CUSTOM_IDENTIFY_TUTORIAL) && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+		msg_to_char(ch, "%s\r\n", obj_get_custom_message(obj, OBJ_CUSTOM_IDENTIFY_TUTORIAL));
+	}
 	if (obj_has_custom_message(obj, OBJ_CUSTOM_IDENTIFY_INFO)) {
 		msg_to_char(ch, "%s\r\n", obj_get_custom_message(obj, OBJ_CUSTOM_IDENTIFY_INFO));
 	}
@@ -1247,6 +1250,9 @@ void identify_vehicle_to_char(vehicle_data *veh, char_data *ch) {
 		msg_to_char(ch, "Notes: %s\r\n", buf);
 	}
 	
+	if (veh_has_custom_message(veh, VEH_CUSTOM_IDENTIFY_TUTORIAL) && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+		msg_to_char(ch, "%s\r\n", veh_get_custom_message(veh, VEH_CUSTOM_IDENTIFY_TUTORIAL));
+	}
 	if (veh_has_custom_message(veh, VEH_CUSTOM_IDENTIFY_INFO)) {
 		msg_to_char(ch, "%s\r\n", veh_get_custom_message(veh, VEH_CUSTOM_IDENTIFY_INFO));
 	}

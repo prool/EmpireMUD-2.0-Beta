@@ -436,6 +436,9 @@ with the Huntsman ability -- at least, when there's something to be butchered
 from the corpse. Not all corpses can be butchered, and some corpses only have
 rare results even with Huntsman.
 
+Smaller corpses are butchered away to nothing. Larger corpses remain, but can
+still only be butchered one time.
+
 See also: HUNTSMAN, SKIN COMMAND
 #
 BUY LIST SHOP SHOPS
@@ -1054,6 +1057,7 @@ See also: DIRECTIONS, DISEMBARK, ENTER, EXIT
 FACTION FACTIONS REPUTATIONS REP "FACTION REP"
 
 Usage:  factions [name]
+        reputations [name]
 
 Factions are groups of NPCs and adventures with whom players can gain or lose
 reputation. The consequences of higher or lower reputation depend on the

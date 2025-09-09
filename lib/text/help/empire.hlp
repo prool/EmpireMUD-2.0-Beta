@@ -577,7 +577,7 @@ Examples:
 #
 ESTABLISH ESTABLISHED ESTABLISHING "NOT ESTABLISHED" "CITY DELAY"
 
-A city is not fully "established" until 2 game days (60 minutes) after you
+A city is not fully "established" until 60 real minutes have passed after you
 found it. In-city-only buildings and functions won't work during this period,
 and it will show as (establishing) on your city list.
 

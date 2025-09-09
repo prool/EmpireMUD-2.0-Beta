@@ -1608,6 +1608,7 @@ typedef struct vehicle_data vehicle_data;
 #define MOB_CUSTOM_SCRIPT_5  11	// called by scripts
 #define MOB_CUSTOM_SCAVENGE_CORPSE  12	// mob eats a corpse due to SCAVENGER flag
 #define MOB_CUSTOM_CONSIDER_INFO  13	// shown on the 'consider' command
+#define MOB_CUSTOM_ECHO_VISIBLE  14	// only shows if player can see it
 
 
 // MOB_MOVE_x: mob/vehicle movement types
@@ -1782,6 +1783,7 @@ typedef enum {
 #define CORPSE_SKINNED  BIT(1)	// The corpse has been skinned
 #define CORPSE_HUMAN  BIT(2)	// a person
 #define CORPSE_NO_LOOT  BIT(3)	// cannot butcher/skin due to !LOOT flag
+#define CORPSE_BUTCHERED  BIT(4)	// for larger corpses, butcher won't consume
 
 
 // ITEM_x: Item types
@@ -1945,6 +1947,7 @@ typedef enum {
 #define OBJ_CUSTOM_ENTER_PORTAL_TO_ROOM  31
 #define OBJ_CUSTOM_EXIT_PORTAL_TO_ROOM  32
 #define OBJ_CUSTOM_IDENTIFY_INFO  33
+#define OBJ_CUSTOM_IDENTIFY_TUTORIAL  34
 
 
 // RES_x: resource requirement types
@@ -2822,6 +2825,7 @@ typedef enum {
 #define VEH_CUSTOM_EXIT_TO_INSIDE  4	// sent inside a vehicle when a player exits
 #define VEH_CUSTOM_EXIT_TO_OUTSIDE  5	// sent outside a vehicle when a player exits
 #define VEH_CUSTOM_IDENTIFY_INFO  6	// shown when a player identifies the vehicle
+#define VEH_CUSTOM_IDENTIFY_TUTORIAL  7	// shown when a player identifies the vehicle
 
 
 // VSPEED_x: indicates the number of speed bonuses this vehicle gives to driving.

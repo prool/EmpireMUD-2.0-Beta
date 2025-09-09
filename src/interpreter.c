@@ -852,6 +852,7 @@ cpp_extern const struct command_info cmd_info[] = {
 	GRANT_CMD( "reload", POS_DEAD, do_reload, LVL_CIMPL, CTYPE_IMMORTAL, GRANT_RELOAD ),
 	SIMPLE_CMD( "remove", POS_RESTING, do_remove, NO_MIN, CTYPE_COMM ),
 	STANDARD_CMD( "repair", POS_STANDING, do_maintain, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_BUILD, CMD_NO_ANIMALS, NO_ABIL ),
+	SIMPLE_CMD( "reputations", POS_DEAD, do_factions, NO_MIN, CTYPE_UTIL ),
 	GRANT_CMD( "rescale", POS_RESTING, do_rescale, LVL_CIMPL, CTYPE_IMMORTAL, GRANT_RESCALE ),
 	SIMPLE_CMD( "respawn", POS_DEAD, do_respawn, NO_MIN, CTYPE_UTIL ),
 	SIMPLE_CMD( "respond", POS_RESTING, do_respond, NO_MIN, CTYPE_COMM ),

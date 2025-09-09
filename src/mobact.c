@@ -1432,7 +1432,7 @@ void run_mob_echoes(void) {
 			// ok now find a random message to show?
 			LL_FOREACH(MOB_CUSTOM_MSGS(mob), mcm) {
 				// MOB_CUSTOM_x: types we use here
-				if (mcm->type == MOB_CUSTOM_ECHO) {
+				if (mcm->type == MOB_CUSTOM_ECHO || mcm->type == MOB_CUSTOM_ECHO_VISIBLE) {
 					// ok = true
 				}
 				else if (mcm->type == MOB_CUSTOM_ECHO_DAY && (sun == SUN_LIGHT || sun == SUN_RISE)) {
@@ -1468,9 +1468,10 @@ void run_mob_echoes(void) {
 			// MOB_CUSTOM_x
 			switch (found_mcm->type) {
 				case MOB_CUSTOM_ECHO:
+				case MOB_CUSTOM_ECHO_VISIBLE:
 				case MOB_CUSTOM_ECHO_DAY:
 				case MOB_CUSTOM_ECHO_NIGHT: {
-					act(found_mcm->msg, FALSE, found_mob, NULL, NULL, TO_ROOM);
+					act(found_mcm->msg, (found_mcm->type == MOB_CUSTOM_ECHO_VISIBLE ? TRUE : FALSE), found_mob, NULL, NULL, TO_ROOM);
 					break;
 				}
 				case MOB_CUSTOM_SAY:

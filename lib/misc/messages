@@ -2289,4 +2289,368 @@ $n stumbles as $e tries to read from $s grimoire.
 $n raises $s staff at you, but you feel nothing.
 $n raises $s staff at $N, but it seems to have no effect.
 
+M12200 b 0 +
+Ribbon Serragons~
+has been ground to pulp at~
+thrash~
+thrashes~
+entwined fury~
+0 1 3.0 4.0 5.0
+You entwine your coils around $N, tightening until $E gasps for air!
+$n entwines its coils around you, crushing the air from your lungs!
+$n entwines its coils around $N, squeezing $M until bones creak!
+You coil toward $N, but $E slips out before you can tighten.
+$n coils toward you, but you slip free before it can tighten.
+$n coils toward $N, but $E slips free.
+#
+#
+#
+You try to crush $N, but your coils tangle against a tree.
+$n tries to crush you, but its coils tangle awkwardly.
+$n tries to crush $N, but tangles itself instead.
+
+M12200 b 0 
+Ribbon Serragons~
+has been ground to pulp at~
+You braid your coils tight around $N, grinding bone to powder as $E collapses lifelessly!
+$n braids its coils tight around you, grinding bone to powder -- your body goes limp!
+$n braids its coils tight around $N, grinding bones to powder until $E collapses lifelessly!
+You braid your coils around $N but end up knotting yourself clumsily.
+$n braids its coils around you but knots itself clumsily.
+$n braids its coils around $N but knots itself clumsily.
+#
+#
+#
+You writhe violently, but only crush dirt and roots.
+$n writhes violently, but only crushes dirt and roots.
+$n writhes violently, crushing nothing but earth.
+
+M12200 b 0 
+Ribbon Serragons~
+has been ground to pulp at~
+You scissor your twin ribbons across $N, sawing scales into $S flesh!
+$n scissors its twin ribbons across you, sawing scales deep into your flesh!
+$n scissors its twin ribbons across $N, scales sawing into $S flesh with ease!
+You twist your ribbons across $N, but only scrape dirt.
+$n twists its ribbons across you, but only scrapes dirt.
+$n twists its ribbons across $N, but only scrapes dirt.
+#
+#
+#
+You shear toward $N but only shred bark.
+$n shears toward you but only shreds bark.
+$n shears toward $N but only shreds bark.
+
+M12200 b 0 
+Ribbon Serragons~
+has been ground to pulp at~
+You scissor your coils together, slicing $N clean in half as blood sprays everywhere!
+$n scissors its coils together, slicing you clean in half -- your blood sprays everywhere!
+$n scissors its coils together, slicing $N in half as gore sprays everywhere!
+You shear at $N but your coils scrape each other instead.
+$n shears at you but scrapes its own coils instead.
+$n shears at $N but scrapes itself instead.
+#
+#
+#
+You scissor wildly, gouging deep furrows in the ground.
+$n scissors wildly, gouging furrows in the ground.
+$n scissors wildly, gouging the earth instead.
+
+M12200 b 0 
+Ribbon Serragons~
+has been ground to pulp at~
+You thrash your braided body in all directions, battering $N with overwhelming force!
+$n thrashes its braided body in all directions, battering you mercilessly!
+$n thrashes its braided body in all directions, battering $N mercilessly!
+You thrash violently, but $N ducks beneath the chaos.
+$n thrashes violently, but you duck beneath the chaos.
+$n thrashes violently, but $N ducks beneath the chaos.
+#
+#
+#
+You thrash in fury, but only send dirt and branches flying.
+$n thrashes in fury, but only sends dirt and branches flying.
+$n thrashes in fury, but only sends debris flying.
+
+M12200 b 0 
+Ribbon Serragons~
+has been ground to pulp at~
+You thrash wildly, smashing $N into the ground again and again until $E lies still in a broken heap!
+$n thrashes wildly, smashing you into the ground again and again until you lie still in a broken heap!
+$n thrashes wildly, smashing $N into the ground again and again until $E lies still in a broken heap!
+You thrash with abandon, but tangle yourself in your own coils.
+$n thrashes with abandon, but tangles itself in its own coils.
+$n thrashes with abandon, but tangles itself in its own coils.
+#
+#
+#
+You thrash in fury, but only send dirt and branches flying.
+$n thrashes in fury, but only sends dirt and branches flying.
+$n thrashes in fury, but only sends debris flying.
+
+M12200 b 0 
+Ribbon Serragons~
+has been ground to pulp at~
+Your head whips out from the tangle and buries its teeth deep into $N's side!
+$n's head whips out from the tangle and buries its teeth deep into your side!
+$n's head whips out from the tangle and buries its teeth deep into $N's side!
+Your head darts at $N, but snaps shut on empty air.
+$n's head darts at you, but snaps shut on empty air.
+$n's head darts at $N, but misses cleanly.
+#
+#
+#
+One ribbon darts out, but only sinks its teeth into a tree trunk.
+One ribbon darts out, but only sinks its teeth into a tree trunk.
+One ribbon darts out, but only sinks its teeth into a tree trunk.
+
+M12200 b 0 
+Ribbon Serragons~
+has been ground to pulp at~
+Your head smashes forward without warning, crushing $N's skull between its jaws in a single, brutal bite!
+$n's head smashes forward without warning, crushing your skull between its jaws in a single, brutal bite!
+$n's head smashes forward without warning, crushing $N's skull between its jaws in a single, brutal bite!
+Your head smashes forward at $N, but only crunches down on your own coils.
+$n's head smashes forward at you, but only crunches down on its own coils.
+$n's head smashes forward at $N, but only crunches down on its own coils.
+#
+#
+#
+Your head snaps forward wildly, smashing face-first into the dirt.
+$n's head snaps forward wildly, smashing face-first into the dirt.
+$n's head snaps forward wildly, smashing face-first into the dirt.
+
+M12201 b 0 +
+Vermilion Ribbon Serragon~
+has been charred and eaten at~
+bite~
+bites~
+fiery bite~
+0 1 3.0 4.0 5.0
+You lash $N with your serrated coils, scales ripping off $S flesh!
+$n lashes you with $s serrated coils, scales ripping off your skin!
+$n lashes $N with $s serrated coils, scales ripping off $S flesh!
+You whip your coils at $N but $E slips away.
+$n whips $s coils at you but you dodge aside.
+$n whips $s coils at $N but $E slips away.
+#
+#
+#
+You whip your coils at $N but only manage to knock loose some dirt.
+$n whips $s coils at you, but only knocks dirt in your face.
+$n whips $s coils at $N, but only sends up a spray of dirt.
+
+M12201 b 0 
+Vermilion Ribbon Serragon~
+has been charred and eaten at~
+You lash $N full across the chest, scales sawing through bone and muscle!
+$n lashes you full across the chest, scales sawing through bone as agony consumes you!
+$n lashes $N full across the chest, scales sawing deep into $S body.
+You whip your tail at $N but $E ducks under them.
+$n whips $s tail at you but you duck under it.
+$n whips $s tail at $N but $E ducks under it.
+#
+#
+#
+You lash wildly at $N, but only succeed in tangling yourself briefly.
+$n lashes wildly at you, but only tangles $mself up.
+$n lashes wildly at $N, but only tangles $mself up.
+
+M12201 b 0 
+Vermilion Ribbon Serragon~
+has been charred and eaten at~
+You sink your blazing jaws through $N's flesh, leaving smoking wounds!
+$n sinks $s blazing jaws through your flesh, searing you with burning pain!
+$n sinks $s blazing jaws through $N, smoke curling from the wounds!
+You snap your jaws at $N but bite only air.
+$n snaps $s fiery jaws at you but misses.
+$n snaps $s jaws at $N but misses cleanly.
+#
+#
+#
+Your blazing teeth just graze $N, leaving a singed mark.
+$n's blazing teeth graze you, leaving only a singe.
+$n grazes $N with $s blazing teeth, leaving a faint scorch.
+
+M12201 b 0 
+Vermilion Ribbon Serragon~
+has been charred and eaten at~
+You bite down on $N's neck with such force that blood and smoke burst forth!
+$n bites into your neck with such force that blood and smoke burst from the wound -- you collapse in agony!
+$n bites $N's neck with such force that smoke and blood spray in every direction!
+You try to bite $N but nearly scorch your own tongue.
+$n tries to bite you but nearly scorches $s own tongue.
+$n tries to bite $N but only singes $s own mouth.
+#
+#
+#
+You snap at $N with fiery jaws, but the heat just makes $M laugh.
+$n snaps at you with fiery jaws, but the heat barely singes you.
+$n snaps at $N with fiery jaws, but the attack only makes $M laugh.
+
+M12201 b 0 
+Vermilion Ribbon Serragon~
+has been charred and eaten at~
+You drive your jagged crest into $N's skull, crushing it with a sickening crack!
+$n drives $s jagged crest into your skull, shattering bone with a sickening crack -- darkness consumes you!
+$n drives $s jagged crest into $N's skull, shattering it with a sickening crack!
+You lower your crest and lunge at $N, but miss wide.
+$n lowers $s crest and lunges at you, but misses wide.
+$n lowers $s crest and lunges at $N, but misses completely.
+#
+#
+#
+You slam forward at $N but only bash dirt and splinters aside.
+$n slams forward at you but only bashes dirt and splinters aside.
+$n slams forward at $N but only sends bark and splinters flying.
+
+M12202 b 0 +
+Veridian Ribbon Serragon~
+has been torn to shreds at~
+rake~
+rakes~
+scale rake~
+0 1 2.8 3.9 5.1
+You rake your jagged scales across $N's flesh, tearing deep grooves!
+$n rakes $s jagged scales across your body, tearing into your flesh!
+$n rakes $s jagged scales across $N, leaving bloody grooves behind!
+You twist your body toward $N, but your scales scrape only air.
+$n twists toward you, but $s scales scrape only air.
+$n twists toward $N, but only slices past harmlessly.
+#
+#
+#
+You rake your scales at $N, but only shear bark.
+$n rakes $s scales at you, but only shears bark.
+$n rakes $s scales at $N, but only scars the ground.
+
+M12202 b 0 
+Veridian Ribbon Serragon~
+has been torn to shreds at~
+You twist your body hard and rake $N from neck to waist, splitting $M open!
+$n twists violently and rakes you from neck to waist -- your body splits open as agony overwhelms you!
+$n rakes $N from neck to waist, splitting $M open in a spray of blood!
+You twist hard toward $N but lose your balance in the motion.
+$n twists hard toward you but loses $mself in the motion.
+$n twists hard toward $N but loses $mself in the motion.
+#
+#
+#
+You rake wildly at $N, but only scar your own scales.
+$n rakes wildly at you, but only scrapes $s own scales.
+$n rakes wildly at $N, but only cuts into $mself.
+
+M12202 b 0 
+Veridian Ribbon Serragon~
+has been torn to shreds at~
+You sink your needle-like teeth deep into $N's arm, piercing to the bone!
+$n sinks $s needle-like teeth deep into your arm, piercing to the bone!
+$n sinks $s needle-like teeth into $N's arm, driving them deep into flesh and bone!
+You snap your jaws at $N, but clamp down on nothing.
+$n snaps $s needle teeth at you but misses.
+$n snaps $s jaws at $N but misses.
+#
+#
+#
+You nip at $N, but only scratch the surface.
+$n nips at you with sharp teeth, but only scratches the surface.
+$n nips at $N, but only scratches $M.
+
+M12202 b 0 
+Veridian Ribbon Serragon~
+has been torn to shreds at~
+You bite straight into $N's throat -- your needle teeth punch through veins and cartilage!
+$n's needle teeth punch straight into your throat -- blood fountains as you collapse!
+$n's needle teeth punch through $N's throat -- $E collapses in a fountain of blood!
+You bite at $N, but end up snapping at your own tongue.
+$n bites at you, but snaps $s own tongue painfully.
+$n bites at $N, but bites $mself instead.
+#
+#
+#
+You bite furiously at $N, but your teeth stick in a tree!
+$n bites furiously at you, but $s teeth stick in a tree!
+$n bites furiously at $N, but $s teeth stick into a tree!
+
+M12202 b 0 
+Veridian Ribbon Serragon~
+has been torn to shreds at~
+You smash $N full in the skull with your frill, caving it in with brutal force!
+$n smashes you full in the skull with $s frill, caving it in with brutal force -- darkness swallows you!
+$n smashes $N full in the skull with $s frill, caving it in with brutal force!
+You swing your frill toward $N but miss entirely.
+$n swings $s frill toward you but misses.
+$n swings $s frill toward $N but misses entirely.
+#
+#
+#
+You sweep your frill, but only stir dust and leaves.
+$n sweeps $s frill, but only stirs dust and leaves.
+$n sweeps $s frill, but only stirs dust and leaves around.
+
+M12211 e 0 
+jagged wounds DoT~
+~
+$N stumbles, then collapses, red and still.
+The saw-edged gouges bleed slower with every breath, until you can no longer stand... or see.
+$N stumbles, then collapses, red and still.
+#
+#
+#
+Blood runs freely from the deep gouges in $N's skin.
+Blood runs freely from the deep gouges in your flesh.
+Blood runs freely from the deep gouges in $N's skin.
+#
+#
+#
+
+M12211 e 0 
+jagged wounds DoT~
+~
+$N staggers, then collapses lifelessly in a spreading pool of red.
+Your vision blurs for the final time as the dripping blood from your wounds slows and the world goes dark.
+$N staggers, then collapses lifelessly in a spreading pool of red.
+#
+#
+#
+Streams of blood run down $N's body.
+With each breath, a hot stream of blood runs down your body.
+Streams of blood run down $N's body.
+#
+#
+#
+
+M12212 e 0 
+puncture wounds DoT~
+~
+$N collapses, unmoving, as the puncture wounds overtake $M.
+Darkness closes in around you as the hot flow of blood from your puncture wounds slows to a drizzle.
+$N collapses, unmoving, as the puncture wounds overtake $M.
+#
+#
+#
+Blood wells from $N's puncture wounds.
+Blood wells from the puncture wounds with each heartbeat sending a hot trickle down your skin.
+Blood wells from $N's puncture wounds.
+#
+#
+#
+
+M12212 e 0 
+puncture wounds DoT~
+~
+$N shuddles and collapses as the blood from $S puncture wounds ebbs.
+Everything seems so cold as blood drizzles ffrom your puncture wounds...
+$N shuddles and collapses as the blood from $S puncture wounds ebbs.
+#
+#
+#
+Blood wells from $N's puncture wounds.
+Blood wells from your puncture wounds.
+Blood wells from $N's puncture wounds.
+#
+#
+#
+
 $
