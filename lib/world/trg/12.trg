@@ -27,6 +27,10 @@ Basic Mana Potion~
 Searing Poison Hit~
 1 s 100
 ~
+if !%target%
+  return 0
+  halt
+end
 set scale 50
 if %actor.has_tech(Poison-Upgrade)%
   set scale 100
