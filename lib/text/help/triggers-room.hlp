@@ -210,9 +210,11 @@ When using field - The variable returns:
 &crmt_flagged(AFF)&0 - True if the room has a room template flag on it.
    If called with no argument, lists current flags instead.
 &cseason&0 - The local season (spring, summer, autumn, winter).
-&csector&0 - The sector type of the room.
-&csector_flagged(FLG)&0 - True if a given sector flag is present.
-&csector_vnum&0 - The sector vnum of the room.
+&csector&0 - The sector type of the room. (Also: &cbase_sector&0, &cnatural_sector&0)
+&csector_flagged(FLG)&0 - True if a given sector flag is present. (Also:
+   &cbase_sector_flagged&0, &cnatural_sector_flagged&0)
+&csector_vnum&0 - The sector vnum of the room. (Also: &cbase_sector_vnum&0,
+   &cnatural_sector_vnum&0)
 &csubzone&0 - The subzone id of the room template, if any (-1 if none).
 &csun&0 - Sun status at the room (regardless of indoor/outdoor): dark, rising,
    light, setting (only 'dark' makes the room dark).
