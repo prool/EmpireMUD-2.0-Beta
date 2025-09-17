@@ -54,9 +54,12 @@ a torch~
 Someone has dropped their torch!~
 This long-lasting torch is one of the few things you packed for this journey.
 ~
-29 0 ao 0 0 2
+29 0 ao 0 0 3
 72 1 7
 0 0
+M
+34
+When this torch burns out, you'll need sticks and a lighter of some kind.~
 S
 #2105
 hammer blacksmith's blacksmiths~
@@ -226,9 +229,12 @@ in order to have a nearby respawn point when you die. This grave marker can
 only be used once, so pick a good spot for it. Later, you can build other types
 of tombs and graves with various abilities, such as the family grave site.
 ~
-3 g a 0 0 1
+3 g a 0 0 2
 0 0 0
 0 0
+M
+34
+When you find a permanent home, build your grave to have a place to respawn close by.~
 S
 #2118
 shovel~
@@ -458,7 +464,7 @@ an anchor~
 A heavy anchor is lying here.~
 Anchors are used in shipbuilding.
 ~
-3 el a 0 0 2
+3 el a 0 0 3
 0 0 0
 2 0
 C
@@ -469,6 +475,9 @@ You attach an anchor to $V.~
 M
 7
 $n attaches an anchor to $V.~
+M
+34
+These are required to make large ships.~
 R
 4 5153 0
 R
@@ -480,7 +489,7 @@ a cannon~
 A ship's cannon is resting on the ground.~
 This cannon is used to build some ships.
 ~
-3 el a 0 0 2
+3 el a 0 0 3
 0 0 0
 2 0
 C
@@ -491,6 +500,9 @@ You hoist a cannon onto $V!~
 M
 7
 $n hoists a cannon onto $V!~
+M
+34
+These are required to make large ships.~
 R
 4 5153 0
 R
@@ -502,11 +514,14 @@ heavy shot~
 A heavy shot ball is lying on the ground.~
 Heavy shot is used by catapults and cannons.
 ~
-3 e a 0 0 2
+3 e a 0 0 3
 0 0 0
 2 0
 C
 1 1
+M
+34
+These are required by catapults and cannons.~
 R
 4 5121 0
 S
@@ -584,11 +599,14 @@ A bone handle is lying here.~
    The handle is carved from bone, or perhaps horn. It can be attached to many
 things to build tools and weapons.
 ~
-1 0 ano 0 0 6
+1 0 ano 0 0 7
 0 3 5
 14 0
 C
 1 1
+M
+34
+This is a basic crafting material.~
 O+ 1 6850
 R
 4 5121 0

@@ -120,7 +120,7 @@ while %cycles_left% >= 0
     break
     case 0
       %echo% ~%self% finishes harvesting the zephyr cattails!
-      %terraform% %room% 0
+      %terraform% %room% %room.base_sector_vnum%
       halt
     break
   done

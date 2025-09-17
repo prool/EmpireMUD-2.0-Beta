@@ -169,7 +169,7 @@ a wood ear mushroom~
 A wood ear mushroom is growing here.~
 The mushroom looks good enough to eat, somehow.
 ~
-6 gC a 0 0 5
+6 gC a 0 0 7
 6 0 0
 7 72
 O+ 1 6101
@@ -829,7 +829,7 @@ A bale of straw sits on the ground.~
    Straw is the byproduct of growing grains like barley, oats, rice, rye, and
 wheat. It has been used since ancient times in crafting and construction.
 ~
-3 l a 0 0 3
+3 l a 0 0 5
 0 0 0
 0 0
 C
@@ -847,6 +847,9 @@ You put some straw on $V.~
 M
 7
 $n puts some straw on $V.~
+M
+34
+This is a common building and crafting material.~
 O+ 1 6422
 R
 4 5118 0
