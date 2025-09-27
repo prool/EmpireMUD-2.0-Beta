@@ -299,7 +299,7 @@ void auto_assign_role(char_data *ch, bool notify) {
 	assign_class_and_extra_abilities(ch, NULL, NOTHING);
 	
 	if (notify) {
-		msg_to_char(ch, "Your group role is now: %s (HELP ROLE).\r\n", class_role[(int) GET_CLASS_ROLE(ch)]);
+		msg_to_char(ch, "Your group role is now: %s%s\t0. (HELP ROLE)\r\n", class_role_color[(int) GET_CLASS_ROLE(ch)], class_role[(int) GET_CLASS_ROLE(ch)]);
 	}
 	queue_delayed_update(ch, CDU_PASSIVE_BUFFS);
 }
