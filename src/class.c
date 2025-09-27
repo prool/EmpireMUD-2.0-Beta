@@ -276,21 +276,19 @@ void auto_assign_role(char_data *ch, bool notify) {
 	}
 	
 	// which rose above the rest?
-	if (count[ROLE_TANK] >= count[ROLE_HEALER] && count[ROLE_TANK] >= count[ROLE_CASTER] && count[ROLE_TANK] >= count[ROLE_MELEE]) {
+	if (count[ROLE_TANK] > 0 && count[ROLE_TANK] >= count[ROLE_HEALER] && count[ROLE_TANK] >= count[ROLE_CASTER] && count[ROLE_TANK] >= count[ROLE_MELEE]) {
 		found = ROLE_TANK;
 	}
-	if (count[ROLE_HEALER] >= count[ROLE_TANK] && count[ROLE_HEALER] >= count[ROLE_CASTER] && count[ROLE_HEALER] >= count[ROLE_MELEE]) {
+	else if (count[ROLE_HEALER] > 0 && count[ROLE_HEALER] >= count[ROLE_TANK] && count[ROLE_HEALER] >= count[ROLE_CASTER] && count[ROLE_HEALER] >= count[ROLE_MELEE]) {
 		found = ROLE_HEALER;
 	}
-	if (count[ROLE_CASTER] >= count[ROLE_HEALER] && count[ROLE_CASTER] >= count[ROLE_TANK] && count[ROLE_CASTER] >= count[ROLE_MELEE]) {
+	else if (count[ROLE_CASTER] > 0 && count[ROLE_CASTER] >= count[ROLE_HEALER] && count[ROLE_CASTER] >= count[ROLE_TANK] && count[ROLE_CASTER] >= count[ROLE_MELEE]) {
 		found = ROLE_CASTER;
 	}
-	if (count[ROLE_MELEE] >= count[ROLE_HEALER] && count[ROLE_MELEE] >= count[ROLE_CASTER] && count[ROLE_MELEE] >= count[ROLE_TANK]) {
+	else if (count[ROLE_MELEE] > 0 && count[ROLE_MELEE] >= count[ROLE_HEALER] && count[ROLE_MELEE] >= count[ROLE_CASTER] && count[ROLE_MELEE] >= count[ROLE_TANK]) {
 		found = ROLE_MELEE;
 	}
-	
-	// none?
-	if (found == ROLE_NONE) {
+	else {
 		found = ROLE_SOLO;
 	}
 	
