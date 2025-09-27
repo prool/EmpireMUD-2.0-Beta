@@ -958,11 +958,6 @@ bool gain_skill(char_data *ch, skill_data *skill, int amount, ability_data *from
 				}
 			}
 			
-			// ensure a role
-			if (GET_SKILL_LEVEL(ch) >= MAX_SKILL_CAP && GET_CLASS_ROLE(ch) == ROLE_NONE) {
-				auto_assign_role(ch, TRUE);
-			}
-			
 			// announce
 			if (!IS_IMMORTAL(ch) && skdata->level == SKILL_MAX_LEVEL(skill)) {
 				log_to_slash_channel_by_name(PLAYER_LOG_CHANNEL, ch, "%s has reached %s %d!", PERS(ch, ch, TRUE), SKILL_NAME(skill), SKILL_MAX_LEVEL(skill));
@@ -976,6 +971,11 @@ bool gain_skill(char_data *ch, skill_data *skill, int amount, ability_data *from
 		
 		// update class and progression
 		update_class_and_abilities(ch);
+		
+		// ensure a role
+		if (GET_SKILL_LEVEL(ch) >= MAX_SKILL_CAP && GET_CLASS_ROLE(ch) == ROLE_NONE) {
+			auto_assign_role(ch, TRUE);
+		}
 		
 		queue_delayed_update(ch, CDU_PASSIVE_BUFFS | CDU_SAVE | CDU_MSDP_SKILLS);
 	}
