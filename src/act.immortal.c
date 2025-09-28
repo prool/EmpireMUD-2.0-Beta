@@ -5452,7 +5452,7 @@ ACMD(do_automessage) {
 		HASH_SORT(automessages_table, sort_automessage_by_data);
 		save_automessages();
 	}
-	else if (is_abbrev(cmd_arg, "change")) {
+	else if (is_abbrev(cmd_arg, "change") || is_abbrev(cmd_arg, "edit")) {
 		argument = any_one_arg(argument, id_arg);
 		
 		if (!*id_arg || !isdigit(*id_arg) || (id = atoi(id_arg)) < 0) {
@@ -5503,7 +5503,7 @@ ACMD(do_automessage) {
 			msg->interval = interval;
 			save_automessages();
 		}
-		else if (is_abbrev(type_arg, "message")) {
+		else if (is_abbrev(type_arg, "message") || is_abbrev(type_arg, "text")) {
 			if (!*argument) {
 				msg_to_char(ch, "Change the message to what?\r\n");
 				return;
@@ -5528,7 +5528,7 @@ ACMD(do_automessage) {
 			return;
 		}
 	}
-	else if (is_abbrev(cmd_arg, "delete")) {
+	else if (is_abbrev(cmd_arg, "delete") || is_abbrev(cmd_arg, "remove")) {
 		skip_spaces(&argument);
 		if (!*argument) {
 			msg_to_char(ch, "Delete which automessage (id)?\r\n");
