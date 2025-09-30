@@ -2922,6 +2922,20 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 				
 				return;
 			}
+			else if (!str_cmp(var, "world")) {
+				if (!str_cmp(field, "height")) {
+					safe_snprintf(str, slen, "%d", MAP_HEIGHT);
+				}
+				else if (!str_cmp(field, "width")) {
+					safe_snprintf(str, slen, "%d", MAP_WIDTH);
+				}
+				
+				else {
+					// bad field
+					script_log("Trigger: %s, VNum %d, unknown instance field: '%s'", GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
+				}
+				return;
+			}
 			
 			// type helpers
 			else if (!str_cmp(var, "_adv")) {

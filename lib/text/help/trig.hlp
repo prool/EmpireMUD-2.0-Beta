@@ -706,6 +706,7 @@ Special Variables When using field - The variable returns:
 &ctimestamp&0 - Current unix timestamp.
 &cweather&0 - One of: sunny, cloudy, raining, lightning
    Note that in cold weather, raining and lightning represent snow instead.
+&cworld.height&0 and &cworld.width&0 - Size of the world map.
 
 Additional data helpers:
 &c_obj.exists(VNUM)&0 - Whether or not this vnum exists.
