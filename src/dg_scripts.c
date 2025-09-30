@@ -5717,7 +5717,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							}
 						}
 					}
-					else if (!str_cmp(field, "coords")) {
+					else if (!str_cmp(field, "coord") || !str_cmp(field, "coords")) {
 						if (GET_MAP_LOC(r) && !NO_LOCATION(r)) {
 							if (subfield && LOWER(*subfield) == 'x') {
 								safe_snprintf(str, slen, "%d", MAP_X_COORD(GET_MAP_LOC(r)->vnum));
