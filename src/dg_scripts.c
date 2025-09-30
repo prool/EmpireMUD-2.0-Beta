@@ -5705,7 +5705,19 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 					}
 					else if (!str_cmp(field, "coords")) {
 						if (GET_MAP_LOC(r) && !NO_LOCATION(r)) {
-							safe_snprintf(str, slen, "(%d, %d)", MAP_X_COORD(GET_MAP_LOC(r)->vnum), MAP_Y_COORD(GET_MAP_LOC(r)->vnum));
+							if (subfield && LOWER(*subfield) == 'x') {
+								safe_snprintf(str, slen, "%d", MAP_X_COORD(GET_MAP_LOC(r)->vnum));
+							}
+							else if (subfield && LOWER(*subfield) == 'y') {
+								safe_snprintf(str, slen, "%d", MAP_Y_COORD(GET_MAP_LOC(r)->vnum));
+							}
+							else {
+								safe_snprintf(str, slen, "(%d, %d)", MAP_X_COORD(GET_MAP_LOC(r)->vnum), MAP_Y_COORD(GET_MAP_LOC(r)->vnum));
+							}
+						}
+						// otherwise no valid location
+						else if (subfield && (LOWER(*subfield) == 'x' || LOWER(*subfield) == 'y')) {
+							safe_snprintf(str, slen, "%s", "???");
 						}
 						else {
 							safe_snprintf(str, slen, "(%s, %s)", "???", "???");
