@@ -528,6 +528,7 @@ switch %outside.building_vnum%
       end
       set ch %ch.next_in_room%
     done
+    %load% obj 12628 %instance.start%
   break
 done
 *
@@ -763,9 +764,11 @@ return 0
 Strange Plant: Delayed despawn~
 1 f 0
 ~
-%adventurecomplete%
 if %self.room.building_vnum% >= 12625 && %self.room.building_vnum% <= 12628
+  %adventurecomplete%
   %terraform% %self.room% %self.room.base_sector_vnum%
+elseif %self.room.template% == 12625
+  %adventurecomplete%
 end
 ~
 #12637
@@ -1288,14 +1291,14 @@ end
 *
 eval stuffed %self.var(stuffed,0)% + 1
 if %obj.is_flagged(LARGE)%
-  eval stuffed %self.var(stuffed,0)% + 1
+  eval stuffed %stuffed% + 1
 end
 remote stuffed %self.id%
 %purge% %obj%
 * trap them if stuffing when untrapped
 %load% obj 12644 %actor%
 *
-if %stuffed% >= %requires_items% 
+if %stuffed% >= %requires_items%
   * finished!
   %echo% ... there's an uncomfortable burbling noise...
   %slay% %self%

@@ -289,6 +289,17 @@ M
 What's left of the burnt plant crumbles to ash and blows away in the breeze.~
 T 12636
 S
+#12628
+debris~
+the debris~
+There's debris floating in the muck.~
+Looks like stray plant parts floating on the muck.
+~
+3 0 0 0 0 2
+0 0 0
+0 0
+T 12636
+S
 #12629
 plant strange large remains~
 the remains of the strange plant~
