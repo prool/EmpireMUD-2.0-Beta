@@ -11,6 +11,61 @@ Flames lash out at you as you move closer and closer, and the wind becomes too
 hot to handle. You will not be able to enter this rift.
 ~
 S
+#12625
+Strange Plant~
+A Strange Plant in the Jungle~
+@.&L\/@.~
+15 0 bdj 0
+0 0 0 -1
+A
+d
+E
+pit ground hole~
+   The jungle floor sinks into a large depression, now totally filled by a
+large, bulbous plant with a large hole in the top.
+~
+E
+plant strange bulbous~
+The plant seems to have died.
+~
+T 12628
+T 12639
+T 12630
+T 12638
+S
+#12626
+Gleaming Plant~
+A Gleaming Plant in the Jungle~
+@.&W*&r\@.~
+15 0 bdj 0
+0 0 0 -1
+A
+d
+T 12638
+T 12630
+S
+#12627
+Glowing Plant~
+A Glowing Plant in the Jungle~
+@.&Y*&L|@.~
+15 0 bdj 0
+0 0 0 -1
+A
+d
+T 12638
+T 12630
+S
+#12628
+Burbling Swamp~
+A Burbling Spot in the Swamp~
+@.&bo&G^@.~
+15 0 bdj 0
+0 0 0 -1
+A
+d
+T 12638
+T 12630
+S
 #12650
 Grove Portal~
 A Portal in the Forest~

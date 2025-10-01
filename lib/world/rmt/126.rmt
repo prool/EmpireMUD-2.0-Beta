@@ -9,6 +9,25 @@ M 0 12602 100.00 1
 M 0 12603 100.00 1
 M 0 12604 100.00 1
 S
+#12625
+A Green Pit~
+   The air is damp and heavy with a sour, resinous stench. You're suspended
+waist-dep in a cold, syrupy fluid that clings to your legs as you try to move.
+Your splashes are muffled as the liquid and the green walls swallow every
+sound. Your skin tingles ever so slightly where the liquid touches it, and
+starts to turn red.
+~
+d 0 0 -1
+T 12625
+T 12640
+T 12638
+S
+#12626
+Strange Plant holding pen~
+This room is used to hold temporary objects used by the strange plant adventure.
+~
+cgi 0 0 -1
+S
 #12650
 A Portal in the Fog~
    You find yourself in a thick bank of fog which has nestled itself into an

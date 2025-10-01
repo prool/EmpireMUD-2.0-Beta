@@ -31,4 +31,16 @@ C
 1 1
 T 9680
 S
+#9682
+clear spawned mobs from room~
+clear spawned mobs from room~
+Clear spawned mobs from room is here.~
+   On load, this object clears spawned mobs from the room and then purges
+itself. Mobs linked to an instance here are excluded.
+~
+3 0 0 0 0 1
+0 0 0
+0 0
+T 9682
+S
 $
