@@ -135,6 +135,19 @@ bitten and bleeding~
 4 0
 0 0 0 0
 S
+#12632
+burnt~
+4 0
+65 0 0 0
+T0
+You manage to put out all the little fires that were on you.~
+T2
+Bits of burning plant fall on you and light you on fire!~
+T3
+$n catches fire!~
+T5
+...$e's trying to pat out fires on $s body.~
+S
 #12650
 Grove Token~
 5 c

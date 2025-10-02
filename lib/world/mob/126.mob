@@ -253,6 +253,8 @@ inside deeper toward the pool. Every attempt to climb the sides meets only the
 plant's treacherous sheen, leaving you to slide back down into the sweet pool
 of liquid at the bottom.
 ~
+I 4 12639 10.00 1 s  # LOOT: vine and dandy clothes
+I 4 12632 25.00 1 s  # LOOT: unknown seedling
 M
 0
 The walls drip with sour-smelling nectar.~
@@ -286,6 +288,8 @@ through the canopy. The stems bristle with fine red hairs, bending slightly
 inward. There's a sweet scent emanating from the plant that seems to linger in
 the air, drawing you back to it.
 ~
+I 4 12639 10.00 1 s  # LOOT: vine and dandy clothes
+I 4 12632 25.00 1 s  # LOOT: unknown seedling
 M
 4
 Droplets on the leaves sparkle like jewels in the sunlight.~
@@ -329,6 +333,8 @@ look dry and fibrous, rasping faintly as they sway, while the glowing pods cast
 an ever-moving ghostly light across the undergrowth. Every part of the plant
 looks ready to burn at the lightest spark.
 ~
+I 4 12639 10.00 1 s  # LOOT: vine and dandy clothes
+I 4 12632 25.00 1 s  # LOOT: unknown seedling
 M
 0
 Hanging pods sway gently.~
@@ -376,6 +382,8 @@ almost like a skin.
    The bog maw looks like it would eat anything. You can type 'stuff <item>' to
 stuff something from your inventory into its mouth.
 ~
+I 4 12639 10.00 1 s  # LOOT: vine and dandy clothes
+I 4 12632 25.00 1 s  # LOOT: unknown seedling
 M
 0
 Bubbles rise lazily through the dark swamp water.~
@@ -505,13 +513,55 @@ S
 #12638
 sproutling~
 the sproutling~
-A sproutling is standing here.
+A sproutling is growing here.
 ~
 1 1 bdoD nG 1
 0 0 33 15 -1 -1
 D
-This minipet swaps its strings for a random plantling when summoned.
+It looks like it's sprouting into some kind of plant...
 ~
+M
+0
+$n rustles.~
+M
+0
+$n tilts to one side~
+M
+0
+$n taps $s roots.~
+M
+0
+$n quivers softly.~
+M
+0
+There's a faint earthy smell in the air.~
+M
+0
+$n hops along, leaving a trail of soil.~
+M
+0
+There's a faint shimmer of dew across $n's surface.~
+M
+5
+$n snores.~
+M
+5
+$n snores.~
+M
+5
+$n snores.~
+M
+0
+$n sways happily.~
+M
+4
+$n leans toward the light.~
+M
+4
+$n leans toward the light.~
+M
+4
+$n leans toward the light.~
 T 12648
 T 12649
 S

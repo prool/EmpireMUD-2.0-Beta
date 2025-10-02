@@ -32,10 +32,10 @@ S
 #12625
 A Strange Plant~
 Paul Clarke~
-tba
+You have stumbled across a rather unusual plant in the jungle.
 ~
 12625 12649 0-0
-5 0 dklp 0
+20 0 dkp 0
 L
 4 a
 12625 12625 12625 -1
@@ -52,6 +52,14 @@ L
 1 a
 12628 -1 -1 -1
 9 m m
+L
+6 0
+45 -1 -1 -1
+-1 0 0
+L
+5 0
+10080 -1 -1 -1
+-1 0 0
 S
 #12650
 Magiterranean: The Grove~

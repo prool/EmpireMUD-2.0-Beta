@@ -295,9 +295,9 @@ the debris~
 There's debris floating in the muck.~
 Looks like stray plant parts floating on the muck.
 ~
-3 0 0 0 0 2
+3 0 0 0 0 3
 0 0 0
-0 0
+0 24
 T 12636
 S
 #12629
@@ -404,6 +404,22 @@ R
 4 5619 0
 R
 4 5215 0
+S
+#12635
+plant strange large remains burnt husk~
+the burnt remains of the strange plant~
+The burnt husk of a large, strange plant is sitting in the pit.~
+   The massive pitcher is blackened and sagging, its walls charred into brittle
+husks. The soil of the pit beneath is damp; something protected it from the
+fire.
+~
+3 0 0 0 0 4
+0 0 0
+0 24
+M
+18
+The strange plant rots away.~
+T 12636
 S
 #12637
 object helper strange plant~

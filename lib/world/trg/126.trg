@@ -408,7 +408,7 @@ while %ch%
       * death!
       %load% obj 12642 %ch% inv
     elseif %inside_time% >= %limit% / 2
-      %send% %ch% &&LThe liquid in the plant is getting to you... You don't feel so good.&&0
+      %send% %ch% &&L**** The liquid in the plant is getting to you... You don't feel so good. ****&&0
     end
   end
   set ch %next_ch%
@@ -450,6 +450,16 @@ else
   set outside %room%
 end
 *
+* reward minipet
+set ch %room.people%
+while %ch%
+  if %ch.is_pc% && !%ch.has_minipet(12638)%
+    nop %ch.add_minipet(12638)%
+    %send% %ch% &&LYou collect a sproutling from the strange plant! A new minipet!&&0
+  end
+  set ch %ch.next_in_room%
+done
+*
 switch %outside.building_vnum%
   case 12625
     * Pitcher plant
@@ -457,7 +467,11 @@ switch %outside.building_vnum%
     * defeat message
     %echo% The side of the plant splits open and gives you a way out!
     if %outside%
-      %at% %outside% %echo% The strange plant splits open and its contents tumble out!
+      if %outside.contents(12635)%
+        %at% %outside% %echo% The strange plant splits open as it crackles and burns, spilling its contents out!
+      else
+        %at% %outside% %echo% The strange plant splits open from the inside and its contents tumble out!
+      end
     end
     *
     * load safety mob - teleports players out
@@ -474,7 +488,9 @@ switch %outside.building_vnum%
       if %portal%
         %purge% %portal%
       end
-      %load% obj 12629 %outside%
+      if !%outside.contents(12635)%
+        %load% obj 12629 %outside%
+      end
     end
   break
   case 12626
@@ -764,11 +780,20 @@ return 0
 Strange Plant: Delayed despawn~
 1 f 0
 ~
-if %self.room.building_vnum% >= 12625 && %self.room.building_vnum% <= 12628
+* start here
+set room %self.room%
+* move outside if in the adventure
+if %room.template% == 12625 || %room.template% == 12626
+  set room %instance.location%
+end
+* ensure we have a room
+if !%room%
+  halt
+end
+* ensure it's part of this adventure
+if %room.building_vnum% >= 12625 && %room.building_vnum% <= 12628
   %adventurecomplete%
-  %terraform% %self.room% %self.room.base_sector_vnum%
-elseif %self.room.template% == 12625
-  %adventurecomplete%
+  %terraform% %room% %room.base_sector_vnum%
 end
 ~
 #12637
@@ -923,22 +948,35 @@ if %actor.wits% > %actor.dexterity%
 else
   set trait %actor.dexterity%
 end
-if %trait% < %random.20%
+if %trait% < %random.16%
   * fail!
-  %send% %actor% You try to burn it, but aren't able to get close enough!
-  %echoaround% %actor% ~%actor% tries to burn the plant but can't seem to get close enough.
+  %send% %actor% You try to burn it, but can't get it to light!
+  %echoaround% %actor% ~%actor% tries to burn the plant but can't seem to get it to light.
   nop %actor.command_lag(COMBAT-ABILITY)%
+  %load% obj 12644 %actor%
 else
   * success!
   %send% %actor% You move quickly and manage to burn the plant!
   %echoaround% %actor% ~%actor% manages to get close enough to burn the plant!
   * free players / slay mob
   if %obj_targ% && %obj_targ.vnum% == 12625
+    %load% obj 12635
     set mob %instance.mob(12625)%
     if %mob%
+      %scale% %mob% %actor.level%
+      * burn players inside
+      set ch %mob.room.people%
+      while %ch%
+        set next_ch %ch.next_in_room%
+        if %ch% != %mob% && !%ch.aff_flagged(!ATTACK)%
+          %dot% #12632 %ch% 100 10 fire
+        end
+        set ch %next_ch%
+      done
       %at% %mob.room% %slay% %mob%
     end
   elseif %char_targ%
+    %scale% %char_targ% %actor.level%
     %slay% %char_targ%
   end
 end
@@ -1233,6 +1271,7 @@ while %ch% && !%any%
 done
 if !%any%
   * no strugglers left
+  %scale% %sundew% %actor.level%
   %slay% %sundew%
 end
 %purge% %self%
@@ -1262,10 +1301,18 @@ end
 #12647
 Strange Plant: Stuff command to put items in the bog maw~
 0 c 0
-stuff~
+stuff give put~
 * usage: stuff <object>
 set requires_items 3
 return 1
+*
+* For put/give, ensure it targets ME
+if %cmd% == give || %cmd% == put
+  if %actor.char_target(%arg.argument2%)% != %self%
+    return 0
+    halt
+  end
+end
 *
 if !%arg%
   %send% %actor% Stuff what in the bog maw?
@@ -1301,6 +1348,7 @@ remote stuffed %self.id%
 if %stuffed% >= %requires_items%
   * finished!
   %echo% ... there's an uncomfortable burbling noise...
+  %scale% %self% %actor.level%
   %slay% %self%
 end
 ~
@@ -1308,6 +1356,7 @@ end
 Sproutling pet rename part 1~
 0 n 50
 ~
+wait %random.10% s
 set mode 1%random.8%
 remote mode %self.id%
 switch %mode%
@@ -1366,6 +1415,7 @@ done
 Sproutling pet rename part 2~
 0 n 100
 ~
+wait %random.10% s
 set mode 2%random.7%
 remote mode %self.id%
 switch %mode%
