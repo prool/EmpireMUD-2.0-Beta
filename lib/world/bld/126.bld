@@ -28,6 +28,11 @@ E
 plant strange bulbous~
 The plant seems to have died.
 ~
+E
+jungle trees forest around~
+   The impenetrable wall of jungle around you is teeming with beautiful and
+exotic plants, none so much as the one in front of you.
+~
 T 12628
 T 12639
 T 12630
@@ -41,6 +46,11 @@ A Gleaming Plant in the Jungle~
 0 0 0 -1
 A
 d
+E
+jungle trees forest around~
+   The impenetrable wall of jungle around you is teeming with beautiful and
+exotic plants, none so much as the one in front of you.
+~
 T 12638
 T 12630
 S
@@ -52,6 +62,20 @@ A Glowing Plant in the Jungle~
 0 0 0 -1
 A
 d
+E
+shadows canopy~
+Light from the glowing pods illuminates the canopy of leaves above.
+~
+E
+floor ground shimmer~
+   The glowing pods cast a transfixing shimmer across the dry and crunch leaves
+on the jungle floor.
+~
+E
+jungle trees forest around~
+   The impenetrable wall of jungle around you is teeming with beautiful and
+exotic plants, none so much as the one in front of you.
+~
 T 12638
 T 12630
 S
@@ -63,6 +87,12 @@ A Burbling Spot in the Swamp~
 0 0 0 -1
 A
 d
+E
+swamp murky river water trees forest jungle around muck~
+   The air in the swamp is thick with moisture, and the ground is soft and
+muddy beneath your feet. Strange, burbling noises leave you wondering an
+important question: what lies beneath the mud?
+~
 T 12638
 T 12630
 S

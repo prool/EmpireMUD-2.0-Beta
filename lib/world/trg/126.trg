@@ -555,10 +555,10 @@ return 0
 Strange Plant: Sundew struggle ticker~
 0 bw 100
 ~
-* ticks twice per 13-second random interval
+* ticks 3 times per 13-second random interval
 set room %self.room%
 set times 0
-while %times% <= 1
+while %times% <= 2
   * safety
   if %self.dead%
     halt
@@ -620,7 +620,7 @@ while %times% <= 1
     set ch %next_ch%
   done
   * repeat
-  wait 6 s
+  wait 4 s
   eval times %times% + 1
 done
 ~
