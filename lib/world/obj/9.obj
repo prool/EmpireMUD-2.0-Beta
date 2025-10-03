@@ -60,7 +60,7 @@ a lyre~
 Someone has left her lyre here.~
 You can play the lyre to make soothing music.
 ~
-22 0 ao 0 0 2
+22 0 ao 0 0 3
 0 0 0
 0 0
 C
@@ -77,6 +77,9 @@ $n hums a tune and strums at $p.~
 M
 3
 $n plucks at $p.~
+M
+34
+Hold this and then play it to make soothing music.~
 R
 4 5610 0
 S
@@ -86,7 +89,7 @@ a wooden flute~
 A wooden flute has been tossed here.~
 You can play the flute to entertain your friends.
 ~
-22 0 ao 0 0 1
+22 0 ao 0 0 2
 1 0 0
 0 0
 M
@@ -101,6 +104,9 @@ $n whistles a tune on $p.~
 M
 3
 $n plays $p.~
+M
+34
+Hold this and then play it to entertain your friends.~
 S
 #914
 stick walking wooden long~
@@ -171,12 +177,15 @@ a wooden handle~
 A wooden handle has been dropped on the ground.~
 The handle can be attached to many things to build tools and weapons.
 ~
-1 l ano 0 0 5
+1 l ano 0 0 7
 0 3 5
 0 0
 C
 1 1
 I 11 184 100.00 1  # LIGHT: torch
+M
+34
+This is a basic crafting material.~
 O+ 1 6850
 R
 4 5121 0
@@ -288,11 +297,14 @@ carefully selected for being dry and ready to burn. You could light something
 on fire by rubbing these sticks together (just type 'light <object>' to light
 something with them).
 ~
-18 0 a 0 0 6
+18 0 a 0 0 7
 5 0 0
 0 0
 C
 1 1
+M
+34
+You can use this to light or burn things.~
 R
 4 5121 0
 R
@@ -308,11 +320,14 @@ But instead of a hard drill bit, it spins bare wood against a plank to build
 friction and start a fire with very little effort. Unfortunately, it doesn't
 last very long before too much of the wood has burned away.
 ~
-18 0 a 0 0 2
+18 0 a 0 0 3
 25 0 0
 0 0
 C
 50 50
+M
+34
+You can use this to light or burn things.~
 R
 4 5121 0
 R

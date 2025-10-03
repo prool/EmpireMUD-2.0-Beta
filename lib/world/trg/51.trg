@@ -234,7 +234,7 @@ while %cycles_left% >= 0
       %echoaround% %actor% ~%actor% looks up, saying, 'Chant softly, words that echo in the language of the land.'
     break
     case 6
-      %send% %actor% You chants, 'Sense the currents, weave the threads, as mana responds to your command.'
+      %send% %actor% You chant, 'Sense the currents, weave the threads, as mana responds to your command.'
       %echoaround% %actor% ~%actor% chants, 'Sense the currents, weave the threads, as mana responds to your command.'
     break
     case 5
@@ -259,7 +259,7 @@ while %cycles_left% >= 0
     case 0
       * chant complete
       if %actor.skill(Natural Magic)% < 1
-        %send% %actor% &&gAs you finish the chant, you finally to see the weave of mana through nature...&&0
+        %send% %actor% &&gAs you finish the chant, you finally begin to see the weave of mana through nature...&&0
         nop %actor.gain_skill(Natural Magic,1)%
         if %actor.skill(Natural Magic)% < 1
           %send% %actor% But you fail to grasp the concepts of the Chant of Magic (you cannot gain Natural Magic skill).

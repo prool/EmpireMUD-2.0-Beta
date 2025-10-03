@@ -421,6 +421,9 @@ switch %random.3%
         set target %actor%
       else
         %echo% ~%self% shoots a bolt of crackling emerald light, but misses completely.
+      end
+      * still no target?
+      if !%target% || %target.dead% 
         halt
       end
     end
@@ -440,6 +443,9 @@ switch %random.3%
     if %self.vnum% == 18503
       %echo% ~%self% draws back ^%self% mighty fist...
       wait 5
+      if !%actor% || %actor.dead% || %actor.room% != %self.room%
+        halt
+      end
       %send% %actor% &&r~%self% delivers a devastating punch, sending you flying!
       %echoaround% %actor% ~%self% delivers a devastating punch, sending ~%actor% flying!
       %damage% %actor% 150 physical
@@ -454,6 +460,9 @@ switch %random.3%
     elseif %self.vnum% == 18504
       %echo% ~%self% crouches, gathering energy to pounce...
       wait 5
+      if !%actor% || %actor.dead% || %actor.room% != %self.room%
+        halt
+      end
       %send% %actor% &&r~%self% pounces on you, raking you with ^%self% claws!
       %echoaround% %actor% ~%self% pounces on ~%actor%, raking *%actor% with ^%self% claws!
       %damage% %actor% 150 physical

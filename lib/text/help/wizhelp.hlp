@@ -650,6 +650,10 @@ See also: FLAGS, GRANT
 #d
 NATURALIZE "NATURAL SECTOR"
 
+A 'natural sector' is the terrain type (sector) a tile had when the map was
+generated, or which was updated using the map editor. Neither player actions
+nor scripts can change a natural sector; it is a permanent record of the tile.
+
 'Naturalize' means return a map tile to its natural sector type. You can see
 what that is by using 'stat room' on the map. It shows a display like this:
 Sector: [10 - Building], Base: [0 - Plains], Natural: [4 - Overgrown Forest]

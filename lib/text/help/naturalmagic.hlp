@@ -202,21 +202,21 @@ Battle synergy:
   Moon Rabbit (healer) - Buffs the party.
 
 High Sorcery synergy:
-  Griffin (caster) - Tanks for the party.
+  Griffin (caster) - Tanks for you.
   Phoenix (healer) - Buffs the party.
 
 Stealth synergy:
-  Griffin (melee) - Tanks for the party.
+  Griffin (melee) - Tanks for you.
   Manticore (tank) - Attacks the enemy.
   Scorpion Shadow (melee) - Debuffs the enemy.
   Owl Shadow (healer) - Buffs the party.
 
 Survival synergy:
-  Griffin (caster/melee) - Tanks for the party.
+  Griffin (caster/melee) - Tanks for you.
   Basilisk - Debuffs the enemy.
 
 Trade synergy:
-  Griffin - Tanks for the party.
+  Griffin - Tanks for you.
   Manticore - Attacks the enemy.
   Salamander - Buffs the party.
 
@@ -512,8 +512,8 @@ Natural Magic Synergy Ability: 100 Trade, High Sorcery, Survival, or Stealth
 Familiar type:  tank
 Command:  companion griffin
 
-The griffin is a powerful familiar that will rescue party members in combat,
-and tank for them.
+The griffin is a powerful familiar that will rescue you in combat and will tank
+for you.
 
 See also: FAMILIAR, COMPANION, DISMISS
 #

@@ -4161,7 +4161,7 @@ elseif %move% == 2
     end
   else
     * hit
-    %echo% &&m~%self% lunges foward and bites right into ~%targ% with ^%self% enormous fangs!&&0
+    %echo% &&m~%self% lunges forward and bites right into ~%targ% with ^%self% enormous fangs!&&0
     if %diff% > 1
       %send% %targ% You don't feel so good...
       if %diff% > 2

@@ -2922,6 +2922,20 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 				
 				return;
 			}
+			else if (!str_cmp(var, "world")) {
+				if (!str_cmp(field, "height")) {
+					safe_snprintf(str, slen, "%d", MAP_HEIGHT);
+				}
+				else if (!str_cmp(field, "width")) {
+					safe_snprintf(str, slen, "%d", MAP_WIDTH);
+				}
+				
+				else {
+					// bad field
+					script_log("Trigger: %s, VNum %d, unknown instance field: '%s'", GET_TRIG_NAME(trig), GET_TRIG_VNUM(trig), field);
+				}
+				return;
+			}
 			
 			// type helpers
 			else if (!str_cmp(var, "_adv")) {
@@ -5595,7 +5609,28 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 					break;
 				}
 				case 'b': {	// room.b*
-					if (!str_cmp(field, "bld_dir")) {
+					if (!str_cmp(field, "base_sector")) {
+						safe_snprintf(str, slen, "%s", GET_SECT_NAME(BASE_SECT(r)));
+					}
+					else if (!str_cmp(field, "base_sector_flagged")) {
+						if (subfield && *subfield) {
+							bitvector_t pos = search_block(subfield, sector_flags, FALSE);
+							if (pos != NOTHING) {
+								safe_snprintf(str, slen, "%d", ROOM_SECT_FLAGGED(r, BIT(pos)) ? 1 : 0);
+							}
+							else {
+								safe_snprintf(str, slen, "0");
+							}
+						}
+						else {
+							sprintbit(GET_SECT_FLAGS(BASE_SECT(r)), sector_flags, buf, TRUE);
+							safe_snprintf(str, slen, "%s", buf);
+						}
+					}
+					else if (!str_cmp(field, "base_sector_vnum")) {
+						safe_snprintf(str, slen, "%d", GET_SECT_VNUM(BASE_SECT(r)));
+					}
+					else if (!str_cmp(field, "bld_dir")) {
 						int dir;
 						if (subfield && *subfield && ((dir = search_block(subfield, dirs, FALSE)) != NO_DIR || (dir = search_block(subfield, alt_dirs, FALSE)) != NO_DIR)) {
 							room_data *home = HOME_ROOM(r);
@@ -5682,9 +5717,21 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							}
 						}
 					}
-					else if (!str_cmp(field, "coords")) {
+					else if (!str_cmp(field, "coord") || !str_cmp(field, "coords")) {
 						if (GET_MAP_LOC(r) && !NO_LOCATION(r)) {
-							safe_snprintf(str, slen, "(%d, %d)", MAP_X_COORD(GET_MAP_LOC(r)->vnum), MAP_Y_COORD(GET_MAP_LOC(r)->vnum));
+							if (subfield && LOWER(*subfield) == 'x') {
+								safe_snprintf(str, slen, "%d", MAP_X_COORD(GET_MAP_LOC(r)->vnum));
+							}
+							else if (subfield && LOWER(*subfield) == 'y') {
+								safe_snprintf(str, slen, "%d", MAP_Y_COORD(GET_MAP_LOC(r)->vnum));
+							}
+							else {
+								safe_snprintf(str, slen, "(%d, %d)", MAP_X_COORD(GET_MAP_LOC(r)->vnum), MAP_Y_COORD(GET_MAP_LOC(r)->vnum));
+							}
+						}
+						// otherwise no valid location
+						else if (subfield && (LOWER(*subfield) == 'x' || LOWER(*subfield) == 'y')) {
+							safe_snprintf(str, slen, "%s", "???");
 						}
 						else {
 							safe_snprintf(str, slen, "(%s, %s)", "???", "???");
@@ -5967,6 +6014,30 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 				case 'n': {	// room.n*
 					if (!str_cmp(field, "name")) {
 						safe_snprintf(str, slen, "%s",  get_room_name(r, FALSE));
+					}
+					else if (!str_cmp(field, "natural_sector")) {
+						sector_data *sect = (GET_ROOM_VNUM(r) < MAP_SIZE ? world_map[X_COORD(r)][Y_COORD(r)].natural_sector : BASE_SECT(r));
+						safe_snprintf(str, slen, "%s", GET_SECT_NAME(sect));
+					}
+					else if (!str_cmp(field, "natural_sector_flagged")) {
+						sector_data *sect = (GET_ROOM_VNUM(r) < MAP_SIZE ? world_map[X_COORD(r)][Y_COORD(r)].natural_sector : BASE_SECT(r));
+						if (subfield && *subfield) {
+							bitvector_t pos = search_block(subfield, sector_flags, FALSE);
+							if (pos != NOTHING) {
+								safe_snprintf(str, slen, "%d", SECT_FLAGGED(sect, BIT(pos)) ? 1 : 0);
+							}
+							else {
+								safe_snprintf(str, slen, "0");
+							}
+						}
+						else {
+							sprintbit(GET_SECT_FLAGS(sect), sector_flags, buf, TRUE);
+							safe_snprintf(str, slen, "%s", buf);
+						}
+					}
+					else if (!str_cmp(field, "natural_sector_vnum")) {
+						sector_data *sect = (GET_ROOM_VNUM(r) < MAP_SIZE ? world_map[X_COORD(r)][Y_COORD(r)].natural_sector : BASE_SECT(r));
+						safe_snprintf(str, slen, "%d", GET_SECT_VNUM(sect));
 					}
 					else if (!str_cmp(field, "north")) {
 						direction_vars(r, NORTH, subfield, str, slen);

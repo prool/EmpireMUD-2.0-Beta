@@ -2023,7 +2023,7 @@ double standard_ability_scale(char_data *ch, ability_data *abil, int level, bitv
 	}
 	
 	// apply matching role if over level 100
-	if (!IS_NPC(ch) && ABILITY_FLAGGED(abil, ABILITY_ROLE_FLAGS) && get_approximate_level(ch) >= MAX_SKILL_CAP) {
+	if (!IS_NPC(ch) && ABILITY_FLAGGED(abil, ABILITY_ROLE_FLAGS) && GET_SKILL_LEVEL(ch) >= MAX_SKILL_CAP) {
 		points *= data->matching_role ? 1.20 : 0.70;
 	}
 	

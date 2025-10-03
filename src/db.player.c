@@ -4613,6 +4613,7 @@ void enter_player_game(descriptor_data *d, int dolog, bool fresh) {
 	check_player_events(ch);
 	schedule_all_obj_timers(ch);
 	ensure_home_storage_timers(ch, NOTHING);
+	auto_assign_role(ch, FALSE);
 	RESET_LAST_MESSAGED_TEMPERATURE(ch);
 	
 	// break last reply if invis

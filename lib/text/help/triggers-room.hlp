@@ -161,7 +161,8 @@ When using field - The variable returns:
 &ccomplete&0 - True if the room/building is complete (finished building).
 &ccontents&0 - The id of the first obj in the room.
 &ccontents(vnum)&0 - The id of the first obj in the room that has that vnum.
-&ccoords&0 - The (x, y) location of the room on the map.
+&ccoords&0 - The (x, y) location of the room on the map, also &ccoords(x)&0 or
+   &ccoords(y)&0 to get either coord. Returns "(???, ???)" in unknown locations.
 &ccrop&0 - The name of the crop on the map room, if any.
 &ccrop_flagged(FLG)&0 - True if it's a crop and a given crop flag is present.
 &ccrop_vnum&0 - The vnum of the crop on the map room, if any.
@@ -210,9 +211,11 @@ When using field - The variable returns:
 &crmt_flagged(AFF)&0 - True if the room has a room template flag on it.
    If called with no argument, lists current flags instead.
 &cseason&0 - The local season (spring, summer, autumn, winter).
-&csector&0 - The sector type of the room.
-&csector_flagged(FLG)&0 - True if a given sector flag is present.
-&csector_vnum&0 - The sector vnum of the room.
+&csector&0 - The sector type of the room. (Also: &cbase_sector&0, &cnatural_sector&0)
+&csector_flagged(FLG)&0 - True if a given sector flag is present. (Also:
+   &cbase_sector_flagged&0, &cnatural_sector_flagged&0)
+&csector_vnum&0 - The sector vnum of the room. (Also: &cbase_sector_vnum&0,
+   &cnatural_sector_vnum&0)
 &csubzone&0 - The subzone id of the room template, if any (-1 if none).
 &csun&0 - Sun status at the room (regardless of indoor/outdoor): dark, rising,
    light, setting (only 'dark' makes the room dark).
