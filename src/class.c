@@ -228,6 +228,84 @@ void assign_class_and_extra_abilities(char_data *ch, class_data *cls, int role) 
 
 
 /**
+* Automatically picks a role based on the character's current abilities and
+* assigns it to the character, if they don't currently have a role. Characters
+* with no role-linked abilities are assigned to the SOLO role.
+*
+* @param char_data *ch The player character to assign to a role (if currently unassigned).
+* @param bool notify If TRUE, player gets a message.
+*/
+void auto_assign_role(char_data *ch, bool notify) {
+	ability_data *abil;
+	int count[NUM_ROLES], found, iter;
+	struct player_ability_data *plab, *next_plab;
+	
+	// safety
+	if (IS_NPC(ch) || GET_CLASS_ROLE(ch) != ROLE_NONE || GET_SKILL_LEVEL(ch) < MAX_SKILL_CAP) {
+		return;
+	}
+	
+	// init
+	found = ROLE_NONE;
+	for (iter = 0; iter < NUM_ROLES; ++iter) {
+		count[iter] = 0;
+	}
+	
+	// check purchased abilties
+	HASH_ITER(hh, GET_ABILITY_HASH(ch), plab, next_plab) {
+		if (!(abil = plab->ptr)) {
+			continue;	// error?
+		}
+		if (!plab->purchased[GET_CURRENT_SKILL_SET(ch)]) {
+			continue;	// wrong skill set
+		}
+		
+		// ROLE_x, ABILF_x: count roles (not mutually exclusive)
+		if (ABILITY_FLAGGED(abil, ABILF_TANK_ROLE)) {
+			++count[ROLE_TANK];
+		}
+		if (ABILITY_FLAGGED(abil, ABILF_HEALER_ROLE)) {
+			++count[ROLE_HEALER];
+		}
+		if (ABILITY_FLAGGED(abil, ABILF_CASTER_ROLE)) {
+			++count[ROLE_CASTER];
+		}
+		if (ABILITY_FLAGGED(abil, ABILF_MELEE_ROLE)) {
+			++count[ROLE_MELEE];
+		}
+	}
+	
+	// which rose above the rest?
+	if (count[ROLE_TANK] > 0 && count[ROLE_TANK] >= count[ROLE_HEALER] && count[ROLE_TANK] >= count[ROLE_CASTER] && count[ROLE_TANK] >= count[ROLE_MELEE]) {
+		found = ROLE_TANK;
+	}
+	else if (count[ROLE_HEALER] > 0 && count[ROLE_HEALER] >= count[ROLE_TANK] && count[ROLE_HEALER] >= count[ROLE_CASTER] && count[ROLE_HEALER] >= count[ROLE_MELEE]) {
+		found = ROLE_HEALER;
+	}
+	else if (count[ROLE_CASTER] > 0 && count[ROLE_CASTER] >= count[ROLE_HEALER] && count[ROLE_CASTER] >= count[ROLE_TANK] && count[ROLE_CASTER] >= count[ROLE_MELEE]) {
+		found = ROLE_CASTER;
+	}
+	else if (count[ROLE_MELEE] > 0 && count[ROLE_MELEE] >= count[ROLE_HEALER] && count[ROLE_MELEE] >= count[ROLE_CASTER] && count[ROLE_MELEE] >= count[ROLE_TANK]) {
+		found = ROLE_MELEE;
+	}
+	else {
+		found = ROLE_SOLO;
+	}
+	
+	// change role
+	GET_CLASS_ROLE(ch) = found;
+	
+	// add new abilities
+	assign_class_and_extra_abilities(ch, NULL, NOTHING);
+	
+	if (notify) {
+		msg_to_char(ch, "Your group role is now: %s%s\t0. (HELP ROLE)\r\n", class_role_color[(int) GET_CLASS_ROLE(ch)], class_role[(int) GET_CLASS_ROLE(ch)]);
+	}
+	queue_delayed_update(ch, CDU_PASSIVE_BUFFS);
+}
+
+
+/**
 * Audits classes on startup. Erroring classes are set IN-DEVELOPMENT.
 */
 void check_classes(void) {

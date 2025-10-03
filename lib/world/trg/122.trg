@@ -607,7 +607,7 @@ if %move% == 1
       %echo% &&lThe serragon lunges with lightning speed -- its needle teeth punch through your body a thousand times!&&0
       %send% %targ% That really hurts!
       %damage% %targ% %ouch% physical
-      %dot% #12212 %person% %ouch% 30 physical 5
+      %dot% #12212 %targ% %ouch% 30 physical 5
     end
     eval cycle %cycle% + 1
     wait 1

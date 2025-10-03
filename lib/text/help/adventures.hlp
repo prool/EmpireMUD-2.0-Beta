@@ -1,6 +1,6 @@
 "BURROW CANYONS"
 
-Burrow Canyons (level 75-100 adventure)
+Burrow Canyons (level 75-175 adventure)
 
 Look for Burrow Canyons, which appears on Mine tiles, and see what secrets
 await!
@@ -885,6 +885,13 @@ Owen Morris (scripting), Baethyn (text), Aelix (text), Wox (testing), Lilmike
 (testing)
 
 See also: ADVENTURE, COINS, EXTRA DESCRIPTIONS, SHOPS
+#
+"STRANGE PLANT" "A STRANGE PLANT"
+
+A Strange Plant (mini-venture for all levels)
+
+This mini-venture can be found in jungles and swamps. It doesn't appear on
+'nearby' and you'll only see it if you get close enough... perhaps too close.
 #
 "SWAMP HAG" "THE SWAMP HAG"
 

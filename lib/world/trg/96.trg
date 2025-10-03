@@ -495,4 +495,24 @@ Vehicle: Set load time on-load~
 set load_time %timestamp%
 remote load_time %self.id%
 ~
+#9682
+Remove spawned NPCs in room~
+1 n 100
+~
+* Removes any spawned NPCs that aren't linked to an adventure
+* Uses:
+* - Ensure no stray NPCs on adventure tile
+*
+set room %self.room%
+set ch %room.people%
+while %ch%
+  set next_ch %ch.next_in_room%
+  if %ch.is_npc% && %ch.mob_flagged(SPAWNED)% && !%ch.linked_to_instance%
+    %echo% ~%ch% leaves.
+    %purge% %ch%
+  end
+  set ch %next_ch%
+done
+%purge% %self%
+~
 $

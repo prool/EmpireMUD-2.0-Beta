@@ -2807,7 +2807,7 @@ The following affect flags are available:
  &c!SEE&0 - Cannot be seen in the room at all -- do not use this on items.
  &cFLYING&0 - Is flying.
  &c!ATTACK&0 - Cannot be attacked -- do not use this on items.
- &cIMMUNE-MAGICAL-DEBUFFS- Immune to any 'magical' debuffs.
+ &cIMMUNE-MAGICAL-DEBUFFS&0 - Immune to any 'magical' debuffs.
  &cDISARMED&0 - Has lost their weapon -- do not use this on items.
  &cHASTE&0 - Has the effect of the Hasten ability.
  &cIMMOBILIZED&0 - Cannot move -- do not use this on items.
@@ -7158,6 +7158,7 @@ Message types:
  &center-portal-to-room&0 - Shown to the room when char enters a portal ($p).
  &cexit-portal-to-room&0 - Shown to the room when char exits a portal ($p).
  &cidentify-info&0 - Shown when the item is identified.
+ &cidentify-tutorial&0 - Shown when the item is identified if tutorials are on.
 
 Resource messages are shown when received from: butcher, chop, dig, fish,
 forage, harvest, mine, pick, quarry, scrape, shear, or skin. These use $p for
@@ -10698,6 +10699,7 @@ Player entering/exiting messages:
 
 Other messages:
  &cidentify-info&0 - Shown when the vehicle is identified.
+ &cidentify-tutorial&0 - Shown when the vehicle is identified.
 
 See also: OLC VEHICLES, DOLLAR SIGN CODES
 #d

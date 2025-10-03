@@ -1947,6 +1947,7 @@ typedef enum {
 #define OBJ_CUSTOM_ENTER_PORTAL_TO_ROOM  31
 #define OBJ_CUSTOM_EXIT_PORTAL_TO_ROOM  32
 #define OBJ_CUSTOM_IDENTIFY_INFO  33
+#define OBJ_CUSTOM_IDENTIFY_TUTORIAL  34
 
 
 // RES_x: resource requirement types
@@ -2824,6 +2825,7 @@ typedef enum {
 #define VEH_CUSTOM_EXIT_TO_INSIDE  4	// sent inside a vehicle when a player exits
 #define VEH_CUSTOM_EXIT_TO_OUTSIDE  5	// sent outside a vehicle when a player exits
 #define VEH_CUSTOM_IDENTIFY_INFO  6	// shown when a player identifies the vehicle
+#define VEH_CUSTOM_IDENTIFY_TUTORIAL  7	// shown when a player identifies the vehicle
 
 
 // VSPEED_x: indicates the number of speed bonuses this vehicle gives to driving.

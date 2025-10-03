@@ -230,7 +230,7 @@ See also: PROGRESS, UPGRADE
 #
 "DEEP MINES"
 
-Deep Mines (Stockpile Iron goal)
+Deep Mines (Ironclad Future goal)
 
 Mines your empire digs or prospects will have 50% more ore. You must be the
 first empire to build a mine or prospect on a given mountain tile (at least,
@@ -577,7 +577,7 @@ Examples:
 #
 ESTABLISH ESTABLISHED ESTABLISHING "NOT ESTABLISHED" "CITY DELAY"
 
-A city is not fully "established" until 2 game days (60 minutes) after you
+A city is not fully "established" until 60 real minutes have passed after you
 found it. In-city-only buildings and functions won't work during this period,
 and it will show as (establishing) on your city list.
 
@@ -1371,7 +1371,7 @@ If you have a truce with a distrustful empire, their guards will attack you.
 However if you have a truce with an empire that isn't distrustful, the guards
 will ignore you.
 
-The exchnage rate with a truce is 50% (the same as no relations).
+The exchange rate with a truce is 50% (the same as no relations).
 
 See also: DIPLOMACY, PEACE
 #

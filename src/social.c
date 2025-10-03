@@ -806,7 +806,7 @@ OLC_MODULE(socedit_name) {
 
 OLC_MODULE(socedit_requirements) {
 	social_data *soc = GET_OLC_SOCIAL(ch->desc);
-	olc_process_requirements(ch, argument, &SOC_REQUIREMENTS(soc), "requirements", FALSE);
+	olc_process_requirements(ch, argument, &SOC_REQUIREMENTS(soc), "requirement", FALSE);
 }
 
 

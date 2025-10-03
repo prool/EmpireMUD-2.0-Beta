@@ -97,7 +97,7 @@ Included Adventure Zones
 [  170] Hamlet of the Undead (replaced by 10400) [0-0] DEPRECATED
 [  180] Misplaced Mother Goose [10730-10749] (1-25) 10 mobs, 19 objs, 1 room
 [  181] Goblin Mines [10750-10774] (1-25) 9 mobs, 23 objs, 6 rooms
-[  200] Burrow Canyons [11100-11129] (75-100) 14 mobs, 27 objs, 24 rooms
+[  200] Burrow Canyons [11100-11129] (75-175) 14 mobs, 28 objs, 24 rooms
 [  201] The Cursed Chalice of Mill Manor [11130-11159] (100-150) 10 mobs, 20 objs, 19 rooms
 [  281] Mountain Valley: Molten Fiend [18075-18099] (200-250) 5 mobs, 23 objs, 2 rooms
 [  282] Goblin Logging Camp [18100-18124] (10-50) 1 mob, 7 objs, 1 room
@@ -121,6 +121,7 @@ Included Adventure Zones
 [12400] The Golden Goblin [12400-12499] (50-150) 24 mobs, 62 objs, 21 rooms
 [12500] Clockwork Colossus [12500-12599] (100-200) 13 mobs, 62 objs, 8 rooms
 [12600] Elemental Escape [12600-12624] (1-25) 11 mobs, 18 objs, 1 room
+[12625] A Strange Plant [12625-12649] (0) 8 mobs, 16 objs, 2 rooms
 [12650] Magiterranean: The Grove [12650-12699] (1-75) 21 mobs, 33 objs, 22 rooms
 [16000] Invasion of: The Goblin Necromancer [16000-16019] (125-200) 18 mobs, 16 objs, 10 rooms
 [16100] Oceanic Hydra [16100-16199] (225-325) 11 mobs, 51 objs, 1 room
