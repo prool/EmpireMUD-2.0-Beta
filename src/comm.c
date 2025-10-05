@@ -3581,7 +3581,7 @@ char *replace_prompt_codes(char_data *ch, char *str) {
 				}
 				case 'f': {	// %f enemy's focus (tank): health percent
 					if (FIGHTING(ch) && (vict = FIGHTING(FIGHTING(ch))) && vict != ch) {
-						sprintf(i, "%s %d%%", (IS_NPC(vict) ? PERS(vict, vict, FALSE) : GET_NAME(vict)), GET_HEALTH(vict) * 100 / MAX(1, GET_MAX_HEALTH(vict)));
+						sprintf(i, "%s %d%%", ((IS_NPC(vict) || !CAN_RECOGNIZE(ch, vict)) ? PERS(vict, vict, FALSE) : GET_NAME(vict)), GET_HEALTH(vict) * 100 / MAX(1, GET_MAX_HEALTH(vict)));
 					}
 					else {
 						*i = '\0';
@@ -3591,8 +3591,13 @@ char *replace_prompt_codes(char_data *ch, char *str) {
 				
 				}
 				case 'F': {	// %f enemy's focus (tank): health total
-					if (FIGHTING(ch) && (vict = FIGHTING(FIGHTING(ch))) && !IS_NPC(vict) && vict != ch) {
-						sprintf(i, "%s %d/%d", (IS_NPC(vict) ? PERS(vict, vict, FALSE) : GET_NAME(vict)), GET_HEALTH(vict), GET_MAX_HEALTH(vict));
+					if (FIGHTING(ch) && (vict = FIGHTING(FIGHTING(ch))) && vict != ch) {
+						if (IS_NPC(vict)) {
+							sprintf(i, "%s %d%%", PERS(vict, vict, FALSE), GET_HEALTH(vict) * 100 / MAX(1, GET_MAX_HEALTH(vict)));
+						}
+						else {
+							sprintf(i, "%s %d/%d", (!CAN_RECOGNIZE(ch, vict) ? PERS(vict, vict, FALSE) : GET_NAME(vict)), GET_HEALTH(vict), GET_MAX_HEALTH(vict));
+						}
 					}
 					else {
 						*i = '\0';
