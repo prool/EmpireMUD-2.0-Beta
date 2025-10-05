@@ -5956,6 +5956,20 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							*str = '\0';
 						}
 					}
+					else if (!str_cmp(field, "island_flagged")) {
+						if (subfield && *subfield) {
+							bitvector_t pos = search_block(subfield, island_bits, FALSE);
+							if (pos != NOTHING) {
+								safe_snprintf(str, slen, "%d", ISLAND_FLAGGED(r, BIT(pos)) ? 1 : 0);
+							}
+							else {
+								safe_snprintf(str, slen, "0");
+							}
+						}
+						else {
+							safe_snprintf(str, slen, "0");
+						}
+					}
 					else if (!str_cmp(field, "is_on_map")) {
 						safe_snprintf(str, slen, "%d", (GET_ROOM_VNUM(r) < MAP_SIZE) ? 1 : 0);
 					}
