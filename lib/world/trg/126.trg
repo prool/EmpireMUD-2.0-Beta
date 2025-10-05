@@ -1801,6 +1801,10 @@ switch %self.vnum%
   break
 done
 wait 3 sec
+* cancel here on no-aggro islands
+if %self.room.island_flagged(!AGGRO)%
+  halt
+end
 if %target.room% != %self.room% || %self.disabled% || %self.fighting%
   halt
 end
