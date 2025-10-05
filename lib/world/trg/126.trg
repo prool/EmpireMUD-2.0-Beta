@@ -1363,7 +1363,7 @@ switch %mode%
   case 11
     %mod% %self% keywords seedling sproutkin tiny shoot
     %mod% %self% shortdesc a tiny sproutkin
-    %mod% %self% longdesc There's a tiny sproutkin is standing here, twitching its leaves.
+    %mod% %self% longdesc There's a tiny sproutkin standing here, twitching its leaves.
     %mod% %self% lookdesc The sproutkin looks like a small green shoot with two stubby leaves and a root-ball base. It hops about energetically, waving its quivering leaves like little hands.
   break
   case 12
