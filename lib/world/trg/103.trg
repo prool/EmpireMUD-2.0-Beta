@@ -5,29 +5,48 @@ Flame Dragon Terrorize~
 if (%self.fighting% || %self.disabled%)
   halt
 end
+* Burnable sectors:
+set crop_sects 7 13 15 16
+set desert_crop_sects 12 14 77 18
+set desert_sects 20 51 70 73 75
+set woods_sects 1 2 3 4 27 28 34 37 38 39 44 45 47 54 55 60 62 64 65 90
+set spruce_sects 10562 10563 10564 10565
+set grove_sects 23 24 25 26 71 72 74 76 79
+set oasis_sects 21 80 81 82 83 84 88 89 91
+set plains_sects 0 36 40 46 50 56 59 61 63 10566
+*
 set room %self.room%
+set vnum %room.sector_vnum%
 if (%instance.location% && (%room.template% == 10300 || (%room% != %instance.location% && %random.10% == 10)))
   %echo% ~%self% flies away!
   mgoto %instance.location%
   %echo% ~%self% flies into the cave!
-elseif %room.sector_vnum% == 7 || %room.sector_vnum% == 13 || %room.sector_vnum% == 15 || %room.sector_vnum% == 16
+elseif %crop_sects% ~= %vnum%
   %echo% ~%self% scorches the crops!
   %terraform% %room% 10303
-elseif %room.sector_vnum% == 12 || %room.sector_vnum% == 14
+elseif %desert_crop_sects% ~= %vnum%
   %echo% ~%self% scorches the crops!
   %terraform% %room% 10304
-elseif %room.sector_vnum% == 20
+elseif %desert_sects% ~= %vnum%
   %echo% ~%self% scorches the desert!
   %terraform% %room% 10305
-elseif (%room.sector_vnum% >= 1 && %room.sector_vnum% <= 4) || %room.sector_vnum% == 27 || %room.sector_vnum% == 28 || %room.sector_vnum% == 44 || %room.sector_vnum% == 45
+elseif %woods_sects% ~= %vnum%
   %echo% ~%self% scorches the trees!
   %terraform% %room% 10300
-elseif %room.sector_vnum% == 26
+elseif %spruce_sects% ~= %vnum%
+  %echo% ~%self% scorches the trees!
+  %terraform% %room% 10307
+elseif %grove_sects% ~= %vnum%
   %echo% ~%self% scorches the grove!
-  %terraform% %room% 10301
-elseif %room.sector_vnum% == 0 || %room.sector_vnum% == 40
+elseif %oasis_sects% ~= %vnum%
+  %echo% ~%self% scorches the oasis!
+  %terraform% %room% 10306
+elseif %plains_sects% ~= %vnum%
   %echo% ~%self% scorches the plains!
   %terraform% %room% 10302
+elseif %vnum% == 33
+  %echo% ~%self% melts the frozen lake!
+  %terraform% %room% 32
 end
 ~
 #10301
