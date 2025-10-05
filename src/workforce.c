@@ -144,6 +144,10 @@ void process_one_chore(empire_data *emp, room_data *room) {
 	if (island == NO_ISLAND) {
 		return;
 	}
+	// skip homes
+	if (ROOM_PRIVATE_OWNER(HOME_ROOM(room)) != NOBODY) {
+		return;
+	}
 	
 	// basic vars that determine what we do:
 	no_work = ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_WORK) ? TRUE : FALSE;
@@ -289,6 +293,9 @@ void process_one_vehicle_chore(empire_data *emp, vehicle_data *veh) {
 	
 	if (!room || GET_ISLAND_ID(room) == NO_ISLAND) {
 		return;
+	}
+	if (VEH_INTERIOR_HOME_ROOM(veh) && ROOM_PRIVATE_OWNER(VEH_INTERIOR_HOME_ROOM(veh)) != NOBODY) {
+		return;	// skip homes
 	}
 	
 	// basic vars that determine what we do:
