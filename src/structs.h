@@ -3001,6 +3001,7 @@ typedef enum {
 #define ISLE_ALWAYS_DARK  BIT(8)	// i. outdoor tiles are always dark
 #define ISLE_ALWAYS_DAY  BIT(9)		// j. island is always daytime
 #define ISLE_ALWAYS_NIGHT  BIT(10)	// k. island is always nighttime
+#define ISLE_NO_ADVENTURES  BIT(11)	// l. island never spawns adventures
 
 
 // ROOM_AFF_x: Room affects -- these are similar to room flags, but if you want to set them

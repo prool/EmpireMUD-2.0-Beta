@@ -4335,6 +4335,7 @@ const char *island_bits[] = {
 	"ALWAYS-DARK",
 	"ALWAYS-DAY",
 	"ALWAYS-NIGHT",	// 10
+	"!ADVENTURES",
 	"\n"
 };
 
