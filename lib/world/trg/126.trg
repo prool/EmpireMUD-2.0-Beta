@@ -1894,7 +1894,9 @@ end
 Escaped wildling load~
 0 n 100
 ~
-mgoto %instance.location%
+if %instance.location%
+  mgoto %instance.location%
+end
 mmove
 mmove
 mmove
