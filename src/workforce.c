@@ -144,10 +144,6 @@ void process_one_chore(empire_data *emp, room_data *room) {
 	if (island == NO_ISLAND) {
 		return;
 	}
-	// skip homes
-	if (ROOM_PRIVATE_OWNER(HOME_ROOM(room)) != NOBODY) {
-		return;
-	}
 	
 	// basic vars that determine what we do:
 	no_work = ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_WORK) ? TRUE : FALSE;
@@ -195,6 +191,9 @@ void process_one_chore(empire_data *emp, room_data *room) {
 	if (IS_COMPLETE(room) && (BUILDING_DAMAGE(room) > 0 || BUILDING_RESOURCES(room)) && HOME_ROOM(room) == room && CHORE_ACTIVE(CHORE_MAINTENANCE)) {
 		do_chore_building(emp, room, CHORE_MAINTENANCE);
 		return;	// no further work while undergoing maintenance
+	}
+	if (ROOM_PRIVATE_OWNER(HOME_ROOM(room)) != NOBODY) {
+		return;	// skip homes for anything other than maintenance or fire
 	}
 	
 	// THING 4: IN-CITY CHECK and NO-INSTANCE: everything else must pass this to run
@@ -294,9 +293,6 @@ void process_one_vehicle_chore(empire_data *emp, vehicle_data *veh) {
 	if (!room || GET_ISLAND_ID(room) == NO_ISLAND) {
 		return;
 	}
-	if (VEH_INTERIOR_HOME_ROOM(veh) && ROOM_PRIVATE_OWNER(VEH_INTERIOR_HOME_ROOM(veh)) != NOBODY) {
-		return;	// skip homes
-	}
 	
 	// basic vars that determine what we do:
 	on_fire = VEH_FLAGGED(veh, VEH_ON_FIRE) ? TRUE : FALSE;
@@ -349,6 +345,9 @@ void process_one_vehicle_chore(empire_data *emp, vehicle_data *veh) {
 	// PART 4: other chores (unlike room chores, you must check city status with vehicle_has_function_and_city_ok)
 	if (VEH_HEALTH(veh) < 1) {
 		return;	// can only fire-brigade/repair if low health
+	}
+	if (VEH_INTERIOR_HOME_ROOM(veh) && ROOM_PRIVATE_OWNER(VEH_INTERIOR_HOME_ROOM(veh)) != NOBODY) {
+		return;	// skip private homes for all other chores
 	}
 	
 	// function chores:
