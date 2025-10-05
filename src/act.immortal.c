@@ -1690,7 +1690,7 @@ void do_instance_info(char_data *ch, char *argument) {
 	struct instance_mob *mc, *next_mc;
 	char buf[MAX_STRING_LENGTH];
 	struct instance_data *iter, *inst = NULL;
-	int num = 1;
+	int num = 1, inst_num;
 	
 	// attempt to find instance here with no arg
 	if (!*argument) {
@@ -1715,7 +1715,16 @@ void do_instance_info(char_data *ch, char *argument) {
 	
 	// show if found
 	if (inst) {
-		msg_to_char(ch, "\tcInstance %d: [%d] %s\t0\r\n", atoi(argument), GET_ADV_VNUM(INST_ADVENTURE(inst)), GET_ADV_NAME(INST_ADVENTURE(inst)));
+		// determine instance number
+		inst_num = 0;
+		DL_FOREACH(instance_list, iter) {
+			++inst_num;
+			if (iter == inst) {
+				break;
+			}
+		}
+		
+		msg_to_char(ch, "\tcInstance %d: [%d] %s\t0\r\n", inst_num, GET_ADV_VNUM(INST_ADVENTURE(inst)), GET_ADV_NAME(INST_ADVENTURE(inst)));
 		
 		if (INST_LOCATION(inst)) {
 			if (ROOM_OWNER(INST_LOCATION(inst))) {
