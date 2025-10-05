@@ -4580,6 +4580,7 @@ const char *sector_flags[] = {
 	"SEPARATE-NOT-NEARS",
 	"INHERIT-BASE-CLIMATE",
 	"IRRIGATES-AREA",
+	"NO-WORKFORCE-AUTOABANDON",
 	"\n"
 };
 

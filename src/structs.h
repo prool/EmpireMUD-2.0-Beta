@@ -2736,6 +2736,7 @@ typedef enum {
 #define SECTF_SEPARATE_NOT_NEARS  BIT(26)	// runs every NOT-NEAR-SECTOR evolution separately instead of ensuring it's not near ANY of them
 #define SECTF_INHERIT_BASE_CLIMATE  BIT(27)	// inherits the climate of the base sector in addition to its own (e.g. road, building, etc)
 #define SECTF_IRRIGATES_AREA  BIT(28)	// tiles around this one trigger irrigation evolutions
+#define SECTF_NO_WORKFORCE_AUTOABANDON  BIT(29)	// workforce will not auto-abandon this terrain
 // note: evolutions use these as flags in a SIGNED sbitvector_t; limit is BIT(62)
 
 
