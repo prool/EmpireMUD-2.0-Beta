@@ -474,8 +474,15 @@ end
 %send% %actor% You cut the head off @%target%...
 %load% obj 9030 %actor% inv
 set item %actor.inventory()%
-if %item%
-  %send% %actor% You get @%item%!
+if %item% && %item.vnum% == 9030
+  set mob_name %_mob.name(%mob_vnum%)%
+  if %mob_name%
+    %mod% %item% keywords head %mob_name.skip_filler% severed
+    %mod% %item% shortdesc the head of %mob_name%
+    %mod% %item% longdesc The severed head of %mob_name% has been left here.
+    %mod% %item% append-lookdesc It appears to be the head of %mob_name%.
+  end
+  %send% %actor% You get %item.name%! Better get this back to the tavern.
 end
 * Don't butcher normally this time. Less buggy this way.
 return 1
