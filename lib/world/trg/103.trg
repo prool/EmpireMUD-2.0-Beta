@@ -14,6 +14,7 @@ set spruce_sects 10562 10563 10564 10565
 set grove_sects 23 24 25 26 71 72 74 76 79
 set oasis_sects 21 80 81 82 83 84 88 89 91
 set plains_sects 0 36 40 46 50 56 59 61 63 10566
+* some other sects are handled individually below
 *
 set room %self.room%
 set vnum %room.sector_vnum%
@@ -44,6 +45,9 @@ elseif %oasis_sects% ~= %vnum%
 elseif %plains_sects% ~= %vnum%
   %echo% ~%self% scorches the plains!
   %terraform% %room% 10302
+elseif %vnum% == 58
+  %echo% ~%self% scorches the foothills!
+  %terraform% %room% 10308
 elseif %vnum% == 33
   %echo% ~%self% melts the frozen lake!
   %terraform% %room% 32
