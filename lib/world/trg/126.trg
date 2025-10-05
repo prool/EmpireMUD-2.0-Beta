@@ -2277,14 +2277,14 @@ while %cycles_left% >= 0
       set person %self.room.people%
       while %person%
         if %person.is_pc% && %person.on_quest(12650)%
-          %quest% %person% trigger 12650
           if %give_token%
+            %quest% %person% trigger 12650
             set curname %currency.12650(1)%.
             %send% %person% You receive %curname.ana% %curname%.
             nop %person.give_currency(12650, 1)%
-          end
-          if %person.quest_finished(12650)%
-            %send% %person% You have tranquilized all four of the manaweaver leaders.
+            if %person.quest_finished(12650)%
+              %send% %person% You have tranquilized all four of the manaweaver leaders.
+            end
           end
         end
         set person %person.next_in_room%
@@ -2567,6 +2567,9 @@ end
 Grove rage spirit speech~
 0 d 1
 *~
+if %actor.is_npc% && %actor.linked_to_instance%
+  halt
+end
 set word_1 calm
 set word_2 relax
 set word_3 pacify
