@@ -482,7 +482,7 @@ if %item% && %item.vnum% == 9030
     %mod% %item% longdesc The severed head of %mob_name% has been left here.
     %mod% %item% append-lookdesc It appears to be the head of %mob_name%.
   end
-  %send% %actor% You get %item.name%! Better get this back to the tavern.
+  %send% %actor% You get %item.shortdesc%! Better get this back to the tavern.
 end
 * Don't butcher normally this time. Less buggy this way.
 return 1
