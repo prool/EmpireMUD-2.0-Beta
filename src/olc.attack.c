@@ -2288,6 +2288,7 @@ OLC_MODULE(attackedit_message) {
 					msg_to_char(ch, "You remove message %d.\r\n", atoi(arg2));
 					LL_DELETE(ATTACK_MSG_LIST(amd), ams);
 					free_attack_message_set(ams);
+					--ATTACK_NUM_MSGS(amd);
 					return;	// done
 				}
 			}
