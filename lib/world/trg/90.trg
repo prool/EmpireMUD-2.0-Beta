@@ -439,6 +439,9 @@ end
 Butcher detect~
 1 c 3
 butcher~
+* Config list:
+set danger_vnums 9001 9002 9016 9017 9019 9059 9060 9100 9102 9114 9118 9143 9177 9213 9225 9231
+*
 set target %actor.obj_target(%arg%)%
 if !%target%
   * Invalid target
@@ -458,13 +461,7 @@ else
   halt
 end
 * Check mob vnum
-if %mob_vnum% == 9017 || %mob_vnum% == 9177
-  * Bear, polar bear
-elseif %mob_vnum% == 9001 || %mob_vnum% == 9002
-  * Snarling and brown wolf
-elseif %mob_vnum% == 9016 || %mob_vnum% == 9100 || %mob_vnum% == 9143 || %mob_vnum% == 9118 || %mob.vnum% == 9102
-  * Tiger, leopard, snow leopard, cougar, jaguar
-else
+if !(%danger_vnums% ~= %mob_vnum%)
   * Wrong kind of corpse
   return 0
   halt
