@@ -1978,7 +1978,7 @@ switch %command%
     if %compan%
       if %pet_vnums% ~= %compan.vnum%
         %force% %compan% xmas_pet_setup
-        %send% %actor% Attempting to repair %compan%...
+        %send% %actor% Attempting to repair ~%compan%...
       else
         %send% %actor% The player has the wrong companion out.
       end
