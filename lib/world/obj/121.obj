@@ -47,6 +47,9 @@ texture. They don't look edible, but you could try planting them somewhere.
 0 8760
 C
 75 75
+M
+34
+You can 'plant' this to grow a crop.~
 O+ 1 6180
 R
 4 5210 0
@@ -111,6 +114,9 @@ current form, but might be ground or planted for some purpose.
 0 8760
 C
 75 75
+M
+34
+You can 'plant' this to grow a crop.~
 O+ 1 6183
 R
 4 5210 0
@@ -171,6 +177,9 @@ These seeds are hard, dark and angular. They might be useful for planting.
 0 8760
 C
 75 75
+M
+34
+You can 'plant' this to grow a crop.~
 O+ 1 6180
 R
 4 5210 0
@@ -231,6 +240,9 @@ perhaps be planted and further processed.
 0 1444
 C
 75 75
+M
+34
+You can 'plant' this to grow a crop.~
 O+ 1 6180
 R
 4 5210 0
@@ -293,6 +305,9 @@ these seeds into nutmeg.
 0 8760
 C
 75 75
+M
+34
+You can 'plant' this to grow a crop.~
 O+ 1 6180
 R
 4 5210 0
@@ -1451,6 +1466,9 @@ been at it again.
 0 8760
 C
 1 1
+M
+34
+You can 'plant' this to grow a crop.~
 R
 4 5210 0
 R
