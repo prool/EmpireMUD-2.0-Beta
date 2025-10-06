@@ -5789,7 +5789,7 @@ ACMD(do_distance) {
 		msg_to_char(ch, "You can only find distances to coordinates.\r\n");
 	}
 	else if (!(target = parse_room_from_coords(argument)) && !(target = find_target_room(ch, argument))) {
-		msg_to_char(ch, "Unknown target.\r\n");
+		// sends its own error in find_target_room
 	}
 	else {	
 		dir_str = get_partial_direction_to(ch, IN_ROOM(ch), target, FALSE);
