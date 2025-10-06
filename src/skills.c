@@ -1356,7 +1356,10 @@ char *get_skill_gain_display(char_data *ch) {
 	
 	*out = '\0';
 	if (!IS_NPC(ch)) {
-		sprintf(out + strlen(out), "You have %d bonus experience point%s available today. Use 'noskill <skill>' to toggle skill gain.\r\n", GET_DAILY_BONUS_EXPERIENCE(ch), PLURAL(GET_DAILY_BONUS_EXPERIENCE(ch)));
+		sprintf(out + strlen(out), "You have %d bonus experience point%s available today.\r\n", GET_DAILY_BONUS_EXPERIENCE(ch), PLURAL(GET_DAILY_BONUS_EXPERIENCE(ch)));
+		if (!PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+			sprintf(out + strlen(out), "Use 'noskill <skill>' to toggle skill gain on and off.\r\n");
+		}
 	}
 	
 	return out;
