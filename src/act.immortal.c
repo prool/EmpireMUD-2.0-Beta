@@ -2453,10 +2453,14 @@ int perform_set(char_data *ch, char_data *vict, int mode, char *val_arg) {
 			// apply them
 			if ((diff = new & ~old)) {
 				apply_bonus_trait(vict, diff, TRUE);
+				sprintbit(diff, bonus_bits, buf, TRUE);
+				sprintf(output + strlen(output), " (added %s)", buf);
 			}
 			if ((diff = old & ~new)) {
 				// removing?
 				apply_bonus_trait(vict, diff, FALSE);
+				sprintbit(diff, bonus_bits, buf, TRUE);
+				sprintf(output + strlen(output), " (removed %s)", buf);
 			}
 		}
 		else {
