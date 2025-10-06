@@ -7957,7 +7957,10 @@ ACMD(do_roadsign) {
 	else if (!has_player_tech(ch, PTECH_CUSTOMIZE_BUILDING)) {
 		msg_to_char(ch, "You require the Customize Building ability to set up road signs.\r\n");
 	}
-	else if (!IS_ROAD(IN_ROOM(ch)) || !IS_COMPLETE(IN_ROOM(ch))) {
+	else if (!IS_OUTDOORS(ch)) {
+		msg_to_char(ch, "You can't put up roadsigns inside.\r\n");
+	}
+	else if ((!IS_ROAD(IN_ROOM(ch)) && !ROOM_BLD_FLAGGED(IN_ROOM(ch), BLD_ATTACH_ROAD)) || !IS_COMPLETE(IN_ROOM(ch))) {
 		msg_to_char(ch, "You can only put up a roadsign on finished roads.\r\n");
 	}
 	else if (!can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {

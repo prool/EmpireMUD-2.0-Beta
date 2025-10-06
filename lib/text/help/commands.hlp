@@ -2263,6 +2263,9 @@ set up a sign on a road, bridge, swamp walk, or mountain path. If the road is
 removed, the sign will be lost. Each road tile can only have one sign at a
 time, and using this ability again will replace the old sign.
 
+In addition to regular roads, you can also put roadsigns up on some open
+buildings that act like roads, such as steps.
+
 Gain Customize Building experience when you place a road sign.
 
 See also: CUSTOMIZE BUILDING, WOODWORKING
