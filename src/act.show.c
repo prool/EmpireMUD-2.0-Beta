@@ -3411,13 +3411,6 @@ struct show_struct {
 } show_command_fields[] = {
 	{ "nothing",		0,		NULL },		// this is skipped
 	
-	// privileged options
-	{ "account",		LVL_TO_SEE_ACCOUNTS,	show_account },
-	{ "cropregions",	LVL_CIMPL,				show_crop_regions },
-	{ "data",			LVL_CIMPL,				show_data },
-	{ "piles",			LVL_CIMPL,				show_piles },
-	{ "stats",			LVL_GOD,				show_stats },
-	
 	// basic options
 	{ "ammotypes",		LVL_START_IMM,		show_ammotypes },
 	{ "author",			LVL_START_IMM,		show_author },
@@ -3476,6 +3469,13 @@ struct show_struct {
 	{ "uses",			LVL_START_IMM,		show_uses },
 	{ "variables",		LVL_START_IMM,		show_variables },
 	{ "workforce",		LVL_START_IMM,		show_workforce },
+	
+	// privileged options
+	{ "account",		LVL_TO_SEE_ACCOUNTS,	show_account },
+	{ "cropregions",	LVL_CIMPL,				show_crop_regions },
+	{ "data",			LVL_CIMPL,				show_data },
+	{ "piles",			LVL_CIMPL,				show_piles },
+	{ "stats",			LVL_GOD,				show_stats },
 	
 	// last
 	{ "\n",		0,		NULL }
