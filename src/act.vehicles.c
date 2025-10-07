@@ -1333,7 +1333,7 @@ ACMD(do_board) {
 		send_config_msg(ch, "need_approval_string");
 	}
 	else if (!IS_IMMORTAL(ch) && !IS_NPC(ch) && IS_CARRYING_N(ch) > CAN_CARRY_N(ch)) {
-		msg_to_char(ch, "You are overburdened and cannot move.\r\n");
+		msg_to_char(ch, "You are overburdened and cannot move (%d/%d items).\r\n", IS_CARRYING_N(ch), CAN_CARRY_N(ch));
 	}
 	else if (!*arg) {
 		safe_snprintf(buf, sizeof(buf), "%s what?\r\n", command);

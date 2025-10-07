@@ -2264,7 +2264,7 @@ ACMD(do_gen_craft) {
 	
 	// regular object-type craft (or soup)
 	else if (IS_CARRYING_N(ch) > CAN_CARRY_N(ch)) {
-		msg_to_char(ch, "You can't %s anything while overburdened.\r\n", gen_craft_data[subcmd].command);
+		msg_to_char(ch, "You can't %s anything while overburdened (%d/%d items).\r\n", gen_craft_data[subcmd].command, IS_CARRYING_N(ch), CAN_CARRY_N(ch));
 	}
 	else if (!has_resources(ch, GET_CRAFT_RESOURCES(type), use_room, TRUE, GET_CRAFT_NAME(type))) {
 		// this sends its own message ("You need X more of ...")

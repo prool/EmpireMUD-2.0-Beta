@@ -210,7 +210,7 @@ bool can_enter_portal(char_data *ch, obj_data *portal, bool allow_infiltrate, bo
 		msg_to_char(ch, "You can't enter that!\r\n");
 	}
 	else if (!IS_IMMORTAL(ch) && !IS_NPC(ch) && IS_CARRYING_N(ch) > CAN_CARRY_N(ch)) {
-		msg_to_char(ch, "You are overburdened and cannot move.\r\n");
+		msg_to_char(ch, "You are overburdened and cannot move (%d/%d items).\r\n", IS_CARRYING_N(ch), CAN_CARRY_N(ch));
 	}
 	else if (!can_enter_room(ch, to_room)) {
 		msg_to_char(ch, "You can't seem to go there. Perhaps it's full.\r\n");
@@ -1128,7 +1128,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 	
 	// too much inventory
 	if (!IS_IMMORTAL(ch) && IS_CARRYING_N(ch) > CAN_CARRY_N(ch)) {
-		msg_to_char(ch, "You are overburdened and cannot move.\r\n");
+		msg_to_char(ch, "You are overburdened and cannot move (%d/%d items).\r\n", IS_CARRYING_N(ch), CAN_CARRY_N(ch));
 		return FALSE;
 	}
 	// permission check
@@ -2094,7 +2094,7 @@ ACMD(do_circle) {
 	}
 	
 	if (!IS_IMMORTAL(ch) && !IS_NPC(ch) && IS_CARRYING_N(ch) > CAN_CARRY_N(ch)) {
-		msg_to_char(ch, "You are overburdened and cannot move.\r\n");
+		msg_to_char(ch, "You are overburdened and cannot move (%d/%d items).\r\n", IS_CARRYING_N(ch), CAN_CARRY_N(ch));
 		return;
 	}
 	
