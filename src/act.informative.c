@@ -1479,10 +1479,10 @@ void list_one_char(char_data *i, char_data *ch, int num) {
 	}
 	
 	if (can_get_quest_from_mob(ch, i, NULL)) {
-		act("...$e has a quest for you!", FALSE, i, NULL, ch, TO_VICT);
+		act("...$e has a quest for you! (start)", FALSE, i, NULL, ch, TO_VICT);
 	}
 	if (can_turn_quest_in_to_mob(ch, i, NULL)) {
-		act("...you can finish a quest here!", FALSE, i, NULL, ch, TO_VICT);
+		act("...you can turn in a quest here! (finish)", FALSE, i, NULL, ch, TO_VICT);
 	}
 	if (IS_RIDING(i)) {
 		sprintf(buf, "...$E is %s upon %s.", (MOUNT_FLAGGED(i, MOUNT_FLYING) ? "flying" : "mounted"), get_mob_name_by_proto(GET_MOUNT_VNUM(i), TRUE));
@@ -1612,10 +1612,10 @@ char *list_one_vehicle_to_char(vehicle_data *veh, char_data *ch) {
 	}
 	
 	if (can_get_quest_from_vehicle(ch, veh, NULL)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "...it has a quest for you!\r\n");
+		size += snprintf(buf + size, sizeof(buf) - size, "...it has a quest for you! (start)\r\n");
 	}
 	if (can_turn_quest_in_to_vehicle(ch, veh, NULL)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "...you can finish a quest here!\r\n");
+		size += snprintf(buf + size, sizeof(buf) - size, "...you can turn in a quest here! (finish)\r\n");
 	}
 
 	return buf;
@@ -2390,10 +2390,10 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 	
 	if (mode == OBJ_DESC_INVENTORY || (mode == OBJ_DESC_LONG && CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
 		if (can_get_quest_from_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s quest available", (*tags ? "," : ""));
+			sprintf(tags + strlen(tags), "%s quest available (start)", (*tags ? "," : ""));
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s finished quest", (*tags ? "," : ""));
+			sprintf(tags + strlen(tags), "%s finished quest (finish)", (*tags ? "," : ""));
 		}
 	}
 	
@@ -2443,10 +2443,10 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 	
 	if (mode == OBJ_DESC_LOOK_AT || (mode == OBJ_DESC_LONG && !CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
 		if (can_get_quest_from_obj(ch, obj, NULL)) {
-			strcat(buf, "...it has a quest for you!\r\n");
+			strcat(buf, "...it has a quest for you! (start)\r\n");
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			strcat(buf, "...you can turn in a quest here!\r\n");
+			strcat(buf, "...you can turn in a quest here! (finish)\r\n");
 		}
 	}
 	
