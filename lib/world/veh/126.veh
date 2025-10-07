@@ -7,7 +7,7 @@ canopy, creating a multi-level, multi-trunk complex in the safety of the
 treetops. You can hardly see it until you're practically right underneath.
 ~
 @.&t[]@.~
-hkmtwBCK 19 24 0 0 0 0 0 4 0 -1 0
+hkmtwBCK 19 24 0 0 0 0 0 4 w -1 0
 B0
 &t[]~
 C
@@ -33,7 +33,7 @@ There's a loud crack above and then the buildings up in the trees come crashing 
 K
 1
 The tree complex comes crashing down to the ground!~
-L lq 0
+L lq r
 P
 2
 R
