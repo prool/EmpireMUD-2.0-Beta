@@ -80,7 +80,7 @@ S
 #11990
 Calamander Grove~
 A Calamander Grove~
-'.' 4 iq 8 adD gp
+'.' 4 ilq 8 adD gp
 C
 chop, dig~
 D0
@@ -127,7 +127,7 @@ S
 #11991
 Calamander Jungle~
 A Calamander Jungle~
-'Y' 4 iq 12 adD gp
+'Y' 4 ilq 12 adD gp
 C
 chop, dig~
 D0
