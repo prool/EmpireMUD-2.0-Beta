@@ -969,6 +969,8 @@ Allows you to pledge your loyalty to an empire. If they find you worthy, you
 may be allowed to join. You can cancel your pledge if you change your mind,
 but you must wait an hour to pledge again.
 
+A member of the empire must accept your pledge using the 'enroll' command.
+
 If the leader of one empire pledges to another empire and is enrolled, the
 entire original empire becomes a part of the second empire, including all
 players and empire inventory. However, if there aren't enough city points in
