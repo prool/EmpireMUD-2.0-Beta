@@ -255,6 +255,7 @@ of liquid at the bottom.
 ~
 I 4 12639 10.00 1 s  # LOOT: vine and dandy clothes
 I 4 12632 25.00 1 s  # LOOT: unknown seedling
+I 4 12636 10.00 1 s  # LOOT: jungle tree complex design
 M
 0
 The walls drip with sour-smelling nectar.~
@@ -290,6 +291,7 @@ the air, drawing you back to it.
 ~
 I 4 12639 10.00 1 s  # LOOT: vine and dandy clothes
 I 4 12632 25.00 1 s  # LOOT: unknown seedling
+I 4 12636 10.00 1 s  # LOOT: jungle tree complex design
 M
 4
 Droplets on the leaves sparkle like jewels in the sunlight.~
@@ -335,6 +337,7 @@ looks ready to burn at the lightest spark.
 ~
 I 4 12639 10.00 1 s  # LOOT: vine and dandy clothes
 I 4 12632 25.00 1 s  # LOOT: unknown seedling
+I 4 12636 10.00 1 s  # LOOT: jungle tree complex design
 M
 0
 Hanging pods sway gently.~
@@ -384,6 +387,7 @@ stuff something from your inventory into its mouth.
 ~
 I 4 12639 10.00 1 s  # LOOT: vine and dandy clothes
 I 4 12632 25.00 1 s  # LOOT: unknown seedling
+I 4 12636 10.00 1 s  # LOOT: jungle tree complex design
 M
 0
 Bubbles rise lazily through the dark swamp water.~
