@@ -538,10 +538,13 @@ See also: MUDSTATS
 #
 ENROLL
 
-Usage:  enroll <person>
+Usage:  enroll [person]
 
-When a person has pledged his loyalty to your empire, you can enroll him into
-it. This will start him at the lowest empire level.
+When a person has pledged their loyalty to your empire, you can enroll them
+into the empire with this command. This will start them at the lowest rank.
+
+Typing this command with no argument will list any online players who have
+pledged to your empire.
 
 If you enroll the leader of another empire, that empire's entire roster,
 inventory, and territory will also become part of your empire. However, if
@@ -965,6 +968,8 @@ Usage:  pledge <empire | cancel>
 Allows you to pledge your loyalty to an empire. If they find you worthy, you
 may be allowed to join. You can cancel your pledge if you change your mind,
 but you must wait an hour to pledge again.
+
+A member of the empire must accept your pledge using the 'enroll' command.
 
 If the leader of one empire pledges to another empire and is enrolled, the
 entire original empire becomes a part of the second empire, including all

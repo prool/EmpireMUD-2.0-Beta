@@ -508,8 +508,6 @@ if %item%
 end
 * and check quests:
 if %actor.on_quest(11907)%
-  * send a blank line first
-  %send% %actor% &&0
   %quest% %actor% trigger 11907
 end
 if %actor.on_quest(11908)%

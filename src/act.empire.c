@@ -5469,8 +5469,8 @@ ACMD(do_enroll) {
 	empire_data *e, *old;
 	room_data *room, *next_room;
 	int iter, island;
-	char_data *targ = NULL, *victim, *mob;
-	bool all_zero, file = FALSE, sub_file = FALSE;
+	char_data *targ = NULL, *victim, *ch_iter, *mob;
+	bool all_zero, any, file = FALSE, sub_file = FALSE;
 	obj_data *obj;
 
 	if (!IS_APPROVED(ch) && config_get_bool("manage_empire_approval")) {
@@ -5500,7 +5500,20 @@ ACMD(do_enroll) {
 		msg_to_char(ch, "You don't have the authority to enroll followers.\r\n");
 	}
 	else if (!*arg) {
-		msg_to_char(ch, "Whom did you want to enroll?\r\n");
+		// no-arg enroll: list people around who pledged
+		any = FALSE;
+		DL_FOREACH2(player_character_list, ch_iter, next_plr) {
+			if (GET_PLEDGE(ch_iter) == EMPIRE_VNUM(e)) {
+				if (!any) {
+					msg_to_char(ch, "Online players pledged to %s%s\t0:\r\n", EMPIRE_BANNER(e), EMPIRE_NAME(e));
+					any = TRUE;
+				}
+				msg_to_char(ch, " %s\r\n", PERS(ch_iter, ch, TRUE));
+			}
+		}
+		if (!any) {
+			msg_to_char(ch, "No online players are pledging to the empire. Whom did you want to enroll?\r\n");
+		}
 	}
 	else if (!(targ = find_or_load_player(arg, &file))) {
 		send_to_char("There is no such player.\r\n", ch);

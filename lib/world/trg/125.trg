@@ -718,6 +718,10 @@ if %questvnum% == 12504
   dg_affect %self% *CHARM on -1
   nop %self.add_mob_flag(SPAWNED)%
   %morph% %self% normal
+  * detach other adventure-related scripts
+  detach 12513 %self.id%
+  detach 12515 %self.id%
+  detach 12536 %self.id%
 end
 ~
 #12528

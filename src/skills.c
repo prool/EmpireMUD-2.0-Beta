@@ -1356,7 +1356,10 @@ char *get_skill_gain_display(char_data *ch) {
 	
 	*out = '\0';
 	if (!IS_NPC(ch)) {
-		sprintf(out + strlen(out), "You have %d bonus experience point%s available today. Use 'noskill <skill>' to toggle skill gain.\r\n", GET_DAILY_BONUS_EXPERIENCE(ch), PLURAL(GET_DAILY_BONUS_EXPERIENCE(ch)));
+		sprintf(out + strlen(out), "You have %d bonus experience point%s available today.\r\n", GET_DAILY_BONUS_EXPERIENCE(ch), PLURAL(GET_DAILY_BONUS_EXPERIENCE(ch)));
+		if (!PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+			sprintf(out + strlen(out), "Use 'noskill <skill>' to toggle skill gain on and off.\r\n");
+		}
 	}
 	
 	return out;
@@ -4125,11 +4128,12 @@ void get_skad_partial(struct skill_ability *list, struct skill_ability *parent, 
 /**
 * Builds the two-column display of abilities for a skill.
 *
+* @param char_data *for_char Which player is viewing it.
 * @param struct skill_ability *list The list to show.
 * @param char *save_buffer Text to write the result to.
 * @param size_t buflen The max length of save_buffer.
 */
-void get_skill_ability_display(struct skill_ability *list, char *save_buffer, size_t buflen) {
+void get_skill_ability_display(char_data *for_char, struct skill_ability *list, char *save_buffer, size_t buflen) {
 	struct skad_element *skad, *mid, *display = NULL;
 	char **left_text = NULL, **right_text = NULL;
 	int left_lines = 0, right_lines = 0;
@@ -4193,17 +4197,30 @@ void get_skill_ability_display(struct skill_ability *list, char *save_buffer, si
 		}
 	}
 	
-	iter = 0;
-	while (iter < left_lines || iter < right_lines) {
-		size += snprintf(save_buffer + size, buflen - size, " %-38.38s", (iter < left_lines ? left_text[iter] : ""));
-		if (iter < right_lines) {
-			size += snprintf(save_buffer + size, buflen - size, " %-38.38s\r\n", right_text[iter]);
+	// build full display
+	if (PRF_FLAGGED(for_char, PRF_SCREEN_READER)) {
+		// 1-column version
+		for (iter = 0; iter < left_lines; ++iter) {
+			size += snprintf(save_buffer + size, buflen - size, " %s\r\n", left_text[iter]);
 		}
-		else {
-			size += snprintf(save_buffer + size, buflen - size, "\r\n");
+		for (iter = 0; iter < right_lines; ++iter) {
+			size += snprintf(save_buffer + size, buflen - size, " %s\r\n", right_text[iter]);
 		}
+	}
+	else {
+		// 2-column version
+		iter = 0;
+		while (iter < left_lines || iter < right_lines) {
+			size += snprintf(save_buffer + size, buflen - size, " %-38.38s", (iter < left_lines ? left_text[iter] : ""));
+			if (iter < right_lines) {
+				size += snprintf(save_buffer + size, buflen - size, " %-38.38s\r\n", right_text[iter]);
+			}
+			else {
+				size += snprintf(save_buffer + size, buflen - size, "\r\n");
+			}
 		
-		++iter;
+			++iter;
+		}
 	}
 	
 	// free all the things
@@ -4252,7 +4269,7 @@ void do_stat_skill(char_data *ch, skill_data *skill) {
 	
 	LL_COUNT(SKILL_ABILITIES(skill), skab, total);
 	build_page_display(ch, "Simplified skill tree: (%d total)", total);
-	get_skill_ability_display(SKILL_ABILITIES(skill), part, sizeof(part));
+	get_skill_ability_display(ch, SKILL_ABILITIES(skill), part, sizeof(part));
 	if (*part) {
 		build_page_display_str(ch, part);
 	}
@@ -4299,7 +4316,7 @@ void olc_show_skill(char_data *ch) {
 	LL_COUNT(SKILL_ABILITIES(skill), skab, total);
 	build_page_display(ch, "<%stree\t0> %d %s (.showtree to toggle display)", OLC_LABEL_PTR(SKILL_ABILITIES(skill)), total, total == 1 ? "ability" : "abilities");
 	if (GET_OLC_SHOW_TREE(ch->desc)) {
-		get_skill_ability_display(SKILL_ABILITIES(skill), lbuf, sizeof(lbuf));
+		get_skill_ability_display(ch, SKILL_ABILITIES(skill), lbuf, sizeof(lbuf));
 		if (*lbuf) {
 			build_page_display_str(ch, lbuf);
 		}

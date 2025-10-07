@@ -138,6 +138,11 @@ ACMD(do_maggro) {
 		return;
 	}
 	
+	// newbie island safety check
+	if (ISLAND_FLAGGED(IN_ROOM(ch), ISLE_NO_AGGRO) && !IS_ADVENTURE_ROOM(IN_ROOM(ch))) {
+		return;
+	}
+	
 	// argument is optional (preferred target)
 	one_argument(argument, arg);
 	if (*arg) {

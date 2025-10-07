@@ -9324,6 +9324,7 @@ Available sector flags:
  &cINHERIT-BASE-CLIMATE&0 - Uses the climate flags of the base sector in addition
     to the ones set on this sector. For example, a road or building sector.
  &cIRRIGATES-AREA&0 - This flag is used to trigger irrigation evolutions.
+ &cNO-WORKFORCE-AUTOABANDON&0 - Workforce chores will not abandon this terrain.
 
 See also: OLC SECTORS, TERRAIN HEIGHT
 #d

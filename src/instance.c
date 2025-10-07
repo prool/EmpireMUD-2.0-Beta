@@ -641,7 +641,7 @@ bool validate_linking_limits(adv_data *adv, room_data *loc, struct map_data *map
 */
 bool validate_one_loc(adv_data *adv, struct adventure_link_rule *rule, room_data *loc, struct map_data *map) {
 	room_data *home;
-	struct island_info *isle = NULL;
+	struct island_info *isle;
 	empire_data *emp;
 	char_data *ch;
 	bool junk;
@@ -670,12 +670,15 @@ bool validate_one_loc(adv_data *adv, struct adventure_link_rule *rule, room_data
 	if (LINK_FLAGGED(rule, ADV_LINKF_CITY_ONLY) && (!home || !ROOM_OWNER(home))) {
 		return FALSE;
 	}
-		
+	
+	// no-adventure island?
+	isle = map ? map->shared->island_ptr : GET_ISLAND(loc);
+	if (isle && IS_SET(isle->flags, ISLE_NO_ADVENTURES)) {
+		return FALSE;
+	}
+	
 	// continental or incontinental?
 	if (LINK_FLAGGED(rule, ADV_LINKF_CONTINENT_ONLY | ADV_LINKF_NO_CONTINENT)) {
-		if (!isle) {
-			isle = map ? map->shared->island_ptr : GET_ISLAND(loc);
-		}
 		if (isle && LINK_FLAGGED(rule, ADV_LINKF_CONTINENT_ONLY) && !IS_SET(isle->flags, ISLE_CONTINENT)) {
 			return FALSE;
 		}
@@ -722,9 +725,6 @@ bool validate_one_loc(adv_data *adv, struct adventure_link_rule *rule, room_data
 	}
 	
 	// newbie island checks
-	if (!isle) {
-		isle = map ? map->shared->island_ptr : GET_ISLAND(loc);
-	}
 	if (isle && isle->id != NO_ISLAND) {
 		if (!ADVENTURE_FLAGGED(adv, ADV_IGNORE_ISLAND_LEVELS | ADV_NEWBIE_ONLY) && !IS_SET(isle->flags, ISLE_CONTINENT) && !config_get_bool("ignore_island_levels")) {	// not continent: check levels
 			if (GET_ADV_MIN_LEVEL(adv) > 0 && (!isle->max_level || isle->max_level + 50 < GET_ADV_MIN_LEVEL(adv))) {

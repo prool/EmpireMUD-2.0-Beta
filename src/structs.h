@@ -2736,6 +2736,7 @@ typedef enum {
 #define SECTF_SEPARATE_NOT_NEARS  BIT(26)	// runs every NOT-NEAR-SECTOR evolution separately instead of ensuring it's not near ANY of them
 #define SECTF_INHERIT_BASE_CLIMATE  BIT(27)	// inherits the climate of the base sector in addition to its own (e.g. road, building, etc)
 #define SECTF_IRRIGATES_AREA  BIT(28)	// tiles around this one trigger irrigation evolutions
+#define SECTF_NO_WORKFORCE_AUTOABANDON  BIT(29)	// workforce will not auto-abandon this terrain
 // note: evolutions use these as flags in a SIGNED sbitvector_t; limit is BIT(62)
 
 
@@ -3001,6 +3002,7 @@ typedef enum {
 #define ISLE_ALWAYS_DARK  BIT(8)	// i. outdoor tiles are always dark
 #define ISLE_ALWAYS_DAY  BIT(9)		// j. island is always daytime
 #define ISLE_ALWAYS_NIGHT  BIT(10)	// k. island is always nighttime
+#define ISLE_NO_ADVENTURES  BIT(11)	// l. island never spawns adventures
 
 
 // ROOM_AFF_x: Room affects -- these are similar to room flags, but if you want to set them

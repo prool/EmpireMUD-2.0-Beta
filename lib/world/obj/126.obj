@@ -421,6 +421,21 @@ M
 The strange plant rots away.~
 T 12636
 S
+#12636
+design jungle tree complex interesting~
+the jungle tree complex design~
+An interesting design is lying on the ground -- looks like a jungle complex.~
+   This old scrap of paper looks half-dissolved, but you can still make out the
+design for a tree complex that could be built in the jungle. Of course, you'll
+need an architect to build it.
+This design will teach you to build: jungle tree complex.
+~
+7 0 a 0 0 1
+12636 0 0
+0 0
+C
+25 25
+S
 #12637
 object helper strange plant~
 a strange plant helper object~

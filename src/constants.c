@@ -63,8 +63,8 @@ void tog_pvp(char_data *ch);
 //// EMPIREMUD CONSTANTS /////////////////////////////////////////////////////
 
 // Shown on the "version" command and sent over MSSP
-const char *version = "EmpireMUD 2.0 beta 5.191";
-const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.11";
+const char *version = "EmpireMUD 2.0 beta 5.192";
+const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.12";
 
 
 // data for the built-in game levels -- this adapts itself if you reduce the number of immortal levels
@@ -4335,6 +4335,7 @@ const char *island_bits[] = {
 	"ALWAYS-DARK",
 	"ALWAYS-DAY",
 	"ALWAYS-NIGHT",	// 10
+	"!ADVENTURES",
 	"\n"
 };
 
@@ -4579,6 +4580,7 @@ const char *sector_flags[] = {
 	"SEPARATE-NOT-NEARS",
 	"INHERIT-BASE-CLIMATE",
 	"IRRIGATES-AREA",
+	"NO-WORKFORCE-AUTOABANDON",
 	"\n"
 };
 

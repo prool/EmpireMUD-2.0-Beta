@@ -810,6 +810,8 @@ When using field - The variable returns
 &cmudcommand&0 - Returns the mud command the string is shorthand for. Used to make 
    sure the command you react to is the one you want: For %text%="o"
    %text.mudcommand% will yield "open".
+&cskip_filler&0 - Returns the string without fill words or reserved words at the
+   start, e.g. "a big stick" -> "big stick".
 &cprocess&0 - Processes variable substitutions like %char%, for example when
    using %mob.custom(script1)% to get text to echo. DO NOT use process on text
    that comes from player input as this could be manipulated.
