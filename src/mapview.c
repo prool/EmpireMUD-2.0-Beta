@@ -3181,7 +3181,7 @@ ACMD(do_mapscan) {
 	else {	// success
 		msg_to_char(ch, "You scan the map to the %s and see:\r\n", dirs[dir]);
 		
-		last_isle = GET_ISLAND_ID(use_room);
+		last_isle = ROOM_SECT_FLAGGED(use_room, SECTF_OCEAN) ? NO_ISLAND : GET_ISLAND_ID(use_room);
 		any = FALSE;
 		show_obscured = (GET_ISLAND_ID(IN_ROOM(ch)) != NO_ISLAND) ? TRUE : FALSE;	// if they're on an island, we will look for a vision-obscuring tile
 		
