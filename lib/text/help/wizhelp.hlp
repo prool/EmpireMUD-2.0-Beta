@@ -618,6 +618,18 @@ Example:
 
 See also: GRANT, VNUM
 #d
+LORE "LORE COMMAND" "EDIT LORE" "LORE EDITOR"
+
+Usage:  lore <name>
+
+This command is used for viewing and editing lore entries for a player.
+
+This command is grantable.
+
+To see the mortal version of this help file, see: MORTAL LORE
+
+See also: GRANT
+#d
 MISSINGHELP MISSINGHELPS "MISSING HELPS"
 
 Usage:  missinghelp

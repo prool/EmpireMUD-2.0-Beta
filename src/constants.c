@@ -1081,6 +1081,7 @@ const char *grant_bits[] = {
 	"unprogress",
 	"events",
 	"triggers",
+	"lore",
 	"\n"
 };
 

@@ -3158,8 +3158,9 @@ WHOIS
 Usage:  whois <name>
 
 Used to find vital information on a person. You cannot abbreviate the name
-because it draws the information from the player file. This allows it to be
-used on players who are not logged in.
+for offline players, only online ones.
+
+See also: LORE
 #
 WIELD
 

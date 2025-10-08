@@ -2317,6 +2317,7 @@ typedef enum {
 #define GRANT_UNPROGRESS  BIT(41)
 #define GRANT_EVENTS  BIT(42)
 #define GRANT_TRIGGERS  BIT(43)
+#define GRANT_LORE  BIT(44)
 
 
 // INFORMATIVE_x: For players' informative views

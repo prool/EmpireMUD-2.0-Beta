@@ -6825,6 +6825,58 @@ ACMD(do_load) {
 }
 
 
+ACMD(do_lore) {
+	bool is_file = FALSE;
+	int count;
+	char_data *vict;
+	struct lore_data *lore;
+	
+	argument = one_argument(argument, arg);
+	skip_spaces(&argument);
+	
+	if (!*arg) {
+		msg_to_char(ch, "Usage: lore <player>\r\n");
+		return;
+	}
+	
+	// load
+	if (!(vict = find_or_load_player(arg, &is_file))) {
+		msg_to_char(ch, "No such player '%s'.\r\n", arg);
+		return;
+	}
+	
+	// just viewing?
+	if (!*argument) {
+		build_page_display(ch, "Lore for: %s", PERS(vict, vict, TRUE));
+		
+		count = 0;
+		LL_FOREACH(GET_LORE(vict), lore) {
+			build_page_display(ch, "%3d. %s (%s)", ++count, NULLSAFE(lore->text), simple_time_since(lore->date));
+		}
+		
+		if (is_file) {
+			free_char(vict);
+		}
+		
+		return;	// end no-arg
+	}
+	
+	// editing?
+	if (GET_ACCESS_LEVEL(vict) > GET_ACCESS_LEVEL(ch)) {
+		msg_to_char(ch, "You can't edit lore for people above your access level.\r\n");
+		if (is_file) {
+			free_char(vict);
+		}
+		return;
+	}
+	
+	
+	if (is_file) {
+		free_char(vict);
+	}
+}
+
+
 ACMD(do_moveeinv) {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
 	struct empire_unique_storage *unique;

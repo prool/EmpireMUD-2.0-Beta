@@ -1162,6 +1162,13 @@ happens, you'll be stuck where you were.
 
 Do not try to get out of a fight by breaking link. You will likely still die.
 #
+LORE "PLAYER LORE" "CHARACTER LORE" "MORTAL LORE"
+
+Lore is shown on the 'whois' command. It encompasses the major milestones and
+accomplishments the character has achieved.
+
+See also: WHOIS
+#
 MANA "MANA POINTS" "MANA POOL" "MAGIC POINTS"
 
 The mana pool is the amount of magical energy you can channel before you must
