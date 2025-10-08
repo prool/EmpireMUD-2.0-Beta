@@ -91,20 +91,20 @@ else
   set target %startloc%
   %adventurecomplete%
 end
-%send% %actor% You disembark from the turtle.
-%echoaround% %actor% ~%actor% disembarks from the turtle.
+%send% %actor% You disembark from the atlasian tortoise.
+%echoaround% %actor% ~%actor% disembarks from the atlasian tortoise.
 %teleport% %actor% %target%
 %force% %actor% look
-%echoaround% %actor% ~%actor% disembarks from the turtle.
+%echoaround% %actor% ~%actor% disembarks from the atlasian tortoise.
 * companions
 set ch %self.people%
 while %ch%
   set next_ch %ch.next_in_room%
   if %ch.is_npc% && %ch.leader% == %actor% && !%ch.fighting% && !%ch.disabled%
-    %send% %ch% You disembark from the turtle.
-    %echoaround% %ch% ~%ch% disembarks from the turtle.
+    %send% %ch% You disembark from the atlasian tortoise.
+    %echoaround% %ch% ~%ch% disembarks from the atlasian tortoise.
     %teleport% %ch% %target%
-    %echoaround% %ch% ~%ch% disembarks from the turtle.
+    %echoaround% %ch% ~%ch% disembarks from the atlasian tortoise.
   end
   set ch %next_ch%
 done
@@ -115,7 +115,7 @@ City turtle look out~
 2 c 0
 look~
 if %cmd.mudcommand% == look && out == %arg%
-  %send% %actor% Looking over the side of the turtle, you see...
+  %send% %actor% Looking over the side of the tortoise, you see...
   set turtle %instance.mob(18200)%
   if %turtle%
     set target %turtle.room%
@@ -187,7 +187,7 @@ if (guild /= %arg% || tortoise /= %arg%)
   set turtle %instance.mob(18200)%
   %teleport% %actor% %room%
   if !%turtle%
-    %send% %actor% Something went wrong (turtle not found).
+    %send% %actor% Something went wrong (tortoise not found).
     halt
   end
   %send% %actor% You hold @%self% aloft...
