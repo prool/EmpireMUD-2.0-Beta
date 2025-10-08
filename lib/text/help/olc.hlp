@@ -6271,7 +6271,8 @@ Available mob flags:
  &cCHAMPION&0 - Will rescue its leader in combat.
  &cEMPIRE&0 - Will not be saved through reboots.
  &c*PICKPOCKETED&0 - Has already been pickpocketed; cannot be pickpocketed again.
- &cCITYGUARD&0 - Will assist allies from the same empire. This will only work if it is spawned by the empire system.
+ &cCITYGUARD&0 - Will assist allies from the same empire. This will only work
+   if it is spawned by the empire system or has had its loyalty set with %own%.
  &cPURSUE&0 - Will pursue players who flee in combat.
  &cHUMAN&0 - Counts as a human for various commands.
  &cVAMPIRE&0 - Counts as a vampire for various commands.
