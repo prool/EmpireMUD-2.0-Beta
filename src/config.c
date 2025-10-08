@@ -123,6 +123,7 @@ struct file_lookup_struct file_lookup[] = {
 	{ "olc", LVL_ASST, "../log/olc" },
 	{ "diplomacy", LVL_ASST, "../log/diplomacy" },
 	{ "scripterr", LVL_ASST, "../log/scripterr" },
+	{ "empires", LVL_ASST, "../log/empires" },
 
 	// last
 	{ "\n", 0, "\n" }

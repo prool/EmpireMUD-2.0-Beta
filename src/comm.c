@@ -722,6 +722,7 @@ void perform_reboot(void) {
 		system("fgrep \"OLC:\" syslog >> log/olc");
 		system("fgrep \"DIPL:\" syslog >> log/diplomacy");
 		system("fgrep \"SCRIPT ERR:\" syslog >> log/scripterr");
+		system("fgrep \"EMPIRE:\" syslog >> log/empires");
 		system("cp syslog log/syslog.old");
 		system("echo 'Rebooting EmpireMUD...' > syslog");
 		
