@@ -1103,27 +1103,27 @@ switch %vnum%
   case 12625
     %send% %actor% &&LThe world goes dark as you collapse in pain into the deadly fluid!&&0
     %echoaround% %actor% ~%actor% collapses in the fluid as bubbles rise from ^%actor% corpse.
-    %slay% %actor% %actor.real_name% has dissolved inside a strange plant at %room.coords%!
+    %slay% %actor% %actor.real_name.cap% has dissolved inside a strange plant at %room.coords%!
   break
   case 12626
     %send% %actor% &&LThe world goes dark as you're unable to remove the sticky dew from your face!&&0
     %echoaround% %actor% The light fades from |%actor% eyes as the sticky dew suffocates *%actor%.
-    %slay% %actor% %actor.real_name% has been suffocated by a strange plant at %room.coords%!
+    %slay% %actor% %actor.real_name.cap% has been suffocated by a strange plant at %room.coords%!
   break
   case 12627
     %send% %actor% &&LThe world fades away... You feel your neck snap just as the last light fades from your eyes.&&0
     %echoaround% %actor% There's a loud snap from |%actor% neck as the tendril chokes away the last of ^%actor% life.
-    %slay% %actor% %actor.real_name% has been strangled by a strange plant at %room.coords%!
+    %slay% %actor% %actor.real_name.cap% has been strangled by a strange plant at %room.coords%!
   break
   case 12628
     %send% %actor% &&LDarkness fills your lungs as the swamp drowns you in silence.&&0
     %echoaround% %actor% The last few bubbles break at the muck's surface as ~%actor% vanishes below.
-    %slay% %actor% %actor.real_name% has been drowned by a strange plant at %room.coords%!
+    %slay% %actor% %actor.real_name.cap% has been drowned by a strange plant at %room.coords%!
   break
   default
     %send% %actor% You die.
     %echoaround% %actor% ~%actor% dies.
-    %slay% %actor% %actor.real_name% has died at %room.coords%!
+    %slay% %actor% %actor.real_name.cap% has died at %room.coords%!
   break
 done
 %purge% %self%
