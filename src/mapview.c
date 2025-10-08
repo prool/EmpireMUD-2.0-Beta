@@ -3152,9 +3152,9 @@ ACMD(do_exits) {
 
 ACMD(do_mapscan) {
 	room_data *use_room = (GET_MAP_LOC(IN_ROOM(ch)) ? real_room(GET_MAP_LOC(IN_ROOM(ch))->vnum) : NULL);
-	int dir, dist, last_isle;
+	int dir, dist, last_isle, tries;
 	room_data *to_room;
-	bool any, show_obscured;
+	bool any, show_obscured, edge;
 	
 	int max_dist = MIN(MAP_WIDTH, MAP_HEIGHT) / 2;
 	
@@ -3185,9 +3185,19 @@ ACMD(do_mapscan) {
 		any = FALSE;
 		show_obscured = (GET_ISLAND_ID(IN_ROOM(ch)) != NO_ISLAND) ? TRUE : FALSE;	// if they're on an island, we will look for a vision-obscuring tile
 		
-		for (dist = 1; dist <= max_dist; dist += ((show_obscured || dist < 10) ? 1 : (dist < 70 ? 5 : 10))) {
+		for (dist = 1, edge = FALSE; dist <= max_dist && !edge; dist += ((show_obscured || dist < 10) ? 1 : (dist < 70 ? 5 : 10))) {
 			if (!(to_room = real_shift(use_room, shift_dir[dir][0] * dist, shift_dir[dir][1] * dist))) {
-				break;
+				// hit an edge: make sure we got the last thing
+				edge = TRUE;
+				// back up a few
+				for (tries = 0; !to_room && tries < (dist < 70 ? 5 : 10); ++tries) {
+					--dist;
+					to_room = real_shift(use_room, shift_dir[dir][0] * dist, shift_dir[dir][1] * dist);
+				}
+				if (!to_room) {
+					// still?
+					break;
+				}
 			}
 			if (show_obscured && ROOM_SECT_FLAGGED(to_room, SECTF_OBSCURE_VISION)) {
 				// we will show the first obscuring tile on the same island
