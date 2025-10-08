@@ -6828,7 +6828,7 @@ ACMD(do_load) {
 ACMD(do_lore) {
 	bool is_file = FALSE;
 	int count;
-	char_data *vict;
+	char_data *vict = NULL;
 	struct lore_data *lore;
 	
 	argument = one_argument(argument, arg);
@@ -6836,17 +6836,12 @@ ACMD(do_lore) {
 	
 	if (!*arg) {
 		msg_to_char(ch, "Usage: lore <player>\r\n");
-		return;
 	}
-	
-	// load
-	if (!(vict = find_or_load_player(arg, &is_file))) {
+	else if (!(vict = find_or_load_player(arg, &is_file))) {
 		msg_to_char(ch, "No such player '%s'.\r\n", arg);
-		return;
 	}
-	
-	// just viewing?
-	if (!*argument) {
+	else if (!*argument) {
+		// VIEW ONLY
 		build_page_display(ch, "Lore for: %s", PERS(vict, vict, TRUE));
 		
 		count = 0;
@@ -6858,18 +6853,16 @@ ACMD(do_lore) {
 			free_char(vict);
 		}
 		
+		send_page_display(ch);
 		return;	// end no-arg
 	}
-	
-	// editing?
-	if (GET_ACCESS_LEVEL(vict) > GET_ACCESS_LEVEL(ch)) {
+	else if (GET_ACCESS_LEVEL(vict) > GET_ACCESS_LEVEL(ch)) {
 		msg_to_char(ch, "You can't edit lore for people above your access level.\r\n");
-		if (is_file) {
-			free_char(vict);
-		}
-		return;
 	}
-	
+	else {
+		// EDIT MODE
+		// ...
+	}
 	
 	if (is_file) {
 		free_char(vict);
