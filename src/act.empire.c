@@ -4653,6 +4653,7 @@ ACMD(do_defect) {
 		add_cooldown(ch, COOLDOWN_LEFT_EMPIRE, 2 * SECS_PER_REAL_HOUR);
 		queue_delayed_update(ch, CDU_SAVE);
 		
+		syslog(SYS_EMPIRE, GET_INVIS_LEV(ch), TRUE, "EMPIRE: %s has defected from %s", GET_NAME(ch), EMPIRE_NAME(e));
 		log_to_empire(e, ELOG_MEMBERS, "%s has defected from the empire", PERS(ch, ch, 1));
 		msg_to_char(ch, "You defect from the empire!\r\n");
 		
@@ -5545,6 +5546,7 @@ ACMD(do_enroll) {
 	}
 	else {
 		// ok: enroll
+		syslog(SYS_EMPIRE, GET_INVIS_LEV(ch), TRUE, "EMPIRE: %s has enrolled %s into %s", GET_NAME(ch), GET_NAME(targ), EMPIRE_NAME(e));
 		log_to_empire(e, ELOG_MEMBERS, "%s has been enrolled in the empire", PERS(targ, targ, 1));
 		msg_to_char(targ, "You have been enrolled in %s.\r\n", EMPIRE_NAME(e));
 		msg_to_char(ch, "You enroll %s in the empire.\r\n", PERS(targ, targ, FALSE));
@@ -6006,6 +6008,7 @@ ACMD(do_expel) {
 		add_cooldown(targ, COOLDOWN_LEFT_EMPIRE, 2 * SECS_PER_REAL_HOUR);
 		clear_private_owner(GET_IDNUM(targ));
 
+		syslog(SYS_EMPIRE, GET_INVIS_LEV(ch), TRUE, "EMPIRE: %s has expelled %s from %s", GET_NAME(ch), GET_NAME(targ), EMPIRE_NAME(e));
 		log_to_empire(e, ELOG_MEMBERS, "%s has been expelled from the empire", PERS(targ, targ, 1));
 		msg_to_char(ch, "You expel %s from %s.\r\n", PERS(targ, targ, TRUE), (e == GET_LOYALTY(ch) ? "the empire" : EMPIRE_NAME(e)));
 		msg_to_char(targ, "You have been expelled from the empire.\r\n");
