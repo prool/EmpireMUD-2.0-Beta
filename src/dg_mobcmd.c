@@ -2128,6 +2128,7 @@ ACMD(do_mslay) {
 		return;
 
 	argument = one_argument(argument, name);
+	skip_spaces(&argument);
 
 	if (!*name) {
 		mob_log(ch, "mslay: no target");

@@ -588,6 +588,7 @@ WCMD(do_wslay) {
 	char_data *vict;
 	
 	argument = one_argument(argument, name);
+	skip_spaces(&argument);
 
 	if (!*name) {
 		wld_log(room, "wslay: no target");
