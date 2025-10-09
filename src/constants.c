@@ -1099,6 +1099,26 @@ const char *informative_view_bits[] = {
 };
 
 
+// LORE_x: Lore types
+const char *lore_types[] = {
+	"JOIN-EMPIRE",
+	"DEFECT-EMPIRE",
+	"KICKED-EMPIRE",
+	"PLAYER-KILL",
+	"PLAYER-DEATH",
+	"TOWER-DEATH",	// 5
+	"FOUND-EMPIRE",
+	"START-VAMPIRE",
+	"SIRE-VAMPIRE",
+	"PURIFY",
+	"CREATED",	// 10
+	"MAKE-VAMPIRE",
+	"PROMOTED",
+	"\n"
+};
+
+
+
 // MOUNT_x: mount flags
 const char *mount_flags[] = {
 	"riding",

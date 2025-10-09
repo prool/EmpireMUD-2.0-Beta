@@ -620,7 +620,10 @@ See also: GRANT, VNUM
 #d
 LORE "LORE COMMAND" "EDIT LORE" "LORE EDITOR"
 
-Usage:  lore <name>
+Usage:  lore <player>
+        lore <player> add <type> <text>
+        lore <player> delete <number>
+        lore <player> edit <number> <type | text> <new value>
 
 This command is used for viewing and editing lore entries for a player.
 

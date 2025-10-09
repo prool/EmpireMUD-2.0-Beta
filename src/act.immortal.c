@@ -6826,16 +6826,23 @@ ACMD(do_load) {
 
 
 ACMD(do_lore) {
-	bool is_file = FALSE;
-	int count;
+	bool error = FALSE, is_file = FALSE;
+	char arg2[MAX_INPUT_LENGTH];
+	int count, iter, num, type;
 	char_data *vict = NULL;
-	struct lore_data *lore;
+	struct lore_data *lore, *next_lore;
+	
+	const char *lore_usage =
+		"Usage: lore <player>\r\n"
+		"       lore <player> add <type> <text>\r\n"
+		"       lore <player> delete <number>\r\n"
+		"       lore <player> edit <number> <type | text> <new value>\r\n";
 	
 	argument = one_argument(argument, arg);
 	skip_spaces(&argument);
 	
 	if (!*arg) {
-		msg_to_char(ch, "Usage: lore <player>\r\n");
+		send_to_char(lore_usage, ch);
 	}
 	else if (!(vict = find_or_load_player(arg, &is_file))) {
 		msg_to_char(ch, "No such player '%s'.\r\n", arg);
@@ -6846,24 +6853,127 @@ ACMD(do_lore) {
 		
 		count = 0;
 		LL_FOREACH(GET_LORE(vict), lore) {
-			build_page_display(ch, "%3d. %s (%s)", ++count, NULLSAFE(lore->text), simple_time_since(lore->date));
-		}
-		
-		if (is_file) {
-			free_char(vict);
+			build_page_display(ch, "%3d. [%s] %s (%s)", ++count, lore_types[lore->type], NULLSAFE(lore->text), simple_time_since(lore->date));
 		}
 		
 		send_page_display(ch);
-		return;	// end no-arg
+		// end no-arg
 	}
 	else if (GET_ACCESS_LEVEL(vict) > GET_ACCESS_LEVEL(ch)) {
 		msg_to_char(ch, "You can't edit lore for people above your access level.\r\n");
 	}
 	else {
 		// EDIT MODE
-		// ...
+		argument = one_argument(argument, arg);
+		skip_spaces(&argument);
+		
+		if (is_abbrev(arg, "add")) {
+			argument = one_argument(argument, arg);
+			skip_spaces(&argument);
+			
+			if (!*arg || !*argument) {
+				msg_to_char(ch, "Usage: lore <player> add <type> <text>\r\n");
+			}
+			else if ((type = search_block(arg, lore_types, FALSE)) == NOTHING) {
+				msg_to_char(ch, "Invalid lore type '%s'. Valid types:\r\n", arg);
+				for (iter = 0; *lore_types[iter] != '\n'; ++iter) {
+					msg_to_char(ch, " %s\r\n", lore_types[iter]);
+				}
+			}
+			else if (strlen(argument) > MAX_LORE_LENGTH) {
+				msg_to_char(ch, "Lore text too long. Maximum length is %d.\r\n", MAX_LORE_LENGTH);
+			}
+			else {
+				add_lore(vict, type, "%s", argument);
+				syslog(SYS_GC, MAX(GET_ACCESS_LEVEL(ch), GET_INVIS_LEV(ch)), TRUE, "GC: %s has added lore for %s: [%s] %s", GET_NAME(ch), GET_NAME(vict), lore_types[type], argument);
+				msg_to_char(ch, "Added lore to %s: [%s] %s\r\n", GET_NAME(vict), lore_types[type], argument);
+			}
+		}	// end add
+		else if (is_abbrev(arg, "delete") || is_abbrev(arg, "remove")) {
+			if (!*argument || !isdigit(*argument) || (num = atoi(argument) < 1)) {
+				msg_to_char(ch, "Usage: lore <player> delete <number>\r\n");
+			}
+			else {
+				LL_FOREACH_SAFE(GET_LORE(vict), lore, next_lore) {
+					if (--num == 0) {
+						syslog(SYS_GC, MAX(GET_ACCESS_LEVEL(ch), GET_INVIS_LEV(ch)), TRUE, "GC: %s has deleted lore for %s: [%s] %s (%s)", GET_NAME(ch), GET_NAME(vict), lore_types[lore->type], NULLSAFE(lore->text), simple_time_since(lore->date));
+						msg_to_char(ch, "You delete lore from %s: [%s] %s (%s)\r\n", GET_NAME(vict), lore_types[lore->type], NULLSAFE(lore->text), simple_time_since(lore->date));
+						LL_DELETE(GET_LORE(vict), lore);
+						if (lore->text) {
+							free(lore->text);
+						}
+						free(lore);
+						break;
+					}
+				}
+				
+				if (num > 0) {
+					// fail
+					msg_to_char(ch, "Invalid lore entry %d to delete.\r\n", atoi(argument));
+				}
+			}
+		}	// end delete/remove
+		else if (is_abbrev(arg, "edit") || is_abbrev(arg, "change")) {
+			argument = two_arguments(argument, arg, arg2);
+			skip_spaces(&argument);
+			
+			if (!*arg || !*arg2 || !*argument || !isdigit(*arg) || (num = atoi(arg)) < 1) {
+				msg_to_char(ch, "Usage: lore <player> edit <number> <type | text> <new value>\r\n");
+			}
+			else {
+				LL_FOREACH_SAFE(GET_LORE(vict), lore, next_lore) {
+					if (--num == 0) {
+						// found!
+						if (is_abbrev(arg2, "type")) {
+							if ((type = search_block(argument, lore_types, FALSE)) == NOTHING) {
+								error = TRUE;
+								msg_to_char(ch, "Invalid lore type '%s'. Valid types:\r\n", arg);
+								for (iter = 0; *lore_types[iter] != '\n'; ++iter) {
+									msg_to_char(ch, " %s\r\n", lore_types[iter]);
+								}
+							}
+							else {
+								syslog(SYS_GC, MAX(GET_ACCESS_LEVEL(ch), GET_INVIS_LEV(ch)), TRUE, "GC: %s has edited lore for %s: type %s changed to %s for: %s", GET_NAME(ch), GET_NAME(vict), lore_types[lore->type], lore_types[type], NULLSAFE(lore->text));
+								msg_to_char(ch, "Changed lore type for %s from %s to %s for: %s\r\n", GET_NAME(vict), lore_types[lore->type], lore_types[type], NULLSAFE(lore->text));
+								lore->type = type;
+								queue_delayed_update(vict, CDU_SAVE);
+							}
+						}	// end edit-type
+						else if (is_abbrev(arg2, "text")) {
+							if (strlen(argument) > MAX_LORE_LENGTH) {
+								msg_to_char(ch, "Lore text too long. Maximum length is %d.\r\n", MAX_LORE_LENGTH);
+								error = TRUE;
+							}
+							else {
+								syslog(SYS_GC, MAX(GET_ACCESS_LEVEL(ch), GET_INVIS_LEV(ch)), TRUE, "GC: %s has edited lore for %s: '%s' changed to '%s'", GET_NAME(ch), GET_NAME(vict), NULLSAFE(lore->text), argument);
+								msg_to_char(ch, "Changed lore text for %s from '%s' to '%s'\r\n", GET_NAME(vict), NULLSAFE(lore->text), argument);
+								if (lore->text) {
+									free(lore->text);
+								}
+								lore->text = str_dup (argument);
+								queue_delayed_update(vict, CDU_SAVE);
+							}
+						}	// end edit-text
+						else {
+							error = TRUE;
+							msg_to_char(ch, "Invalid lore field to edit '%s'.\r\n", arg2);
+						}
+						break;
+					}
+				}
+				
+				if (num > 0 && !error) {
+					// fail
+					msg_to_char(ch, "Invalid lore entry %d to edit.\r\n", atoi(argument));
+				}
+			}
+		}	// end edit/change
+		else {
+			send_to_char(lore_usage, ch);
+		}
 	}
 	
+	// ALWAYS do this at the end
 	if (is_file) {
 		free_char(vict);
 	}

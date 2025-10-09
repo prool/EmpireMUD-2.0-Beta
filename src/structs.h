@@ -2339,7 +2339,7 @@ typedef enum {
 #define LASTNAME_CHOOSE_FROM_LIST  BIT(2)	// c. player can choose from the namelist
 
 
-// Lore types
+// LORE_x: Lore types
 #define LORE_JOIN_EMPIRE		0
 #define LORE_DEFECT_EMPIRE		1
 #define LORE_KICKED_EMPIRE		2
@@ -3112,6 +3112,7 @@ typedef enum {
 #define MAX_INVALID_NAMES  200	// ban.c
 #define MAX_ISLAND_NAME  40	// island name length -- seems more than reasonable
 #define MAX_ITEM_DESCRIPTION  8000
+#define MAX_LORE_LENGTH  250	// less than 1 line as read in from a file
 #define MAX_MAIL_SIZE  4096	// arbitrary
 #define MAX_MOTD_LENGTH  4000	// eedit.c, configs
 #define MAX_NAME_LENGTH  20
@@ -5181,7 +5182,7 @@ struct follow_type {
 
 // For a person's lore
 struct lore_data {
-	int type;	// LORE_x
+	int type;	// LORE_
 	long date;	// when it was acquired (timestamp)
 	char *text;
 
