@@ -3079,20 +3079,20 @@ ACMD(do_chart) {
 	struct empire_island *e_isle, *eiter, *next_eiter;
 	empire_data *emp, *next_emp;
 	int iter, total_claims, num;
-	struct island_info *isle, *isle_iter, *next_isle;
+	struct island_info *isle = NULL, *isle_iter, *next_isle;
 	bool any, city_prompt;
 	char buf[MAX_STRING_LENGTH];
 	
 	skip_spaces(&argument);
 	
-	if (!*argument) {
+	if (!*argument && (!(isle = GET_ISLAND(IN_ROOM(ch))) || isle->id == NO_ISLAND)) {
 		msg_to_char(ch, "Get chart information on which island?\r\n");
 	}
-	else if (!(isle = get_island_by_name(ch, argument)) || isle->id == NO_ISLAND) {
+	else if (!isle && (!(isle = get_island_by_name(ch, argument)) || isle->id == NO_ISLAND)) {
 		msg_to_char(ch, "Unknown island.\r\n");
 	}
 	else if (IS_SET(isle->flags, ISLE_NO_CHART)) {
-		msg_to_char(ch, "That island doesn't appear on any charts.\r\n");
+		msg_to_char(ch, "%s island doesn't appear on any charts.\r\n", (isle == GET_ISLAND(IN_ROOM(ch)) ? "This" : "That"));
 	}
 	else {
 		msg_to_char(ch, "Chart information for %s:\r\n", get_island_name_for(isle->id, ch));
