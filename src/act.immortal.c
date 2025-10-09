@@ -6893,7 +6893,7 @@ ACMD(do_lore) {
 			}
 		}	// end add
 		else if (is_abbrev(arg, "delete") || is_abbrev(arg, "remove")) {
-			if (!*argument || !isdigit(*argument) || (num = atoi(argument) < 1)) {
+			if (!*argument || !isdigit(*argument) || (num = atoi(argument)) < 1) {
 				msg_to_char(ch, "Usage: lore <player> delete <number>\r\n");
 			}
 			else {
