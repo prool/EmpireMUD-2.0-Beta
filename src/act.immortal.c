@@ -6900,7 +6900,6 @@ ACMD(do_lore) {
 			}
 			else {
 				LL_FOREACH_SAFE(GET_LORE(vict), lore, next_lore) {
-					msg_to_char(ch, "Debug %d: %s\r\n", (num-1), NULLSAFE(lore->text));
 					if (--num == 0) {
 						syslog(SYS_GC, MAX(GET_ACCESS_LEVEL(ch), GET_INVIS_LEV(ch)), TRUE, "GC: %s has deleted lore for %s: [%s] %s (%s)", GET_NAME(ch), GET_NAME(vict), lore_types[lore->type], NULLSAFE(lore->text), simple_time_since(lore->date));
 						msg_to_char(ch, "You delete lore from %s: [%s] %s (%s)\r\n", GET_NAME(vict), lore_types[lore->type], NULLSAFE(lore->text), simple_time_since(lore->date));
@@ -6942,7 +6941,6 @@ ACMD(do_lore) {
 								syslog(SYS_GC, MAX(GET_ACCESS_LEVEL(ch), GET_INVIS_LEV(ch)), TRUE, "GC: %s has edited lore for %s: type %s changed to %s for: %s", GET_NAME(ch), GET_NAME(vict), lore_types[lore->type], lore_types[type], NULLSAFE(lore->text));
 								msg_to_char(ch, "Changed lore type for %s from %s to %s for: %s\r\n", GET_NAME(vict), lore_types[lore->type], lore_types[type], NULLSAFE(lore->text));
 								lore->type = type;
-								queue_delayed_update(vict, CDU_SAVE);
 							}
 						}	// end edit-type
 						else if (is_abbrev(arg2, "text")) {
@@ -6957,7 +6955,6 @@ ACMD(do_lore) {
 									free(lore->text);
 								}
 								lore->text = str_dup (argument);
-								queue_delayed_update(vict, CDU_SAVE);
 							}
 						}	// end edit-text
 						else {
@@ -6981,7 +6978,10 @@ ACMD(do_lore) {
 	
 	// ALWAYS do this at the end
 	if (is_file) {
-		free_char(vict);
+		store_loaded_char(vict);
+	}
+	else {
+		queue_delayed_update(vict, CDU_SAVE);
 	}
 }
 
