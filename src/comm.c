@@ -76,6 +76,7 @@ void check_wars();
 void chore_update();
 void clear_leftover_page_displays();
 void display_automessages();
+void expire_old_politics();
 void frequent_combat(unsigned long pulse);
 void process_import_evolutions();
 void process_imports();
@@ -721,6 +722,7 @@ void perform_reboot(void) {
 		system("fgrep \"OLC:\" syslog >> log/olc");
 		system("fgrep \"DIPL:\" syslog >> log/diplomacy");
 		system("fgrep \"SCRIPT ERR:\" syslog >> log/scripterr");
+		system("fgrep \"EMPIRE:\" syslog >> log/empires");
 		system("cp syslog log/syslog.old");
 		system("echo 'Rebooting EmpireMUD...' > syslog");
 		
@@ -981,6 +983,11 @@ void heartbeat(unsigned long heart_pulse) {
 		
 		update_instance_world_size();
 		HEARTBEAT_LOG("31")
+	}
+	
+	if (HEARTBEAT(SECS_PER_REAL_WEEK)) {
+		expire_old_politics();
+		HEARTBEAT_LOG("31.5")
 	}
 	
 	// check if we've been asked to import new evolutions
@@ -3582,7 +3589,7 @@ char *replace_prompt_codes(char_data *ch, char *str) {
 				}
 				case 'f': {	// %f enemy's focus (tank): health percent
 					if (FIGHTING(ch) && (vict = FIGHTING(FIGHTING(ch))) && vict != ch) {
-						sprintf(i, "%s %d%%", (IS_NPC(vict) ? PERS(vict, vict, FALSE) : GET_NAME(vict)), GET_HEALTH(vict) * 100 / MAX(1, GET_MAX_HEALTH(vict)));
+						sprintf(i, "%s %d%%", ((IS_NPC(vict) || !CAN_RECOGNIZE(ch, vict)) ? PERS(vict, vict, FALSE) : GET_NAME(vict)), GET_HEALTH(vict) * 100 / MAX(1, GET_MAX_HEALTH(vict)));
 					}
 					else {
 						*i = '\0';
@@ -3592,8 +3599,13 @@ char *replace_prompt_codes(char_data *ch, char *str) {
 				
 				}
 				case 'F': {	// %f enemy's focus (tank): health total
-					if (FIGHTING(ch) && (vict = FIGHTING(FIGHTING(ch))) && !IS_NPC(vict) && vict != ch) {
-						sprintf(i, "%s %d/%d", (IS_NPC(vict) ? PERS(vict, vict, FALSE) : GET_NAME(vict)), GET_HEALTH(vict), GET_MAX_HEALTH(vict));
+					if (FIGHTING(ch) && (vict = FIGHTING(FIGHTING(ch))) && vict != ch) {
+						if (IS_NPC(vict)) {
+							sprintf(i, "%s %d%%", PERS(vict, vict, FALSE), GET_HEALTH(vict) * 100 / MAX(1, GET_MAX_HEALTH(vict)));
+						}
+						else {
+							sprintf(i, "%s %d/%d", (!CAN_RECOGNIZE(ch, vict) ? PERS(vict, vict, FALSE) : GET_NAME(vict)), GET_HEALTH(vict), GET_MAX_HEALTH(vict));
+						}
 					}
 					else {
 						*i = '\0';

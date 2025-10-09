@@ -412,8 +412,12 @@ quest_data *find_completed_quest_by_name(char_data *ch, char *argument) {
 quest_data *find_local_quest_by_name(char_data *ch, char *argument, bool check_char, bool check_room, struct instance_data **find_inst) {
 	quest_data *quest, *abbrev = NULL;
 	struct instance_data *inst, *abbrev_inst = NULL;
+	bool want_number;
+	int number;
 	
 	*find_inst = NULL;
+	want_number = (isdigit(*argument) && strchr(argument, '.'));
+	number = get_number(&argument);
 	
 	if (check_char) {
 		struct player_quest *pq;
@@ -423,13 +427,25 @@ quest_data *find_local_quest_by_name(char_data *ch, char *argument, bool check_c
 			}
 			
 			if (!str_cmp(argument, QUEST_NAME(quest))) {
-				// exact match
-				*find_inst = get_instance_by_id(pq->instance_id);
-				return quest;
+				if (--number <= 0) {
+					// exact match
+					*find_inst = get_instance_by_id(pq->instance_id);
+					return quest;
+				}
 			}
 			else if (!abbrev && multi_isname(argument, QUEST_NAME(quest))) {
-				abbrev = quest;
-				abbrev_inst = get_instance_by_id(pq->instance_id);
+				if (want_number) {
+					// number requested -- no preference for exact matches
+					if (--number <= 0) {
+						*find_inst = get_instance_by_id(pq->instance_id);
+						return quest;
+					}
+				}
+				else {
+					// number not requested
+					abbrev = quest;
+					abbrev_inst = get_instance_by_id(pq->instance_id);
+				}
 			}
 		}
 	}
@@ -443,14 +459,27 @@ quest_data *find_local_quest_by_name(char_data *ch, char *argument, bool check_c
 			inst = qtl->instance;
 			
 			if (!str_cmp(argument, QUEST_NAME(quest))) {
-				// exact match
-				free_quest_temp_list(quest_list);
-				*find_inst = inst;
-				return quest;
+				if (--number <= 0) {
+					// exact match
+					free_quest_temp_list(quest_list);
+					*find_inst = inst;
+					return quest;
+				}
 			}
 			else if (!abbrev && multi_isname(argument, QUEST_NAME(quest))) {
-				abbrev = quest;
-				abbrev_inst = inst;
+				if (want_number) {
+					// number requested -- no preference for exact matches
+					if (--number <= 0) {
+						free_quest_temp_list(quest_list);
+						*find_inst = inst;
+						return quest;
+					}
+				}
+				else {
+					// number not requested
+					abbrev = quest;
+					abbrev_inst = inst;
+				}
 			}
 		}
 		

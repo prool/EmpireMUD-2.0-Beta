@@ -557,7 +557,7 @@ prompted to press any key to enter the game.
 
 See also: INVIS, VISIBLE, SET
 #d
-ISLAND "ISLAND COMMAND" CONTINENT
+ISLAND "ISLAND COMMAND" CONTINENT "ISLAND FLAGS"
 
 Usage:  island list [keywords]
         island rename <id> <name>
@@ -578,6 +578,7 @@ Island flags:
  &cALWAYS-DARK&0 - Outdoor tiles are dark even during the day
  &cALWAYS-DAY&0 - The sun is always up.
  &cALWAYS-NIGHT&0 - The sun is always down.
+ &c!ADVENTURES&0 - Island will not spawn adventures.
 
 See also: CHART, GRANT
 #d
@@ -616,6 +617,36 @@ Example:
   You create a snarling wolf.
 
 See also: GRANT, VNUM
+#d
+LORE "LORE COMMAND" "EDIT LORE" "LORE EDITOR"
+
+Usage:  lore <player>
+        lore <player> add <type> <text>
+        lore <player> delete <number>
+        lore <player> edit <number> <type | text> <new value>
+
+This command is used for viewing and editing lore entries for a player.
+
+This command is grantable.
+
+Lore types:
+ &cJOIN-EMPIRE&0 - First joins an empire.
+ &cDEFECT-EMPIRE&0 - Chose to leave an empire.
+ &cKICKED-EMPIRE&0 - Was kicked from an empire.
+ &cPLAYER-KILL&0 - Killed a player.
+ &cPLAYER-DEATH&0 - Died to a player.
+ &cTOWER-DEATH&0 - Died to a guard tower.
+ &cFOUND-EMPIRE&0 - Started an empire.
+ &cSTART-VAMPIRE&0 - Started the game as a vampire.
+ &cSIRE-VAMPIRE&0 - Became a vampire in-game.
+ &cPURIFY&0 - Lost vampire status from the purify spell.
+ &cCREATED&0 - Character creation (based on archetype).
+ &cMAKE-VAMPIRE&0 - Turned another person into a vampire.
+ &cPROMOTED&0 - Gained empire rank.
+
+To see the mortal version of this help file, see: MORTAL LORE
+
+See also: GRANT
 #d
 MISSINGHELP MISSINGHELPS "MISSING HELPS"
 

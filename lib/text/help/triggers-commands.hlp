@@ -911,10 +911,10 @@ TATTACH
 Disambiguation: This is the immortal trigger attachment command. For the
                 scripting command, see &yATTACH&0.
 
-Usage:  attach mob <trigger vnum> <mob name> [location]
-        attach obj <trigger vnum> <obj name> [location]
-        attach room <trigger vnum> <room vnum> [location]
-        attach vehicle <trigger vnum> <vehicle name> [location]
+Usage:  tattach mob <trigger vnum> <mob name> [location]
+        tattach obj <trigger vnum> <obj name> [location]
+        tattach room <trigger vnum> <room vnum> [location]
+        tattach vehicle <trigger vnum> <vehicle name> [location]
 
 The tattach command allows you to attach a trigger to a single live copy of
 a mob (or object, etc) -- rather than attach it to the prototype. This is good

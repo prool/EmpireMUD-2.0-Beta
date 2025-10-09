@@ -2317,6 +2317,7 @@ typedef enum {
 #define GRANT_UNPROGRESS  BIT(41)
 #define GRANT_EVENTS  BIT(42)
 #define GRANT_TRIGGERS  BIT(43)
+#define GRANT_LORE  BIT(44)
 
 
 // INFORMATIVE_x: For players' informative views
@@ -2338,7 +2339,7 @@ typedef enum {
 #define LASTNAME_CHOOSE_FROM_LIST  BIT(2)	// c. player can choose from the namelist
 
 
-// Lore types
+// LORE_x: Lore types
 #define LORE_JOIN_EMPIRE		0
 #define LORE_DEFECT_EMPIRE		1
 #define LORE_KICKED_EMPIRE		2
@@ -2736,6 +2737,7 @@ typedef enum {
 #define SECTF_SEPARATE_NOT_NEARS  BIT(26)	// runs every NOT-NEAR-SECTOR evolution separately instead of ensuring it's not near ANY of them
 #define SECTF_INHERIT_BASE_CLIMATE  BIT(27)	// inherits the climate of the base sector in addition to its own (e.g. road, building, etc)
 #define SECTF_IRRIGATES_AREA  BIT(28)	// tiles around this one trigger irrigation evolutions
+#define SECTF_NO_WORKFORCE_AUTOABANDON  BIT(29)	// workforce will not auto-abandon this terrain
 // note: evolutions use these as flags in a SIGNED sbitvector_t; limit is BIT(62)
 
 
@@ -3001,6 +3003,7 @@ typedef enum {
 #define ISLE_ALWAYS_DARK  BIT(8)	// i. outdoor tiles are always dark
 #define ISLE_ALWAYS_DAY  BIT(9)		// j. island is always daytime
 #define ISLE_ALWAYS_NIGHT  BIT(10)	// k. island is always nighttime
+#define ISLE_NO_ADVENTURES  BIT(11)	// l. island never spawns adventures
 
 
 // ROOM_AFF_x: Room affects -- these are similar to room flags, but if you want to set them
@@ -3109,6 +3112,7 @@ typedef enum {
 #define MAX_INVALID_NAMES  200	// ban.c
 #define MAX_ISLAND_NAME  40	// island name length -- seems more than reasonable
 #define MAX_ITEM_DESCRIPTION  8000
+#define MAX_LORE_LENGTH  250	// less than 1 line as read in from a file
 #define MAX_MAIL_SIZE  4096	// arbitrary
 #define MAX_MOTD_LENGTH  4000	// eedit.c, configs
 #define MAX_NAME_LENGTH  20
@@ -5178,7 +5182,7 @@ struct follow_type {
 
 // For a person's lore
 struct lore_data {
-	int type;	// LORE_x
+	int type;	// LORE_
 	long date;	// when it was acquired (timestamp)
 	char *text;
 

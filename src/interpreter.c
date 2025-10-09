@@ -231,6 +231,7 @@ ACMD(do_list);
 ACMD(do_load);
 ACMD(do_load_vehicle);
 ACMD(do_look);
+ACMD(do_lore);
 
 ACMD(do_mail);
 ACMD(do_maintain);
@@ -756,6 +757,7 @@ cpp_extern const struct command_info cmd_info[] = {
 	GRANT_CMD( "load", POS_DEAD, do_load, LVL_CIMPL, CTYPE_IMMORTAL, GRANT_LOAD ),
 	STANDARD_CMD( "load", POS_STANDING, do_load_vehicle, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_MOVE, CMD_NO_ANIMALS, NO_ABIL ),
 	STANDARD_CMD( "loadvehicle", POS_STANDING, do_load_vehicle, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_MOVE, CMD_NO_ANIMALS, NO_ABIL ),
+	GRANT_CMD( "lore", POS_DEAD, do_lore, LVL_CIMPL, CTYPE_IMMORTAL, GRANT_LORE ),
 	SCMD_CMD( "levels", POS_DEAD, do_no_cmd, NO_MIN, CTYPE_UTIL, NOCMD_LEVELS ),
 
 	SIMPLE_CMD( "mount", POS_STANDING, do_mount, NO_MIN, CTYPE_MOVE ),

@@ -770,6 +770,7 @@ VCMD(do_vslay) {
 	char_data *vict;
 	
 	argument = one_argument(argument, name);
+	skip_spaces(&argument);
 
 	if (!*name) {
 		veh_log(veh, "vslay: no target");

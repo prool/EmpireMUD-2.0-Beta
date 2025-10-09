@@ -2847,7 +2847,7 @@ void show_event_leaderboard(char_data *ch, struct event_running_data *re) {
 		}
 		
 		index = find_player_index_by_idnum(lb->id);
-		build_page_display(ch, "%s. %s (%d)", part, index ? index->fullname : "???", lb->points);
+		build_page_display(ch, "%s%s. %s (%d)%s", (lb->id == GET_IDNUM(ch) ? "\tc" : ""), part, index ? index->fullname : "???", lb->points, (lb->id == GET_IDNUM(ch) ? " (you)\t0" : ""));
 	}
 	
 	if (!re->player_leaderboard) {

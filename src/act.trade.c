@@ -948,6 +948,10 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 				sprintf(buf + strlen(buf), ", %s armor", armor_types[GET_ARMOR_TYPE(proto)]);
 				break;
 			}
+			case ITEM_DRINKCON: {
+				sprintf(buf + strlen(buf), ", holds %d units of liquid", GET_DRINK_CONTAINER_CAPACITY(proto));
+				break;
+			}
 			case ITEM_MISSILE_WEAPON: {
 				sprintf(buf + strlen(buf), ", %s attack, speed %.2f", get_attack_name_by_vnum(GET_MISSILE_WEAPON_TYPE(proto)), get_weapon_speed(proto));
 				break;
@@ -978,6 +982,10 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 				if (*part) {
 					sprintf(buf + strlen(buf), ", %s", part);
 				}
+				break;
+			}
+			case ITEM_PACK: {
+				sprintf(buf + strlen(buf), ", pack size %d", GET_PACK_CAPACITY(proto));
 				break;
 			}
 		}	// end 'type' portion of info string
@@ -2264,7 +2272,7 @@ ACMD(do_gen_craft) {
 	
 	// regular object-type craft (or soup)
 	else if (IS_CARRYING_N(ch) > CAN_CARRY_N(ch)) {
-		msg_to_char(ch, "You can't %s anything while overburdened.\r\n", gen_craft_data[subcmd].command);
+		msg_to_char(ch, "You can't %s anything while overburdened (%d/%d items).\r\n", gen_craft_data[subcmd].command, IS_CARRYING_N(ch), CAN_CARRY_N(ch));
 	}
 	else if (!has_resources(ch, GET_CRAFT_RESOURCES(type), use_room, TRUE, GET_CRAFT_NAME(type))) {
 		// this sends its own message ("You need X more of ...")

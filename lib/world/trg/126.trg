@@ -455,7 +455,7 @@ set ch %room.people%
 while %ch%
   if %ch.is_pc% && !%ch.has_minipet(12638)%
     nop %ch.add_minipet(12638)%
-    %send% %ch% &&LYou collect a sproutling from the strange plant! A new minipet!&&0
+    %send% %ch% &&LYou collect a seedling from the strange plant! A new minipet!&&0
   end
   set ch %ch.next_in_room%
 done
@@ -1103,27 +1103,27 @@ switch %vnum%
   case 12625
     %send% %actor% &&LThe world goes dark as you collapse in pain into the deadly fluid!&&0
     %echoaround% %actor% ~%actor% collapses in the fluid as bubbles rise from ^%actor% corpse.
-    %slay% %actor% %actor.real_name% has dissolved inside a strange plant at %room.coords%!
+    %slay% %actor% %actor.real_name.cap% has dissolved inside a strange plant at %room.coords%!
   break
   case 12626
     %send% %actor% &&LThe world goes dark as you're unable to remove the sticky dew from your face!&&0
     %echoaround% %actor% The light fades from |%actor% eyes as the sticky dew suffocates *%actor%.
-    %slay% %actor% %actor.real_name% has been suffocated by a strange plant at %room.coords%!
+    %slay% %actor% %actor.real_name.cap% has been suffocated by a strange plant at %room.coords%!
   break
   case 12627
     %send% %actor% &&LThe world fades away... You feel your neck snap just as the last light fades from your eyes.&&0
     %echoaround% %actor% There's a loud snap from |%actor% neck as the tendril chokes away the last of ^%actor% life.
-    %slay% %actor% %actor.real_name% has been strangled by a strange plant at %room.coords%!
+    %slay% %actor% %actor.real_name.cap% has been strangled by a strange plant at %room.coords%!
   break
   case 12628
     %send% %actor% &&LDarkness fills your lungs as the swamp drowns you in silence.&&0
     %echoaround% %actor% The last few bubbles break at the muck's surface as ~%actor% vanishes below.
-    %slay% %actor% %actor.real_name% has been drowned by a strange plant at %room.coords%!
+    %slay% %actor% %actor.real_name.cap% has been drowned by a strange plant at %room.coords%!
   break
   default
     %send% %actor% You die.
     %echoaround% %actor% ~%actor% dies.
-    %slay% %actor% %actor.real_name% has died at %room.coords%!
+    %slay% %actor% %actor.real_name.cap% has died at %room.coords%!
   break
 done
 %purge% %self%
@@ -1353,7 +1353,7 @@ if %stuffed% >= %requires_items%
 end
 ~
 #12648
-Sproutling pet rename part 1~
+Seedling pet rename part 1~
 0 n 50
 ~
 wait %random.10% s
@@ -1361,58 +1361,58 @@ set mode 1%random.8%
 remote mode %self.id%
 switch %mode%
   case 11
-    %mod% %self% keywords sproutling sproutkin tiny shoot
+    %mod% %self% keywords seedling sproutkin tiny shoot
     %mod% %self% shortdesc a tiny sproutkin
-    %mod% %self% longdesc There's a tiny sproutkin is standing here, twitching its leaves.
+    %mod% %self% longdesc There's a tiny sproutkin standing here, twitching its leaves.
     %mod% %self% lookdesc The sproutkin looks like a small green shoot with two stubby leaves and a root-ball base. It hops about energetically, waving its quivering leaves like little hands.
   break
   case 12
-    %mod% %self% keywords sproutling fernling lazy
+    %mod% %self% keywords seedling fernling lazy
     %mod% %self% shortdesc a lazy fernling
     %mod% %self% longdesc A fernling uncurls lazily on the ground.
     %mod% %self% lookdesc This plantling resembles a fresh fern frond, still coiled at the top, walking about on spindly rootlike tendrils. Its movements are slow and graceful, almost hypnotic.
   break
   case 13
-    %mod% %self% keywords sproutling petalbud bud trembling
+    %mod% %self% keywords seedling petalbud bud trembling
     %mod% %self% shortdesc a trembling petalbud
     %mod% %self% longdesc A petalbud trembles softly as it bobs back and forth.
     %mod% %self% lookdesc The petalbud looks like a flower caught just before blooming, its petals still tightly closed. Now and then, it shivers, and the bud splits slightly to reveal a flash of brilliant color before snapping shut again.
   break
   case 14
-    %mod% %self% keywords sproutling acornling sccuttling
+    %mod% %self% keywords seedling acornling sccuttling
     %mod% %self% shortdesc a scuttling acornling
     %mod% %self% longdesc An acornling flaps its little leaves as it scuttles about.
     %mod% %self% lookdesc This stout creature is shaped like an acorn, with two sprouting leaves sticking out from its top. Its tiny root-feet tap quickly as it follows along, wobbling slightly with its round body.
   break
   case 15
-    %mod% %self% keywords sproutling mosskin forest lumpy
+    %mod% %self% keywords seedling mosskin forest lumpy
     %mod% %self% shortdesc a lumpy mosskin
     %mod% %self% longdesc There's a lump of forest moss here.
     %mod% %self% lookdesc The mosskin is a small, shaggy puff of damp greenery. Its surface glistens faintly, and when it hops, tiny bits of moss and spores flake off, leaving a faint trail of green fuzz behind it.
   break
   case 16
-    %mod% %self% keywords sproutling glowpod pod drifting
+    %mod% %self% keywords seedling glowpod pod drifting
     %mod% %self% shortdesc a drifting glowpod
     %mod% %self% longdesc A glowpod casts off a soft light as it gently drifts by.
     %mod% %self% lookdesc This plantling looks like a dangling seedpod, glowing faintly from within. Thin vine tendrils suspend it in the air as it sways, glowing brighter as it moves.
   break
   case 17
-    %mod% %self% keywords sproutling sporeling toddling
+    %mod% %self% keywords seedling sporeling toddling
     %mod% %self% shortdesc a toddling sporeling
     %mod% %self% longdesc A sporeling puffs out faint clouds as it toddles about.
     %mod% %self% lookdesc The sporeling is a little puffball fungus balanced on twitching root-legs. Each step causes a faint cloud of powdery spores to escape; the glow only faintly before dispersing.
   break
   case 18
-    %mod% %self% keywords sproutling thornling bristling spines
+    %mod% %self% keywords seedling thornling bristling spines
     %mod% %self% shortdesc a bristling thornling
     %mod% %self% longdesc A thornling bristles with tiny barbed spines, a little too close.
     %mod% %self% lookdesc This squat plantling is shaped like a spiky bush, its every surface bristling with sharp little thorns. It shifts from side to side in short, jerky motions, as though it's itching for someone to come too close.
   break
 done
-%echo% The little sproutling grows into %self.name%!
+%echo% The little seedling grows into %self.name%!
 ~
 #12649
-Sproutling pet rename part 2~
+Seedling pet rename part 2~
 0 n 100
 ~
 wait %random.10% s
@@ -1420,19 +1420,19 @@ set mode 2%random.7%
 remote mode %self.id%
 switch %mode%
   case 21
-    %mod% %self% keywords sproutling vinekin trailing tendrils
+    %mod% %self% keywords seedling vinekin trailing tendrils
     %mod% %self% shortdesc a trailing vinekin
     %mod% %self% longdesc A vinekin trails its looping tendrils across the ground.
     %mod% %self% lookdesc The plantling looks like a living tangle of vines that knot and unknot themselves as it moves. Its tendrils occasionally curl upward curiously, like a plant stretching toward the sun.
   break
   case 22
-    %mod% %self% keywords sproutling pitcherkin squeaking
+    %mod% %self% keywords seedling pitcherkin squeaking
     %mod% %self% shortdesc a squeaking pitcherkin
     %mod% %self% longdesc A pitcherkin makes tiny squeaking noises as it waddles.
     %mod% %self% lookdesc The plantling is a miniature carnivorous pitcher plant with a rounded base and a wide lid that snaps shut whenever it gets startled. Its oversized eyes and squeaky chirps make it more cute than dangerous.
   break
   case 23
-    %mod% %self% keywords sproutling bogbloom bloom drooping petals
+    %mod% %self% keywords seedling bogbloom bloom drooping petals
     %mod% %self% shortdesc a drooping bogbloom
     %mod% %self% longdesc A bogbloom droops here, dripping swamp water from its petals.
     %mod% %self% lookdesc The bogbloom looks like a heavy flower with soggy, half-rotted petals. It waddles on thick roots, trailing a faint puddle behind it, and its head lolls from side to side as though too waterlogged to hold up.
@@ -1444,25 +1444,25 @@ switch %mode%
     %mod% %self% lookdesc This tiny root-creature looks like a twisted mandrake with stubby arms and legs. Its leafy green hair fans out wildly, and now and then it lets out a soft, squeaky cry.
   break
   case 25
-    %mod% %self% keywords sproutling sapling wight glowing eyes
+    %mod% %self% keywords seedling sapling wight glowing eyes
     %mod% %self% shortdesc a sapling wight
     %mod% %self% longdesc Glowing eyes peer out from the barklike skin of a sapling wight.
     %mod% %self% lookdesc This unsettling plantling looks like a small humanoid sprout, its skin made of rough bark with cracks that glow faintly from within. Its eyes glimmer like fireflies, watching every movement, waiting for the right one.
   break
   case 26
-    %mod% %self% keywords sproutling creeper pod shell
+    %mod% %self% keywords seedling creeper pod shell
     %mod% %self% shortdesc a creeper pod
     %mod% %self% longdesc A creeper pod clicks its shell open and closed.
     %mod% %self% lookdesc This knobbly seedpod scuttles on root-legs, and its shell splits now and then to reveal a mess of writhing green tendrils inside. The tendrils curl and uncurl restlessly before snapping back inside.
   break
   case 27
-    %mod% %self% keywords sproutling mirefern fern sloshing
+    %mod% %self% keywords seedling mirefern fern sloshing
     %mod% %self% shortdesc a sloshing mirefern
     %mod% %self% longdesc A mirefern drips muddy water from its fronds as it sloshes about.
     %mod% %self% lookdesc The plantling looks like a shaggy bundle of swamp ferns bundled around a dripping rootball. It sloshes noisily as it waddles with its damp fronds clinging together in dripping clumps.
   break
 done
-%echo% The little sproutling grows into %self.name%!
+%echo% The little seedling grows into %self.name%!
 ~
 #12650
 Mob block higher template id (Grove 2.0)~
@@ -1801,6 +1801,10 @@ switch %self.vnum%
   break
 done
 wait 3 sec
+* cancel here on no-aggro islands
+if %self.room.island_flagged(!AGGRO)%
+  halt
+end
 if %target.room% != %self.room% || %self.disabled% || %self.fighting%
   halt
 end
@@ -1890,7 +1894,9 @@ end
 Escaped wildling load~
 0 n 100
 ~
-mgoto %instance.location%
+if %instance.location%
+  mgoto %instance.location%
+end
 mmove
 mmove
 mmove
@@ -2277,14 +2283,14 @@ while %cycles_left% >= 0
       set person %self.room.people%
       while %person%
         if %person.is_pc% && %person.on_quest(12650)%
-          %quest% %person% trigger 12650
           if %give_token%
+            %quest% %person% trigger 12650
             set curname %currency.12650(1)%.
             %send% %person% You receive %curname.ana% %curname%.
             nop %person.give_currency(12650, 1)%
-          end
-          if %person.quest_finished(12650)%
-            %send% %person% You have tranquilized all four of the manaweaver leaders.
+            if %person.quest_finished(12650)%
+              %send% %person% You have tranquilized all four of the manaweaver leaders.
+            end
           end
         end
         set person %person.next_in_room%
@@ -2567,6 +2573,9 @@ end
 Grove rage spirit speech~
 0 d 1
 *~
+if %actor.is_npc% && %actor.linked_to_instance%
+  halt
+end
 set word_1 calm
 set word_2 relax
 set word_3 pacify
@@ -2616,14 +2625,14 @@ if %success% && !%failure%
   set person %self.room.people%
   while %person%
     if %person.is_pc% && %person.on_quest(12650)%
-      %quest% %person% trigger 12650
       if %give_token%
+        %quest% %person% trigger 12650
         set curname %currency.12650(1)%
         %send% %person% You receive %curname.ana% %curname%.
         nop %person.give_currency(12650, 1)%
-      end
-      if %person.quest_finished(12650)%
-        %send% %person% You have tranquilized all four of the manaweaver leaders.
+        if %person.quest_finished(12650)%
+          %send% %person% You have tranquilized all four of the manaweaver leaders.
+        end
       end
     end
     set person %person.next_in_room%

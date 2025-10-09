@@ -7957,7 +7957,10 @@ ACMD(do_roadsign) {
 	else if (!has_player_tech(ch, PTECH_CUSTOMIZE_BUILDING)) {
 		msg_to_char(ch, "You require the Customize Building ability to set up road signs.\r\n");
 	}
-	else if (!IS_ROAD(IN_ROOM(ch)) || !IS_COMPLETE(IN_ROOM(ch))) {
+	else if (!IS_OUTDOORS(ch)) {
+		msg_to_char(ch, "You can't put up roadsigns inside.\r\n");
+	}
+	else if ((!IS_ROAD(IN_ROOM(ch)) && !ROOM_BLD_FLAGGED(IN_ROOM(ch), BLD_ATTACH_ROAD)) || !IS_COMPLETE(IN_ROOM(ch))) {
 		msg_to_char(ch, "You can only put up a roadsign on finished roads.\r\n");
 	}
 	else if (!can_use_room(ch, IN_ROOM(ch), MEMBERS_ONLY)) {
@@ -7979,7 +7982,14 @@ ACMD(do_roadsign) {
 		if (ROOM_CUSTOM_DESCRIPTION(IN_ROOM(ch))) {
 			old_sign = TRUE;
 		}
-		set_room_custom_description(IN_ROOM(ch), argument);
+		if (IS_ROAD(IN_ROOM(ch))) {
+			// simple roadsign
+			set_room_custom_description(IN_ROOM(ch), argument);
+		}
+		else {
+			safe_snprintf(buf, sizeof(buf), "Sign: %s\r\n", argument);
+			set_room_custom_description(IN_ROOM(ch), buf);
+		}
 
 		act("You engrave your message and plant $p in the ground by the road.", FALSE, ch, sign, NULL, TO_CHAR);
 		act("$n engraves a message on $p and plants it in the ground by the road.", FALSE, ch, sign, NULL, TO_ROOM);

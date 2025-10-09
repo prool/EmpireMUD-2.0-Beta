@@ -1336,7 +1336,12 @@ trying to figure out what to drop or give away, since the numbering (2.bag)
 will be the same for identify and drop (instead of also checking your equipment
 for the identify command).
 
-See also: EIDENTIFY, COMPARE, LEVEL COLORS, EQUIPMENT
+Weapons show damage in two ways. The first number is the damage per attack. The
+second number, in parentheses, gives the base DPS (damage per second) for the
+weapon, which is expressed as an attribute plus a number. DPS is a combination
+of the weapon's damage and speed.
+
+See also: EIDENTIFY, COMPARE, LEVEL COLORS, EQUIPMENT, DPS
 #
 INFORMATIVE "TOGGLE INFORMATIVE"
 
@@ -2263,6 +2268,9 @@ set up a sign on a road, bridge, swamp walk, or mountain path. If the road is
 removed, the sign will be lost. Each road tile can only have one sign at a
 time, and using this ability again will replace the old sign.
 
+In addition to regular roads, you can also put roadsigns up on some open
+buildings that act like roads, such as steps.
+
 Gain Customize Building experience when you place a road sign.
 
 See also: CUSTOMIZE BUILDING, WOODWORKING
@@ -3150,8 +3158,9 @@ WHOIS
 Usage:  whois <name>
 
 Used to find vital information on a person. You cannot abbreviate the name
-because it draws the information from the player file. This allows it to be
-used on players who are not logged in.
+for offline players, only online ones.
+
+See also: LORE
 #
 WIELD
 

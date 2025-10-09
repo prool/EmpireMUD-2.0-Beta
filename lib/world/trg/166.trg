@@ -1861,7 +1861,7 @@ Holiday Pet Leash (admin tool)~
 1 c 2
 leash~
 set usage Usage: leash <person> <command>
-set valid_commands Valid commands: check (shows data), clear (wipes data), progress (view/change progress), repair (tries to fix)
+set valid_commands Valid commands: check (shows data), clear (wipes data), progress (view/change progress), rename (changes pet name), repair (tries to fix)
 set pet_vnums 16635 16636 16637 16638 16639 16640
 return 1
 if !%actor.is_immortal%
@@ -1962,13 +1962,23 @@ switch %command%
       %send% %actor% %target.name% has no xmas_pet_progress data.
     end
   break
+  case rename
+    if !%arg%
+      %send% %actor% Rename |%target% pet what?
+      halt
+    end
+    set xmas_pet_name %arg%
+    remote xmas_pet_name %target.id%
+    %send% %actor% You rename |%target% pet to '%xmas_pet_name%'.
+    %send% %actor% Note: You must also use the 'repair' leash tool on that player to complete the renaming; this will force their pet to activate as their companion.
+  break
   case repair
     * forces the pet to re-name itself
     set compan %target.companion%
     if %compan%
       if %pet_vnums% ~= %compan.vnum%
         %force% %compan% xmas_pet_setup
-        %send% %actor% Attempting to repair %compan%...
+        %send% %actor% Attempting to repair ~%compan%...
       else
         %send% %actor% The player has the wrong companion out.
       end

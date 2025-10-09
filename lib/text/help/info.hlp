@@ -1162,6 +1162,13 @@ happens, you'll be stuck where you were.
 
 Do not try to get out of a fight by breaking link. You will likely still die.
 #
+LORE "PLAYER LORE" "CHARACTER LORE" "MORTAL LORE"
+
+Lore is shown on the 'whois' command. It encompasses the major milestones and
+accomplishments the character has achieved.
+
+See also: WHOIS
+#
 MANA "MANA POINTS" "MANA POOL" "MAGIC POINTS"
 
 The mana pool is the amount of magical energy you can channel before you must
@@ -1892,11 +1899,18 @@ if you equip a tool like an axe that would apply stats if it were in the
 
 See also: USE
 #
-UNSTUCK
+UNSTUCK STUCK
 
 You gain the 'unstuck' effect if you're inside a building and try to leave it,
 but the entrance is water and you have no ability to swim or fly. This short
 effect will get you past the water.
+
+Additional ways to get unstuck from somewhere:
+- Request help from a game administrator
+- Toggle autorecall on and then log out for a full hours
+- Use a spell or trinket to teleport home
+
+See also: TOGGLE AUTORECALL
 #
 VEHICLE VEHICLES VEH
 

@@ -63,8 +63,8 @@ void tog_pvp(char_data *ch);
 //// EMPIREMUD CONSTANTS /////////////////////////////////////////////////////
 
 // Shown on the "version" command and sent over MSSP
-const char *version = "EmpireMUD 2.0 beta 5.192";
-const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.11";
+const char *version = "EmpireMUD 2.0 beta 5.193";
+const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.12";
 
 
 // data for the built-in game levels -- this adapts itself if you reduce the number of immortal levels
@@ -1081,6 +1081,7 @@ const char *grant_bits[] = {
 	"unprogress",
 	"events",
 	"triggers",
+	"lore",
 	"\n"
 };
 
@@ -1096,6 +1097,26 @@ const char *informative_view_bits[] = {
 	"no-dismantle",
 	"\n"
 };
+
+
+// LORE_x: Lore types
+const char *lore_types[] = {
+	"JOIN-EMPIRE",
+	"DEFECT-EMPIRE",
+	"KICKED-EMPIRE",
+	"PLAYER-KILL",
+	"PLAYER-DEATH",
+	"TOWER-DEATH",	// 5
+	"FOUND-EMPIRE",
+	"START-VAMPIRE",
+	"SIRE-VAMPIRE",
+	"PURIFY",
+	"CREATED",	// 10
+	"MAKE-VAMPIRE",
+	"PROMOTED",
+	"\n"
+};
+
 
 
 // MOUNT_x: mount flags
@@ -4335,6 +4356,7 @@ const char *island_bits[] = {
 	"ALWAYS-DARK",
 	"ALWAYS-DAY",
 	"ALWAYS-NIGHT",	// 10
+	"!ADVENTURES",
 	"\n"
 };
 
@@ -4579,6 +4601,7 @@ const char *sector_flags[] = {
 	"SEPARATE-NOT-NEARS",
 	"INHERIT-BASE-CLIMATE",
 	"IRRIGATES-AREA",
+	"NO-WORKFORCE-AUTOABANDON",
 	"\n"
 };
 

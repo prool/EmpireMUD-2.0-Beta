@@ -5638,6 +5638,11 @@ void add_lore(char_data *ch, int type, const char *str, ...) {
 	va_start(tArgList, str);
 	vsprintf(text, str, tArgList);
 	
+	// safety due to limits reading in text from file
+	if (strlen(text) > MAX_LORE_LENGTH) {
+		text[MAX_LORE_LENGTH] = '\0';
+	}
+	
 	CREATE(new, struct lore_data, 1);
 	new->type = type;
 	new->date = (long) time(0);
@@ -5645,6 +5650,8 @@ void add_lore(char_data *ch, int type, const char *str, ...) {
 	LL_APPEND(GET_LORE(ch), new);
 	
 	va_end(tArgList);
+	
+	queue_delayed_update(ch, CDU_SAVE);
 }
 
 

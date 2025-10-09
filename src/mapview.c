@@ -2006,10 +2006,10 @@ void look_at_room_by_loc(char_data *ch, room_data *room, bitvector_t options) {
 
 	if (!AFF_FLAGGED(ch, AFF_EARTHMELDED)) {
 		if (can_get_quest_from_room(ch, room, NULL)) {
-			msg_to_char(ch, "\tA...there is a quest here for you!\t0\r\n");
+			msg_to_char(ch, "\tA...there is a quest here for you! (start)\t0\r\n");
 		}
 		if (can_turn_quest_in_to_room(ch, room, NULL)) {
-			msg_to_char(ch, "\tA...you can turn in a quest here!\t0\r\n");
+			msg_to_char(ch, "\tA...you can turn in a quest here! (finish)\t0\r\n");
 		}
 	
 		/* now list characters, vehicles, & objects */
@@ -3152,9 +3152,9 @@ ACMD(do_exits) {
 
 ACMD(do_mapscan) {
 	room_data *use_room = (GET_MAP_LOC(IN_ROOM(ch)) ? real_room(GET_MAP_LOC(IN_ROOM(ch))->vnum) : NULL);
-	int dir, dist, last_isle;
+	int dir, dist, last_isle, tries;
 	room_data *to_room;
-	bool any, show_obscured;
+	bool any, show_obscured, edge;
 	
 	int max_dist = MIN(MAP_WIDTH, MAP_HEIGHT) / 2;
 	
@@ -3181,13 +3181,23 @@ ACMD(do_mapscan) {
 	else {	// success
 		msg_to_char(ch, "You scan the map to the %s and see:\r\n", dirs[dir]);
 		
-		last_isle = GET_ISLAND_ID(use_room);
+		last_isle = ROOM_SECT_FLAGGED(use_room, SECTF_OCEAN) ? NO_ISLAND : GET_ISLAND_ID(use_room);
 		any = FALSE;
 		show_obscured = (GET_ISLAND_ID(IN_ROOM(ch)) != NO_ISLAND) ? TRUE : FALSE;	// if they're on an island, we will look for a vision-obscuring tile
 		
-		for (dist = 1; dist <= max_dist; dist += ((show_obscured || dist < 10) ? 1 : (dist < 70 ? 5 : 10))) {
+		for (dist = 1, edge = FALSE; dist <= max_dist && !edge; dist += ((show_obscured || dist < 10) ? 1 : (dist < 70 ? 5 : 10))) {
 			if (!(to_room = real_shift(use_room, shift_dir[dir][0] * dist, shift_dir[dir][1] * dist))) {
-				break;
+				// hit an edge: make sure we got the last thing
+				edge = TRUE;
+				// back up a few
+				for (tries = 0; !to_room && tries < (dist < 70 ? 5 : 10); ++tries) {
+					--dist;
+					to_room = real_shift(use_room, shift_dir[dir][0] * dist, shift_dir[dir][1] * dist);
+				}
+				if (!to_room) {
+					// still?
+					break;
+				}
 			}
 			if (show_obscured && ROOM_SECT_FLAGGED(to_room, SECTF_OBSCURE_VISION)) {
 				// we will show the first obscuring tile on the same island

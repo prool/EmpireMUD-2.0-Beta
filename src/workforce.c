@@ -192,6 +192,9 @@ void process_one_chore(empire_data *emp, room_data *room) {
 		do_chore_building(emp, room, CHORE_MAINTENANCE);
 		return;	// no further work while undergoing maintenance
 	}
+	if (ROOM_PRIVATE_OWNER(HOME_ROOM(room)) != NOBODY) {
+		return;	// skip homes for anything other than maintenance or fire
+	}
 	
 	// THING 4: IN-CITY CHECK and NO-INSTANCE: everything else must pass this to run
 	// NOTE: Further chores can use HAS_FUNCTION instead of room_has_function_and_city_ok
@@ -342,6 +345,9 @@ void process_one_vehicle_chore(empire_data *emp, vehicle_data *veh) {
 	// PART 4: other chores (unlike room chores, you must check city status with vehicle_has_function_and_city_ok)
 	if (VEH_HEALTH(veh) < 1) {
 		return;	// can only fire-brigade/repair if low health
+	}
+	if (VEH_INTERIOR_HOME_ROOM(veh) && ROOM_PRIVATE_OWNER(VEH_INTERIOR_HOME_ROOM(veh)) != NOBODY) {
+		return;	// skip private homes for all other chores
 	}
 	
 	// function chores:
@@ -2150,7 +2156,10 @@ void do_chore_burn_stumps(empire_data *emp, room_data *room) {
 		// done
 		stop_room_action(room, ACT_BURN_AREA);
 		
-		if (!ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_ABANDON_CHOPPED)) {
+		if (!ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && !ROOM_SECT_FLAGGED(room, SECTF_NO_WORKFORCE_AUTOABANDON) && empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_ABANDON_CHOPPED)) {
+			if (ROOM_PEOPLE(room)) {
+				act("The worker abandons the area. It is now unclaimed.", FALSE, ROOM_PEOPLE(room), NULL, NULL, TO_CHAR | TO_ROOM);
+			}
 			force_autostore(room);
 			abandon_room(room);
 		}
@@ -2233,7 +2242,10 @@ void do_chore_chopping(empire_data *emp, room_data *room) {
 						// done
 						stop_room_action(room, ACT_CHOPPING);
 					
-						if (!ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_ABANDON_CHOPPED) && (!has_evolution_type(SECT(room), EVO_BURN_STUMPS) || !empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_BURN_STUMPS))) {
+						if (!ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && !ROOM_SECT_FLAGGED(room, SECTF_NO_WORKFORCE_AUTOABANDON) && empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_ABANDON_CHOPPED) && (!has_evolution_type(SECT(room), EVO_BURN_STUMPS) || !empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_BURN_STUMPS))) {
+							if (ROOM_PEOPLE(room)) {
+								act("The worker abandons the area. It is now unclaimed.", FALSE, ROOM_PEOPLE(room), NULL, NULL, TO_CHAR | TO_ROOM);
+							}
 							force_autostore(room);
 							abandon_room(room);
 						}
@@ -2309,7 +2321,10 @@ void do_chore_dismantle(empire_data *emp, room_data *room) {
 			if (!BUILDING_RESOURCES(room)) {
 				add_workforce_production_log(emp, WPLOG_BUILDING_DISMANTLED, GET_BUILDING(room) ? GET_BLD_VNUM(GET_BUILDING(room)) : NOTHING, 1);
 				finish_dismantle(worker, room);
-				if (!ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_ABANDON_DISMANTLED)) {
+				if (!ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && !ROOM_SECT_FLAGGED(room, SECTF_NO_WORKFORCE_AUTOABANDON) && empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_ABANDON_DISMANTLED)) {
+					if (ROOM_PEOPLE(room)) {
+						act("The worker abandons the area. It is now unclaimed.", FALSE, ROOM_PEOPLE(room), NULL, NULL, TO_CHAR | TO_ROOM);
+					}
 					force_autostore(room);
 					abandon_room(room);
 				}
@@ -2555,7 +2570,10 @@ void do_chore_farming(empire_data *emp, room_data *room) {
 					// change to base sect
 					uncrop_tile(room);
 					
-					if (!ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_ABANDON_FARMED)) {
+					if (!ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && !ROOM_SECT_FLAGGED(room, SECTF_NO_WORKFORCE_AUTOABANDON) && empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_ABANDON_FARMED)) {
+						if (ROOM_PEOPLE(room)) {
+							act("The worker abandons the area. It is now unclaimed.", FALSE, ROOM_PEOPLE(room), NULL, NULL, TO_CHAR | TO_ROOM);
+						}
 						force_autostore(room);
 						abandon_room(room);
 					}
@@ -2598,7 +2616,10 @@ void do_chore_farming(empire_data *emp, room_data *room) {
 					// change to base sect
 					uncrop_tile(room);
 					
-					if (!ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_ABANDON_FARMED)) {
+					if (!ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && !ROOM_SECT_FLAGGED(room, SECTF_NO_WORKFORCE_AUTOABANDON) && empire_chore_limit(emp, GET_ISLAND_ID(room), CHORE_ABANDON_FARMED)) {
+						if (ROOM_PEOPLE(room)) {
+							act("The worker abandons the area. It is now unclaimed.", FALSE, ROOM_PEOPLE(room), NULL, NULL, TO_CHAR | TO_ROOM);
+						}
 						force_autostore(room);
 						abandon_room(room);
 					}
@@ -3332,9 +3353,12 @@ void vehicle_chore_dismantle(empire_data *emp, vehicle_data *veh) {
 				finish_dismantle_vehicle(worker, veh);	// ** sends own message **
 			
 				// auto-abandon?
-				if (claims_with_room && !ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && empire_chore_limit(emp, islid, CHORE_ABANDON_DISMANTLED)) {
+				if (claims_with_room && !ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_ABANDON) && !ROOM_SECT_FLAGGED(room, SECTF_NO_WORKFORCE_AUTOABANDON) && empire_chore_limit(emp, islid, CHORE_ABANDON_DISMANTLED)) {
 					// auto-abandon only if they have no other buildings left
 					if (count_building_vehicles_in_room(room, ROOM_OWNER(room)) == 0) {
+						if (ROOM_PEOPLE(room)) {
+							act("The worker abandons the area. It is now unclaimed.", FALSE, ROOM_PEOPLE(room), NULL, NULL, TO_CHAR | TO_ROOM);
+						}
 						force_autostore(room);
 						abandon_room(room);
 					}

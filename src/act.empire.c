@@ -4653,6 +4653,7 @@ ACMD(do_defect) {
 		add_cooldown(ch, COOLDOWN_LEFT_EMPIRE, 2 * SECS_PER_REAL_HOUR);
 		queue_delayed_update(ch, CDU_SAVE);
 		
+		syslog(SYS_EMPIRE, GET_INVIS_LEV(ch), TRUE, "EMPIRE: %s has defected from %s", GET_NAME(ch), EMPIRE_NAME(e));
 		log_to_empire(e, ELOG_MEMBERS, "%s has defected from the empire", PERS(ch, ch, 1));
 		msg_to_char(ch, "You defect from the empire!\r\n");
 		
@@ -5469,8 +5470,8 @@ ACMD(do_enroll) {
 	empire_data *e, *old;
 	room_data *room, *next_room;
 	int iter, island;
-	char_data *targ = NULL, *victim, *mob;
-	bool all_zero, file = FALSE, sub_file = FALSE;
+	char_data *targ = NULL, *victim, *ch_iter, *mob;
+	bool all_zero, any, file = FALSE, sub_file = FALSE;
 	obj_data *obj;
 
 	if (!IS_APPROVED(ch) && config_get_bool("manage_empire_approval")) {
@@ -5500,7 +5501,20 @@ ACMD(do_enroll) {
 		msg_to_char(ch, "You don't have the authority to enroll followers.\r\n");
 	}
 	else if (!*arg) {
-		msg_to_char(ch, "Whom did you want to enroll?\r\n");
+		// no-arg enroll: list people around who pledged
+		any = FALSE;
+		DL_FOREACH2(player_character_list, ch_iter, next_plr) {
+			if (GET_PLEDGE(ch_iter) == EMPIRE_VNUM(e)) {
+				if (!any) {
+					msg_to_char(ch, "Online players pledged to %s%s\t0:\r\n", EMPIRE_BANNER(e), EMPIRE_NAME(e));
+					any = TRUE;
+				}
+				msg_to_char(ch, " %s\r\n", PERS(ch_iter, ch, TRUE));
+			}
+		}
+		if (!any) {
+			msg_to_char(ch, "No online players are pledging to the empire. Whom did you want to enroll?\r\n");
+		}
 	}
 	else if (!(targ = find_or_load_player(arg, &file))) {
 		send_to_char("There is no such player.\r\n", ch);
@@ -5532,6 +5546,7 @@ ACMD(do_enroll) {
 	}
 	else {
 		// ok: enroll
+		syslog(SYS_EMPIRE, GET_INVIS_LEV(ch), TRUE, "EMPIRE: %s has enrolled %s into %s", GET_NAME(ch), GET_NAME(targ), EMPIRE_NAME(e));
 		log_to_empire(e, ELOG_MEMBERS, "%s has been enrolled in the empire", PERS(targ, targ, 1));
 		msg_to_char(targ, "You have been enrolled in %s.\r\n", EMPIRE_NAME(e));
 		msg_to_char(ch, "You enroll %s in the empire.\r\n", PERS(targ, targ, FALSE));
@@ -5993,6 +6008,7 @@ ACMD(do_expel) {
 		add_cooldown(targ, COOLDOWN_LEFT_EMPIRE, 2 * SECS_PER_REAL_HOUR);
 		clear_private_owner(GET_IDNUM(targ));
 
+		syslog(SYS_EMPIRE, GET_INVIS_LEV(ch), TRUE, "EMPIRE: %s has expelled %s from %s", GET_NAME(ch), GET_NAME(targ), EMPIRE_NAME(e));
 		log_to_empire(e, ELOG_MEMBERS, "%s has been expelled from the empire", PERS(targ, targ, 1));
 		msg_to_char(ch, "You expel %s from %s.\r\n", PERS(targ, targ, TRUE), (e == GET_LOYALTY(ch) ? "the empire" : EMPIRE_NAME(e)));
 		msg_to_char(targ, "You have been expelled from the empire.\r\n");

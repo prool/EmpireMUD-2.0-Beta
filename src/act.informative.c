@@ -1479,10 +1479,10 @@ void list_one_char(char_data *i, char_data *ch, int num) {
 	}
 	
 	if (can_get_quest_from_mob(ch, i, NULL)) {
-		act("...$e has a quest for you!", FALSE, i, NULL, ch, TO_VICT);
+		act("...$e has a quest for you! (start)", FALSE, i, NULL, ch, TO_VICT);
 	}
 	if (can_turn_quest_in_to_mob(ch, i, NULL)) {
-		act("...you can finish a quest here!", FALSE, i, NULL, ch, TO_VICT);
+		act("...you can turn in a quest here! (finish)", FALSE, i, NULL, ch, TO_VICT);
 	}
 	if (IS_RIDING(i)) {
 		sprintf(buf, "...$E is %s upon %s.", (MOUNT_FLAGGED(i, MOUNT_FLYING) ? "flying" : "mounted"), get_mob_name_by_proto(GET_MOUNT_VNUM(i), TRUE));
@@ -1612,10 +1612,10 @@ char *list_one_vehicle_to_char(vehicle_data *veh, char_data *ch) {
 	}
 	
 	if (can_get_quest_from_vehicle(ch, veh, NULL)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "...it has a quest for you!\r\n");
+		size += snprintf(buf + size, sizeof(buf) - size, "...it has a quest for you! (start)\r\n");
 	}
 	if (can_turn_quest_in_to_vehicle(ch, veh, NULL)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "...you can finish a quest here!\r\n");
+		size += snprintf(buf + size, sizeof(buf) - size, "...you can turn in a quest here! (finish)\r\n");
 	}
 
 	return buf;
@@ -2390,10 +2390,10 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 	
 	if (mode == OBJ_DESC_INVENTORY || (mode == OBJ_DESC_LONG && CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
 		if (can_get_quest_from_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s quest available", (*tags ? "," : ""));
+			sprintf(tags + strlen(tags), "%s quest available (start)", (*tags ? "," : ""));
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s finished quest", (*tags ? "," : ""));
+			sprintf(tags + strlen(tags), "%s finished quest (finish)", (*tags ? "," : ""));
 		}
 	}
 	
@@ -2443,10 +2443,10 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 	
 	if (mode == OBJ_DESC_LOOK_AT || (mode == OBJ_DESC_LONG && !CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
 		if (can_get_quest_from_obj(ch, obj, NULL)) {
-			strcat(buf, "...it has a quest for you!\r\n");
+			strcat(buf, "...it has a quest for you! (start)\r\n");
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			strcat(buf, "...you can turn in a quest here!\r\n");
+			strcat(buf, "...you can turn in a quest here! (finish)\r\n");
 		}
 	}
 	
@@ -3079,20 +3079,20 @@ ACMD(do_chart) {
 	struct empire_island *e_isle, *eiter, *next_eiter;
 	empire_data *emp, *next_emp;
 	int iter, total_claims, num;
-	struct island_info *isle, *isle_iter, *next_isle;
+	struct island_info *isle = NULL, *isle_iter, *next_isle;
 	bool any, city_prompt;
 	char buf[MAX_STRING_LENGTH];
 	
 	skip_spaces(&argument);
 	
-	if (!*argument) {
+	if (!*argument && (!(isle = GET_ISLAND(IN_ROOM(ch))) || isle->id == NO_ISLAND)) {
 		msg_to_char(ch, "Get chart information on which island?\r\n");
 	}
-	else if (!(isle = get_island_by_name(ch, argument)) || isle->id == NO_ISLAND) {
+	else if (!isle && (!(isle = get_island_by_name(ch, argument)) || isle->id == NO_ISLAND)) {
 		msg_to_char(ch, "Unknown island.\r\n");
 	}
 	else if (IS_SET(isle->flags, ISLE_NO_CHART)) {
-		msg_to_char(ch, "That island doesn't appear on any charts.\r\n");
+		msg_to_char(ch, "%s island doesn't appear on any charts.\r\n", (isle == GET_ISLAND(IN_ROOM(ch)) ? "This" : "That"));
 	}
 	else {
 		msg_to_char(ch, "Chart information for %s:\r\n", get_island_name_for(isle->id, ch));

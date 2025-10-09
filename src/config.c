@@ -123,6 +123,7 @@ struct file_lookup_struct file_lookup[] = {
 	{ "olc", LVL_ASST, "../log/olc" },
 	{ "diplomacy", LVL_ASST, "../log/diplomacy" },
 	{ "scripterr", LVL_ASST, "../log/scripterr" },
+	{ "empires", LVL_ASST, "../log/empires" },
 
 	// last
 	{ "\n", 0, "\n" }
@@ -2266,6 +2267,7 @@ ACMD(do_config) {
 		else {
 			// no argument: show
 			msg_to_char(ch, "&y%s&0: &c%s&0\r\n", cnf->key, cnf->description);
+			msg_to_char(ch, "Type: %s\r\n", config_groups[cnf->set]);
 			
 			if (cnf->show_func != NULL) {
 				(cnf->show_func)(ch, cnf, val_arg);

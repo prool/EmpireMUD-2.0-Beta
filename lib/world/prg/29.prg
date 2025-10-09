@@ -115,7 +115,8 @@ P 2018
 S
 #2911
 Faster Prospecting~
-Everyone in your empire will now prospect faster.
+   Everyone in your empire will now prospect faster. Note that this only
+applies to players, not workforce NPCs.
 ~
 1 2 50 0 b
 K 0 17

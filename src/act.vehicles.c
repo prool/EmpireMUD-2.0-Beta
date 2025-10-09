@@ -1333,7 +1333,7 @@ ACMD(do_board) {
 		send_config_msg(ch, "need_approval_string");
 	}
 	else if (!IS_IMMORTAL(ch) && !IS_NPC(ch) && IS_CARRYING_N(ch) > CAN_CARRY_N(ch)) {
-		msg_to_char(ch, "You are overburdened and cannot move.\r\n");
+		msg_to_char(ch, "You are overburdened and cannot move (%d/%d items).\r\n", IS_CARRYING_N(ch), CAN_CARRY_N(ch));
 	}
 	else if (!*arg) {
 		safe_snprintf(buf, sizeof(buf), "%s what?\r\n", command);
@@ -2367,6 +2367,7 @@ ACMD(do_load_vehicle) {
 
 ACMD(do_scrap) {
 	char arg[MAX_INPUT_LENGTH];
+	obj_data *temp;
 	vehicle_data *veh;
 	char_data *iter;
 	
@@ -2376,7 +2377,13 @@ ACMD(do_scrap) {
 		msg_to_char(ch, "Scrap what?\r\n");
 	}
 	else if (!(veh = get_vehicle_in_room_vis(ch, arg, NULL))) {
-		msg_to_char(ch, "You don't see anything like that here.\r\n");
+		// helpful check: could they have meant scrape?
+		if (((temp = get_obj_in_list_vis_prefer_interaction(ch, arg, NULL, ch->carrying, INTERACT_SCRAPE)) || (can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED) && (temp = get_obj_in_list_vis_prefer_interaction(ch, arg, NULL, ROOM_CONTENTS(IN_ROOM(ch)), INTERACT_SCRAPE)))) && has_interaction(GET_OBJ_INTERACTIONS(temp), INTERACT_SCRAPE)) {
+			act("You can't scrap $p. (Did you mean scrape?)", FALSE, ch, temp, NULL, TO_CHAR);
+		}
+		else {
+			msg_to_char(ch, "You don't see anything like that here to scrap.\r\n");
+		}
 	}
 	else if (!can_use_vehicle(ch, veh, MEMBERS_ONLY)) {
 		msg_to_char(ch, "You can't scrap that! It's not even yours.\r\n");

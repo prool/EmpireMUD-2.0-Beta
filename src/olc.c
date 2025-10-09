@@ -6824,10 +6824,10 @@ int olc_process_type(char_data *ch, char *argument, char *name, char *command, c
 		for (iter = 0; *type_names[iter] != '\n'; ++iter) {
 			sprintf(line, "%s%s", type_names[iter], ((old_value == iter) ? " (current)" : ""));
 			if (one_per_line) {
-				sprintf(buf + strlen(buf), "%2d. %s%s&0\r\n", (iter + 1), (old_value == iter) ? "&g" : "", line);
+				sprintf(buf + strlen(buf), "%d. %s%s&0\r\n", (iter + 1), (old_value == iter) ? "&g" : "", line);
 			}
 			else {
-				sprintf(buf + strlen(buf), "%2d. %s%-34.34s&0%s", (iter + 1), (old_value == iter) ? "&g" : "", line, ((iter % 2) ? "\r\n" : ""));
+				sprintf(buf + strlen(buf), "%3d. %s%-33.33s&0%s", (iter + 1), (old_value == iter) ? "&g" : "", line, ((iter % 2) ? "\r\n" : ""));
 			}
 		}
 		if (!one_per_line && (iter % 2) != 0) {

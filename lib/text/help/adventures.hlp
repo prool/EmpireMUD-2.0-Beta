@@ -218,7 +218,9 @@ a difficulty with the 'difficulty' command.
 
 The gear sold in the shops is the same as the gear created by the crafting
 patterns and the loot dropped by the goblins, but it will be BoE instead of BoP
-when crafted, can go as high as level 175, and may be crafted as superior.
+when crafted, can go as high as level 175, and may be crafted as superior. Note
+that "list id" and "craft info" will show these items as BOP even though they
+are only BOP when they drop as loot.
 
 Healer crafts (Haxaw's mad sketches):
  Haxaw's poison ring  (finger, forged, Jewelry)
@@ -335,6 +337,9 @@ Grandmother Poplar's Poplar Goods sells for wooden nickels:
 The belts, rings, and gloves can be upgraded (once each) using the oil of the
 snake shifter by typing 'oil <item>'. You must be at least level 50 to upgrade
 the gear with snake oil.
+
+This adventure has one of three different quests depending upon your skills
+(Natural Magic, Stealth, or neither).
 
 You can find this adventure in most forests.
 
