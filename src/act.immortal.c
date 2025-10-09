@@ -6849,6 +6849,7 @@ ACMD(do_lore) {
 	}
 	else if (!*argument) {
 		// VIEW ONLY
+		check_delayed_load(vict);
 		build_page_display(ch, "Lore for: %s", PERS(vict, vict, TRUE));
 		
 		count = 0;
@@ -6864,6 +6865,7 @@ ACMD(do_lore) {
 	}
 	else {
 		// EDIT MODE
+		check_delayed_load(vict);
 		argument = one_argument(argument, arg);
 		skip_spaces(&argument);
 		
@@ -6898,6 +6900,7 @@ ACMD(do_lore) {
 			}
 			else {
 				LL_FOREACH_SAFE(GET_LORE(vict), lore, next_lore) {
+					msg_to_char(ch, "Debug %d: %s\r\n", (num-1), NULLSAFE(lore->text));
 					if (--num == 0) {
 						syslog(SYS_GC, MAX(GET_ACCESS_LEVEL(ch), GET_INVIS_LEV(ch)), TRUE, "GC: %s has deleted lore for %s: [%s] %s (%s)", GET_NAME(ch), GET_NAME(vict), lore_types[lore->type], NULLSAFE(lore->text), simple_time_since(lore->date));
 						msg_to_char(ch, "You delete lore from %s: [%s] %s (%s)\r\n", GET_NAME(vict), lore_types[lore->type], NULLSAFE(lore->text), simple_time_since(lore->date));
