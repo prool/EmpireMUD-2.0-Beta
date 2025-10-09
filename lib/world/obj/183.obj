@@ -455,9 +455,21 @@ A jar of linseed oil is sitting here.~
    The jar of linseed oil, which is made from flax, has been sealed for
 storage. It could be used for cooking or for vehicle maintenance.
 ~
-3 C a 0 0 10
+3 C a 0 0 11
 0 0 0
 6 0
+M
+0
+You apply some linseed oil to the building.~
+M
+1
+$n applies some linseed oil to the building.~
+M
+6
+You apply some linseed oil to $V.~
+M
+7
+$n applies some linseed oil to $V.~
 O+ 1 6321
 R
 4 5134 0
