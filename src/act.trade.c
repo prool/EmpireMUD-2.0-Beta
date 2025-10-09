@@ -948,6 +948,10 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 				sprintf(buf + strlen(buf), ", %s armor", armor_types[GET_ARMOR_TYPE(proto)]);
 				break;
 			}
+			case ITEM_DRINKCON: {
+				sprintf(buf + strlen(buf), ", holds %d units of liquid", GET_DRINK_CONTAINER_CAPACITY(proto));
+				break;
+			}
 			case ITEM_MISSILE_WEAPON: {
 				sprintf(buf + strlen(buf), ", %s attack, speed %.2f", get_attack_name_by_vnum(GET_MISSILE_WEAPON_TYPE(proto)), get_weapon_speed(proto));
 				break;
@@ -978,6 +982,10 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 				if (*part) {
 					sprintf(buf + strlen(buf), ", %s", part);
 				}
+				break;
+			}
+			case ITEM_PACK: {
+				sprintf(buf + strlen(buf), ", pack size %d", GET_PACK_CAPACITY(proto));
 				break;
 			}
 		}	// end 'type' portion of info string
