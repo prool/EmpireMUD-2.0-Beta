@@ -1056,6 +1056,10 @@ QCMD(qcmd_share) {
 		msg_to_char(ch, "You must be in a group to share quests.\r\n");
 		return;
 	}
+	if (!*argument) {
+		msg_to_char(ch, "Share which quest?\r\n");
+		return;
+	}
 	if (!(qst = find_local_quest_by_name(ch, argument, TRUE, FALSE, &inst)) || !(pq = is_on_quest(ch, QUEST_VNUM(qst)))) {
 		msg_to_char(ch, "You don't seem to be on a quest called '%s'.\r\n", argument);
 		return;
@@ -1235,7 +1239,7 @@ QCMD(qcmd_tracker) {
 		msg_to_char(ch, "Show the tracker for which quest?\r\n");
 	}
 	else if (!(qst = find_local_quest_by_name(ch, argument, TRUE, FALSE, &inst)) || !(pq = is_on_quest(ch, QUEST_VNUM(qst)))) {
-		msg_to_char(ch, "You don't seem to be on a quest called '%s' here.\r\n", argument);
+		msg_to_char(ch, "You don't seem to be on a quest called '%s'.\r\n", argument);
 	}
 	else {
 		build_page_display(ch, "%s Tracker:", QUEST_NAME(qst));
