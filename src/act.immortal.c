@@ -6872,7 +6872,10 @@ ACMD(do_lore) {
 			skip_spaces(&argument);
 			
 			if (!*arg || !*argument) {
-				msg_to_char(ch, "Usage: lore <player> add <type> <text>\r\n");
+				msg_to_char(ch, "Usage: lore <player> add <type> <text>\r\nValid types:");
+				for (iter = 0; *lore_types[iter] != '\n'; ++iter) {
+					msg_to_char(ch, " %s\r\n", lore_types[iter]);
+				}
 			}
 			else if ((type = search_block(arg, lore_types, FALSE)) == NOTHING) {
 				msg_to_char(ch, "Invalid lore type '%s'. Valid types:\r\n", arg);
