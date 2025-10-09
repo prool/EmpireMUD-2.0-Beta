@@ -380,7 +380,11 @@ For each type, there is a help file named &yMTRIG <type>&0.
 #d
 "MTRIG VARS" "MTRIG VARIABLES" CHAR-VARS MOB-VAR TRIGEDIT-CHAR-VAR TRIGEDIT-VARIABLES-CHARACTERS MOBVARS MOB-VARS 
 
-All mob scripts provide the &c%self%&0 variable.
+Character Variables
+
+All mob scripts provide the &c%self%&0 variable. Many other scripts provide
+%actor%, but there are other ways to get character variables, too. The fields
+below are accessed like %self.name%.
 
 Names and pronouns:
 &c~%person%&0 - name, someone, you
