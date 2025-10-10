@@ -3507,7 +3507,7 @@ char *how_drunk(char_data *ch) {
 		return "drunk";
 	}
 	else if (GET_COND(ch, DRUNK) >= (REAL_UPDATES_PER_MUD_HOUR * 12)) {
-		return "getting drunk";
+		return "tipsy";
 	}
 	else {
 		return NULL;	// no report when sober
