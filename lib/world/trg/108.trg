@@ -214,6 +214,36 @@ elseif %direction% == north && !%actor.aff_flagged(SNEAK)%
   return 0
 end
 ~
+#10856
+Sneak tutorial: EZ-Sneak~
+0 c 0
+sneak~
+return 0
+if !%arg%
+  * no-arg just falls through to sneak command
+elseif %actor.on_quest(10855)%
+  * has ability?
+  if !%actor.ability(Sneak)%
+    %send% %actor% You need to purchase that with 'skill buy Sneak' first.
+    return 1
+    halt
+  end
+  * right dir?
+  set dir %actor.parse_dir(%arg%)%
+  eval to_room %%actor.room.%dir%(room)%%
+  if !%to_room%
+    * pass thru to fail
+    halt
+  end
+  * Allow it
+  %send% %actor% You sneak past!
+  %teleport% %actor% %to_room%
+  %quest% %actor% trigger 10855
+  %send% %actor% &&0
+  %send% %actor% You have successfully sneaked! The quest is complete.
+  return 1
+end
+~
 #10857
 Start Blood Tutorial~
 2 u 100
