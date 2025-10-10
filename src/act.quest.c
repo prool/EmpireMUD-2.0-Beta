@@ -664,7 +664,7 @@ void show_quest_info(char_data *ch, quest_data *qst) {
 	
 	// show string?
 	if (*buf) {
-		if (strstr(buf, "#e") || strstr(buf, "#n") || strstr(buf, "#a")) {
+		if (strstr(buf, "#e") || strstr(buf, "#n") || strstr(buf, "#a") || strstr(buf, "#A")) {
 			// #n
 			buf2 = str_replace("#n", "<name>", buf);
 			strcpy(buf, buf2);
@@ -675,6 +675,10 @@ void show_quest_info(char_data *ch, quest_data *qst) {
 			free(buf2);
 			// #a
 			buf2 = str_replace("#a", "<empire>", buf);
+			strcpy(buf, buf2);
+			free(buf2);
+			// #a
+			buf2 = str_replace("#A", "<empire>", buf);
 			strcpy(buf, buf2);
 			free(buf2);
 		}

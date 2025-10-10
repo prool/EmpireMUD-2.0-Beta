@@ -701,8 +701,8 @@ I 4 2315 10.00 1  # LOOT: kite shield
 S
 #253
 scout #a #n~
-a #a scout~
-A #a scout is standing here.
+#A scout~
+#A scout is standing here.
 ~
 50 75 dqtvI c 3
 0 0 0 1 -1

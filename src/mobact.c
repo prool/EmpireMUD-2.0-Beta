@@ -365,6 +365,7 @@ int pick_generic_name(int name_set, int sex) {
 */
 char *replace_npc_names(const char *str, const char *name, const char *empire_name, const char *empire_adjective) {
 	static char buf[MAX_STRING_LENGTH];
+	char temp[MAX_RANK_LENGTH + 10];
 	char *cp = buf, *ptr, *iter;
 
 	for (iter = (char*)str; *iter; ++iter) {
@@ -376,9 +377,20 @@ char *replace_npc_names(const char *str, const char *name, const char *empire_na
 				case 'e':
 					for (ptr = (char*)empire_name; *ptr && (cp - buf) < (MAX_STRING_LENGTH - 1); *(cp++) = *(ptr++));
 					break;
-				case 'a':
+				case 'a': { // adjective
 					for (ptr = (char*)empire_adjective; *ptr && (cp - buf) < (MAX_STRING_LENGTH - 1); *(cp++) = *(ptr++));
 					break;
+				}
+				case 'A': {	// a/an adjective
+					if (!strn_cmp(empire_adjective, "a ", 2) || !strn_cmp(empire_adjective, "an ", 3)) {
+						strcpy(temp, empire_adjective);
+					}
+					else {
+						safe_snprintf(temp, sizeof(temp), "%s %s", AN(empire_adjective), empire_adjective);
+					}
+					for (ptr = (char*)temp; *ptr && (cp - buf) < (MAX_STRING_LENGTH - 1); *(cp++) = *(ptr++));
+					break;
+				}
 				default:
 					if ((cp - buf) < (MAX_STRING_LENGTH - 1)) {
 						*(cp++) = '#';

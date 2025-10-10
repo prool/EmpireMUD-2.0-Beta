@@ -923,6 +923,10 @@ void identify_obj_to_char(obj_data *obj, char_data *ch, bool simple) {
 					temp = str_replace("#a", "imperial", lbuf);
 					strcpy(lbuf, temp);
 					free(temp);
+					// #A
+					temp = str_replace("#A", "an imperial", lbuf);
+					strcpy(lbuf, temp);
+					free(temp);
 				}
 				msg_to_char(ch, "%s\r\n", lbuf);
 				

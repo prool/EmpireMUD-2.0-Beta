@@ -2971,6 +2971,11 @@ char *get_mob_name_by_proto(mob_vnum vnum, bool replace_placeholders) {
 			strcpy(output, tmp);
 			free(tmp);
 		}
+		if (strstr(GET_SHORT_DESC(proto), "#A")) {
+			tmp = str_replace("#A", "<empire>", output);
+			strcpy(output, tmp);
+			free(tmp);
+		}
 		
 		return output;
 	}
