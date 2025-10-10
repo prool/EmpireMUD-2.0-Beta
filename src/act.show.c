@@ -321,8 +321,11 @@ SHOW(show_account) {
 	char empart[MAX_STRING_LENGTH], skills[MAX_STRING_LENGTH], ago_buf[256], *ago_ptr, color;
 	char_data *plr = NULL, *loaded;
 	int acc_id = NOTHING;
-	time_t last_online = -1;	// -1 here will indicate no data, -2 will indicate online now
 	account_data *acc_ptr;
+	
+	time_t last_online = -1;	// -1 here will indicate no data, -2 will indicate online now
+	int total_playtime = 0;
+	time_t earliest_birth = time(0);
 	
 	#define ONLINE_NOW  -2
 	
@@ -408,9 +411,13 @@ SHOW(show_account) {
 				}
 				
 				msg_to_char(ch, " [%d %s] %s - \t%c%s ago\t0%s\r\n", GET_LAST_KNOWN_LEVEL(loaded), skills, GET_PC_NAME(loaded), color, ago_ptr, empart);
+				
+				// records
 				if (last_online != ONLINE_NOW) {
 					last_online = MAX(last_online, GET_PREV_LOGON(loaded));
 				}
+				earliest_birth = MIN(earliest_birth, loaded->player.time.birth);
+				SAFE_ADD(total_playtime, loaded->player.time.played, 0, INT_MAX, FALSE);
 			}
 		}
 		else if (ACCOUNT_FLAGGED(loaded, ACCT_MULTI_IP) || IS_SET(acc_ptr->flags, ACCT_MULTI_IP)) {
@@ -426,10 +433,13 @@ SHOW(show_account) {
 		}
 	}
 	
+	msg_to_char(ch, "Total playtime: %s\r\n", colon_time(total_playtime, FALSE, NULL));
+	strcpy(ago_buf, ctime(&earliest_birth));
+	msg_to_char(ch, "Oldest creation time: %s\r\n", ago_buf);
 	if (last_online > 0) {
 		ago_ptr = strcpy(ago_buf, simple_time_since(last_online));
 		skip_spaces(&ago_ptr);
-		msg_to_char(ch, " (last online: %-24.24s, %s ago)\r\n", ctime(&last_online), ago_ptr);
+		msg_to_char(ch, "Last online: %-24.24s, %s ago\r\n", ctime(&last_online), ago_ptr);
 	}
 	
 	if (plr && file) {
