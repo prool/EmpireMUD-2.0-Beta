@@ -2174,15 +2174,16 @@ char *get_obj_desc(obj_data *obj, char_data *ch, int mode) {
 			if (IN_ROOM(obj) && ROOM_SECT_FLAGGED(IN_ROOM(obj), SECTF_FRESH_WATER | SECTF_OCEAN)) {
 				// floating!?
 				
-				strcpy(output, (*sdesc ? sdesc : GET_OBJ_SHORT_DESC(obj)));
-				CAP(output);
-				
-				if (materials[GET_OBJ_MATERIAL(obj)].floats) {
-					strcat(output, " is floating in the water.");
+				if (obj_has_custom_message(obj, OBJ_CUSTOM_FLOATING)) {
+					strcpy(output, obj_get_custom_message(obj, OBJ_CUSTOM_FLOATING));
+				}
+				else if (materials[GET_OBJ_MATERIAL(obj)].floats) {
+					sprintf(output, "%s is floating in the water.", (*sdesc ? sdesc : GET_OBJ_SHORT_DESC(obj)));
 				}
 				else {
-					strcat(output, " is sinking fast.");
+					sprintf(output, "%s is sinking fast.", (*sdesc ? sdesc : GET_OBJ_SHORT_DESC(obj)));
 				}
+				CAP(output);
 			}
 			else {	// NOT floating in water, or not in a room at all
 				if (*sdesc) {
