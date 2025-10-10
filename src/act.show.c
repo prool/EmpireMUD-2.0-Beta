@@ -433,8 +433,8 @@ SHOW(show_account) {
 		}
 	}
 	
-	msg_to_char(ch, "Total playtime: %s\r\n", colon_time(total_playtime, TRUE, NULL));
-	msg_to_char(ch, "Oldest creation time: %-20s\r\n", ctime(&earliest_birth));
+	msg_to_char(ch, "Total playtime: %s\r\n", colon_time(total_playtime, FALSE, NULL));
+	msg_to_char(ch, "Oldest creation time: %-24.24s\r\n", ctime(&earliest_birth));
 	if (last_online > 0) {
 		ago_ptr = strcpy(ago_buf, simple_time_since(last_online));
 		skip_spaces(&ago_ptr);
