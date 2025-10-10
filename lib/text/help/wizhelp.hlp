@@ -604,11 +604,14 @@ LOAD is used to create instances of mobs, objects, and vehicles. The first
 argument specifies what type you are trying to load; the second is the virtual
 number. This command is grantable.
 
+To set the level of a loaded thing, use 'rescale'. To get rid of it, use
+'purge'.
+
 (For the mortal command, try LOAD VEHICLE.)
 
 You can load: mob, obj, vehicle, book
 
-Example:
+Examples:
 
   > load obj 1
   You create a bulletin board.
@@ -616,7 +619,7 @@ Example:
   > load mob 1
   You create a snarling wolf.
 
-See also: GRANT, VNUM
+See also: GRANT, PURGE, RESCALE, VNUM
 #d
 LORE "LORE COMMAND" "EDIT LORE" "LORE EDITOR"
 
@@ -750,12 +753,14 @@ You can change the following fields:
 Setting the keywords, longdescription, or shortdescription to "none" will
 restore its strings from the prototype (if one exists).
 
+To change the level of an item, use 'rescale'.
+
 Examples:
 
   > oset sword flag HARD-DROP
   > oset bread value 0 72
 
-See also: GRANT, OEDIT, OBJ VALUES
+See also: GRANT, OEDIT, OBJ VALUES, RESCALE
 #d
 PAGE
 
@@ -918,7 +923,7 @@ Examples:
   > purge sword
   > purge dragon
 
-See also: DC, GRANT
+See also: DC, GRANT, LOAD, RESCALE
 #d
 RANDOM
 
@@ -983,7 +988,7 @@ maximum scale value.
 Caution: Rescaling an item will almost always cause it to be re-loaded and it
 will lose any enchantments or modifications.
 
-See also: GRANT
+See also: GRANT, LOAD, PURGE
 #d
 RESTORE
 
@@ -1860,7 +1865,7 @@ Examples:
   > stat crop
   > stat building -d
 
-See also: VSTAT
+See also: RESCALE, VSTAT
 #d
 SWITCH
 
