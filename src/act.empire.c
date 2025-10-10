@@ -5147,7 +5147,15 @@ ACMD(do_efind) {
 					append_page_display_line(line, "%s", skip_filler(get_obj_desc(eg->obj, ch, OBJ_DESC_SHORT)));
 				}
 				else if (eg->veh) {
-					append_page_display_line(line, "%s", skip_filler(VEH_SHORT_DESC(eg->veh)));
+					if (VEH_SITTING_ON(eg->veh) && GET_LOYALTY(VEH_SITTING_ON(eg->veh)) == GET_LOYALTY(ch)) {
+						append_page_display_line(line, "%s (%s)", skip_filler(VEH_SHORT_DESC(eg->veh)), PERS(VEH_SITTING_ON(eg->veh), ch, FALSE));
+					}
+					else if (VEH_LED_BY(eg->veh) && GET_LOYALTY(VEH_LED_BY(eg->veh)) == GET_LOYALTY(ch)) {
+						append_page_display_line(line, "%s (%s)", skip_filler(VEH_SHORT_DESC(eg->veh)), PERS(VEH_LED_BY(eg->veh), ch, FALSE));
+					}
+					else {
+						append_page_display_line(line, "%s", skip_filler(VEH_SHORT_DESC(eg->veh)));
+					}
 				}
 				
 				DL_DELETE(list, eg);
