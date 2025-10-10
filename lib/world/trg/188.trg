@@ -2202,6 +2202,10 @@ if %cmd% == stand
       set apple_val 1
       set apple_size bitty
     break
+    default
+      set apple_size 1
+      set apple_size eensy
+    break
   done
   %send% %actor% You managed to get a %apple_size% apple from the bucket!
   %echoaround% %actor% ~%actor% straightens up with a %apple_size% apple in ^%actor% mouth!
