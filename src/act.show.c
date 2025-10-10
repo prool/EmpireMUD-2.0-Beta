@@ -433,7 +433,7 @@ SHOW(show_account) {
 		}
 	}
 	
-	msg_to_char(ch, "Total playtime: %s\r\n", colon_time(total_playtime, FALSE, NULL));
+	msg_to_char(ch, "Total playtime: %s\r\n", colon_time(total_playtime, TRUE, NULL));
 	strcpy(ago_buf, ctime(&earliest_birth));
 	msg_to_char(ch, "Oldest creation time: %s\r\n", ago_buf);
 	if (last_online > 0) {
