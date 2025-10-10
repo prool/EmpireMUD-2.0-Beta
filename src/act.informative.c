@@ -4561,7 +4561,8 @@ ACMD(do_survey) {
 	struct empire_city_data *city;
 	struct empire_island *eisle;
 	struct island_info *island;
-	int max, prc, ter_type, base_height, mod_height;
+	int max, prc, ter_type;
+	// int base_height, mod_height;
 	bool junk, large_radius;
 	struct depletion_data *dep;
 	
@@ -4591,6 +4592,7 @@ ACMD(do_survey) {
 	}
 	msg_to_char(ch, "Temperature: %s\r\n", temperature_to_string(get_room_temperature(IN_ROOM(ch))));
 	
+	/* Not currently showing elevation
 	base_height = ROOM_HEIGHT(HOME_ROOM(IN_ROOM(ch)));
 	mod_height = get_room_blocking_height(IN_ROOM(ch), NULL);
 	if (base_height > 0 && mod_height > 0) {
@@ -4601,6 +4603,7 @@ ACMD(do_survey) {
 			msg_to_char(ch, "Elevation: %d\r\n", base_height);
 		}
 	}
+	*/
 	
 	// empire
 	if (ROOM_OWNER(IN_ROOM(ch))) {
