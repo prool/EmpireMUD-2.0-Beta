@@ -765,6 +765,11 @@ highest-ranking leaders). You can unset your home from anywhere, or clear the
 owner for the building you're in. Only the empire leaders can clear homes they
 don't own.
 
+When you first set a house as your home, there is a 1-hour delay before you
+can retrieve items from home inventory. After that, your home inventory will
+be there even if your previous home was on a different island. This delay
+applies every time you change homes, even if you haven't moved far.
+
 Any member may type "home list" to see all homes in the empire.
 
 You can store up to 300 unique items -- items that can't be stored in other
