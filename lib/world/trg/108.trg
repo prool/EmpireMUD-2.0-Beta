@@ -221,11 +221,13 @@ sneak~
 return 0
 if !%arg%
   * no-arg just falls through to sneak command
-elseif %actor.on_quest(10855)%
+elseif %actor.on_quest(10855)% && !%actor.quest_triggered(10855)%
   * has ability?
   if !%actor.ability(Sneak)%
     %send% %actor% You need to purchase that with 'skill buy Sneak' first.
     return 1
+    halt
+  elseif %actor.position% != Standing
     halt
   end
   * right dir?
