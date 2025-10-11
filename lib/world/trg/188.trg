@@ -2224,7 +2224,8 @@ if %cmd% == stand
       %purge% %self%
     elseif %ow_apple% < %ch_apple%
       %send% %actor% You've lost this time.
-      %echoaround% %actor% ~%self.challenged% wins!
+      %send% %self.challenged% You win!
+      %echoaround% %self.challenged% ~%self.challenged% wins!
     else
       %echo% It's a tie!
     end
@@ -2922,7 +2923,7 @@ if invoke /= %cmd%
     %mod% %mob% keywords spirit faded grandmother ancestor %halloween_grandma%
     %force% %mob% mfollow %actor%
     %send% %actor% You drip some blood on the ground and invoke the name of your ancestor, %halloween_grandma%!
-    %echoaround% %actor% ~%actor% drips some blood on the name and shouts, 'Grandmother %halloween_grandma%, I invoke you!'
+    %echoaround% %actor% ~%actor% drips some blood on the ground and shouts, 'Grandmother %halloween_grandma%, I invoke you!'
     %echo% ~%mob% rises from the grave.
   else
     %send% %actor% Something went wrong.
