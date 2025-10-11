@@ -10,7 +10,7 @@ CC = gcc
 CXREF = cxref
 
 # Any special flags you want to pass to the compiler
-MYFLAGS = -Wall
+MYFLAGS = -Wall -Wno-char-subscripts
 
 #flags for profiling (see hacker.doc for more information)
 PROFILE = 
@@ -23,7 +23,7 @@ BINDIR = ../bin
 
 CFLAGS = -g -O2 $(MYFLAGS) $(PROFILE)
 
-LIBS =    -lm
+LIBS =  -lcrypt  -lm
 
 OBJFILES = abilities.o act.action.o act.battle.o act.comm.o act.empire.o \
 	act.fight.o act.god.o act.highsorcery.o act.immortal.o act.informative.o \
