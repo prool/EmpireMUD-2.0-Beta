@@ -1346,7 +1346,7 @@ yourself. Maybe you can figure out what it is. I've never seen one like it.'
 great way to find out what things are.
    Once you figure out what the item is, be sure to report back to the new
 arrival outside the Soulstream on the Newbie Island.
-   Type 'look object' or 'examine object' to get stated.
+   Type 'look object' or 'examine object' to get started.
 ~
    'That's all it was?' the young man says with more than a little surprise in
 his voice. 'I really must learn to examine things more carefully.'
@@ -1355,7 +1355,7 @@ something else off the ground and is examining it intently. Perhaps he, like
 you, has finally learned that he can just look at items and identify them to
 see what they do.
 ~
-5 h 1 50 -1
+5 h 1 15 -1
 A
 1 10862
 P
@@ -1438,9 +1438,10 @@ Leaving Newbie Island~
    The newbie island has been your home, and it may be hard to imagine leaving
 it now, but eventually you must find a 'forever home'. You can only stay on the
 newbie island for 7 days (real time), and any resources you gather there will
-be difficult to transport to your new home. But don't leave until you're ready
-because the newbie island protects you from hostile NPCs and gives you a safe
-place to complete some tutorials, level some skills, and learn the game.
+be difficult to transport to your new home. But make sure you're ready to go
+because only the newbie island protects you from hostile NPCs and gives you a
+safe place to complete tutorials, level some skills, and learn the game. Other
+lands might be more hostile.
    When you've done all that and you're ready to leave, craft a canoe (Basic
 Crafts) or find a raft (surely one of those goblins sells one). You'll only
 be able to take what you can carry, but any items you stored on the newbie
@@ -1504,8 +1505,8 @@ Personal Growth~
    The young man leans way over as he stretches one muscle group after another,
 working himself up for the next task.
    'I'm preparing to start adventuring,' he says, sheepishly. 'But I'm not sure
-what to focus on in order to be read. Perhaps you could give me some tips. I'm
-not sure I understand how to gain experience.'
+what to focus on in order to get ready. Perhaps you could give me some tips.
+I'm not sure I understand how to gain experience.'
    It seems like the new arrival is new to all this -- which is okay! Everyone
 is new at some point. EmpireMUD uses a different leveling system than most
 games. In this one, your level is based on your skills and your gear.
