@@ -985,7 +985,12 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 				break;
 			}
 			case ITEM_PACK: {
-				sprintf(buf + strlen(buf), ", pack size %d", GET_PACK_CAPACITY(proto));
+				if (OBJ_FLAGGED(proto, OBJ_SCALABLE)) {
+					sprintf(buf + strlen(buf), ", size scales with level");
+				}
+				else {
+					sprintf(buf + strlen(buf), ", size %d", GET_PACK_CAPACITY(proto));
+				}
 				break;
 			}
 		}	// end 'type' portion of info string

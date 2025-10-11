@@ -2971,6 +2971,11 @@ char *get_mob_name_by_proto(mob_vnum vnum, bool replace_placeholders) {
 			strcpy(output, tmp);
 			free(tmp);
 		}
+		if (strstr(GET_SHORT_DESC(proto), "#A")) {
+			tmp = str_replace("#A", "<empire>", output);
+			strcpy(output, tmp);
+			free(tmp);
+		}
 		
 		return output;
 	}
@@ -3507,7 +3512,7 @@ char *how_drunk(char_data *ch) {
 		return "drunk";
 	}
 	else if (GET_COND(ch, DRUNK) >= (REAL_UPDATES_PER_MUD_HOUR * 12)) {
-		return "getting drunk";
+		return "tipsy";
 	}
 	else {
 		return NULL;	// no report when sober

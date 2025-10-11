@@ -1642,7 +1642,7 @@ of 3, while the radius has a minimum of 1.
 The standard mapsize is radius 7 (width 15).
 
 If you set your map size to 'auto', the game will attempt to detect the size of
-your client window.
+your client window. This requires a client that supports NAWS.
 
 When you move very fast on the map, your map size will start to shrink as it
 becomes more difficult for your character to pay attention to all his/her
@@ -1650,7 +1650,7 @@ surroundings (and saves the game time rendering large views repeatedly). You
 can restore your original map size if you stop and type 'look', or wait a few
 seconds.
 
-See also: MAP, TOGGLE
+See also: MAP, NAWS, TOGGLE
 #
 MAIL CHECK RECEIVE SEND "PIGEON MAIL"
 

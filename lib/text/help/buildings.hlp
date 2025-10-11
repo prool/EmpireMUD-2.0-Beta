@@ -272,6 +272,13 @@ You can see how many shards you have by typing 'coins'.
 The shards do not yet have a purpose, but in the future they will allow you to
 enhance your gear or buy other items.
 
+Shard types:
+  iron shards  (level 1-75)
+  imperium shards  (level 76-175)
+  argentine shards  (level 176-275)
+  meteorite shards  (level 276-375)
+  celestial shards  (level 376-475)
+
 See also: CURRENCY
 #
 CEMETERY

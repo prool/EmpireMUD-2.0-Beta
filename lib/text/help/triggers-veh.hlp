@@ -97,7 +97,11 @@ For each type, there is a help file named &yVTRIG <type>&0.
 #d
 "VTRIG VARS" "VTRIG VARIABLES" VEH-VARS TRIGEDIT-VEH-VAR TRIGEDIT-VARIABLES-VEHICLES
 
-All vehicle scripts provide the &c%self%&0 variable.
+Vehicle Variables
+
+All vehicle scripts provide the &c%self%&0 variable. Other ways of getting a
+vehicle variable include %room.vehicles%. Access the fields of a vehicle var,
+listed below, like this: %veh.shortdesc%
 
 The correct way to get a vehicle's short description in a send/echo is:
 @%veh% - short desc, something

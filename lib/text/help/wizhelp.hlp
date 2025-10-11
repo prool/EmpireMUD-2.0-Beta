@@ -479,6 +479,51 @@ of inactivity. You can still idle out if you lose your link.
 
 See also: TOGGLE
 #d
+IMMORTAL IMMORTALS IMMORT IMM IMPLEMENTORS CO-IMPLEMENTORS ASSISTANTS 
+
+Immortals are the game's administration and staff. They are organized into
+several access levels. Implementors and co-implementors generally have access
+to all game commands, while assistants and the lowest immortals have a smaller
+number of commands. Additional commands can be bestowed upon them using the
+'grant' command.
+
+Immortal rules are available on the 'handbook' command.
+
+You can type 'wizhelp' to see a list of all immortal-level commands available
+to you.
+
+Basic immortal commands:
+ at - Perform a task as if you were elsewhere.
+ goto - Teleport yourself around.
+ last - See when a player was last online.
+ poofin/poofout - Change your goto messages.
+ show - Multi-purpose command with many options.
+ stat - See stats on something in-game.
+ vnum - Look up virtual numbers by name.
+ vstat - See stats on something by virtual number.
+ wiznet - Immortal channel (use ; as a shortcut).
+ wizhistory - Immortal channel history.
+
+Common grantable commands:
+ addnotes/editnotes - Update a player's notes.
+ advance - Increase a player's access level (not character level).
+ approve - Authorize a character to play the game.
+ automessage - Set recurring messages for players.
+ clearabilities - Reset ability purchases for a player.
+ force - Cause a mob or player to perform an action.
+ instance - Create and delete adventure instances.
+ load - Create a copy of an object, mob, or vehicle.
+ oset - Modify object properties.
+ purge - Destroy a mob, object in the room, or all contents in the room.
+ rescale - Change the level of a mob or object.
+ restore - Heal a player or mob.
+ set - Change stats on a player or mob.
+ snoop - Watch what a player is typing and seeing.
+
+Check out HELP IMMORTAL COMMANDS for more.
+
+See also: ACCESS LEVEL, GRANT, SHOW, WIZHELP
+#d
 IMOTD
 
 Usage:  imotd
@@ -604,11 +649,14 @@ LOAD is used to create instances of mobs, objects, and vehicles. The first
 argument specifies what type you are trying to load; the second is the virtual
 number. This command is grantable.
 
+To set the level of a loaded thing, use 'rescale'. To get rid of it, use
+'purge'.
+
 (For the mortal command, try LOAD VEHICLE.)
 
 You can load: mob, obj, vehicle, book
 
-Example:
+Examples:
 
   > load obj 1
   You create a bulletin board.
@@ -616,7 +664,7 @@ Example:
   > load mob 1
   You create a snarling wolf.
 
-See also: GRANT, VNUM
+See also: GRANT, PURGE, RESCALE, VNUM
 #d
 LORE "LORE COMMAND" "EDIT LORE" "LORE EDITOR"
 
@@ -750,12 +798,14 @@ You can change the following fields:
 Setting the keywords, longdescription, or shortdescription to "none" will
 restore its strings from the prototype (if one exists).
 
+To change the level of an item, use 'rescale'.
+
 Examples:
 
   > oset sword flag HARD-DROP
   > oset bread value 0 72
 
-See also: GRANT, OEDIT, OBJ VALUES
+See also: GRANT, OEDIT, OBJ VALUES, RESCALE
 #d
 PAGE
 
@@ -918,7 +968,7 @@ Examples:
   > purge sword
   > purge dragon
 
-See also: DC, GRANT
+See also: DC, GRANT, LOAD, RESCALE
 #d
 RANDOM
 
@@ -983,7 +1033,7 @@ maximum scale value.
 Caution: Rescaling an item will almost always cause it to be re-loaded and it
 will lose any enchantments or modifications.
 
-See also: GRANT
+See also: GRANT, LOAD, PURGE
 #d
 RESTORE
 
@@ -1860,7 +1910,7 @@ Examples:
   > stat crop
   > stat building -d
 
-See also: VSTAT
+See also: RESCALE, VSTAT
 #d
 SWITCH
 

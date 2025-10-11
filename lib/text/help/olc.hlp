@@ -3562,6 +3562,7 @@ tokens on the mob itself, if it is only loaded as an artisan:
  #n - randomly chosen first name
  #e - name of the empire it belongs to
  #a - the adjective form of its empire's name
+ #A - adjective form with "a" or "an" before it
 
 Use ".artisan none" if you need to remove the artisan.
 
@@ -9977,6 +9978,8 @@ keywords.
       spawn on the map.
 
 - #a  Empire adjective. See notes on #e.
+
+- #A  Same as #a but will add "a" or "an" before.
 
 See also: MEDIT NAMESET
 #d

@@ -1135,7 +1135,7 @@ You can't really tell whether or not you were successful at sneaking. But don't
 worry, you'll get better at it as you level up.
  1. Purchase the ability with 'skill buy sneak'.
  2. Make sure you're in the Soulstream.
- 3. Sneak into the hidden part of the Soulstream with 'sneak north'.
+ 3. Sneak into the hidden part of the Soulstream with the 'sneak' command.
  4. If you were successful, this quest's tracker will show complete.
  5. Type 'quest track Stealth' to check.
  6. Sneak between the two rooms of the Soulstream until complete.

@@ -1016,14 +1016,16 @@ void olc_show_adventure(char_data *ch) {
 	build_page_display(ch, "<%slimit\t0> %d instance%s (adjusts to %d)", OLC_LABEL_VAL(GET_ADV_MAX_INSTANCES(adv), 1), GET_ADV_MAX_INSTANCES(adv), (GET_ADV_MAX_INSTANCES(adv) != 1 ? "s" : ""), adjusted_instance_limit(adv));
 	build_page_display(ch, "<%splayerlimit\t0> %d", OLC_LABEL_VAL(GET_ADV_PLAYER_LIMIT(adv), 0), GET_ADV_PLAYER_LIMIT(adv));
 	
-	// reset time display helper
-	if (GET_ADV_RESET_TIME(adv) <= 0) {
-		strcpy(lbuf, " (never)");
+	if (GET_ADV_RESET_TIME(adv) == 0) {
+		build_page_display(ch, "<%sreset\t0> never (0 minutes)", OLC_LABEL_VAL(GET_ADV_RESET_TIME(adv), default_adv_reset));
+	}
+	else if (GET_ADV_RESET_TIME(adv) < 60) {
+		build_page_display(ch, "<%sreset\t0> %d minutes", OLC_LABEL_VAL(GET_ADV_RESET_TIME(adv), default_adv_reset), GET_ADV_RESET_TIME(adv));
 	}
 	else {
 		strcpy(lbuf, colon_time(GET_ADV_RESET_TIME(adv), TRUE, NULL));
+		build_page_display(ch, "<%sreset\t0> %d minutes (%s)", OLC_LABEL_VAL(GET_ADV_RESET_TIME(adv), default_adv_reset), GET_ADV_RESET_TIME(adv), lbuf);
 	}
-	build_page_display(ch, "<%sreset\t0> %d minutes %s", OLC_LABEL_VAL(GET_ADV_RESET_TIME(adv), default_adv_reset), GET_ADV_RESET_TIME(adv), lbuf);
 
 	build_page_display(ch, "Linking rules: <%slinking\t0>", OLC_LABEL_PTR(GET_ADV_LINKING(adv)));
 	if (GET_ADV_LINKING(adv)) {

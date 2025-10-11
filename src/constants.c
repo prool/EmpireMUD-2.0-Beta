@@ -3532,6 +3532,8 @@ const char *obj_custom_types[] = {
 	"exit-portal-to-room",
 	"identify-info",
 	"identify-tutorial",
+	"floating",	// 35
+	"sinking",
 	"\n"
 };
 
@@ -3555,7 +3557,8 @@ const char *obj_custom_type_help =
 " Shown when using portals: enter-portal-to-char enter-portal-to-room,\r\n"
 "   exit-portal-to-room\r\n"
 "&w Shown when item is identified: identify-info identify-tutorial&0\r\n"
-" Available for scripts: script1 script2 script3 script4 script5\r\n";
+" Shown when on a water tile: floating\r\n"
+"&w Available for scripts: script1 script2 script3 script4 script5\r\n&0";
 
 
 // basic speed is the theoretical average weapon speed without wits/haste,

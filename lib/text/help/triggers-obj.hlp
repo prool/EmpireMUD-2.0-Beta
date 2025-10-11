@@ -192,7 +192,11 @@ For each type, there is a help file named &yOTRIG <type>&0.
 #d
 "OTRIG VARS" "OTRIG VARIABLES" OBJ-VARS TRIGEDIT-OBJ-VAR TRIGEDIT-VARIABLES-OBJECTS
 
-All object scripts provide the &c%self%&0 variable.
+Object Variables
+
+All object scripts provide the &c%self%&0 variable. Other ways of getting an
+object variable include %room.contents% and %actor.inventory%. Access the
+fields listed below like this: %obj.shortdesc%
 
 The correct way to get an object's short description in a send/echo is:
 &c@%obj%&0 - short desc, something
