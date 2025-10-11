@@ -84,9 +84,11 @@ items like the fiddle, pail, candlestick, and more whenever you kill a low-
 level mob anywhere in the world. When you find one, use 'start all' and look at
 the item for information on how to get it back to its rightful owner.
 ~
-2 0 0 100 -1
+3 0 0 100 -1
 A
 3 10850
+A
+1 10862
 P
 0 10851 0 1 -
 P
@@ -404,9 +406,11 @@ also more to explore inside. Get a torch and head into the mine to see what's
 inside. Maybe it will be interesting. Type 'adventure' inside the mine for more
 information.
 ~
-2 0 0 100 -1
+3 0 0 100 -1
 A
 3 10850
+A
+1 10862
 P
 0 10851 0 1 -
 P
