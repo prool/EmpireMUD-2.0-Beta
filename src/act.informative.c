@@ -1483,7 +1483,7 @@ void list_one_char(char_data *i, char_data *ch, int num) {
 		act(buf, FALSE, i, NULL, ch, TO_VICT);
 	}
 	if (can_turn_quest_in_to_mob(ch, i, NULL)) {
-		safe_snprintf(buf, sizeof(buf), "...you can turn in a quest here!", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
+		safe_snprintf(buf, sizeof(buf), "...you can turn in a quest here!%s", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
 		act(buf, FALSE, i, NULL, ch, TO_VICT);
 	}
 	if (IS_RIDING(i)) {
@@ -1617,7 +1617,7 @@ char *list_one_vehicle_to_char(vehicle_data *veh, char_data *ch) {
 		size += snprintf(buf + size, sizeof(buf) - size, "...it has a quest for you!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
 	}
 	if (can_turn_quest_in_to_vehicle(ch, veh, NULL)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "...you can turn in a quest here!\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
+		size += snprintf(buf + size, sizeof(buf) - size, "...you can turn in a quest here!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
 	}
 
 	return buf;
@@ -2396,7 +2396,7 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 			sprintf(tags + strlen(tags), "%s quest available%s", (*tags ? "," : ""), PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s finished quest", (*tags ? "," : ""), PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
+			sprintf(tags + strlen(tags), "%s finished quest%s", (*tags ? "," : ""), PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
 		}
 	}
 	
@@ -2449,7 +2449,7 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 			sprintf(buf + strlen(buf), "...it has a quest for you!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			sprintf(buf + strlen(buf), "...you can turn in a quest here!\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
+			sprintf(buf + strlen(buf), "...you can turn in a quest here!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
 		}
 	}
 	
