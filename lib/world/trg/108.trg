@@ -257,8 +257,7 @@ elseif %actor.on_quest(10855)% && !%actor.quest_triggered(10855)%
   %send% %actor% You sneak past!
   %teleport% %actor% %to_room%
   %quest% %actor% trigger 10855
-  %send% %actor% &&0
-  %send% %actor% You have successfully sneaked! The quest is complete.
+  %load% obj 9680 %actor%
   return 1
 end
 ~
