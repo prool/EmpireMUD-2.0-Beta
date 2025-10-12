@@ -1479,10 +1479,12 @@ void list_one_char(char_data *i, char_data *ch, int num) {
 	}
 	
 	if (can_get_quest_from_mob(ch, i, NULL)) {
-		act("...$e has a quest for you! (start)", FALSE, i, NULL, ch, TO_VICT);
+		safe_snprintf(buf, sizeof(buf), "...$e has a quest for you!%s", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
+		act(buf, FALSE, i, NULL, ch, TO_VICT);
 	}
 	if (can_turn_quest_in_to_mob(ch, i, NULL)) {
-		act("...you can turn in a quest here! (finish)", FALSE, i, NULL, ch, TO_VICT);
+		safe_snprintf(buf, sizeof(buf), "...you can turn in a quest here!%s", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
+		act(buf, FALSE, i, NULL, ch, TO_VICT);
 	}
 	if (IS_RIDING(i)) {
 		sprintf(buf, "...$E is %s upon %s.", (MOUNT_FLAGGED(i, MOUNT_FLYING) ? "flying" : "mounted"), get_mob_name_by_proto(GET_MOUNT_VNUM(i), TRUE));
@@ -1612,10 +1614,10 @@ char *list_one_vehicle_to_char(vehicle_data *veh, char_data *ch) {
 	}
 	
 	if (can_get_quest_from_vehicle(ch, veh, NULL)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "...it has a quest for you! (start)\r\n");
+		size += snprintf(buf + size, sizeof(buf) - size, "...it has a quest for you!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
 	}
 	if (can_turn_quest_in_to_vehicle(ch, veh, NULL)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "...you can turn in a quest here! (finish)\r\n");
+		size += snprintf(buf + size, sizeof(buf) - size, "...you can turn in a quest here!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
 	}
 
 	return buf;
@@ -2391,10 +2393,10 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 	
 	if (mode == OBJ_DESC_INVENTORY || (mode == OBJ_DESC_LONG && CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
 		if (can_get_quest_from_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s quest available (start)", (*tags ? "," : ""));
+			sprintf(tags + strlen(tags), "%s quest available%s", (*tags ? "," : ""), PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s finished quest (finish)", (*tags ? "," : ""));
+			sprintf(tags + strlen(tags), "%s finished quest%s", (*tags ? "," : ""), PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
 		}
 	}
 	
@@ -2444,10 +2446,10 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 	
 	if (mode == OBJ_DESC_LOOK_AT || (mode == OBJ_DESC_LONG && !CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
 		if (can_get_quest_from_obj(ch, obj, NULL)) {
-			strcat(buf, "...it has a quest for you! (start)\r\n");
+			sprintf(buf + strlen(buf), "...it has a quest for you!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			strcat(buf, "...you can turn in a quest here! (finish)\r\n");
+			sprintf(buf + strlen(buf), "...you can turn in a quest here!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
 		}
 	}
 	
