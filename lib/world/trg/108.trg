@@ -148,12 +148,21 @@ Start Grandmaster's Journey~
 %load% obj 10837 %actor%
 ~
 #10850
-No-see on spawn~
+Soulstream: Shared load trigger for mobs~
 0 n 100
 ~
-* Mob will appear via its greet trig later
-nop %self.add_mob_flag(SILENT)%
-dg_affect %self% !SEE on -1
+if %self.vnum% == 10862
+  * outside greeter
+  if %instance.location%
+    mgoto %instance.location%
+    %echo% ~%self% arrives.
+  end
+else
+  * inside mobs
+  * Mob will appear via its greet trig later
+  nop %self.add_mob_flag(SILENT)%
+  dg_affect %self% !SEE on -1
+end
 ~
 #10851
 Detect Ritual of Burdens~
@@ -178,10 +187,17 @@ while %tries% > 0
 done
 ~
 #10853
-Give Skinning Knife~
+Soulstream: Shared quest start (give item)~
 2 u 100
 ~
-%load% obj 10853 %actor%
+switch %questvnum%
+  case 10853
+    %load% obj 10853 %actor%
+  break
+  case 10862
+    %load% obj 10862 %actor%
+  break
+done
 ~
 #10854
 Detect Heal~
@@ -212,6 +228,37 @@ if %actor.on_quest(10855)% && !%actor.quest_triggered(10855)%
 elseif %direction% == north && !%actor.aff_flagged(SNEAK)%
   %send% %actor% You can't get there unless you're sneaking.
   return 0
+end
+~
+#10856
+Sneak tutorial: EZ-Sneak~
+0 c 0
+sneak~
+return 0
+if !%arg%
+  * no-arg just falls through to sneak command
+elseif %actor.on_quest(10855)% && !%actor.quest_triggered(10855)%
+  * has ability?
+  if !%actor.ability(Sneak)%
+    %send% %actor% You need to purchase that with 'skill buy Sneak' first.
+    return 1
+    halt
+  elseif %actor.position% != Standing
+    halt
+  end
+  * right dir?
+  set dir %actor.parse_dir(%arg%)%
+  eval to_room %%actor.room.%dir%(room)%%
+  if !%to_room%
+    * pass thru to fail
+    halt
+  end
+  * Allow it
+  %send% %actor% You sneak past!
+  %teleport% %actor% %to_room%
+  %quest% %actor% trigger 10855
+  %load% obj 9680 %actor%
+  return 1
 end
 ~
 #10857
@@ -330,6 +377,28 @@ if %actor.on_quest(10855)% && !%actor.quest_triggered(10855)%
     wait 1
     %send% %actor% You weren't sneaky enough.
   end
+end
+~
+#10862
+Soulstream: Look at and identify item for quest~
+1 c 2
+look examine identify~
+if %actor.obj_target(%arg.argument1%)% != %self%
+  return 0
+elseif %cmd% == identify
+  if !%self.var(has_looked)%
+    %send% %actor% Look at the object before you identify it.
+    return 1
+  else
+    %quest% %actor% trigger 10862
+    return 0
+  end
+elseif %cmd% == look || %cmd% == examine
+  set has_looked 1
+  remote has_looked %self.id%
+  return 0
+else
+  return 0
 end
 ~
 #10865

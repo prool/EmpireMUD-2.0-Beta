@@ -3562,6 +3562,7 @@ tokens on the mob itself, if it is only loaded as an artisan:
  #n - randomly chosen first name
  #e - name of the empire it belongs to
  #a - the adjective form of its empire's name
+ #A - adjective form with "a" or "an" before it
 
 Use ".artisan none" if you need to remove the artisan.
 
@@ -5527,7 +5528,8 @@ Available flags:
  IN-DEVELOPMENT - Will not be used live.
  ADVENTURE-ONLY - This global table will only apply to the adventure it's in.
     Supported for: Mob Interactions (only when mob is attached to an instance),
-    Obj Interactions (disenchant), Mine Data (in room templates only).
+    Obj Interactions (disenchant), Mine Data (in room templates only). Do not
+    use this for Map Spawns, which will always fail.
  CUMULATIVE-PRC - Percent check will be cumulative.
  CHOOSE-LAST - The first choose-last global that passes the percent check will
     be saved for later, and only used if no other global succeeds. This can
@@ -6270,7 +6272,8 @@ Available mob flags:
  &cCHAMPION&0 - Will rescue its leader in combat.
  &cEMPIRE&0 - Will not be saved through reboots.
  &c*PICKPOCKETED&0 - Has already been pickpocketed; cannot be pickpocketed again.
- &cCITYGUARD&0 - Will assist allies from the same empire. This will only work if it is spawned by the empire system.
+ &cCITYGUARD&0 - Will assist allies from the same empire. This will only work
+   if it is spawned by the empire system or has had its loyalty set with %own%.
  &cPURSUE&0 - Will pursue players who flee in combat.
  &cHUMAN&0 - Counts as a human for various commands.
  &cVAMPIRE&0 - Counts as a vampire for various commands.
@@ -9975,6 +9978,8 @@ keywords.
       spawn on the map.
 
 - #a  Empire adjective. See notes on #e.
+
+- #A  Same as #a but will add "a" or "an" before.
 
 See also: MEDIT NAMESET
 #d

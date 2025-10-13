@@ -1336,7 +1336,12 @@ trying to figure out what to drop or give away, since the numbering (2.bag)
 will be the same for identify and drop (instead of also checking your equipment
 for the identify command).
 
-See also: EIDENTIFY, COMPARE, LEVEL COLORS, EQUIPMENT
+Weapons show damage in two ways. The first number is the damage per attack. The
+second number, in parentheses, gives the base DPS (damage per second) for the
+weapon, which is expressed as an attribute plus a number. DPS is a combination
+of the weapon's damage and speed.
+
+See also: EIDENTIFY, COMPARE, LEVEL COLORS, EQUIPMENT, DPS
 #
 INFORMATIVE "TOGGLE INFORMATIVE"
 
@@ -1637,7 +1642,7 @@ of 3, while the radius has a minimum of 1.
 The standard mapsize is radius 7 (width 15).
 
 If you set your map size to 'auto', the game will attempt to detect the size of
-your client window.
+your client window. This requires a client that supports NAWS.
 
 When you move very fast on the map, your map size will start to shrink as it
 becomes more difficult for your character to pay attention to all his/her
@@ -1645,7 +1650,7 @@ surroundings (and saves the game time rendering large views repeatedly). You
 can restore your original map size if you stop and type 'look', or wait a few
 seconds.
 
-See also: MAP, TOGGLE
+See also: MAP, NAWS, TOGGLE
 #
 MAIL CHECK RECEIVE SEND "PIGEON MAIL"
 
@@ -3153,8 +3158,9 @@ WHOIS
 Usage:  whois <name>
 
 Used to find vital information on a person. You cannot abbreviate the name
-because it draws the information from the player file. This allows it to be
-used on players who are not logged in.
+for offline players, only online ones.
+
+See also: LORE
 #
 WIELD
 

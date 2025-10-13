@@ -2742,22 +2742,30 @@ struct efind_group {
 	obj_data *obj;	// 1st object for this set (used for names, etc)
 	vehicle_data *veh;	// 1st vehicle for this set
 	int count;	// how many found
+	int distance;	// how far
 	bool stackable;	// whether or not this can stack
 	
 	struct efind_group *prev, *next;	// DLL
 };
 
 
+// simple sorter by distance
+int sort_efind_groups(struct efind_group *a, struct efind_group *b) {
+	return a->distance - b->distance;
+}
+
+
 /**
 * simple increment/add function for managing efind groups -- supports obj or
 * vehicle (not both in 1 call).
 *
+* @param char_data *ch Reference character (for start location).
 * @param struct efind_group **list The list to add to/update.
 * @param obj_data *obj The object to add (optional; use NULL if none).
 * @param vehicle_data *veh The vehicle to add (optional; use NULL if none).
 * @param room_data *location Where it is.
 */
-void add_obj_to_efind(struct efind_group **list, obj_data *obj, vehicle_data *veh, room_data *location) {
+void add_obj_to_efind(char_data *ch, struct efind_group **list, obj_data *obj, vehicle_data *veh, room_data *location) {
 	struct efind_group *eg;
 	bool found = FALSE;
 	
@@ -2800,6 +2808,7 @@ void add_obj_to_efind(struct efind_group **list, obj_data *obj, vehicle_data *ve
 		eg->obj = obj;
 		eg->veh = veh;
 		eg->count = 1;
+		eg->distance = ch ? compute_distance(IN_ROOM(ch), location) : 0;
 		eg->stackable = obj ? OBJ_CAN_STACK(obj) : FALSE;	// not used for vehicle
 		DL_APPEND(*list, eg);
 	}
@@ -4653,6 +4662,7 @@ ACMD(do_defect) {
 		add_cooldown(ch, COOLDOWN_LEFT_EMPIRE, 2 * SECS_PER_REAL_HOUR);
 		queue_delayed_update(ch, CDU_SAVE);
 		
+		syslog(SYS_EMPIRE, GET_INVIS_LEV(ch), TRUE, "EMPIRE: %s has defected from %s", GET_NAME(ch), EMPIRE_NAME(e));
 		log_to_empire(e, ELOG_MEMBERS, "%s has defected from the empire", PERS(ch, ch, 1));
 		msg_to_char(ch, "You defect from the empire!\r\n");
 		
@@ -5092,7 +5102,7 @@ ACMD(do_efind) {
 			if (ROOM_OWNER(iter) == emp) {
 				DL_FOREACH2(ROOM_CONTENTS(iter), obj, next_content) {
 					if ((all && CAN_WEAR(obj, ITEM_WEAR_TAKE)) || (!all && isname(arg, obj->name))) {
-						add_obj_to_efind(&list, obj, NULL, iter);
+						add_obj_to_efind(ch, &list, obj, NULL, iter);
 						++total;
 					}
 				}
@@ -5114,7 +5124,7 @@ ACMD(do_efind) {
 				continue;
 			}
 			
-			add_obj_to_efind(&list, NULL, veh, IN_ROOM(veh));
+			add_obj_to_efind(ch, &list, NULL, veh, IN_ROOM(veh));
 			++total;
 		}
 
@@ -5127,6 +5137,7 @@ ACMD(do_efind) {
 			}
 			
 			last_rm = NULL;
+			DL_SORT(list, sort_efind_groups);
 			
 			DL_FOREACH_SAFE(list, eg, next_eg) {
 				// first item at this location?
@@ -5146,7 +5157,15 @@ ACMD(do_efind) {
 					append_page_display_line(line, "%s", skip_filler(get_obj_desc(eg->obj, ch, OBJ_DESC_SHORT)));
 				}
 				else if (eg->veh) {
-					append_page_display_line(line, "%s", skip_filler(VEH_SHORT_DESC(eg->veh)));
+					if (VEH_SITTING_ON(eg->veh) && GET_LOYALTY(VEH_SITTING_ON(eg->veh)) == GET_LOYALTY(ch)) {
+						append_page_display_line(line, "%s (%s)", skip_filler(VEH_SHORT_DESC(eg->veh)), PERS(VEH_SITTING_ON(eg->veh), ch, FALSE));
+					}
+					else if (VEH_LED_BY(eg->veh) && GET_LOYALTY(VEH_LED_BY(eg->veh)) == GET_LOYALTY(ch)) {
+						append_page_display_line(line, "%s (%s)", skip_filler(VEH_SHORT_DESC(eg->veh)), PERS(VEH_LED_BY(eg->veh), ch, FALSE));
+					}
+					else {
+						append_page_display_line(line, "%s", skip_filler(VEH_SHORT_DESC(eg->veh)));
+					}
 				}
 				
 				DL_DELETE(list, eg);
@@ -5545,6 +5564,7 @@ ACMD(do_enroll) {
 	}
 	else {
 		// ok: enroll
+		syslog(SYS_EMPIRE, GET_INVIS_LEV(ch), TRUE, "EMPIRE: %s has enrolled %s into %s", GET_NAME(ch), GET_NAME(targ), EMPIRE_NAME(e));
 		log_to_empire(e, ELOG_MEMBERS, "%s has been enrolled in the empire", PERS(targ, targ, 1));
 		msg_to_char(targ, "You have been enrolled in %s.\r\n", EMPIRE_NAME(e));
 		msg_to_char(ch, "You enroll %s in the empire.\r\n", PERS(targ, targ, FALSE));
@@ -6006,6 +6026,7 @@ ACMD(do_expel) {
 		add_cooldown(targ, COOLDOWN_LEFT_EMPIRE, 2 * SECS_PER_REAL_HOUR);
 		clear_private_owner(GET_IDNUM(targ));
 
+		syslog(SYS_EMPIRE, GET_INVIS_LEV(ch), TRUE, "EMPIRE: %s has expelled %s from %s", GET_NAME(ch), GET_NAME(targ), EMPIRE_NAME(e));
 		log_to_empire(e, ELOG_MEMBERS, "%s has been expelled from the empire", PERS(targ, targ, 1));
 		msg_to_char(ch, "You expel %s from %s.\r\n", PERS(targ, targ, TRUE), (e == GET_LOYALTY(ch) ? "the empire" : EMPIRE_NAME(e)));
 		msg_to_char(targ, "You have been expelled from the empire.\r\n");

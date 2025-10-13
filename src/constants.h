@@ -216,6 +216,7 @@ extern const char *combat_message_types[];
 extern const char *friend_status_types[];
 extern const char *grant_bits[];
 extern const char *informative_view_bits[];
+extern const char *lore_types[];
 extern const char *mount_flags[];
 extern const char *player_bits[];
 extern const char *preference_bits[];

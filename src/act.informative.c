@@ -1479,10 +1479,12 @@ void list_one_char(char_data *i, char_data *ch, int num) {
 	}
 	
 	if (can_get_quest_from_mob(ch, i, NULL)) {
-		act("...$e has a quest for you!", FALSE, i, NULL, ch, TO_VICT);
+		safe_snprintf(buf, sizeof(buf), "...$e has a quest for you!%s", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
+		act(buf, FALSE, i, NULL, ch, TO_VICT);
 	}
 	if (can_turn_quest_in_to_mob(ch, i, NULL)) {
-		act("...you can finish a quest here!", FALSE, i, NULL, ch, TO_VICT);
+		safe_snprintf(buf, sizeof(buf), "...you can turn in a quest here!%s", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
+		act(buf, FALSE, i, NULL, ch, TO_VICT);
 	}
 	if (IS_RIDING(i)) {
 		sprintf(buf, "...$E is %s upon %s.", (MOUNT_FLAGGED(i, MOUNT_FLYING) ? "flying" : "mounted"), get_mob_name_by_proto(GET_MOUNT_VNUM(i), TRUE));
@@ -1612,10 +1614,10 @@ char *list_one_vehicle_to_char(vehicle_data *veh, char_data *ch) {
 	}
 	
 	if (can_get_quest_from_vehicle(ch, veh, NULL)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "...it has a quest for you!\r\n");
+		size += snprintf(buf + size, sizeof(buf) - size, "...it has a quest for you!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
 	}
 	if (can_turn_quest_in_to_vehicle(ch, veh, NULL)) {
-		size += snprintf(buf + size, sizeof(buf) - size, "...you can finish a quest here!\r\n");
+		size += snprintf(buf + size, sizeof(buf) - size, "...you can turn in a quest here!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
 	}
 
 	return buf;
@@ -2174,15 +2176,16 @@ char *get_obj_desc(obj_data *obj, char_data *ch, int mode) {
 			if (IN_ROOM(obj) && ROOM_SECT_FLAGGED(IN_ROOM(obj), SECTF_FRESH_WATER | SECTF_OCEAN)) {
 				// floating!?
 				
-				strcpy(output, (*sdesc ? sdesc : GET_OBJ_SHORT_DESC(obj)));
-				CAP(output);
-				
-				if (materials[GET_OBJ_MATERIAL(obj)].floats) {
-					strcat(output, " is floating in the water.");
+				if (obj_has_custom_message(obj, OBJ_CUSTOM_FLOATING)) {
+					strcpy(output, obj_get_custom_message(obj, OBJ_CUSTOM_FLOATING));
+				}
+				else if (materials[GET_OBJ_MATERIAL(obj)].floats) {
+					sprintf(output, "%s is floating in the water.", (*sdesc ? sdesc : GET_OBJ_SHORT_DESC(obj)));
 				}
 				else {
-					strcat(output, " is sinking fast.");
+					sprintf(output, "%s is sinking fast.", (*sdesc ? sdesc : GET_OBJ_SHORT_DESC(obj)));
 				}
+				CAP(output);
 			}
 			else {	// NOT floating in water, or not in a room at all
 				if (*sdesc) {
@@ -2390,10 +2393,10 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 	
 	if (mode == OBJ_DESC_INVENTORY || (mode == OBJ_DESC_LONG && CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
 		if (can_get_quest_from_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s quest available", (*tags ? "," : ""));
+			sprintf(tags + strlen(tags), "%s quest available%s", (*tags ? "," : ""), PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s finished quest", (*tags ? "," : ""));
+			sprintf(tags + strlen(tags), "%s finished quest%s", (*tags ? "," : ""), PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
 		}
 	}
 	
@@ -2443,10 +2446,10 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 	
 	if (mode == OBJ_DESC_LOOK_AT || (mode == OBJ_DESC_LONG && !CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
 		if (can_get_quest_from_obj(ch, obj, NULL)) {
-			strcat(buf, "...it has a quest for you!\r\n");
+			sprintf(buf + strlen(buf), "...it has a quest for you!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			strcat(buf, "...you can turn in a quest here!\r\n");
+			sprintf(buf + strlen(buf), "...you can turn in a quest here!%s\r\n", PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
 		}
 	}
 	
@@ -3079,20 +3082,20 @@ ACMD(do_chart) {
 	struct empire_island *e_isle, *eiter, *next_eiter;
 	empire_data *emp, *next_emp;
 	int iter, total_claims, num;
-	struct island_info *isle, *isle_iter, *next_isle;
+	struct island_info *isle = NULL, *isle_iter, *next_isle;
 	bool any, city_prompt;
 	char buf[MAX_STRING_LENGTH];
 	
 	skip_spaces(&argument);
 	
-	if (!*argument) {
+	if (!*argument && (!(isle = GET_ISLAND(IN_ROOM(ch))) || isle->id == NO_ISLAND)) {
 		msg_to_char(ch, "Get chart information on which island?\r\n");
 	}
-	else if (!(isle = get_island_by_name(ch, argument)) || isle->id == NO_ISLAND) {
+	else if (!isle && (!(isle = get_island_by_name(ch, argument)) || isle->id == NO_ISLAND)) {
 		msg_to_char(ch, "Unknown island.\r\n");
 	}
 	else if (IS_SET(isle->flags, ISLE_NO_CHART)) {
-		msg_to_char(ch, "That island doesn't appear on any charts.\r\n");
+		msg_to_char(ch, "%s island doesn't appear on any charts.\r\n", (isle == GET_ISLAND(IN_ROOM(ch)) ? "This" : "That"));
 	}
 	else {
 		msg_to_char(ch, "Chart information for %s:\r\n", get_island_name_for(isle->id, ch));
@@ -4560,7 +4563,8 @@ ACMD(do_survey) {
 	struct empire_city_data *city;
 	struct empire_island *eisle;
 	struct island_info *island;
-	int max, prc, ter_type, base_height, mod_height;
+	int max, prc, ter_type;
+	// int base_height, mod_height;
 	bool junk, large_radius;
 	struct depletion_data *dep;
 	
@@ -4590,6 +4594,7 @@ ACMD(do_survey) {
 	}
 	msg_to_char(ch, "Temperature: %s\r\n", temperature_to_string(get_room_temperature(IN_ROOM(ch))));
 	
+	/* Not currently showing elevation
 	base_height = ROOM_HEIGHT(HOME_ROOM(IN_ROOM(ch)));
 	mod_height = get_room_blocking_height(IN_ROOM(ch), NULL);
 	if (base_height > 0 && mod_height > 0) {
@@ -4600,6 +4605,7 @@ ACMD(do_survey) {
 			msg_to_char(ch, "Elevation: %d\r\n", base_height);
 		}
 	}
+	*/
 	
 	// empire
 	if (ROOM_OWNER(IN_ROOM(ch))) {

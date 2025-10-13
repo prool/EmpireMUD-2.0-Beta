@@ -1162,6 +1162,13 @@ happens, you'll be stuck where you were.
 
 Do not try to get out of a fight by breaking link. You will likely still die.
 #
+LORE "PLAYER LORE" "CHARACTER LORE" "MORTAL LORE"
+
+Lore is shown on the 'whois' command. It encompasses the major milestones and
+accomplishments the character has achieved.
+
+See also: WHOIS
+#
 MANA "MANA POINTS" "MANA POOL" "MAGIC POINTS"
 
 The mana pool is the amount of magical energy you can channel before you must
@@ -1342,6 +1349,21 @@ are offline.
 See the POLICY command for detailed rules on multiplaying and alts.
 
 See also: ALTERNATE
+#
+NAWS "NEGOTIATE ABOUT WINDOW SIZE"
+
+Some MUD clients support the NAWS feature, which stands for Negotiate About
+Window Size. This lets the client send its display size to the MUD, and allows
+the MUD to format some things to fit it.
+
+If you enable NAWS in your client, you may need to disconnect and reconnect for
+the MUD to recognize it.
+
+If you have a NAWS-enabled client, you can use 'mapsize auto' to get the best
+map size for your window. This only applies to the ascii map; it won't be very
+useful for screenreader users.
+
+See also: MAPSIZE
 #
 NEARBY
 

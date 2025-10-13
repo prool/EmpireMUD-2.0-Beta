@@ -1149,7 +1149,7 @@ if !%self.morph%
   wait 1 sec
 end
 %echo% &&r~%self% goes berserk, claws flailing in all directions!
-if %verify_target% != %actor.id%
+if %verify_target% == %actor.id%
   %damage% %actor% 75 physical
 end
 %aoe% 25 physical

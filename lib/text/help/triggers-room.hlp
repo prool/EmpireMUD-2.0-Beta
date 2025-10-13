@@ -146,7 +146,11 @@ For each type, there is a help file named &yRTRIG <type>&0.
 #d
 "RTRIG VARS" "RTRIG VARIABLES" ROOM-VARS TRIGEDIT-ROOM-VAR TRIGEDIT-VARIABLES-ROOMS
 
-All room scripts provide the &c%room%&0 variable.
+Room Variables
+
+All room scripts provide the &c%room%&0 variable. Other ways of getting a room
+variable include %actor.room% or %obj.room%. Access the below fields from a
+room variable like this: %room.coords%
 
 When using field - The variable returns:
 &caff_flagged(AFF)&0 - True if the room has an affect flag on it.

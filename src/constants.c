@@ -63,7 +63,7 @@ void tog_pvp(char_data *ch);
 //// EMPIREMUD CONSTANTS /////////////////////////////////////////////////////
 
 // Shown on the "version" command and sent over MSSP
-const char *version = "EmpireMUD 2.0 beta 5.192";
+const char *version = "EmpireMUD 2.0 beta 5.193";
 const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.12";
 
 
@@ -1081,6 +1081,7 @@ const char *grant_bits[] = {
 	"unprogress",
 	"events",
 	"triggers",
+	"lore",
 	"\n"
 };
 
@@ -1096,6 +1097,26 @@ const char *informative_view_bits[] = {
 	"no-dismantle",
 	"\n"
 };
+
+
+// LORE_x: Lore types
+const char *lore_types[] = {
+	"JOIN-EMPIRE",
+	"DEFECT-EMPIRE",
+	"KICKED-EMPIRE",
+	"PLAYER-KILL",
+	"PLAYER-DEATH",
+	"TOWER-DEATH",	// 5
+	"FOUND-EMPIRE",
+	"START-VAMPIRE",
+	"SIRE-VAMPIRE",
+	"PURIFY",
+	"CREATED",	// 10
+	"MAKE-VAMPIRE",
+	"PROMOTED",
+	"\n"
+};
+
 
 
 // MOUNT_x: mount flags
@@ -3511,6 +3532,8 @@ const char *obj_custom_types[] = {
 	"exit-portal-to-room",
 	"identify-info",
 	"identify-tutorial",
+	"floating",	// 35
+	"sinking",
 	"\n"
 };
 
@@ -3534,7 +3557,8 @@ const char *obj_custom_type_help =
 " Shown when using portals: enter-portal-to-char enter-portal-to-room,\r\n"
 "   exit-portal-to-room\r\n"
 "&w Shown when item is identified: identify-info identify-tutorial&0\r\n"
-" Available for scripts: script1 script2 script3 script4 script5\r\n";
+" Shown when on a water tile: floating\r\n"
+"&w Available for scripts: script1 script2 script3 script4 script5\r\n&0";
 
 
 // basic speed is the theoretical average weapon speed without wits/haste,

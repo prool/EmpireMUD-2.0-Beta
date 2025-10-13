@@ -465,6 +465,7 @@ Forge (Trade ability)
 Building:  (FF)  Forge  (Build ability)
 Temperature:  warmer than outside
 Tool:  hammer
+Speed boosts:  superior tool, mastery ability
 Commands:  forge [number] <item>
            forge info <item>
            forge list <keywords>

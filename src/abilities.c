@@ -4175,7 +4175,7 @@ PREP_ABIL(prep_conjure_object_ability) {
 	}
 	
 	if (any_inv && any_size > 0 && IS_CARRYING_N(ch) + any_size > CAN_CARRY_N(ch)) {
-		msg_to_char(ch, "You can't use that ability because your inventory is full.\r\n");
+		msg_to_char(ch, "You can't use that ability because your inventory is full (%d/%d items).\r\n", IS_CARRYING_N(ch), CAN_CARRY_N(ch));
 		CANCEL_ABILITY(data);
 		return;
 	}
