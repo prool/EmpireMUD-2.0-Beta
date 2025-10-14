@@ -4412,6 +4412,8 @@ void b5_194_tropical_terrain_overhaul(void) {
 	int changed_sect = 0, changed_base = 0, changed_nat = 0;
 	sector_vnum to_sect, to_base, to_natural, trench_original;
 	bool is_tropic;
+	crop_data *new_crop;
+	room_data *room;
 	
 	sector_vnum B5194_GRASSLAND = 200;
 	
@@ -4566,6 +4568,15 @@ void b5_194_tropical_terrain_overhaul(void) {
 			if (to_sect != NOTHING) {
 				perform_change_sect(NULL, map, sector_proto(to_sect));
 				++changed_sect;
+				
+				if (map->crop_type) {
+					if (!IS_SET(GET_CROP_CLIMATE(map->crop_type), (is_tropic ? CLIM_TROPICAL : CLIM_TEMPERATE))) {
+						if ((room = real_room(map->vnum))) {
+							new_crop = get_potential_crop_for_location(room, NOTHING);
+							set_crop_type(room, new_crop ? new_crop : crop_table);
+						}
+					}
+				}
 			}
 			if (to_base != NOTHING) {
 				perform_change_base_sect(NULL, map, sector_proto(to_base));
