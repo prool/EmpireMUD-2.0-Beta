@@ -3214,7 +3214,7 @@ void b5_151_terrain_fix(void) {
 		
 		// LAST: do the work
 		if ((to_sect != NOTHING || to_base != NOTHING)) { // && (room = map->room ? map->room : real_room(map->vnum))) {
-			if (to_sect && !b5151_no_sect_change(GET_SECT_VNUM(map->sector_type))) {
+			if (to_sect != NOTHING && !b5151_no_sect_change(GET_SECT_VNUM(map->sector_type))) {
 				perform_change_sect(NULL, map, sector_proto(to_sect));
 				++changed_sect;
 			}
@@ -4406,6 +4406,190 @@ PLAYER_UPDATE_FUNC(b5_189_molds_update_plr) {
 }
 
 
+void b5_194_tropical_terrain_overhaul(void) {
+	struct map_data *map;
+	int iter;
+	int changed_sect = 0, changed_base = 0, changed_nat = 0;
+	sector_vnum to_sect, to_base, to_natural, trench_original;
+	bool is_tropic;
+	
+	sector_vnum B5194_GRASSLAND = 200;
+	
+	// tropical base tile list
+	sector_vnum jungle_base_list[] = { 16, 27, 28, 29, 34, 35, 55, 61 ,62 ,63, 64, 65, -1 };
+	
+	// converts from-vnum -> to-vnum, when base tile was temperate (bad jungle)
+	sector_vnum temperate_conversion[][2] = {
+		{ 15, 13 },	// Jungle Field -> Seeded Field
+		{ 16, 7 },	// Jungle Crop -> Crop
+		{ 27, 3 },	// Partial Jungle -> Shady Forest
+		{ 28, 4 },	// Jungle -> Overgrown Forest
+		{ 29, 4 },	// Swamp -> Overgrown Forest
+		{ 34, 4 },	// Damaged Jungle -> Overgrown Forest
+		{ 35, 4 },	// Marsh -> Overgrown Forest
+		{ 55, 54 },	// Seaside Jungle -> Shoreside Tree
+		{ 61, 36 },	// Jungle Stumps -> Stumps
+		{ 62, 38 },	// Jungle Copse -> Copse
+		{ 63, 59 },	// Seaside Jungle Stumps -> Seaside Stumps
+		{ 64, 60 },	// Seaside Jungle Copse -> Seaside Copse
+		{ 65, 39 },	// Jungle Edge -> Forest Edge
+		
+		{ -1, -1 }	// last
+	};
+	
+	// converts from-vnum -> to-vnum, when base tile was tropical (make tropical)
+	sector_vnum tropic_conversion[][2] = {
+		{ 0, 200 },		// Plains -> Grassland
+		{ 1, 221 },		// Light Forest -> Partial Jungle
+		{ 2, 221 },		// Forest -> Partial Jungle
+		{ 3, 220 },		// Shady Forest -> Jungle
+		{ 4, 220 },		// Overgrown Forest -> Jungle
+		{ 7, 203 },		// Crop -> Tropical Crop
+		{ 13, 202 },	// Seeded Field -> Seeded Soil
+		{ 15, 202 },	// Jungle Field -> Seeded Soil
+		{ 16, 203 },	// Jungle Crop -> Tropical Crop
+		{ 17, 201 },	// Trench -> Marshy Trench
+		{ 19, 260 },	// Canal -> Overgrown Canal
+		{ 27, 221 },	// Partial Jungle -> Partial Jungle
+		{ 28, 220 },	// Jungle -> Jungle
+		{ 29, 250 },	// Swamp -> Swamp
+		{ 34, 221 },	// Damaged Jungle -> Partial Jungle
+		{ 35, 252 },	// Marsh -> Marsh
+		{ 36, 222 },	// Stumps -> Wasteland
+		{ 37, 223 },	// Small Copse -> Jungle Copse
+		{ 38, 223 },	// Copse -> Jungle Copse
+		{ 39, 224 },	// Forest Edge -> Jungle Edge
+		{ 40, 240 },	// Riverbank -> Grassy Riverbank
+		{ 41, 242 },	// Floodplains -> Flooded Riverbank
+		{ 42, 221 },	// Flooded Woods -> Partial Jungle
+		{ 43, 221 },	// Flooded Forest -> Partial Jungle
+		{ 44, 221 },	// Light Riverbank Forest -> Partial Jungle
+		{ 45, 221 },	// Forested Riverbank -> Partial Jungle
+		{ 46, 223 },	// Stumped Riverbank -> Jungle Copse
+		{ 47, 223 },	// Riverside Copse -> Jungle Copse
+		{ 50, 230 },	// Shore -> Grassy Seaside
+		{ 54, 224 },	// Shoreside Tree -> Jungle Edge
+		{ 55, 232 },	// Seaside Jungle -> Mangrove Forest
+		{ 56, 234 },	// Estuary Shore -> Estuary Shore
+		{ 59, 233 },	// Seaside Stumps -> Seaside Wasteland
+		{ 60, 223 },	// Seaside Copse -> Jungle Copse
+		{ 61, 222 },	// Jungle Stumps -> Wasteland
+		{ 62, 223 },	// Jungle Copse -> Jungle Copse
+		{ 63, 233 },	// Seaside Jungle Stumps -> Seaside Wasteland
+		{ 64, 232 },	// Seaside Jungle Copse -> Mangrove Forest
+		{ 65, 224 },	// Jungle Edge -> Jungle Edge
+		{ 90, 220 },	// Old-Growth Forest -> Jungle
+		{ 10300, 10310 },	// Scorched Woods -> Scorched Jungle
+		{ 10302, 10311 },	// Scorched Plains -> Scorched Grassland
+		{ 10303, 10309 },	// Scorched Crop -> Scorched Tropical Crop
+		{ 10307, 10310 },	// Scorched Spruce -> Scorched Jungle
+		{ 10552, 10556 },	// Frozen Canal -> Frozen Canal
+		{ 10562, 221 },		// Thin Evergreen Forest -> Partial Jungle
+		{ 10563, 221 },		// Evergreen Forest -> Partial Jungle
+		{ 10564, 220 },		// Overgrown Evergreen Forest -> Jungle
+		{ 10565, 220 },		// Thick Evergreen Forest -> Jungle
+		{ 10566, 222 },		// Stumps -> Wasteland
+		{ 10775, 222 },		// Withered Tree -> Wasteland
+		{ 12361, 260 },		// Frozen Canal -> Overgrown Canal
+		{ 12365, 220 },		// Frozen Forest -> Jungle
+		{ 12366, 200 },		// Frozen Plains -> Grassland
+		{ 16697, 11988 },	// Nordlys Stumps -> Clear-Cut Calamander
+		{ 16698, 11990 },	// Nordlys Tree -> Calamander Grove
+		{ 16699, 11991 },	// Nordlys Grove -> Calamander Jungle
+		{ 18100, 222 },		// Stumps -> Wasteland
+		{ 18451, 18458 },	// Flooded Plains -> Flooded Grassland
+		{ 18452, 250 },		// Flooded Woods -> Swamp
+		{ 18451, 18458 },	// Flooded Plains -> Flooded Grassland
+		{ 18452, 250 },		// Flooded Woods -> Swamp
+		{ 600, 11988 },		// Enchanted Saplings -> Clear-Cut Calamander
+		{ 601, 11988 },		// Clear-Cut Starwood Forest -> Clear-Cut Calamander
+		{ 602, 11989 },		// Starwood Copse -> Calamander Thicket
+		{ 603, 11990 },		// Starwood Stand -> Calamander Grove
+		{ 604, 11991 },		// Starwood Forest -> Calamander Jungle
+		{ 605, 11992 },		// Dead Forest -> Dead Calamanders
+		{ 606, 11989 },		// Sprouting Starwood Stumps -> Calamander Thicket
+		{ 607, 11990 },		// Sprouting Starwood Copse -> Calamander Grove
+		{ 608, 11991 },		// Sprouting Starwood Stand -> Calamander Jungle
+
+		{ -1, -1 }	// last
+	};
+	
+	LL_FOREACH(land_map, map) {
+		to_sect = to_base = to_natural = NOTHING;
+		
+		// just skip ocean
+		if (map->shared == &ocean_shared_data) {
+			continue;
+		}
+		
+		// PRESERVE
+		trench_original = get_extra_data(map->shared->extra_data, ROOM_EXTRA_TRENCH_ORIGINAL_SECTOR);
+		
+		// FIRST: see if it began as a tropic tile
+		is_tropic = FALSE;
+		for (iter = 0; jungle_base_list[iter] != -1 && !is_tropic; ++iter) {
+			if (jungle_base_list[iter] == GET_SECT_VNUM(map->natural_sector)) {
+				is_tropic = TRUE;
+			}
+		}
+		
+		// DETERMINE: sectors to change
+		if (is_tropic) {
+			for (iter = 0; tropic_conversion[iter][0] != -1; ++iter) {
+				if (GET_SECT_VNUM(map->sector_type) == tropic_conversion[iter][0]) {
+					to_sect = tropic_conversion[iter][1];
+				}
+				if (GET_SECT_VNUM(map->base_sector) == tropic_conversion[iter][0]) {
+					to_base = tropic_conversion[iter][1];
+				}
+				if (GET_SECT_VNUM(map->natural_sector) == tropic_conversion[iter][0]) {
+					to_natural = tropic_conversion[iter][1];
+				}
+			}
+		}
+		else {	// temperate
+			for (iter = 0; temperate_conversion[iter][0] != -1; ++iter) {
+				if (GET_SECT_VNUM(map->sector_type) == temperate_conversion[iter][0]) {
+					to_sect = temperate_conversion[iter][1];
+				}
+				if (GET_SECT_VNUM(map->base_sector) == temperate_conversion[iter][0]) {
+					to_base = temperate_conversion[iter][1];
+				}
+				if (GET_SECT_VNUM(map->natural_sector) == temperate_conversion[iter][0]) {
+					to_natural = temperate_conversion[iter][1];
+				}
+			}
+		}
+		
+		// LAST: do the work
+		if ((to_sect != NOTHING || to_base != NOTHING)) { // && (room = map->room ? map->room : real_room(map->vnum))) {
+			if (to_sect != NOTHING) {
+				perform_change_sect(NULL, map, sector_proto(to_sect));
+				++changed_sect;
+			}
+			if (to_base != NOTHING) {
+				perform_change_base_sect(NULL, map, sector_proto(to_base));
+				++changed_base;
+			}
+			if (to_natural != NOTHING) {
+				set_natural_sector(map, sector_proto(to_natural));
+				++changed_nat;
+			}
+			if (SECT_FLAGGED(map->sector_type, SECTF_IS_TRENCH)) {
+				if (is_tropic) {
+					set_extra_data(&map->shared->extra_data, ROOM_EXTRA_TRENCH_ORIGINAL_SECTOR, B5194_GRASSLAND);
+				}
+				else {
+					set_extra_data(&map->shared->extra_data, ROOM_EXTRA_TRENCH_ORIGINAL_SECTOR, trench_original);
+				}
+			}
+		}
+	}
+	
+	log("- total: %d sector%s, %d base sector%s, %d natural sector%s", changed_sect, PLURAL(changed_sect), changed_base, PLURAL(changed_base), changed_nat, PLURAL(changed_nat));
+}
+
+
 // ADD HERE, above: more beta 5 update functions
 
 
@@ -4523,6 +4707,7 @@ const struct {
 	{ "b5.183", b5_183_trigger_update, b5_183_trigger_update_plr, "Applying new triggers to water bottles and molten essence" },
 	{ "b5.183a", b5_183_molten_fiend_update, NULL, "Updating Molten Fiend adventure from 281 to 18000" },
 	{ "b5.189", b5_189_molds_update, b5_189_molds_update_plr, "Updating old molds to use trigger 12144" },
+	{ "b5.194", b5_194_tropical_terrain_overhaul, NULL, "Updating tropical tiles to new terrain vnums 200-260" },
 	
 	// ADD HERE, above: more beta 5 update lines
 	
