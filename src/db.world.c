@@ -1088,13 +1088,13 @@ void uncrop_tile(room_data *room) {
 	
 	// 5. did we fail entirely?
 	if (!to_sect) {
-		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "SYSERR: uncrop_tile: unable to find a valid tile to return to for room %d; using default_land_sect");
+		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "SYSERR: uncrop_tile: unable to find a valid tile to return to for room %d; using default_land_sect", GET_ROOM_VNUM(room));
 		to_sect = sector_proto(config_get_int("default_land_sect"));
 	}
 	
 	// fail?
 	if (!to_sect) {
-		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "SYSERR: uncrop_tile: unable to find a valid tile to return to; 'config world default_land_sect' may not be set");
+		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "SYSERR: uncrop_tile: unable to find a valid tile to return to for room %d; 'config world default_land_sect' may not be set", GET_ROOM_VNUM(room));
 		return;
 	}
 	
