@@ -172,6 +172,34 @@ canal frozen ice around~
 The canal has frozen solid!
 ~
 S
+#10556
+Frozen Canal~
+A Frozen Canal~
+'~' 2 fy 25 C 0
+D0
+~~~~~
+&W~
+E
+4 0 5.00 260
+E
+9 0 100.00 260
+I 6 10562 95.00 25 F  # FORAGE: handful of red and green seeds
+I 6 10563 5.00 25 F  # FORAGE: seed of pure ice
+M
+9178 0.03 g
+M
+9186 5.00 0
+M
+10556 5.00 0
+M
+10557 5.00 0
+M
+10558 5.00 0
+X
+canal frozen ice around~
+The canal has frozen solid!
+~
+S
 #10562
 Thin Evergreen Forest~
 A Thin Evergreen Forest~
@@ -369,7 +397,37 @@ D4
 E
 0 1 100.00 10564
 E
-17 4 0.01 10565
+17 200 0.30 224
+E
+17 204 1.00 224
+E
+17 210 0.60 224
+E
+17 230 0.30 232
+E
+17 231 1.00 232
+E
+17 244 1.00 224
+E
+17 243 0.30 224
+E
+17 241 1.00 224
+E
+17 240 0.30 224
+E
+17 40 0.10 10562
+E
+17 45 0.03 10565
+E
+17 50 0.10 10562
+E
+17 90 0.03 10565
+E
+17 56 0.10 10562
+E
+17 54 0.03 10562
+E
+17 4 0.03 10565
 E
 17 0 0.10 10562
 I 5 102 15.00 125 X  # DIG: flint stone
