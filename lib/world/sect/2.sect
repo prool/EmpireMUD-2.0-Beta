@@ -38,7 +38,9 @@ E
 I 5 102 9.00 15 X  # DIG: flint stone
 I 5 101 15.00 15 X  # DIG: lump of clay
 I 5 100 76.00 15 X  # DIG: rock
-I 6 3013 75.00 25  # FORAGE: handful of nuts
+I 6 3080 20.00 25 f  # FORAGE: lizard tail
+I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
+I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1201 91.67 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
@@ -68,6 +70,7 @@ E
 I 5 102 9.00 125 X  # DIG: flint stone
 I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
+I 6 3083 100.00 25 f  # FORAGE: river snail
 X
 trench canal moat ground around marshy~
    You're deep in a trench that has been dug, scoop by scoop, to form the start
@@ -87,7 +90,10 @@ E
 E
 9 0 20.00 203
 E
+16 0 100.00 204
+E
 19 0 100.00 204
+I 6 3087 100.00 25 f  # FORAGE: crisp wild leaves
 X
 field seeded seeds plants crop around soil~
    The field around you has been meticulously plowed into rows and seeded with
@@ -103,6 +109,8 @@ A Tropical Crop~
 D0
 ????~
 &G~
+E
+16 0 100.00 204
 E
 19 0 100.00 204
 U
@@ -131,6 +139,7 @@ E
 I 5 102 9.00 15 X  # DIG: flint stone
 I 5 101 15.00 15 X  # DIG: lump of clay
 I 5 100 100.00 15 X  # DIG: rock
+I 6 3082 100.00 25  # FORAGE: succulent root
 X
 soil fertile ground plains field around grass~
    The soil here is black with rich nutrients. The land has been cleared,
@@ -195,7 +204,10 @@ E
 I 5 102 9.00 15 X  # DIG: flint stone
 I 5 101 15.00 15 X  # DIG: lump of clay
 I 5 100 100.00 15 X  # DIG: rock
-I 6 3015 75.00 25  # FORAGE: red berries
+I 6 3080 10.00 25 f  # FORAGE: lizard tail
+I 6 3081 15.00 25 f  # FORAGE: colorful bird egg
+I 6 3087 25.00 25 f  # FORAGE: crisp wild leaves
+I 6 3069 25.00 25 f  # FORAGE: honeycomb
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
@@ -265,7 +277,9 @@ E
 I 5 102 9.00 15 X  # DIG: flint stone
 I 5 101 15.00 15 X  # DIG: lump of clay
 I 5 100 100.00 15 X  # DIG: rock
-I 6 3013 75.00 25  # FORAGE: handful of nuts
+I 6 3080 20.00 25 f  # FORAGE: lizard tail
+I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
+I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 9 140 100.00 50  # GATHER: bundle of long grass
 X
 savannah grassland plains field ground around trees stumps~
@@ -315,7 +329,10 @@ E
 4 0 0.80 210
 E
 9 0 50.00 210
-I 6 3017 75.00 25  # FORAGE: plump fig
+I 6 3080 10.00 25 f  # FORAGE: lizard tail
+I 6 3081 15.00 25 f  # FORAGE: colorful bird egg
+I 6 3087 20.00 25 f  # FORAGE: crisp wild leaves
+I 6 3069 20.00 25 f  # FORAGE: honeycomb
 I 20 135 100.00 1  # CHOP: reaching sapling
 U
 0
@@ -401,7 +418,11 @@ E
 17 200 0.30 224
 E
 17 0 0.60 39
-I 6 3017 75.00 25  # FORAGE: plump fig
+I 6 3081 10.00 25 f  # FORAGE: colorful bird egg
+I 6 3086 5.00 25 f  # FORAGE: tree frog
+I 6 3017 20.00 25 f  # FORAGE: plump fig
+I 6 3069 20.00 25 f  # FORAGE: honeycomb
+I 6 3085 20.00 25 f  # FORAGE: fern tips
 I 9 133 100.00 50  # GATHER: tangle of vines
 I 20 128 100.00 1  # CHOP: massive jungle tree
 U
@@ -464,7 +485,11 @@ E
 7 5 2.00 250
 E
 9 0 50.00 220
-I 6 3017 75.00 25  # FORAGE: plump fig
+I 6 3081 10.00 25 f  # FORAGE: colorful bird egg
+I 6 3086 5.00 25 f  # FORAGE: tree frog
+I 6 3017 20.00 25 f  # FORAGE: plump fig
+I 6 3069 20.00 25 f  # FORAGE: honeycomb
+I 6 3085 20.00 25 f  # FORAGE: fern tips
 I 9 133 100.00 50  # GATHER: tangle of vines
 I 20 128 100.00 1  # CHOP: massive jungle tree
 U
@@ -532,7 +557,10 @@ E
 9 0 50.00 223
 E
 16 0 100.00 204
-I 6 3017 75.00 25  # FORAGE: plump fig
+I 6 3080 10.00 25 f  # FORAGE: lizard tail
+I 6 3081 25.00 25 f  # FORAGE: colorful bird egg
+I 6 3082 20.00 25 f  # FORAGE: succulent root
+I 6 3085 20.00 25 f  # FORAGE: fern tips
 X
 wasteland stumps vines ground around land~
    The remnants of a once-proud jungle litter the landscape around you. Jagged
@@ -585,7 +613,11 @@ E
 7 5 2.00 250
 E
 9 0 50.00 221
-I 6 3017 75.00 25  # FORAGE: plump fig
+I 6 3081 10.00 25 f  # FORAGE: colorful bird egg
+I 6 3086 5.00 25 f  # FORAGE: tree frog
+I 6 3017 20.00 25 f  # FORAGE: plump fig
+I 6 3069 20.00 25 f  # FORAGE: honeycomb
+I 6 3085 20.00 25 f  # FORAGE: fern tips
 I 20 135 100.00 1  # CHOP: reaching sapling
 U
 0
@@ -636,7 +668,11 @@ E
 7 5 2.00 250
 E
 9 0 50.00 220
-I 6 3017 75.00 25  # FORAGE: plump fig
+I 6 3081 10.00 25 f  # FORAGE: colorful bird egg
+I 6 3086 5.00 25 f  # FORAGE: tree frog
+I 6 3017 20.00 25 f  # FORAGE: plump fig
+I 6 3069 20.00 25 f  # FORAGE: honeycomb
+I 6 3085 20.00 25 f  # FORAGE: fern tips
 I 20 135 100.00 1  # CHOP: reaching sapling
 U
 0
@@ -770,8 +806,9 @@ E
 17 241 4.00 224
 E
 17 231 4.00 232
-I 6 3051 40.00 25 x  # FORAGE: sea urchin
-I 6 3052 40.00 25 x  # FORAGE: clam
+I 6 3084 20.00 25 x  # FORAGE: brittlegill mushroom
+I 6 3051 30.00 25 x  # FORAGE: sea urchin
+I 6 3052 30.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1200 100.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
@@ -895,7 +932,9 @@ E
 I 5 102 9.00 15 x  # DIG: flint stone
 I 5 100 9.00 15 x  # DIG: rock
 I 5 101 100.00 15 x  # DIG: lump of clay
-I 6 3013 75.00 25  # FORAGE: handful of nuts
+I 6 3080 20.00 25 f  # FORAGE: lizard tail
+I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
+I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1205 100.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
@@ -947,6 +986,7 @@ E
 I 5 102 9.00 15 x  # DIG: flint stone
 I 5 100 9.00 15 x  # DIG: rock
 I 5 101 100.00 15 x  # DIG: lump of clay
+I 6 3082 100.00 25  # FORAGE: succulent root
 _
 Floods to 242 seasonally.
 ~
@@ -968,19 +1008,17 @@ E
 13 0 80.00 241
 E
 15 0 20.00 241
-I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
-I+ 0 70  # Ability: Find Herbs
-I 7 123 100.00 125 p  # PICK: small flower
+I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3310 55.00 25 f  # FORAGE: wood ear mushroom
+I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
 I 21 256 0.25 125 f  # FISH: hestian trinket
 I 21 262 0.25 125 f  # FISH: trinket of conveyance
 I 21 1304 5.00 125 f  # FISH: sea junk
 I 21 1311 25.00 125 f  # FISH: spotted eel
-I 21 1313 25.00 125 f  # FISH: bright red leaping fish
-I 21 1312 100.00 125 f  # FISH: speckled trout
-I 22 174 5.00 25  # PAN: small flake of gold
+I 21 1316 25.00 125 f  # FISH: small gator
+I 21 1314 100.00 125 f  # FISH: fat catfish
 _
 Flooded version of 240/241 - reverts to 241.
 ~
@@ -1048,7 +1086,9 @@ E
 I 5 102 9.00 15 x  # DIG: flint stone
 I 5 100 9.00 15 x  # DIG: rock
 I 5 101 100.00 15 x  # DIG: lump of clay
-I 6 3013 75.00 25  # FORAGE: handful of nuts
+I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
+I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
+I 6 3080 20.00 25 f  # FORAGE: lizard tail
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1205 100.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
@@ -1100,6 +1140,7 @@ E
 I 5 102 9.00 15 x  # DIG: flint stone
 I 5 100 9.00 15 x  # DIG: rock
 I 5 101 100.00 15 x  # DIG: lump of clay
+I 6 3082 100.00 25  # FORAGE: succulent root
 _
 Floods to 245 seasonally.
 ~
@@ -1121,14 +1162,17 @@ E
 13 0 80.00 244
 E
 15 0 40.00 244
+I 6 3084 50.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3310 25.00 25 f  # FORAGE: wood ear mushroom
+I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
 I 21 256 0.25 125 f  # FISH: hestian trinket
 I 21 262 0.25 125 f  # FISH: trinket of conveyance
 I 21 1304 5.00 125 f  # FISH: sea junk
-I 21 1314 25.00 125 f  # FISH: fat catfish
-I 21 1315 25.00 125 f  # FISH: yellow perch
-I 21 1312 100.00 125 f  # FISH: speckled trout
+I 21 1311 25.00 125 f  # FISH: spotted eel
+I 21 1316 25.00 125 f  # FISH: small gator
+I 21 1314 100.00 125 f  # FISH: fat catfish
 _
 Flooded version of 243/244 - reverts to 244.
 ~
@@ -1213,7 +1257,8 @@ E
 17 231 2.00 232
 E
 17 204 2.00 224
-I 6 3310 75.00 25  # FORAGE: wood ear mushroom
+I 6 3310 75.00 25 f  # FORAGE: wood ear mushroom
+I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1316,7 +1361,8 @@ E
 17 231 2.00 232
 E
 17 204 2.00 224
-I 6 3310 75.00 25  # FORAGE: wood ear mushroom
+I 6 3310 75.00 25 f  # FORAGE: wood ear mushroom
+I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1410,7 +1456,8 @@ E
 17 231 2.00 232
 E
 17 204 2.00 224
-I 6 3310 75.00 25  # FORAGE: wood ear mushroom
+I 6 3310 20.00 25 f  # FORAGE: wood ear mushroom
+I 6 3084 75.00 25 f  # FORAGE: brittlegill mushroom
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1513,7 +1560,8 @@ E
 17 231 2.00 232
 E
 17 204 2.00 224
-I 6 3310 75.00 25  # FORAGE: wood ear mushroom
+I 6 3310 20.00 25 f  # FORAGE: wood ear mushroom
+I 6 3084 75.00 25 f  # FORAGE: brittlegill mushroom
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1534,6 +1582,11 @@ An Overgrown Canal~
 D0
 @w&?~~@e~
 &c~
+I 6 3081 10.00 25 f  # FORAGE: colorful bird egg
+I 6 3083 10.00 25 f  # FORAGE: river snail
+I 6 3082 15.00 25 f  # FORAGE: succulent root
+I 6 3087 15.00 25 f  # FORAGE: crisp wild leaves
+I 6 3017 25.00 25 f  # FORAGE: plump fig
 U
 0
 The canal's waters begin to flow.~

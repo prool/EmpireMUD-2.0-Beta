@@ -1458,4 +1458,109 @@ O+ 1 6142
 R
 4 5619 0
 S
+#3080
+tail lizard~
+a lizard tail~
+A lizard tail wriggles on the ground.~
+It's not ideal but it is edible.
+~
+6 g a 0 0 7
+6 0 0
+7 24
+R
+4 5619 0
+S
+#3081
+egg bird colorful~
+a colorful bird egg~
+A colorful bird egg is hidden on the ground.~
+The small, delicate egg is mottled in several bright colors.
+~
+6 g a 0 0 12
+1 0 0
+7 336
+C
+1 1
+O+ 1 6205
+R
+4 5619 0
+T 3202
+S
+#3082
+root succulent~
+a succulent root~
+A succulent root sticks up.~
+The inside of the root is soft and chewy, with the aroma of fresh soil.
+~
+6 gC a 0 0 8
+6 0 0
+7 48
+O+ 1 6100
+R
+4 5619 0
+S
+#3083
+snail river~
+a river snail~
+A river snail is squiggling along.~
+It doesn't necessarily look good to eat, but it's definitely food.
+~
+6 g a 0 0 8
+6 0 0
+7 24
+R
+4 5619 0
+S
+#3084
+mushroom brittlegill gill~
+a brittlegill mushroom~
+A brittlegill mushroom is lying here.~
+This fleshy yellow mushroom is delicate but delectible.
+~
+6 gC a 0 0 8
+6 0 0
+7 72
+O+ 1 6101
+R
+4 5619 0
+S
+#3085
+fern tips~
+some fern tips~
+Some fern tips are lying here.~
+The curving fiddlehead-shaped tips of the fern are delicate and edible.
+~
+6 gC a 0 0 8
+6 0 0
+7 24
+O+ 1 6100
+R
+4 5619 0
+S
+#3086
+frog tree dead~
+a tree frog~
+A dead tree frog is lying here.~
+This green little creature has died, but it still looks edible.
+~
+6 g a 0 0 8
+6 0 0
+7 24
+R
+4 5619 0
+S
+#3087
+leaves crisp wild~
+some crisp wild leaves~
+Some crisp wild leaves have been scattered here.~
+   These leaves belong to various tropical plants, all edible, but with little
+flavor.
+~
+6 gC a 0 0 9
+6 0 0
+7 24
+O+ 1 6100
+R
+4 5619 0
+S
 $
