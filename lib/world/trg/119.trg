@@ -7426,7 +7426,7 @@ Smash striped stone seedling to create calamander forest~
 1 c 2
 smash~
 * smash <self>
-set valid_sects 27 28 55 62 64 65
+set valid_sects 220 221 223 224 232
 set room %actor.room%
 set targ %actor.obj_target(%arg%)%
 if %targ% != %self%

@@ -358,8 +358,8 @@ end
 %quest% %actor% trigger 16607
 set xmas_tree %room.contents(16607)%
 * update descriptions? each entry must end in a colon
-set unimpressive_sects 4: 26: 45: 54: 71:
-set giant_sects 28: 55:
+set unimpressive_sects 4: 26: 45: 54: 71: 72: 210: 224: 232:
+set giant_sects 220: 221:
 set spruce_sects 10562: 10563: 10564: 10565:
 set magic_sects 602: 603: 604: 612: 613: 614: 16698: 16699:
 if %self.varexists(winter_holiday_sect_check)%
@@ -423,7 +423,7 @@ xmas tree chopping~
 1 c 2
 chop~
 * config valid sects (must also update trig 16609)
-set valid_sects 4 26 28 45 54 55 71 72 80 81 89 104 145 154 602 603 604 612 613 614 617 618 10562 10563 10564 10565 11989 11990 11991 16698 16699
+set valid_sects 4 26 45 54 55 71 72 80 81 89 104 145 154 210 224 232 220 221 602 603 604 612 613 614 617 618 10562 10563 10564 10565 11989 11990 11991 16698 16699
 return 0
 if %actor.inventory(16606)%
   %send% %actor% You really should get this tree back to your city center and plant it.
@@ -470,7 +470,7 @@ if !(%valid_tree_types% ~= %tree_type%)
 end
 * chances of success: each entry should end in a colon
 set 30_percent_sects 4: 26: 71: 10562: 10563:
-set 40_percent_sects 28: 45: 54: 55: 602: 612: 10564:
+set 40_percent_sects 72: 210: 220: 221: 224: 232: 45: 54: 55: 602: 612: 10564:
 set 50_percent_sects 603: 613:
 set 60_percent_sects 604: 614: 10565:
 set 100_percent_sects 16698: 16699:

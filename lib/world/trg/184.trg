@@ -10,7 +10,8 @@ end
 * sector configs
 set plains_sects 0 7 13 17 36 46
 set forest_sects 1 2 3 4 90 39 44 45 37 38 39 47
-set jungle_sects 15 16 27 28 61 62 65
+set jungle_sects 220 221 223 224
+set tropic_sects 200 201 202 203 204 210 211 212 222 230 231 233 234 240 241 242 243 244
 set desert_sects 20 12 14 22 23 24 25 26
 set oasis_sects 21 80 81 82 83 84 86 88 89
 set irrigated_sects 70 73 74 75 76 77 78
@@ -28,8 +29,11 @@ elseif %forest_sects% ~= %room.sector_vnum%
   %terraform% %room% 18452
   %echo% The rising water from the nearby river floods the forest!
 elseif %jungle_sects% ~= %room.sector_vnum%
-  %terraform% %room% 29
+  %terraform% %room% 250
   %echo% The rising water from the nearby river floods the jungle!
+elseif %jungle_sects% ~= %room.sector_vnum%
+  %terraform% %room% 18458
+  %echo% The rising water from the nearby river floods the grassland!
 elseif %desert_sects% ~= %room.sector_vnum%
   %terraform% %room% 18453
   %echo% The rising water from the nearby river floods the desert!

@@ -13,6 +13,9 @@ dg_affect %actor% INFRA on 300
 Magiterranean Terracrop~
 0 in 100
 ~
+* Valid terrains:
+set valid_sects 0 1 2 3 4 7 13 36 37 38 39 40 41 42 43 44 45 50 54 55 56 90
+*
 wait 1
 * pick a crop -- use start of time as jan 1, 2015: 1420070400
 * 2628288 seconds in a month
@@ -75,11 +78,7 @@ if !%instance.location%
   %purge% %self%
   halt
 end
-if %room.sector_vnum% <= 4 || (%room.sector_vnum% >= 40 && %room.sector_vnum% <= 45) || %room.sector_vnum% == 50 || %room.sector_vnum% == 90 || (%room.sector_vnum% >= 54 && %room.sector_vnum% <= 56)
-  * valid, plains/forest or shore-jungle (55)
-  set sector_valid 1
-elseif %room.sector_vnum% == 7 || %room.sector_vnum% == 13 || %room.sector_vnum% == 15 || %room.sector_vnum% == 16 || %room.sector_vnum% == 27 || %room.sector_vnum% == 28 || %room.sector_vnum% == 34
-  * valid, jungle / crop
+if %valid_sects% ~= %room.sector_vnum%
   set sector_valid 1
 end
 if (%room.template% == 10500 || %room.distance(%instance.location%)% > 3 || %room.building% == Fence || %room.building% == Wall)
@@ -813,6 +812,8 @@ elseif %room.sector_vnum% == 85
   %echo% The irrigation canal freezes over!
 elseif %room.sector_vnum% == 87
   %terraform% %room% 10555
+elseif %room.sector_vnum% == 260
+  %terraform% %room% 10556
   %echo% The canal freezes over!
 elseif %room.sector_vnum% == 32
   %terraform% %room% 10553
