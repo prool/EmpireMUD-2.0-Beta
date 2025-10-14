@@ -666,6 +666,8 @@ D0
 E
 5 0 100.00 201
 E
+9 0 100.00 232
+E
 10 57 5.00 200
 E
 16 0 100.00 231
@@ -875,6 +877,8 @@ D0
 E
 5 0 100.00 201
 E
+9 0 100.00 224
+E
 10 5 10.00 200
 E
 14 0 25.00 242
@@ -957,6 +961,8 @@ D0
 ~~~~~
 &c~
 E
+9 0 25.00 250
+E
 12 0 20.00 241
 E
 13 0 80.00 241
@@ -1023,6 +1029,8 @@ D0
 &G~
 E
 5 0 100.00 201
+E
+9 0 25.00 224
 E
 10 32 10.00 200
 E
@@ -1105,6 +1113,8 @@ fish~
 D0
 ~~~~~
 &c~
+E
+9 0 25.00 252
 E
 12 0 40.00 244
 E
@@ -1215,6 +1225,9 @@ I 21 1316 25.00 125 f  # FISH: small gator
 I 21 1314 100.00 125 f  # FISH: fat catfish
 M
 264 10.00 ace
+U
+0
+Green plants twist and writhe as they rise from the water!~
 _
 Non-flooded variant of 251
 ~
@@ -1409,6 +1422,9 @@ I 21 1316 25.00 125 f  # FISH: small gator
 I 21 1314 100.00 125 f  # FISH: fat catfish
 M
 264 10.00 ace
+U
+0
+Plants burst forth from the murky marsh and reach for the sky!~
 _
 Non-flooded variant of 253
 ~
