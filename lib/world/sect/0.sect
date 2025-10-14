@@ -675,9 +675,9 @@ come.
 ~
 S
 #15
-Jungle Field~
+Old Jungle Field~
 A Jungle Field~
-',' 12 l 3 j kp
+',' 12 0 3 j 0
 C
 gather~
 D0
@@ -690,9 +690,9 @@ Old jungle terrain, replaced by 202.
 ~
 S
 #16
-Jungle Crop~
+Old Jungle Crop~
 A Jungle Crop~
-'.' 12 l 3 djk kp
+'.' 12 0 3 jk 0
 D1
 ????~
 &g~
@@ -1149,9 +1149,9 @@ survive in this unforgiving environment.
 ~
 S
 #27
-Partial Jungle~
+Old Partial Jungle~
 The Jungle, Partially Cleared~
-'^' 12 lqr 6 d g
+'^' 12 0 6 0 0
 C
 chop, gather~
 D1
@@ -1173,9 +1173,9 @@ Old jungle terrain, replaced by vnum 221.
 ~
 S
 #28
-Jungle~
+Old Jungle~
 The Jungle~
-'^' 12 lq 8 d g
+'^' 12 0 8 0 0
 C
 chop, gather~
 D1
@@ -1197,9 +1197,9 @@ Old jungle terrain, replaced by 220.
 ~
 S
 #29
-Swamp~
+Old Swamp~
 A Murky Swamp~
-'~' 13 lov 10 aw m
+'~' 13 0 10 aw 0
 D0
 ~~~&G^~
 &c~
@@ -1301,9 +1301,9 @@ venture further out onto its frozen expanse.
 ~
 S
 #34
-Damaged Jungle~
+Old Damaged Jungle~
 A Frost-Damaged Jungle~
-'^' 12 l 6 d 0
+'^' 12 0 6 0 0
 C
 chop, gather~
 D0
@@ -1319,9 +1319,9 @@ Old jungle terrain, no longer exists and replaced by 220 Jungle.
 ~
 S
 #35
-Marsh~
+Old Marsh~
 A Marshy Lakeshore~
-'~' 13 louv 10 aw m
+'~' 13 0 10 aw 0
 D0
 ~~~&G^~
 &c~
@@ -2216,9 +2216,9 @@ swaying in the wind.
 ~
 S
 #55
-Seaside Jungle~
+Old Seaside Jungle~
 The Edge of the Jungle, Overlooking the Sea~
-'^' 12 ls 5 d g
+'^' 12 0 5 0 0
 C
 chop, gather, pick~
 D0
@@ -2474,9 +2474,9 @@ resilience of nature.
 ~
 S
 #61
-Jungle Stumps~
+Old Jungle Stumps~
 A Densely Vined Field of Stumps~
-'.' 10 lr 3 dl p
+'.' 10 0 3 0 0
 C
 burn stumps~
 D1
@@ -2510,9 +2510,9 @@ Old jungle terrain, replaced by 222.
 ~
 S
 #62
-Jungle Copse~
+Old Jungle Copse~
 A Copse of Young Jungle Trees~
-'w' 13 l 6 d 0
+'w' 13 0 6 0 0
 C
 chop~
 D1
@@ -2534,9 +2534,9 @@ Old jungle terrain, replaced by 223.
 ~
 S
 #63
-Seaside Jungle Stumps~
+Old Seaside Jungle Stumps~
 Amidst Tropical Stumps on the Seaside~
-'.' 10 lrs 3 dl pr
+'.' 10 0 3 0 0
 C
 burn stumps, pick~
 D0
@@ -2552,9 +2552,9 @@ Old jungle terrain, replaced by 233.
 ~
 S
 #64
-Seaside Jungle Copse~
+Old Seaside Jungle Copse~
 A Copse in the Jungle by the Sea~
-'w' 13 lrs 6 d pr
+'w' 13 0 6 0 0
 C
 chop, pick~
 D0
@@ -2570,9 +2570,9 @@ Old jungle terrain, replaced by 232
 ~
 S
 #65
-Jungle Edge~
+Old Jungle Edge~
 The Edge of the Jungle~
-'w' 13 lr 5 d 0
+'w' 13 0 5 0 0
 C
 chop~
 D0
