@@ -4637,6 +4637,7 @@ random each time.
 Message types:
  &cmagic-growth&0 - Shown to the whole room when a MAGIC-GROWTH evolution occurs.
    If the sector also has a magic-growth message, only the crop's will show.
+ &cburns-down&0 - Shown when this crop is burned (full crop only, not seeded).
 
 See also: OLC CROPS
 #d
@@ -9224,6 +9225,11 @@ random each time.
 Message types:
  &cmagic-growth&0 - Shown to the whole room when a MAGIC-GROWTH evolution occurs.
    This will not be shown if there is a crop here that has one.
+ &cburns-down&0 - Shown when this sector gets burned. This will not be shown on
+   crop tiles if the crop also has a custom message.
+ &cwas-burned&0 - Shows when this sect appears after a burn. Note that if no
+   burns-down or was-burned message is shown, a default message is shown for
+   burning instead.
 
 See also: OLC SECTORS
 #d
