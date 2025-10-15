@@ -1086,18 +1086,18 @@ void uncrop_tile(room_data *room) {
 	
 	// 4. attempt to find one
 	if (!to_sect) {
-		// should this be get_climate(room) rather than GET_SECT_CLIMATE(SECT(room)) ?
 		to_sect = find_first_matching_sector(NOBITS, invalid_sect_flags, GET_SECT_CLIMATE(SECT(room)));
 	}
 	
 	// 5. did we fail entirely?
 	if (!to_sect) {
+		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "SYSERR: uncrop_tile: unable to find a valid tile to return to for room %d; using default_land_sect", GET_ROOM_VNUM(room));
 		to_sect = sector_proto(config_get_int("default_land_sect"));
 	}
 	
 	// fail?
 	if (!to_sect) {
-		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "SYSERR: uncrop_tile: unable to find a valid tile to return to; 'config world default_land_sect' may not be set");
+		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "SYSERR: uncrop_tile: unable to find a valid tile to return to for room %d; 'config world default_land_sect' may not be set", GET_ROOM_VNUM(room));
 		return;
 	}
 	

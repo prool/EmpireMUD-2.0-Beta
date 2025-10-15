@@ -6,14 +6,17 @@ if (%self.fighting% || %self.disabled%)
   halt
 end
 * Burnable sectors:
-set crop_sects 7 13 15 16
-set desert_crop_sects 12 14 77 18
+set crop_sects 7 13
+set desert_crop_sects 12 14 77
 set desert_sects 20 51 70 73 75
-set woods_sects 1 2 3 4 27 28 34 37 38 39 44 45 47 54 55 60 62 64 65 90
+set woods_sects 1 2 3 4 34 37 38 39 44 45 47 54 55 60 62 64 65 90
 set spruce_sects 10562 10563 10564 10565
 set grove_sects 23 24 25 26 71 72 74 76 79
 set oasis_sects 21 80 81 82 83 84 88 89 91
 set plains_sects 0 36 40 46 50 56 59 61 63 10566
+set jungle_sects 220 221 224
+set tropic_sects 200 204 210 211 212 222 223 230 231 233 240 241 243 244
+set tropic_crop_sects 202 203
 * some other sects are handled individually below
 *
 set room %self.room%
@@ -28,6 +31,9 @@ elseif %crop_sects% ~= %vnum%
 elseif %desert_crop_sects% ~= %vnum%
   %echo% ~%self% scorches the crops!
   %terraform% %room% 10304
+elseif %tropic_crop_sects% ~= %vnum%
+  %echo% ~%self% scorches the crops!
+  %terraform% %room% 10309
 elseif %desert_sects% ~= %vnum%
   %echo% ~%self% scorches the desert!
   %terraform% %room% 10305
@@ -45,6 +51,12 @@ elseif %oasis_sects% ~= %vnum%
 elseif %plains_sects% ~= %vnum%
   %echo% ~%self% scorches the plains!
   %terraform% %room% 10302
+elseif %jungle_sects% ~= %vnum%
+  %echo% ~%self% scorches the jungle!
+  %terraform% %room% 10310
+elseif %tropic_sects% ~= %vnum%
+  %echo% ~%self% scorches the grassland!
+  %terraform% %room% 10311
 elseif %vnum% == 58
   %echo% ~%self% scorches the foothills!
   %terraform% %room% 10308

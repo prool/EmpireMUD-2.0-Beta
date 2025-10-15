@@ -306,8 +306,8 @@ end
 Swamp Platform~
 2 o 100
 ~
-%echo% The platform is complete and the area is now plains.
-%terraform% %room% 0
+%echo% The platform is complete and the area is now a grassland.
+%terraform% %room% 200
 return 0
 ~
 #5161

@@ -531,8 +531,10 @@ end
 Muck Dragon updater + leash~
 0 i 100
 ~
+set valid_sects 5 32 250 251 252 253
+*
 eval room %self.room%
-if (%room.sector% != Swamp && %room.sector% != Marsh && %room.sector% != River && %room.sector% != Lake)
+if !(%valid_sects% ~= %room.sector_vnum%)
   return 0
   halt
 end

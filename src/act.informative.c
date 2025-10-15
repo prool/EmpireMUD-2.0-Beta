@@ -3213,36 +3213,38 @@ ACMD(do_chart) {
 		free_chart_hash(hash);
 		
 		// other islands with similar names
-		*buf = '\0';
-		HASH_ITER(hh, island_table, isle_iter, next_isle) {
-			if (isle_iter == isle) {
-				continue;	// same isle
-			}
-			if (!is_multiword_abbrev(argument, isle_iter->name)) {
-				continue;	// no match
-			}
-			
-			// found
-			safe_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s%s", (*buf ? ", " : ""), isle_iter->name);
-		}
-		if (GET_LOYALTY(ch)) {
-			HASH_ITER(hh, EMPIRE_ISLANDS(GET_LOYALTY(ch)), eiter, next_eiter) {
-				if (eiter->island == isle->id) {
+		if (*argument) {
+			*buf = '\0';
+			HASH_ITER(hh, island_table, isle_iter, next_isle) {
+				if (isle_iter == isle) {
 					continue;	// same isle
 				}
-				if (!eiter->name) {
-					continue;	// no custom name
-				}
-				if (!is_multiword_abbrev(argument, eiter->name)) {
+				if (!is_multiword_abbrev(argument, isle_iter->name)) {
 					continue;	// no match
 				}
-				
+			
 				// found
-				safe_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s%s", (*buf ? ", " : ""), eiter->name);
+				safe_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s%s", (*buf ? ", " : ""), isle_iter->name);
 			}
-		}
-		if (*buf) {
-			msg_to_char(ch, "Islands with similar names: %s\r\n", buf);
+			if (GET_LOYALTY(ch)) {
+				HASH_ITER(hh, EMPIRE_ISLANDS(GET_LOYALTY(ch)), eiter, next_eiter) {
+					if (eiter->island == isle->id) {
+						continue;	// same isle
+					}
+					if (!eiter->name) {
+						continue;	// no custom name
+					}
+					if (!is_multiword_abbrev(argument, eiter->name)) {
+						continue;	// no match
+					}
+				
+					// found
+					safe_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s%s", (*buf ? ", " : ""), eiter->name);
+				}
+			}
+			if (*buf) {
+				msg_to_char(ch, "Islands with similar names: %s\r\n", buf);
+			}
 		}
 	}
 }
