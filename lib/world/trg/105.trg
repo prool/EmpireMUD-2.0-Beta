@@ -14,7 +14,7 @@ Magiterranean Terracrop~
 0 in 100
 ~
 * Valid terrains:
-set valid_sects 0 1 2 3 4 7 13 36 37 38 39 40 41 42 43 44 45 50 54 55 56 90
+set valid_sects 0 1 2 3 4 7 13 36 37 38 39 40 41 42 43 44 45 50 54 56 90
 *
 wait 1
 * pick a crop -- use start of time as jan 1, 2015: 1420070400
