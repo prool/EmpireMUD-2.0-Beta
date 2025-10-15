@@ -212,9 +212,10 @@ I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
-I 9 121 88.00 50 g  # GATHER: sticks and leaves
-I 9 131 12.00 50 g  # GATHER: green sapling
-I 20 120 100.00 1  # CHOP: large tree
+I 9 121 44.00 50 g  # GATHER: sticks and leaves
+I 9 148 12.00 50 g  # GATHER: thorny shoot
+I 9 132 44.00 50 g  # GATHER: thorny branches
+I 20 147 100.00 1  # CHOP: thorny tree
 U
 0
 A tree springs from the ground and shoots green leaves up into the air!~
@@ -280,7 +281,8 @@ I 5 100 100.00 15 X  # DIG: rock
 I 6 3080 20.00 25 f  # FORAGE: lizard tail
 I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
 I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
-I 9 140 100.00 50  # GATHER: bundle of long grass
+I 9 148 33.33 50 g  # GATHER: thorny shoot
+I 9 140 66.67 50 g  # GATHER: bundle of long grass
 X
 savannah grassland plains field ground around trees stumps~
    The vast field of grass extends around this large tree stump, sweltering in
@@ -333,7 +335,7 @@ I 6 3080 10.00 25 f  # FORAGE: lizard tail
 I 6 3081 15.00 25 f  # FORAGE: colorful bird egg
 I 6 3087 20.00 25 f  # FORAGE: crisp wild leaves
 I 6 3069 20.00 25 f  # FORAGE: honeycomb
-I 20 135 100.00 1  # CHOP: reaching sapling
+I 20 134 100.00 1  # CHOP: thorny sapling
 U
 0
 New shoots spring forth from the stumps and begin to push out leaves!~
@@ -423,8 +425,10 @@ I 6 3086 5.00 25 f  # FORAGE: tree frog
 I 6 3017 20.00 25 f  # FORAGE: plump fig
 I 6 3069 20.00 25 f  # FORAGE: honeycomb
 I 6 3085 20.00 25 f  # FORAGE: fern tips
-I 9 133 100.00 50  # GATHER: tangle of vines
-I 20 128 100.00 1  # CHOP: massive jungle tree
+I 9 133 90.00 50 g  # GATHER: tangle of vines
+I 9 121 10.00 50 g  # GATHER: sticks and leaves
+I 20 149 6.00 1 c  # CHOP: tremendous jungle tree
+I 20 128 94.00 1 c  # CHOP: massive jungle tree
 U
 0
 More and more trees burst from the ground, twisting their way up to the sky and spreading a wide canopy!~
@@ -490,7 +494,8 @@ I 6 3086 5.00 25 f  # FORAGE: tree frog
 I 6 3017 20.00 25 f  # FORAGE: plump fig
 I 6 3069 20.00 25 f  # FORAGE: honeycomb
 I 6 3085 20.00 25 f  # FORAGE: fern tips
-I 9 133 100.00 50  # GATHER: tangle of vines
+I 9 133 90.00 50 g  # GATHER: tangle of vines
+I 9 121 10.00 50 g  # GATHER: sticks and leaves
 I 20 128 100.00 1  # CHOP: massive jungle tree
 U
 0
@@ -508,7 +513,7 @@ Wasteland~
 A Wasteland of Stumps and Vines~
 '.' 37 l 3 adl 0
 C
-burn stumps~
+burn stumps, gather~
 D0
 ..&Tnn~
 &t~
@@ -561,6 +566,8 @@ I 6 3080 10.00 25 f  # FORAGE: lizard tail
 I 6 3081 25.00 25 f  # FORAGE: colorful bird egg
 I 6 3082 20.00 25 f  # FORAGE: succulent root
 I 6 3085 20.00 25 f  # FORAGE: fern tips
+I 9 121 25.00 25 g  # GATHER: sticks and leaves
+I 9 133 75.00 25 g  # GATHER: tangle of vines
 X
 wasteland stumps vines ground around land~
    The remnants of a once-proud jungle litter the landscape around you. Jagged
@@ -618,6 +625,8 @@ I 6 3086 5.00 25 f  # FORAGE: tree frog
 I 6 3017 20.00 25 f  # FORAGE: plump fig
 I 6 3069 20.00 25 f  # FORAGE: honeycomb
 I 6 3085 20.00 25 f  # FORAGE: fern tips
+I 9 121 25.00 25 g  # GATHER: sticks and leaves
+I 9 133 75.00 25 g  # GATHER: tangle of vines
 I 20 135 100.00 1  # CHOP: reaching sapling
 U
 0
@@ -673,6 +682,8 @@ I 6 3086 5.00 25 f  # FORAGE: tree frog
 I 6 3017 20.00 25 f  # FORAGE: plump fig
 I 6 3069 20.00 25 f  # FORAGE: honeycomb
 I 6 3085 20.00 25 f  # FORAGE: fern tips
+I 9 121 25.00 25 g  # GATHER: sticks and leaves
+I 9 133 75.00 25 g  # GATHER: tangle of vines
 I 20 135 100.00 1  # CHOP: reaching sapling
 U
 0
@@ -813,9 +824,10 @@ I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1200 100.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
-I 9 133 88.00 50 g  # GATHER: tangle of vines
-I 9 135 12.00 50 g  # GATHER: reaching sapling
-I 20 128 100.00 1  # CHOP: massive jungle tree
+I 9 121 88.00 25 g  # GATHER: sticks and leaves
+I 9 135 12.00 25 g  # GATHER: reaching sapling
+I 20 150 88.00 1 c  # CHOP: mangrove tree
+I 20 135 12.00 1 c  # CHOP: reaching sapling
 U
 0
 Trees burst from the wet soil and spread their leaves over the edge of the sea!~
@@ -862,8 +874,9 @@ E
 I 5 102 9.00 15 x  # DIG: flint stone
 I 5 107 9.00 15 x  # DIG: bag of sand
 I 5 101 100.00 15 x  # DIG: lump of clay
-I 6 3051 50.00 25 x  # FORAGE: sea urchin
-I 6 3052 50.00 25 x  # FORAGE: clam
+I 6 3051 33.33 25 x  # FORAGE: sea urchin
+I 6 3052 33.34 25 x  # FORAGE: clam
+I 6 3083 33.33 25 x  # FORAGE: river snail
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1200 100.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
@@ -933,8 +946,8 @@ I 5 102 9.00 15 x  # DIG: flint stone
 I 5 100 9.00 15 x  # DIG: rock
 I 5 101 100.00 15 x  # DIG: lump of clay
 I 6 3080 20.00 25 f  # FORAGE: lizard tail
-I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
 I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
+I 6 3083 20.00 25 f  # FORAGE: river snail
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1205 100.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
@@ -986,7 +999,8 @@ E
 I 5 102 9.00 15 x  # DIG: flint stone
 I 5 100 9.00 15 x  # DIG: rock
 I 5 101 100.00 15 x  # DIG: lump of clay
-I 6 3082 100.00 25  # FORAGE: succulent root
+I 6 3082 75.00 25 f  # FORAGE: succulent root
+I 6 3083 25.00 25 f  # FORAGE: river snail
 _
 Floods to 242 seasonally.
 ~
@@ -1257,8 +1271,9 @@ E
 17 231 2.00 232
 E
 17 204 2.00 224
-I 6 3310 75.00 25 f  # FORAGE: wood ear mushroom
+I 6 3310 50.00 25 f  # FORAGE: wood ear mushroom
 I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3083 25.00 25 f  # FORAGE: river snail
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1361,8 +1376,9 @@ E
 17 231 2.00 232
 E
 17 204 2.00 224
-I 6 3310 75.00 25 f  # FORAGE: wood ear mushroom
+I 6 3310 50.00 25 f  # FORAGE: wood ear mushroom
 I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3083 25.00 25 f  # FORAGE: river snail
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
