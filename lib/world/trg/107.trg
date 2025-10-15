@@ -1391,6 +1391,10 @@ end
 Pick fruit of knowledge~
 2 c 0
 pick~
+*
+set forest_list 4 90 104 10565
+set grove_list 26
+*
 if !%actor.canuseroom_member()%
   %send% %actor% You don't have permission to pick anything here.
   return 1
@@ -1399,10 +1403,14 @@ end
 %load% obj 10777 %actor% inv
 %send% %actor% You pick the fruit of knowledge from the tree, which withers and dies!
 %echoaround% %actor% ~%actor% picks the fruit of knowledge from the tree, which withers and dies!
-if %room.building_vnum% == 10779
+if %grove_list% ~= %room.base_sector_vnum%
   %terraform% %room% 10776
-else
+elseif %forest_list% ~= %room.base_sector_vnum%
   %terraform% %room% 10775
+else
+  * leave this tile alone
+  %echo% The area quickly returns to its original splendor.
+  %build% %room% demolish
 end
 return 1
 ~
