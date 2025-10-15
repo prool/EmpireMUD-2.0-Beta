@@ -463,7 +463,7 @@ if (%arg% ~= tree. || %arg% ~= wood.)
   set tree_type %tree_type.vnum%
 end
 set winter_holiday_sect_check %self.var(winter_holiday_sect_check,-1)%
-set valid_tree_types 10558 603 120 122 128 618 16697
+set valid_tree_types 10558 603 120 122 128 618 16697 150 147
 if !(%valid_tree_types% ~= %tree_type%)
   * not a valid tree
   halt
