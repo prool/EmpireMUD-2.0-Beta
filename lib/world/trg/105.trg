@@ -16,6 +16,11 @@ Magiterranean Terracrop~
 * Valid terrains:
 set valid_sects 0 1 2 3 4 7 13 36 37 38 39 40 41 42 43 44 45 50 54 56 90
 *
+* Same list exists in #10507 for cleaning up
+*
+* IMPORTANT: only things that are "basically plains" should be in the sect list
+* because this adventure will terraform them back down to plains when it ends.
+*
 wait 1
 * pick a crop -- use start of time as jan 1, 2015: 1420070400
 * 2628288 seconds in a month
@@ -243,6 +248,10 @@ end
 Interdimensional Whirlwind Cleanup~
 2 e 100
 ~
+*
+* Cleanable sect list from #10501
+set valid_sects 0 1 2 3 4 7 13 36 37 38 39 40 41 42 43 44 45 50 54 56 90
+*
 set main_direction_1 west
 set main_direction_2 east
 set branch_direction_1 north
@@ -257,7 +266,9 @@ while %dir_var% <= 2
   while %room.distance(%row_room%)% <= 3
     * %regionecho% %room% 5 %row_room.sector% @ %row_room.coords%
     if ((%row_room.crop_vnum% >= 10500) && (%row_room.crop_vnum% <= 10549) && (!%row_room.empire_id%)) && %row_room% != %room%
-      %terraform% %row_room% 0
+      if %valid_sects% ~= %row_room.natural_sector_vnum%
+        %terraform% %row_room% 0
+      end
     end
     set branch_dir_var 1
     * mirror up/down
@@ -268,7 +279,9 @@ while %dir_var% <= 2
       while %target_room% && %room.distance(%target_room%)% <= 3
         * %regionecho% %room% 5 %target_room.sector% @ %target_room.coords%
         if ((%target_room.crop_vnum% >= 10500) && (%target_room.crop_vnum% <= 10549) && (!%target_room.empire_id%))
-          %terraform% %target_room% 0
+          if %valid_sects% ~= %target_room.natural_sector_vnum%
+            %terraform% %target_room% 0
+          end
         end
         eval target_room %%target_room.%column_direction%(map)%%
       done
@@ -281,7 +294,10 @@ while %dir_var% <= 2
   eval row_room %%room.%row_direction%(map)%%
 done
 %regionecho% %room% -3 The nearby whirlwind implodes, sucking in the crops surrounding it.
-%terraform% %room% 0
+if %valid_sects% ~= %room.natural_sector_vnum%
+  %terraform% %room% 0
+end
+valid_sect
 ~
 #10508
 Dragonstooth sceptre equip first~
