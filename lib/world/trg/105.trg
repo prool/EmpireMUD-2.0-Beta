@@ -100,9 +100,15 @@ if !%no_work%
     %echo% ~%self% spreads mana over the land and crops begin to grow!
   end
 end
-if %month_change%
-  %at% %instance.location% %echo% The whirlwind collapses in on itself, leaving behind crops!
-  %terracrop% %instance.location% %starting_crop_vnum%
+set instloc %instance.location%
+if %month_change% && %instloc%
+  if %valid_sects% ~= %instloc.base_sector_vnum%
+    %at% %instloc% %echo% The whirlwind collapses in on itself, leaving behind crops!
+    %terracrop% %instloc% %starting_crop_vnum%
+  else
+    %at% %instloc% %echo% The whirlwind collapses in on itself!
+    %terraform% %instloc% %instloc.base_sector_vnum%
+  end
 end
 ~
 #10502
