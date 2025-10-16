@@ -4077,6 +4077,7 @@ const char *crop_flags[] = {
 // CROP_CUSTOM_x: custom messages
 const char *crop_custom_types[] = {
 	"magic-growth",	// 0
+	"burns-down",
 	"\n"
 };
 
@@ -4612,6 +4613,8 @@ const char *sector_flags[] = {
 // SECT_CUSTOM_x: custom messages
 const char *sect_custom_types[] = {
 	"magic-growth",	// 0
+	"burns-down",
+	"was-burned",
 	"\n"
 };
 

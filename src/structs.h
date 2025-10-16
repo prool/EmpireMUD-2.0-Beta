@@ -1054,6 +1054,7 @@ typedef struct vehicle_data vehicle_data;
 
 // CROP_CUSTOM_x: custom messages
 #define CROP_CUSTOM_MAGIC_GROWTH		0	// shown on magic-growth evolution
+#define CROP_CUSTOM_BURNS_DOWN			1	// shown when this crop is burned
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -2744,6 +2745,8 @@ typedef enum {
 
 // SECT_CUSTOM_x: custom messages
 #define SECT_CUSTOM_MAGIC_GROWTH		0	// shown on magic-growth evolution
+#define SECT_CUSTOM_BURNS_DOWN			1	// shown when sector goes away due to burn
+#define SECT_CUSTOM_WAS_BURNED			2	// shown when on new sector after burning
 
 
  //////////////////////////////////////////////////////////////////////////////

@@ -257,21 +257,21 @@ struct {
 		{ "b", "Temp Crop", 7, TRUE, TRUE },	// 5, unused
 	{ "m", "Desert", 20, TRUE, TRUE },
 	{ "*", "Tower", 18, TRUE, TRUE },
-	{ "d", "Jungle", 28, TRUE, TRUE },
+	{ "d", "Jungle", 220, TRUE, TRUE },
 	{ "j", "Oasis", 21, TRUE, TRUE },
 	{ "b", "Grove", 26, TRUE, TRUE },	// 10
-	{ "e", "Swamp", 29, TRUE, TRUE },
+	{ "e", "Swamp", 250, TRUE, TRUE },
 	{ "h", "Tundra", 30, FALSE, FALSE },
 	{ "i", "Lake", 32, TRUE, TRUE },
 		{ "o", "Dsrt Crop", 12, TRUE, TRUE },	// unused
-		{ "3", "Jngl Crop", 16, TRUE, TRUE },	// 15, unused
+		{ "3", "Jngl Crop", 203, TRUE, TRUE },	// 15, unused
 	{ "f", "Riverbank", 45, TRUE, TRUE },
 	{ "f", "Shore", 54, TRUE, TRUE },
-	{ "d", "Jngl Shore", 55, TRUE, TRUE },
+	{ "d", "Mangrove", 232, TRUE, TRUE },
 	{ "m", "Beach", 51, TRUE, TRUE },
 	{ "q", "Cliffs", 52, TRUE, TRUE },	// 20
 	{ "j", "Estuary", 53, TRUE, TRUE },
-	{ "e", "Marsh", 35, TRUE, TRUE },
+	{ "e", "Marsh", 252, TRUE, TRUE },
 	{ "j", "Shallows", 57, FALSE, TRUE },
 	{ "b", "Foothills", 58, TRUE, TRUE },
 	{ "F", "Old-Growth", 90, TRUE, TRUE },	// 25
