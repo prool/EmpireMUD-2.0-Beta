@@ -2268,7 +2268,7 @@ I 7 1200 100.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 X
-shore exstuary river water ocean sea around~
+shore estuary river water ocean sea around~
    The estuary shore is a mix of mud and sand, with the water slowly rising and
 falling with the tide. Small crabs scurry around, digging into the sand and mud
 for food. Seagulls and other shorebirds swoop down to grab small fish and other
