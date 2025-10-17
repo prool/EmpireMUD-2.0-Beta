@@ -108,7 +108,7 @@ S
 #203
 Tropical Crop~
 A Tropical Crop~
-',' 37 l 3 djk kp
+',' 37 l 3 djkE kp
 D0
 ????~
 &G~
@@ -709,7 +709,7 @@ Grassy Seaside~
 A Grassy Seaside~
 ',' 12 lrs 3 al bpr
 C
-gather, pick, burn grass~
+dig, gather, pick, burn grass~
 D0
 @w&?,,@e~
 &G~
@@ -741,6 +741,7 @@ E
 17 244 2.50 243
 E
 17 231 2.50 230
+I 5 107 100.00 25 d  # DIG: bag of sand
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
@@ -766,6 +767,8 @@ S
 Fertile Seaside~
 Some Fertile Soil by the Seaside~
 '.' 37 l 2 l bpr
+C
+dig~
 D0
 @w&?..@e~
 &t~
@@ -779,6 +782,7 @@ E
 9 0 100.00 230
 E
 10 57 5.00 204
+I 5 107 100.00 25 d  # DIG: bag of sand
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 X
@@ -901,7 +905,7 @@ Estuary Shore~
 The Shore of the Estuary~
 '.' 37 lrs 2 l bprs
 C
-pick~
+dig, pick~
 D0
 @w&t..@~
 &t~
@@ -911,6 +915,9 @@ E
 8 0 100.00 202
 E
 10 53 5.00 204
+I 5 102 9.00 50 x  # DIG: flint stone
+I 5 107 9.00 50 x  # DIG: bag of sand
+I 5 101 82.00 50 x  # DIG: lump of clay
 I 6 3051 33.33 25 x  # FORAGE: sea urchin
 I 6 3052 33.34 25 x  # FORAGE: clam
 I 6 3083 33.33 25 x  # FORAGE: river snail
@@ -918,6 +925,13 @@ I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1200 100.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
+X
+shore estuary river water ocean sea around~
+   The shore is a mix of mud and sand, with the water slowly rising and
+falling. Small crabs scurry around, digging into the muck for food. The
+occasional bird swoops down to grab a meal as you listen to the sound of waves
+crashing.
+~
 S
 #240
 Grassy Riverbank~
@@ -993,6 +1007,12 @@ Waves of grass spread across the riverbank!~
 U
 1
 The grass burns away, fertilizing the dark soil with ash.~
+X
+grassland grassy plains field ground around riverbank bank~
+   The tall grass almost disguises the riverbank, to the point that you nearly
+tumble down into the mud as you only see it at the last moment. Luckily, you
+can hear the flowing water before you see it.
+~
 _
 Floods to 242 seasonally.
 ~
@@ -1033,6 +1053,13 @@ E
 14 0 25.00 242
 I 6 3082 75.00 25 f  # FORAGE: succulent root
 I 6 3083 25.00 25 f  # FORAGE: river snail
+X
+riverbank bank fertile ground plains around~
+   The rich, black soil sits above the riverbank, already germinating new
+plants. Soon it will be teeming with tall grass. Birds stride along, pecking
+tiny insects and stray crustaceans from the most soil, interrupted by the
+occasional croak.
+~
 _
 Floods to 242 seasonally.
 ~
@@ -1065,6 +1092,13 @@ I 21 1304 5.00 125 f  # FISH: sea junk
 I 21 1311 25.00 125 f  # FISH: spotted eel
 I 21 1316 25.00 125 f  # FISH: small gator
 I 21 1314 100.00 125 f  # FISH: fat catfish
+X
+riverbank bank flooded water around~
+   Heavy rainfall has raised the river up out of its bed and, surely, into the
+beds of every creature within a hundred paces. The water rages past, ripping
+out grass and plants from the submerged bank, churning almost loudly enough to
+drown out the chirping insects it evicted.
+~
 _
 Flooded version of 240/241 - reverts to 241.
 ~
@@ -1143,6 +1177,12 @@ Grass bursts up out of the ground and spreads across the shoreline!~
 U
 1
 The grass burns away, fertilizing the rich lakeshore with ash.~
+X
+grassland grassy plains field ground around lakeshore lake~
+   As you pry your way through the tall grass, you find yourself at the shore
+of a large lake. The water is so still you can't hear it at all; discovering it
+hiding in the grass is a welcome relief.
+~
 _
 Floods to 245 seasonally.
 ~
@@ -1182,6 +1222,13 @@ E
 E
 14 0 10.00 245
 I 6 3082 100.00 25  # FORAGE: succulent root
+X
+lakeshore shore fertile area around ground plains~
+   Around the lake, black soil teems with sprouting life -- both in the green
+shoots of new plants, and the hungry larvae that munch on them. Chirping
+insects drown out the lake's serenity, but there's still the occasional wave of
+peace when a hungry bird flies in.
+~
 _
 Floods to 245 seasonally.
 ~
@@ -1214,6 +1261,12 @@ I 21 1304 5.00 125 f  # FISH: sea junk
 I 21 1311 25.00 125 f  # FISH: spotted eel
 I 21 1316 25.00 125 f  # FISH: small gator
 I 21 1314 100.00 125 f  # FISH: fat catfish
+X
+lake flooded overflowing water down around lakeshore shore~
+   Heavy rains have lifted the lake high above its usual water level. Near the
+old shore, grasses poke above the water level, but they seem to be wilting as
+they drown in the deluge.
+~
 _
 Flooded version of 243/244 - reverts to 244.
 ~
@@ -1298,9 +1351,10 @@ E
 17 231 2.00 232
 E
 17 204 2.00 224
-I 6 3310 50.00 25 f  # FORAGE: wood ear mushroom
+I 6 3310 30.00 25 f  # FORAGE: wood ear mushroom
 I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
 I 6 3083 25.00 25 f  # FORAGE: river snail
+I 6 3086 20.00 25 f  # FORAGE: tree frog
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1317,7 +1371,7 @@ U
 Green plants twist and writhe as they rise from the water!~
 X
 swamp murky river water trees forest jungle around~
-   The thick, moist air chokes your lungs as you survey the muddy swamp. 
+   The thick, moist air chokes your lungs as you survey the muddy swamp.
 Burbles emanate from the murk here and there, perhaps from the twisted roots
 and submerged logs that stick out here and there. The river flows lazily by,
 dotted here and there with lily pads and curious creatures.
@@ -1410,9 +1464,10 @@ E
 17 231 2.00 232
 E
 17 204 2.00 224
-I 6 3310 50.00 25 f  # FORAGE: wood ear mushroom
+I 6 3310 30.00 25 f  # FORAGE: wood ear mushroom
 I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
 I 6 3083 25.00 25 f  # FORAGE: river snail
+I 6 3086 25.00 25 f  # FORAGE: tree frog
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1422,6 +1477,13 @@ I 21 1304 5.00 125 f  # FISH: sea junk
 I 21 1311 25.00 125 f  # FISH: spotted eel
 I 21 1316 25.00 125 f  # FISH: small gator
 I 21 1314 100.00 125 f  # FISH: fat catfish
+X
+swamp murky river water trees forest jungle around deep depths~
+   The murk and mud are hidden beneath the brown waters, which have risen high
+enough that shrubs and low-lying plants are completely submerged. The swamp has
+flooded from all the recent rains, leaving the air abuzz with flying insects
+and the water too deep to find footing.
+~
 _
 Flooded / deep version of 250
 ~
@@ -1507,7 +1569,8 @@ E
 E
 17 204 2.00 224
 I 6 3310 20.00 25 f  # FORAGE: wood ear mushroom
-I 6 3084 75.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3084 55.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3086 20.00 25 f  # FORAGE: tree frog
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1522,6 +1585,12 @@ M
 U
 0
 Plants burst forth from the murky marsh and reach for the sky!~
+X
+marshy lakeshore shore swamp jungle forest trees water around~
+   The jungle around the lake has swollen with water, rendering it soft and
+marshy beneath your feet. All around you, creatures chirp and croak unseen.
+Flying insects take their fill of you; you are truly at the mercy of the marsh.
+~
 _
 Non-flooded variant of 253
 ~
@@ -1611,7 +1680,8 @@ E
 E
 17 204 2.00 224
 I 6 3310 20.00 25 f  # FORAGE: wood ear mushroom
-I 6 3084 75.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3084 55.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3086 25.00 25 f  # FORAGE: tree frog
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1621,6 +1691,13 @@ I 21 1304 5.00 125 f  # FISH: sea junk
 I 21 1311 25.00 125 f  # FISH: spotted eel
 I 21 1316 25.00 125 f  # FISH: small gator
 I 21 1314 100.00 125 f  # FISH: fat catfish
+X
+marshy lakeshore shore swamp jungle forest trees water around~
+   The shoreline has moved inland as recent rains have raised the lake to the
+point that even trees struggle to hold their footing. Something stirs below the
+water, revealed only by the faintest ripple. You certainly can't see what lies
+beneath the murk.
+~
 _
 Flooded variant of 252
 ~
