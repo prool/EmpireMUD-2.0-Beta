@@ -325,9 +325,7 @@ OLC_MODULE(mapedit_decay) {
 OLC_MODULE(mapedit_terrain) {
 	struct empire_city_data *city;
 	empire_data *emp, *rescan_emp = NULL;
-	int count;
-	sector_data *sect = NULL, *next_sect, *old_sect = NULL;
-	crop_data *crop, *next_crop;
+	sector_data *sect = NULL, *old_sect = NULL;
 	crop_data *cp = NULL;
 	
 	if (isdigit(*argument)) {
@@ -341,17 +339,7 @@ OLC_MODULE(mapedit_terrain) {
 	if (IS_INSIDE(IN_ROOM(ch)) || IS_ADVENTURE_ROOM(IN_ROOM(ch)))
 		msg_to_char(ch, "Leave the building or area first.\r\n");
 	else if (!*argument || (!sect && !cp)) {
-		msg_to_char(ch, "What type of terrain would you like to set?\r\nYour choices are:");
-		
-		count = 0;
-		HASH_ITER(hh, sector_table, sect, next_sect) {
-			msg_to_char(ch, "%s %s", (count++ > 0 ? "," : ""), GET_SECT_NAME(sect));
-		}
-		HASH_ITER(hh, crop_table, crop, next_crop) {
-			msg_to_char(ch, ", %s", GET_CROP_NAME(crop));
-		}
-		
-		msg_to_char(ch, "\r\n");
+		msg_to_char(ch, "What type of terrain would you like to set (sector name, crop name, or sector vnum)?\r\n");
 	}
 	else if (sect && SECT_FLAGGED(sect, SECTF_MAP_BUILDING | SECTF_INSIDE | SECTF_ADVENTURE)) {
 		msg_to_char(ch, "That sector requires extra data and can't be set this way.\r\n");
