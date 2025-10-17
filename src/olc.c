@@ -354,6 +354,7 @@ OLC_MODULE(medit_size);
 OLC_MODULE(medit_short_description);
 
 // map modules
+OLC_MODULE(mapedit_basesector);
 OLC_MODULE(mapedit_build);
 OLC_MODULE(mapedit_complete_room);
 OLC_MODULE(mapedit_convert2newbie);
@@ -937,6 +938,7 @@ const struct olc_command_data olc_data[] = {
 	{ "size", medit_size, OLC_MOBILE, OLC_CF_EDITOR },
 	
 	// map commands
+	{ "basesector", mapedit_basesector, OLC_MAP, OLC_CF_MAP_EDIT },
 	{ "build", mapedit_build, OLC_MAP, OLC_CF_MAP_EDIT },
 	{ "complete", mapedit_complete_room, OLC_MAP, OLC_CF_MAP_EDIT },
 	{ "convert2newbie", mapedit_convert2newbie, OLC_MAP, OLC_CF_MAP_EDIT },

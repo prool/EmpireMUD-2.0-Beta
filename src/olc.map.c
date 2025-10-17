@@ -37,6 +37,34 @@
  //////////////////////////////////////////////////////////////////////////////
 //// EDIT MODULES ////////////////////////////////////////////////////////////
 
+OLC_MODULE(mapedit_basesector) {
+	sector_data *sect = NULL;
+	
+	// prefer vnum; allow name
+	if (isdigit(*argument)) {
+		sect = sector_proto(atoi(argument));
+	}
+	else {
+		sect = get_sect_by_name(argument);
+	}
+	
+	if (IS_INSIDE(IN_ROOM(ch)) || IS_ADVENTURE_ROOM(IN_ROOM(ch))) {
+		msg_to_char(ch, "Leave the building or area first.\r\n");
+	}
+	else if (!*argument || !sect) {
+		msg_to_char(ch, "What type of sector would you like to set as the base terrain for this tile (VNum or name)?\r\n");
+	}
+	else if (SECT_FLAGGED(sect, SECTF_MAP_BUILDING | SECTF_INSIDE | SECTF_ADVENTURE)) {
+		msg_to_char(ch, "That sector requires extra data and can't be set this way.\r\n");
+	}
+	else {
+		msg_to_char(ch, "The base sect for this room is now [%d] %s.\r\n", GET_SECT_VNUM(sect), GET_SECT_NAME(sect));
+		
+		change_base_sector(IN_ROOM(ch), sect);
+	}
+}
+
+
 OLC_MODULE(mapedit_build) {
 	char bld_arg[MAX_INPUT_LENGTH], dir_arg[MAX_INPUT_LENGTH], buf[MAX_STRING_LENGTH];
 	bld_data *bld;
@@ -297,9 +325,7 @@ OLC_MODULE(mapedit_decay) {
 OLC_MODULE(mapedit_terrain) {
 	struct empire_city_data *city;
 	empire_data *emp, *rescan_emp = NULL;
-	int count;
-	sector_data *sect = NULL, *next_sect, *old_sect = NULL;
-	crop_data *crop, *next_crop;
+	sector_data *sect = NULL, *old_sect = NULL;
 	crop_data *cp = NULL;
 	
 	if (isdigit(*argument)) {
@@ -313,17 +339,7 @@ OLC_MODULE(mapedit_terrain) {
 	if (IS_INSIDE(IN_ROOM(ch)) || IS_ADVENTURE_ROOM(IN_ROOM(ch)))
 		msg_to_char(ch, "Leave the building or area first.\r\n");
 	else if (!*argument || (!sect && !cp)) {
-		msg_to_char(ch, "What type of terrain would you like to set?\r\nYour choices are:");
-		
-		count = 0;
-		HASH_ITER(hh, sector_table, sect, next_sect) {
-			msg_to_char(ch, "%s %s", (count++ > 0 ? "," : ""), GET_SECT_NAME(sect));
-		}
-		HASH_ITER(hh, crop_table, crop, next_crop) {
-			msg_to_char(ch, ", %s", GET_CROP_NAME(crop));
-		}
-		
-		msg_to_char(ch, "\r\n");
+		msg_to_char(ch, "What type of terrain would you like to set (sector name, crop name, or sector vnum)?\r\n");
 	}
 	else if (sect && SECT_FLAGGED(sect, SECTF_MAP_BUILDING | SECTF_INSIDE | SECTF_ADVENTURE)) {
 		msg_to_char(ch, "That sector requires extra data and can't be set this way.\r\n");
@@ -354,7 +370,7 @@ OLC_MODULE(mapedit_terrain) {
 			}
 		}
 		else if (cp) {
-			if (!(sect = find_first_matching_sector(SECTF_CROP, NOBITS, get_climate(IN_ROOM(ch))))) {
+			if (!(sect = find_first_matching_sector(SECTF_CROP | SECTF_BASIC_CROP, NOBITS, GET_CROP_CLIMATE(cp)))) {
 				msg_to_char(ch, "No crop sector types are set up.\r\n");
 				return;
 			}

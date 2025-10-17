@@ -3,7 +3,7 @@ Grassland~
 A Lush Grassland~
 ',' 12 lr 3 al bp
 C
-dig, gather, pick, burn grassland~
+gather, pick, burn grassland~
 D0
 ,`,`~
 &G~
@@ -35,9 +35,6 @@ E
 17 241 2.50 240
 E
 17 204 2.50 200
-I 5 102 9.00 15 X  # DIG: flint stone
-I 5 101 15.00 15 X  # DIG: lump of clay
-I 5 100 76.00 15 X  # DIG: rock
 I 6 3080 20.00 25 f  # FORAGE: lizard tail
 I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
 I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
@@ -49,6 +46,9 @@ I 9 140 100.00 50  # GATHER: bundle of long grass
 U
 0
 Grass pops up all over, quickly growing to chest height!~
+U
+1
+The grassland burns away, fertilizing the rich soil underneath!~
 X
 grassland plains field ground around~
    You stand in a sea of tall grass. Some if it comes up to your chest; some is
@@ -81,9 +81,9 @@ S
 #202
 Seeded Soil~
 A Seeded Soil Field~
-'.' 37 l 3 j kp
+',' 37 l 3 j kp
 D0
-....~
+,,,,~
 &t~
 E
 1 0 100.00 203
@@ -92,8 +92,11 @@ E
 E
 16 0 100.00 204
 E
-19 0 100.00 204
+18 0 100.00 204
 I 6 3087 100.00 25 f  # FORAGE: crisp wild leaves
+U
+1
+The germinating crops are burnt away, fertilizing the rich soil!~
 X
 field seeded seeds plants crop around soil~
    The field around you has been meticulously plowed into rows and seeded with
@@ -105,24 +108,25 @@ S
 #203
 Tropical Crop~
 A Tropical Crop~
-',' 37 l 3 djk kp
+',' 37 l 3 djkE kp
 D0
 ????~
 &G~
 E
 16 0 100.00 204
 E
-19 0 100.00 204
+18 0 100.00 200
 U
 0
 The crops grow all around you with phenomenal speed!~
+U
+1
+The crops burn away to ash, which rains down and fertilizes the dark soil!~
 S
 #204
 Fertile Soil~
 A Patch of Fertile Soil~
-'.' 37 lr 2 l bp
-C
-dig~
+'.' 37 l 2 l bp
 D0
 ....~
 &t~
@@ -136,9 +140,6 @@ E
 8 0 100.00 202
 E
 9 0 100.00 200
-I 5 102 9.00 15 X  # DIG: flint stone
-I 5 101 15.00 15 X  # DIG: lump of clay
-I 5 100 100.00 15 X  # DIG: rock
 I 6 3082 100.00 25  # FORAGE: succulent root
 X
 soil fertile ground plains field around grass~
@@ -152,7 +153,7 @@ Savanna~
 A Vast Savanna~
 ',' 12 lqr 3 adl np
 C
-chop, dig, gather, pick~
+chop, gather, pick~
 D0
 ,,&T|&?^~
 &G~
@@ -201,9 +202,6 @@ E
 17 241 2.50 240
 E
 17 204 2.50 200
-I 5 102 9.00 15 X  # DIG: flint stone
-I 5 101 15.00 15 X  # DIG: lump of clay
-I 5 100 100.00 15 X  # DIG: rock
 I 6 3080 10.00 25 f  # FORAGE: lizard tail
 I 6 3081 15.00 25 f  # FORAGE: colorful bird egg
 I 6 3087 25.00 25 f  # FORAGE: crisp wild leaves
@@ -230,7 +228,7 @@ Grassland Stump~
 A Stump in the Grassland~
 ',' 12 lr 3 adl bp
 C
-dig, gather, burn stump~
+gather, burn stump~
 D0
 `,&Tn&?,~
 &G~
@@ -275,14 +273,14 @@ E
 17 204 2.50 200
 E
 17 244 2.50 243
-I 5 102 9.00 15 X  # DIG: flint stone
-I 5 101 15.00 15 X  # DIG: lump of clay
-I 5 100 100.00 15 X  # DIG: rock
 I 6 3080 20.00 25 f  # FORAGE: lizard tail
 I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
 I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 9 148 33.33 50 g  # GATHER: thorny shoot
 I 9 140 66.67 50 g  # GATHER: bundle of long grass
+U
+1
+The stump burns away to ash, taking the grass with it as it fertilizes the rich soil!~
 X
 savannah grassland plains field ground around trees stumps~
    The vast field of grass extends around this large tree stump, sweltering in
@@ -568,6 +566,9 @@ I 6 3082 20.00 25 f  # FORAGE: succulent root
 I 6 3085 20.00 25 f  # FORAGE: fern tips
 I 9 121 25.00 25 g  # GATHER: sticks and leaves
 I 9 133 75.00 25 g  # GATHER: tangle of vines
+U
+1
+The stumps and grass burn away, raining ash down on the fertile soil.~
 X
 wasteland stumps vines ground around land~
    The remnants of a once-proud jungle litter the landscape around you. Jagged
@@ -580,7 +581,7 @@ Jungle Copse~
 A Copse of Young Jungle Trees~
 '.' 4 l 6 ad 0
 C
-chop~
+chop, gather~
 D0
 ..&Gww~
 &t~
@@ -631,13 +632,20 @@ I 20 135 100.00 1  # CHOP: reaching sapling
 U
 0
 Young trees spring up from the stumps to form a lush copse!~
+X
+copse young jungle trees forest stumps around~
+   All around, the stumps of once-proud jungle trees have bushed out into leafy
+copses. Saplings shoot straight up from the stumps to seek the light,
+struggling to capture whatever sun they can find. In the middle of the copse,
+the air is thick and humid, full of the scent of moist soil.
+~
 S
 #224
 Jungle Edge~
 The Edge of the Jungle~
 '.' 4 lr 5 ad 0
 C
-chop~
+chop, gather~
 D0
 @w&?.&Gw@e~
 &t~
@@ -688,6 +696,13 @@ I 20 135 100.00 1  # CHOP: reaching sapling
 U
 0
 Small trees pop up all over, soaking up water as they grow!~
+X
+jungle edge trees forest grassland plains around~
+   At the edge of the jungle, the air is cooler and more humid. The cacophany
+of sounds from the trees meets the chirps of insects that live in tall grass.
+In one direction, trees tower to the sky. In the other, you see tranquil, open
+space.
+~
 S
 #230
 Grassy Seaside~
@@ -726,8 +741,7 @@ E
 17 244 2.50 243
 E
 17 231 2.50 230
-I 5 107 75.00 15 x  # DIG: bag of sand
-I 5 101 25.00 15 x  # DIG: lump of clay
+I 5 107 100.00 25 d  # DIG: bag of sand
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
@@ -738,11 +752,21 @@ I 9 140 100.00 50  # GATHER: bundle of long grass
 U
 0
 Tufts of grass squeak up out of the soil, turning black dirt to green paradise!~
+U
+1
+The grass burns away, fertilizing the soil beneath!~
+X
+seaside grassy ocean ground plains around~
+   Tall tropical grass rises almost to the very edge of the sea, where only a
+small sandy buffer separates it from the vastness of the ocean. The salt spray
+lingers in your nose as you look out, the caws of seabirds cutting across the
+serene silence.
+~
 S
 #231
 Fertile Seaside~
 Some Fertile Soil by the Seaside~
-'.' 37 l 2 l bpr
+'.' 37 ls 2 l bpr
 C
 dig~
 D0
@@ -753,15 +777,20 @@ E
 E
 5 0 100.00 201
 E
-8 0 100.00 202
+8 0 100.00 236
 E
 9 0 100.00 230
 E
 10 57 5.00 204
-I 5 107 75.00 15 x  # DIG: bag of sand
-I 5 101 25.00 15 x  # DIG: lump of clay
+I 5 107 100.00 25 d  # DIG: bag of sand
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
+X
+fertile soil seaside ground plains around ocean~
+   Here, the rich brown-black soil meets sand and sea as the land comes to an
+end. Salty sea spray seasons the air; it's strong in your nose than the earthy
+aroma of the soil.
+~
 S
 #232
 Mangrove Forest~
@@ -831,6 +860,12 @@ I 20 135 12.00 1 c  # CHOP: reaching sapling
 U
 0
 Trees burst from the wet soil and spread their leaves over the edge of the sea!~
+X
+mangrove forest seaside trees canopy jungle around ocean~
+   Woody roots stick up like straws across the salty floor of the mangrove
+forest, nestled on the very edge of the land where it meets the sea. Above, a
+leafy canopy provides shade from the harsh tropical sun.
+~
 S
 #233
 Seaside Wasteland~
@@ -855,6 +890,15 @@ I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1200 100.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
+U
+1
+The stumps and grass burn away, scattering ash along the fertile seaside.~
+X
+seaside wasteland land ocean stumps fores trees around ground~
+   The stumps of the mangrove forest rise between woody straw-like roots that
+stick up all over. Everything here has been cut down, leaving only devastation
+at the edge of the sea.
+~
 S
 #234
 Estuary Shore~
@@ -868,12 +912,12 @@ D0
 E
 5 0 100.00 201
 E
-8 0 100.00 202
+8 0 100.00 238
 E
 10 53 5.00 204
-I 5 102 9.00 15 x  # DIG: flint stone
-I 5 107 9.00 15 x  # DIG: bag of sand
-I 5 101 100.00 15 x  # DIG: lump of clay
+I 5 102 9.00 50 x  # DIG: flint stone
+I 5 107 9.00 50 x  # DIG: bag of sand
+I 5 101 82.00 50 x  # DIG: lump of clay
 I 6 3051 33.33 25 x  # FORAGE: sea urchin
 I 6 3052 33.34 25 x  # FORAGE: clam
 I 6 3083 33.33 25 x  # FORAGE: river snail
@@ -881,13 +925,112 @@ I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1200 100.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
+X
+shore estuary river water ocean sea around~
+   The shore is a mix of mud and sand, with the water slowly rising and
+falling. Small crabs scurry around, digging into the muck for food. The
+occasional bird swoops down to grab a meal as you listen to the sound of waves
+crashing.
+~
+S
+#236
+Seeded Seaside~
+A Seeded Field by the Seaside~
+',' 37 ls 3 j kp
+D0
+,,,,~
+&t~
+E
+1 0 100.00 237
+E
+9 0 20.00 237
+E
+16 0 100.00 231
+E
+18 0 100.00 231
+I 6 3052 33.33 25 f  # FORAGE: clam
+I 6 3087 33.34 25 f  # FORAGE: crisp wild leaves
+I 6 3051 33.33 25 f  # FORAGE: sea urchin
+U
+1
+The germinating crops are burnt away, fertilizing the rich soil!~
+X
+seeded seaside fertile soil ground field around ocean weeds crops~
+   Though someone has neatly planted crops in long rows along the seaside, the
+humidity and bountiful sunlight have already added a host of weeds and grasses
+to the mix. The crops have germinated already, and are growing quickly.
+~
+S
+#237
+Tropical Seaside Crop~
+A Tropical Crop by the Sea~
+',' 37 ls 3 djk kp
+D0
+????~
+&G~
+E
+16 0 100.00 231
+E
+18 0 100.00 230
+U
+0
+The crops grow all around you with phenomenal speed!~
+U
+1
+The crops burn away to ash, which rains down and fertilizes the dark soil!~
+S
+#238
+Seeded Estuary~
+A Seeded Field in the Estuary~
+',' 37 ls 3 j kp
+D0
+,,,,~
+&t~
+E
+1 0 100.00 239
+E
+9 0 20.00 239
+E
+16 0 100.00 234
+E
+18 0 100.00 234
+I 6 3052 33.33 25 f  # FORAGE: clam
+I 6 3087 33.34 25 f  # FORAGE: crisp wild leaves
+I 6 3051 33.33 25 f  # FORAGE: sea urchin
+U
+1
+The germinating crops are burnt away, fertilizing the rich soil!~
+X
+shore estuary river water ocean sea around field seeded weeds crops~
+   Despite the brackish water and salty smell, a well-seeded field seems to be
+thriving. The germinating plants run in neat rows parallel to the shore,
+growing quickly in the sun.
+~
+S
+#239
+Tropical Estuary Crop~
+A Tropical Crop by the Estuary~
+',' 37 ls 3 djk kp
+D0
+????~
+&G~
+E
+16 0 100.00 234
+E
+18 0 100.00 234
+U
+0
+The crops grow all around you with phenomenal speed!~
+U
+1
+The crops burn away to ash, which rains down and fertilizes the dark soil!~
 S
 #240
 Grassy Riverbank~
 A Grassland, Above the Riverbank~
 ',' 12 lrv 3 al bps
 C
-dig, gather, pick, burn grassland~
+gather, pick, burn grassland~
 D0
 @w&?,,@e~
 &G~
@@ -942,9 +1085,6 @@ E
 17 204 2.50 200
 E
 17 241 2.50 240
-I 5 102 9.00 15 x  # DIG: flint stone
-I 5 100 9.00 15 x  # DIG: rock
-I 5 101 100.00 15 x  # DIG: lump of clay
 I 6 3080 20.00 25 f  # FORAGE: lizard tail
 I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 6 3083 20.00 25 f  # FORAGE: river snail
@@ -956,6 +1096,15 @@ I 9 140 100.00 50  # GATHER: bundle of long grass
 U
 0
 Waves of grass spread across the riverbank!~
+U
+1
+The grass burns away, fertilizing the dark soil with ash.~
+X
+grassland grassy plains field ground around riverbank bank~
+   The tall grass almost disguises the riverbank, to the point that you nearly
+tumble down into the mud as you only see it at the last moment. Luckily, you
+can hear the flowing water before you see it.
+~
 _
 Floods to 242 seasonally.
 ~
@@ -964,8 +1113,6 @@ S
 Fertile Riverbank~
 On a Fertile Riverbank~
 '.' 37 lv 2 al bps
-C
-dig~
 D0
 @w&?..@e~
 &t~
@@ -989,18 +1136,22 @@ E
 E
 5 0 100.00 201
 E
-8 0 100.00 202
+8 0 100.00 246
 E
 9 0 100.00 240
 E
 10 5 10.00 204
 E
 14 0 25.00 242
-I 5 102 9.00 15 x  # DIG: flint stone
-I 5 100 9.00 15 x  # DIG: rock
-I 5 101 100.00 15 x  # DIG: lump of clay
 I 6 3082 75.00 25 f  # FORAGE: succulent root
 I 6 3083 25.00 25 f  # FORAGE: river snail
+X
+riverbank bank fertile ground plains around~
+   The rich, black soil sits above the riverbank, already germinating new
+plants. Soon it will be teeming with tall grass. Birds stride along, pecking
+tiny insects and stray crustaceans from the most soil, interrupted by the
+occasional croak.
+~
 _
 Floods to 242 seasonally.
 ~
@@ -1033,6 +1184,13 @@ I 21 1304 5.00 125 f  # FISH: sea junk
 I 21 1311 25.00 125 f  # FISH: spotted eel
 I 21 1316 25.00 125 f  # FISH: small gator
 I 21 1314 100.00 125 f  # FISH: fat catfish
+X
+riverbank bank flooded water around~
+   Heavy rainfall has raised the river up out of its bed and, surely, into the
+beds of every creature within a hundred paces. The water rages past, ripping
+out grass and plants from the submerged bank, churning almost loudly enough to
+drown out the chirping insects it evicted.
+~
 _
 Flooded version of 240/241 - reverts to 241.
 ~
@@ -1042,7 +1200,7 @@ Grassy Lakeshore~
 A Grassy Lakeshore~
 ',' 12 lrv 3 al bp
 C
-dig, gather, pick, burn grass~
+gather, pick, burn grass~
 D0
 @w&?,,@e~
 &G~
@@ -1097,9 +1255,6 @@ E
 17 204 2.50 200
 E
 17 241 2.50 240
-I 5 102 9.00 15 x  # DIG: flint stone
-I 5 100 9.00 15 x  # DIG: rock
-I 5 101 100.00 15 x  # DIG: lump of clay
 I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
 I 6 3080 20.00 25 f  # FORAGE: lizard tail
@@ -1111,6 +1266,15 @@ I 9 140 100.00 50  # GATHER: bundle of long grass
 U
 0
 Grass bursts up out of the ground and spreads across the shoreline!~
+U
+1
+The grass burns away, fertilizing the rich lakeshore with ash.~
+X
+grassland grassy plains field ground around lakeshore lake~
+   As you pry your way through the tall grass, you find yourself at the shore
+of a large lake. The water is so still you can't hear it at all; discovering it
+hiding in the grass is a welcome relief.
+~
 _
 Floods to 245 seasonally.
 ~
@@ -1119,8 +1283,6 @@ S
 Fertile Lakeshore~
 A Fertile Area Around the Lake~
 '.' 37 lv 2 al bp
-C
-dig~
 D0
 @w&?..@e~
 &t~
@@ -1144,17 +1306,21 @@ E
 E
 5 0 100.00 201
 E
-8 0 100.00 202
+8 0 100.00 248
 E
 9 0 100.00 243
 E
 10 32 10.00 204
 E
 14 0 10.00 245
-I 5 102 9.00 15 x  # DIG: flint stone
-I 5 100 9.00 15 x  # DIG: rock
-I 5 101 100.00 15 x  # DIG: lump of clay
 I 6 3082 100.00 25  # FORAGE: succulent root
+X
+lakeshore shore fertile area around ground plains~
+   Around the lake, black soil teems with sprouting life -- both in the green
+shoots of new plants, and the hungry larvae that munch on them. Chirping
+insects drown out the lake's serenity, but there's still the occasional wave of
+peace when a hungry bird flies in.
+~
 _
 Floods to 245 seasonally.
 ~
@@ -1187,9 +1353,105 @@ I 21 1304 5.00 125 f  # FISH: sea junk
 I 21 1311 25.00 125 f  # FISH: spotted eel
 I 21 1316 25.00 125 f  # FISH: small gator
 I 21 1314 100.00 125 f  # FISH: fat catfish
+X
+lake flooded overflowing water down around lakeshore shore~
+   Heavy rains have lifted the lake high above its usual water level. Near the
+old shore, grasses poke above the water level, but they seem to be wilting as
+they drown in the deluge.
+~
 _
 Flooded version of 243/244 - reverts to 244.
 ~
+S
+#246
+Seeded Riverbank~
+A Seeded Field Above the Riverbank~
+',' 37 lv 3 j kp
+D0
+,,,,~
+&t~
+E
+1 0 100.00 247
+E
+9 0 20.00 247
+E
+16 0 100.00 241
+E
+18 0 100.00 241
+I 6 3087 33.34 25 f  # FORAGE: crisp wild leaves
+I 6 3083 33.33 25 f  # FORAGE: river snail
+I 6 3081 33.33 25 f  # FORAGE: colorful bird egg
+U
+1
+The germinating crops are burnt away, fertilizing the rich soil!~
+X
+riverbank bank seeded field fertile ground around crops~
+   Orderly rows of baby crops run parallel to the riverbank, providing ample
+water and sun to these thirsty plants. In the afternoons, you can almost hear
+them squeaking as they shoot up.
+~
+S
+#247
+Tropical Riverbank Crop~
+A Tropical Crop by the Riverbank~
+',' 37 lv 3 djk kp
+D0
+????~
+&G~
+E
+16 0 100.00 241
+E
+18 0 100.00 240
+U
+0
+The crops grow all around you with phenomenal speed!~
+U
+1
+The crops burn away to ash, which rains down and fertilizes the dark soil!~
+S
+#248
+Seeded Lakeshore~
+A Seeded Field Near the Lakeshore~
+',' 37 lv 3 j kp
+D0
+,,,,~
+&t~
+E
+1 0 100.00 249
+E
+9 0 20.00 249
+E
+16 0 100.00 244
+E
+18 0 100.00 244
+I 6 3087 100.00 25 f  # FORAGE: crisp wild leaves
+U
+1
+The germinating crops are burnt away, fertilizing the rich soil!~
+X
+lakeshore shore fertile seeded field crops ground around weeds~
+   Rows of well-planted crops grace the lakeshore -- not too close, but close
+enough that they never thirst for water. In this climate, everything grows
+quickly. Even weeds have started to grow already.
+~
+S
+#249
+Tropical Lakeshore Crop~
+A Tropical Crop Near the Lakeshore~
+',' 37 lv 3 djk kp
+D0
+????~
+&G~
+E
+16 0 100.00 244
+E
+18 0 100.00 243
+U
+0
+The crops grow all around you with phenomenal speed!~
+U
+1
+The crops burn away to ash, which rains down and fertilizes the dark soil!~
 S
 #250
 Swamp~
@@ -1271,9 +1533,10 @@ E
 17 231 2.00 232
 E
 17 204 2.00 224
-I 6 3310 50.00 25 f  # FORAGE: wood ear mushroom
+I 6 3310 30.00 25 f  # FORAGE: wood ear mushroom
 I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
 I 6 3083 25.00 25 f  # FORAGE: river snail
+I 6 3086 20.00 25 f  # FORAGE: tree frog
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1288,6 +1551,13 @@ M
 U
 0
 Green plants twist and writhe as they rise from the water!~
+X
+swamp murky river water trees forest jungle around~
+   The thick, moist air chokes your lungs as you survey the muddy swamp.
+Burbles emanate from the murk here and there, perhaps from the twisted roots
+and submerged logs that stick out here and there. The river flows lazily by,
+dotted here and there with lily pads and curious creatures.
+~
 _
 Non-flooded variant of 251
 ~
@@ -1376,9 +1646,10 @@ E
 17 231 2.00 232
 E
 17 204 2.00 224
-I 6 3310 50.00 25 f  # FORAGE: wood ear mushroom
+I 6 3310 30.00 25 f  # FORAGE: wood ear mushroom
 I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
 I 6 3083 25.00 25 f  # FORAGE: river snail
+I 6 3086 25.00 25 f  # FORAGE: tree frog
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1388,6 +1659,13 @@ I 21 1304 5.00 125 f  # FISH: sea junk
 I 21 1311 25.00 125 f  # FISH: spotted eel
 I 21 1316 25.00 125 f  # FISH: small gator
 I 21 1314 100.00 125 f  # FISH: fat catfish
+X
+swamp murky river water trees forest jungle around deep depths~
+   The murk and mud are hidden beneath the brown waters, which have risen high
+enough that shrubs and low-lying plants are completely submerged. The swamp has
+flooded from all the recent rains, leaving the air abuzz with flying insects
+and the water too deep to find footing.
+~
 _
 Flooded / deep version of 250
 ~
@@ -1473,7 +1751,8 @@ E
 E
 17 204 2.00 224
 I 6 3310 20.00 25 f  # FORAGE: wood ear mushroom
-I 6 3084 75.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3084 55.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3086 20.00 25 f  # FORAGE: tree frog
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1488,6 +1767,12 @@ M
 U
 0
 Plants burst forth from the murky marsh and reach for the sky!~
+X
+marshy lakeshore shore swamp jungle forest trees water around~
+   The jungle around the lake has swollen with water, rendering it soft and
+marshy beneath your feet. All around you, creatures chirp and croak unseen.
+Flying insects take their fill of you; you are truly at the mercy of the marsh.
+~
 _
 Non-flooded variant of 253
 ~
@@ -1577,7 +1862,8 @@ E
 E
 17 204 2.00 224
 I 6 3310 20.00 25 f  # FORAGE: wood ear mushroom
-I 6 3084 75.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3084 55.00 25 f  # FORAGE: brittlegill mushroom
+I 6 3086 25.00 25 f  # FORAGE: tree frog
 I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
@@ -1587,6 +1873,13 @@ I 21 1304 5.00 125 f  # FISH: sea junk
 I 21 1311 25.00 125 f  # FISH: spotted eel
 I 21 1316 25.00 125 f  # FISH: small gator
 I 21 1314 100.00 125 f  # FISH: fat catfish
+X
+marshy lakeshore shore swamp jungle forest trees water around~
+   The shoreline has moved inland as recent rains have raised the lake to the
+point that even trees struggle to hold their footing. Something stirs below the
+water, revealed only by the faintest ripple. You certainly can't see what lies
+beneath the murk.
+~
 _
 Flooded variant of 252
 ~

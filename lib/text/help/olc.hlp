@@ -3499,7 +3499,7 @@ In some cases, tiles inherit properties from the base sector. For example,
 roads have the same climate as their base sector due to their
 INHERIT-BASE-CLIMATE flag.
 
-See also: SECTOR, STAT
+See also: MAPEDIT BASE SECTOR, SECTOR, STAT
 #d
 "BEDIT AFFECTS" "REDIT AFFECTS" "VEDIT AFFECTS" "ROOM AFFECTS" "ROOM AFFECT FLAGS"
 
@@ -5879,6 +5879,21 @@ For notes on the mud's building rules, see HELP BUILDING GUIDE.
 
 See also: OLC
 #d
+"MAPEDIT BASESECTOR" "MAPEDIT BASE SECTOR" "CHANGE BASE SECTOR"
+
+Usage:  .map basesector <sector vnum | name>
+
+This changes the base sector for the tile you are standing on. The base sector
+is usually the same as the current sector, but it is different for various
+reasons, including:
+
+- the sector a crop tile will return to when harvested
+- the sector underneath a building, for when it's dismantled
+- the sector under a city center, which determines the color of the center
+- the sector underneath a road, determining the roadside icon
+
+See also: BASE SECTOR, MAPEDIT TERRAIN
+#d
 "MAPEDIT BUILD"
 
 Usage:  .map build <building vnum> [direction]
@@ -6117,10 +6132,15 @@ a building on the map.
 
 This command accepts sector names, crop names, or sector vnums.
 
+This will also change the base sector of the tile in most cases, but you can
+set the base sector of a tile separately afterwards by using ".map basesector".
+You should check the base sector with "stat room" and fix it if necessary after
+using this command to create a crop tile.
+
 Example:
  > .map terrain Tower of Souls
 
-See also: MAP OLC, MAPEDIT UNCLAIMABLE
+See also: MAP OLC, MAPEDIT BASE SECTOR, MAPEDIT UNCLAIMABLE, SECTOR TYPE, STAT
 #d
 "MAPEDIT UNCLAIMABLE"
 
@@ -9334,6 +9354,9 @@ Available sector flags:
     to the ones set on this sector. For example, a road or building sector.
  &cIRRIGATES-AREA&0 - This flag is used to trigger irrigation evolutions.
  &cNO-WORKFORCE-AUTOABANDON&0 - Workforce chores will not abandon this terrain.
+ &cBASIC-CROP&0 - Indicates this tile counts as a basic crop tile for its
+    climate. Used in conjunction with the CROP flag by commands like .map
+    terrain.
 
 See also: OLC SECTORS, TERRAIN HEIGHT
 #d

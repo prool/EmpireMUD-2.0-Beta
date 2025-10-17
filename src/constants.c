@@ -4606,6 +4606,7 @@ const char *sector_flags[] = {
 	"INHERIT-BASE-CLIMATE",
 	"IRRIGATES-AREA",
 	"NO-WORKFORCE-AUTOABANDON",
+	"BASIC-CROP",	// 30
 	"\n"
 };
 

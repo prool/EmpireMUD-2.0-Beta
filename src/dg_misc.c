@@ -707,7 +707,7 @@ void do_dg_terracrop(room_data *target, crop_data *cp) {
 		return;
 	}
 	
-	if (!(sect = find_first_matching_sector(SECTF_CROP, NOBITS, get_climate(target)))) {
+	if (!(sect = find_first_matching_sector(SECTF_CROP | SECTF_BASIC_CROP, NOBITS, GET_CROP_CLIMATE(cp)))) {
 		// no crop sects?
 		return;
 	}

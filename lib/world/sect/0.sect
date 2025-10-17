@@ -452,7 +452,7 @@ S
 #7
 Crop~
 A Crop~
-'.' 10 j 3 djk kp
+'.' 10 j 3 djkE kp
 D1
 ????~
 &g~
@@ -585,7 +585,7 @@ S
 #12
 Desert Crop~
 A Desert Crop~
-'.' 21 k 3 djk kp
+'.' 21 k 3 djkE kp
 D1
 ????~
 &Y~
@@ -2268,7 +2268,7 @@ I 7 1200 100.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 X
-shore exstuary river water ocean sea around~
+shore estuary river water ocean sea around~
    The estuary shore is a mix of mud and sand, with the water slowly rising and
 falling with the tide. Small crabs scurry around, digging into the sand and mud
 for food. Seagulls and other shorebirds swoop down to grab small fish and other
@@ -3003,7 +3003,7 @@ E
 E
 16 0 100.00 70
 E
-19 0 100.00 70
+18 0 100.00 70
 E
 27 268435456 4.00 20
 I 5 101 15.00 125 X  # DIG: lump of clay
@@ -3030,7 +3030,7 @@ D0
 E
 16 0 100.00 70
 E
-19 0 100.00 70
+18 0 100.00 70
 E
 27 268435456 4.00 20
 I 5 102 15.00 125 X  # DIG: flint stone
