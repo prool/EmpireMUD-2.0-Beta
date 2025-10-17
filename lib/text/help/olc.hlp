@@ -6134,11 +6134,13 @@ This command accepts sector names, crop names, or sector vnums.
 
 This will also change the base sector of the tile in most cases, but you can
 set the base sector of a tile separately afterwards by using ".map basesector".
+You should check the base sector with "stat room" and fix it if necessary after
+using this command to create a crop tile.
 
 Example:
  > .map terrain Tower of Souls
 
-See also: MAP OLC, MAPEDIT BASE SECTOR, MAPEDIT UNCLAIMABLE, SECTOR TYPE
+See also: MAP OLC, MAPEDIT BASE SECTOR, MAPEDIT UNCLAIMABLE, SECTOR TYPE, STAT
 #d
 "MAPEDIT UNCLAIMABLE"
 
