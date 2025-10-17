@@ -421,9 +421,12 @@ You can also burn down some vehicles. You cannot burn other players' property
 if you are not a member of an empire. Burning your own buildings and vehicles
 requires the 'dismantle' privilege.
 
+In the tropics, burning stumps or grassland will create fertile soil for
+planting.
+
 To light torches or other items, use 'light'.
 
-See also: DOUSE, LIGHT, LIGHTERS, TORCH, PRIVILEGES
+See also: DOUSE, LIGHT, LIGHTERS, TORCH, PLANT, PRIVILEGES
 #
 BUTCHER
 
