@@ -81,9 +81,9 @@ S
 #202
 Seeded Soil~
 A Seeded Soil Field~
-'.' 37 l 3 j kp
+',' 37 l 3 j kp
 D0
-....~
+,,,,~
 &t~
 E
 1 0 100.00 203
@@ -92,7 +92,7 @@ E
 E
 16 0 100.00 204
 E
-19 0 100.00 204
+18 0 100.00 204
 I 6 3087 100.00 25 f  # FORAGE: crisp wild leaves
 U
 1
@@ -115,7 +115,7 @@ D0
 E
 16 0 100.00 204
 E
-19 0 100.00 204
+18 0 100.00 200
 U
 0
 The crops grow all around you with phenomenal speed!~
@@ -126,7 +126,7 @@ S
 #204
 Fertile Soil~
 A Patch of Fertile Soil~
-'.' 37 lr 2 l bp
+'.' 37 l 2 l bp
 D0
 ....~
 &t~
@@ -766,7 +766,7 @@ S
 #231
 Fertile Seaside~
 Some Fertile Soil by the Seaside~
-'.' 37 l 2 l bpr
+'.' 37 ls 2 l bpr
 C
 dig~
 D0
@@ -777,7 +777,7 @@ E
 E
 5 0 100.00 201
 E
-8 0 100.00 202
+8 0 100.00 236
 E
 9 0 100.00 230
 E
@@ -912,7 +912,7 @@ D0
 E
 5 0 100.00 201
 E
-8 0 100.00 202
+8 0 100.00 238
 E
 10 53 5.00 204
 I 5 102 9.00 50 x  # DIG: flint stone
@@ -932,6 +932,98 @@ falling. Small crabs scurry around, digging into the muck for food. The
 occasional bird swoops down to grab a meal as you listen to the sound of waves
 crashing.
 ~
+S
+#236
+Seeded Seaside~
+A Seeded Field by the Seaside~
+',' 37 ls 3 j kp
+D0
+,,,,~
+&t~
+E
+1 0 100.00 237
+E
+9 0 20.00 237
+E
+16 0 100.00 231
+E
+18 0 100.00 231
+I 6 3052 33.33 25 f  # FORAGE: clam
+I 6 3087 33.34 25 f  # FORAGE: crisp wild leaves
+I 6 3051 33.33 25 f  # FORAGE: sea urchin
+U
+1
+The germinating crops are burnt away, fertilizing the rich soil!~
+X
+seeded seaside fertile soil ground field around ocean weeds crops~
+   Though someone has neatly planted crops in long rows along the seaside, the
+humidity and bountiful sunlight have already added a host of weeds and grasses
+to the mix. The crops have germinated already, and are growing quickly.
+~
+S
+#237
+Tropical Seaside Crop~
+A Tropical Crop by the Sea~
+',' 37 ls 3 djk kp
+D0
+????~
+&G~
+E
+16 0 100.00 231
+E
+18 0 100.00 230
+U
+0
+The crops grow all around you with phenomenal speed!~
+U
+1
+The crops burn away to ash, which rains down and fertilizes the dark soil!~
+S
+#238
+Seeded Estuary~
+A Seeded Field in the Estuary~
+',' 37 ls 3 j kp
+D0
+,,,,~
+&t~
+E
+1 0 100.00 239
+E
+9 0 20.00 239
+E
+16 0 100.00 234
+E
+18 0 100.00 234
+I 6 3052 33.33 25 f  # FORAGE: clam
+I 6 3087 33.34 25 f  # FORAGE: crisp wild leaves
+I 6 3051 33.33 25 f  # FORAGE: sea urchin
+U
+1
+The germinating crops are burnt away, fertilizing the rich soil!~
+X
+shore estuary river water ocean sea around field seeded weeds crops~
+   Despite the brackish water and salty smell, a well-seeded field seems to be
+thriving. The germinating plants run in neat rows parallel to the shore,
+growing quickly in the sun.
+~
+S
+#239
+Tropical Estuary Crop~
+A Tropical Crop by the Estuary~
+',' 37 ls 3 djk kp
+D0
+????~
+&G~
+E
+16 0 100.00 234
+E
+18 0 100.00 234
+U
+0
+The crops grow all around you with phenomenal speed!~
+U
+1
+The crops burn away to ash, which rains down and fertilizes the dark soil!~
 S
 #240
 Grassy Riverbank~
@@ -1044,7 +1136,7 @@ E
 E
 5 0 100.00 201
 E
-8 0 100.00 202
+8 0 100.00 246
 E
 9 0 100.00 240
 E
@@ -1214,7 +1306,7 @@ E
 E
 5 0 100.00 201
 E
-8 0 100.00 202
+8 0 100.00 248
 E
 9 0 100.00 243
 E
@@ -1270,6 +1362,96 @@ they drown in the deluge.
 _
 Flooded version of 243/244 - reverts to 244.
 ~
+S
+#246
+Seeded Riverbank~
+A Seeded Field Above the Riverbank~
+',' 37 lv 3 j kp
+D0
+,,,,~
+&t~
+E
+1 0 100.00 247
+E
+9 0 20.00 247
+E
+16 0 100.00 241
+E
+18 0 100.00 241
+I 6 3087 33.34 25 f  # FORAGE: crisp wild leaves
+I 6 3083 33.33 25 f  # FORAGE: river snail
+I 6 3081 33.33 25 f  # FORAGE: colorful bird egg
+U
+1
+The germinating crops are burnt away, fertilizing the rich soil!~
+X
+riverbank bank seeded field fertile ground around crops~
+   Orderly rows of baby crops run parallel to the riverbank, providing ample
+water and sun to these thirsty plants. In the afternoons, you can almost hear
+them squeaking as they shoot up.
+~
+S
+#247
+Tropical Riverbank Crop~
+A Tropical Crop by the Riverbank~
+',' 37 lv 3 djk kp
+D0
+????~
+&G~
+E
+16 0 100.00 241
+E
+18 0 100.00 240
+U
+0
+The crops grow all around you with phenomenal speed!~
+U
+1
+The crops burn away to ash, which rains down and fertilizes the dark soil!~
+S
+#248
+Seeded Lakeshore~
+A Seeded Field Near the Lakeshore~
+',' 37 lv 3 j kp
+D0
+,,,,~
+&t~
+E
+1 0 100.00 249
+E
+9 0 20.00 249
+E
+16 0 100.00 244
+E
+18 0 100.00 244
+I 6 3087 100.00 25 f  # FORAGE: crisp wild leaves
+U
+1
+The germinating crops are burnt away, fertilizing the rich soil!~
+X
+lakeshore shore fertile seeded field crops ground around weeds~
+   Rows of well-planted crops grace the lakeshore -- not too close, but close
+enough that they never thirst for water. In this climate, everything grows
+quickly. Even weeds have started to grow already.
+~
+S
+#249
+Tropical Lakeshore Crop~
+A Tropical Crop Near the Lakeshore~
+',' 37 lv 3 djk kp
+D0
+????~
+&G~
+E
+16 0 100.00 244
+E
+18 0 100.00 243
+U
+0
+The crops grow all around you with phenomenal speed!~
+U
+1
+The crops burn away to ash, which rains down and fertilizes the dark soil!~
 S
 #250
 Swamp~
