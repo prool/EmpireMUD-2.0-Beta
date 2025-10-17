@@ -9334,6 +9334,9 @@ Available sector flags:
     to the ones set on this sector. For example, a road or building sector.
  &cIRRIGATES-AREA&0 - This flag is used to trigger irrigation evolutions.
  &cNO-WORKFORCE-AUTOABANDON&0 - Workforce chores will not abandon this terrain.
+ &cBASIC-CROP&0 - Indicates this tile counts as a basic crop tile for its
+    climate. Used in conjunction with the CROP flag by commands like .map
+    terrain.
 
 See also: OLC SECTORS, TERRAIN HEIGHT
 #d
