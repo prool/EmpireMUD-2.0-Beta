@@ -518,7 +518,7 @@ A massive tree is lying on its side.~
    You can use a sharp tool to shape this exotic tree into a pillar, or you can
 saw it into lumber.
 ~
-3 e a 0 0 9
+3 e a 0 0 10
 0 0 0
 0 0
 C
@@ -527,10 +527,14 @@ I 11 1002 100.00 1  # LIGHT: roaring fire
 I 16 129 100.00 1  # SCRAPE: fine wooden pillar
 I 16 133 50.00 1 s  # SCRAPE: tangle of vines
 I 16 133 25.00 2 s  # SCRAPE: tangle of vines
+I 16 121 25.00 1 t  # SCRAPE: sticks and leaves
+I 16 121 25.00 2 t  # SCRAPE: sticks and leaves
 I 17 130 50.00 1 c  # SAW: fine tropical lumber
 I 17 130 50.00 2 c  # SAW: fine tropical lumber
 I 17 133 50.00 1 s  # SAW: tangle of vines
 I 17 133 25.00 2 s  # SAW: tangle of vines
+I 17 121 25.00 1 t  # SAW: sticks and leaves
+I 17 121 25.00 2 t  # SAW: sticks and leaves
 M
 34
 Scrape or saw the tree to get building materials.~
@@ -1011,7 +1015,7 @@ S
 thorny-tree tree trees thorny~
 a thorny tree~
 A thorny tree has fallen here.~
-   The rough-barked tree has a sturdy trunk with several major branches. 
+   The rough-barked tree has a sturdy trunk with several major branches.
 Spines cover many of the branches to fend off herbivores -- and unwary loggers.
 You can use a sharp tool to scrape the tree into a log or saw it at a lumber
 yard.

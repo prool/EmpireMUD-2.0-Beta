@@ -179,12 +179,10 @@ M
 S
 #30
 Jungle Spawns - North~
-3 0 lq op 0-0 dg
+3 0 lq kopr 0-0 dg
 E
 -1 100.00
 0 0 0
-M
-9061 0.01 0
 M
 9107 15.00 0
 M
@@ -206,12 +204,10 @@ M
 S
 #31
 Jungle Spawns - South~
-3 0 lq op 0-0 dh
+3 0 lq kopr 0-0 dh
 E
 -1 100.00
 0 0 0
-M
-9061 0.01 0
 M
 9106 15.00 0
 M
@@ -231,9 +227,108 @@ M
 M
 9113 15.00 a
 S
+#32
+Jungle Spawns - Everywhere~
+3 0 lq kopr 0-0 d
+E
+-1 100.00
+0 0 0
+M
+9061 0.01 0
+S
+#34
+Mangrove Tropical Seaside Spawns - Everywhere~
+3 0 lqs kop 0-0 d
+E
+-1 100.00
+0 0 0
+M
+9061 0.01 0
+S
+#35
+Tropical Grassland Spawns - North~
+3 0 lr kopq 0-0 dg
+E
+-1 100.00
+0 0 0
+M
+9252 10.00 0
+M
+9253 5.00 0
+M
+9236 2.50 0
+M
+9265 2.50 0
+M
+9256 2.50 b
+M
+9254 5.00 0
+M
+9255 2.50 b
+S
+#36
+Tropical Grassland Spawns - South~
+3 0 lr kopq 0-0 dh
+E
+-1 100.00
+0 0 0
+M
+9257 2.50 k
+M
+9258 5.00 0
+M
+9259 5.00 k
+M
+9260 5.00 0
+M
+9261 5.00 0
+M
+9262 2.50 b
+M
+9263 10.00 0
+M
+9267 10.00 k
+M
+9268 10.00 l
+M
+9100 5.00 a
+M
+9238 5.00 0
+S
+#37
+Tropical Grassland Spawns - Everywhere~
+3 0 lr kopq 0-0 d
+E
+-1 100.00
+0 0 0
+M
+9237 5.00 bk
+M
+9237 10.00 bl
+M
+9240 5.00 0
+M
+9239 10.00 0
+M
+9241 5.00 0
+M
+9242 10.00 k
+M
+9244 10.00 0
+M
+9246 5.00 k
+M
+9247 5.00 0
+M
+9248 10.00 0
+M
+9249 10.00 0
+M
+9250 5.00 k
+S
 #40
 Swamp Spawns - Everywhere~
-3 0 lo p 0-0 d
+3 0 lo kp 0-0 d
 E
 -1 100.00
 0 0 0
@@ -254,7 +349,7 @@ M
 S
 #41
 Swamp Spawns - North~
-3 0 lo p 0-0 dg
+3 0 lo kp 0-0 dg
 E
 -1 100.00
 0 0 0
@@ -269,7 +364,7 @@ M
 S
 #42
 Swamp Spawns - South~
-3 0 lo p 0-0 dh
+3 0 lo kp 0-0 dh
 E
 -1 100.00
 0 0 0
@@ -283,6 +378,43 @@ M
 9104 15.00 b
 M
 9105 15.00 b
+S
+#45
+Savanna Spawns - North~
+3 0 lqr kop 0-0 dg
+E
+-1 100.00
+0 0 0
+S
+#46
+Savanna Spawns - South~
+3 0 lqr kop 0-0 dh
+E
+-1 100.00
+0 0 0
+S
+#47
+Savanna Spawns~
+3 0 lqr kop 0-0 d
+E
+-1 100.00
+0 0 0
+M
+9247 5.00 0
+M
+9248 10.00 0
+M
+9240 5.00 0
+M
+9239 10.00 0
+M
+9241 5.00 0
+M
+9237 5.00 bk
+M
+9237 10.00 bl
+M
+9269 2.50 b
 S
 #50
 Desert Continent Spawns - All hours~

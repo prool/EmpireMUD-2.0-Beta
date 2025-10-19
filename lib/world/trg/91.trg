@@ -114,6 +114,34 @@ Jungle Bird Speech~
 set last_phrase %speech%
 remote last_phrase %self.id%
 ~
+#9108
+Snake: Constrict Damage (requires 9104, 9600, 9601, 9604)~
+0 bw 100
+~
+* Deals damage to constricted players every 6-7 seconds
+* This pairs with scripts 9104 to add damage to the struggle.
+set times 2
+while %times% > 0
+  set any 0
+  set ch %self.room.people%
+  while %ch%
+    set next_ch %ch.next_in_room%
+    if %ch% != %self% && %ch.affect(9602)%
+      * being constricted
+      %send% %ch% &&G**** &&Z|%self% grip tightens around you, slowly crushing you! ****&&0 (struggle)
+      %echoaround% %ch% ~%ch% cracks as &%ch%'s slowly crushed by ~%self%.
+      set any 1
+      %damage% %ch% 200 direct
+    end
+    set ch %next_ch%
+  done
+  if !%any%
+    dg_affect #9108 %self% off
+  end
+  eval times %times% + 1
+  wait 6 s
+done
+~
 #9117
 Animal Becomes Hidden Over Time~
 0 ab 20

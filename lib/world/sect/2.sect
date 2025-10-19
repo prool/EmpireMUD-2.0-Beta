@@ -643,7 +643,7 @@ S
 #224
 Jungle Edge~
 The Edge of the Jungle~
-'.' 4 lr 5 ad 0
+'.' 4 lqr 5 ad 0
 C
 chop, gather~
 D0
