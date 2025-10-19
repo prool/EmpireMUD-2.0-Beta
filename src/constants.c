@@ -2949,6 +2949,7 @@ const char *mob_move_types[] = {
 	"tears",	"tiptoes",	"toddles",	"totters",	"traipses",	// 91 - 95
 	"tramps",	"travels",	"treks",	"trudges",	"vaults",	// 96 - 100
 	"wades",	"wanders",	"whizzes",	"zigzags",	"zooms",	// 101 - 105
+	"stalks",	// 106
 	"\n"
 };
 

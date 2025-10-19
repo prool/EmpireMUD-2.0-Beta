@@ -1719,6 +1719,7 @@ typedef struct vehicle_data vehicle_data;
 #define MOB_MOVE_WHIZZES  103
 #define MOB_MOVE_ZIGZAGS  104
 #define MOB_MOVE_ZOOMS  105
+#define MOB_MOVE_STALKS  106
 
 
 // NAMES_x: name sets: add matching files in lib/text/names/
