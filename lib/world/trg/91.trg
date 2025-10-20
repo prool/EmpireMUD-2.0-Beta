@@ -26,6 +26,7 @@ detach 9104 %self.id%
 Snake: Constrict (requires 9600, 9601, 9604)~
 0 k 100
 ~
+* Requires scripts 9600, 9601, and 9604. Optionally add 9108 for constrict damage.
 if %self.cooldown(9103)%
   halt
 end
@@ -46,7 +47,7 @@ if !%target%
   * Sanity check
   halt
 end
-if %target.affect(9104)%
+if %target.affect(9602)%
   * No valid targets
   halt
 end
@@ -65,7 +66,7 @@ if (!%target% || %target.room% != %self.room%)
 end
 %send% %target% &&G**** &&Z~%self% squeezes around you, constricting until you cannot move! ****&&0 (struggle)
 %echoaround% %target% &&G~%self% constricts around ~%target%!&&0
-scfight setup struggle %target% 15
+scfight setup struggle %target% 30
 set scf_strug_char You struggle, but fail to break free.
 set scf_strug_room ~%%actor%% struggles to break free!
 set scf_free_char You squirm out of the snake's coils!
@@ -74,6 +75,8 @@ remote scf_strug_char %target.id%
 remote scf_strug_room %target.id%
 remote scf_free_char %target.id%
 remote scf_free_room %target.id%
+* and stun me
+dg_affect #9108 %self% HARD-STUNNED on 30
 ~
 #9105
 Snake: Venom~
@@ -113,6 +116,34 @@ Jungle Bird Speech~
 *~
 set last_phrase %speech%
 remote last_phrase %self.id%
+~
+#9108
+Snake: Constrict Damage (requires 9104, 9600, 9601, 9604)~
+0 bw 100
+~
+* Deals damage to constricted players every 6-7 seconds
+* This pairs with scripts 9104 to add damage to the struggle.
+set times 2
+while %times% > 0
+  set any 0
+  set ch %self.room.people%
+  while %ch%
+    set next_ch %ch.next_in_room%
+    if %ch% != %self% && %ch.affect(9602)%
+      * being constricted
+      %send% %ch% &&G**** &&Z|%self% grip tightens around you, slowly crushing you! ****&&0 (struggle)
+      %echoaround% %ch% ~%ch% cracks as &%ch%'s slowly crushed by ~%self%.
+      set any 1
+      %damage% %ch% 200 direct
+    end
+    set ch %next_ch%
+  done
+  if !%any%
+    dg_affect #9108 %self% off
+  end
+  eval times %times% + 1
+  wait 6 s
+done
 ~
 #9117
 Animal Becomes Hidden Over Time~
