@@ -68,6 +68,8 @@ void free_whole_library();
 int perform_alias(descriptor_data *d, char *orig);
 char *prompt_olc_info(char_data *ch);
 
+char *ptime(void); // by prool: Возвращаемое значение: ссылка на текстовую строку с текущим временем
+
 // heartbeat functions
 void check_idle_menu_users();
 void check_maintenance_and_depletion_reset();
@@ -880,6 +882,36 @@ void heartbeat(unsigned long heart_pulse) {
 		process_theft_logs();
 		HEARTBEAT_LOG("10")
 	}
+
+	if (HEARTBEAT(SECS_PER_REAL_MIN)) {
+		//log("prool debug: beat! %s", ptime());
+		int num_mobs=0, num_players=0, num_descs=0;
+		char_data *vict;
+		FILE *fp;
+
+       		// count connections, players, mobs
+        	DL_FOREACH(character_list, vict) {
+                if (IS_NPC(vict)) {
+                        ++num_mobs;
+                }
+                else if (1) {
+                        ++num_players;
+                        if (vict->desc) {
+                                ++num_descs;
+                        }
+                }
+        	}
+		//
+		//log("prool debug: players %i", num_players);
+		fp=fopen("empiremud.lst","w");
+		if (fp) {
+		fprintf(fp,"EmpireMUD every minute statistics. This file is automatish generate\r\n");
+		fprintf(fp,"Time %s\r\n", ptime());
+		fprintf(fp,"Players %i\r\nDescriptors %i\r\nMobs %i\r\n", num_players, num_descs, num_mobs);
+		fclose(fp);
+		}
+	}
+
 	if (HEARTBEAT(SECS_PER_REAL_UPDATE)) {
 		real_update();
 		HEARTBEAT_LOG("11")
@@ -4215,7 +4247,7 @@ void init_game(ush_int port) {
 	if (reboot_recovery)
 		reboot_recover();
 
-	log("Entering game loop.");
+	log("EmpireMUD/prool mod: Entering game loop.");
 	game_loop(mother_desc);
 
 	save_all_players(FALSE);
