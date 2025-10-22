@@ -786,6 +786,30 @@ I 0 3012 100.00 4  # BUTCHER: fillet of raw meat
 I 0 9139 5.00 1 a  # BUTCHER: rare rhinoceros horn
 I 0 9141 95.00 1 a  # BUTCHER: common rhinoceros horn
 I 1 1351 100.00 3  # SKIN: large skin
+M
+0
+$n puffs dust into the air as $e snorts.~
+M
+0
+$n lowers $s head to tear up a mouthful of grass.~
+M
+0
+$n flicks $s tail to shake off a fly.~
+M
+0
+$n flicks $s ear to shake off a fly.~
+M
+0
+$n raises $s head and sniffs the wind.~
+M
+0
+$n paws at the ground, scattering the birds.~
+M
+0
+$n bellows across the plains.~
+M
+0
+$n flicks $s tail idly as $e grazes.~
 T 9118
 T 9503
 S
@@ -806,6 +830,36 @@ grassland. Its legs are long and thin, making it quick and quiet.
 F 9242
 I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
 I 1 1351 100.00 1 s  # SKIN: large skin
+M
+0
+$n circles restlessly.~
+M
+0
+$n's ears twitch at every sound.~
+M
+0
+$n sniffs the ground.~
+M
+0
+$n bares $s teeth in a silent snarl.~
+M
+0
+$n's nostrils flare as $e raises $s head to the wind.~
+M
+0
+$n gives a low, throaty growl.~
+M
+0
+$n paces in a tight circle, tail held rigid.~
+M
+0
+$n shakes dust from $s rough fur.~
+M
+0
+$n crouches low, fixated on you.~
+M
+0
+$n sits back on $s haunches, eyes still fixed on you.~
 T 9242
 S
 #9243
@@ -837,6 +891,36 @@ A wild dog is chewing on a bone.~
 M
 6
 A wild dog turns its ears toward you as you look around.~
+M
+0
+$n circles restlessly.~
+M
+0
+$n's ears twitch at every sound.~
+M
+0
+$n sniffs the ground.~
+M
+0
+$n bares $s teeth in a silent snarl.~
+M
+0
+$n's nostrils flare as $e raises $s head to the wind.~
+M
+0
+$n gives a low, throaty growl.~
+M
+0
+$n paces in a tight circle, tail held rigid.~
+M
+0
+$n shakes dust from $s rough fur.~
+M
+0
+$n crouches low, fixated on you.~
+M
+0
+$n sits back on $s haunches, eyes still fixed on you.~
 S
 #9244
 kudu great~
@@ -853,6 +937,24 @@ watches you through small brown eyes, wary of any movement.
 I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
 I 0 9244 50.00 1  # BUTCHER: pair of antelope horns
 I 1 1351 100.00 1  # SKIN: large skin
+M
+0
+$n flicks $s ears toward a distant sound.~
+M
+0
+$n lowers $s head to graze.~
+M
+0
+$n stands perfectly still, nearly blending into the grass.~
+M
+0
+$n stamps a hoof softly and twitches $s tail.~
+M
+0
+$n turns $s head, nostrils flaring.~
+M
+0
+$n shifts its stance nervously.~
 T 9121
 T 9242
 S
@@ -870,6 +972,45 @@ hint of threat.
 ~
 I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
 I 1 1351 100.00 1  # SKIN: large skin
+M
+0
+$n flicks $s tail lazily.~
+M
+0
+$n chews on a mouthful of leaves.~
+M
+0
+$n's ears turn constantly as $e eats.~
+M
+0
+$n glances up, watchful.~
+M
+0
+$n walks silently through the grass.~
+M
+0
+$n flicks $s ears and snorts softly.~
+M
+0
+$n shakes $s mane to repel a fly.~
+M
+0
+$n stretches $s neck for a nibble.~
+M
+6
+A striped kudu stands here, alert and motionless.~
+M
+6
+A striped kudu grazes quietly among the tall grass.~
+M
+6
+A striped kudu is grazing on low shoots.~
+M
+6
+A striped kudu stands cautiously in the grass.~
+M
+6
+A striped kudu stands near the herd.~
 T 9121
 S
 #9246
@@ -1454,5 +1595,380 @@ M
 5
 Something lets out a threatening hiss.~
 T 9105
+S
+#9270
+bear black sloth~
+a sloth bear~
+A black bear is resting here.
+~
+70 100 bdgjoy c 4
+0 0 0 10 -1 -1
+D
+   The shaggy black bear looks rather lazy as it dozes. When it stirs, you can
+see a white crest across its chest in the shape of a Y. Aside from that and its
+white muzzle, all other parts of the bear are black except its lengthy
+sickle-like claws.
+~
+I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 1  # SKIN: large skin
+M
+0
+$n dozes sleepily.~
+M
+0
+$n rolls over.~
+M
+0
+$n wakes up long enough to slurp at a small termite mound for a few moments.~
+M
+0
+$n snores.~
+M
+0
+$n gets up, turns in a circle three times, then curls up in a ball.~
+M
+0
+$n scratches its nose with its long claws.~
+S
+#9271
+monkey red~
+a red monkey~
+A red monkey is climbing nearby.
+~
+70 100 djo c 2
+0 0 107 9 -1 -1
+D
+   This red and brown monkey has short, thick fur with a naked face and
+striking brown eyes. It clings to everything it passes with its long prehensile
+tail.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 1 1350 100.00 1  # SKIN: small skin
+M
+0
+$n howls.~
+M
+0
+$n howls loudly.~
+M
+0
+$n emits a series of low growls and grunts.~
+M
+0
+$n calls out.~
+M
+0
+$n howls.~
+M
+0
+$n howls out loud.~
+S
+#9272
+cockatoo chatty loud~
+a chatty cockatoo~
+A loud, chatty cockatoo warns of your location.
+~
+10 20 djo m 1
+0 0 2 26 -1 -1
+D
+   This brightly colored cockatoo rules the treetops with majestic ease. Its
+stout, powerful black beak appears capable of crushing the hardest nuts with
+ease, giving it a playful yet destructive look. The large parrot's eyes glitter
+with intelligence and mischievous curiosity as it surveys its surroundings.
+~
+I 0 3200 100.00 1  # BUTCHER: cut of poultry
+I 0 9025 75.00 1  # BUTCHER: bird feathers
+I 1 1350 50.00 1  # SKIN: small skin
+M
+0
+$n spends time preening $s colorful feathers.~
+M
+0
+$n flutters $s wings while bouncing from foot to foot.~
+M
+0
+$n tilts $s head with curiosity.~
+T 9106
+T 9107
+S
+#9273
+sloth moving slow-moving slowmoving~
+a slow-moving sloth~
+A slow-moving sloth looks for a place to nap.
+~
+50 100 bdj s 3
+0 0 58 10 -1 -1
+D
+   You encounter a creature covered in thick, shaggy fur with a strange green
+tint. Its disproportionately long limbs end in formidable, curved claws
+designed for gripping, though they appear cumbersome on flat ground. A
+strangely serene, almost smiling expression is fixed on its face, and it moves
+with an extreme, unhurried slowness that makes every action a deliberate
+effort.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 1 1350 100.00 2  # SKIN: small skin
+M
+0
+$n snuffles about for $s favorite leaves.~
+M
+0
+$n closes $s eyes for a long snooze.~
+S
+#9274
+chimpanzee~
+a chimpanzee~
+A chimpanzee sits here, grooming.
+~
+75 100 adoM 0 3
+2 0 0 15 -1 -1
+D
+   This furry, dark-brown, tailless ape sits cautiously, splitting time between
+careful grooming and surveying the landscape for trouble.
+~
+F 9272
+I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
+I 1 1350 100.00 2  # SKIN: small skin
+M
+6
+A chimpanzee sits here, grooming.~
+M
+6
+A chimpanzee is foraging for ants.~
+M
+6
+A chimpanzee is picking at grubs.~
+M
+6
+There's a chimpanzee nearby.~
+M
+6
+There's a chimpanzee scratching itself.~
+M
+6
+There's a chimpanzee sitting near you.~
+T 9121
+S
+#9275
+bonobo curious~
+a curious bonobo~
+A curious bonobo investigates her surroundings.
+~
+70 100 adjo c 2
+2 0 0 37 -1 -1
+D
+   A sleek, dark-furred bonobo with a distinct, often upright posture and a
+dark face framed by a centrally-parted hairstyle scans her surroundings. Her
+slender body and long limbs suggest agility, while her large eyes hold a
+curious, gentle gaze.
+~
+F 9275
+I 0 3012 50.00 2  # BUTCHER: fillet of raw meat
+I 1 1350 50.00 2  # SKIN: small skin
+M
+0
+$n lets out a soft coo.~
+M
+0
+$n grooms her fur.~
+M
+0
+$n gazes around with an interested look.~
+T 9275
+T 9121
+S
+#9276
+bonobo watchful~
+a watchful bonobo~
+A watchful bonobo guards the area.
+~
+70 100 adjo c 2
+1 0 0 37 -1 -1
+D
+   A sleek, dark-furred bonobo with a distinct, often upright posture and a
+dark face framed by a centrally-parted hairstyle scans his surroundings. His
+slender body and long limbs suggest agility, while his large eyes hold a
+watchful gaze.
+~
+F 9275
+I 0 3012 50.00 2  # BUTCHER: fillet of raw meat
+I 1 1350 50.00 2  # SKIN: small skin
+M
+0
+$n lets out an alarm call.~
+M
+0
+$n picks a bug from $s fur and pops it into $s mouth.~
+S
+#9277
+bonobo young~
+a young bonobo~
+A young bonobo forages through the leaves.
+~
+70 100 adjo c 2
+2 0 0 15 -1 -1
+D
+   The dark-furred, tailless bonobo digs through the undergrowth, occasionally
+pulling a grub or bug out and crunching on it with a gleeful smile.
+~
+F 9275
+I 0 3012 50.00 2  # BUTCHER: fillet of raw meat
+I 1 1350 50.00 2  # SKIN: small skin
+M
+6
+A young bonobo forages through the leaves.~
+M
+6
+There's a young bonobo nearby.~
+M
+6
+A young bonobo watches you with a smile.~
+M
+6
+There's a young bonobo digging through the underbrush.~
+M
+6
+There's a young bonobo slowly approaching you.~
+M
+6
+A young bonobo picks at its ear.~
+T 9121
+S
+#9278
+tarsier furry~
+a furry tarsier~
+A furry tarsier hangs about.
+~
+20 40 djo c 2
+0 0 71 9 -1 -1
+D
+   This is a tarsier, which is a tiny primate with soft fur and a long, skinny
+tail. Its entire face is dominated by two massive, goggling eyes that stare
+unnervingly forward, giving it a perpetually startled look. Its large,
+membranous ears and impossibly long limbs make it appear ready to launch itself
+higher up into the trees.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 1 1350 100.00 1  # SKIN: small skin
+M
+0
+$n peers around with $s large unmoving eyes.~
+M
+0
+$n slowly turns $s head 180 degrees to stare at you.~
+M
+0
+$n points an elongated finger at you.~
+M
+5
+$n growls from the shadows.~
+S
+#9279
+caiman spectacled~
+a spectacled caiman~
+A spectacled caiman lerks here waiting for prey.
+~
+70 100 bcdgj 0 3
+0 0 79 9 -1 -1
+D
+   A small, armored spectacled caiman lies motionless near the murky water's
+edge. Its dull olive-green and brown hide is covered in tough, bony scutes, and
+its snout is narrower and more pointed than that of a crocodile. The prominent
+bony ridge connecting its eyes resembles a pair of spectacles.
+~
+I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 1  # SKIN: large skin
+M
+5
+$n glares at you.~
+M
+4
+$n looks for a sunny spot to warm itself.~
+M
+0
+$n blinks $s transparent eyelids without breaking eye contact.~
+T 9117
+S
+#9280
+eagle harpy large~
+a large harpy eagle~
+A large harpy eagle hunts for prey.
+~
+60 80 djz m 3
+0 0 2 10 -1 -1
+D
+   You glimpse the immense harpy eagle, the most powerful eagle of the skies.
+Its pale gray head is crowned with a bold, raisable double crest of dark
+feathers, giving it a fierce, focused appearance. The bird's sheer power is
+evident in its thick legs and massive, curved talons, which are designed to
+snatch prey from the canopy.
+~
+I 0 3200 100.00 2  # BUTCHER: cut of poultry
+I 0 9025 100.00 1  # BUTCHER: bird feathers
+M
+0
+$n lets out a long echoing hunting cry.~
+M
+0
+$n flexes its long curved talons.~
+M
+0
+$n circles high above searching for prey.~
+S
+#9281
+hippopotamus hungry hippo~
+a hungry hippopotamus~
+A hippopotamus is ready to attack!
+~
+20 40 cdjoy 0 5
+0 0 0 27 -1 -1
+D
+   A colossal hippopotamus emerges from the water, its massive, smooth body a
+slick, gray-brown barrel of brute force. Its huge, broad head is dominated by
+bulging eyes and nostrils set high, but its most fearsome feature is a
+cavernous mouth that reveals enormous, razor-sharp tusks. Despite its sluggish
+appearance, this beast radiates a deadly, territorial power as it sizes you up.
+~
+I 0 3012 100.00 6  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 3  # SKIN: large skin
+S
+#9282
+spider goliath birdeater bird-eater eater~
+a goliath birdeater spider~
+A goliath birdeater spider peeks out of its burrow.
+
+~
+75 100 bdjo c 3
+0 0 17 9 -1 -1
+D
+   This immense goliath birdeater, a tarantula of monstrous size, is covered in
+thick, golden-hued bristles. Its formidable, dinner-plate-sized legs end in
+sharp claws, and its large, visible fangs suggest terrifying strength.
+~
+S
+#9283
+lemur ring-tailed ringtailed tailed~
+a ring-tailed lemur~
+A ring-tailed lemur gazes at you from a branch.
+~
+60 80 dj c 2
+0 0 71 9 -1 -1
+D
+   You observe a striking ring-tailed lemur with soft gray fur and a sharp,
+fox-like face. Its signature feature is a magnificent, long tail circled with
+bold, alternating black and white rings. The primate stares out with brilliant,
+expressive golden-orange eyes.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 1 1350 100.00 1  # SKIN: small skin
+M
+0
+$n combs its fur with its lower teeth.~
+M
+0
+$n waves its tail side to side, scent-marking its territory.~
+M
+0
+With its hind feet, $n grooms its fur.~
 S
 $

@@ -177,4 +177,25 @@ while %num% > 0
 done
 * Note: Copies are free-range, not followers
 ~
+#9274
+Chimp troop~
+0 n 100
+~
+set num %random.3%
+while %num% > 0
+  eval num %num% - 1
+  %load% mob 9274 ally
+done
+~
+#9275
+Bonobo troop~
+0 n 100
+~
+%load% mob 9276 ally
+set num %random.2%
+while %num% > 0
+  eval num %num% - 1
+  %load% mob 9277 ally
+done
+~
 $
