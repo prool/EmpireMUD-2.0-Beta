@@ -152,7 +152,7 @@ a monkey~
 A little brown monkey is walking along a low branch.
 ~
 30 40 djo c 2
-0 0 0 9 -1 -1
+0 0 107 9 -1 -1
 D
    The little monkey is balanced carefully on a low branch, clinging to the
 branch with its nimble toes as it reaches for dangling branches with its hands.
@@ -162,17 +162,20 @@ I 1 1350 100.00 1  # SKIN: small skin
 S
 #9110
 chimpanzee hairy~
-a chimpanzee~
+a hairy chimpanzee~
 A hairy chimpanzee eyes you cautiously.
 ~
-75 100 doAM 0 3
+75 100 adoAM 0 3
 1 0 0 15 -1 -1
 D
    The chimpanzee scratches its gray chin as it ponders you. It reminds you of
 a little old man, hunched over and contemplative.
 ~
+F 9272
 I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
+I 1 1350 100.00 2  # SKIN: small skin
 T 9121
+T 9274
 S
 #9111
 gorilla huge~
