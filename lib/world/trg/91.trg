@@ -141,7 +141,7 @@ while %times% > 0
   if !%any%
     dg_affect #9108 %self% off
   end
-  eval times %times% + 1
+  eval times %times% - 1
   wait 6 s
 done
 ~
