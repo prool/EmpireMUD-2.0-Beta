@@ -235,6 +235,10 @@ E
 0 0 0
 M
 9061 0.01 0
+M
+9280 5.00 b
+M
+9248 10.00 0
 S
 #34
 Mangrove Tropical Seaside Spawns - Everywhere~
@@ -244,6 +248,20 @@ E
 0 0 0
 M
 9061 0.01 0
+M
+9291 10.00 b
+M
+9292 10.00 b
+M
+9293 10.00 0
+M
+9279 2.50 h
+M
+9288 2.50 g
+M
+9289 10.00 g
+M
+9290 10.00 h
 S
 #35
 Tropical Grassland Spawns - North~
@@ -294,6 +312,8 @@ M
 9100 5.00 a
 M
 9238 5.00 0
+M
+9284 5.00 0
 S
 #37
 Tropical Grassland Spawns - Everywhere~

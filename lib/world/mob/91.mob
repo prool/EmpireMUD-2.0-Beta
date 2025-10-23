@@ -18,12 +18,13 @@ elephant jungle towering~
 a jungle elephant~
 A towering jungle elephant is rummaging around.
 ~
-20 40 dejoy 0 5
+20 40 adejoy 0 5
 0 0 0 27 -1 -1
 D
    The great elephant has a blanket over its back, belted on to form a sort of
 saddle, or a place to attach a proper saddle.
 ~
+F 9284
 I 0 3012 100.00 6  # BUTCHER: fillet of raw meat
 I 0 9140 50.00 2 t  # BUTCHER: huge ivory tusk
 I 0 9140 25.00 1 t  # BUTCHER: huge ivory tusk
@@ -630,11 +631,12 @@ elephant massive~
 a massive elephant~
 A massive elephant lumbers past you.
 ~
-20 40 dejoy 0 5
+20 40 adejoy 0 5
 0 0 0 27 -1 -1
 D
 The gray elephant is truly huge, with ears like bedsheets and legs like trees.
 ~
+F 9284
 I 0 3012 100.00 6  # BUTCHER: fillet of raw meat
 I 0 9140 50.00 2 t  # BUTCHER: huge ivory tusk
 I 0 9140 25.00 1 t  # BUTCHER: huge ivory tusk
@@ -919,12 +921,12 @@ half.
 I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
 S
 #9159
-heron great~
+heron great bird~
 a great heron~
 A great heron is poking around for food.
 ~
-40 60 djo m 2
-0 0 2 9 -1 -1
+40 60 djo 0 2
+0 0 2 26 -1 -1
 D
    This tall, slender, graceful bird is a heron. Its long beak is perfect for
 stabbing into the water to grab an unsuspecting fish. When it flaps its wings,
@@ -1332,7 +1334,7 @@ seal elephant large~
 a large elephant seal~
 A large elephant seal bellows nearby.
 ~
-75 100 djoA 0 4
+75 100 adjoA 0 4
 0 0 13 5 -1 -1
 D
    Although it's easily the largest seal you've ever seen, the most impressive

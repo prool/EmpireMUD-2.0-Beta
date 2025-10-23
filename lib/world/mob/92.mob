@@ -138,12 +138,12 @@ M
 $n dives for a moment, then comes back up with a fish.~
 S
 #9208
-heron tall~
+heron tall bird~
 a heron~
 A tall heron pokes its beak around for food.
 ~
-10 20 djo m 2
-0 0 2 9 -1 -1
+10 20 djo 0 2
+0 0 2 26 -1 -1
 D
    This lanky brown bird is a heron, a predator of the shoreline. It stalks
 through the water on its spindly legs, occasionally stabbing its long, pointed
@@ -1306,7 +1306,7 @@ elephant bull rampaging~
 a rampaging bull elephant~
 A bull elephant is on a dangerous rampage!
 ~
-75 100 cdjyA c 3
+75 100 acdjyA c 3
 1 0 68 5 -1 -1
 D
    A towering bull elephant barrels toward you, a thunderous mass of muscle and
@@ -1315,6 +1315,7 @@ lets loose an ear-splitting trumpet of rage. The elephant's ivory tusks are
 aimed forward, ready to impale any object unfortunate enough to lie in the path
 of its furious charge.
 ~
+F 9284
 I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
 I 1 1351 100.00 3  # SKIN: large skin
 I 4 9140 10.00 1  # LOOT: huge ivory tusk
@@ -1970,5 +1971,251 @@ $n waves its tail side to side, scent-marking its territory.~
 M
 0
 With its hind feet, $n grooms its fur.~
+S
+#9284
+elephant matriarch~
+the elephant matriarch~
+An elephant matriarch towers over you.
+~
+70 100 adjoy 0 5
+2 0 0 5 -1 -1
+D
+   The gray-brown matriarch looks down at you through soft, old eyes, but her
+look isn't one of compassion or concern. She's weighing you, calculating
+whether or not you pose a threat to her herd. She sways her trunk, signalling
+to the other elephants, but you cannot fathom what her signals mean.
+~
+F 9284
+I 0 3012 100.00 6  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 3  # SKIN: large skin
+T 9284
+S
+#9285
+elephant mud-caked mudcaked caked~
+a mud-caked elephant~
+A mud-caked elephant stands here.
+~
+70 100 adjoy 0 5
+0 0 0 5 -1 -1
+D
+   The enormous elephant has dried mud covering much of its body, though a
+patch on the belly still looks damp. The elephant regards you, briefly, but
+resumes the colossal task of ranking whole bales of grass from the ground and
+trunking it into its mouth.
+~
+F 9284
+I 0 3012 100.00 6  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 3  # SKIN: large skin
+I 24 9101 100.00 1  # TAME: jungle elephant
+M
+6
+An elephant stands near the herd.~
+M
+6
+An elephant grazes quietly among the tall grass.~
+M
+6
+An elephant towers over the grass.~
+M
+6
+An elephant watches you as it eats.~
+M
+6
+An elephant holds its trunk high in the air.~
+M
+6
+There is an elephant standing over you.~
+M
+6
+There is an elephant grazing near the herd.~
+T 9027
+T 9028
+S
+#9286
+elephant young~
+a young elephant~
+A young elephant swings its trunk.
+~
+70 80 adjoy 0 4
+0 0 0 5 -1 -1
+D
+   Though it's dwarfed by its mother and aunts, the elephant is already larger
+than even the largest horse. It sways its trunk back and forth almost idly,
+stopping only occasionally to prod at something in the grass.
+~
+F 9284
+I 0 3012 100.00 4  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 2  # SKIN: large skin
+S
+#9287
+elephant sun-dappled sundappled dappled~
+a sun-dappled elephant~
+A sun-dappled elephant munches some grass.
+~
+70 100 adejoy 0 5
+0 0 0 5 -1 -1
+D
+   The gray-brown elephant has kind, gentle eyes. The blanket strapped to its
+back marks it as a riding elephant. It doesn't particularly seem to mind, as
+it's preoccupied with poking things with its trunk.
+~
+F 9284
+I 0 3012 100.00 6  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 3  # SKIN: large skin
+I 3 302 100.00 1 X  # BARDE: armored warelephant
+S
+#9288
+lizard monitor water large~
+a water monitor~
+A large lizard swims nearby.
+~
+70 100 bcdj 0 2
+0 0 9 9 -1 -1
+D
+   This dangerously large lizard has a blackish-brown back with pale yellow
+dots and rosettes covering parts of its body. It seems perfectly at home in the
+shallows, but whenever anything ventures too close, it darts out of the water,
+toothy jaws ready for lunch.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+T 9105
+S
+#9289
+cat fishing~
+a fishing cat~
+A fishing cat plays near the shore.
+~
+40 60 bdjo c 2
+0 0 0 10 -1 -1
+D
+   Though much larger than a housecat, the fishing cat is still rather small
+compared to most of the felines you find in this area. Its short ears mark it
+immediately as a wild cat, as does its spotted coat.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 1 9113 100.00 1  # SKIN: spotted fur
+S
+#9290
+civet musky~
+a musky civet~
+A civet stalks the shoreline.
+~
+40 60 bdjo c 2
+0 0 0 10 -1 -1
+D
+   Though it looks something like a cross between a cat and a weasel, the civet
+has an attitude all its own as it stalks along the shoreline. The front half of
+its body is mottled and striped, while the back half is distinctly spotted,
+with a black ridge down its stubby, triangular tail. It has an ever-present and
+somewhat foul, musky smell that lingers in your nose even when it darts away.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 1 9113 100.00 1  # SKIN: spotted fur
+S
+#9291
+kingfisher fisher majestic bird~
+a majestic kingfisher~
+A majestic kingfisher sits on a low branch.
+~
+1 5 bdjo m 1
+0 0 2 26 -1 -1
+D
+   What it lacks in size, the kingfisher makes up in sheer beauty. Its body is
+a dizzying array of orange, violet, blue, and pink, peaked by an outsized
+orange bill which it uses to pluck small fish from the water. It sits on a low
+branch, watching the shallows, waiting for the right moment.
+~
+I 0 3200 100.00 1  # BUTCHER: cut of poultry
+I 0 9025 75.00 1  # BUTCHER: bird feathers
+M
+0
+$n tilts $s head, watching the water below.~
+M
+0
+Colorful light glints off $n's feathers.~
+M
+0
+$n lets out a sharp, chattering call.~
+M
+0
+$n darts from $s perch into the water and returns with a fish.~
+M
+0
+$n flicks water from its feathers.~
+M
+0
+$n shifts along the branch, tail flicking impatiently.~
+M
+0
+$n preens its bright plumage with its beak.~
+S
+#9292
+heron blue bird~
+a blue heron~
+A blue heron stalks the shore.
+~
+70 100 bdjo 0 2
+0 0 2 26 -1 -1
+D
+   The heron is a rather stretched bird; its legs, neck, and bill are all
+exceptionally long. Its slender body is covered in long, flowing blue-gray
+feathers and its white head has a black streak over teh eye. It wades through
+the shallows, stabbing down into the water and sand every few moments for a
+chance at food.
+~
+I 0 3200 100.00 1  # BUTCHER: cut of poultry
+I 0 9025 75.00 1  # BUTCHER: bird feathers
+M
+0
+$n watches the water intently, waiting for movement.~
+M
+0
+$n tilts $s head, then strikes the water with lightning speed.~
+M
+0
+$n spreads its broad wings and stretches.~
+M
+0
+A low, throaty croak from $n breaks the silence.~
+M
+0
+$n steps lightly between the mangrove roots.~
+M
+0
+$n watches you cautiously.~
+S
+#9293
+pelican bird~
+a pelican~
+A pelican is perched here, watching the sea.
+~
+70 100 djo m 2
+0 0 2 26 -1 -1
+D
+   The pelican's white feathers are fringed with black on the edges of the
+wing. Its long, slender bill belies a terrfying secret: when it dives for the
+water, the bill expands tenfold to scoop up any hapless creature that might be
+in the way.
+~
+I 0 3200 100.00 1  # BUTCHER: cut of poultry
+I 0 9025 75.00 1  # BUTCHER: bird feathers
+M
+0
+$n ruffles $s feathers.~
+M
+0
+$n gives a low, throaty croak.~
+M
+4
+$n spreads $s wings in the sun.~
+M
+0
+$n snaps its beak at you with a series of soft claps.~
+M
+0
+$n surveys the area.~
+M
+15
+A pelican floats on the water.~
 S
 $

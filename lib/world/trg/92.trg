@@ -198,4 +198,17 @@ while %num% > 0
   %load% mob 9277 ally
 done
 ~
+#9284
+Elephant herd~
+0 n 100
+~
+eval num 1 + %random.2%
+while %num% > 0
+  %load% mob 9285 ally
+  eval num %num% - 1
+done
+if %random.2% == 2
+  %load% mob 9286 ally
+end
+~
 $
