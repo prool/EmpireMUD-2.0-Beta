@@ -2910,6 +2910,7 @@ const char *mob_custom_types[] = {
 	"scavenge-corpse",
 	"consider-info",
 	"echo-visible",
+	"water-long-desc",	// 15
 	"\n"
 };
 
@@ -2919,7 +2920,7 @@ const char *mob_custom_type_help =
 "Types of messages:\r\n"
 "&w Echo messages: echo echo-visible echo-day echo-night&0\r\n"
 " Speak text: say say-day say-night\r\n"
-"&w Varying lond descriptions: long-desc&0\r\n"
+"&w Varying lond descriptions: long-desc water-long-desc&0\r\n"
 " Shown when a scavenger mob eats a corpse: scavenge-corpse\r\n"
 "&w Shown when the player considers the mob: consider-info&0\r\n"
 " Available for scripts: script1 script2 script3 script4 script5\r\n";
