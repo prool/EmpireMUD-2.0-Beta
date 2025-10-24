@@ -926,8 +926,7 @@ void show_adventure_linking_display(char_data *ch, struct adventure_link_rule *l
 				break;
 			}
 			case ADV_LINK_REQUIRE_CLIMATE: {
-				sprintbit(rule->bld_on, climate_flags, flg, TRUE);
-				sprintf(lbuf, "require climate: %s", flg);
+				sprintbit(rule->bld_on, climate_flags, lbuf, TRUE);
 				break;
 			}
 			case ADV_LINK_FORBID_CLIMATE: {
@@ -1561,7 +1560,7 @@ OLC_MODULE(advedit_linking) {
 		
 		if (!*num_arg || !isdigit(*num_arg) || !*type_arg) {
 			msg_to_char(ch, "Usage: linking change <number> <field> <value>\r\n");
-			msg_to_char(ch, "Valid fields: vnum, vehicle, dir, flags, buildon, buildfacing, portalin, portalout, number\r\n");
+			msg_to_char(ch, "Valid fields: vnum, vehicle, dir, flags, buildon, buildfacing, portalin, portalout, number, climate\r\n");
 			return;
 		}
 		
