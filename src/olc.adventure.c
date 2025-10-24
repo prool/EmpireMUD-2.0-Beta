@@ -931,8 +931,7 @@ void show_adventure_linking_display(char_data *ch, struct adventure_link_rule *l
 				break;
 			}
 			case ADV_LINK_FORBID_CLIMATE: {
-				sprintbit(rule->bld_on, climate_flags, flg, TRUE);
-				sprintf(lbuf, "forbid climate: %s", flg);
+				sprintbit(rule->bld_on, climate_flags, lbuf, TRUE);
 				break;
 			}
 			
