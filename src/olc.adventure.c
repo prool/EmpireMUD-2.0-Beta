@@ -1503,7 +1503,7 @@ OLC_MODULE(advedit_linking) {
 				buildfacing = olc_process_flag(ch, buildfacing_arg, "build-facing", NULL, bld_on_flags, NOBITS);
 			}
 			if (need_climate) {
-				buildon = olc_process_flag(ch, buildon_arg, "climate", NULL, climate_flags, NOBITS);
+				buildon = olc_process_flag(ch, climate_arg, "climate", NULL, climate_flags, NOBITS);
 			}
 			
 			// setup done...
