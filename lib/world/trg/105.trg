@@ -297,7 +297,6 @@ done
 if %valid_sects% ~= %room.natural_sector_vnum%
   %terraform% %room% 0
 end
-valid_sect
 ~
 #10508
 Dragonstooth sceptre equip first~
