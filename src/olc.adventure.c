@@ -1341,6 +1341,13 @@ OLC_MODULE(advedit_linking) {
 			case ADV_LINK_REQUIRE_CLIMATE: {
 				skip_spaces(&argument);
 				strcpy(climate_arg, argument);
+				*argument = '\0';
+				break;
+			}
+			case ADV_LINK_FORBID_CLIMATE: {
+				skip_spaces(&argument);
+				strcpy(climate_arg, argument);
+				*argument = '\0';
 				break;
 			}
 			case ADV_LINK_EVENT_RUNNING: {
