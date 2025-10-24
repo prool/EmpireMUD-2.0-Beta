@@ -671,7 +671,7 @@ lion prowling~
 a prowling lion~
 The prowling lion prepares for the hunt.
 ~
-75 100 acdgjoz c 3
+75 100 acdgjouz c 3
 0 0 106 10 -1 -1
 D
    The large lion tracks its prey with intense, golden eyes. Its tan and gold
@@ -775,7 +775,7 @@ rhinoceros armored well-armored wellarmored~
 an armored rhino~
 A well-armored rhinoceros munches on some grass.
 ~
-75 100 djoyA 0 4
+75 100 djouyA 0 4
 0 0 39 27 -1 -1
 D
    The rhinoceros is enormous; you could hide a small army inside it. At a
@@ -1018,7 +1018,7 @@ cheetah speedy~
 a speedy cheetah~
 A cheetah stalks through the grass.
 ~
-75 100 djo c 3
+75 100 djou c 3
 0 0 11 9 -1 -1
 D
    The cheetah's yellow-tan coat is flecked all over with spots, even on its
@@ -1035,7 +1035,7 @@ jackal black-backed blackbacked backed~
 a black-backed jackal~
 A black-backed jackal trots past you.
 ~
-70 100 adgjo c 3
+70 100 adgjou c 3
 0 0 0 9 -1 -1
 D
    This skinny creature looks like something between a fox, a wolf, and a dog.
@@ -1050,7 +1050,7 @@ S
 #9248
 mongoose grey gray~
 a grey mongoose~
-A grey mongoose darts through the grass.
+A grey mongoose sniffs the air.
 ~
 50 75 djo 0 1
 0 0 0 9 -1 -1
@@ -1448,7 +1448,7 @@ hyena large~
 a large hyena~
 A large hyena is sitting here, panting.
 ~
-75 100 adgjo c 3
+75 100 adgjou c 3
 0 0 14 9 -1 -1
 D
    The awkward, shaggy creature is mostly brown, as its common name suggests,
@@ -1487,7 +1487,7 @@ lion fierce~
 a fierce lion~
 A lion crouches low and prepares to strike!
 ~
-75 100 acdgjoz c 3
+75 100 acdgjouz c 3
 0 0 106 10 -1 -1
 D
    As the lion notices you've seen it, it springs forward with all its immense
