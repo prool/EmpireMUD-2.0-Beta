@@ -2321,6 +2321,7 @@ if (%terra% && !%self.val0%) || (!%terra% && !%self.val1%)
   %send% %actor% @%self% is out of charges for that ability.
   halt
 end
+set room_var %actor.room%
 set cycle 0
 while %cycle% >= 0
   * Repeats until break
