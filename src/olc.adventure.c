@@ -296,7 +296,7 @@ bool delete_link_rule_by_type_value(struct adventure_link_rule **list, int type,
 * @param int type ADV_LINK_ type.
 * @param ... All other parameters are pointers to variables to set up based on type.
 */
-void get_advedit_linking_params(int type, int *vnum_type, bool *need_vnum, bool *need_dir, bool *need_buildon, bool *need_buildfacing, bool *need_portalin, bool *need_portalout, bool *need_num, bool *no_rooms, bool *restrict_sect, bool *need_veh) {
+void get_advedit_linking_params(int type, int *vnum_type, bool *need_vnum, bool *need_dir, bool *need_buildon, bool *need_buildfacing, bool *need_portalin, bool *need_portalout, bool *need_num, bool *no_rooms, bool *restrict_sect, bool *need_veh, bool *need_climate) {
 	// init
 	*vnum_type = OLC_SECTOR;
 	*need_vnum = FALSE;
@@ -309,6 +309,7 @@ void get_advedit_linking_params(int type, int *vnum_type, bool *need_vnum, bool 
 	*no_rooms = FALSE;
 	*restrict_sect = FALSE;
 	*need_veh = FALSE;
+	*need_climate = FALSE;
 	
 	// ADV_LINK_x: needed params depend on type
 	switch (type) {
@@ -370,6 +371,14 @@ void get_advedit_linking_params(int type, int *vnum_type, bool *need_vnum, bool 
 		case ADV_LINK_EVENT_RUNNING: {
 			*need_vnum = TRUE;
 			*vnum_type = OLC_EVENT;
+			break;
+		}
+		case ADV_LINK_REQUIRE_CLIMATE: {
+			*need_climate = TRUE;
+			break;
+		}
+		case ADV_LINK_FORBID_CLIMATE: {
+			*need_climate = TRUE;
 			break;
 		}
 		
@@ -916,6 +925,16 @@ void show_adventure_linking_display(char_data *ch, struct adventure_link_rule *l
 				sprintf(lbuf, "[\tc%d\t0] %s", rule->value, get_event_name_by_proto(rule->value));
 				break;
 			}
+			case ADV_LINK_REQUIRE_CLIMATE: {
+				sprintbit(rule->bld_on, climate_flags, flg, TRUE);
+				sprintf(lbuf, "require climate: %s", flg);
+				break;
+			}
+			case ADV_LINK_FORBID_CLIMATE: {
+				sprintbit(rule->bld_on, climate_flags, flg, TRUE);
+				sprintf(lbuf, "forbid climate: %s", flg);
+				break;
+			}
 			
 			// vehicle types:
 			case ADV_LINK_PORTAL_VEH_EXISTING:	// drop-thru
@@ -1206,8 +1225,8 @@ OLC_MODULE(advedit_limit) {
 
 // warning: linking rules require highly-customized input
 OLC_MODULE(advedit_linking) {
-	bool need_vnum, need_dir, need_buildon, need_buildfacing, need_portalin, need_portalout, need_num, no_rooms, restrict_sect, need_veh;
-	char type_arg[MAX_INPUT_LENGTH], vnum_arg[MAX_INPUT_LENGTH], dir_arg[MAX_INPUT_LENGTH], buildon_arg[MAX_INPUT_LENGTH], buildfacing_arg[MAX_INPUT_LENGTH], portalin_arg[MAX_INPUT_LENGTH], portalout_arg[MAX_INPUT_LENGTH], num_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], veh_arg[MAX_INPUT_LENGTH];
+	bool need_vnum, need_dir, need_buildon, need_buildfacing, need_portalin, need_portalout, need_num, no_rooms, restrict_sect, need_veh, need_climate;
+	char type_arg[MAX_INPUT_LENGTH], vnum_arg[MAX_INPUT_LENGTH], dir_arg[MAX_INPUT_LENGTH], buildon_arg[MAX_INPUT_LENGTH], buildfacing_arg[MAX_INPUT_LENGTH], portalin_arg[MAX_INPUT_LENGTH], portalout_arg[MAX_INPUT_LENGTH], num_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], veh_arg[MAX_INPUT_LENGTH], climate_arg[MAX_INPUT_LENGTH];
 	bitvector_t buildon = NOBITS, buildfacing = NOBITS;
 	char arg1[MAX_INPUT_LENGTH], lbuf[MAX_STRING_LENGTH];
 	struct adventure_link_rule *link, *change;
@@ -1269,7 +1288,7 @@ OLC_MODULE(advedit_linking) {
 		}
 		
 		// determine params
-		get_advedit_linking_params(linktype, &vnum_type, &need_vnum, &need_dir, &need_buildon, &need_buildfacing, &need_portalin, &need_portalout, &need_num, &no_rooms, &restrict_sect, &need_veh);
+		get_advedit_linking_params(linktype, &vnum_type, &need_vnum, &need_dir, &need_buildon, &need_buildfacing, &need_portalin, &need_portalout, &need_num, &no_rooms, &restrict_sect, &need_veh, &need_climate);
 		
 		// ADV_LINK_x: argument order depends on type
 		switch (linktype) {
@@ -1317,6 +1336,11 @@ OLC_MODULE(advedit_linking) {
 			}
 			case ADV_LINK_NOT_NEAR_SELF: {
 				argument = any_one_word(argument, num_arg);
+				break;
+			}
+			case ADV_LINK_REQUIRE_CLIMATE: {
+				skip_spaces(&argument);
+				strcpy(climate_arg, argument);
 				break;
 			}
 			case ADV_LINK_EVENT_RUNNING: {
@@ -1406,6 +1430,9 @@ OLC_MODULE(advedit_linking) {
 		else if (need_buildon && !*buildon_arg) {
 			msg_to_char(ch, "You must provide build-on information (in quotes if more than 1 flag).\r\n");
 		}
+		else if (need_climate && !*climate_arg) {
+			msg_to_char(ch, "You must provide climate flags (HELP CLIMATE FLAGS).\r\n");
+		}
 		else if (need_portalin && !*portalin_arg) {
 			msg_to_char(ch, "You must specify a vnum for the entrance portal.\r\n");
 		}
@@ -1468,6 +1495,9 @@ OLC_MODULE(advedit_linking) {
 			if (need_buildfacing) {
 				buildfacing = olc_process_flag(ch, buildfacing_arg, "build-facing", NULL, bld_on_flags, NOBITS);
 			}
+			if (need_climate) {
+				buildon = olc_process_flag(ch, buildon_arg, "climate", NULL, climate_flags, NOBITS);
+			}
 			
 			// setup done...
 			CREATE(link, struct adventure_link_rule, 1);
@@ -1499,6 +1529,10 @@ OLC_MODULE(advedit_linking) {
 			if (need_buildfacing) {
 				ordered_sprintbit(buildfacing, bld_on_flags, bld_on_flags_order, TRUE, lbuf);
 				msg_to_char(ch, " - built facing: %s\r\n", lbuf);
+			}
+			if (need_climate) {
+				sprintbit(buildon, climate_flags, lbuf, TRUE);
+				msg_to_char(ch, " - climate: %s\r\n", lbuf);
 			}
 			if (need_portalin) {
 				msg_to_char(ch, " - portal in: %d %s\r\n", GET_OBJ_VNUM(portalin), skip_filler(GET_OBJ_SHORT_DESC(portalin)));
@@ -1541,7 +1575,7 @@ OLC_MODULE(advedit_linking) {
 		}
 		
 		// determine params
-		get_advedit_linking_params(change->type, &vnum_type, &need_vnum, &need_dir, &need_buildon, &need_buildfacing, &need_portalin, &need_portalout, &need_num, &no_rooms, &restrict_sect, &need_veh);
+		get_advedit_linking_params(change->type, &vnum_type, &need_vnum, &need_dir, &need_buildon, &need_buildfacing, &need_portalin, &need_portalout, &need_num, &no_rooms, &restrict_sect, &need_veh, &need_climate);
 		
 		if (is_abbrev(type_arg, "vnum")) {
 			if (!need_vnum) {
@@ -1623,6 +1657,14 @@ OLC_MODULE(advedit_linking) {
 			}
 			else {
 				change->bld_facing = olc_process_flag(ch, val_arg, "buildfacing", "linking change buildfacing", bld_on_flags, change->bld_facing);
+			}
+		}
+		else if (is_abbrev(type_arg, "climate")) {
+			if (!need_climate) {
+				msg_to_char(ch, "That link has no climate.\r\n");
+			}
+			else {
+				change->bld_on = olc_process_flag(ch, val_arg, "climate", "linking change climate", climate_flags, change->bld_on);
 			}
 		}
 		else if (is_abbrev(type_arg, "portalin")) {

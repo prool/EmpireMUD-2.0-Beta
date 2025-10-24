@@ -685,6 +685,8 @@ const char *adventure_link_types[] = {
 	"IN-VEHICLE-NEW-BDG-NEW",
 	"IN-VEHICLE-NEW-CROP",
 	"IN-VEHICLE-NEW-WORLD",
+	"REQUIRE-CLIMATE",
+	"FORBID-CLIMATE",	// 20
 	"\n"
 };
 
@@ -710,6 +712,8 @@ const bool adventure_link_is_location_rule[] = {
 	TRUE,	// ADV_LINK_IN_VEH_NEW_BUILDING_NEW
 	TRUE,	// ADV_LINK_IN_VEH_NEW_CROP
 	TRUE,	// ADV_LINK_IN_VEH_NEW_WORLD
+	FALSE,	// ADV_EDIT_REQUIRE_CLIMATE
+	FALSE,	// ADV_EDIT_FORBID_CLIMATE
 };
 
 

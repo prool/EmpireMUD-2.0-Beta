@@ -590,6 +590,8 @@ typedef struct vehicle_data vehicle_data;
 #define ADV_LINK_IN_VEH_NEW_BUILDING_NEW  16
 #define ADV_LINK_IN_VEH_NEW_CROP  17
 #define ADV_LINK_IN_VEH_NEW_WORLD  18
+#define ADV_LINK_REQUIRE_CLIMATE  19
+#define ADV_LINK_FORBID_CLIMATE  20
 
 
 // ADV_LINKF_x: adventure link rule flags

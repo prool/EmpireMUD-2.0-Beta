@@ -618,6 +618,28 @@ bool validate_linking_limits(adv_data *adv, room_data *loc, struct map_data *map
 				
 				break;
 			}
+			case ADV_LINK_REQUIRE_CLIMATE: {
+				if (loc && (get_climate(loc) & rule->bld_on) != rule->bld_on) {
+					// missing at least 1 required climate
+					return FALSE;
+				}
+				else if (!loc && map && (get_climate_map(map) & rule->bld_on) != rule->bld_on) {
+					// missing at least 1 required climate
+					return FALSE;
+				}
+				break;
+			}
+			case ADV_LINK_FORBID_CLIMATE: {
+				if (loc && IS_SET(get_climate(loc), rule->bld_on)) {
+					// has forbidden climate
+					return FALSE;
+				}
+				else if (!loc && map && IS_SET(get_climate_map(map), rule->bld_on)) {
+					// has forbidden climate
+					return FALSE;
+				}
+				break;
+			}
 			// other types don't have secondary linking limits
 		}
 	}

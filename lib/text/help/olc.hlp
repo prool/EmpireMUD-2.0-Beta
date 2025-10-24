@@ -2387,6 +2387,17 @@ event is not running.
 
 See also: ADVEDIT LINKING
 #d
+"ADVEDIT FORBID-CLIMATE" "ADVEDIT LINK FORBID-CLIMATE" "ADVEDIT LINKING FORBID-CLIMATE"
+
+Usage:  .linking add FORBID-CLIMATE <climate flag(s)>
+
+This will forbid the adventure from spawning on a tile that has any flag in
+this list.
+
+This is the opposite of REQUIRE-CLIMATE.
+
+See also: ADVEDIT LINKING, ADVEDIT REQUIRE-CLIMATE, CLIMATE FLAGS
+#d
 "ADVEDIT IN-VEHICLE-EXISTING" "ADVEDIT LINK IN-VEHICLE-EXISTING" "ADVEDIT LINKING IN-VEHICLE-EXISTING"
 
 Usage:  .linking add IN-VEHICLE-EXISTING <vehicle vnum> [flags]
@@ -2635,6 +2646,17 @@ After the adventure ends, the vehicle will vanish unless you remove its
 
 See also: ADVEDIT LINKING, VNUM
 #d
+"ADVEDIT REQUIRE-CLIMATE" "ADVEDIT LINK REQUIRE-CLIMATE" "ADVEDIT LINKING REQUIRE-CLIMATE"
+
+Usage:  .linking add REQUIRE-CLIMATE <climate flag(s)>
+
+This will require any tile the adventure spawns on to have a specific set of
+climate flags. If more than 1 flag is specified, all flags must match.
+
+This is the opposite of FORBID-CLIMATE.
+
+See also: ADVEDIT LINKING, ADVEDIT FORBID-CLIMATE, CLIMATE FLAGS
+#d
 "ADVEDIT TIME-LIMIT" "ADVEDIT LINK TIME-LIMIT" "ADVEDIT LINKING TIME-LIMIT"
 
 Usage:  .linking add TIME-LIMIT <minutes> [flags]
@@ -2682,6 +2704,8 @@ See specific help files for each type: &yHELP ADVEDIT <TYPE>&0
  &cIN-VEHICLE-NEW-BDG-NEW&0: Interior of new vehicle at new building.
  &cIN-VEHICLE-NEW-CROP&0: Interior of new vehicle at a crop.
  &cIN-VEHICLE-NEW-WORLD&0: Interior of new vehicle at a sector.
+ &cREQUIRE-CLIMATE&0: Climate flags must be present when spawning adventure.
+ &cFORBID-CLIMATE&0: Climate flags must NOT be present to spawn.
 
 Available flags:
  &cCLAIMED-OK&0 - Can link to claimed locations (default: unclaimed only).
