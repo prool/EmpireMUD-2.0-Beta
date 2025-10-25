@@ -220,6 +220,7 @@ set mob %self.room.people%
 if %mob.vnum% == 9296
   %slay% %mob%
 end
+%load% veh 9296
 ~
 #9297
 Dire-tusk mammoth to War Platform when barded~
@@ -229,7 +230,29 @@ wait 1
 %load% veh 9297
 set veh %self.room.vehicles%
 if %veh.vnum% == 9297
-  * setup
+  * auto-claim
+  set owner_match 0
+  set only_empire 0
+  set ch %self.room.people%
+  * detect claimant
+  while %ch%
+    if %ch.is_pc% && %ch.empire%
+      if %ch.empire% == %self.room.empire%
+        set owner_match 1
+      elseif %ch.empire% && %only_empire% == 0
+        set only_empire %ch.empire%
+      elseif %ch.empire% && %ch.empire% != %only_empire%
+        set only_empire -1
+      end
+    end
+    set ch %ch.next_in_room%
+  done
+  * did we find a claimant
+  if %owner_match%
+    %own% %veh% %self.room.empire%
+  elseif %only_empire% != 0 && %only_empire% != -1
+    %own% %veh% %only_empire%
+  end
 end
 %purge% %self%
 ~
