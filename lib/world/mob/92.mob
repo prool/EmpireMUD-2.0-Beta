@@ -2218,4 +2218,77 @@ M
 15
 A pelican floats on the water.~
 S
+#9294
+otherworlder predator~
+an otherworld predator~
+An otherworld predator stalks through the underbrush.
+~
+70 100 cdyAIJ ci 4
+0 0 106 4 -1 -1
+D
+   The otherworlder is a sight to behold: it's taller than a human, with
+periwinkle skin dappled with white specks. It wears only light armor, showing
+off its inhuman muscles. Its limbs move more like tentacles, boneless but
+versatile -- and worse, unpredictable. Tentacles drape from the back of its
+head like dreadlocks. Only now do you notice that you've attracted the
+attention of all four of its round black eyes.
+~
+I 4 9294 100.00 1  # LOOT: otherworlder skull
+S
+#9295
+spider goliath horse-eater horseeater eater~
+a goliath horse-eater spider~
+A goliath horse-eater spider leaps at you!
+~
+75 100 bcdjoA c 3
+0 0 17 9 -1 -1
+D
+   This immense goliath horse-eater, a tarantula of truly monstrous size, is
+covered in long, golden-hued bristles that make it rather difficult for you to
+get close enough to damage it. Its legs are each tipped with a deadly claw and
+its large, visible fangs look like they could go straight through you.
+~
+I 0 9295 100.00 1  # BUTCHER: goliath spider's silk gland
+S
+#9296
+mammoth dire-tusked diretusked tusked~
+a dire-tusked mammoth~
+A dire-tusked mammoth towers over you, blocking the scenery.
+~
+100 125 dejoyA 0 5
+0 0 26 9044 -1 -1
+D
+   The hairless gray mammoth looms like a living mountain, hide creased as tree
+bark. From its massive head sweep a forest of tusks -- one pair curved like
+scythes, another jagged and worn, a third sharp and cruel. Each ponderous step
+shakes loose dust and men from the ground; each trumpet deafens a village.
+~
+I 0 3012 100.00 12  # BUTCHER: fillet of raw meat
+I 0 9058 100.00 2  # BUTCHER: enormous mammoth tusk
+I 0 9058 50.00 1  # BUTCHER: enormous mammoth tusk
+I 1 1351 100.00 3  # SKIN: large skin
+I 1 1351 75.00 1  # SKIN: large skin
+I 3 9297 100.00 1 X  # BARDE: mammoth war platform
+S
+#9297
+mammoth dire-tusked diretusked tusked war platform~
+a mammoth war platform~
+A dire-tusked mammoth war platform stands over you.
+~
+100 125 djoyA 0 5
+0 0 26 9044 -1 -1
+D
+   The hairless gray mammoth looms like a living mountain, hide creased as tree
+bark. From its massive head sweep a forest of tusks -- one pair curved like
+scythes, another jagged and worn, a third sharp and cruel. Each ponderous step
+shakes loose dust and men from the ground; each trumpet deafens a village. A
+war platform has been built upon its back.
+~
+I 0 3012 100.00 12  # BUTCHER: fillet of raw meat
+I 0 9058 100.00 2  # BUTCHER: enormous mammoth tusk
+I 0 9058 50.00 1  # BUTCHER: enormous mammoth tusk
+I 1 1351 100.00 3  # SKIN: large skin
+I 1 1351 75.00 1  # SKIN: large skin
+T 9297
+S
 $

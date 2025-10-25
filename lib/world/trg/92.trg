@@ -211,4 +211,26 @@ if %random.2% == 2
   %load% mob 9286 ally
 end
 ~
+#9296
+Dire-tusked Mammoth War Platform Leaves Mammoth on Death~
+5 f 100
+~
+%load% mob 9296
+set mob %self.room.people%
+if %mob.vnum% == 9296
+  %slay% %mob%
+end
+~
+#9297
+Dire-tusk mammoth to War Platform when barded~
+0 n 100
+~
+wait 1
+%load% veh 9297
+set veh %self.room.vehicles%
+if %veh.vnum% == 9297
+  * setup
+end
+%purge% %self%
+~
 $
