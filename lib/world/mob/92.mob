@@ -704,7 +704,7 @@ a bull giraffe~
 A bull giraffe is stomping around.
 ~
 70 100 djoz 0 5
-0 0 0 5 -1 -1
+0 0 0 9138 -1 -1
 D
    The giraffe snorts and swings its neck toward you, forcing you to take a
 step back. You have little time to marvel at its reticulated spots before it
@@ -720,7 +720,7 @@ a swift zebra~
 A zebra watches you as it grazes.
 ~
 75 100 djo 0 4
-0 0 14 11 -1 -1
+0 0 14 9021 -1 -1
 D
    The zebra is a glamorous beast, barred with vertical black and white stripes
 across its head and neck, with horizontal striping down its rump and legs. It
@@ -1307,7 +1307,7 @@ a rampaging bull elephant~
 A bull elephant is on a dangerous rampage!
 ~
 75 100 acdjyA c 3
-1 0 68 5 -1 -1
+1 0 68 9044 -1 -1
 D
    A towering bull elephant barrels toward you, a thunderous mass of muscle and
 wrinkled, gray hide. Its massive head is low, enormous ears flared wide, as it
@@ -1978,7 +1978,7 @@ the elephant matriarch~
 An elephant matriarch towers over you.
 ~
 70 100 adjoy 0 5
-2 0 0 5 -1 -1
+2 0 0 9043 -1 -1
 D
    The gray-brown matriarch looks down at you through soft, old eyes, but her
 look isn't one of compassion or concern. She's weighing you, calculating
@@ -1996,7 +1996,7 @@ a mud-caked elephant~
 A mud-caked elephant stands here.
 ~
 70 100 adjoy 0 5
-0 0 0 5 -1 -1
+0 0 0 9043 -1 -1
 D
    The enormous elephant has dried mud covering much of its body, though a
 patch on the belly still looks damp. The elephant regards you, briefly, but
@@ -2037,7 +2037,7 @@ a young elephant~
 A young elephant swings its trunk.
 ~
 70 80 adjoy 0 4
-0 0 0 5 -1 -1
+0 0 0 9043 -1 -1
 D
    Though it's dwarfed by its mother and aunts, the elephant is already larger
 than even the largest horse. It sways its trunk back and forth almost idly,
@@ -2053,7 +2053,7 @@ a sun-dappled elephant~
 A sun-dappled elephant munches some grass.
 ~
 70 100 adejoy 0 5
-0 0 0 5 -1 -1
+0 0 0 9043 -1 -1
 D
    The gray-brown elephant has kind, gentle eyes. The blanket strapped to its
 back marks it as a riding elephant. It doesn't particularly seem to mind, as

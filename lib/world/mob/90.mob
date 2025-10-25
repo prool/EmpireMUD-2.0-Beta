@@ -437,7 +437,7 @@ a donkey~
 A grey donkey is standing here.
 ~
 10 20 dejo 0 4
-0 0 0 9 -1 -1
+0 0 0 9021 -1 -1
 D
    The old grey donkey looks like it's seen better days as it slowly walks in a
 circle around you. Still, it looks strong enough for farm work.
@@ -562,7 +562,7 @@ a wild horse~
 A wild horse dashes past you!
 ~
 10 20 djo 0 4
-0 0 14 11 -1 -1
+0 0 14 9021 -1 -1
 D
    This wild horse is as fast as the wind, and just as free. Its mane blows in
 the breeze as it gallops past you. You might be able to tame the horse, if you
@@ -646,7 +646,7 @@ a brown horse~
 A brown horse is standing here.
 ~
 10 20 dejo 0 4
-0 0 14 11 -1 -1
+0 0 14 9021 -1 -1
 D
    The horse stands with its head high, ears alert for danger. Nevertheless, it
 looks tame, and you might be able to ride it.
@@ -670,7 +670,7 @@ a paint horse~
 A brown and white paint horse is standing here.
 ~
 10 20 dejo 0 4
-0 0 14 11 -1 -1
+0 0 14 9021 -1 -1
 D
    The horse wanders over to you, perhaps curious if you have a carrot for it.
 Its coat is blotched like a great canvas, and it's clear someone has cared for
@@ -695,7 +695,7 @@ a roan horse~
 A blue roan horse is standing here.
 ~
 10 20 dejo 0 4
-0 0 14 11 -1 -1
+0 0 14 9021 -1 -1
 D
    The horse's roan coat glimmers in the light. It wanders over to you as you
 admire it, and looks tame enough to ride.
@@ -719,7 +719,7 @@ an appaloosa horse~
 A spotted appaloosa horse is standing here.
 ~
 10 20 dejo 0 4
-0 0 14 11 -1 -1
+0 0 14 9021 -1 -1
 D
    The speckled horse stands still, cautiously watching you. But as you
 approach, it seems friendly enough to ride.
@@ -743,7 +743,7 @@ a golden palomino horse~
 A golden palomino horse is standing here.
 ~
 10 20 dejo 0 4
-0 0 14 11 -1 -1
+0 0 14 9021 -1 -1
 D
 This tall horse has a gorgeous palomino coat and luxurious blonde mane.
 ~
@@ -766,7 +766,7 @@ a chestnut horse~
 A stunning chestnut horse is standing here.
 ~
 10 20 dejo 0 4
-0 0 14 11 -1 -1
+0 0 14 9021 -1 -1
 D
    The horse has a beautiful chestnut coat and it seems friendly. You might be
 able to ride it.
@@ -790,7 +790,7 @@ a bay horse~
 A tall bay horse is standing here.
 ~
 10 20 dejo 0 4
-0 0 14 11 -1 -1
+0 0 14 9021 -1 -1
 D
    The horse has a brown body, with black legs and hair. It looks friendly
 enough to ride.
@@ -814,7 +814,7 @@ a majestic unicorn~
 A majestic white unicorn is standing here!
 ~
 100 125 dejox 0 4
-0 0 14 11 -1 -1
+0 0 14 9021 -1 -1
 D
    The unicorn glistens in the light, like something out of a fairy tale. Its
 coat is as white as the driven snow, with mane and tail to match. But the
@@ -832,7 +832,7 @@ a wild horse~
 A wild horse dashes past you!
 ~
 10 20 djo 0 4
-0 0 14 11 -1 -1
+0 0 14 9021 -1 -1
 D
    This wild horse is as fast as the wind, and just as free. Its mane blows in
 the breeze as it gallops past you. You might be able to tame the horse, if you
@@ -890,7 +890,7 @@ a wild jungle elephant~
 A wild jungle elephant is rummaging around.
 ~
 20 40 djoy 0 5
-0 0 0 27 -1 -1
+0 0 0 9044 -1 -1
 D
    The elephant is most brown, with some fine pink or orange spots. It stands
 over you, easily twice your height, but doesn't seem very interested in you.
@@ -910,7 +910,7 @@ a wild elephant~
 A wild elephant lumbers along slowly.
 ~
 20 40 adjoy 0 5
-0 0 0 27 -1 -1
+0 0 0 9044 -1 -1
 D
    The elephant is enormous, powerful, and terrifying. Luckily, it doesn't seem
 very interested in something as small as you.
@@ -1128,7 +1128,7 @@ a woolly mammoth~
 A huge woolly mammoth is standing over you!
 ~
 20 40 defjoy 0 5
-0 0 0 5 -1 -1
+0 0 0 9044 -1 -1
 D
    The mammoth is enormous -- bigger than any elephant you've ever seen. It has
 long, shaggy brown hair and tusks the size of trees, and its every step rattles
