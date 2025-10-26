@@ -671,7 +671,7 @@ lion prowling~
 a prowling lion~
 The prowling lion prepares for the hunt.
 ~
-75 100 acdgjouz c 3
+125 150 acdgjouz c 3
 0 0 106 10 -1 -1
 D
    The large lion tracks its prey with intense, golden eyes. Its tan and gold
@@ -689,7 +689,7 @@ tortoise plodding~
 a plodding tortoise~
 A tortoise plods by, undisturbed by your presence.
 ~
-75 100 djoy 0 1
+65 90 djoy 0 1
 0 0 61 9 -1 -1
 D
    The tortoise is huge! With a size larger than a dog and a bite meaner than a
@@ -703,7 +703,7 @@ giraffe bull~
 a bull giraffe~
 A bull giraffe is stomping around.
 ~
-70 100 djoz 0 5
+100 150 djoz 0 5
 0 0 0 9138 -1 -1
 D
    The giraffe snorts and swings its neck toward you, forcing you to take a
@@ -719,7 +719,7 @@ zebra swift~
 a swift zebra~
 A zebra watches you as it grazes.
 ~
-75 100 djo 0 4
+100 125 djo 0 4
 0 0 14 9021 -1 -1
 D
    The zebra is a glamorous beast, barred with vertical black and white stripes
@@ -747,7 +747,7 @@ warthog tusked hog~
 a tusked warthog~
 A tusked warthog forages for grubs.
 ~
-20 40 djo 0 3
+100 150 djo 0 3
 0 0 0 27 -1 -1
 D
    This wild pig has a thick, bristly mane running down its back and a large,
@@ -775,7 +775,7 @@ rhinoceros armored well-armored wellarmored~
 an armored rhino~
 A well-armored rhinoceros munches on some grass.
 ~
-75 100 djouyA 0 4
+125 150 djouyA 0 4
 0 0 39 27 -1 -1
 D
    The rhinoceros is enormous; you could hide a small army inside it. At a
@@ -818,7 +818,7 @@ dog wild large~
 a large wild dog~
 A large wild dog watches you fiercely.
 ~
-70 100 adgjo c 3
+100 125 adgjo c 3
 0 0 0 9 -1 -1
 D
    The dog has a mottled black and buff coat, a bit like a mutt, but this is no
@@ -867,7 +867,7 @@ dog wild mottled~
 a mottled wild dog~
 There's a mottled wild dog here.
 ~
-70 100 adgjo c 3
+100 125 adgjo c 3
 0 0 0 9 -1 -1
 D
    The dog has a mottled black and buff coat, a bit like a mutt, but this is no
@@ -927,7 +927,7 @@ kudu great~
 a great kudu~
 A great kudu surveys the grassland.
 ~
-70 100 djo 0 4
+100 125 djo 0 4
 0 0 11 27 -1 -1
 D
    This mighty kudu has a brown coat with vertical white stripes along its
@@ -963,7 +963,7 @@ kudu striped~
 a striped kudu~
 A striped kudu is here.
 ~
-70 100 djo 0 4
+100 125 djo 0 4
 0 0 11 11 -1 -1
 D
    The light brown kudu has vertical white stripes along its back. It searches
@@ -1018,7 +1018,7 @@ cheetah speedy~
 a speedy cheetah~
 A cheetah stalks through the grass.
 ~
-75 100 djou c 3
+100 150 djou c 3
 0 0 11 9 -1 -1
 D
    The cheetah's yellow-tan coat is flecked all over with spots, even on its
@@ -1035,7 +1035,7 @@ jackal black-backed blackbacked backed~
 a black-backed jackal~
 A black-backed jackal trots past you.
 ~
-70 100 adgjou c 3
+100 150 adgjou c 3
 0 0 0 9 -1 -1
 D
    This skinny creature looks like something between a fox, a wolf, and a dog.
@@ -1052,7 +1052,7 @@ mongoose grey gray~
 a grey mongoose~
 A grey mongoose sniffs the air.
 ~
-50 75 djo 0 1
+100 125 djo 0 1
 0 0 0 9 -1 -1
 D
    The little mongoose has iron grey fur, grizzled with bite of white. It seems
@@ -1067,7 +1067,7 @@ crane crowned~
 a crowned crane~
 There is a crowned crane here.
 ~
-50 75 djo c 2
+65 90 djo c 2
 0 0 2 26 -1 -1
 D
    This leggy grey bird towers over its grass kingdom, reaching downward with
@@ -1134,7 +1134,7 @@ ostrich great black~
 a great black ostrich~
 A great black ostrich circles you slowly.
 ~
-75 100 djo c 3
+100 125 djo c 3
 0 0 0 11 -1 -1
 D
    This enormous bird has a long, bare, pink neck, with powerful legs to match.
@@ -1155,7 +1155,7 @@ ostrich great grey gray~
 a great gray ostrich~
 A gray ostrich pecks at the ground.
 ~
-75 100 djo c 3
+100 125 djo c 3
 0 0 0 11 -1 -1
 D
    This enormous bird has a long, bare, pink neck, with powerful legs to match.
@@ -1175,7 +1175,7 @@ gazelle~
 a gazelle~
 A gazelle is browsing on low plants.
 ~
-70 100 djo 0 4
+100 125 djo 0 4
 0 0 11 27 -1 -1
 D
    This small antelope has a beige-orange back and a white belly. Its horns,
@@ -1208,7 +1208,7 @@ kongoni large~
 a large kongoni~
 A large kongoni is grazing here.
 ~
-70 100 djo 0 4
+100 125 djo 0 4
 0 0 11 11 -1 -1
 D
    It's a heavy antelope, nearly as tall as a man, light brown in color except
@@ -1241,7 +1241,7 @@ vulture griffon griffin gryphon~
 a griffon vulture~
 A griffon vulture soars above you.
 ~
-50 75 dgjo m 2
+65 90 dgjo m 2
 0 0 2 9 -1 -1
 D
    High above you, the mottled griffon vulture soars on long, black-frilled
@@ -1265,7 +1265,7 @@ adder puff snake~
 a puff adder~
 You spot a puff adder in the grass!
 ~
-75 100 djno cd 2
+100 150 djno cd 2
 0 0 5 9 -1 -1
 D
    This fat snake is cryptically colored and easy to miss beneath the long
@@ -1281,7 +1281,7 @@ python immense~
 an immense python~
 You turn and see an immense python piled up a little too close.
 ~
-75 100 cdgjo cd 1
+100 150 cdgjo cd 1
 0 0 5 9 -1 -1
 D
    The hairs on the back of your neck stand up as you notice the python. It's
@@ -1306,7 +1306,7 @@ elephant bull rampaging~
 a rampaging bull elephant~
 A bull elephant is on a dangerous rampage!
 ~
-75 100 acdjyA c 3
+125 150 acdjyA c 3
 1 0 68 9044 -1 -1
 D
    A towering bull elephant barrels toward you, a thunderous mass of muscle and
@@ -1336,7 +1336,7 @@ badger honey sleepy~
 a sleepy honey badger~
 A honey badger dozes here.
 ~
-20 40 bdjoz cq 3
+100 125 bdjoz cq 3
 0 0 0 10 -1 -1
 D
    A thick-set honey badger is curled tightly in a sun-drenched patch,
@@ -1359,7 +1359,7 @@ gnu brindled~
 a brindled gnu~
 A brindled gnu roams the grassland.
 ~
-70 100 djo 0 4
+100 125 djo 0 4
 0 0 11 27 -1 -1
 D
    Despite the name, the creature is closer to grayish-brown, with vertical
@@ -1396,7 +1396,7 @@ impala swift~
 a swift impala~
 An impala darts past you.
 ~
-70 100 djo 0 3
+100 125 djo 0 3
 0 0 11 11 -1 -1
 D
    The graceful impala has a reddish-brown back with tank flanks, in sharp
@@ -1413,7 +1413,7 @@ secretarybird bird~
 a secretarybird~
 A secretarybird stalks through the grass.
 ~
-75 100 djo c 2
+100 125 djo c 2
 0 0 106 10 -1 -1
 D
    Like the ghost of an eagle on the legs of a crane, this proud white bird
@@ -1432,7 +1432,7 @@ lizard clouded monitor~
 a clouded monitor lizard~
 A clouded monitor lizard is resting nearby.
 ~
-70 100 dj 0 2
+100 125 dj 0 2
 0 0 9 9 -1 -1
 D
    Though this creature is unusually large for a lizard, it would be a fairly
@@ -1448,7 +1448,7 @@ hyena large~
 a large hyena~
 A large hyena is sitting here, panting.
 ~
-75 100 adgjou c 3
+125 150 adgjou c 3
 0 0 14 9 -1 -1
 D
    The awkward, shaggy creature is mostly brown, as its common name suggests,
@@ -1468,7 +1468,7 @@ hyena brown~
 a brown hyena~
 A brown hyena is scavenging around.
 ~
-75 100 adgjo c 3
+125 150 adgjo c 3
 0 0 14 9 -1 -1
 D
    The awkward, shaggy creature is mostly brown, as its common name suggests,
@@ -1487,7 +1487,7 @@ lion fierce~
 a fierce lion~
 A lion crouches low and prepares to strike!
 ~
-75 100 acdgjouz c 3
+125 150 acdgjouz c 3
 0 0 106 10 -1 -1
 D
    As the lion notices you've seen it, it springs forward with all its immense
@@ -1505,7 +1505,7 @@ lion brute~
 a brute lion~
 You turn and see a lion behind you!
 ~
-75 100 acdgjoz c 3
+125 150 acdgjoz c 3
 0 0 106 10 -1 -1
 D
    The lion is huge! As it pounces for you, you can't see anything past its
@@ -1521,7 +1521,7 @@ buffalo hefty~
 a hefty buffalo~
 A hefty buffalo is roaming around.
 ~
-75 100 dfjoy 0 4
+125 150 dfjoy 0 4
 0 0 0 27 -1 -1
 D
    The buffalo is a thick, muscled herbivor with a pair of upward-curving horns
@@ -1558,7 +1558,7 @@ wombat large~
 a large wombat~
 A large wombat is digging at the ground.
 ~
-70 100 djo 0 3
+100 125 djo 0 3
 0 0 16 9 -1 -1
 D
    This plump creature sits low to the ground, digging what appears to be the
@@ -1572,7 +1572,7 @@ cobra crowned~
 a crown cobra~
 A crown cobra with a dangerous attitude confronts you.
 ~
-70 100 cdjoz c 3
+100 150 cdjoz c 3
 0 0 5 9 -1 -1
 D
    The crown cobra confronts you, its massive body a sleek length of
@@ -1602,7 +1602,7 @@ bear black sloth~
 a sloth bear~
 A black bear is resting here.
 ~
-70 100 bdgjoy c 4
+100 150 bdgjoy c 4
 0 0 0 10 -1 -1
 D
    The shaggy black bear looks rather lazy as it dozes. When it stirs, you can
@@ -1636,7 +1636,7 @@ monkey red~
 a red monkey~
 A red monkey is climbing nearby.
 ~
-70 100 djo c 2
+100 125 djo c 2
 0 0 107 9 -1 -1
 D
    This red and brown monkey has short, thick fur with a naked face and
@@ -1669,7 +1669,7 @@ cockatoo chatty loud~
 a chatty cockatoo~
 A loud, chatty cockatoo warns of your location.
 ~
-10 20 djo m 1
+65 90 djo m 1
 0 0 2 26 -1 -1
 D
    This brightly colored cockatoo rules the treetops with majestic ease. Its
@@ -1697,7 +1697,7 @@ sloth moving slow-moving slowmoving~
 a slow-moving sloth~
 A slow-moving sloth looks for a place to nap.
 ~
-50 100 bdj s 3
+65 90 bdj s 3
 0 0 58 10 -1 -1
 D
    You encounter a creature covered in thick, shaggy fur with a strange green
@@ -1721,7 +1721,7 @@ chimpanzee~
 a chimpanzee~
 A chimpanzee sits here, grooming.
 ~
-75 100 adoM 0 3
+100 150 adoM 0 3
 2 0 0 15 -1 -1
 D
    This furry, dark-brown, tailless ape sits cautiously, splitting time between
@@ -1755,7 +1755,7 @@ bonobo curious~
 a curious bonobo~
 A curious bonobo investigates her surroundings.
 ~
-70 100 adjo c 2
+100 150 adjo c 2
 2 0 0 37 -1 -1
 D
    A sleek, dark-furred bonobo with a distinct, often upright posture and a
@@ -1783,7 +1783,7 @@ bonobo watchful~
 a watchful bonobo~
 A watchful bonobo guards the area.
 ~
-70 100 adjo c 2
+100 150 adjo c 2
 1 0 0 37 -1 -1
 D
    A sleek, dark-furred bonobo with a distinct, often upright posture and a
@@ -1806,7 +1806,7 @@ bonobo young~
 a young bonobo~
 A young bonobo forages through the leaves.
 ~
-70 100 adjo c 2
+100 150 adjo c 2
 2 0 0 15 -1 -1
 D
    The dark-furred, tailless bonobo digs through the undergrowth, occasionally
@@ -1840,7 +1840,7 @@ tarsier furry~
 a furry tarsier~
 A furry tarsier hangs about.
 ~
-20 40 djo c 2
+65 90 djo c 2
 0 0 71 9 -1 -1
 D
    This is a tarsier, which is a tiny primate with soft fur and a long, skinny
@@ -1869,7 +1869,7 @@ caiman spectacled~
 a spectacled caiman~
 A spectacled caiman lerks here waiting for prey.
 ~
-70 100 bcdgj 0 3
+125 150 bcdgj 0 3
 0 0 79 9114 -1 -1
 D
    A small, armored spectacled caiman lies motionless near the murky water's
@@ -1895,7 +1895,7 @@ eagle harpy large~
 a large harpy eagle~
 A large harpy eagle hunts for prey.
 ~
-60 80 djz m 3
+100 125 djz m 3
 0 0 2 10 -1 -1
 D
    You glimpse the immense harpy eagle, the most powerful eagle of the skies.
@@ -1921,7 +1921,7 @@ hippopotamus hungry hippo~
 a hungry hippopotamus~
 A hippopotamus is ready to attack!
 ~
-20 40 cdjoy 0 5
+125 150 cdjoy 0 5
 0 0 0 27 -1 -1
 D
    A colossal hippopotamus emerges from the water, its massive, smooth body a
@@ -1939,7 +1939,7 @@ a goliath birdeater spider~
 A goliath birdeater spider peeks out of its burrow.
 
 ~
-75 100 bdjo c 3
+65 90 bdjo c 3
 0 0 17 9 -1 -1
 D
    This immense goliath birdeater, a tarantula of monstrous size, is covered in
@@ -1952,7 +1952,7 @@ lemur ring-tailed ringtailed tailed~
 a ring-tailed lemur~
 A ring-tailed lemur gazes at you from a branch.
 ~
-60 80 dj c 2
+100 125 dj c 2
 0 0 71 9 -1 -1
 D
    You observe a striking ring-tailed lemur with soft gray fur and a sharp,
@@ -1977,7 +1977,7 @@ elephant matriarch~
 the elephant matriarch~
 An elephant matriarch towers over you.
 ~
-70 100 adjoy 0 5
+125 150 adjoy 0 5
 2 0 0 9043 -1 -1
 D
    The gray-brown matriarch looks down at you through soft, old eyes, but her
@@ -1995,7 +1995,7 @@ elephant mud-caked mudcaked caked~
 a mud-caked elephant~
 A mud-caked elephant stands here.
 ~
-70 100 adjoy 0 5
+100 150 adjoy 0 5
 0 0 0 9043 -1 -1
 D
    The enormous elephant has dried mud covering much of its body, though a
@@ -2038,7 +2038,7 @@ elephant young~
 a young elephant~
 A young elephant swings its trunk.
 ~
-70 80 adjoy 0 4
+100 125 adjoy 0 4
 0 0 0 9043 -1 -1
 D
    Though it's dwarfed by its mother and aunts, the elephant is already larger
@@ -2054,7 +2054,7 @@ elephant sun-dappled sundappled dappled~
 a sun-dappled elephant~
 A sun-dappled elephant munches some grass.
 ~
-70 100 adejoy 0 5
+100 150 adejoy 0 5
 0 0 0 9043 -1 -1
 D
    The gray-brown elephant has kind, gentle eyes. The blanket strapped to its
@@ -2071,7 +2071,7 @@ lizard monitor water large~
 a water monitor~
 A large lizard swims nearby.
 ~
-70 100 bcdj 0 2
+100 125 bcdj 0 2
 0 0 9 9 -1 -1
 D
    This dangerously large lizard has a blackish-brown back with pale yellow
@@ -2087,7 +2087,7 @@ cat fishing~
 a fishing cat~
 A fishing cat plays near the shore.
 ~
-40 60 bdjo c 2
+100 125 bdjo c 2
 0 0 0 10 -1 -1
 D
    Though much larger than a housecat, the fishing cat is still rather small
@@ -2102,7 +2102,7 @@ civet musky~
 a musky civet~
 A civet stalks the shoreline.
 ~
-40 60 bdjo c 2
+100 125 bdjo c 2
 0 0 0 10 -1 -1
 D
    Though it looks something like a cross between a cat and a weasel, the civet
@@ -2119,7 +2119,7 @@ kingfisher fisher majestic bird~
 a majestic kingfisher~
 A majestic kingfisher sits on a low branch.
 ~
-1 5 bdjo m 1
+65 90 bdjo m 1
 0 0 2 26 -1 -1
 D
    What it lacks in size, the kingfisher makes up in sheer beauty. Its body is
@@ -2156,7 +2156,7 @@ heron blue bird~
 a blue heron~
 A blue heron stalks the shore.
 ~
-70 100 bdjo 0 2
+65 90 bdjo 0 2
 0 0 2 26 -1 -1
 D
    The heron is a rather stretched bird; its legs, neck, and bill are all
@@ -2191,7 +2191,7 @@ pelican bird~
 a pelican~
 A pelican is perched here, watching the sea.
 ~
-70 100 djo m 2
+65 90 djo m 2
 0 0 2 26 -1 -1
 D
    The pelican's white feathers are fringed with black on the edges of the
@@ -2225,7 +2225,7 @@ otherworlder predator~
 an otherworld predator~
 An otherworld predator stalks through the underbrush.
 ~
-70 100 cdyAIJ ci 4
+125 150 cdyAIJ ci 4
 0 0 106 4 -1 -1
 D
    The otherworlder is a sight to behold: it's taller than a human, with
@@ -2242,7 +2242,7 @@ spider goliath horse-eater horseeater eater~
 a goliath horse-eater spider~
 A goliath horse-eater spider leaps at you!
 ~
-75 100 bcdjoA c 3
+125 150 bcdjoA c 3
 0 0 17 9 -1 -1
 D
    This immense goliath horse-eater, a tarantula of truly monstrous size, is
@@ -2257,7 +2257,7 @@ mammoth dire-tusked diretusked tusked~
 a dire-tusked mammoth~
 A dire-tusked mammoth towers over you, blocking the scenery.
 ~
-100 125 dejoyA 0 5
+125 150 dejoyA 0 5
 0 0 26 9044 -1 -1
 D
    The hairless gray mammoth looms like a living mountain, hide creased as tree
@@ -2277,7 +2277,7 @@ mammoth dire-tusked diretusked tusked war platform~
 a mammoth war platform~
 A dire-tusked mammoth war platform stands over you.
 ~
-100 125 djoyA 0 5
+125 150 djoyA 0 5
 0 0 26 9044 -1 -1
 D
    The hairless gray mammoth looms like a living mountain, hide creased as tree
@@ -2298,7 +2298,7 @@ alligator armored~
 an armored alligator~
 An armored alligator lurks nearby.
 ~
-75 100 cdgjo c 5
+125 150 cdgjo c 5
 0 0 0 9114 -1 -1
 D
    The alligator's thick hide is plated in rigid scales, dull and dark as river

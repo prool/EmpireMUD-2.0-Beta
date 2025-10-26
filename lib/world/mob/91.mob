@@ -3,7 +3,7 @@ leopard~
 a leopard~
 A leopard is waiting to strike!
 ~
-75 100 cdgjouz c 3
+125 150 cdgjouz c 3
 0 0 0 10 -1 -1
 D
    The leopard is a beautiful golden color with rosette spots all over its
@@ -36,7 +36,7 @@ jaguar spotted~
 a jaguar~
 A spotted jaguar is stalking you!
 ~
-75 100 cdgjouz c 3
+125 150 cdgjouz c 3
 0 0 0 10 -1 -1
 D
    The jaguar is barely visible as it stalks through heavy leaves, but its
@@ -51,7 +51,7 @@ tapir~
 a tapir~
 A tapir is rooting around a bush.
 ~
-75 100 djo 0 3
+100 125 djo 0 3
 0 0 0 9 -1 -1
 D
    The tapir is tapered on the front end. It's the strangest animal you've ever
@@ -65,7 +65,7 @@ anaconda giant snake~
 a giant anaconda~
 A giant anaconda is draping from the tree!
 ~
-75 100 cdgjo cs 4
+100 150 cdgjo cs 4
 0 0 5 5 -1 -1
 D
    The snake is as long as a boat, and as big around as a dog. It's capable of
@@ -88,7 +88,7 @@ snake green treesnake~
 a green treesnake~
 A green treesnake is dangling toward you.
 ~
-40 60 cdjo c 1
+100 125 cdjo c 1
 0 0 5 9 -1 -1
 D
    The little treesnake is no bigger around than your smallest finger, but its
@@ -104,7 +104,7 @@ macaw brightly colored bird~
 a macaw~
 A brightly colored macaw flies past you.
 ~
-10 20 djo m 1
+65 90 djo m 1
 0 0 2 9 -1 -1
 D
 The exotic macaw has plumage in bright red, yellow and blue.
@@ -119,7 +119,7 @@ parrot bird grey gray~
 a grey parrot~
 A grey parrot is pecking at some fruit.
 ~
-10 20 djo m 1
+65 90 djo m 1
 0 0 2 9 -1 -1
 D
    The small parrot is a beautiful palette of greys. Its yellow eye follows you
@@ -134,7 +134,7 @@ mamba black snake~
 a black mamba~
 A black mamba is coiled up on the ground.
 ~
-40 60 cdjno c 2
+100 150 cdjno c 2
 0 0 5 9 -1 -1
 D
    Despite its name, the snake is a pale shade of grey. It looks small until it
@@ -152,7 +152,7 @@ monkey brown little~
 a monkey~
 A little brown monkey is walking along a low branch.
 ~
-30 40 djo c 2
+100 125 djo c 2
 0 0 107 9 -1 -1
 D
    The little monkey is balanced carefully on a low branch, clinging to the
@@ -166,7 +166,7 @@ chimpanzee hairy~
 a hairy chimpanzee~
 A hairy chimpanzee eyes you cautiously.
 ~
-75 100 adoAM 0 3
+100 150 adoAM 0 3
 1 0 0 15 -1 -1
 D
    The chimpanzee scratches its gray chin as it ponders you. It reminds you of
@@ -183,7 +183,7 @@ gorilla huge~
 a gorilla~
 A huge gorilla pounds its chest at you.
 ~
-75 100 doAM 0 3
+125 150 doAM 0 3
 1 0 0 15 -1 -1
 D
    The gorilla is twice your size. It's mostly black, but its back is pure
@@ -198,7 +198,7 @@ baboon~
 a baboon~
 A baboon is sitting here and staring at you.
 ~
-75 100 djoA 0 3
+100 150 djoA 0 3
 1 0 0 9 -1 -1
 D
    The brown baboon chews a handful of leaves, watching you cautiously as if
@@ -212,7 +212,7 @@ ocelot~
 an ocelot~
 An ocelot is cleaning its paws.
 ~
-40 60 djo c 2
+100 125 djo c 2
 0 0 0 10 -1 -1
 D
    The ocelot's fur is a beautiful mix of lines, spots, and rosettes that make
@@ -227,7 +227,7 @@ crocodile massive~
 a massive crocodile~
 A massive crocodile is lurking here.
 ~
-75 100 cdgjo c 5
+125 150 cdgjo c 5
 0 0 0 9114 -1 -1
 D
    The enormous, flat reptile is barely moving -- more a murder-log than an
@@ -243,7 +243,7 @@ bat flying fox~
 a flying fox~
 A flying fox is flapping around above you.
 ~
-10 20 djo m 1
+65 90 djo m 1
 0 0 2 9 -1 -1
 D
 This gigantic bat is nearly the size of a fox!
@@ -807,7 +807,7 @@ bird paradise~
 a bird of paradise~
 A bird of paradise is displaying its feathers.
 ~
-10 20 djo m 1
+65 90 djo m 1
 0 0 2 26 -1 -1
 D
    The exotic bird is larger than a pigeon, but smaller than a goose. Its long,
@@ -872,7 +872,7 @@ muskrat~
 a muskrat~
 A muskrat is digging around.
 ~
-40 60 djo 0 2
+100 125 djo 0 2
 0 0 0 9 -1 -1
 D
 The muskrat is big, for a rodent. It's more like a beaver than a rat.
@@ -885,7 +885,7 @@ beaver~
 a beaver~
 A beaver rests back on its hind legs and looks at you.
 ~
-40 60 djo 0 2
+100 125 djo 0 2
 0 0 0 9 -1 -1
 D
    The beaver is large, with a distinctive flat tail and massive teeth, which
@@ -899,7 +899,7 @@ crab giant swamp~
 a swamp crab~
 A giant swamp crab pokes its claw up out of the water.
 ~
-40 60 cdjo cG 2
+100 125 cdjo cG 2
 0 0 0 10 -1 -1
 D
    The crab is nearly the size of a hunting dog! It has one massive claw and
@@ -911,7 +911,7 @@ turtle snapping~
 a snapping turtle~
 A snapping turtle pokes its head up.
 ~
-40 60 cdjo c 1
+65 90 cdjo c 1
 0 0 0 9 -1 -1
 D
    This large freshwater turtle isn't much to look at, until it opens its
@@ -925,7 +925,7 @@ heron great bird~
 a great heron~
 A great heron is poking around for food.
 ~
-40 60 djo 0 2
+65 90 djo 0 2
 0 0 2 26 -1 -1
 D
    This tall, slender, graceful bird is a heron. Its long beak is perfect for
@@ -952,7 +952,7 @@ witch swamp~
 the swamp witch~
 The swamp witch lurches about.
 ~
-75 100 cdovxI c 3
+125 150 cdovxI c 3
 2 0 0 19 -1 -1
 D
    The old witch is clothed in bits of swamp. Her hair is indistinguishable
@@ -970,7 +970,7 @@ bandit swamp someone~
 a swamp bandit~
 Someone is lurking behind a tree!
 ~
-75 100 cdovI c 3
+100 125 cdovI c 3
 1 0 0 4 -1 -1
 D
    The bandit is dressed in gray and green to match the swamp, with a mask over
