@@ -643,7 +643,7 @@ S
 #224
 Jungle Edge~
 The Edge of the Jungle~
-'.' 4 lqr 5 ad 0
+'.' 4 lq 5 ad 0
 C
 chop, gather~
 D0
@@ -855,7 +855,7 @@ I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 88.00 25 g  # GATHER: sticks and leaves
 I 9 135 12.00 25 g  # GATHER: reaching sapling
-I 10 9288 0.50 1  # ENCOUNTER: water monitor
+I 10 9288 1.10 1  # ENCOUNTER: water monitor
 I 20 150 88.00 1 c  # CHOP: mangrove tree
 I 20 135 12.00 1 c  # CHOP: reaching sapling
 U
@@ -891,6 +891,18 @@ I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1200 100.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
+I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
+I+ 9 64  # Region: NORTH
+I+ 9 512  # Region: WEST
+I 10 9114 0.90 1  # ENCOUNTER: massive crocodile
+I+ 9 128  # Region: SOUTH
+I+ 9 512  # Region: WEST
+I 10 9298 0.90 1  # ENCOUNTER: armored alligator
+I+ 9 64  # Region: NORTH
+I+ 9 256  # Region: EAST
+I 10 9281 0.90 1  # ENCOUNTER: hungry hippopotamus
+I+ 9 128  # Region: SOUTH
+I+ 9 256  # Region: EAST
 U
 1
 The stumps and grass burn away, scattering ash along the fertile seaside.~
@@ -926,6 +938,18 @@ I 7 1206 8.33 125 p  # PICK: iridescent blue iris
 I 7 1200 100.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
+I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
+I+ 9 64  # Region: NORTH
+I+ 9 512  # Region: WEST
+I 10 9114 0.90 1  # ENCOUNTER: massive crocodile
+I+ 9 128  # Region: SOUTH
+I+ 9 512  # Region: WEST
+I 10 9298 0.90 1  # ENCOUNTER: armored alligator
+I+ 9 64  # Region: NORTH
+I+ 9 256  # Region: EAST
+I 10 9281 0.90 1  # ENCOUNTER: hungry hippopotamus
+I+ 9 128  # Region: SOUTH
+I+ 9 256  # Region: EAST
 X
 shore estuary river water ocean sea around~
    The shore is a mix of mud and sand, with the water slowly rising and
@@ -998,6 +1022,18 @@ E
 I 6 3052 33.33 25 f  # FORAGE: clam
 I 6 3087 33.34 25 f  # FORAGE: crisp wild leaves
 I 6 3051 33.33 25 f  # FORAGE: sea urchin
+I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
+I+ 9 64  # Region: NORTH
+I+ 9 512  # Region: WEST
+I 10 9114 0.90 1  # ENCOUNTER: massive crocodile
+I+ 9 128  # Region: SOUTH
+I+ 9 512  # Region: WEST
+I 10 9298 0.90 1  # ENCOUNTER: armored alligator
+I+ 9 64  # Region: NORTH
+I+ 9 256  # Region: EAST
+I 10 9281 0.90 1  # ENCOUNTER: hungry hippopotamus
+I+ 9 128  # Region: SOUTH
+I+ 9 256  # Region: EAST
 U
 1
 The germinating crops are burnt away, fertilizing the rich soil!~
@@ -1019,6 +1055,18 @@ E
 16 0 100.00 234
 E
 18 0 100.00 234
+I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
+I+ 9 64  # Region: NORTH
+I+ 9 512  # Region: WEST
+I 10 9114 0.90 1  # ENCOUNTER: massive crocodile
+I+ 9 128  # Region: SOUTH
+I+ 9 512  # Region: WEST
+I 10 9298 0.90 1  # ENCOUNTER: armored alligator
+I+ 9 64  # Region: NORTH
+I+ 9 256  # Region: EAST
+I 10 9281 0.90 1  # ENCOUNTER: hungry hippopotamus
+I+ 9 128  # Region: SOUTH
+I+ 9 256  # Region: EAST
 U
 0
 The crops grow all around you with phenomenal speed!~
@@ -1176,16 +1224,16 @@ E
 15 0 20.00 241
 I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
 I 6 3310 55.00 25 f  # FORAGE: wood ear mushroom
-I 10 9278 0.50 1  # ENCOUNTER: furry tarsier
+I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
 I+ 9 64  # Region: NORTH
 I+ 9 512  # Region: WEST
-I 10 9114 0.50 1  # ENCOUNTER: massive crocodile
+I 10 9114 0.90 1  # ENCOUNTER: massive crocodile
 I+ 9 128  # Region: SOUTH
 I+ 9 512  # Region: WEST
-I 10 9298 0.50 1  # ENCOUNTER: armored alligator
+I 10 9298 0.90 1  # ENCOUNTER: armored alligator
 I+ 9 64  # Region: NORTH
 I+ 9 256  # Region: EAST
-I 10 9281 0.50 1  # ENCOUNTER: hungry hippopotamus
+I 10 9281 0.90 1  # ENCOUNTER: hungry hippopotamus
 I+ 9 128  # Region: SOUTH
 I+ 9 256  # Region: EAST
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
@@ -1356,7 +1404,18 @@ E
 15 0 40.00 244
 I 6 3084 50.00 25 f  # FORAGE: brittlegill mushroom
 I 6 3310 25.00 25 f  # FORAGE: wood ear mushroom
-I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
+I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
+I+ 9 64  # Region: NORTH
+I+ 9 512  # Region: WEST
+I 10 9114 0.90 1  # ENCOUNTER: massive crocodile
+I+ 9 128  # Region: SOUTH
+I+ 9 512  # Region: WEST
+I 10 9298 0.90 1  # ENCOUNTER: armored alligator
+I+ 9 64  # Region: NORTH
+I+ 9 256  # Region: EAST
+I 10 9281 0.90 1  # ENCOUNTER: hungry hippopotamus
+I+ 9 128  # Region: SOUTH
+I+ 9 256  # Region: EAST
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
 I 21 256 0.25 125 f  # FISH: hestian trinket
@@ -1549,7 +1608,18 @@ I 6 3310 30.00 25 f  # FORAGE: wood ear mushroom
 I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
 I 6 3083 25.00 25 f  # FORAGE: river snail
 I 6 3086 20.00 25 f  # FORAGE: tree frog
-I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
+I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
+I+ 9 64  # Region: NORTH
+I+ 9 512  # Region: WEST
+I 10 9114 0.90 1  # ENCOUNTER: massive crocodile
+I+ 9 128  # Region: SOUTH
+I+ 9 512  # Region: WEST
+I 10 9298 0.90 1  # ENCOUNTER: armored alligator
+I+ 9 64  # Region: NORTH
+I+ 9 256  # Region: EAST
+I 10 9281 0.90 1  # ENCOUNTER: hungry hippopotamus
+I+ 9 128  # Region: SOUTH
+I+ 9 256  # Region: EAST
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
 I 21 256 0.25 125 f  # FISH: hestian trinket
@@ -1662,7 +1732,18 @@ I 6 3310 30.00 25 f  # FORAGE: wood ear mushroom
 I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
 I 6 3083 25.00 25 f  # FORAGE: river snail
 I 6 3086 25.00 25 f  # FORAGE: tree frog
-I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
+I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
+I+ 9 64  # Region: NORTH
+I+ 9 512  # Region: WEST
+I 10 9114 0.90 1  # ENCOUNTER: massive crocodile
+I+ 9 128  # Region: SOUTH
+I+ 9 512  # Region: WEST
+I 10 9298 0.90 1  # ENCOUNTER: armored alligator
+I+ 9 64  # Region: NORTH
+I+ 9 256  # Region: EAST
+I 10 9281 0.90 1  # ENCOUNTER: hungry hippopotamus
+I+ 9 128  # Region: SOUTH
+I+ 9 256  # Region: EAST
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
 I 21 256 0.25 125 f  # FISH: hestian trinket
@@ -1765,7 +1846,18 @@ E
 I 6 3310 20.00 25 f  # FORAGE: wood ear mushroom
 I 6 3084 55.00 25 f  # FORAGE: brittlegill mushroom
 I 6 3086 20.00 25 f  # FORAGE: tree frog
-I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
+I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
+I+ 9 64  # Region: NORTH
+I+ 9 512  # Region: WEST
+I 10 9114 0.90 1  # ENCOUNTER: massive crocodile
+I+ 9 128  # Region: SOUTH
+I+ 9 512  # Region: WEST
+I 10 9298 0.90 1  # ENCOUNTER: armored alligator
+I+ 9 64  # Region: NORTH
+I+ 9 256  # Region: EAST
+I 10 9281 0.90 1  # ENCOUNTER: hungry hippopotamus
+I+ 9 128  # Region: SOUTH
+I+ 9 256  # Region: EAST
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
 I 21 256 0.25 125 f  # FISH: hestian trinket
@@ -1876,7 +1968,18 @@ E
 I 6 3310 20.00 25 f  # FORAGE: wood ear mushroom
 I 6 3084 55.00 25 f  # FORAGE: brittlegill mushroom
 I 6 3086 25.00 25 f  # FORAGE: tree frog
-I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
+I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
+I+ 9 64  # Region: NORTH
+I+ 9 512  # Region: WEST
+I 10 9114 0.90 1  # ENCOUNTER: massive crocodile
+I+ 9 128  # Region: SOUTH
+I+ 9 512  # Region: WEST
+I 10 9298 0.90 1  # ENCOUNTER: armored alligator
+I+ 9 64  # Region: NORTH
+I+ 9 256  # Region: EAST
+I 10 9281 0.90 1  # ENCOUNTER: hungry hippopotamus
+I+ 9 128  # Region: SOUTH
+I+ 9 256  # Region: EAST
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
 I 21 256 0.25 125 f  # FISH: hestian trinket
@@ -1908,6 +2011,18 @@ I 6 3083 10.00 25 f  # FORAGE: river snail
 I 6 3082 15.00 25 f  # FORAGE: succulent root
 I 6 3087 15.00 25 f  # FORAGE: crisp wild leaves
 I 6 3017 25.00 25 f  # FORAGE: plump fig
+I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
+I+ 9 64  # Region: NORTH
+I+ 9 512  # Region: WEST
+I 10 9114 0.90 1  # ENCOUNTER: massive crocodile
+I+ 9 128  # Region: SOUTH
+I+ 9 512  # Region: WEST
+I 10 9298 0.90 1  # ENCOUNTER: armored alligator
+I+ 9 64  # Region: NORTH
+I+ 9 256  # Region: EAST
+I 10 9281 0.90 1  # ENCOUNTER: hungry hippopotamus
+I+ 9 128  # Region: SOUTH
+I+ 9 256  # Region: EAST
 U
 0
 The canal's waters begin to flow.~

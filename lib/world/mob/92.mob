@@ -2002,11 +2002,13 @@ D
 patch on the belly still looks damp. The elephant regards you, briefly, but
 resumes the colossal task of ranking whole bales of grass from the ground and
 trunking it into its mouth.
+   It looks like it would like some grain or vegetables. Since it was
+interested in you, perhaps you could tame it.
 ~
 F 9284
 I 0 3012 100.00 6  # BUTCHER: fillet of raw meat
 I 1 1351 100.00 3  # SKIN: large skin
-I 24 9101 100.00 1  # TAME: jungle elephant
+I 24 9287 100.00 1  # TAME: sun-dappled elephant
 M
 6
 An elephant stands near the herd.~
