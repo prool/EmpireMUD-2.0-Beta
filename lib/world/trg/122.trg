@@ -849,4 +849,182 @@ end
 %purge% %other%
 %purge% %self%
 ~
+#12250
+Stomping Ground: Shared mob load trig~
+0 n 100
+~
+wait 0
+set loc %instance.location%
+if %loc%
+  mgoto %loc%
+  mmove
+  mmove
+  mmove
+  set start %instance.start%
+  if %start%
+    eval elephants %start.var(elephants,0)% + 1
+    remote elephants %start.id%
+  end
+else
+  * not instanced?
+  nop %self.add_mob_flag(SPAWNED)%
+end
+~
+#12251
+Stomping Ground: Terraform tile on cleanup~
+2 e 100
+~
+* converts to grassland when despawning adventure
+set terra_sects 203 210 211 212 220 221 222 223 224 232 233 237 239 247 249 250 252
+if %terra_sects% ~= %room.base_sector_vnum%
+  %terraform% %room% 200
+end
+~
+#12252
+Stomping Ground: Elephant death~
+0 f 100
+~
+set start %instance.start%
+if %start%
+  eval elephants %start.var(elephants,1)% - 1
+  remote elephants %start.id%
+  if %elephants% <= 0
+    %load% obj 12251 %instance.location%
+  end
+end
+~
+#12253
+Stomping Ground: Leash~
+0 i 100
+~
+set allow_outside_sects 5 9 32 33 57 58
+set room %self.room%
+* safety
+if %method% != move
+  return 1
+  halt
+end
+* terrain-based leash
+if (%room.sector_vnum% < 200 || %room.sector_vnum% > 299) && !(%allow_outside_sects% ~= %room.sector_vnum%) && %room.building_vnum% != 12250
+  * sector I don't like
+  return 0
+  halt
+end
+* no distance leash if no instance
+set loc %instance.location%
+if !%loc%
+  return 1
+  halt
+end
+* compute range
+eval max_x %world.width% / 180
+eval max_y %world.height% / 100
+if %max_x% < %max_y%
+  set range %max_x%
+else
+  set range %max_y%
+end
+if %range% < 5
+  set range 5
+end
+* odd directions
+set dir %loc.direction(%room%)%
+if %dir% == northwest
+  eval range %range% + 1
+elseif %dir% == southeast
+  eval range %range% - 1
+end
+* leash distance
+set dist %loc.distance(%room%)%
+if %dist% > %range% && %random.2% == 2
+  return 0
+  halt
+end
+~
+#12254
+Stomping Ground: Terraform jungle to grassland~
+0 ab 10
+~
+* Terraforms ONLY the listed vnums, and only when attached to an instance
+if !%instance.location%
+  * no instance / no terraform
+  halt
+elseif %room.empire%
+  * claimed
+  halt
+end
+set room %self.room%
+set sect %room.sector_vnum%
+* Convert territory
+if %sect% == 203
+  * crop -> fertile soil
+  %echo% ~%self% rips up the crop and devours it!
+  %terraform% %room% 204
+elseif %sect% == 210 && %random.3% == 3
+  * savanna -> grassland
+  %echo% ~%self% rips up a tree!
+  %load% obj 147 %room%
+  %terraform% %room% 200
+elseif %sect% == 212
+  * savanna copse -> grassland
+  %echo% ~%self% rips up some saplings!
+  %load% obj 134 %room%
+  %load% obj 134 %room%
+  %terraform% %room% 200
+elseif %sect% == 220
+  * jungle -> partial
+  %echo% ~%self% rips up a tree!
+  %load% obj 128 %room%
+  %terraform% %room% 221
+elseif %sect% == 221
+  * partial jungle -> fertile soil
+  %echo% ~%self% rips up a tree!
+  %load% obj 128 %room%
+  %terraform% %room% 204
+elseif %sect% == 223
+  * jungle copse -> fertile soil
+  %echo% ~%self% rips up some saplings!
+  %load% obj 135 %room%
+  %load% obj 135 %room%
+  %terraform% %room% 204
+elseif %sect% == 224
+  * jungle edge -> grassland
+  %echo% ~%self% rips up some saplings!
+  %load% obj 135 %room%
+  %load% obj 135 %room%
+  %terraform% %room% 200
+elseif %sect% == 232
+  * mangrove forest -> fertile seaside
+  %echo% ~%self% rips up some trees!
+  %load% obj 150 %room%
+  %load% obj 150 %room%
+  %terraform% %room% 231
+elseif %sect% == 237
+  * seaside crop -> fertile seaside
+  %echo% ~%self% rips up the crop and devours it!
+  %terraform% %room% 231
+elseif %sect% == 239
+  * seaside crop -> estuary shore
+  %echo% ~%self% rips up the crop and devours it!
+  %terraform% %room% 234
+elseif %sect% == 247
+  * riverbank crop -> fertile riverbank
+  %echo% ~%self% rips up the crop and devours it!
+  %terraform% %room% 241
+elseif %sect% == 249
+  * lakeshore crop -> fertile lakeshore
+  %echo% ~%self% rips up the crop and devours it!
+  %terraform% %room% 244
+elseif %sect% == 250 && %random.3% == 3
+  * swamp -> fertile soil
+  %echo% ~%self% rips all the swamp plants!
+  %terraform% %room% 204
+elseif %sect% == 252 && %random.3% == 3
+  * swamp -> fertile soil
+  %echo% ~%self% rips all the marsh plants!
+  %terraform% %room% 204
+end
+* ensure not more than once per minute
+wait 60 s
+~
 $

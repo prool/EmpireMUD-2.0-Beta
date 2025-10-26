@@ -250,4 +250,51 @@ M
 0
 $n skitters around.~
 S
+#12250
+elephant matriarch massive~
+the massive elephant~
+A massive elephant matriarch lumbers along beside you.
+~
+125 150 adjyA cL 5
+2 0 0 9043 -1 -1
+D
+   The gray-brown matriarch is enormous -- easily among the largest elephants
+you've ever seen. Her soft, old eyes scan the horizon with a calculating motion
+you can't quite fathom. She sways her trunk, signalling to the other elephants,
+but you don't grasp her meaning.
+~
+F 9284
+I 0 3012 100.00 6  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 3  # SKIN: large skin
+M
+15
+A massive elephant matriarch is standing in the water.~
+T 12250
+T 12253
+T 12254
+T 12252
+S
+#12251
+elephant lumbering~
+a lumbering elephant~
+An elephant is lumbering around, pulling up plants.
+~
+100 150 adjy cL 5
+2 0 0 9043 -1 -1
+D
+   The gray-brown elephant seems uninterested in you as it yanks up any plant
+in sight. The small ones, it shoves into its hungry mouth. Anything larger is
+tossed aside unceremoniously as the elephant reshapes the landscape.
+~
+F 9284
+I 0 3012 100.00 6  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 3  # SKIN: large skin
+M
+15
+An elephant is wading through the water.~
+T 12250
+T 12253
+T 12254
+T 12252
+S
 $

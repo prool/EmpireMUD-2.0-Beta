@@ -31,4 +31,46 @@ L
 21600 -1 -1 -1
 -1 0 0
 S
+#12250
+Elephant Stomping Grounds~
+Paul Clarke~
+   A herd of elephants has taken up residence and has decided to turn this area
+into their new stomping grounds. Devastation abounds as they rip trees up by
+the roots and eat every stray bush and fern to make room for new grasslands.
+~
+12250 12299 100-150
+2 0 dlmnp 0
+L
+1 e
+12250 -1 -1 -1
+9 bg bg
+L
+1 e
+12250 -1 -1 -1
+9 bg bg
+L
+1 e
+12250 -1 -1 -1
+9 bg bg
+L
+1 0
+12250 -1 -1 -1
+9 bg bg
+L
+6 0
+100 -1 -1 -1
+-1 0 0
+L
+5 0
+43200 -1 -1 -1
+-1 0 0
+L
+19 0
+-1 -1 -1 -1
+-1 l 0
+L
+20 0
+-1 -1 -1 -1
+-1 jk 0
+S
 $
