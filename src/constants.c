@@ -685,6 +685,8 @@ const char *adventure_link_types[] = {
 	"IN-VEHICLE-NEW-BDG-NEW",
 	"IN-VEHICLE-NEW-CROP",
 	"IN-VEHICLE-NEW-WORLD",
+	"REQUIRE-CLIMATE",
+	"FORBID-CLIMATE",	// 20
 	"\n"
 };
 
@@ -710,6 +712,8 @@ const bool adventure_link_is_location_rule[] = {
 	TRUE,	// ADV_LINK_IN_VEH_NEW_BUILDING_NEW
 	TRUE,	// ADV_LINK_IN_VEH_NEW_CROP
 	TRUE,	// ADV_LINK_IN_VEH_NEW_WORLD
+	FALSE,	// ADV_EDIT_REQUIRE_CLIMATE
+	FALSE,	// ADV_EDIT_FORBID_CLIMATE
 };
 
 
@@ -2910,6 +2914,7 @@ const char *mob_custom_types[] = {
 	"scavenge-corpse",
 	"consider-info",
 	"echo-visible",
+	"water-long-desc",	// 15
 	"\n"
 };
 
@@ -2919,7 +2924,7 @@ const char *mob_custom_type_help =
 "Types of messages:\r\n"
 "&w Echo messages: echo echo-visible echo-day echo-night&0\r\n"
 " Speak text: say say-day say-night\r\n"
-"&w Varying lond descriptions: long-desc&0\r\n"
+"&w Varying lond descriptions: long-desc water-long-desc&0\r\n"
 " Shown when a scavenger mob eats a corpse: scavenge-corpse\r\n"
 "&w Shown when the player considers the mob: consider-info&0\r\n"
 " Available for scripts: script1 script2 script3 script4 script5\r\n";
@@ -5294,6 +5299,7 @@ const char *interact_restriction_types[] = {
 	"boss",
 	"depletion",
 	"tool",
+	"region",
 	"\n"
 };
 

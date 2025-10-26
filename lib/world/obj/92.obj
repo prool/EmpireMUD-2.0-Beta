@@ -160,4 +160,37 @@ O+ 1 6562
 R
 4 5120 0
 S
+#9294
+skull otherworlder~
+an otherworlder skull~
+An otherworlder skull is lying here.~
+   Though it's recognizably the skull of... something... it doesn't look like
+any creature you've ever seen. The pale, bony form is elongated and curved,
+with a ridge along the crest and odd slits running vertically down the sides.
+The eye holes, if that's what these are, are set quite far back on the sides.
+Its teeth, though, are eerily similar to a human's.
+~
+15 e a 0 0 1
+16 2 0
+14 0
+C
+100 100
+R
+4 5193 a
+S
+#9295
+gland spider's spiders silk goliath~
+a goliath spider's silk gland~
+A goliath spider's silk gland has been left here for some reason.~
+   The silk gland is a large knot of translucent flesh with veins of
+silver-white fluid. Even in death it twitches from time to time. It smells
+foul, but craftsmen prize such glands -- as do adventurers, to show they've
+bested the largest of spiders.
+~
+15 0 a 0 0 1
+12 2 0
+7 0
+R
+4 5193 a
+S
 $
