@@ -5181,7 +5181,8 @@ bool has_interaction(struct interaction_item *list, int type) {
 */
 bool meets_interaction_restrictions(struct interact_restriction *list, char_data *ch, empire_data *emp, char_data *inter_mob, obj_data *inter_item) {
 	struct interact_restriction *res;
-	bool any_diff = FALSE, diff_ok = FALSE;
+	bool any_diff = FALSE, diff_ok = FALSE, junk;
+	room_data *room;
 	
 	LL_FOREACH(list, res) {
 		// INTERACT_RESTRICT_x
@@ -5246,6 +5247,24 @@ bool meets_interaction_restrictions(struct interact_restriction *list, char_data
 			}
 			case INTERACT_RESTRICT_TOOL: {
 				if (ch && !has_tool(ch, res->vnum)) {
+					return FALSE;
+				}
+				break;
+			}
+			case INTERACT_RESTRICT_REGION: {
+				// detect room?
+				room = NULL;
+				if (ch) {
+					room = IN_ROOM(ch);
+				}
+				if (!room && inter_mob) {
+					room = IN_ROOM(inter_mob);
+				}
+				if (!room && inter_item) {
+					room = obj_room(inter_item);
+				}
+				// check spawn flags on room
+				if (res->vnum && room && !validate_spawn_location(room, res->vnum, X_COORD(room), Y_COORD(room), ROOM_OWNER(room) ? is_in_city_for_empire(room, ROOM_OWNER(room), TRUE, &junk) : FALSE)) {
 					return FALSE;
 				}
 				break;

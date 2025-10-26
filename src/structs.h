@@ -443,6 +443,7 @@ typedef struct vehicle_data vehicle_data;
 #define INTERACT_RESTRICT_BOSS  6	// only when mob/obj is 'hard' (hard + group)
 #define INTERACT_RESTRICT_DEPLETION  7	// determines which depletion is checked/applied, if applicable
 #define INTERACT_RESTRICT_TOOL  8	// tool required for the interaction
+#define INTERACT_RESTRICT_REGION  9	// uses SPAWN_ flags to mark region
 
 
 // for object saving

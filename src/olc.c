@@ -4681,6 +4681,11 @@ char *get_interaction_restriction_display(struct interact_restriction *list, boo
 				safe_snprintf(line, sizeof(line), "Tool: %s", part);
 				break;
 			}
+			case INTERACT_RESTRICT_REGION: {
+				prettier_sprintbit(res->vnum, spawn_flags_short, part);
+				safe_snprintf(line, sizeof(line), "Region: %s", part);
+				break;
+			}
 			default: {
 				safe_snprintf(line, sizeof(line), "Unknown %d:%lld", res->type, res->vnum);
 				break;
@@ -7673,6 +7678,19 @@ bool parse_interaction_restrictions(char_data *ch, char *argument, struct intera
 			}
 			else {
 				msg_to_char(ch, "Invalid tool '%s'.\r\n", arg);
+				fail = TRUE;
+			}
+		}
+		else if (is_abbrev(arg, "-region")) {
+			ptr = any_one_word(ptr, arg);
+			if ((num = search_block(arg, spawn_flags, FALSE)) != NOTHING || (num = search_block(arg, spawn_flags_short, FALSE)) != NOTHING) {	// valid restriction
+				CREATE(res, struct interact_restriction, 1);
+				res->type = INTERACT_RESTRICT_REGION;
+				res->vnum = BIT(num);
+				LL_APPEND(*found_restrictions, res);
+			}
+			else {
+				msg_to_char(ch, "Invalid region '%s' (HELP SPAWN FLAGS).\r\n", arg);
 				fail = TRUE;
 			}
 		}

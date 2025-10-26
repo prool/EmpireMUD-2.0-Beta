@@ -3973,6 +3973,7 @@ Optional interaction restrictions:
  &c-tech <name>&0 - Empire must have this tech.
  &c-tool <name>&0 - Require a specific tool for this interaction.
  &c-depletion <type>&0 - Uses this type of depletion (see OLC DEPLETION).
+ &c-region <flag>&0 - Restrict by region (see SPAWN FLAGS for regions).
 
 Examples:
 > .interaction add FORAGE 1 12345 100 x -ability "Find Herbs"
@@ -6407,6 +6408,7 @@ Optional interaction restrictions:
  &c-ptech <name>&0 - Player must have this player-tech.
  &c-tech <name>&0 - Empire must have this tech.
  &c-tool <name>&0 - Require a specific tool for this interaction.
+ &c-region <flag>&0 - Restrict by region (see SPAWN FLAGS for regions).
 
 Example of a rare result from barding (order matters here):
  1. BARDE: 1x an epic warhorse .50% (e)
@@ -7411,6 +7413,7 @@ Optional interaction restrictions:
  &c-ptech <name>&0 - Player must have this player-tech.
  &c-tech <name>&0 - Empire must have this tech.
  &c-tool <name>&0 - Require a specific tool for this interaction.
+ &c-region <flag>&0 - Restrict by region (see SPAWN FLAGS for regions).
 
 See also: OLC OBJECTS
 #d
@@ -10361,6 +10364,7 @@ Optional interaction restrictions:
  &c-tech <name>&0 - Empire must have this tech.
  &c-tool <name>&0 - Require a specific tool for this interaction.
  &c-depletion <type>&0 - Uses this type of depletion (see OLC DEPLETION).
+ &c-region <flag>&0 - Restrict by region (see SPAWN FLAGS for regions).
 
 Examples:
 > .interaction add FORAGE 1 12345 100 x -ability "Find Herbs"

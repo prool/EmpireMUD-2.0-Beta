@@ -5299,6 +5299,7 @@ const char *interact_restriction_types[] = {
 	"boss",
 	"depletion",
 	"tool",
+	"region",
 	"\n"
 };
 
