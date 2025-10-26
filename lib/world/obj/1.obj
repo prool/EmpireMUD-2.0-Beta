@@ -356,14 +356,14 @@ Some rough wood is stacked here.~
 tree. You can saw it into boards, and might even be able to salvage some
 sticks.
 ~
-3 e a 0 0 11
+3 e a 0 0 12
 0 0 0
 0 0
 C
 1 1
 I 11 1002 100.00 1  # LIGHT: roaring fire
 I 17 126 100.00 1  # SAW: rough boards
-I 17 136 5.00 1  # SAW: large shoot
+I 17 148 5.00 1  # SAW: thorny shoot
 I 17 132 20.00 1 s  # SAW: thorny branches
 I 17 132 20.00 2 s  # SAW: thorny branches
 I 17 132 20.00 3 s  # SAW: thorny branches
@@ -518,7 +518,7 @@ A massive tree is lying on its side.~
    You can use a sharp tool to shape this exotic tree into a pillar, or you can
 saw it into lumber.
 ~
-3 e a 0 0 9
+3 e a 0 0 10
 0 0 0
 0 0
 C
@@ -527,10 +527,14 @@ I 11 1002 100.00 1  # LIGHT: roaring fire
 I 16 129 100.00 1  # SCRAPE: fine wooden pillar
 I 16 133 50.00 1 s  # SCRAPE: tangle of vines
 I 16 133 25.00 2 s  # SCRAPE: tangle of vines
+I 16 121 25.00 1 t  # SCRAPE: sticks and leaves
+I 16 121 25.00 2 t  # SCRAPE: sticks and leaves
 I 17 130 50.00 1 c  # SAW: fine tropical lumber
 I 17 130 50.00 2 c  # SAW: fine tropical lumber
 I 17 133 50.00 1 s  # SAW: tangle of vines
 I 17 133 25.00 2 s  # SAW: tangle of vines
+I 17 121 25.00 1 t  # SAW: sticks and leaves
+I 17 121 25.00 2 t  # SAW: sticks and leaves
 M
 34
 Scrape or saw the tree to get building materials.~
@@ -1004,6 +1008,146 @@ M
 34
 This is an uncommon building and crafting material.~
 O+ 1 6036
+R
+4 5118 0
+S
+#147
+thorny-tree tree trees thorny~
+a thorny tree~
+A thorny tree has fallen here.~
+   The rough-barked tree has a sturdy trunk with several major branches.
+Spines cover many of the branches to fend off herbivores -- and unwary loggers.
+You can use a sharp tool to scrape the tree into a log or saw it at a lumber
+yard.
+~
+3 e a 0 0 12
+0 0 0
+0 0
+C
+1 1
+I 11 1002 100.00 1  # LIGHT: roaring fire
+I 16 124 100.00 1  # SCRAPE: heavy log
+I 16 148 5.00 1  # SCRAPE: thorny shoot
+I 16 132 25.00 2 s  # SCRAPE: thorny branches
+I 16 132 25.00 3 s  # SCRAPE: thorny branches
+I 16 132 25.00 4 s  # SCRAPE: thorny branches
+I 16 132 25.00 5 s  # SCRAPE: thorny branches
+I 17 126 100.00 2  # SAW: rough boards
+I 17 148 5.00 1  # SAW: thorny shoot
+I 17 132 50.00 1 s  # SAW: thorny branches
+I 17 132 40.00 2 s  # SAW: thorny branches
+I 17 132 10.00 3 s  # SAW: thorny branches
+M
+7
+$n carves out a tree for $V.~
+M
+6
+You carve out a tree for $V.~
+M
+34
+Scrape or saw the tree to get building materials.~
+O+ 1 6010
+R
+4 5118 0
+S
+#148
+thorny-shoot shoot shoots thorny~
+a thorny shoot~
+A thorny shoot is lying here.~
+   This long, straight shoot is covered in sharp thorns, but you could still
+scrape it into a sturdy pole for building or crafting.
+~
+1 0 an 0 0 7
+0 2 3
+0 0
+C
+1 1
+I 11 184 100.00 1  # LIGHT: torch
+I 16 142 100.00 1  # SCRAPE: wooden pole
+I 16 132 50.00 1  # SCRAPE: thorny branches
+M
+34
+This is a common building and crafting material.~
+O+ 1 6025
+R
+4 5118 0
+S
+#149
+tremendous-tree jungle tree trees~
+a tremendous jungle tree~
+A tremendous tree, covered in vines, has fallen here.~
+   The tree lies stretched across the jungle floor, its vast trunk draped in
+climbing vines and moss. The bark is rough and weathered, streaked with sap
+where it splintered in the fall. It's far too big to carry, but you could saw
+it up or scrape it where it lies.
+~
+3 E 0 0 0 23
+0 0 0
+0 34560
+C
+1 1
+I 11 1002 100.00 1  # LIGHT: roaring fire
+I 16 138 100.00 1  # SCRAPE: enormous mast
+I 16 136 5.00 10 p  # SCRAPE: large shoot
+I 16 136 5.00 7 p  # SCRAPE: large shoot
+I 16 136 10.00 4 p  # SCRAPE: large shoot
+I 16 136 5.00 2 p  # SCRAPE: large shoot
+I 16 121 25.00 3 s  # SCRAPE: sticks and leaves
+I 16 121 25.00 4 s  # SCRAPE: sticks and leaves
+I 16 121 25.00 5 s  # SCRAPE: sticks and leaves
+I 16 121 25.00 6 s  # SCRAPE: sticks and leaves
+I 16 133 25.00 3 t  # SCRAPE: tangle of vines
+I 16 133 25.00 4 t  # SCRAPE: tangle of vines
+I 16 133 25.00 5 t  # SCRAPE: tangle of vines
+I 16 133 25.00 6 t  # SCRAPE: tangle of vines
+I 17 130 100.00 12  # SAW: fine tropical lumber
+I 17 136 5.00 10 p  # SAW: large shoot
+I 17 136 5.00 7 p  # SAW: large shoot
+I 17 136 10.00 4 p  # SAW: large shoot
+I 17 136 5.00 2 p  # SAW: large shoot
+I 17 121 50.00 3 s  # SAW: sticks and leaves
+I 17 121 40.00 5 s  # SAW: sticks and leaves
+I 17 121 10.00 6 s  # SAW: sticks and leaves
+I 17 133 50.00 3 t  # SAW: tangle of vines
+I 17 133 40.00 5 t  # SAW: tangle of vines
+I 17 133 10.00 6 t  # SAW: tangle of vines
+I 26 136 100.00 4  # DECAYS-TO: large shoot
+I 26 121 100.00 4  # DECAYS-TO: sticks and leaves
+I 26 133 100.00 4  # DECAYS-TO: tangle of vines
+I 26 128 100.00 2  # DECAYS-TO: massive jungle tree
+M
+34
+Scrape this tree to make a large pillar for a mast.~
+O+ 1 6012
+R
+4 5118 0
+S
+#150
+mangrove-tree tree trees felled~
+a mangrove tree~
+A felled mangrove tree lies here, its tangled roots heavy with mud.~
+   The mangrove tree has been cleanly cut near its base. Its long, twisted
+roots sprawl uselessly across the ground. Chunks of damp bark cling to the
+trunk, with a briny scent from the tide. You can saw it or scrape it to get
+more useful resources.
+~
+3 e a 0 0 10
+0 0 0
+0 0
+C
+1 1
+I 11 1002 100.00 1  # LIGHT: roaring fire
+I 16 129 100.00 1  # SCRAPE: fine wooden pillar
+I 16 121 50.00 1 s  # SCRAPE: sticks and leaves
+I 16 121 25.00 2 s  # SCRAPE: sticks and leaves
+I 17 130 75.00 1 c  # SAW: fine tropical lumber
+I 17 130 25.00 2 c  # SAW: fine tropical lumber
+I 17 121 50.00 1 s  # SAW: sticks and leaves
+I 17 121 25.00 2 s  # SAW: sticks and leaves
+M
+34
+Scrape or saw the tree to get building materials.~
+O+ 1 6010
 R
 4 5118 0
 S

@@ -901,21 +901,47 @@ void perform_burn_room(room_data *room, int evo_type) {
 	char buf[MAX_STRING_LENGTH], from[256], to[256];
 	struct evolution_data *evo;
 	sector_data *sect;
+	bool any_message;
 	
 	if ((evo = get_evolution_by_type(SECT(room), evo_type)) && (sect = sector_proto(evo->becomes)) && SECT(room) != sect) {
+		// messaging first
 		if (ROOM_PEOPLE(room)) {
-			if (ROOM_CROP(room)) {
-				strcpy(from, GET_CROP_NAME(ROOM_CROP(room)));
-			}
-			else {
-				strcpy(from, GET_SECT_NAME(SECT(room)));
-			}
-			strtolower(from);
-			strcpy(to, GET_SECT_NAME(sect));
-			strtolower(to);
+			any_message = FALSE;
 			
-			sprintf(buf, "The %s burn%s down and become%s %s%s%s.", from, (from[strlen(from)-1] == 's' ? "" : "s"), (from[strlen(from)-1] == 's' ? "" : "s"), (to[strlen(to)-1] == 's' ? "" : AN(to)), (to[strlen(to)-1] == 's' ? "" : " "), to);
-			act(buf, FALSE, ROOM_PEOPLE(room), NULL, NULL, TO_CHAR | TO_ROOM);
+			// out message
+			if (ROOM_SECT_FLAGGED(room, SECTF_CROP) && ROOM_CROP(room) && crop_has_custom_message(ROOM_CROP(room), CROP_CUSTOM_BURNS_DOWN)) {
+				// crop custom
+				act(crop_get_custom_message(ROOM_CROP(room), CROP_CUSTOM_BURNS_DOWN), FALSE, ROOM_PEOPLE(room), NULL, NULL, TO_CHAR | TO_ROOM);
+				any_message = TRUE;
+			}
+			else if (sect_has_custom_message(SECT(room), SECT_CUSTOM_BURNS_DOWN)) {
+				// sect custom
+				act(sect_get_custom_message(SECT(room), SECT_CUSTOM_BURNS_DOWN), FALSE, ROOM_PEOPLE(room), NULL, NULL, TO_CHAR | TO_ROOM);
+				any_message = TRUE;
+			}
+			
+			// in message
+			if (sect_has_custom_message(sect, SECT_CUSTOM_WAS_BURNED)) {
+				// sect custom
+				act(sect_get_custom_message(sect, SECT_CUSTOM_WAS_BURNED), FALSE, ROOM_PEOPLE(room), NULL, NULL, TO_CHAR | TO_ROOM);
+				any_message = TRUE;
+			}
+			
+			// generic message if neither out nor in message was sent
+			if (!any_message) {
+				if (ROOM_CROP(room)) {
+					strcpy(from, GET_CROP_NAME(ROOM_CROP(room)));
+				}
+				else {
+					strcpy(from, GET_SECT_NAME(SECT(room)));
+				}
+				strtolower(from);
+				strcpy(to, GET_SECT_NAME(sect));
+				strtolower(to);
+			
+				sprintf(buf, "The %s burn%s down and become%s %s%s%s.", from, (from[strlen(from)-1] == 's' ? "" : "s"), (from[strlen(from)-1] == 's' ? "" : "s"), (to[strlen(to)-1] == 's' ? "" : AN(to)), (to[strlen(to)-1] == 's' ? "" : " "), to);
+				act(buf, FALSE, ROOM_PEOPLE(room), NULL, NULL, TO_CHAR | TO_ROOM);
+			}
 		}
 		
 		change_terrain(room, evo->becomes, NOTHING);
@@ -1083,18 +1109,18 @@ void uncrop_tile(room_data *room) {
 	
 	// 4. attempt to find one
 	if (!to_sect) {
-		// should this be get_climate(room) rather than GET_SECT_CLIMATE(SECT(room)) ?
 		to_sect = find_first_matching_sector(NOBITS, invalid_sect_flags, GET_SECT_CLIMATE(SECT(room)));
 	}
 	
 	// 5. did we fail entirely?
 	if (!to_sect) {
+		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "SYSERR: uncrop_tile: unable to find a valid tile to return to for room %d; using default_land_sect", GET_ROOM_VNUM(room));
 		to_sect = sector_proto(config_get_int("default_land_sect"));
 	}
 	
 	// fail?
 	if (!to_sect) {
-		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "SYSERR: uncrop_tile: unable to find a valid tile to return to; 'config world default_land_sect' may not be set");
+		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "SYSERR: uncrop_tile: unable to find a valid tile to return to for room %d; 'config world default_land_sect' may not be set", GET_ROOM_VNUM(room));
 		return;
 	}
 	

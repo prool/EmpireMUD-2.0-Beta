@@ -4841,8 +4841,8 @@ void unmark_items_for_char(char_data *ch, bool ground) {
 * This function finds a sector that has (or doesn't have) certain flags, and
 * returns the first matching sector.
 *
-* @param bitvector_t with_flags Find a sect that has these flags.
-* @param bitvector_t without_flags Find a sect that doesn't have these flags.
+* @param bitvector_t with_flags Find a sect that has these flags (all flags must be present).
+* @param bitvector_t without_flags Find a sect that doesn't have these flags (none may be present).
 * @param bitvector_t prefer_climate Will attempt to find a good match for this climate (but will return without it if not).
 * @return sector_data* A sector, or NULL if none matches.
 */
@@ -4850,7 +4850,7 @@ sector_data *find_first_matching_sector(bitvector_t with_flags, bitvector_t with
 	sector_data *sect, *next_sect, *low_climate = NULL, *no_climate = NULL;
 	
 	HASH_ITER(hh, sector_table, sect, next_sect) {
-		if (with_flags && !SECT_FLAGGED(sect, with_flags)) {
+		if (with_flags && (GET_SECT_FLAGS(sect) & with_flags) != with_flags) {
 			continue;
 		}
 		if (without_flags && SECT_FLAGGED(sect, without_flags)) {

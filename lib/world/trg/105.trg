@@ -13,6 +13,14 @@ dg_affect %actor% INFRA on 300
 Magiterranean Terracrop~
 0 in 100
 ~
+* Valid terrains:
+set valid_sects 0 1 2 3 4 7 13 36 37 38 39 40 41 42 43 44 45 50 54 56 90
+*
+* Same list exists in #10507 for cleaning up
+*
+* IMPORTANT: only things that are "basically plains" should be in the sect list
+* because this adventure will terraform them back down to plains when it ends.
+*
 wait 1
 * pick a crop -- use start of time as jan 1, 2015: 1420070400
 * 2628288 seconds in a month
@@ -75,11 +83,7 @@ if !%instance.location%
   %purge% %self%
   halt
 end
-if %room.sector_vnum% <= 4 || (%room.sector_vnum% >= 40 && %room.sector_vnum% <= 45) || %room.sector_vnum% == 50 || %room.sector_vnum% == 90 || (%room.sector_vnum% >= 54 && %room.sector_vnum% <= 56)
-  * valid, plains/forest or shore-jungle (55)
-  set sector_valid 1
-elseif %room.sector_vnum% == 7 || %room.sector_vnum% == 13 || %room.sector_vnum% == 15 || %room.sector_vnum% == 16 || %room.sector_vnum% == 27 || %room.sector_vnum% == 28 || %room.sector_vnum% == 34
-  * valid, jungle / crop
+if %valid_sects% ~= %room.sector_vnum%
   set sector_valid 1
 end
 if (%room.template% == 10500 || %room.distance(%instance.location%)% > 3 || %room.building% == Fence || %room.building% == Wall)
@@ -101,9 +105,15 @@ if !%no_work%
     %echo% ~%self% spreads mana over the land and crops begin to grow!
   end
 end
-if %month_change%
-  %at% %instance.location% %echo% The whirlwind collapses in on itself, leaving behind crops!
-  %terracrop% %instance.location% %starting_crop_vnum%
+set instloc %instance.location%
+if %month_change% && %instloc%
+  if %valid_sects% ~= %instloc.base_sector_vnum%
+    %at% %instloc% %echo% The whirlwind collapses in on itself, leaving behind crops!
+    %terracrop% %instloc% %starting_crop_vnum%
+  else
+    %at% %instloc% %echo% The whirlwind collapses in on itself!
+    %terraform% %instloc% %instloc.base_sector_vnum%
+  end
 end
 ~
 #10502
@@ -238,6 +248,10 @@ end
 Interdimensional Whirlwind Cleanup~
 2 e 100
 ~
+*
+* Cleanable sect list from #10501
+set valid_sects 0 1 2 3 4 7 13 36 37 38 39 40 41 42 43 44 45 50 54 56 90
+*
 set main_direction_1 west
 set main_direction_2 east
 set branch_direction_1 north
@@ -252,7 +266,9 @@ while %dir_var% <= 2
   while %room.distance(%row_room%)% <= 3
     * %regionecho% %room% 5 %row_room.sector% @ %row_room.coords%
     if ((%row_room.crop_vnum% >= 10500) && (%row_room.crop_vnum% <= 10549) && (!%row_room.empire_id%)) && %row_room% != %room%
-      %terraform% %row_room% 0
+      if %valid_sects% ~= %row_room.natural_sector_vnum%
+        %terraform% %row_room% 0
+      end
     end
     set branch_dir_var 1
     * mirror up/down
@@ -263,7 +279,9 @@ while %dir_var% <= 2
       while %target_room% && %room.distance(%target_room%)% <= 3
         * %regionecho% %room% 5 %target_room.sector% @ %target_room.coords%
         if ((%target_room.crop_vnum% >= 10500) && (%target_room.crop_vnum% <= 10549) && (!%target_room.empire_id%))
-          %terraform% %target_room% 0
+          if %valid_sects% ~= %target_room.natural_sector_vnum%
+            %terraform% %target_room% 0
+          end
         end
         eval target_room %%target_room.%column_direction%(map)%%
       done
@@ -276,7 +294,9 @@ while %dir_var% <= 2
   eval row_room %%room.%row_direction%(map)%%
 done
 %regionecho% %room% -3 The nearby whirlwind implodes, sucking in the crops surrounding it.
-%terraform% %room% 0
+if %valid_sects% ~= %room.natural_sector_vnum%
+  %terraform% %room% 0
+end
 ~
 #10508
 Dragonstooth sceptre equip first~
@@ -813,6 +833,8 @@ elseif %room.sector_vnum% == 85
   %echo% The irrigation canal freezes over!
 elseif %room.sector_vnum% == 87
   %terraform% %room% 10555
+elseif %room.sector_vnum% == 260
+  %terraform% %room% 10556
   %echo% The canal freezes over!
 elseif %room.sector_vnum% == 32
   %terraform% %room% 10553

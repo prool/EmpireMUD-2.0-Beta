@@ -17,29 +17,11 @@ D4
 ....~
 &0~
 E
-2 55 0.60 65
-E
-2 54 0.60 39
-E
-2 45 0.60 39
-E
-2 28 0.60 65
-E
-2 29 0.60 65
-E
-2 4 0.60 39
-E
 2 53 5.00 56
 E
 2 57 10.00 50
 E
 2 5 10.00 40
-E
-3 29 0.80 29
-E
-3 28 2.00 65
-E
-3 4 2.00 39
 E
 5 0 100.00 17
 E
@@ -93,8 +75,6 @@ E
 2 57 10.00 50
 E
 2 5 10.00 44
-E
-3 29 0.80 29
 E
 4 0 0.80 2
 E
@@ -151,8 +131,6 @@ E
 E
 2 5 10.00 45
 E
-3 29 0.80 29
-E
 4 0 0.80 3
 E
 9 0 50.00 3
@@ -206,8 +184,6 @@ E
 2 57 10.00 50
 E
 2 5 10.00 45
-E
-3 29 0.20 29
 E
 4 0 0.20 4
 E
@@ -286,7 +262,27 @@ E
 E
 2 5 10.00 45
 E
-3 29 0.80 29
+17 70 0.80 71
+E
+17 200 0.30 224
+E
+17 204 1.00 224
+E
+17 210 0.60 224
+E
+17 230 0.30 232
+E
+17 231 1.00 232
+E
+17 244 1.00 224
+E
+17 243 0.30 224
+E
+17 241 1.00 224
+E
+17 240 0.30 224
+E
+17 0 0.50 39
 E
 20 40320 0.01 90
 I 5 102 15.00 125 X  # DIG: flint stone
@@ -456,7 +452,7 @@ S
 #7
 Crop~
 A Crop~
-'.' 10 j 3 djk kp
+'.' 10 j 3 djkE kp
 D1
 ????~
 &g~
@@ -589,7 +585,7 @@ S
 #12
 Desert Crop~
 A Desert Crop~
-'.' 21 k 3 djk kp
+'.' 21 k 3 djkE kp
 D1
 ????~
 &Y~
@@ -679,43 +675,24 @@ come.
 ~
 S
 #15
-Jungle Field~
+Old Jungle Field~
 A Jungle Field~
-',' 12 l 3 j kp
+',' 12 0 3 j 0
 C
 gather~
 D0
 ,,,,~
 &G~
 E
-1 0 100.00 16
-E
-9 0 20.00 16
-E
-16 0 100.00 0
-E
-19 0 100.00 27
-I 6 3017 100.00 25  # FORAGE: plump fig
-I 9 133 100.00 50  # GATHER: tangle of vines
-X
-field seeded seeds plants crop jungle around~
-   You have come upon a small clearing, where you can see that the verdant
-jungle has been cleared to make way for a new crop. The freshly turned earth is
-dark and fertile, and tiny green shoots have just begun to emerge from the
-soil. You can't quite make out what the crop is yet, as the plants are still
-too small to identify. But you can see that the farmers who planted them have
-taken great care to ensure that they are planted in neat rows, with plenty of
-space between them to grow. Beyond the clearing, the jungle looms tall and
-green, a stark contrast to the orderly rows of the new crop. It's a scene of
-life and growth in the midst of a wild and untamed environment, and you can't
-help but feel a sense of awe at the tenacity of these farmers in the face of
-such daunting surroundings.
+4 0 50.00 202
+_
+Old jungle terrain, replaced by 202.
 ~
 S
 #16
-Jungle Crop~
+Old Jungle Crop~
 A Jungle Crop~
-'.' 12 l 3 djk kp
+'.' 12 0 3 jk 0
 D1
 ????~
 &g~
@@ -729,12 +706,10 @@ D4
 ????~
 &g~
 E
-16 0 100.00 0
-E
-19 0 100.00 27
-U
-0
-The crop grows with astounding speed!~
+4 0 50.00 203
+_
+Old jungle terrain, replaced by 203.
+~
 S
 #17
 Trench~
@@ -1174,9 +1149,9 @@ survive in this unforgiving environment.
 ~
 S
 #27
-Partial Jungle~
+Old Partial Jungle~
 The Jungle, Partially Cleared~
-'^' 12 lqr 6 d g
+'^' 12 0 6 0 0
 C
 chop, gather~
 D1
@@ -1192,45 +1167,15 @@ D4
 ^&g.&?^&g.~
 &G~
 E
-0 1 50.00 61
-E
-0 1 100.00 27
-E
-2 32 2.00 35
-E
-2 57 10.00 50
-E
-4 0 0.80 28
-E
-7 5 2.00 29
-E
-8 0 100.00 15
-E
-9 0 50.00 28
-E
-15 0 1.00 34
-I 6 3017 33.00 25  # FORAGE: plump fig
-I 9 133 100.00 50  # GATHER: tangle of vines
-I 20 128 100.00 1  # CHOP: massive jungle tree
-U
-0
-New trees shoot up toward the sky from the soil, soaking up water and threatening to block the sun with fresh leaves!~
-X
-jungle clearing cleared trees forest around canopy~
-   The trees here have been selectively cut down to make way for small paths,
-but there is still an abundance of vegetation surrounding you. You can hear the
-sound of birds and insects, and the air is thick with humidity. Sunlight
-filters through the leaves of the remaining trees, casting dappled patterns on
-the ground. You can see small bushes and shrubs growing alongside the path,
-their leaves and branches reaching out in all directions. The ground is covered
-with a layer of decaying leaves and other organic matter, providing a fertile
-bed for the growth of new plants.
+4 0 50.00 221
+_
+Old jungle terrain, replaced by vnum 221.
 ~
 S
 #28
-Jungle~
+Old Jungle~
 The Jungle~
-'^' 12 lq 8 d g
+'^' 12 0 8 0 0
 C
 chop, gather~
 D1
@@ -1246,48 +1191,15 @@ D4
 ^^^^~
 &G~
 E
-0 1 50.00 27
-E
-0 1 100.00 28
-E
-2 32 2.00 35
-E
-2 57 10.00 50
-E
-7 5 2.00 29
-E
-15 0 1.00 34
-E
-17 59 0.60 63
-E
-17 60 0.60 64
-E
-17 54 0.60 55
-E
-17 4 0.50 27
-E
-17 90 0.70 27
-I 6 3017 33.00 25  # FORAGE: plump fig
-I 9 133 100.00 50  # GATHER: tangle of vines
-I 20 128 100.00 1  # CHOP: massive jungle tree
-U
-0
-Vines overtake the world as they grow down from the rising trees!~
-X
-jungle trees forest around canopy~
-   You are standing in a tropical jungle, surrounded by an impenetrable wall of
-vegetation. The humid air is thick with the scent of plant life, and the ground
-beneath you is soft and damp. The towering trees rise up around you, their
-trunks wrapped in vines and their branches draped with epiphytes. Sunlight
-struggles to penetrate the canopy above, casting everything in a greenish hue.
-The air is alive with the sounds of chirping birds, chattering monkeys, and the
-rustling of leaves as unseen creatures move through the underbrush.
+4 0 50.00 220
+_
+Old jungle terrain, replaced by 220.
 ~
 S
 #29
-Swamp~
+Old Swamp~
 A Murky Swamp~
-'~' 13 lov 10 aw m
+'~' 13 0 10 aw 0
 D0
 ~~~&G^~
 &c~
@@ -1301,32 +1213,11 @@ D0
 &G^&?~~~~
 &c~
 E
-9 0 25.00 27
-E
-11 5 4.00 27
-E
-15 0 5.00 34
-I 6 3310 50.00 25  # FORAGE: wood ear mushroom
-I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
-I 21 1300 20.00 125 f  # FISH: glowing green seashell
-I 21 1305 0.25 125 f  # FISH: worn old statuette
-I 21 256 0.25 125 f  # FISH: hestian trinket
-I 21 262 0.25 125 f  # FISH: trinket of conveyance
-I 21 1304 5.00 125 f  # FISH: sea junk
-I 21 1311 25.00 125 f  # FISH: spotted eel
-I 21 1316 25.00 125 f  # FISH: small gator
-I 21 1314 100.00 125 f  # FISH: fat catfish
+4 0 50.00 250
 M
 264 10.00 ace
-X
-swamp murky river water trees forest jungle around~
-   The air in the swamp is thick with moisture, and the ground is soft and
-muddy beneath your feet. Strange noises emanate from the murky water, where you
-can barely make out the shapes of twisted roots and submerged logs. Insects
-buzz all around, and a faint smell of decay hangs in the air. Mangroves and
-other trees with gnarled roots rise up from the water, creating a tangled
-canopy overhead that blocks out much of the sunlight. The river flows lazily
-by, its surface dotted with lily pads and occasional waterfowl.
+_
+ Old jungle terrain, replaced by 250.
 ~
 S
 #30
@@ -1410,9 +1301,9 @@ venture further out onto its frozen expanse.
 ~
 S
 #34
-Damaged Jungle~
+Old Damaged Jungle~
 A Frost-Damaged Jungle~
-'^' 12 l 6 d 0
+'^' 12 0 6 0 0
 C
 chop, gather~
 D0
@@ -1422,28 +1313,15 @@ D0
 ^.^.~
 &0~
 E
-0 1 100.00 36
-E
-4 0 1.20 2
-E
-9 0 50.00 27
-I 9 133 100.00 50  # GATHER: tangle of vines
-I 20 128 100.00 1  # CHOP: massive jungle tree
-X
-jungle damaged frost-damaged dead trees forest around~
-   The jungle is eerily silent, as if the forest itself is mourning the loss of
-its fallen kin. The canopy is sparse, with many trees standing tall but
-lifeless, stripped of their vibrant foliage by a harsh frost. The ground is
-littered with dry, dead leaves and twigs that snap underfoot. The occasional
-bird or monkey call can be heard in the distance, but they seem to avoid this
-desolate area. Despite the devastation, new growth can be seen pushing its way
-through the wreckage, determined to reclaim what was lost.
+4 0 50.00 220
+_
+Old jungle terrain, no longer exists and replaced by 220 Jungle.
 ~
 S
 #35
-Marsh~
+Old Marsh~
 A Marshy Lakeshore~
-'~' 13 louv 10 aw m
+'~' 13 0 10 aw 0
 D0
 ~~~&G^~
 &c~
@@ -1457,31 +1335,9 @@ D0
 &G^&?~~~~
 &c~
 E
-9 0 25.00 27
-E
-10 32 4.00 27
-E
-17 0 0.60 65
-I 6 3310 50.00 25  # FORAGE: wood ear mushroom
-I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
-I 21 1300 20.00 125 f  # FISH: glowing green seashell
-I 21 1305 0.25 125 f  # FISH: worn old statuette
-I 21 256 0.25 125 f  # FISH: hestian trinket
-I 21 262 0.25 125 f  # FISH: trinket of conveyance
-I 21 1304 5.00 125 f  # FISH: sea junk
-I 21 1311 25.00 125 f  # FISH: spotted eel
-I 21 1316 25.00 125 f  # FISH: small gator
-I 21 1314 100.00 125 f  # FISH: fat catfish
-M
-264 10.00 ace
-X
-marshy lakeshore swamp jungle forest trees water around~
-   The marsh around the lake in the jungle is a dense and tangled web of life.
-The murky water is alive with the croaks and chirps of unseen creatures. Mossy
-logs, partially submerged, stretch like skeletal fingers toward the sky. Lush
-greenery thrives in the nutrient-rich soil, their leaves reaching out like
-eager hands to soak up the sun's rays. Despite the fecundity, there's an eerie
-stillness to this place, and a faint smell of decay hangs in the air.
+4 0 50.00 252
+_
+Old jungle terrain, replaced by 252.
 ~
 S
 #36
@@ -1514,8 +1370,6 @@ D4
 D4
 ..&t.&?.~
 &0~
-E
-2 29 0.80 61
 E
 2 53 5.00 56
 E
@@ -1572,8 +1426,6 @@ E
 E
 2 5 10.00 47
 E
-3 29 0.80 29
-E
 4 0 0.80 38
 E
 9 0 50.00 38
@@ -1623,8 +1475,6 @@ E
 2 57 10.00 60
 E
 2 5 10.00 47
-E
-3 29 0.80 29
 E
 4 0 0.40 2
 E
@@ -1676,8 +1526,6 @@ E
 E
 2 5 10.00 47
 E
-3 29 0.80 29
-E
 4 0 0.80 1
 E
 9 0 50.00 1
@@ -1723,15 +1571,7 @@ E
 E
 2 45 0.80 44
 E
-2 28 0.80 65
-E
-2 29 0.80 65
-E
 2 4 1.00 44
-E
-3 29 0.80 29
-E
-3 28 2.00 65
 E
 3 4 3.00 44
 E
@@ -1938,8 +1778,6 @@ D4
 E
 0 0 100.00 46
 E
-2 29 0.80 29
-E
 4 0 1.00 45
 E
 9 0 50.00 45
@@ -2003,11 +1841,11 @@ D4
 E
 0 0 100.00 44
 E
-2 29 0.80 29
-E
 10 5 10.00 2
 E
 12 0 25.00 43
+E
+17 0 0.60 39
 I 5 102 9.00 125 x  # DIG: flint stone
 I 5 100 9.00 125 x  # DIG: rock
 I 5 101 100.00 125 x  # DIG: lump of clay
@@ -2114,8 +1952,6 @@ E
 E
 0 0 100.00 47
 E
-2 29 0.80 29
-E
 4 0 0.40 44
 E
 9 0 50.00 44
@@ -2165,15 +2001,9 @@ D4
 ....~
 &0~
 E
-2 55 0.80 55
-E
 2 54 0.80 54
 E
-2 28 0.80 55
-E
 2 4 0.80 54
-E
-3 29 0.80 29
 E
 5 0 100.00 17
 E
@@ -2357,6 +2187,8 @@ E
 0 1 100.00 59
 E
 10 57 5.00 1
+E
+17 0 0.60 39
 I 5 102 9.00 125 x  # DIG: flint stone
 I 5 107 9.00 125 x  # DIG: bag of sand
 I 5 110 9.00 125 x  # DIG: sea salt crystals
@@ -2384,9 +2216,9 @@ swaying in the wind.
 ~
 S
 #55
-Seaside Jungle~
+Old Seaside Jungle~
 The Edge of the Jungle, Overlooking the Sea~
-'^' 12 ls 5 d g
+'^' 12 0 5 0 0
 C
 chop, gather, pick~
 D0
@@ -2396,35 +2228,9 @@ D0
 .^.^~
 &G~
 E
-0 1 100.00 63
-E
-7 5 2.00 29
-E
-8 0 100.00 15
-E
-10 57 5.00 27
-I 6 3051 40.00 25 x  # FORAGE: sea urchin
-I 6 3052 40.00 25 x  # FORAGE: clam
-I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
-I+ 0 70  # Ability: Find Herbs
-I 7 123 100.00 125 p  # PICK: small flower
-I 9 133 85.00 50 g  # GATHER: tangle of vines
-I 9 135 15.00 50 g  # GATHER: reaching sapling
-I 20 128 100.00 1  # CHOP: massive jungle tree
-U
-0
-The jungle grows so fast that it rapidly overtakes the view of the sea!~
-X
-jungle edge sea seaside shore tree forest around~
-   A large, gnarled tree stands at the edge of the jungle, its roots twisting
-and intertwining with the sand and rocks of the shoreline. The tree's thick
-trunk is covered in vines and moss, and its branches stretch out in all
-directions, some reaching out over the water. The leaves of the tree are a
-vibrant green, rustling in the sea breeze, and the sound of the waves crashing
-against the shore can be heard in the distance. The tree provides a stark
-contrast to the dense jungle behind it, and seems to be holding its own against
-the relentless power of the ocean.
+4 0 50.00 232
+_
+Old jungle terrain, replaced by 232.
 ~
 S
 #56
@@ -2462,7 +2268,7 @@ I 7 1200 100.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 X
-shore exstuary river water ocean sea around~
+shore estuary river water ocean sea around~
    The estuary shore is a mix of mud and sand, with the water slowly rising and
 falling with the tide. Small crabs scurry around, digging into the sand and mud
 for food. Seagulls and other shorebirds swoop down to grab small fish and other
@@ -2573,8 +2379,6 @@ D4
 ..&t.&?.~
 &0~
 E
-3 29 0.80 29
-E
 4 0 2.50 60
 E
 9 0 50.00 60
@@ -2670,9 +2474,9 @@ resilience of nature.
 ~
 S
 #61
-Jungle Stumps~
+Old Jungle Stumps~
 A Densely Vined Field of Stumps~
-'.' 10 lr 3 dl p
+'.' 10 0 3 0 0
 C
 burn stumps~
 D1
@@ -2700,40 +2504,15 @@ D4
 ..&t.&?.~
 &0~
 E
-2 32 2.00 35
-E
-2 57 10.00 63
-E
-4 0 2.50 62
-E
-7 5 2.00 29
-E
-8 0 100.00 15
-E
-9 0 50.00 62
-E
-15 0 1.00 0
-E
-16 0 100.00 0
-E
-23 0 100.00 0
-I 6 3017 33.00 25  # FORAGE: plump fig
-X
-vined densely field stumps jungle trees forest around~
-   You step into a clearing amidst the dense jungle, only to find it marred by
-a cluster of stumps. It's evident that the trees that once stood here have been
-cut down, leaving behind a stark reminder of the human impact on the natural
-world. The ground is littered with fallen branches and leaves, while a faint
-scent of sawdust still lingers in the air. Despite the absence of trees, the
-clearing is not entirely barren. New sprouts and shrubs are beginning to
-emerge, perhaps signaling the start of a new chapter in this patch of land's
-story.
+4 0 50.00 222
+_
+Old jungle terrain, replaced by 222.
 ~
 S
 #62
-Jungle Copse~
+Old Jungle Copse~
 A Copse of Young Jungle Trees~
-'w' 13 l 6 d 0
+'w' 13 0 6 0 0
 C
 chop~
 D1
@@ -2749,41 +2528,15 @@ D4
 w&g.&?w&g.~
 &G~
 E
-0 1 50.00 61
-E
-0 0 100.00 62
-E
-2 32 2.00 35
-E
-2 57 10.00 64
-E
-4 0 0.80 27
-E
-7 5 2.00 29
-E
-8 0 100.00 15
-E
-9 0 50.00 27
-E
-15 0 1.00 34
-I 6 3017 33.00 25  # FORAGE: plump fig
-I 20 135 100.00 1  # CHOP: reaching sapling
-U
-0
-A tangle of new saplings spring up from the stumps!~
-X
-copse young jungle trees forest stumps around~
-   You find yourself in a lush jungle copse, surrounded by tall trees and thick
-vegetation. Stumps of previously felled trees dot the area, and new growth has
-emerged from them in the form of saplings and young trees. The air is thick
-with the scent of damp earth and the sounds of wildlife can be heard in the
-distance.
+4 0 50.00 223
+_
+Old jungle terrain, replaced by 223.
 ~
 S
 #63
-Seaside Jungle Stumps~
+Old Seaside Jungle Stumps~
 Amidst Tropical Stumps on the Seaside~
-'.' 10 lrs 3 dl pr
+'.' 10 0 3 0 0
 C
 burn stumps, pick~
 D0
@@ -2793,36 +2546,15 @@ D0
 ..&t.&?.~
 &g~
 E
-4 0 2.50 64
-E
-7 5 2.00 29
-E
-9 0 50.00 64
-E
-10 57 5.00 61
-E
-16 0 100.00 50
-E
-23 0 100.00 50
-I 6 3051 50.00 25 x  # FORAGE: sea urchin
-I 6 3052 50.00 25 x  # FORAGE: clam
-I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
-I+ 0 70  # Ability: Find Herbs
-I 7 123 100.00 125 p  # PICK: small flower
-X
-stumps tropical seaside ocean forest trees around~
-   As you make your way along the jungle's edge, you come across a section
-where the dense foliage abruptly stops, replaced by a stretch of barren ground.
-Here, several tree stumps, their tops cut clean off, jut up from the earth.
-Looking out past the stumps, you can see the shimmering expanse of the ocean,
-its waves crashing against the rocky shore.
+4 0 50.00 233
+_
+Old jungle terrain, replaced by 233.
 ~
 S
 #64
-Seaside Jungle Copse~
+Old Seaside Jungle Copse~
 A Copse in the Jungle by the Sea~
-'w' 13 lrs 6 d pr
+'w' 13 0 6 0 0
 C
 chop, pick~
 D0
@@ -2832,77 +2564,24 @@ D0
 &g..&?w&g.~
 &G~
 E
-0 0 50.00 63
-E
-0 0 100.00 64
-E
-4 0 0.40 55
-E
-7 5 2.00 29
-E
-9 0 50.00 55
-E
-10 57 5.00 62
-I 6 3051 50.00 25 x  # FORAGE: sea urchin
-I 6 3052 50.00 25 x  # FORAGE: clam
-I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
-I+ 0 70  # Ability: Find Herbs
-I 7 123 100.00 125 p  # PICK: small flower
-I 20 135 100.00 1  # CHOP: reaching sapling
-U
-0
-New saplings burst forth from the edges of the stumps!~
-X
-copse jungle seaside ocean trees forest around~
-   You find yourself standing at the edge of a jungle copse that reaches down
-to the shore. The area appears to have been disturbed, with stumps of trees
-visible around you. However, new life is emerging from the stumps, with small
-trees and saplings beginning to take root and grow. The sound of the waves
-lapping against the shore can be heard in the distance, and the moist air is
-thick with the scent of the jungle. As you step forward into the copse, you
-can't help but feel a sense of awe at the power of nature to regenerate itself.
+4 0 50.00 232
+_
+Old jungle terrain, replaced by 232
 ~
 S
 #65
-Jungle Edge~
+Old Jungle Edge~
 The Edge of the Jungle~
-'w' 13 lr 5 d 0
+'w' 13 0 5 0 0
 C
 chop~
 D0
 &g.&?w&g..~
 &G~
 E
-0 1 75.00 61
-E
-0 0 100.00 65
-E
-2 32 2.00 35
-E
-2 57 10.00 64
-E
-4 0 0.80 27
-E
-7 5 2.00 29
-E
-8 0 100.00 15
-E
-9 0 50.00 27
-E
-15 0 1.00 34
-I 6 3017 33.00 25  # FORAGE: plump fig
-I 20 135 100.00 1  # CHOP: reaching sapling
-X
-jungle edge trees forest grassland plains around~
-   As you approach the edge of the jungle, you can feel the air becoming
-slightly cooler and more humid. The sounds of the forest creatures give way to
-the rustling of tall grasses in the open plains beyond. You can see the thick
-foliage of the jungle ahead, with tall trees reaching high into the sky. The
-transition from the grassland to the jungle is marked by a line of trees, their
-trunks thick and gnarled, their branches heavy with vines and moss. The dense
-undergrowth of the jungle begins here, the plant life spilling out from the
-shaded canopy to carpet the ground with vibrant greenery.
+4 0 50.00 224
+_
+Old jungle terrain, replaced by 224.
 ~
 S
 #70
@@ -2914,16 +2593,6 @@ dig, gather, pick~
 D0
 ....~
 &G~
-E
-2 4 0.80 71
-E
-2 29 0.80 72
-E
-2 28 0.80 72
-E
-3 4 2.00 71
-E
-3 28 2.00 72
 E
 5 0 100.00 22
 E
@@ -2983,6 +2652,24 @@ E
 4 0 1.00 79
 E
 9 0 50.00 79
+E
+17 200 0.30 224
+E
+17 204 1.00 224
+E
+17 210 0.60 224
+E
+17 230 0.30 232
+E
+17 231 1.00 232
+E
+17 244 1.00 224
+E
+17 243 0.30 224
+E
+17 241 1.00 224
+E
+17 240 0.30 224
 E
 17 0 0.60 39
 E
@@ -3046,9 +2733,27 @@ E
 E
 0 0 100.00 72
 E
+17 200 0.30 224
+E
+17 204 1.00 224
+E
+17 210 0.60 224
+E
+17 230 0.30 232
+E
+17 231 1.00 232
+E
+17 244 1.00 224
+E
+17 243 0.30 224
+E
+17 241 1.00 224
+E
+17 240 0.30 224
+E
 17 70 1.00 72
 E
-17 0 0.60 65
+17 0 0.60 39
 E
 27 268435456 4.00 26
 I 5 102 15.00 125 X  # DIG: flint stone
@@ -3298,7 +3003,7 @@ E
 E
 16 0 100.00 70
 E
-19 0 100.00 70
+18 0 100.00 70
 E
 27 268435456 4.00 20
 I 5 101 15.00 125 X  # DIG: lump of clay
@@ -3325,7 +3030,7 @@ D0
 E
 16 0 100.00 70
 E
-19 0 100.00 70
+18 0 100.00 70
 E
 27 268435456 4.00 20
 I 5 102 15.00 125 X  # DIG: flint stone
@@ -3798,8 +3503,6 @@ E
 2 5 10.00 45
 E
 2 53 16.66 56
-E
-3 29 0.80 29
 E
 3 90 5.00 4
 E

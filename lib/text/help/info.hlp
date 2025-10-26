@@ -12,7 +12,7 @@ These are the common map icons:
  &y....&0  Desert              &y.&g^^&y.&0  Desert Grove        &y.&c~~&y.&0  Oasis
  &c~~~~&0  River               &b~~~~&0  Ocean               &a~~~~&0  Estuary/Shallows
  &c~&t..&c~&0  Riverbank           &c~&g^&t.&c~&0  Riverbank           &c~~&g^&c~&0  Swamp/Marsh
- &G^^^^&0  Jungle              &W,,,,&0  Arctic Tundra       &0
+ &G^^%^&0  Jungle              &G ,,&T|&?^  Savanna             &W,,,,&0  Arctic Tundra
 
  --+-  Road                [--]  Building            \__/  Trench
  vvvv  Fence               vxxv  Gate                VVVV  Wall
@@ -883,11 +883,11 @@ Arid crops (desert):
  &y.&g/&to&y.&0  Coconuts            &0::::&0  Cotton               &Y.&G^o&G.&0  Olives
  &Y.&G^&yo&G.&0  Oranges             &gnn&Ri&gn&0  Peppers
 
-Tropical crops (partially cleared jungle):
+Tropical crops (fertile soil):
  &Yd&G\/&Yb&0  Bananas             &G^&Oo&G^&Oo&0  Mangoes              &Gd&g\/&Gb&0  Plantains
  &G^&Yo&G^^&0  Lemons              &Gwwow&0  Watermelons
  
-Tropical river crops (partially cleared jungle near river):
+Tropical river crops (fertile soil near river):
  &G||||&0  Sugarcane
 
 Newbie island crops:
@@ -1770,8 +1770,8 @@ When you chop down a forest, you are usually left with a field of stumps. If
 left alone, they will regrow into a copse, and can be chopped down for
 saplings. Given time, they will regrow into full-size trees again.
 
-You can build without removing stumps, but most other uses will require that
-you burn them. Try 'burn stumps' to remove them.
+You can usually build without removing stumps, but most other uses will require
+that you burn them. Try 'burn stumps' to remove them.
 
 See also: BURN, LIGHTER
 #

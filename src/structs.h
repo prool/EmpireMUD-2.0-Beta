@@ -443,6 +443,7 @@ typedef struct vehicle_data vehicle_data;
 #define INTERACT_RESTRICT_BOSS  6	// only when mob/obj is 'hard' (hard + group)
 #define INTERACT_RESTRICT_DEPLETION  7	// determines which depletion is checked/applied, if applicable
 #define INTERACT_RESTRICT_TOOL  8	// tool required for the interaction
+#define INTERACT_RESTRICT_REGION  9	// uses SPAWN_ flags to mark region
 
 
 // for object saving
@@ -590,6 +591,8 @@ typedef struct vehicle_data vehicle_data;
 #define ADV_LINK_IN_VEH_NEW_BUILDING_NEW  16
 #define ADV_LINK_IN_VEH_NEW_CROP  17
 #define ADV_LINK_IN_VEH_NEW_WORLD  18
+#define ADV_LINK_REQUIRE_CLIMATE  19
+#define ADV_LINK_FORBID_CLIMATE  20
 
 
 // ADV_LINKF_x: adventure link rule flags
@@ -1054,6 +1057,7 @@ typedef struct vehicle_data vehicle_data;
 
 // CROP_CUSTOM_x: custom messages
 #define CROP_CUSTOM_MAGIC_GROWTH		0	// shown on magic-growth evolution
+#define CROP_CUSTOM_BURNS_DOWN			1	// shown when this crop is burned
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -1609,6 +1613,7 @@ typedef struct vehicle_data vehicle_data;
 #define MOB_CUSTOM_SCAVENGE_CORPSE  12	// mob eats a corpse due to SCAVENGER flag
 #define MOB_CUSTOM_CONSIDER_INFO  13	// shown on the 'consider' command
 #define MOB_CUSTOM_ECHO_VISIBLE  14	// only shows if player can see it
+#define MOB_CUSTOM_WATER_LONG_DESC  15	// shown on water tiles instead of long desc
 
 
 // MOB_MOVE_x: mob/vehicle movement types
@@ -1718,6 +1723,8 @@ typedef struct vehicle_data vehicle_data;
 #define MOB_MOVE_WHIZZES  103
 #define MOB_MOVE_ZIGZAGS  104
 #define MOB_MOVE_ZOOMS  105
+#define MOB_MOVE_STALKS  106
+#define MOB_MOVE_SWINGS  107
 
 
 // NAMES_x: name sets: add matching files in lib/text/names/
@@ -2739,11 +2746,14 @@ typedef enum {
 #define SECTF_INHERIT_BASE_CLIMATE  BIT(27)	// inherits the climate of the base sector in addition to its own (e.g. road, building, etc)
 #define SECTF_IRRIGATES_AREA  BIT(28)	// tiles around this one trigger irrigation evolutions
 #define SECTF_NO_WORKFORCE_AUTOABANDON  BIT(29)	// workforce will not auto-abandon this terrain
+#define SECTF_BASIC_CROP  BIT(30)	// to be used on the "basic crop tile" for its terrain
 // note: evolutions use these as flags in a SIGNED sbitvector_t; limit is BIT(62)
 
 
 // SECT_CUSTOM_x: custom messages
 #define SECT_CUSTOM_MAGIC_GROWTH		0	// shown on magic-growth evolution
+#define SECT_CUSTOM_BURNS_DOWN			1	// shown when sector goes away due to burn
+#define SECT_CUSTOM_WAS_BURNED			2	// shown when on new sector after burning
 
 
  //////////////////////////////////////////////////////////////////////////////

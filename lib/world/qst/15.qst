@@ -305,7 +305,7 @@ interested in your reflections on the harsh beauty of nature. You can already
 tell these stories will be told in taverns throughout the land for years to
 come!
 ~
-7 f 100 0 -1
+8 f 100 0 -1
 A
 1 220
 P
@@ -325,9 +325,9 @@ W
 W
 14 20 0 1 a
 W
-14 28 0 1 a
+14 220 0 1 a
 W
-14 29 0 1 a
+14 250 0 1 a
 W
 14 58 0 1 a
 W

@@ -2292,16 +2292,27 @@ if %actor.obj_target(%arg%)% != %self%
   return 0
   halt
 end
-set sectname %self.room.sector%
+set sectvnum %self.room.sector_vnum%
 set terra 1
-if %sectname% == Scorched Woods
+if %sectvnum% == 10300
+  * Scorched Woods back to Forest
   set vnum 2
-elseif %sectname% == Scorched Grove
+elseif %sectvnum% == 10301
   set vnum 26
-elseif %sectname% == Scorched Plains || %sectname% == Scorched Crop
+elseif %sectvnum% == 10302 || %sectvnum% == 10303
   set vnum 0
-elseif %sectname% == Scorched Desert || %sectname% == Scorched Desert Crop
+elseif %sectvnum% == 10304 || %sectvnum% == 10305
   set vnum 20
+elseif %sectvnum% == 10306
+  set vnum 21
+elseif %sectvnum% == 10307
+  set vnum 10565
+elseif %sectvnum% == 10308
+  set vnum 58
+elseif %sectvnum% == 10309 || %sectvnum% == 10311
+  set vnum 200
+elseif %sectvnum% == 10310
+  set vnum 220
 else
   set terra 0
 end
@@ -2310,6 +2321,7 @@ if (%terra% && !%self.val0%) || (!%terra% && !%self.val1%)
   %send% %actor% @%self% is out of charges for that ability.
   halt
 end
+set room_var %actor.room%
 set cycle 0
 while %cycle% >= 0
   * Repeats until break
@@ -2334,7 +2346,7 @@ while %cycle% >= 0
     %send% %actor% The destination is too busy.
     set error 1
   end
-  if %actor.room% != %room_var% || %self.carried_by% != %actor% || %error%
+  if %actor.room% != %room_var% || %self.carried_by% != %actor% || %sectvnum% != %self.room.sector_vnum% || %error%
     if %cycle% > 0
       %send% %actor% @%self% sparks and fizzles.
       %echoaround% %actor% |%actor% trinket sparks and fizzles.

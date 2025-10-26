@@ -2185,6 +2185,282 @@ $N sweats profusely as $E suffers in the heat.
 #
 #
 
+M9021 b 11 +
+donkey kick~
+~
+kick~
+kicks~
+hind kick~
+0 0 4.0 4.0 4.0
+You kick $N squarely in the chest and $E crumples beneath the force of your hooves!
+$n kicks you squarely in the chest and you crumple to the ground, dead!
+$n kicks $N squarely in the chest and $E crumples to the ground, dead!
+You kick backward, but strike only air.
+$n kicks backwards at you, but strikes only air.
+$n kicks backwards, but strikes only air.
+#
+#
+#
+You kick your heels up and shout at $N.
+$n kicks $s heels up and shouts at you.
+$n kicks $s heels up and shouts at $N.
+
+M9021 b 11 
+donkey kick~
+~
+You kick $N high into the air; by the end of the arc $E's already dead!
+$n kicks you high into the air; your vision goes black before you even land!
+$n kicks $N high into the air; by the end of the arc $E's already dead!
+You buck hard, but your hooves miss their mark.
+$n bucks hard, but $s hooves miss you as you dodge.
+$n bucks hard, but $s hooves miss their mark.
+#
+#
+#
+You buck around like bronco for $N's amusement.
+$n bucks around like a bronco for your amusement.
+$n bucks around like a horse for $N's amusement.
+
+M9021 b 11 
+donkey kick~
+~
+You buck hard, slamming your rear hooves into $N and sending $M sprawling lifeless!
+$n bucks hard, slamming $s rear hooves into you and sending you lifeless to the ground!
+$n bucks hard, slamming $s rear hooves into $N and sending $M sprawling lifeless!
+You kick backward, but $N twists aside at the last moment.
+You twist aside at the last moment as $n kicks backward at you.
+$n kicks backward, but $N twists aside at the last moment.
+#
+#
+#
+You dance around, heels in the air, wishing you could hit $N.
+$n dances around, heels in the air, wishing $e could hit you.
+$n dances around, heels in the air, wishing $e could hit $N.
+
+M9043 b 5 +
+trunk pound~
+~
+pound~
+pounds~
+trunk~
+0 0 3.6 4.0 4.4
+You slam your trunk into $N's chest with a crushing CRACK!
+$n slams $s trunk into your chest with a crushing CRACK!
+$n slams $s trunk into $N's chest with a crushing CRACK!
+You slam you trunk down onto the ground but miss $N.
+$n slams $s trunk down onto the ground, narrowly missing you.
+$n slams $s trunk down onto the ground, narrowly missing $N.
+#
+#
+#
+You spin your trunk madly, unable to hit $N.
+$n spins $s trunk madly, unable to hit you.
+$n spins $s trunk madly, unable to hit $N.
+
+M9043 b 5 
+trunk pound~
+~
+You slam your trunk down onto $N one final time, ending $S struggle for good.
+$n slams $s trunk down onto you one final time, and it's the last thing you see.
+$n slams $s trunk down onto $N one final time, ending $S struggle for good.
+You swing your trunk, but $N ducks out of reach.
+You duck at the precise second to feel $N's trunk swing right over your head.
+$N ducks out of reach as $n swings $s trunk right over $S head.
+#
+#
+#
+$N laughs as you swing your trunk everywhere but into $M.
+You laugh as $n swings $s trunk wildly but can't seem to hit you.
+$N laughs as $n swings $s trunk wildly but fails to land a hit.
+
+M9043 b 5 
+trunk pound~
+~
+You grab $N in your trunk and bash $M against the ground... to death!
+$n grabs you in $s trunk and bashes you against the ground until you lose consciousness for the last time.
+$n grabs $N in $s trunk and bashes $M against the ground... to death!
+$N slips free just as your trunk closes around $M.
+You slip free just as $n's trunk tries to close around you.
+$N slips free just as $n's trunk tries to grab $M.
+#
+#
+#
+You tickle $N with your trunk.
+$n tickles you with $s trunk.
+$n tickles $N with $s trunk.
+
+M9044 b 5 +
+trunk and tusk pound~
+~
+pound~
+pounds~
+trunk~
+0 0 3.6 4.0 4.4
+You slam your trunk into $N's chest with a crushing CRACK!
+$n slams $s trunk into your chest with a crushing CRACK!
+$n slams $s trunk into $N's chest with a crushing CRACK!
+You slam you trunk down onto the ground but miss $N.
+$n slams $s trunk down onto the ground, narrowly missing you.
+$n slams $s trunk down onto the ground, narrowly missing $N.
+#
+#
+#
+You spin your trunk madly, unable to hit $N.
+$n spins $s trunk madly, unable to hit you.
+$n spins $s trunk madly, unable to hit $N.
+
+M9044 b 5 
+trunk and tusk pound~
+~
+You slam your trunk down onto $N one final time, ending $S struggle for good.
+$n slams $s trunk down onto you one final time, and it's the last thing you see.
+$n slams $s trunk down onto $N one final time, ending $S struggle for good.
+You swing your trunk, but $N ducks out of reach.
+You duck at the precise second to feel $N's trunk swing right over your head.
+$N ducks out of reach as $n swings $s trunk right over $S head.
+#
+#
+#
+$N laughs as you swing your trunk everywhere but into $M.
+You laugh as $n swings $s trunk wildly but can't seem to hit you.
+$N laughs as $n swings $s trunk wildly but fails to land a hit.
+
+M9044 b 5 
+trunk and tusk pound~
+~
+You grab $N in your trunk and bash $M against the ground... to death!
+$n grabs you in $s trunk and bashes you against the ground until you lose consciousness for the last time.
+$n grabs $N in $s trunk and bashes $M against the ground... to death!
+$N slips free just as your trunk closes around $M.
+You slip free just as $n's trunk tries to close around you.
+$N slips free just as $n's trunk tries to grab $M.
+#
+#
+#
+You tickle $N with your trunk.
+$n tickles you with $s trunk.
+$n tickles $N with $s trunk.
+
+M9044 b 5 
+trunk and tusk pound~
+~
+You drive your tusk deep into $N, shattering $S ribs!
+$n drives $s tusk deep into you as things go red and then black!
+$n drives $s tusk deep into $N, shattering $S ribs!
+You lower your head to gore $N but $E leaps away.
+You leap out of the way as $n lowers $s head to gore you.
+$n lowers $s head to gore $N but $E leaps away.
+#
+#
+#
+You can't bring yourself to gore $N.
+$n stands in awe as $e can't bring $mself to gore you.
+$n can't seem to bring $mself to gore $N.
+
+M9044 b 5 
+trunk and tusk pound~
+~
+You gore $N clean through, leaving $M shattered and broken!
+$n gores you clean through! It's the last thing you feel.
+$n goes $N clean through, leaving $M shattered and broken!
+You charge forward, tusks slicing empty air where $N was.
+$n charges forward at you but $s tusks slice empty air.
+$n charges forward at $N but $s tusks slice empty air.
+#
+#
+#
+You show your gleaming tusks to $N.
+$n shows you $s gleaming tusks.
+$n shows $N $s gleaming tusks.
+
+M9044 b 5 
+trunk and tusk pound~
+~
+You thrust your tusks upward, tossing $N's lifeless body aside!
+$n thrusts $s tusks upward, and it's the last thing you see!
+$n thrusts $s tusks upward, tossing $N's lifeless body aside!
+You hook $N with your tusks but $E slips free.
+$n hooks you with $s tusks but you slip free.
+$n hooks $N with $s tusks but $E slips free.
+#
+#
+#
+You try to bash $N with your tusks but an invisible force stops you.
+$n tries to bash you with $s tusks but can't seem to hit.
+$n tries to bash $N with $s tusks but something stops $m.
+
+M9114 b 9 +
+crocodilian bite~
+~
+bite~
+bites~
+bite~
+0 0 3.8 4.2 6.0
+You clamp your jaws on $N and spin like a whirlpool -- when you let go, $E no longer moves.
+$n clamps $s jaws on you and spins like a whirlpool -- your vision goes red and then black!
+$n clamps $s jaws on $N and spins like a whirlpool -- by the time $e lets go, $N is dead!
+You snap your jaws at $N, but $E slips away at the last moment.
+$n snaps $s jaws at you, but you slip away at the last moment.
+$n snaps $s jaws at $N, but $E slips away at the last moment.
+#
+#
+#
+Your teeth tremble as you rethink your urge to bite $N.
+$n's teeth tremble at the thought of biting you.
+$n's teeth tremble at the thought of biting $N.
+
+M9114 b 9 
+crocodilian bite~
+~
+Your teeth find a major artery; blood fountains out as $N collapses!
+$n's teeth find a major artery! Blood fountains out of you as you collapse.
+$n's teeth find a major artery; blood fountains out as $N collapses!
+You lunge and bite, but clamp your maw on empty air.
+$n lunges and bites, but clamps $s maw on empty air.
+$n lunges and bites, but clamps $s maw on empty air.
+#
+#
+#
+Your bite falters mid-lunge as some inexplicable shame stops you from chomping $N.
+$n's bite falters mid-lunge as some inexplicable shame stops $m from chomping you.
+$n's bite falters mid-lunge as some inexplicable shame stops $m from chomping $N.
+
+M9138 b 5 +
+neck pound~
+~
+pound~
+pounds~
+swinging neck~
+0 0 3.6 4.0 4.2
+You swing your neck with brutal force, and $N collapses under the blow!
+$n swings $s neck into you with brutal force -- you're dead!
+$n swings $s neck into $N with brutal force!
+You swing your neck wide and $N dodges easily.
+$n swings $s neck wide but you easily dodge.
+$n swings $s neck wide and $N dodges easily.
+#
+#
+#
+You swing your neck in $N's direction but can't get close.
+$n swings $s neck around but can't seem to get close to you.
+$n swings $s neck around but can't seem to get near $N.
+
+M9138 b 5 
+neck pound~
+~
+You swing your neck hard enough to toss $N into the air; $E comes down dead!
+$n swings $s neck hard enough to toss you into the air; you don't remember the landing.
+$n swings $s neck hard enough to toss $N into the air; $E comes down dead!
+You overextend your neck trying to pound $N.
+$n overextends $s neck trying to pound you and failing.
+$n overextends $s neck trying to pound $N.
+#
+#
+#
+You whip your neck in circles for $N's amusement.
+$n whips $s neck in circles for your amusement.
+$n whips $s neck in circles for $N's amusement.
+
 M11815 b 0 +
 Uncaged Goblin~
 ~

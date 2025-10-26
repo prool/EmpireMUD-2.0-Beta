@@ -29,8 +29,8 @@ Stilt Buildings~
    Through extensive development and training, your empire has learned to build
 on stilts over water, allowing you to drain swamps and oases, as well as stilt
 houses and other useful seaside structures. Building the swamp platform will
-convert a swamp tile to plains, while building drainage will convert an oasis
-to desert.
+convert a swamp tile to grassland, while building drainage will convert an
+oasis to desert.
 ~
 5 1 70 0 b
 K 2 5156

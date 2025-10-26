@@ -896,7 +896,7 @@ Hoarfrost Serragon: Terraformer~
 ~
 * freezes the tile as the creature walks in, or leashes it
 * configs:
-set avoid_sects 6 15 16 27 28 29 34 35 55 61 62 63 64 65
+set avoid_sects 6 63 64 200 201 202 203 204 210 211 212 220 221 222 223 224 230 231 232 233 234 240 241 242 243 244 245 250 251 252 253 260
 set ignore_sects 8 9
 set frozen_plains 0 7 13 36 40 41 46 50 54 56 59
 set frozen_forest 1 2 3 4 37 38 39 42 43 44 45 47 60 90

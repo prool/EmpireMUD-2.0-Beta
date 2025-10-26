@@ -2387,6 +2387,17 @@ event is not running.
 
 See also: ADVEDIT LINKING
 #d
+"ADVEDIT FORBID-CLIMATE" "ADVEDIT LINK FORBID-CLIMATE" "ADVEDIT LINKING FORBID-CLIMATE"
+
+Usage:  .linking add FORBID-CLIMATE <climate flag(s)>
+
+This will forbid the adventure from spawning on a tile that has any flag in
+this list.
+
+This is the opposite of REQUIRE-CLIMATE.
+
+See also: ADVEDIT LINKING, ADVEDIT REQUIRE-CLIMATE, CLIMATE FLAGS
+#d
 "ADVEDIT IN-VEHICLE-EXISTING" "ADVEDIT LINK IN-VEHICLE-EXISTING" "ADVEDIT LINKING IN-VEHICLE-EXISTING"
 
 Usage:  .linking add IN-VEHICLE-EXISTING <vehicle vnum> [flags]
@@ -2635,6 +2646,17 @@ After the adventure ends, the vehicle will vanish unless you remove its
 
 See also: ADVEDIT LINKING, VNUM
 #d
+"ADVEDIT REQUIRE-CLIMATE" "ADVEDIT LINK REQUIRE-CLIMATE" "ADVEDIT LINKING REQUIRE-CLIMATE"
+
+Usage:  .linking add REQUIRE-CLIMATE <climate flag(s)>
+
+This will require any tile the adventure spawns on to have a specific set of
+climate flags. If more than 1 flag is specified, all flags must match.
+
+This is the opposite of FORBID-CLIMATE.
+
+See also: ADVEDIT LINKING, ADVEDIT FORBID-CLIMATE, CLIMATE FLAGS
+#d
 "ADVEDIT TIME-LIMIT" "ADVEDIT LINK TIME-LIMIT" "ADVEDIT LINKING TIME-LIMIT"
 
 Usage:  .linking add TIME-LIMIT <minutes> [flags]
@@ -2682,6 +2704,8 @@ See specific help files for each type: &yHELP ADVEDIT <TYPE>&0
  &cIN-VEHICLE-NEW-BDG-NEW&0: Interior of new vehicle at new building.
  &cIN-VEHICLE-NEW-CROP&0: Interior of new vehicle at a crop.
  &cIN-VEHICLE-NEW-WORLD&0: Interior of new vehicle at a sector.
+ &cREQUIRE-CLIMATE&0: Climate flags must be present when spawning adventure.
+ &cFORBID-CLIMATE&0: Climate flags must NOT be present to spawn.
 
 Available flags:
  &cCLAIMED-OK&0 - Can link to claimed locations (default: unclaimed only).
@@ -3499,7 +3523,7 @@ In some cases, tiles inherit properties from the base sector. For example,
 roads have the same climate as their base sector due to their
 INHERIT-BASE-CLIMATE flag.
 
-See also: SECTOR, STAT
+See also: MAPEDIT BASE SECTOR, SECTOR, STAT
 #d
 "BEDIT AFFECTS" "REDIT AFFECTS" "VEDIT AFFECTS" "ROOM AFFECTS" "ROOM AFFECT FLAGS"
 
@@ -3949,6 +3973,7 @@ Optional interaction restrictions:
  &c-tech <name>&0 - Empire must have this tech.
  &c-tool <name>&0 - Require a specific tool for this interaction.
  &c-depletion <type>&0 - Uses this type of depletion (see OLC DEPLETION).
+ &c-region <flag>&0 - Restrict by region (see SPAWN FLAGS for regions).
 
 Examples:
 > .interaction add FORAGE 1 12345 100 x -ability "Find Herbs"
@@ -4637,6 +4662,7 @@ random each time.
 Message types:
  &cmagic-growth&0 - Shown to the whole room when a MAGIC-GROWTH evolution occurs.
    If the sector also has a magic-growth message, only the crop's will show.
+ &cburns-down&0 - Shown when this crop is burned (full crop only, not seeded).
 
 See also: OLC CROPS
 #d
@@ -5878,6 +5904,21 @@ For notes on the mud's building rules, see HELP BUILDING GUIDE.
 
 See also: OLC
 #d
+"MAPEDIT BASESECTOR" "MAPEDIT BASE SECTOR" "CHANGE BASE SECTOR"
+
+Usage:  .map basesector <sector vnum | name>
+
+This changes the base sector for the tile you are standing on. The base sector
+is usually the same as the current sector, but it is different for various
+reasons, including:
+
+- the sector a crop tile will return to when harvested
+- the sector underneath a building, for when it's dismantled
+- the sector under a city center, which determines the color of the center
+- the sector underneath a road, determining the roadside icon
+
+See also: BASE SECTOR, MAPEDIT TERRAIN
+#d
 "MAPEDIT BUILD"
 
 Usage:  .map build <building vnum> [direction]
@@ -6116,10 +6157,15 @@ a building on the map.
 
 This command accepts sector names, crop names, or sector vnums.
 
+This will also change the base sector of the tile in most cases, but you can
+set the base sector of a tile separately afterwards by using ".map basesector".
+You should check the base sector with "stat room" and fix it if necessary after
+using this command to create a crop tile.
+
 Example:
  > .map terrain Tower of Souls
 
-See also: MAP OLC, MAPEDIT UNCLAIMABLE
+See also: MAP OLC, MAPEDIT BASE SECTOR, MAPEDIT UNCLAIMABLE, SECTOR TYPE, STAT
 #d
 "MAPEDIT UNCLAIMABLE"
 
@@ -6231,7 +6277,8 @@ Message types:
  &csay&0 - The message is said aloud by the mob periodically.
  &csay-day&0 - Like say, but only during the day.
  &csay-night&0 - Only during the night.
- &clong-desc&0 - Variable long descriptions (prevents normal long desc showing)
+ &clong-desc&0 - Variable long descriptions (prevents normal long desc showing).
+ &cwater-long-desc&0 - Variant long descriptions shown when on water tiles.
  &cscript1&0 - &cscript5&0 - Can be referenced in scripts as
    %mob.custom(script1)%, %mob.custom(script1,0)%, etc.
  &cscavenge-corpse&0 - Shown when a SCAVENGER mob eats a corpse ($p is the corpse).
@@ -6361,6 +6408,7 @@ Optional interaction restrictions:
  &c-ptech <name>&0 - Player must have this player-tech.
  &c-tech <name>&0 - Empire must have this tech.
  &c-tool <name>&0 - Require a specific tool for this interaction.
+ &c-region <flag>&0 - Restrict by region (see SPAWN FLAGS for regions).
 
 Example of a rare result from barding (order matters here):
  1. BARDE: 1x an epic warhorse .50% (e)
@@ -7365,6 +7413,7 @@ Optional interaction restrictions:
  &c-ptech <name>&0 - Player must have this player-tech.
  &c-tech <name>&0 - Empire must have this tech.
  &c-tool <name>&0 - Require a specific tool for this interaction.
+ &c-region <flag>&0 - Restrict by region (see SPAWN FLAGS for regions).
 
 See also: OLC OBJECTS
 #d
@@ -9224,6 +9273,11 @@ random each time.
 Message types:
  &cmagic-growth&0 - Shown to the whole room when a MAGIC-GROWTH evolution occurs.
    This will not be shown if there is a crop here that has one.
+ &cburns-down&0 - Shown when this sector gets burned. This will not be shown on
+   crop tiles if the crop also has a custom message.
+ &cwas-burned&0 - Shows when this sect appears after a burn. Note that if no
+   burns-down or was-burned message is shown, a default message is shown for
+   burning instead.
 
 See also: OLC SECTORS
 #d
@@ -9328,6 +9382,9 @@ Available sector flags:
     to the ones set on this sector. For example, a road or building sector.
  &cIRRIGATES-AREA&0 - This flag is used to trigger irrigation evolutions.
  &cNO-WORKFORCE-AUTOABANDON&0 - Workforce chores will not abandon this terrain.
+ &cBASIC-CROP&0 - Indicates this tile counts as a basic crop tile for its
+    climate. Used in conjunction with the CROP flag by commands like .map
+    terrain.
 
 See also: OLC SECTORS, TERRAIN HEIGHT
 #d
@@ -10307,6 +10364,7 @@ Optional interaction restrictions:
  &c-tech <name>&0 - Empire must have this tech.
  &c-tool <name>&0 - Require a specific tool for this interaction.
  &c-depletion <type>&0 - Uses this type of depletion (see OLC DEPLETION).
+ &c-region <flag>&0 - Restrict by region (see SPAWN FLAGS for regions).
 
 Examples:
 > .interaction add FORAGE 1 12345 100 x -ability "Find Herbs"
