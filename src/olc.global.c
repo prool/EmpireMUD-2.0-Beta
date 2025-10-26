@@ -573,7 +573,7 @@ OLC_MODULE(gedit_climateexclude) {
 		msg_to_char(ch, "You can't set climateexclude on this type.\r\n");
 	}
 	else {
-		GET_GLOBAL_TYPE_EXCLUDE(glb) = olc_process_flag(ch, argument, "climate", "climateexclude", climate_flags, GET_GLOBAL_TYPE_EXCLUDE(glb));
+		GET_GLOBAL_TYPE_EXCLUDE(glb) = olc_process_flag(ch, argument, "climate exclusion", "climateexclude", climate_flags, GET_GLOBAL_TYPE_EXCLUDE(glb));
 	}
 }
 
