@@ -1870,7 +1870,7 @@ a spectacled caiman~
 A spectacled caiman lerks here waiting for prey.
 ~
 70 100 bcdgj 0 3
-0 0 79 9 -1 -1
+0 0 79 9114 -1 -1
 D
    A small, armored spectacled caiman lies motionless near the murky water's
 edge. Its dull olive-green and brown hide is covered in tough, bony scutes, and
@@ -2290,5 +2290,21 @@ I 0 9058 50.00 1  # BUTCHER: enormous mammoth tusk
 I 1 1351 100.00 3  # SKIN: large skin
 I 1 1351 75.00 1  # SKIN: large skin
 T 9297
+S
+#9298
+alligator armored~
+an armored alligator~
+An armored alligator lurks nearby.
+~
+75 100 cdgjo c 5
+0 0 0 9114 -1 -1
+D
+   The alligator's thick hide is plated in rigid scales, dull and dark as river
+stone and capable of blending in until it's too late. Old scars mar its flesh,
+but little penetrates its scales.
+~
+I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 2  # SKIN: large skin
+T 9117
 S
 $

@@ -855,6 +855,7 @@ I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 88.00 25 g  # GATHER: sticks and leaves
 I 9 135 12.00 25 g  # GATHER: reaching sapling
+I 10 9288 0.50 1  # ENCOUNTER: water monitor
 I 20 150 88.00 1 c  # CHOP: mangrove tree
 I 20 135 12.00 1 c  # CHOP: reaching sapling
 U
@@ -1175,7 +1176,18 @@ E
 15 0 20.00 241
 I 6 3084 20.00 25 f  # FORAGE: brittlegill mushroom
 I 6 3310 55.00 25 f  # FORAGE: wood ear mushroom
-I 10 9114 1.00 1  # ENCOUNTER: massive crocodile
+I 10 9278 0.50 1  # ENCOUNTER: furry tarsier
+I+ 9 64  # Region: NORTH
+I+ 9 512  # Region: WEST
+I 10 9114 0.50 1  # ENCOUNTER: massive crocodile
+I+ 9 128  # Region: SOUTH
+I+ 9 512  # Region: WEST
+I 10 9298 0.50 1  # ENCOUNTER: armored alligator
+I+ 9 64  # Region: NORTH
+I+ 9 256  # Region: EAST
+I 10 9281 0.50 1  # ENCOUNTER: hungry hippopotamus
+I+ 9 128  # Region: SOUTH
+I+ 9 256  # Region: EAST
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
 I 21 1305 0.25 125 f  # FISH: worn old statuette
 I 21 256 0.25 125 f  # FISH: hestian trinket
