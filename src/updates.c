@@ -4414,8 +4414,7 @@ void b5_194_tropical_terrain_overhaul(void) {
 	bool is_tropic;
 	crop_data *new_crop;
 	room_data *room;
-	
-	sector_vnum B5194_GRASSLAND = 200;
+	struct room_extra_data *red;
 	
 	// tropical base tile list
 	sector_vnum jungle_base_list[] = { 16, 27, 28, 29, 34, 35, 55, 61 ,62 ,63, 64, 65, -1 };
@@ -4525,7 +4524,12 @@ void b5_194_tropical_terrain_overhaul(void) {
 		}
 		
 		// PRESERVE
-		trench_original = get_extra_data(map->shared->extra_data, ROOM_EXTRA_TRENCH_ORIGINAL_SECTOR);
+		if ((red = find_extra_data(map->shared->extra_data, ROOM_EXTRA_TRENCH_ORIGINAL_SECTOR))) {
+			trench_original = red->value;
+		}
+		else {
+			trench_original = NOTHING;
+		}
 		
 		// FIRST: see if it began as a tropic tile
 		is_tropic = FALSE;
@@ -4586,13 +4590,27 @@ void b5_194_tropical_terrain_overhaul(void) {
 				set_natural_sector(map, sector_proto(to_natural));
 				++changed_nat;
 			}
-			if (SECT_FLAGGED(map->sector_type, SECTF_IS_TRENCH)) {
+			
+			// translate trench
+			if (trench_original != NOTHING) {
 				if (is_tropic) {
-					set_extra_data(&map->shared->extra_data, ROOM_EXTRA_TRENCH_ORIGINAL_SECTOR, B5194_GRASSLAND);
+					for (iter = 0; tropic_conversion[iter][0] != -1; ++iter) {
+						if (trench_original == tropic_conversion[iter][0]) {
+							trench_original = tropic_conversion[iter][1];
+							break;
+						}
+					}
 				}
 				else {
-					set_extra_data(&map->shared->extra_data, ROOM_EXTRA_TRENCH_ORIGINAL_SECTOR, trench_original);
+					for (iter = 0; temperate_conversion[iter][0] != -1; ++iter) {
+						if (trench_original == temperate_conversion[iter][0]) {
+							trench_original = temperate_conversion[iter][1];
+						}
+					}
 				}
+				
+				// and update
+				set_extra_data(&map->shared->extra_data, ROOM_EXTRA_TRENCH_ORIGINAL_SECTOR, trench_original);
 			}
 		}
 	}
