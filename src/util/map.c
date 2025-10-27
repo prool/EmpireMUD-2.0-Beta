@@ -257,7 +257,7 @@ struct {
 		{ "b", "Temp Crop", 7, TRUE, TRUE },	// 5, unused
 	{ "m", "Desert", 20, TRUE, TRUE },
 	{ "*", "Tower", 18, TRUE, TRUE },
-	{ "d", "Jungle", 220, TRUE, TRUE },
+	{ "2", "Jungle", 220, TRUE, TRUE },
 	{ "j", "Oasis", 21, TRUE, TRUE },
 	{ "b", "Grove", 26, TRUE, TRUE },	// 10
 	{ "e", "Swamp", 250, TRUE, TRUE },
