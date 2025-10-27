@@ -255,7 +255,7 @@ elephant matriarch massive~
 the massive elephant~
 A massive elephant matriarch lumbers along beside you.
 ~
-125 150 adjyA cL 5
+125 150 adjyAL cL 5
 2 0 0 9043 -1 -1
 D
    The gray-brown matriarch is enormous -- easily among the largest elephants
@@ -279,7 +279,7 @@ elephant lumbering~
 a lumbering elephant~
 An elephant is lumbering around, pulling up plants.
 ~
-100 150 adjy cL 5
+100 150 adjyL cL 5
 2 0 0 9043 -1 -1
 D
    The gray-brown elephant seems uninterested in you as it yanks up any plant

@@ -868,6 +868,7 @@ if %loc%
 else
   * not instanced?
   nop %self.add_mob_flag(SPAWNED)%
+  nop %self.remove_mob_flag(IMPORTANT)%
 end
 ~
 #12251
@@ -936,7 +937,7 @@ elseif %dir% == southeast
 end
 * leash distance
 set dist %loc.distance(%room%)%
-if %dist% > %range% && %random.2% == 2
+if (%dist% >= %range% && %random.3% != 3) || %dist% >= (%range% + 2)
   return 0
   halt
 end
