@@ -18,7 +18,7 @@ elephant jungle towering~
 a jungle elephant~
 A towering jungle elephant is rummaging around.
 ~
-20 40 adejoy 0 5
+20 40 adejoy c 5
 0 0 0 9044 -1 -1
 D
    The great elephant has a blanket over its back, belted on to form a sort of
@@ -51,7 +51,7 @@ tapir~
 a tapir~
 A tapir is rooting around a bush.
 ~
-100 125 djo 0 3
+100 125 djo c 3
 0 0 0 9 -1 -1
 D
    The tapir is tapered on the front end. It's the strangest animal you've ever
@@ -243,7 +243,7 @@ bat flying fox~
 a flying fox~
 A flying fox is flapping around above you.
 ~
-65 90 djo m 1
+65 90 djo cm 1
 0 0 2 9 -1 -1
 D
 This gigantic bat is nearly the size of a fox!
@@ -256,7 +256,7 @@ bat black~
 a black bat~
 A black bat is flying here.
 ~
-1 5 djo m 1
+1 5 djo cm 1
 0 0 2 9 -1 -1
 D
 The tiny bat is fluttering to and fro, chasing bugs. You can barely see the
@@ -268,7 +268,7 @@ jackrabbit rabbit~
 a jackrabbit~
 A jackrabbit sits with its ears raised.
 ~
-1 5 djo 0 1
+1 5 djo c 1
 0 0 15 9 -1 -1
 D
    The oversized jackrabbit -- actually a hare -- sits perfectly still and
@@ -475,7 +475,7 @@ rattlesnake snake sidewinder~
 a sidewinder~
 A sidewinder rattlesnake is coiled and rattling.
 ~
-5 15 djo 0 1
+5 15 djo c 1
 0 0 5 9 -1 -1
 D
    The sidewinder moves in a characteristic sideways motion, waving across the
@@ -492,7 +492,7 @@ scorpion giant~
 a giant scorpion~
 A giant scorpion skitters toward cover.
 ~
-5 15 djoz 0 1
+5 15 djoz c 1
 0 0 8 3 -1 -1
 D
 Though giant for a scorpion, it's still quite small.
@@ -517,7 +517,7 @@ owl great-horned greathorned horned~
 a great-horned owl~
 A great-horned owl is surveying the ground.
 ~
-5 15 djo m 2
+5 15 djo cm 2
 0 0 2 10 -1 -1
 D
 You can barely see the owl as it swoops silently across the night sky.
@@ -612,7 +612,7 @@ rhinoceros white~
 a white rhino~
 A white rhinoceros stomps around.
 ~
-20 40 djoA 0 4
+20 40 djoA c 4
 0 0 0 27 -1 -1
 D
    The massive rhinoceros is large, even by its own standards. It has a great
@@ -631,7 +631,7 @@ elephant massive~
 a massive elephant~
 A massive elephant lumbers past you.
 ~
-20 40 adejoy 0 5
+20 40 adejoy c 5
 0 0 0 9044 -1 -1
 D
 The gray elephant is truly huge, with ears like bedsheets and legs like trees.
@@ -985,7 +985,7 @@ manatee~
 a manatee~
 A manatee is bobbing near the surface.
 ~
-30 50 djlo 0 4
+30 50 djlo c 4
 0 0 6 9 -1 -1
 D
    The manatee takes a breath at the surface and then drifts down to chew the
@@ -999,7 +999,7 @@ dolphin common~
 a dolphin~
 A common dolphin is swimming along side you.
 ~
-30 50 djlo 0 3
+30 50 djlo c 3
 0 0 6 9 -1 -1
 D
    The dolphin jumps out of the water over and over, either trying to perform
@@ -1015,7 +1015,7 @@ otter sea~
 a sea otter~
 A sea otter glides past you.
 ~
-30 50 djlo 0 2
+30 50 djlo c 2
 0 0 6 9 -1 -1
 D
    The large, brown otter swims past you and then rolls over to float on its
@@ -1031,7 +1031,7 @@ whale right huge~
 the right whale~
 A huge right whale surfaces nearby!
 ~
-30 50 djloy 0 6
+30 50 djloy c 6
 0 0 6 5 -1 -1
 D
    This type of whale is known as a the right whale to hunt. The whale slowly
@@ -1046,7 +1046,7 @@ whale fin gigantic~
 the fin whale~
 A gigantic fin whale swims up alongside you!
 ~
-30 50 djloy 0 6
+30 50 djloy c 6
 0 0 6 5 -1 -1
 D
    Cruising just below the surface, the fin whale is barely visible as it pulls
@@ -1062,7 +1062,7 @@ shark whale huge spotted~
 the whale shark~
 A huge, spotted whale shark swims just below the surface.
 ~
-30 50 djloy 0 5
+30 50 djloy c 5
 0 0 6 5 -1 -1
 D
    The whale shark is unmistakably a fish, and yet it is the size of a whale!
@@ -1080,7 +1080,7 @@ shark basking~
 the basking shark~
 A basking shark swims slowly, with its mouth wide open.
 ~
-30 50 djloy 0 5
+30 50 djloy c 5
 0 0 6 5 -1 -1
 D
    Though large, the basking shark isn't exceptionally big, for a shark. It
@@ -1159,7 +1159,7 @@ hare arctic~
 an arctic hare~
 An arctic hare sits upright, staring.
 ~
-10 20 djo 0 1
+10 20 djo c 1
 0 0 15 9 -1 -1
 D
    The coat of this hare is as white as the driven snow, punctuated only by
@@ -1174,7 +1174,7 @@ deer reindeer~
 a reindeer~
 A reindeer raises its head from grazing.
 ~
-50 75 dejo 0 4
+50 75 dejo c 4
 0 0 14 27 -1 -1
 D
    This heavy creature is a reindeer, found only in the coldest parts of the
@@ -1191,7 +1191,7 @@ reindeer barded~
 a barded reindeer~
 A barded reindeer waits regally nearby.
 ~
-50 75 bdej 0 4
+50 75 bdej c 4
 0 0 14 27 -1 -1
 D
    This heavy creature is a reindeer, found only in the coldest parts of the
@@ -1226,7 +1226,7 @@ narwhal narwal huge~
 a narwhal~
 A huge narwhal breaks the surface of the water.
 ~
-50 75 djloy 0 4
+50 75 djloy c 4
 0 0 6 5 -1 -1
 D
    The narwhal is smaller than most whales you've seen, but still larger than
@@ -1255,7 +1255,7 @@ walrus huge~
 a huge walrus~
 A huge walrus bellows nearby.
 ~
-75 100 djoA 0 4
+75 100 djoA c 4
 0 0 13 27 -1 -1
 D
    This massive creature, which looks to be half seal and half bear, bears
@@ -1318,7 +1318,7 @@ penguin emperor~
 an emperor penguin~
 An emperor penguin slides across the ice nearby.
 ~
-50 75 dgjlo 0 2
+50 75 dgjlo c 2
 0 0 16 26 -1 -1
 D
    This enormous penguin has a splash of yellow over its white belly. It
@@ -1334,7 +1334,7 @@ seal elephant large~
 a large elephant seal~
 A large elephant seal bellows nearby.
 ~
-75 100 adjoA 0 4
+75 100 adjoA c 4
 0 0 13 5 -1 -1
 D
    Although it's easily the largest seal you've ever seen, the most impressive
@@ -1350,7 +1350,7 @@ seal~
 a seal~
 A seal slides across the ice.
 ~
-30 50 dgjlo 0 3
+30 50 dgjlo c 3
 0 0 24 9 -1 -1
 D
    This little gray seal slides around on the ice, moving in circles around you
@@ -1364,7 +1364,7 @@ emperor penguins~
 the Emperor of Penguins~
 The Emperor of Penguins stares at you from beneath his penguin cowl.
 ~
-150 150 bdovAI 0 3
+150 150 bdovAI c 3
 1 0 13 15 -1 -1
 D
    This strange man is wearing a white suit with a black cape and cowl. He
