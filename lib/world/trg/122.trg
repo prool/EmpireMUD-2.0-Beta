@@ -853,6 +853,7 @@ end
 Stomping Ground: Shared mob load trig~
 0 n 100
 ~
+set important_vnums 12250 12251
 wait 0
 set loc %instance.location%
 if %loc%
@@ -861,7 +862,7 @@ if %loc%
   mmove
   mmove
   set start %instance.start%
-  if %start%
+  if %start% && %important_vnums% ~= %self.vnum%
     eval elephants %start.var(elephants,0)% + 1
     remote elephants %start.id%
   end
@@ -885,6 +886,7 @@ end
 Stomping Ground: Elephant death~
 0 f 100
 ~
+* This only belongs on elephants listed as %important_vnums% in trig 12250
 set start %instance.start%
 if %start%
   eval elephants %start.var(elephants,1)% - 1
@@ -918,8 +920,8 @@ if !%loc%
   halt
 end
 * compute range
-eval max_x %world.width% / 180
-eval max_y %world.height% / 100
+eval max_x %world.width% / 220
+eval max_y %world.height% / 120
 if %max_x% < %max_y%
   set range %max_x%
 else
@@ -958,9 +960,9 @@ set room %self.room%
 set sect %room.sector_vnum%
 * Convert territory
 if %sect% == 203
-  * crop -> fertile soil
+  * crop -> soil
   %echo% ~%self% rips up the crop and devours it!
-  %terraform% %room% 204
+  %terraform% %room% 12250
 elseif %sect% == 210 && %random.3% == 3
   * savanna -> grassland
   %echo% ~%self% rips up a tree!
@@ -978,16 +980,16 @@ elseif %sect% == 220
   %load% obj 128 %room%
   %terraform% %room% 221
 elseif %sect% == 221
-  * partial jungle -> fertile soil
+  * partial jungle -> soil
   %echo% ~%self% rips up a tree!
   %load% obj 128 %room%
-  %terraform% %room% 204
+  %terraform% %room% 12250
 elseif %sect% == 223
-  * jungle copse -> fertile soil
+  * jungle copse -> soil
   %echo% ~%self% rips up some saplings!
   %load% obj 135 %room%
   %load% obj 135 %room%
-  %terraform% %room% 204
+  %terraform% %room% 12250
 elseif %sect% == 224
   * jungle edge -> grassland
   %echo% ~%self% rips up some saplings!
@@ -995,35 +997,35 @@ elseif %sect% == 224
   %load% obj 135 %room%
   %terraform% %room% 200
 elseif %sect% == 232
-  * mangrove forest -> fertile seaside
+  * mangrove forest -> soil
   %echo% ~%self% rips up some trees!
   %load% obj 150 %room%
   %load% obj 150 %room%
-  %terraform% %room% 231
+  %terraform% %room% 12250
 elseif %sect% == 237
-  * seaside crop -> fertile seaside
+  * seaside crop -> soil
   %echo% ~%self% rips up the crop and devours it!
-  %terraform% %room% 231
+  %terraform% %room% 12250
 elseif %sect% == 239
   * seaside crop -> estuary shore
   %echo% ~%self% rips up the crop and devours it!
   %terraform% %room% 234
 elseif %sect% == 247
-  * riverbank crop -> fertile riverbank
+  * riverbank crop -> soil
   %echo% ~%self% rips up the crop and devours it!
-  %terraform% %room% 241
+  %terraform% %room% 12250
 elseif %sect% == 249
-  * lakeshore crop -> fertile lakeshore
+  * lakeshore crop -> soil
   %echo% ~%self% rips up the crop and devours it!
-  %terraform% %room% 244
+  %terraform% %room% 12250
 elseif %sect% == 250 && %random.3% == 3
-  * swamp -> fertile soil
+  * swamp -> soil
   %echo% ~%self% rips all the swamp plants!
-  %terraform% %room% 204
+  %terraform% %room% 12250
 elseif %sect% == 252 && %random.3% == 3
-  * swamp -> fertile soil
+  * swamp -> soil
   %echo% ~%self% rips all the marsh plants!
-  %terraform% %room% 204
+  %terraform% %room% 12250
 end
 * ensure not more than once per minute
 wait 60 s
