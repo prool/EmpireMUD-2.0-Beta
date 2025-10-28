@@ -129,13 +129,16 @@ struct island_def island_types[] = {
 // tundra: only used if WRAP_Y is off
 #define TUNDRA_HEIGHT  1	// tiles of tundra at top/bottom (will be half a tile higher than this number)
 
-// jungle replaces temperate terrain -- if you change these, you should also change the TROPIC_LATITUDE/ARCTIC_LATITUDE in structs.h
-#define JUNGLE_START_PRC  43//30	// % up from bottom of map where jungle starts
-#define JUNGLE_END_PRC  57//70	// % up from bottom of map where jungle ends
+// NOTE: if you change jungle/desert start, you should also change the TROPIC_LATITUDE/ARCTIC_LATITUDE in structs.h
+// This would let you define a world that's less than a full globe.
 
-// desert overrides jungle
-#define DESERT_START_PRC  30 //36.6	// % up from bottom where desert starts
-#define DESERT_END_PRC  70 //63.3	// % up from bottom where desert ends
+// jungle overrides desert and temperate terrain (center of map)
+#define JUNGLE_START_PRC  43	// % up from bottom of map where jungle starts
+#define JUNGLE_END_PRC  57	// % up from bottom of map where jungle ends
+
+// desert overrides temperate (between jungle and temperate on the map)
+#define DESERT_START_PRC  30	// % up from bottom where desert starts
+#define DESERT_END_PRC  70	// % up from bottom where desert ends
 
 
  //////////////////////////////////////////////////////////////////////////////
