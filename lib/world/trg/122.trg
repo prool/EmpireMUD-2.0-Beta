@@ -947,7 +947,7 @@ end
 ~
 #12254
 Stomping Ground: Terraform jungle to grassland~
-0 ab 10
+0 ab 7
 ~
 * Terraforms ONLY the listed vnums, and only when attached to an instance
 set room %self.room%
@@ -1030,5 +1030,81 @@ elseif %sect% == 252 && %random.3% == 3
 end
 * ensure not more than once per minute
 wait 60 s
+~
+#12255
+Stomping Ground: Tame small elephant to gain minipet~
+0 c 0
+tame feed~
+* mostly a copy of 9028 with updates for the minipet here
+* Amount of tameness required
+set target 5
+* This script also overrides 'feed'
+if %cmd% == feed
+  if %actor.char_target(%arg.argument2%) == %self%
+    %send% %actor% Just 'give' the food to *%self%.
+    return 1
+  else
+    * ignore 'feed'
+    return 0
+  end
+  halt
+end
+* Check target and tech
+if (!%actor.has_tech(Tame-Command)% || %actor.char_target(%arg%)% != %self%)
+  return 0
+  halt
+end
+* Skill checks / load tameness
+if %actor.ability(Summon Animals)%
+  set tameness %target%
+  %send% %actor% You whistle at ~%self%...
+  %echoaround% %actor% ~%actor% whistles at ~%self%...
+elseif %self.varexists(tameness)%
+  set tameness %self.tameness%
+else
+  set tameness 0
+end
+if %tameness% < %target%
+  %send% %actor% You can't seem to get close enough to ~%self% to tame *%self%. Try feeding *%self% some fruit or grain.
+  return 1
+elseif %actor.has_minipet(12255)%
+  %send% %actor% ~%self% seems quite tame but you already have one as a minipet.
+  return 1
+else
+  * Ok to tame (which is fake)
+  %send% %actor% You try to tame ~%self%... and gain a playful little elephant as a minipet!
+  %echoaround% %actor% ~%actor% tries to tame ~%self%... and gains a playful little elephant!
+  nop %actor.add_minipet(12255)%
+  return 1
+  %purge% %self%
+end
+~
+#12256
+Stomping Ground: Trumpeting Call~
+0 b 2
+~
+%echo% ~%self% raises ^%self% trunk to the sky and lets out a powerful call...
+%regionecho% %self.room% 15 A trumpeting call echoes through the tropical air.
+~
+#12257
+Stomping Ground: Spawn friends~
+0 b 4
+~
+* summons a friend at random over time
+set room %self.room%
+if (%room.sector_vnum% < 200 || %room.sector_vnum% > 299) && %room.building_vnum% != 12250
+  * don't summon here
+  halt
+end
+if %random.3% == 1
+  set vnum 12254
+else
+  set vnum 12252
+end
+%load% mob %vnum%
+set mob %room.people%
+if %mob.vnum% == %vnum%
+  %echo% Another elephant arrives and greets the matriarch with a polite trumpet.
+end
 ~
 $

@@ -54,4 +54,32 @@ stomping grounds grasslands jungle area around~
 create a vast grassland to use as their new stomping grounds!
 ~
 S
+#12255
+Elephant Graveyard~
+An Elephant Graveyard~
+@.&w(c@.~
+48 2 dx 0
+0 0 0 -1
+B0
+&w(c~
+B1
+&w(~
+C
+tomb~
+E
+graveyard elephant yard tomb area around bones~
+   As you step down into the dusty depression, the bones -- gleaming from a
+distance -- rise around you. These elephantine bones represent countless
+generations of the great creatures stretching back to the dawn of time.
+~
+F
+B
+I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
+M
+12253 0.03 0
+R
+1002 1 5 0
+R
+12255 1 5 0
+S
 $
