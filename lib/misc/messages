@@ -2389,6 +2389,42 @@ You try to bash $N with your tusks but an invisible force stops you.
 $n tries to bash you with $s tusks but can't seem to hit.
 $n tries to bash $N with $s tusks but something stops $m.
 
+M9114 b 9 +
+crocodilian bite~
+~
+bite~
+bites~
+bite~
+0 0 3.8 4.2 6.0
+You clamp your jaws on $N and spin like a whirlpool -- when you let go, $E no longer moves.
+$n clamps $s jaws on you and spins like a whirlpool -- your vision goes red and then black!
+$n clamps $s jaws on $N and spins like a whirlpool -- by the time $e lets go, $N is dead!
+You snap your jaws at $N, but $E slips away at the last moment.
+$n snaps $s jaws at you, but you slip away at the last moment.
+$n snaps $s jaws at $N, but $E slips away at the last moment.
+#
+#
+#
+Your teeth tremble as you rethink your urge to bite $N.
+$n's teeth tremble at the thought of biting you.
+$n's teeth tremble at the thought of biting $N.
+
+M9114 b 9 
+crocodilian bite~
+~
+Your teeth find a major artery; blood fountains out as $N collapses!
+$n's teeth find a major artery! Blood fountains out of you as you collapse.
+$n's teeth find a major artery; blood fountains out as $N collapses!
+You lunge and bite, but clamp your maw on empty air.
+$n lunges and bites, but clamps $s maw on empty air.
+$n lunges and bites, but clamps $s maw on empty air.
+#
+#
+#
+Your bite falters mid-lunge as some inexplicable shame stops you from chomping $N.
+$n's bite falters mid-lunge as some inexplicable shame stops $m from chomping you.
+$n's bite falters mid-lunge as some inexplicable shame stops $m from chomping $N.
+
 M9138 b 5 +
 neck pound~
 ~

@@ -129,13 +129,16 @@ struct island_def island_types[] = {
 // tundra: only used if WRAP_Y is off
 #define TUNDRA_HEIGHT  1	// tiles of tundra at top/bottom (will be half a tile higher than this number)
 
-// jungle replaces temperate terrain -- if you change these, you should also change the TROPIC_LATITUDE/ARCTIC_LATITUDE in structs.h
-#define JUNGLE_START_PRC  30	// % up from bottom of map where jungle starts
-#define JUNGLE_END_PRC  70	// % up from bottom of map where jungle ends
+// NOTE: if you change jungle/desert start, you should also change the TROPIC_LATITUDE/ARCTIC_LATITUDE in structs.h
+// This would let you define a world that's less than a full globe.
 
-// desert overrides jungle
-#define DESERT_START_PRC  36.6	// % up from bottom where desert starts
-#define DESERT_END_PRC  63.3	// % up from bottom where desert ends
+// jungle overrides desert and temperate terrain (center of map)
+#define JUNGLE_START_PRC  43	// % up from bottom of map where jungle starts
+#define JUNGLE_END_PRC  57	// % up from bottom of map where jungle ends
+
+// desert overrides temperate (between jungle and temperate on the map)
+#define DESERT_START_PRC  30	// % up from bottom where desert starts
+#define DESERT_END_PRC  70	// % up from bottom where desert ends
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -257,7 +260,7 @@ struct {
 		{ "b", "Temp Crop", 7, TRUE, TRUE },	// 5, unused
 	{ "m", "Desert", 20, TRUE, TRUE },
 	{ "*", "Tower", 18, TRUE, TRUE },
-	{ "d", "Jungle", 220, TRUE, TRUE },
+	{ "2", "Jungle", 220, TRUE, TRUE },
 	{ "j", "Oasis", 21, TRUE, TRUE },
 	{ "b", "Grove", 26, TRUE, TRUE },	// 10
 	{ "e", "Swamp", 250, TRUE, TRUE },
@@ -394,7 +397,15 @@ void create_map(void) {
 	printf("Adding mountains and rivers...\n");
 	LL_FOREACH(island_list, isle) {
 		// fillings based on location (it's not desert or jungle YET, so we check prcs
-		if (IS_IN_Y_PRC_RANGE(Y_COORD(isle->loc), DESERT_START_PRC, DESERT_END_PRC)) {
+		if (IS_IN_Y_PRC_RANGE(Y_COORD(isle->loc), JUNGLE_START_PRC, JUNGLE_END_PRC)) {
+			// jungle
+			// chance of mountain
+			if (!number(0, isle->continent ? 2 : 1)) {
+				add_mountains(isle);
+			}
+			add_lake_river(isle);
+		}
+		else if (IS_IN_Y_PRC_RANGE(Y_COORD(isle->loc), DESERT_START_PRC, DESERT_END_PRC)) {
 			// desert
 			if (!isle->continent || !number(0, 2)) {
 				add_mountains(isle);	// less common on continents
@@ -403,14 +414,6 @@ void create_map(void) {
 			if (!number(0, 2)) {
 				add_lake_river(isle);
 			}
-		}
-		else if (IS_IN_Y_PRC_RANGE(Y_COORD(isle->loc), JUNGLE_START_PRC, JUNGLE_END_PRC)) {
-			// jungle
-			// chance of mountain
-			if (!number(0, isle->continent ? 2 : 1)) {
-				add_mountains(isle);
-			}
-			add_lake_river(isle);
 		}
 		else {	// temperate (not jungle or desert)
 			if (!isle->continent || !number(0, 3)) {
@@ -428,10 +431,10 @@ void create_map(void) {
 	replace_near(MOUNTAIN, FOOTHILLS, LAKE, 1);
 	
 	// these really need to go in order, as they modify the map in passes
-	printf("Adding desert...\n");
-	add_latitude_terrain(DESERT, DESERT_START_PRC, DESERT_END_PRC);
 	printf("Adding jungle...\n");
 	add_latitude_terrain(JUNGLE, JUNGLE_START_PRC, JUNGLE_END_PRC);
+	printf("Adding desert...\n");
+	add_latitude_terrain(DESERT, DESERT_START_PRC, DESERT_END_PRC);
 	
 	// oases convert to river here (instead of canal like in-game)
 	printf("Merging oases...\n");

@@ -49,7 +49,7 @@ set lion_assist_count 0
 set ch %self.room.people%
 while %ch%
   if %ch.is_npc% && %ch.allegiance% == %self.allegiance%
-    nop %ch.add_cooldown(9236,%use_cooldown%)%
+    nop %ch.set_cooldown(9236,%use_cooldown%)%
     if %ch.vnum% == %self.vnum% && %ch.var(lion_assist_count)% > %lion_assist_count%
       set lion_assist_count %ch.var(lion_assist_count)%
     end
@@ -78,7 +78,7 @@ if %loaded.vnum% == %self.vnum% && %loaded% != %self%
   * success
   %echo% Another lion leaps in from out of sight!
   remote lion_assist_count %loaded.id%
-  nop %loaded.add_cooldown(9236,%use_cooldown%)%
+  nop %loaded.set_cooldown(9236,%use_cooldown%)%
   %force% %loaded% maggro
 end
 ~

@@ -411,7 +411,7 @@ D0
 D0
 &to&?^^^~
 &Y~
-I 6 3065 100.00 25  # FORAGE: red berries
+I 6 3065 100.00 25  # FORAGE: bright red berries
 I 8 3045 20.00 2 H  # HARVEST: sack of coffee beans
 I 8 3045 20.00 3 H  # HARVEST: sack of coffee beans
 I 8 3045 20.00 4 H  # HARVEST: sack of coffee beans
@@ -576,7 +576,7 @@ S
 apricots~
 An Apricot Orchard~
 23 j b
-55 80 75 100
+50 75 75 100
 D0
 ^^^^~
 &Y~
@@ -734,7 +734,7 @@ S
 cucumbers~
 A Cucumber Field~
 12 j a
-25 75 35 65
+25 75 32 68
 D0
 mmmm~
 &g~

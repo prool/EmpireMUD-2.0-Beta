@@ -675,7 +675,7 @@ void olc_delete_mobile(char_data *ch, mob_vnum vnum) {
 void olc_fullsearch_mob(char_data *ch, char *argument) {
 	char type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH], find_keywords[MAX_INPUT_LENGTH];
 	bitvector_t  find_interacts = NOBITS, found_interacts, find_custom = NOBITS, found_custom;
-	bitvector_t not_flagged = NOBITS, only_flags = NOBITS, only_affs = NOBITS;
+	bitvector_t not_flagged = NOBITS, only_flags = NOBITS, only_affs = NOBITS, not_aff = NOBITS;
 	int only_move = NOTHING, only_nameset = NOTHING;
 	int count, only_level = NOTHING, only_sex = NOTHING, only_size = NOTHING, vmin = NOTHING, vmax = NOTHING;
 	faction_data *only_fct = NULL;
@@ -712,6 +712,7 @@ void olc_fullsearch_mob(char_data *ch, char *argument) {
 		FULLSEARCH_LIST("sex", only_sex, genders)
 		FULLSEARCH_LIST("gender", only_sex, genders)
 		FULLSEARCH_LIST("size", only_size, size_types)
+		FULLSEARCH_FLAGS("unaffected", not_aff, affected_bits)
 		FULLSEARCH_FLAGS("unflagged", not_flagged, action_bits)
 		FULLSEARCH_INT("vmin", vmin, 0, INT_MAX)
 		FULLSEARCH_INT("vmax", vmax, 0, INT_MAX)
@@ -747,6 +748,9 @@ void olc_fullsearch_mob(char_data *ch, char *argument) {
 			continue;
 		}
 		if (only_affs != NOBITS && (AFF_FLAGS(mob) & only_affs) != only_affs) {
+			continue;
+		}
+		if (not_aff != NOBITS && (AFF_FLAGS(mob) & not_aff)) {
 			continue;
 		}
 		if (only_flags != NOBITS && (MOB_FLAGS(mob) & only_flags) != only_flags) {

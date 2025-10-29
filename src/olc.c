@@ -8692,7 +8692,7 @@ void olc_process_spawns(char_data *ch, char *argument, struct spawn_info **list)
 			while (*flagarg) {
 				flagarg = any_one_arg(flagarg, arg);
 				
-				if ((loc = search_block(arg, spawn_flags, FALSE)) != NOTHING) {
+				if ((loc = search_block(arg, spawn_flags, FALSE)) != NOTHING || (loc = search_block(arg, spawn_flags_short, FALSE)) != NOTHING) {
 					spawn->flags |= BIT(loc);
 				}
 			}

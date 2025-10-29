@@ -139,4 +139,21 @@ You spread blood from the serragon heart across the basin.~
 T5
 $n spreads blood from the serragon heart across the basin.~
 S
+#12255
+consecrate~
+2 0
+0 0 0 0
+T0
+You consecrate the elephant graveyard.~
+T1
+$n consecrates the elephant graveyard.~
+T2
+You consecrate the elephant graveyard.~
+T3
+$n consecrates the elephant graveyard.~
+T4
+You re-consecrate the elephant graveyard.~
+T5
+$n re-consecrates the elephant graveyard.~
+S
 $

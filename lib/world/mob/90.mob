@@ -352,7 +352,7 @@ tiger hungry~
 a tiger~
 A hungry tiger is crouched low to the ground!
 ~
-75 100 cdgjouz c 3
+125 150 cdgjouz c 3
 0 0 0 10 -1 -1
 D
    The huge tiger is crouched low, perhaps hoping its bright orange fur and
@@ -399,7 +399,7 @@ shark huge~
 a shark~
 A huge shark circles below you!
 ~
-75 100 cdjlo 0 5
+75 100 cdjlo c 5
 0 0 6 9 -1 -1
 D
    The shark circles just below the surface, barely visible as its dark back
@@ -889,7 +889,7 @@ elephant wild jungle~
 a wild jungle elephant~
 A wild jungle elephant is rummaging around.
 ~
-20 40 djoy 0 5
+125 150 djoy c 5
 0 0 0 9044 -1 -1
 D
    The elephant is most brown, with some fine pink or orange spots. It stands
@@ -909,7 +909,7 @@ elephant wild~
 a wild elephant~
 A wild elephant lumbers along slowly.
 ~
-20 40 adjoy 0 5
+20 40 adjoy c 5
 0 0 0 9044 -1 -1
 D
    The elephant is enormous, powerful, and terrifying. Luckily, it doesn't seem
@@ -1082,7 +1082,7 @@ jackalope horned~
 the jackalope~
 A horned jackalope is prancing about.
 ~
-50 75 djko 0 2
+50 75 djko c 2
 0 0 0 27 -1 -1
 D
    The strange and previously-mythical jackalope sits on its haunches and looks
@@ -1097,7 +1097,7 @@ sasquatch bigfoot hairy~
 the sasquatch~
 A hairy sasquatch is trying to escape.
 ~
-100 125 dkoxM 0 3
+100 125 dkoxM c 3
 0 0 0 15 -1 -1
 D
    The sasquatch is over eight feet tall, with unusually long arms and legs.
@@ -1112,7 +1112,7 @@ yeti~
 the yeti~
 The yeti is watching you carefully.
 ~
-100 125 dkoxM 0 4
+100 125 dkoxM c 4
 0 0 0 15 -1 -1
 D
    You can't believe your eyes! Like the son of a lumberjack and a mountain,
@@ -1127,7 +1127,7 @@ mammoth woolly wooly huge~
 a woolly mammoth~
 A huge woolly mammoth is standing over you!
 ~
-20 40 defjoy 0 5
+20 40 defjoy c 5
 0 0 0 9044 -1 -1
 D
    The mammoth is enormous -- bigger than any elephant you've ever seen. It has
@@ -1183,7 +1183,7 @@ toad hypnotoad~
 a hypnotoad~
 You seem to be staring at a hypnotoad!
 ~
-50 75 djo 0 1
+100 125 djo 0 1
 0 0 0 33 -1 -1
 D
    The hypnotoad drones a constant, peaceful sound as its eyes swirl and
@@ -1197,7 +1197,7 @@ mermaid~
 the mermaid~
 A mermaid swims along beside you!
 ~
-75 100 dlovxI 0 3
+75 100 dlovxI c 3
 2 0 6 16 -1 -1
 D
    The mermaid is ethereal, graceful, and fleeting as she dives beneath the

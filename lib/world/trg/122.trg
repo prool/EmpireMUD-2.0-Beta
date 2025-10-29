@@ -849,4 +849,262 @@ end
 %purge% %other%
 %purge% %self%
 ~
+#12250
+Stomping Ground: Shared mob load trig~
+0 n 100
+~
+set important_vnums 12250 12251
+wait 0
+set loc %instance.location%
+if %loc%
+  mgoto %loc%
+  mmove
+  mmove
+  mmove
+  set start %instance.start%
+  if %start% && %important_vnums% ~= %self.vnum%
+    eval elephants %start.var(elephants,0)% + 1
+    remote elephants %start.id%
+  end
+else
+  * not instanced?
+  nop %self.add_mob_flag(SPAWNED)%
+  nop %self.remove_mob_flag(IMPORTANT)%
+end
+~
+#12251
+Stomping Ground: Terraform tile on cleanup~
+2 e 100
+~
+* converts to grassland when despawning adventure
+set terra_sects 203 210 211 212 220 221 222 223 224 232 233 237 239 247 249 250 252
+if %terra_sects% ~= %room.base_sector_vnum%
+  %terraform% %room% 200
+end
+~
+#12252
+Stomping Ground: Elephant death~
+0 f 100
+~
+* This only belongs on elephants listed as %important_vnums% in trig 12250
+set start %instance.start%
+if %start%
+  eval elephants %start.var(elephants,1)% - 1
+  remote elephants %start.id%
+  if %elephants% <= 0
+    %load% obj 12251 %instance.location%
+    %load% obj 12255 %instance.location%
+  end
+end
+~
+#12253
+Stomping Ground: Leash~
+0 i 100
+~
+set allow_outside_sects 5 9 32 33 57 58
+set room %self.room%
+* safety
+if %method% != move
+  return 1
+  halt
+end
+* terrain-based leash
+if (%room.sector_vnum% < 200 || %room.sector_vnum% > 299) && !(%allow_outside_sects% ~= %room.sector_vnum%) && %room.building_vnum% != 12250
+  * sector I don't like
+  return 0
+  halt
+end
+* no distance leash if no instance
+set loc %instance.location%
+if !%loc%
+  return 1
+  halt
+end
+* compute range
+eval max_x %world.width% / 220
+eval max_y %world.height% / 120
+if %max_x% < %max_y%
+  set range %max_x%
+else
+  set range %max_y%
+end
+if %range% < 5
+  set range 5
+end
+* odd directions
+set dir %loc.direction(%room%)%
+if %dir% == northwest
+  eval range %range% + 1
+elseif %dir% == southeast
+  eval range %range% - 1
+end
+* leash distance
+set dist %loc.distance(%room%)%
+if (%dist% >= %range% && %random.3% != 3) || %dist% >= (%range% + 2)
+  return 0
+  halt
+end
+~
+#12254
+Stomping Ground: Terraform jungle to grassland~
+0 ab 7
+~
+* Terraforms ONLY the listed vnums, and only when attached to an instance
+set room %self.room%
+if !%instance.location%
+  * no instance / no terraform
+  halt
+elseif %room.empire%
+  * claimed
+  halt
+end
+set sect %room.sector_vnum%
+* Convert territory
+if %sect% == 203
+  * crop -> soil
+  %echo% ~%self% rips up the crop and devours it!
+  %terraform% %room% 12250
+elseif %sect% == 210 && %random.3% == 3
+  * savanna -> grassland
+  %echo% ~%self% rips up a tree!
+  %load% obj 147 %room%
+  %terraform% %room% 200
+elseif %sect% == 212
+  * savanna copse -> grassland
+  %echo% ~%self% rips up some saplings!
+  %load% obj 134 %room%
+  %load% obj 134 %room%
+  %terraform% %room% 200
+elseif %sect% == 220
+  * jungle -> partial
+  %echo% ~%self% rips up a tree!
+  %load% obj 128 %room%
+  %terraform% %room% 221
+elseif %sect% == 221
+  * partial jungle -> soil
+  %echo% ~%self% rips up a tree!
+  %load% obj 128 %room%
+  %terraform% %room% 12250
+elseif %sect% == 223
+  * jungle copse -> soil
+  %echo% ~%self% rips up some saplings!
+  %load% obj 135 %room%
+  %load% obj 135 %room%
+  %terraform% %room% 12250
+elseif %sect% == 224
+  * jungle edge -> grassland
+  %echo% ~%self% rips up some saplings!
+  %load% obj 135 %room%
+  %load% obj 135 %room%
+  %terraform% %room% 200
+elseif %sect% == 232
+  * mangrove forest -> soil
+  %echo% ~%self% rips up some trees!
+  %load% obj 150 %room%
+  %load% obj 150 %room%
+  %terraform% %room% 12250
+elseif %sect% == 237
+  * seaside crop -> soil
+  %echo% ~%self% rips up the crop and devours it!
+  %terraform% %room% 12250
+elseif %sect% == 239
+  * seaside crop -> estuary shore
+  %echo% ~%self% rips up the crop and devours it!
+  %terraform% %room% 234
+elseif %sect% == 247
+  * riverbank crop -> soil
+  %echo% ~%self% rips up the crop and devours it!
+  %terraform% %room% 12250
+elseif %sect% == 249
+  * lakeshore crop -> soil
+  %echo% ~%self% rips up the crop and devours it!
+  %terraform% %room% 12250
+elseif %sect% == 250 && %random.3% == 3
+  * swamp -> soil
+  %echo% ~%self% rips all the swamp plants!
+  %terraform% %room% 12250
+elseif %sect% == 252 && %random.3% == 3
+  * swamp -> soil
+  %echo% ~%self% rips all the marsh plants!
+  %terraform% %room% 12250
+end
+* ensure not more than once per minute
+wait 60 s
+~
+#12255
+Stomping Ground: Tame small elephant to gain minipet~
+0 c 0
+tame feed~
+* mostly a copy of 9028 with updates for the minipet here
+* Amount of tameness required
+set target 5
+* This script also overrides 'feed'
+if %cmd% == feed
+  if %actor.char_target(%arg.argument2%) == %self%
+    %send% %actor% Just 'give' the food to *%self%.
+    return 1
+  else
+    * ignore 'feed'
+    return 0
+  end
+  halt
+end
+* Check target and tech
+if (!%actor.has_tech(Tame-Command)% || %actor.char_target(%arg%)% != %self%)
+  return 0
+  halt
+end
+* Skill checks / load tameness
+if %actor.ability(Summon Animals)%
+  set tameness %target%
+  %send% %actor% You whistle at ~%self%...
+  %echoaround% %actor% ~%actor% whistles at ~%self%...
+elseif %self.varexists(tameness)%
+  set tameness %self.tameness%
+else
+  set tameness 0
+end
+if %tameness% < %target%
+  %send% %actor% You can't seem to get close enough to ~%self% to tame *%self%. Try feeding *%self% some fruit or grain.
+  return 1
+elseif %actor.has_minipet(12255)%
+  %send% %actor% ~%self% seems quite tame but you already have one as a minipet.
+  return 1
+else
+  * Ok to tame (which is fake)
+  %send% %actor% You try to tame ~%self%... and gain a playful little elephant as a minipet!
+  %echoaround% %actor% ~%actor% tries to tame ~%self%... and gains a playful little elephant!
+  nop %actor.add_minipet(12255)%
+  return 1
+  %purge% %self%
+end
+~
+#12256
+Stomping Ground: Trumpeting Call~
+0 b 2
+~
+%echo% ~%self% raises ^%self% trunk to the sky and lets out a powerful call...
+%regionecho% %self.room% 15 A trumpeting call echoes through the tropical air.
+~
+#12257
+Stomping Ground: Spawn friends~
+0 b 4
+~
+* summons a friend at random over time
+set room %self.room%
+if (%room.sector_vnum% < 200 || %room.sector_vnum% > 299) && %room.building_vnum% != 12250
+  * don't summon here
+  halt
+end
+if %random.3% == 1
+  set vnum 12254
+else
+  set vnum 12252
+end
+%load% mob %vnum%
+set mob %room.people%
+if %mob.vnum% == %vnum%
+  %echo% Another elephant arrives and greets the matriarch with a polite trumpet.
+end
+~
 $
