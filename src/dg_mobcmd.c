@@ -208,10 +208,10 @@ ACMD(do_maggro) {
 		}
 		
 		// success!
-		if (IS_NPC(iter) && !backup) {
+		if (IS_NPC(iter) && !backup && (!victim || iter != victim)) {
 			backup = iter;
 		}
-		else if (!IS_NPC(iter)) {
+		else if (!IS_NPC(iter) || iter == victim) {
 			hit(ch, iter, GET_EQ(ch, WEAR_WIELD), TRUE);
 			return;
 		}
