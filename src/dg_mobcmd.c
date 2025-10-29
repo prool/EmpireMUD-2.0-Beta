@@ -130,7 +130,7 @@ ACMD(do_madventurecomplete) {
 
 // attempts to aggro the player, his party, or any PC present (in order)
 ACMD(do_maggro) {
-	char_data *iter, *next_iter, *victim = NULL;
+	char_data *iter, *next_iter, *victim = NULL, *backup = NULL;
 	char arg[MAX_INPUT_LENGTH];
 
 	if (!MOB_OR_IMPL(ch) || AFF_FLAGGED(ch, AFF_ORDERED)) {
@@ -208,8 +208,13 @@ ACMD(do_maggro) {
 		}
 		
 		// success!
-		hit(ch, iter, GET_EQ(ch, WEAR_WIELD), TRUE);
-		return;
+		if (IS_NPC(iter) && !backup) {
+			backup = iter;
+		}
+		else if (!IS_NPC(iter)) {
+			hit(ch, iter, GET_EQ(ch, WEAR_WIELD), TRUE);
+			return;
+		}
 	}
 	
 	// okay, look for a broader target
@@ -222,8 +227,18 @@ ACMD(do_maggro) {
 		}
 		
 		// success!
-		hit(ch, iter, GET_EQ(ch, WEAR_WIELD), TRUE);
-		return;
+		if (IS_NPC(iter) && !backup) {
+			backup = iter;
+		}
+		else if (!IS_NPC(iter)) {
+			hit(ch, iter, GET_EQ(ch, WEAR_WIELD), TRUE);
+			return;
+		}
+	}
+	
+	if (backup) {
+		// reached here with no player target-- use a backup
+		hit(ch, backup, GET_EQ(ch, WEAR_WIELD), TRUE);
 	}
 }
 
