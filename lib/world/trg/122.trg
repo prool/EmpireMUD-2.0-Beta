@@ -893,6 +893,7 @@ if %start%
   remote elephants %start.id%
   if %elephants% <= 0
     %load% obj 12251 %instance.location%
+    %load% obj 12255 %instance.location%
   end
 end
 ~
