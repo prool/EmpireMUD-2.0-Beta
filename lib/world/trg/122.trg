@@ -949,6 +949,7 @@ Stomping Ground: Terraform jungle to grassland~
 0 ab 10
 ~
 * Terraforms ONLY the listed vnums, and only when attached to an instance
+set room %self.room%
 if !%instance.location%
   * no instance / no terraform
   halt
@@ -956,7 +957,6 @@ elseif %room.empire%
   * claimed
   halt
 end
-set room %self.room%
 set sect %room.sector_vnum%
 * Convert territory
 if %sect% == 203
