@@ -974,9 +974,10 @@ A verdant wand is here.~
    You can 'use wand' to restore scorched terrain or teleport yourself to a
 flame dragon cave.
 ~
-3 0 a 0 0 3
+3 0 a 0 0 4
 10 1 0
 0 0
+T 18295
 S
 #18296
 dragon-tree tree dragon great~
