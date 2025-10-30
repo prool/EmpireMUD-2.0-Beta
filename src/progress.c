@@ -1044,7 +1044,8 @@ void refresh_one_goal_tracker(empire_data *emp, struct empire_goal *goal) {
 				task->current = count_empire_objects(emp, task->vnum);
 				break;
 			}
-			case REQ_OWN_BUILDING: {
+			case REQ_OWN_BUILDING:
+			case REQ_NOT_OWN_BUILDING: {
 				task->current = count_owned_buildings(emp, task->vnum);
 				break;
 			}
@@ -1429,6 +1430,10 @@ void et_gain_building(empire_data *emp, any_vnum vnum) {
 				++task->current;
 				TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_GOAL_COMPLETE);
 			}
+			else if (task->type == REQ_NOT_OWN_BUILDING && building_counts_as(bld, task->vnum, NOTHING)) {
+				++task->current;
+				TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_GOAL_COMPLETE);
+			}
 			else if (task->type == REQ_OWN_VEHICLE && building_counts_as(bld, NOTHING, task->vnum)) {
 				++task->current;
 				TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_GOAL_COMPLETE);
@@ -1501,6 +1506,10 @@ void et_gain_vehicle(empire_data *emp, vehicle_data *veh) {
 				TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_GOAL_COMPLETE);
 			}
 			else if (task->type == REQ_OWN_BUILDING && vehicle_counts_as(veh, task->vnum, NOTHING)) {
+				++task->current;
+				TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_GOAL_COMPLETE);
+			}
+			else if (task->type == REQ_NOT_OWN_BUILDING && vehicle_counts_as(veh, task->vnum, NOTHING)) {
 				++task->current;
 				TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_GOAL_COMPLETE);
 			}
@@ -1636,6 +1645,12 @@ void et_lose_building(empire_data *emp, any_vnum vnum) {
 				// check min
 				task->current = MAX(task->current, 0);
 			}
+			else if (task->type == REQ_NOT_OWN_BUILDING && building_counts_as(bld, task->vnum, NOTHING)) {
+				--task->current;
+				
+				// check min
+				task->current = MAX(task->current, 0);
+			}
 			else if (task->type == REQ_OWN_VEHICLE && building_counts_as(bld, NOTHING, task->vnum)) {
 				--task->current;
 				task->current = MAX(task->current, 0);
@@ -1716,6 +1731,13 @@ void et_lose_vehicle(empire_data *emp, vehicle_data *veh) {
 				task->current = MAX(task->current, 0);
 			}
 			else if (task->type == REQ_OWN_BUILDING && vehicle_counts_as(veh, task->vnum, NOTHING)) {
+				--task->current;
+				TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_GOAL_COMPLETE);
+				
+				// check min
+				task->current = MAX(task->current, 0);
+			}
+			else if (task->type == REQ_NOT_OWN_BUILDING && vehicle_counts_as(veh, task->vnum, NOTHING)) {
 				--task->current;
 				TRIGGER_DELAYED_REFRESH(emp, DELAY_REFRESH_GOAL_COMPLETE);
 				

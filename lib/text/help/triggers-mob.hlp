@@ -188,7 +188,8 @@ target, the mob will still try to hit someone else but WON'T change focus to
 them.
 
 Calling %aggro% with no argument will simply attempt to attack someone in the
-room with the mob, similar to the AGGR flag.
+room with the mob, similar to the AGGR flag. This will prefer a player, if
+present, over an NPC.
 
 No error is sent if the mob cannot find a valid target in the room.
 

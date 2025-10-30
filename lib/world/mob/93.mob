@@ -1,0 +1,51 @@
+#9300
+bat fox flying spectacled~
+a spectacled flying fox~
+A spectacled flying fox swoops past.
+~
+65 90 djo cm 1
+0 0 2 9 -1 -1
+D
+   This curious creature has the face of a fox with the wings of a bat. 
+Straw-colored fur around its eyes gives it the appearance that it's wearing a
+pair of spectacles. There's also light fur on its shoulders and part of its
+body, but the predominant color is black.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 1 1350 100.00 1  # SKIN: small skin
+S
+#9301
+bird paradise majestic~
+a majestic bird of paradise~
+A majestic bird of paradise fans its colorful feathers.
+~
+65 90 djo m 1
+0 0 2 26 -1 -1
+D
+   A riot of color and grace, this bird seems almost unreal against the green
+backdrop. Long plumes spill from its tail in cascading shades of gold, scarlet,
+and deep indigo, catching the light every time it turns. When it dances, it
+moves with a deliberate, almost ritualistic precision.
+~
+I 0 3200 100.00 1  # BUTCHER: cut of poultry
+I 0 9025 75.00 1  # BUTCHER: bird feathers
+S
+#9302
+beaver burly~
+a burly beaver~
+A burly beaver is dragging a log.
+~
+100 125 djo L 2
+0 0 0 9 -1 -1
+D
+   This stocky, powerful beaver is well-suited to both labor and defense in
+this rugged terrain. Its dense brown fur is slick with water and mud. Its
+broad, paddle-like tail leaves a wide groove in the soft earth as it moves.
+~
+I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 1  # SKIN: large skin
+M
+15
+A burly beaver weaves through the water.~
+S
+$

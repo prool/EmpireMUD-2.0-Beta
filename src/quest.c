@@ -1174,7 +1174,8 @@ void refresh_one_quest_tracker(char_data *ch, struct player_quest *pq) {
 				task->current = is_on_quest(ch, task->vnum) ? 0 : task->needed;
 				break;
 			}
-			case REQ_OWN_BUILDING: {
+			case REQ_OWN_BUILDING:
+			case REQ_NOT_OWN_BUILDING: {
 				task->current = count_owned_buildings(GET_LOYALTY(ch), task->vnum);
 				break;
 			}
@@ -3079,6 +3080,9 @@ void qt_gain_building(char_data *ch, any_vnum vnum) {
 			if (task->type == REQ_OWN_BUILDING && building_counts_as(bld, task->vnum, NOTHING)) {
 				++task->current;
 			}
+			else if (task->type == REQ_NOT_OWN_BUILDING && building_counts_as(bld, task->vnum, NOTHING)) {
+				++task->current;
+			}
 			else if (task->type == REQ_OWN_VEHICLE && building_counts_as(bld, NOTHING, task->vnum)) {
 				++task->current;
 			}
@@ -3150,6 +3154,9 @@ void qt_gain_vehicle(char_data *ch, vehicle_data *veh) {
 				++task->current;
 			}
 			else if (task->type == REQ_OWN_BUILDING && vehicle_counts_as(veh, task->vnum, NOTHING)) {
+				++task->current;
+			}
+			else if (task->type == REQ_NOT_OWN_BUILDING && vehicle_counts_as(veh, task->vnum, NOTHING)) {
 				++task->current;
 			}
 			else if (task->type == REQ_OWN_VEHICLE_FLAGGED && (VEH_FLAGS(veh) & task->misc) == task->misc) {
@@ -3316,6 +3323,9 @@ void qt_lose_building(char_data *ch, any_vnum vnum) {
 			if (task->type == REQ_OWN_BUILDING && building_counts_as(bld, task->vnum, NOTHING)) {
 				--task->current;
 			}
+			else if (task->type == REQ_NOT_OWN_BUILDING && building_counts_as(bld, task->vnum, NOTHING)) {
+				--task->current;
+			}
 			else if (task->type == REQ_OWN_VEHICLE && building_counts_as(bld, NOTHING, task->vnum)) {
 				--task->current;
 			}
@@ -3417,6 +3427,9 @@ void qt_lose_vehicle(char_data *ch, vehicle_data *veh) {
 				--task->current;
 			}
 			else if (task->type == REQ_OWN_BUILDING && vehicle_counts_as(veh, task->vnum, NOTHING)) {
+				--task->current;
+			}
+			else if (task->type == REQ_NOT_OWN_BUILDING && vehicle_counts_as(veh, task->vnum, NOTHING)) {
 				--task->current;
 			}
 			else if (task->type == REQ_OWN_VEHICLE_FLAGGED && (VEH_FLAGS(veh) & task->misc) == task->misc) {

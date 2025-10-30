@@ -515,4 +515,11 @@ while %ch%
 done
 %purge% %self%
 ~
+#9683
+Delayed Despawner: Attach to Obj with Timer~
+1 f 0
+~
+* Marks the adventure complete when the item decays.
+%adventurecomplete%
+~
 $

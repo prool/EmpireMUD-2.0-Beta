@@ -899,6 +899,7 @@ ADMIN_UTIL(util_bldconvert) {
 	}
 	HASH_ITER(hh, progress_table, prg, next_prg) {
 		any = find_requirement_in_list(PRG_TASKS(prg), REQ_OWN_BUILDING, from_vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_NOT_OWN_BUILDING, from_vnum);
 		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_VISIT_BUILDING, from_vnum);
 		
 		if (any) {
@@ -913,7 +914,7 @@ ADMIN_UTIL(util_bldconvert) {
 		}
 	}
 	HASH_ITER(hh, quest_table, quest, next_quest) {
-		if (find_quest_giver_in_list(QUEST_STARTS_AT(quest), QG_BUILDING, from_vnum) || find_quest_giver_in_list(QUEST_ENDS_AT(quest), QG_BUILDING, from_vnum) || find_requirement_in_list(QUEST_TASKS(quest), REQ_OWN_BUILDING, from_vnum) || find_requirement_in_list(QUEST_PREREQS(quest), REQ_OWN_BUILDING, from_vnum) || find_requirement_in_list(QUEST_TASKS(quest), REQ_VISIT_BUILDING, from_vnum) || find_requirement_in_list(QUEST_PREREQS(quest), REQ_VISIT_BUILDING, from_vnum)) {
+		if (find_quest_giver_in_list(QUEST_STARTS_AT(quest), QG_BUILDING, from_vnum) || find_quest_giver_in_list(QUEST_ENDS_AT(quest), QG_BUILDING, from_vnum) || find_requirement_in_list(QUEST_TASKS(quest), REQ_OWN_BUILDING, from_vnum) || find_requirement_in_list(QUEST_TASKS(quest), REQ_NOT_OWN_BUILDING, from_vnum) || find_requirement_in_list(QUEST_PREREQS(quest), REQ_OWN_BUILDING, from_vnum)  || find_requirement_in_list(QUEST_PREREQS(quest), REQ_NOT_OWN_BUILDING, from_vnum) || find_requirement_in_list(QUEST_TASKS(quest), REQ_VISIT_BUILDING, from_vnum) || find_requirement_in_list(QUEST_PREREQS(quest), REQ_VISIT_BUILDING, from_vnum)) {
 			msg_to_char(ch, "- Building %d %s in data for QST [%d %s].\r\n", to_vnum, GET_BLD_NAME(from_bld), QUEST_VNUM(quest), QUEST_NAME(quest));
 		}
 	}
@@ -923,7 +924,7 @@ ADMIN_UTIL(util_bldconvert) {
 		}
 	}
 	HASH_ITER(hh, social_table, soc, next_soc) {
-		if (find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_OWN_BUILDING, from_vnum) || find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_VISIT_BUILDING, from_vnum)) {
+		if (find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_OWN_BUILDING, from_vnum) || find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_NOT_OWN_BUILDING, from_vnum) || find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_VISIT_BUILDING, from_vnum)) {
 			msg_to_char(ch, "- Building %d %s in requirements for SOC [%d %s].\r\n", to_vnum, GET_BLD_NAME(from_bld), SOC_VNUM(soc), SOC_NAME(soc));
 		}
 	}

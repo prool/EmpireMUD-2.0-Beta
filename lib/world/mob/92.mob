@@ -18,7 +18,7 @@ tapir forest~
 a forest tapir~
 A forest tapir is rooting around a bush.
 ~
-20 30 djo 0 3
+20 30 djo c 3
 0 0 0 9 -1 -1
 D
    This fat creature looks like someone took the worst parts of the pig, horse,
@@ -157,7 +157,7 @@ crab mud~
 a mud crab~
 A mud crab pokes its head up.
 ~
-10 15 djloz G 1
+10 15 djloz cG 1
 0 0 6 3 -1 -1
 D
    This little brown crab has buried itself in the mud, perhaps to wait for
@@ -192,7 +192,7 @@ penguin little~
 a little penguin~
 A little penguin waddles along.
 ~
-10 15 djo 0 1
+10 15 djo c 1
 0 0 16 9 -1 -1
 D
    This black and white penguin looks around for predators and then climbs onto
@@ -378,7 +378,7 @@ goshawk hawk brown~
 a brown goshawk~
 A brown goshawk flies overhead.
 ~
-5 15 djo m 2
+5 15 djo cm 2
 0 0 2 10 -1 -1
 D
    The goshawk is a small raptor with brown stripes. It flies above you,
@@ -438,7 +438,7 @@ snake tiger~
 a tiger snake~
 A tiger snake is stretched out on the ground.
 ~
-10 20 djo 0 1
+10 20 djo c 1
 0 0 5 9 -1 -1
 D
    The tiger snake is mostly brown, with banded stripes much like a real tiger.
@@ -454,7 +454,7 @@ lizard monitor~
 a monitor lizard~
 A monitor lizard flicks its tongue impatiently.
 ~
-10 20 dj 0 1
+10 20 dj c 1
 0 0 0 9 -1 -1
 D
    This large lizard is the infamous monitor, whose toxic bite is know to leave
@@ -550,7 +550,7 @@ bunyip huge~
 a huge bunyip~
 A huge bunyip is resting here.
 ~
-80 100 dejo 0 4
+80 100 dejo c 4
 0 0 26 9 -1 -1
 D
    The bunyip is an enormous creature, almost like a bear, but with a massive,
@@ -703,7 +703,7 @@ giraffe bull~
 a bull giraffe~
 A bull giraffe is stomping around.
 ~
-100 150 djoz 0 5
+100 150 djoz c 5
 0 0 0 9138 -1 -1
 D
    The giraffe snorts and swings its neck toward you, forcing you to take a
@@ -719,7 +719,7 @@ zebra swift~
 a swift zebra~
 A zebra watches you as it grazes.
 ~
-100 125 djo 0 4
+100 125 djo c 4
 0 0 14 9021 -1 -1
 D
    The zebra is a glamorous beast, barred with vertical black and white stripes
@@ -747,7 +747,7 @@ warthog tusked hog~
 a tusked warthog~
 A tusked warthog forages for grubs.
 ~
-100 150 djo 0 3
+100 150 djo c 3
 0 0 0 27 -1 -1
 D
    This wild pig has a thick, bristly mane running down its back and a large,
@@ -775,7 +775,7 @@ rhinoceros armored well-armored wellarmored~
 an armored rhino~
 A well-armored rhinoceros munches on some grass.
 ~
-125 150 djouyA 0 4
+125 150 djouyA c 4
 0 0 39 27 -1 -1
 D
    The rhinoceros is enormous; you could hide a small army inside it. At a
@@ -1029,6 +1029,27 @@ its prey.
 ~
 I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
 I 1 1353 100.00 1  # SKIN: big cat pelt
+M
+0
+$n lifts $s head, scanning the horizon.~
+M
+0
+$n's tail flicks lazily in the grass.~
+M
+0
+$n crouches low and wiggles $s butt.~
+M
+0
+$n licks a paw and brushes $s face.~
+M
+0
+$n flashes $s teeth as $e yawns.~
+M
+0
+$n flicks an ear toward a distant sound.~
+M
+0
+$n stretches and yawns.~
 S
 #9247
 jackal black-backed blackbacked backed~
@@ -1046,13 +1067,37 @@ require it.
 F 9242
 I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
 I 1 1351 100.00 1 s  # SKIN: large skin
+M
+0
+$n sniffs at the ground.~
+M
+0
+$n lifts its head with its ears pricked toward a distant sound.~
+M
+0
+$n lets out a short, high bark.~
+M
+0
+$n trots around in a circle.~
+M
+0
+$n scratches behind one ear with $s hind paw.~
+M
+0
+$n flashes $s teeth as $e yawns.~
+M
+0
+$n crouches low and watches for trouble.~
+M
+0
+$n tilts $s head.~
 S
 #9248
 mongoose grey gray~
 a grey mongoose~
 A grey mongoose sniffs the air.
 ~
-100 125 djo 0 1
+100 125 djo c 1
 0 0 0 9 -1 -1
 D
    The little mongoose has iron grey fur, grizzled with bite of white. It seems
@@ -1061,6 +1106,27 @@ even as you watch.
 ~
 I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
 I 1 1350 100.00 1  # SKIN: small skin
+M
+0
+$n stands up on $s hind legs and sniffs the air.~
+M
+0
+$n darts around, searching for something in the grass.~
+M
+0
+$n digs at the soil.~
+M
+0
+$n chitters softly.~
+M
+0
+$n grooms $s whiskers.~
+M
+0
+$n's ears twitch, searching for a sound.~
+M
+0
+$n hops sideways.~
 S
 #9249
 crane crowned~
@@ -1148,6 +1214,27 @@ I 0 9124 33.33 3 b  # BUTCHER: large ostrich feather
 I 0 9124 33.33 2 b  # BUTCHER: large ostrich feather
 I 0 9124 33.34 1 b  # BUTCHER: large ostrich feather
 I 1 1351 100.00 1  # SKIN: large skin
+M
+0
+$n lowers $s head to peck at the ground.~
+M
+0
+$n lifts $s head suddenly an looks at the horizon.~
+M
+0
+$n stretches $s long neck and gives a low call.~
+M
+0
+$n scratches at the dirt with $s claw.~
+M
+0
+$n shakes dust from $s feathers.~
+M
+0
+$n flicks $s wings.~
+M
+0
+$n fans out $s feathers.~
 T 9250
 S
 #9251
@@ -1169,6 +1256,27 @@ I 0 9124 33.33 3 b  # BUTCHER: large ostrich feather
 I 0 9124 33.33 2 b  # BUTCHER: large ostrich feather
 I 0 9124 33.34 1 b  # BUTCHER: large ostrich feather
 I 1 1351 100.00 1  # SKIN: large skin
+M
+0
+$n lowers $s head to peck at the ground.~
+M
+0
+$n lifts $s head suddenly an looks at the horizon.~
+M
+0
+$n stretches $s long neck and gives a low call.~
+M
+0
+$n scratches at the dirt with $s claw.~
+M
+0
+$n shakes dust from $s feathers.~
+M
+0
+$n flicks $s wings.~
+M
+0
+$n fans out $s feathers.~
 S
 #9252
 gazelle~
@@ -1200,6 +1308,39 @@ There's a gazelle standing so still you almost miss it.~
 M
 6
 There's a gazelle browsing on the grass.~
+M
+0
+$n lowers $s head to graze.~
+M
+0
+$n chews a mouthful of grass.~
+M
+0
+$n flicks $s tail and twitches $s ears.~
+M
+0
+$n takes a step sideways.~
+M
+0
+$n chews calmly, still watching you.~
+M
+0
+$n stamps a hoof softly.~
+M
+0
+$n flicks its ears.~
+M
+0
+$n stands motionless.~
+M
+0
+$n nibbles at a tuft of grass.~
+M
+0
+$n's ears swivel, searching for trouble.~
+M
+0
+$n paces in a circle.~
 T 9249
 T 9252
 S
@@ -1241,7 +1382,7 @@ vulture griffon griffin gryphon~
 a griffon vulture~
 A griffon vulture soars above you.
 ~
-65 90 dgjo m 2
+65 90 dgjo cm 2
 0 0 2 9 -1 -1
 D
    High above you, the mottled griffon vulture soars on long, black-frilled
@@ -1432,7 +1573,7 @@ lizard clouded monitor~
 a clouded monitor lizard~
 A clouded monitor lizard is resting nearby.
 ~
-100 125 dj 0 2
+100 125 dj c 2
 0 0 9 9 -1 -1
 D
    Though this creature is unusually large for a lizard, it would be a fairly
@@ -1521,7 +1662,7 @@ buffalo hefty~
 a hefty buffalo~
 A hefty buffalo is roaming around.
 ~
-125 150 dfjoy 0 4
+125 150 dfjoy c 4
 0 0 0 27 -1 -1
 D
    The buffalo is a thick, muscled herbivor with a pair of upward-curving horns
@@ -1869,7 +2010,7 @@ caiman spectacled~
 a spectacled caiman~
 A spectacled caiman lerks here waiting for prey.
 ~
-125 150 bcdgj 0 3
+125 150 bcdgj c 3
 0 0 79 9114 -1 -1
 D
    A small, armored spectacled caiman lies motionless near the murky water's
@@ -1895,7 +2036,7 @@ eagle harpy large~
 a large harpy eagle~
 A large harpy eagle hunts for prey.
 ~
-100 125 djz m 3
+100 125 djz cm 3
 0 0 2 10 -1 -1
 D
    You glimpse the immense harpy eagle, the most powerful eagle of the skies.
@@ -1921,7 +2062,7 @@ hippopotamus hungry hippo~
 a hungry hippopotamus~
 A hippopotamus is ready to attack!
 ~
-125 150 cdjoy 0 5
+125 150 cdjoy c 5
 0 0 0 27 -1 -1
 D
    A colossal hippopotamus emerges from the water, its massive, smooth body a
@@ -1977,7 +2118,7 @@ elephant matriarch~
 the elephant matriarch~
 An elephant matriarch towers over you.
 ~
-125 150 adjoy 0 5
+125 150 adjoy c 5
 2 0 0 9043 -1 -1
 D
    The gray-brown matriarch looks down at you through soft, old eyes, but her
@@ -1995,7 +2136,7 @@ elephant mud-caked mudcaked caked~
 a mud-caked elephant~
 A mud-caked elephant stands here.
 ~
-100 150 adjoy 0 5
+100 150 adjoy c 5
 0 0 0 9043 -1 -1
 D
    The enormous elephant has dried mud covering much of its body, though a
@@ -2054,7 +2195,7 @@ elephant sun-dappled sundappled dappled~
 a sun-dappled elephant~
 A sun-dappled elephant munches some grass.
 ~
-100 150 adejoy 0 5
+100 150 adejoy c 5
 0 0 0 9043 -1 -1
 D
    The gray-brown elephant has kind, gentle eyes. The blanket strapped to its
@@ -2071,7 +2212,7 @@ lizard monitor water large~
 a water monitor~
 A large lizard swims nearby.
 ~
-100 125 bcdj 0 2
+100 125 bcdj c 2
 0 0 9 9 -1 -1
 D
    This dangerously large lizard has a blackish-brown back with pale yellow
@@ -2257,7 +2398,7 @@ mammoth dire-tusked diretusked tusked~
 a dire-tusked mammoth~
 A dire-tusked mammoth towers over you, blocking the scenery.
 ~
-125 150 dejoyA 0 5
+125 150 dejoyA c 5
 0 0 26 9044 -1 -1
 D
    The hairless gray mammoth looms like a living mountain, hide creased as tree
@@ -2277,7 +2418,7 @@ mammoth dire-tusked diretusked tusked war platform~
 a mammoth war platform~
 A dire-tusked mammoth war platform stands over you.
 ~
-125 150 djoyA 0 5
+125 150 djoyA c 5
 0 0 26 9044 -1 -1
 D
    The hairless gray mammoth looms like a living mountain, hide creased as tree
@@ -2308,5 +2449,20 @@ but little penetrates its scales.
 I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
 I 1 1351 100.00 2  # SKIN: large skin
 T 9117
+S
+#9299
+monkey vervet~
+a vervet monkey~
+A vervet monkey is dangling near you.
+~
+100 125 djo c 2
+0 0 107 9 -1 -1
+D
+   This fuzzy little guy has a black face with a white fringe, with a grizzled
+gray coat. It also has alarmingly bright colors on its genitals; you can hardly
+look away.
+~
+I 0 3012 100.00 1  # BUTCHER: fillet of raw meat
+I 1 1350 100.00 1  # SKIN: small skin
 S
 $
