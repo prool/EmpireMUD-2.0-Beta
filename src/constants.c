@@ -5374,6 +5374,7 @@ const char *requirement_types[] = {
 	"NIGHTTIME",	// 45
 	"DIPLOMACY-OVER",
 	"OWN-ROADS",
+	"NOT-OWN-BUILDING",
 	"\n",
 };
 

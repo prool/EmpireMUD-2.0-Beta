@@ -469,6 +469,7 @@ void olc_delete_building(char_data *ch, bld_vnum vnum) {
 	// update progress
 	HASH_ITER(hh, progress_table, prg, next_prg) {
 		found = delete_requirement_from_list(&PRG_TASKS(prg), REQ_OWN_BUILDING, vnum);
+		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_NOT_OWN_BUILDING, vnum);
 		found |= delete_requirement_from_list(&PRG_TASKS(prg), REQ_VISIT_BUILDING, vnum);
 		
 		if (found) {
@@ -487,7 +488,9 @@ void olc_delete_building(char_data *ch, bld_vnum vnum) {
 		
 		// REQ_x:
 		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_OWN_BUILDING, vnum);
+		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_NOT_OWN_BUILDING, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_OWN_BUILDING, vnum);
+		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_NOT_OWN_BUILDING, vnum);
 		found |= delete_requirement_from_list(&QUEST_TASKS(quest), REQ_VISIT_BUILDING, vnum);
 		found |= delete_requirement_from_list(&QUEST_PREREQS(quest), REQ_VISIT_BUILDING, vnum);
 		
@@ -512,6 +515,7 @@ void olc_delete_building(char_data *ch, bld_vnum vnum) {
 	// socials
 	HASH_ITER(hh, social_table, soc, next_soc) {
 		found = delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_OWN_BUILDING, vnum);
+		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_NOT_OWN_BUILDING, vnum);
 		found |= delete_requirement_from_list(&SOC_REQUIREMENTS(soc), REQ_VISIT_BUILDING, vnum);
 		
 		if (found) {
@@ -582,6 +586,7 @@ void olc_delete_building(char_data *ch, bld_vnum vnum) {
 		}
 		if (GET_OLC_PROGRESS(desc)) {
 			found = delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_OWN_BUILDING, vnum);
+			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_NOT_OWN_BUILDING, vnum);
 			found |= delete_requirement_from_list(&PRG_TASKS(GET_OLC_PROGRESS(desc)), REQ_VISIT_BUILDING, vnum);
 		
 			if (found) {
@@ -593,7 +598,9 @@ void olc_delete_building(char_data *ch, bld_vnum vnum) {
 			found = delete_quest_giver_from_list(&QUEST_STARTS_AT(GET_OLC_QUEST(desc)), QG_BUILDING, vnum);
 			found |= delete_quest_giver_from_list(&QUEST_ENDS_AT(GET_OLC_QUEST(desc)), QG_BUILDING, vnum);
 			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_OWN_BUILDING, vnum);
+			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_NOT_OWN_BUILDING, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_OWN_BUILDING, vnum);
+			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_NOT_OWN_BUILDING, vnum);
 			found |= delete_requirement_from_list(&QUEST_TASKS(GET_OLC_QUEST(desc)), REQ_VISIT_BUILDING, vnum);
 			found |= delete_requirement_from_list(&QUEST_PREREQS(GET_OLC_QUEST(desc)), REQ_VISIT_BUILDING, vnum);
 		
@@ -612,6 +619,7 @@ void olc_delete_building(char_data *ch, bld_vnum vnum) {
 		}
 		if (GET_OLC_SOCIAL(desc)) {
 			found = delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_OWN_BUILDING, vnum);
+			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_NOT_OWN_BUILDING, vnum);
 			found |= delete_requirement_from_list(&SOC_REQUIREMENTS(GET_OLC_SOCIAL(desc)), REQ_VISIT_BUILDING, vnum);
 		
 			if (found) {
@@ -981,6 +989,7 @@ void olc_search_building(char_data *ch, bld_vnum vnum) {
 	HASH_ITER(hh, progress_table, prg, next_prg) {
 		// REQ_x: requirement search
 		any = find_requirement_in_list(PRG_TASKS(prg), REQ_OWN_BUILDING, vnum);
+		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_NOT_OWN_BUILDING, vnum);
 		any |= find_requirement_in_list(PRG_TASKS(prg), REQ_VISIT_BUILDING, vnum);
 		
 		if (any) {
@@ -998,6 +1007,8 @@ void olc_search_building(char_data *ch, bld_vnum vnum) {
 		// REQ_x:
 		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_OWN_BUILDING, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_OWN_BUILDING, vnum);
+		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_NOT_OWN_BUILDING, vnum);
+		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_NOT_OWN_BUILDING, vnum);
 		any |= find_requirement_in_list(QUEST_TASKS(quest), REQ_VISIT_BUILDING, vnum);
 		any |= find_requirement_in_list(QUEST_PREREQS(quest), REQ_VISIT_BUILDING, vnum);
 		
@@ -1017,7 +1028,7 @@ void olc_search_building(char_data *ch, bld_vnum vnum) {
 	
 	// socials
 	HASH_ITER(hh, social_table, soc, next_soc) {
-		if (find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_OWN_BUILDING, vnum) || find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_VISIT_BUILDING, vnum)) {
+		if (find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_OWN_BUILDING, vnum) || find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_NOT_OWN_BUILDING, vnum) || find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_VISIT_BUILDING, vnum)) {
 			++found;
 			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
 		}

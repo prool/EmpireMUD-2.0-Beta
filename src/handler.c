@@ -9093,6 +9093,12 @@ bool meets_requirements(char_data *ch, struct req_data *list, struct instance_da
 				}
 				break;
 			}
+			case REQ_NOT_OWN_BUILDING: {
+				if (GET_LOYALTY(ch) && count_owned_buildings(GET_LOYALTY(ch), req->vnum) >= req->needed) {
+					ok = FALSE;
+				}
+				break;
+			}
 			case REQ_OWN_BUILDING_FUNCTION: {
 				if (!GET_LOYALTY(ch) || count_owned_buildings_by_function(GET_LOYALTY(ch), req->misc) < req->needed) {
 					ok = FALSE;
@@ -9421,6 +9427,11 @@ char *requirement_string(struct req_data *req, bool show_vnums, bool allow_custo
 		case REQ_OWN_BUILDING: {
 			bld_data *bld = building_proto(req->vnum);
 			safe_snprintf(output, sizeof(output), "Own %dx building%s: %s%s", req->needed, PLURAL(req->needed), vnum, bld ? GET_BLD_NAME(bld) : "UNKNOWN");
+			break;
+		}
+		case REQ_NOT_OWN_BUILDING: {
+			bld_data *bld = building_proto(req->vnum);
+			safe_snprintf(output, sizeof(output), "Don't own %dx building%s: %s%s", req->needed, PLURAL(req->needed), vnum, bld ? GET_BLD_NAME(bld) : "UNKNOWN");
 			break;
 		}
 		case REQ_OWN_BUILDING_FUNCTION: {
