@@ -108,7 +108,6 @@ while %ch%
   end
   set ch %next_ch%
 done
-
 ~
 #18205
 City turtle look out~
@@ -415,7 +414,11 @@ detach 18216 %room.id%
 Give Adventurer Guild Charter~
 2 u 100
 ~
-%load% obj 18216 %actor%
+if %questvnum% == 18200
+  %load% obj 18216 %actor%
+elseif %questvnum% == 18202
+  %load% obj 18240 %actor%
+end
 ~
 #18218
 Guildhall mob out of city despawn~

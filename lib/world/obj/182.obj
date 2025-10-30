@@ -556,6 +556,20 @@ A
 C
 100 200
 S
+#18240
+charter guild adventurers~
+a Guild of Adventurers charter~
+A guild charter is lying here.~
+   This document bears the official seal of the Guild of Adventurers. Its text
+is a difficult combination of wordiness and verbosity, but it appears to
+sanction the building of an Adventurer's Guildhall in your city.
+Use: build guildhall <direction> (city-only, single use)
+~
+3 gp a 0 0 3
+0 0 0
+0 0
+Q 18202
+S
 #18248
 bar prying enchanted~
 an enchanted bar of prying~
