@@ -5429,6 +5429,7 @@ const bool requirement_amt_type[] = {
 	REQ_AMT_NONE,	// 45, nighttime
 	REQ_AMT_NUMBER,	// diplomacy-over
 	REQ_AMT_NUMBER,	// own-roads
+	REQ_AMT_NUMBER,	// not own building
 };
 
 
@@ -5482,6 +5483,7 @@ const bool requirement_needs_tracker[] = {
 	FALSE,	// 45, nighttime
 	FALSE,	// diplomacy-over
 	FALSE,	// own-roads
+	FALSE,	// not own building
 };
 
 
