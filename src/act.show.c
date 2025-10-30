@@ -388,6 +388,9 @@ SHOW(show_account) {
 				*empart = '\0';
 			}
 			
+			SAFE_ADD(total_playtime, loaded->player.time.played, 0, INT_MAX, FALSE);
+			earliest_birth = MIN(earliest_birth, loaded->player.time.birth);
+			
 			if (!loaded_file) {
 				msg_to_char(ch, " &c[%d %s] %s  (online)&0%s\r\n", GET_COMPUTED_LEVEL(loaded), skills, GET_PC_NAME(loaded), empart);
 				last_online = ONLINE_NOW;
@@ -416,8 +419,6 @@ SHOW(show_account) {
 				if (last_online != ONLINE_NOW) {
 					last_online = MAX(last_online, GET_PREV_LOGON(loaded));
 				}
-				earliest_birth = MIN(earliest_birth, loaded->player.time.birth);
-				SAFE_ADD(total_playtime, loaded->player.time.played, 0, INT_MAX, FALSE);
 			}
 		}
 		else if (ACCOUNT_FLAGGED(loaded, ACCT_MULTI_IP) || IS_SET(acc_ptr->flags, ACCT_MULTI_IP)) {
