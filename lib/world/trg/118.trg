@@ -2449,7 +2449,7 @@ switch %self.vnum%
   case 11815
     * uncaged goblin
     set name_list Grimscar Crunchleaf Rattlecage Quicklock Stabfriend Lootfirst Gutcheck Rocktooth Jumpdie Shivfast Biteasy Stabsall Dirtnap Littleglory
-    set sex_list  male     female     female     male      male       male      female   female    male    female   male    female   male
+    set sex_list  male     female     female     male      male       male      female   female    male    female   male    female   male    female
   break
   case 11816
     * goblin commando
