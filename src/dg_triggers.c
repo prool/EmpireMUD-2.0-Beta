@@ -712,7 +712,7 @@ void speech_mtrigger(char_data *actor, char *str, generic_data *language, char_d
 		
 		if (SCRIPT_CHECK(ch, MTRIG_SPEECH) && AWAKE(ch) && (actor!=ch)) {
 			LL_FOREACH_SAFE(TRIGGERS(SCRIPT(ch)), t, next_t) {
-				if (multi && IS_SET(GET_TRIG_TYPE(t), MTRIG_ALLOW_MULTIPLE)) {
+				if (multi && !IS_SET(GET_TRIG_TYPE(t), MTRIG_ALLOW_MULTIPLE)) {
 					continue;	// already did an allow-multi
 				}
 				if (AFF_FLAGGED(ch, AFF_CHARM) && !TRIGGER_CHECK(t, MTRIG_CHARMED)) {
@@ -831,7 +831,7 @@ void act_mtrigger(const char_data *ch, char *str, char_data *actor, char_data *v
 
 	if (SCRIPT_CHECK(ch, MTRIG_ACT) && (actor!=ch)) {
 		LL_FOREACH_SAFE(TRIGGERS(SCRIPT(ch)), t, next_t) {
-			if (multi && IS_SET(GET_TRIG_TYPE(t), MTRIG_ALLOW_MULTIPLE)) {
+			if (multi && !IS_SET(GET_TRIG_TYPE(t), MTRIG_ALLOW_MULTIPLE)) {
 				continue;	// already did an allow-multi
 			}
 			if (AFF_FLAGGED(ch, AFF_CHARM) && !TRIGGER_CHECK(t, MTRIG_CHARMED)) {
@@ -954,7 +954,7 @@ void hitprcnt_mtrigger(char_data *ch) {
 	}
 
 	LL_FOREACH_SAFE(TRIGGERS(SCRIPT(ch)), t, next_t) {
-		if (multi && IS_SET(GET_TRIG_TYPE(t), MTRIG_ALLOW_MULTIPLE)) {
+		if (multi && !IS_SET(GET_TRIG_TYPE(t), MTRIG_ALLOW_MULTIPLE)) {
 			continue;	// already did an allow-multi
 		}
 		if (AFF_FLAGGED(ch, AFF_CHARM) && !TRIGGER_CHECK(t, MTRIG_CHARMED)) {
@@ -1034,7 +1034,7 @@ int death_mtrigger(char_data *ch, char_data *actor) {
 	}
 
 	LL_FOREACH_SAFE(TRIGGERS(SCRIPT(ch)), t, next_t) {
-		if (multi && IS_SET(GET_TRIG_TYPE(t), MTRIG_ALLOW_MULTIPLE)) {
+		if (multi && !IS_SET(GET_TRIG_TYPE(t), MTRIG_ALLOW_MULTIPLE)) {
 			continue;	// already did an allow-multi
 		}
 		if (AFF_FLAGGED(ch, AFF_CHARM) && !TRIGGER_CHECK(t, MTRIG_CHARMED)) {
@@ -1157,8 +1157,8 @@ void load_mtrigger(char_data *ch) {
 	}
 
 	LL_FOREACH_SAFE(TRIGGERS(SCRIPT(ch)), t, next_t) {
-		if (multi && IS_SET(GET_TRIG_TYPE(t), MTRIG_ALLOW_MULTIPLE)) {
-			continue;	// already did an allow-multi
+		if (multi && !IS_SET(GET_TRIG_TYPE(t), MTRIG_ALLOW_MULTIPLE)) {
+			continue;	// already did an allow-multi, skip any non-allow-multi
 		}
 		if (TRIGGER_CHECK(t, MTRIG_LOAD) &&  (number(1, 100) <= GET_TRIG_NARG(t))) {
 			union script_driver_data_u sdd;
