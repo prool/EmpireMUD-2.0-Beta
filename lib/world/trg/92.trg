@@ -41,7 +41,7 @@ Lion and friends combat script~
 set max_summons 14
 set use_cooldown 20
 * check cooldown
-if %self.cooldown(9236)%
+if %self.cooldown(9236)% || %self.disabled%
   halt
 end
 * set cooldown on same-faction mobs and check count

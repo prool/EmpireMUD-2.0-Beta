@@ -152,7 +152,7 @@ monkey brown little~
 a monkey~
 A little brown monkey is walking along a low branch.
 ~
-100 125 djo c 2
+30 40 djo c 2
 0 0 107 9 -1 -1
 D
    The little monkey is balanced carefully on a low branch, clinging to the
@@ -243,7 +243,7 @@ bat flying fox~
 a flying fox~
 A flying fox is flapping around above you.
 ~
-65 90 djo cm 1
+10 20 djo cm 1
 0 0 2 9 -1 -1
 D
 This gigantic bat is nearly the size of a fox!
@@ -807,7 +807,7 @@ bird paradise~
 a bird of paradise~
 A bird of paradise is displaying its feathers.
 ~
-65 90 djo m 1
+10 20 djo m 1
 0 0 2 26 -1 -1
 D
    The exotic bird is larger than a pigeon, but smaller than a goose. Its long,
@@ -885,7 +885,7 @@ beaver~
 a beaver~
 A beaver rests back on its hind legs and looks at you.
 ~
-100 125 djo 0 2
+40 60 djo 0 2
 0 0 0 9 -1 -1
 D
    The beaver is large, with a distinctive flat tail and massive teeth, which

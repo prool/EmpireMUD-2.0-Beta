@@ -5945,7 +5945,8 @@ bool olc_parse_requirement_args(char_data *ch, int type, char *argument, bool fi
 			need_mob_flags = TRUE;
 			break;
 		}
-		case REQ_OWN_BUILDING: {
+		case REQ_OWN_BUILDING:
+		case REQ_NOT_OWN_BUILDING: {
 			need_bld = TRUE;
 			break;
 		}

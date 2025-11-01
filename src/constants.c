@@ -63,8 +63,8 @@ void tog_pvp(char_data *ch);
 //// EMPIREMUD CONSTANTS /////////////////////////////////////////////////////
 
 // Shown on the "version" command and sent over MSSP
-const char *version = "EmpireMUD 2.0 beta 5.195";
-const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.12";
+const char *version = "EmpireMUD 2.0 beta 5.196";
+const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.13";
 
 
 // data for the built-in game levels -- this adapts itself if you reduce the number of immortal levels
@@ -5374,6 +5374,7 @@ const char *requirement_types[] = {
 	"NIGHTTIME",	// 45
 	"DIPLOMACY-OVER",
 	"OWN-ROADS",
+	"NOT-OWN-BUILDING",
 	"\n",
 };
 
@@ -5428,6 +5429,7 @@ const bool requirement_amt_type[] = {
 	REQ_AMT_NONE,	// 45, nighttime
 	REQ_AMT_NUMBER,	// diplomacy-over
 	REQ_AMT_NUMBER,	// own-roads
+	REQ_AMT_NUMBER,	// not own building
 };
 
 
@@ -5481,6 +5483,7 @@ const bool requirement_needs_tracker[] = {
 	FALSE,	// 45, nighttime
 	FALSE,	// diplomacy-over
 	FALSE,	// own-roads
+	FALSE,	// not own building
 };
 
 

@@ -9145,6 +9145,7 @@ Available tasks:
  &cNOT-ON-QUEST&0 - Is not currently on a certain quest.
  &cOWN-BUILDING&0 - Empire has a certain building.
  &cOWN-BUILDING-FUNCTION&0^ - Empire has a building (or building-vehicle) with a given function flag.
+ &cNOT-OWN-BUILDING&0 - Empire does not own this many of a certain building.
  &cOWN-VEHICLE&0 - Empire has a certain vehicle (or building-vehicle).
  &cOWN-VEHICLE-FLAGGED&0^ - Empire has a vehicle (including building-vehicles) with specific flags.
  &cOWN-VEHICLE-FUNCTION&0^ - Empire has a non-building vehicle with specific functions.
