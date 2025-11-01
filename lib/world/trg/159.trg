@@ -1,6 +1,11 @@
 #15900
 Shipwrecked Goblins: Shared load trigger~
-0 nA 100
+0 nA 100 5
+L b 15900
+L b 15901
+L b 15902
+L b 15903
+L r 15900
 ~
 set important_vnums 15900 15901 15902 15903
 set traps 3
@@ -91,7 +96,8 @@ done
 ~
 #15901
 Shipwrecked Goblins: Shared death trigger~
-0 f 100
+0 f 100 1
+L c 15900
 ~
 * This only belongs on goblins listed as %important_vnums% in trig 15900
 set start %instance.start%
@@ -105,7 +111,22 @@ end
 ~
 #15902
 Shipwrecked Goblins: Leash script~
-0 i 100
+0 i 100 15
+L h 5
+L h 6
+L h 8
+L h 30
+L h 32
+L h 33
+L h 52
+L h 57
+L h 251
+L h 253
+L h 10190
+L h 10191
+L h 10192
+L h 12368
+L h 18450
 ~
 *
 set max_dist 6
@@ -129,11 +150,52 @@ if %avoid_sects% ~= %room.sector_vnum%
 end
 ~
 #15903
-Shipwrecked Goblins: Scrapboss build and chop~
-0 ab 10
+Shipwrecked Goblins: Scrapboss build and repair~
+0 ab 10 42
+L e 15901
+L e 15905
+L h 0
+L h 20
+L h 21
+L h 40
+L h 50
+L h 51
+L h 56
+L h 58
+L h 70
+L h 71
+L h 72
+L h 73
+L h 74
+L h 75
+L h 76
+L h 79
+L h 82
+L h 200
+L h 204
+L h 230
+L h 231
+L h 234
+L h 240
+L h 241
+L h 243
+L h 244
+L h 250
+L h 252
+L h 10301
+L h 10302
+L h 10303
+L h 10305
+L h 10306
+L h 10308
+L h 10311
+L h 57
+L r 15900
+L r 15901
+L r 15902
+L r 15903
 ~
 * This script terraforms the area and builds defenses
-set easy_forest 2 3 4 24 37 38 45 47 81 89 212 10563 10564 10565
 set trap_sects 0 20 21 40 50 51 56 58 70 71 72 73 74 75 76 79 82 200 204 230 231 234 240 241 243 244 250 252 10301 10302 10303 10305 10306 10308 10311
 set start %instance.location%
 if !%start%
@@ -150,68 +212,6 @@ elseif %room.building_vnum% == 15901
 elseif %room.sector_vnum% == 57
   %echo% ~%self% uses some of the wreckage to construct a barricade.
   %build% %room% 15901
-elseif %room.sector_vnum% == 1
-  %echo% ~%self% chops down the last tree.
-  %terraform% %room% 0
-elseif %easy_forest% ~= %room.sector_vnum%
-  %echo% ~%self% chops down a tree.
-  eval vnum %room.sector_vnum% - 1
-  %terraform% %room% %vnum%
-elseif %room.sector_vnum% == 9
-  %echo% ~%self% pulls up the road.
-  %terraform% %room% %room.base_sector_vnum%
-elseif %room.sector_vnum% == 23
-  %echo% ~%self% burns the stumps.
-  %terraform% %room% 20
-elseif %room.sector_vnum% == 26
-  %echo% ~%self% chops down the last tree.
-  %terraform% %room% 20
-elseif %room.sector_vnum% == 36
-  %echo% ~%self% burns the stumps.
-  %terraform% %room% 0
-elseif %room.sector_vnum% == 39
-  %echo% ~%self% chops down the last tree.
-  %terraform% %room% 0
-elseif %room.sector_vnum% == 44
-  %echo% ~%self% chops down the last tree.
-  %terraform% %room% 40
-elseif %room.sector_vnum% == 46
-  %echo% ~%self% burns the stumps.
-  %terraform% %room% 40
-elseif %room.sector_vnum% == 54
-  %echo% ~%self% chops down the last tree.
-  %terraform% %room% 50
-elseif %room.sector_vnum% == 59
-  %echo% ~%self% burns the stumps.
-  %terraform% %room% 50
-elseif %room.sector_vnum% == 80
-  %echo% ~%self% chops down the last tree.
-  %terraform% %room% 21
-elseif %room.sector_vnum% == 90
-  %echo% ~%self% chops down a massive tree.
-  %terraform% %room% 4
-  %load% obj 137 %room%
-elseif %room.sector_vnum% == 200
-  %echo% ~%self% chops down a tree.
-  %terraform% %room% 200
-elseif %room.sector_vnum% == 211 || %room.sector_vnum% == 222
-  %echo% ~%self% burns the stumps.
-  %terraform% %room% 204
-elseif %room.sector_vnum% == 220
-  %echo% ~%self% chops down a tree.
-  %terraform% %room% 221
-elseif %room.sector_vnum% == 221 || %room.sector_vnum% == 223 || %room.sector_vnum% == 224
-  %echo% ~%self% chops down a tree.
-  %terraform% %room% 204
-elseif %room.sector_vnum% == 232 || %room.sector_vnum% == 233
-  %echo% ~%self% chops down a tree.
-  %terraform% %room% 231
-elseif %room.sector_vnum% == 10562
-  %echo% ~%self% chops down the last tree.
-  %terraform% %room% 0
-elseif %room.sector_vnum% == 10566
-  %echo% ~%self% burns the stumps.
-  %terraform% %room% 0
 elseif %trap_sects% ~= %room.sector_vnum% && %self.var(traps,0)% > 0 && %dist% >= 4
   %echo% ~%self% arranges some debris into piles.
   %build% %room% 15905
@@ -234,7 +234,85 @@ end
 ~
 #15904
 Shipwrecked Goblins: Tent setup and leash~
-0 i 100
+0 i 100 78
+L f 15904
+L f 15909
+L h 0
+L h 7
+L h 9
+L h 12
+L h 13
+L h 14
+L h 20
+L h 21
+L h 50
+L h 51
+L h 53
+L h 56
+L h 58
+L h 70
+L h 71
+L h 73
+L h 74
+L h 77
+L h 78
+L h 83
+L h 84
+L h 91
+L h 200
+L h 202
+L h 203
+L h 204
+L h 230
+L h 231
+L h 236
+L h 237
+L h 238
+L h 239
+L h 240
+L h 241
+L h 243
+L h 244
+L h 246
+L h 247
+L h 248
+L h 249
+L h 250
+L h 601
+L h 602
+L h 603
+L h 604
+L h 606
+L h 607
+L h 608
+L h 611
+L h 612
+L h 613
+L h 614
+L h 615
+L h 616
+L h 617
+L h 618
+L h 621
+L h 622
+L h 623
+L h 5
+L h 6
+L h 8
+L h 30
+L h 32
+L h 33
+L h 52
+L h 251
+L h 253
+L h 10190
+L h 10191
+L h 10192
+L h 12368
+L h 18450
+L r 15901
+L r 15902
+L r 15903
 ~
 * this builds tents for each mob in a specific range, mob vnums 15901 15902 15903
 set tent_sects 0 7 9 12 13 14 20 21 50 51 53 56 58 70 71 73 74 77 78 83 84 91 200 202 203 204 230 231 236 237 238 239 240 241 243 244 246 247 248 249 250 601 602 603 604 606 607 608 611 612 613 614 615 616 617 618 621 622 623
@@ -262,6 +340,7 @@ elseif %dist% >= %range% && %dist% < %range% + 1
     wait 1 s
     enter tent
     detach 15904 %self.id%
+    detach 15909 %self.id%
   end
 elseif %dist% > %range%
   return 0
@@ -270,11 +349,24 @@ end
 ~
 #15905
 Shipwrecked Goblins: Random Namer~
-0 nA 100
+0 nA 100 13
+L b 15900
+L b 15901
+L b 15902
+L b 15903
+L b 15904
+L b 15905
+L b 15906
+L b 15907
+L b 15908
+L b 15909
+L b 15910
+L b 15911
+L j 15900
 ~
 * Namelists: Both 20 names in length, update size if you change this
-set male_names Zalkaba Greenchops Gobtholomew Gidd Gobstede Goblarossa Balben Rek Rekker Brokka Elvo Goona Seascar Stabman Shivnow Bitesal Fyunk Diyed Axer Bilj Rotbelleh Grimspit Bonegryn Bonepocket Charmspit Grubsnuff Murcant Glummire Pokeskull Bleedsout
-set female_names Merkilda Nilbagga Thilxa Bongy Reeda Gobshih Killigobba Myain Pimba Crunchbones Rattlebones Steala Drooner Vence Bitta Bythe Onner Nelbog Meener Warze Rotlik Moldthumb Wormbitar Stitchgut Sewrot Eetchfang Peeleye Moonspork Blinkgone Hakbone
+set male_names Zalkaba Greenchops Gobtholomew Gidd Gobstede Goblarossa Balben Rek Rekker Brokka Elvo Goona Seascar Stabman Shivnow Bitesal Fyunk Diyed Axer Bilj Rotbelleh Grimspit Bonegryn Bonepocket Charmspit Grubsnuff Murcant Glummire Pokeskull
+set female_names Merkilda Nilbagga Thilxa Bongy Reeda Gobshih Killigobba Myain Pimba Crunchbones Rattlebones Steala Drooner Vence Bitta Bythe Onner Nelbog Meener Warze Rotlik Moldthumb Wormbitar Stitchgut Sewrot Eetchfang Peeleye Moonspork Hakbone
 set size 30
 *
 * Exit early on resurrect
@@ -380,7 +472,8 @@ done
 ~
 #15906
 Shipwrecked Goblin: Another trap~
-1 n 100
+1 n 100 1
+L b 15900
 ~
 * Restores a trap to the scrapboss, if possible
 set mob %instance.mob(15900)%
@@ -392,7 +485,9 @@ end
 ~
 #15907
 Shipwrecked Goblins: Trap go boom~
-2 g 100
+2 g 100 2
+L c 15902
+L c 15901
 ~
 if %actor.is_npc%
   halt
@@ -416,7 +511,7 @@ end
 ~
 #15908
 Goblin Shipwreck: Trap damage~
-1 n 100
+1 n 100 0
 ~
 wait 0
 %echo% &&r**** The debris piles EXPLODE! ****&&0
@@ -424,9 +519,171 @@ wait 0
 %build% %self.room% demolish
 %purge% %self%
 ~
+#15909
+Shipwrecked Goblins: Choppin' trees~
+0 ab 10 46
+L h 24
+L h 37
+L h 38
+L h 45
+L h 47
+L h 81
+L h 89
+L h 212
+L h 10563
+L h 10564
+L h 10565
+L h 23
+L h 36
+L h 44
+L h 46
+L h 80
+L h 88
+L h 211
+L h 10562
+L h 1
+L h 39
+L h 2
+L h 3
+L h 4
+L h 9
+L h 54
+L h 59
+L h 90
+L h 200
+L h 222
+L h 26
+L h 10566
+L h 210
+L h 220
+L h 221
+L h 223
+L h 224
+L h 232
+L h 233
+L h 231
+L h 204
+L h 21
+L h 50
+L h 40
+L h 0
+L h 20
+~
+Commands:
+* This script terraforms forests to flat land
+* forests that terraform down 1 vnum:
+set easy_forest 24 37 38 45 47 81 89 212 10563 10564 10565
+*
+set room %self.room%
+set start %instance.location%
+if !%start% || %room.empire% || %self.fighting% || %self.disabled%
+  halt
+end
+set dist %room.distance(%start%)%
+set sect %room.sector_vnum%
+* some forests chop down 1 vnum
+if %easy_forest% ~= %sect%
+  %echo% ~%self% chops down a tree.
+  eval vnum %sect% - 1
+  %terraform% %room% %vnum%
+  halt
+end
+* otherwise chop/burn by vnum:
+switch %sect%
+  case 1
+  case 39
+  case 10562
+    %echo% ~%self% chops down the last tree.
+    %terraform% %room% 0
+  break
+  case 2
+    %echo% ~%self% chops the last trees.
+    %terraform% %room% 0
+  break
+  case 3
+    %echo% ~%self% chops trees.
+    %terraform% %room% 2
+  break
+  case 4
+    %echo% ~%self% chops some last trees.
+    %terraform% %room% 2
+  break
+  case 9
+    %echo% ~%self% pulls up the road.
+    %terraform% %room% %room.base_sector_vnum%
+  break
+  case 23
+  case 211
+  case 222
+    %echo% ~%self% burns the stumps.
+    %terraform% %room% 20
+  break
+  case 26
+    %echo% ~%self% chops down the last tree.
+    %terraform% %room% 20
+  break
+  case 36
+  case 10566
+    %echo% ~%self% burns the stumps.
+    %terraform% %room% 0
+  break
+  case 44
+    %echo% ~%self% chops down the last tree.
+    %terraform% %room% 40
+  break
+  case 46
+    %echo% ~%self% burns the stumps.
+    %terraform% %room% 40
+  break
+  case 54
+    %echo% ~%self% chops down the last tree.
+    %terraform% %room% 50
+  break
+  case 59
+    %echo% ~%self% burns the stumps.
+    %terraform% %room% 50
+  break
+  case 80
+    %echo% ~%self% chops down the last tree.
+    %terraform% %room% 21
+  break
+  case 90
+    %echo% ~%self% chops down a massive tree.
+    %terraform% %room% 4
+    %load% obj 137 %room%
+  break
+  case 210
+    %echo% ~%self% chops down a tree.
+    %terraform% %room% 200
+  break
+  case 220
+    %echo% ~%self% chops down a tree.
+    %terraform% %room% 221
+  break
+  case 221
+  case 223
+  case 224
+    %echo% ~%self% chops down a tree.
+    %terraform% %room% 204
+  break
+  case 232
+  case 233
+    %echo% ~%self% chops down a tree.
+    %terraform% %room% 231
+  break
+end
+~
 #15911
 Shipwrecked Goblins: Deadwright resurrection~
-0 b 10
+0 b 10 8
+L b 15904
+L b 15905
+L b 15906
+L b 15907
+L b 15908
+L b 15909
+L b 15910
+L b 15911
 ~
 * find and resurrect a goblin
 if %self.disabled%
