@@ -331,7 +331,7 @@ olc.attack.o: olc.attack.c conf.h sysdep.h structs.h protocol.h uthash.h \
   constants.h
 	$(CC) -c $(CFLAGS) olc.attack.c
 olc.craft.o: olc.craft.c conf.h sysdep.h structs.h uthash.h utils.h \
-  interpreter.h db.h comm.h olc.h skills.h handler.h constants.h
+  interpreter.h db.h comm.h olc.h skills.h handler.h constants.h dg_scripts.h
 	$(CC) -c $(CFLAGS) olc.craft.c
 olc.crop.o: olc.crop.c conf.h sysdep.h structs.h uthash.h utils.h \
   interpreter.h db.h comm.h olc.h skills.h handler.h constants.h

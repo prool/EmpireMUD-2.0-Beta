@@ -327,7 +327,7 @@ bool delete_from_proto_list_by_vnum(struct trig_proto_list **list, trig_vnum vnu
 * @param trig_vnum vnum The vnum to delete.
 */
 void olc_delete_trigger(char_data *ch, trig_vnum vnum) {
-	trig_data *trig;
+	trig_data *trig, *trig_iter, *next_trig;
 	quest_data *quest, *next_quest;
 	room_template *rmt, *next_rmt;
 	vehicle_data *veh, *next_veh;
@@ -456,6 +456,16 @@ void olc_delete_trigger(char_data *ch, trig_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig_iter, next_trig) {
+		found = trigger_has_link(trig_iter, OLC_TRIGGER, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to trigger [%d] %s", GET_TRIG_VNUM(trig_iter), GET_TRIG_NAME(trig_iter), vnum, GET_TRIG_NAME(trig));
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// update vehicle protos
 	HASH_ITER(hh, vehicle_table, veh, next_veh) {
 		if (delete_from_proto_list_by_vnum(&veh->proto_script, vnum)) {
@@ -494,6 +504,12 @@ void olc_delete_trigger(char_data *ch, trig_vnum vnum) {
 			if (found) {
 				SET_BIT(SHOP_FLAGS(GET_OLC_SHOP(dsc)), SHOP_IN_DEVELOPMENT);
 				msg_to_desc(dsc, "A trigger used by the shop you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(dsc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(dsc), OLC_TRIGGER, vnum);
+			if (found) {
+				msg_to_desc(dsc, "Trigger [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, GET_TRIG_NAME(trig));
 			}
 		}
 		if (GET_OLC_ROOM_TEMPLATE(dsc) && delete_from_proto_list_by_vnum(&GET_OLC_ROOM_TEMPLATE(dsc)->proto_script, vnum)) {
@@ -670,6 +686,7 @@ void olc_search_trigger(char_data *ch, trig_vnum vnum) {
 	adv_data *adv, *next_adv;
 	obj_data *obj, *next_obj;
 	bld_data *bld, *next_bld;
+	trig_data *trig_iter, *next_trig;
 	int found;
 	bool any;
 	
@@ -767,6 +784,14 @@ void olc_search_trigger(char_data *ch, trig_vnum vnum) {
 		if (any) {
 			++found;
 			build_page_display(ch, "SHOP [%5d] %s", SHOP_VNUM(shop), SHOP_NAME(shop));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig_iter, next_trig) {
+		if (trigger_has_link(trig_iter, OLC_TRIGGER, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig_iter), GET_TRIG_NAME(trig_iter));
 		}
 	}
 	
