@@ -542,10 +542,11 @@ void olc_delete_mobile(char_data *ch, mob_vnum vnum) {
 	
 	// update triggers
 	HASH_ITER(hh, trigger_table, trig, next_trig) {
-		found = delete_trigger_links(trig, OLC_MOBILE, vnum);
+		found = trigger_has_link(trig, OLC_MOBILE, vnum);
 		if (found) {
 			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to mobile [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, GET_SHORT_DESC(proto));
-			save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+			// doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
 		}
 	}
 	
@@ -657,6 +658,12 @@ void olc_delete_mobile(char_data *ch, mob_vnum vnum) {
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
 				msg_to_desc(desc, "A mobile required by the social you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_MOBILE, vnum);
+			if (found) {
+				msg_to_desc(desc, "Mobile [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, GET_SHORT_DESC(proto));
 			}
 		}
 		if (GET_OLC_VEHICLE(desc)) {

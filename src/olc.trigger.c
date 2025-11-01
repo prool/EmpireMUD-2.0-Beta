@@ -68,6 +68,7 @@ bool audit_trigger(trig_data *trig, char_data *ch) {
 	bitvector_t bits;
 	int pos;
 	bool links;
+	struct trig_link *link;
 		
 	if (!str_cmp(GET_TRIG_NAME(trig), default_trig_name)) {
 		olc_audit_msg(ch, GET_TRIG_VNUM(trig), "Name not set");
@@ -101,6 +102,13 @@ bool audit_trigger(trig_data *trig, char_data *ch) {
 	if (links && !GET_TRIG_LINKS(trig)) {
 		olc_audit_msg(ch, GET_TRIG_VNUM(trig), "Contains numbers but has no links");
 		problem = TRUE;
+	}
+	
+	LL_FOREACH(GET_TRIG_LINKS(trig), link) {
+		if (!str_cmp(get_name_by_olc_type(link->type, link->vnum), "Unknown")) {
+			olc_audit_msg(ch, GET_TRIG_VNUM(trig), "Contains link to Unknown/missing thing");
+			problem = TRUE;
+		}
 	}
 	
 	return problem;
