@@ -512,6 +512,30 @@ struct trig_link *copy_trigger_links(struct trig_link *from) {
 }
 
 
+/**
+* Deletes any matching links on the trigger.
+*
+* @param trig_data *trig The trigger to check.
+* @param bitvector_t type Any OLC_ type to remove.
+* @param any_vnum vnum What vnum of that type to delete.
+* @return bool TRUE if any were deleted, FALSE if not.
+*/
+bool delete_trigger_links(trig_data *trig, bitvector_t type, any_vnum vnum) {
+	struct trig_link *link, *next;
+	bool any = FALSE;
+	
+	LL_FOREACH_SAFE(GET_TRIG_LINKS(trig), link, next) {
+		if (link->type == type && link->vnum == vnum) {
+			LL_DELETE(GET_TRIG_LINKS(trig), link);
+			free(link);
+			any = TRUE;
+		}
+	}
+	
+	return any;
+}
+
+
 // Simple type sorter for trigger links
 int sort_trigger_links(struct trig_link *a, struct trig_link *b) {
 	// type is unsigned, shouldn't use basic math

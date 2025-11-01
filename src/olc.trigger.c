@@ -1038,7 +1038,7 @@ void build_trigger_link_page_display(char_data *ch, trig_data *trig, const char 
 	struct page_display *line;
 	struct trig_link *link;
 	
-	width = (ch && ch->desc && ch->desc->pProtocol->ScreenWidth > 15) ? ch->desc->pProtocol->ScreenWidth : 79;
+	width = (ch && ch->desc && ch->desc->pProtocol->ScreenWidth > 15) ? (ch->desc->pProtocol->ScreenWidth - 1) : 79;
 	
 	LL_SORT(GET_TRIG_LINKS(trig), sort_trigger_links);
 	if (header && *header) {

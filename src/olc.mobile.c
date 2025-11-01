@@ -326,6 +326,7 @@ void olc_delete_mobile(char_data *ch, mob_vnum vnum) {
 	shop_data *shop, *next_shop;
 	empire_data *emp, *next_emp;
 	social_data *soc, *next_soc;
+	trig_data *trig, *next_trig;
 	bld_data *bld, *next_bld;
 	struct mount_data *mount;
 	char name[256];
@@ -536,6 +537,15 @@ void olc_delete_mobile(char_data *ch, mob_vnum vnum) {
 			SET_BIT(SOC_FLAGS(soc), SOC_IN_DEVELOPMENT);
 			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Social %d %s set IN-DEV due to deleted mobile", SOC_VNUM(soc), SOC_NAME(soc));
 			save_library_file_for_vnum(DB_BOOT_SOC, SOC_VNUM(soc));
+		}
+	}
+	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = delete_trigger_links(trig, OLC_MOBILE, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to mobile [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, GET_SHORT_DESC(proto));
+			save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
 		}
 	}
 	
@@ -833,6 +843,7 @@ void olc_search_mob(char_data *ch, mob_vnum vnum) {
 	shop_data *shop, *next_shop;
 	social_data *soc, *next_soc;
 	bld_data *bld, *next_bld;
+	trig_data *trig, *next_trig;
 	int found;
 	bool any;
 	
@@ -1016,6 +1027,14 @@ void olc_search_mob(char_data *ch, mob_vnum vnum) {
 		if (find_requirement_in_list(SOC_REQUIREMENTS(soc), REQ_KILL_MOB, vnum)) {
 			++found;
 			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_MOBILE, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	

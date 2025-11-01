@@ -530,6 +530,7 @@ void add_trigger_to_global_lists(trig_data *trig);
 bool has_trigger(struct script_data *sc, any_vnum vnum);
 trig_data *read_trigger(int nr);
 void add_var(struct trig_var_data **var_list, char *name, char *value, int id);
+bool delete_trigger_links(trig_data *trig, bitvector_t type, any_vnum vnum);
 room_data *dg_room_of_obj(obj_data *obj);
 room_data *do_dg_add_room_dir(room_data *from, int dir, bld_data *bld);
 void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int type, char *cmd);
