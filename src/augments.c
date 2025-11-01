@@ -22,6 +22,7 @@
 #include "skills.h"
 #include "handler.h"
 #include "constants.h"
+#include "dg_scripts.h"
 
 /**
 * Contents:
@@ -365,6 +366,7 @@ void olc_fullsearch_augment(char_data *ch, char *argument) {
 */
 void olc_search_augment(char_data *ch, any_vnum vnum) {
 	augment_data *aug = augment_proto(vnum);
+	trig_data *trig, *next_trig;
 	int found;
 	
 	if (!aug) {
@@ -375,7 +377,13 @@ void olc_search_augment(char_data *ch, any_vnum vnum) {
 	found = 0;
 	build_page_display(ch, "Occurrences of augment %d (%s):", vnum, GET_AUG_NAME(aug));
 	
-	// augments are not actually used anywhere else
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_AUGMENT, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
+		}
+	}
 	
 	if (found > 0) {
 		build_page_display(ch, "%d location%s shown", found, PLURAL(found));
@@ -681,7 +689,10 @@ augment_data *create_augment_table_entry(any_vnum vnum) {
 */
 void olc_delete_augment(char_data *ch, any_vnum vnum) {
 	augment_data *aug;
+	descriptor_data *desc;
+	trig_data *trig, *next_trig;
 	char name[256];
+	bool found;
 	
 	if (!(aug = augment_proto(vnum))) {
 		msg_to_char(ch, "There is no such augment %d.\r\n", vnum);
@@ -696,6 +707,26 @@ void olc_delete_augment(char_data *ch, any_vnum vnum) {
 	// save index and augment file now
 	save_index(DB_BOOT_AUG);
 	save_library_file_for_vnum(DB_BOOT_AUG, vnum);
+	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_AUGMENT, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to augment [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
+	// live olc editors
+	LL_FOREACH(descriptor_list, desc) {
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_AUGMENT, vnum);
+			if (found) {
+				msg_to_desc(desc, "Augment [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
+			}
+		}
+	}
 	
 	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted augment %d %s", GET_NAME(ch), vnum, name);
 	msg_to_char(ch, "Augment %d (%s) deleted.\r\n", vnum, name);

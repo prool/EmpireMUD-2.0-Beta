@@ -545,7 +545,7 @@ void olc_delete_adventure(char_data *ch, adv_vnum vnum) {
 	HASH_ITER(hh, trigger_table, trig, next_trig) {
 		found = trigger_has_link(trig, OLC_ADVENTURE, vnum);
 		if (found) {
-			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to adventure [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, GET_ADV_NAME(adv));
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to adventure [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
 			// Doesn't delete
 			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
 		}
@@ -556,7 +556,7 @@ void olc_delete_adventure(char_data *ch, adv_vnum vnum) {
 		if (GET_OLC_TRIGGER(desc)) {
 			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_ADVENTURE, vnum);
 			if (found) {
-				msg_to_desc(desc, "Adventure [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, GET_ADV_NAME(adv));
+				msg_to_desc(desc, "Adventure [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
 			}
 		}
 	}

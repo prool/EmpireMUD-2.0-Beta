@@ -22,6 +22,7 @@
 #include "skills.h"
 #include "handler.h"
 #include "constants.h"
+#include "dg_scripts.h"
 
 
 /**
@@ -1956,6 +1957,7 @@ void olc_search_progress(char_data *ch, any_vnum vnum) {
 	progress_data *prg = real_progress(vnum), *iter, *next_iter;
 	struct progress_list *pl;
 	quest_data *qiter, *next_qiter;
+	trig_data *trig, *next_trig;
 	int found;
 	bool any;
 	
@@ -1987,6 +1989,14 @@ void olc_search_progress(char_data *ch, any_vnum vnum) {
 		if (any) {
 			++found;
 			build_page_display(ch, "QST [%5d] %s", QUEST_VNUM(qiter), QUEST_NAME(qiter));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_PROGRESS, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	
@@ -2453,10 +2463,11 @@ void olc_delete_progress(char_data *ch, any_vnum vnum) {
 	struct progress_list *pl, *next_pl;
 	quest_data *qiter, *next_qiter;
 	empire_data *emp, *next_emp;
+	trig_data *trig, *next_trig;
 	struct empire_goal *goal;
 	descriptor_data *desc;
 	char name[256];
-	bool any;
+	bool any, found;
 	
 	if (!(prg = real_progress(vnum))) {
 		msg_to_char(ch, "There is no such progress entry %d.\r\n", vnum);
@@ -2517,6 +2528,16 @@ void olc_delete_progress(char_data *ch, any_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_PROGRESS, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to progress [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// remove from from active editors
 	LL_FOREACH(descriptor_list, desc) {
 		if (GET_OLC_PROGRESS(desc)) {
@@ -2542,6 +2563,12 @@ void olc_delete_progress(char_data *ch, any_vnum vnum) {
 			if (any) {
 				SET_BIT(QUEST_FLAGS(GET_OLC_QUEST(desc)), QST_IN_DEVELOPMENT);
 				msg_to_desc(desc, "A quest used by the progress goal you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_PROGRESS, vnum);
+			if (found) {
+				msg_to_desc(desc, "Progress [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
 			}
 		}
 	}

@@ -1484,6 +1484,7 @@ void olc_search_event(char_data *ch, any_vnum vnum) {
 	quest_data *quest, *next_quest;
 	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
+	trig_data *trig, *next_trig;
 	event_data *ev, *next_ev;
 	int found;
 	bool any;
@@ -1545,6 +1546,14 @@ void olc_search_event(char_data *ch, any_vnum vnum) {
 		if (any) {
 			++found;
 			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_EVENT, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	
@@ -2269,6 +2278,7 @@ void olc_delete_event(char_data *ch, any_vnum vnum) {
 	quest_data *quest, *next_quest;
 	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
+	trig_data *trig, *next_trig;
 	event_data *ev, *next_ev;
 	descriptor_data *desc;
 	char_data *chiter;
@@ -2373,6 +2383,16 @@ void olc_delete_event(char_data *ch, any_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_EVENT, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to event [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// remove from from active editors
 	for (desc = descriptor_list; desc; desc = desc->next) {
 		if (GET_OLC_EVENT(desc)) {
@@ -2417,6 +2437,12 @@ void olc_delete_event(char_data *ch, any_vnum vnum) {
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
 				msg_to_desc(desc, "An event required by the social you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_EVENT, vnum);
+			if (found) {
+				msg_to_desc(desc, "Event [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
 			}
 		}
 	}

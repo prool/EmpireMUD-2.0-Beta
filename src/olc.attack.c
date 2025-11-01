@@ -22,6 +22,7 @@
 #include "skills.h"
 #include "handler.h"
 #include "constants.h"
+#include "dg_scripts.h"
 
 /**
 * Contents:
@@ -794,6 +795,7 @@ void olc_search_attack_message(char_data *ch, any_vnum vnum) {
 	char_data *mob, *next_mob;
 	morph_data *morph, *next_morph;
 	obj_data *obj, *next_obj;
+	trig_data *trig, *next_trig;
 	
 	if (!amd) {
 		msg_to_char(ch, "There is no attack message %d.\r\n", vnum);
@@ -855,6 +857,14 @@ void olc_search_attack_message(char_data *ch, any_vnum vnum) {
 		if (any) {
 			++found;
 			build_page_display(ch, "OBJ [%5d] %s", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_ATTACK, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	
@@ -1370,6 +1380,7 @@ void olc_delete_attack_message(char_data *ch, any_vnum vnum) {
 	char_data *mob, *next_mob;
 	morph_data *morph, *next_morph;
 	obj_data *obj, *next_obj;
+	trig_data *trig, *next_trig;
 	
 	if (!(amd = real_attack_message(vnum))) {
 		msg_to_char(ch, "There is no such attack message %d.\r\n", vnum);
@@ -1452,6 +1463,16 @@ void olc_delete_attack_message(char_data *ch, any_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_ATTACK, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to attack [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// olc editor updates
 	LL_FOREACH(descriptor_list, desc) {
 		if (GET_OLC_ABILITY(desc)) {
@@ -1503,6 +1524,12 @@ void olc_delete_attack_message(char_data *ch, any_vnum vnum) {
 			
 			if (found) {
 				msg_to_char(desc->character, "An attack type used by the weapon you're editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_ATTACK, vnum);
+			if (found) {
+				msg_to_desc(desc, "Attack [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
 			}
 		}
 	}
