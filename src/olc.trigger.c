@@ -1083,7 +1083,7 @@ void build_trigger_link_page_display(char_data *ch, trig_data *trig, const char 
 			if (count++ > 0) {
 				append_page_display_line(line, ",");
 			}
-			line = build_page_display_str(ch, buf);
+			line = build_page_display(ch, "  %s", buf);
 		}
 		else {
 			append_page_display_line(line, "%s%s", (count++ > 0 ? ", " : ""), buf); 
