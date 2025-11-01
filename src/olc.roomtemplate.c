@@ -275,6 +275,7 @@ void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
 	room_data *room, *next_room;
 	social_data *soc, *next_soc;
 	shop_data *shop, *next_shop;
+	trig_data *trig, *next_trig;
 	descriptor_data *desc;
 	room_template *rmt;
 	char name[256];
@@ -348,6 +349,16 @@ void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_ROOM_TEMPLATE, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to room template [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, GET_RMT_TITLE(rmt));
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// update world
 	count = 0;
 	DL_FOREACH_SAFE2(interior_room_list, room, next_room, next_interior) {
@@ -396,6 +407,12 @@ void olc_delete_room_template(char_data *ch, rmt_vnum vnum) {
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
 				msg_to_desc(desc, "A room template required by the social you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_ROOM_TEMPLATE, vnum);
+			if (found) {
+				msg_to_desc(desc, "Room template [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, GET_RMT_TITLE(rmt));
 			}
 		}
 	}
@@ -527,6 +544,7 @@ void olc_search_room_template(char_data *ch, rmt_vnum vnum) {
 	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
 	shop_data *shop, *next_shop;
+	trig_data *trig, *next_trig;
 	struct exit_template *ex;
 	obj_data *obj, *next_obj;
 	int found;
@@ -601,6 +619,14 @@ void olc_search_room_template(char_data *ch, rmt_vnum vnum) {
 		if (any) {
 			++found;
 			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_ROOM_TEMPLATE, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	
