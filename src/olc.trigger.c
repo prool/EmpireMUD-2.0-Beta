@@ -67,6 +67,7 @@ bool audit_trigger(trig_data *trig, char_data *ch) {
 	bool problem = FALSE;
 	bitvector_t bits;
 	int pos;
+	bool links;
 		
 	if (!str_cmp(GET_TRIG_NAME(trig), default_trig_name)) {
 		olc_audit_msg(ch, GET_TRIG_VNUM(trig), "Name not set");
@@ -81,11 +82,25 @@ bool audit_trigger(trig_data *trig, char_data *ch) {
 		}
 	}
 	
+	links = FALSE;
+	
 	LL_FOREACH(trig->cmdlist, cmd) {
 		if (strlen(cmd->cmd) > 255) {
 			olc_audit_msg(ch, GET_TRIG_VNUM(trig), "Trigger has a line longer than 255 characters and won't save properly");
 			problem = TRUE;
 		}
+		
+		// check for links
+		for (pos = 0; pos < strlen(cmd->cmd) - 1 && !links; ++pos) {
+			if (isdigit(cmd->cmd[pos]) && isdigit(cmd->cmd[pos+1])) {
+				links = TRUE;
+			}
+		}
+	}
+	
+	if (links && !GET_TRIG_LINKS(trig)) {
+		olc_audit_msg(ch, GET_TRIG_VNUM(trig), "Contains ");
+		problem = TRUE;
 	}
 	
 	return problem;
