@@ -1,0 +1,211 @@
+#15900
+goblin scrapboss boss~
+the goblin scrapboss~
+The goblin scrapboss is dragging a bag of nails.
+~
+75 175 adyzIJLM cm 2
+1 0 0 6 -1 -1
+D
+   The scrapboss is stocky, for a goblin. His skin is the palest shade of
+green, to the point that it almost shimmers in direct light. His clothing is
+leather, but bulges all over reveal the plates of metal and wood that are
+crammed into every pocket. Near him sit a bag of nails and a travois laden with
+scrapwood.
+~
+F 15900
+T 15905
+T 15902
+T 15900
+T 15903
+T 15901
+S
+#15901
+goblin wavewhisperer whisperer wave-whisperer~
+the goblin wavewhisperer~
+The goblin wavewhisperer stares serenely off into the distance.
+~
+75 175 adxyIJLM c 2
+2 0 86 22 -1 -1
+D
+   The old whisperer has a deep jade complexion, though she has smeared a light
+paste over her face and upper arms. Her violet cloth robes are stitched with
+gleaming silver, though the edges are frayed and torn. Her face bears a serene
+demeanor and her eyes never fix on a single point as she looks off.
+~
+F 15900
+T 15905
+T 15900
+T 15901
+T 15904
+S
+#15902
+goblin crabherd crab-herd herd~
+the goblin crabherd~
+The goblin crabherd is looking for something.
+~
+75 175 adyIJLM c 2
+2 0 86 3 -1 -1
+D
+   The young crabherd has wisely bound both of her pale green legs with strips
+of hardened leather; the strips are etched and marred by the pinch-marks of
+crustacean claws. She has also tied her long red hair up out of reach of the
+little crawlers.
+~
+F 15900
+T 15905
+T 15900
+T 15901
+T 15904
+S
+#15903
+goblin raidscribe raid-scribe scribe~
+the goblin raidscribe~
+The goblin raidscribe is carving notches into a long pole.
+~
+75 175 adyIJLM c 2
+1 0 86 3 -1 -1
+D
+   The raidscribe has aged to the point that his skin, now almost gray, cracks
+like stone. Here and there, dried blood is caked to the cracks, though there's
+no way to tell from here if it's his blood or someone else's. He holds a long
+wooden pole with a series of notched and grooved patterns, and it looks like
+he's finishing the work.
+~
+F 15900
+T 15905
+T 15900
+T 15901
+T 15904
+S
+#15904
+goblin ropesnarl rope-snarl snarl !#n~
+a goblin ropesnarl~
+A goblin ropesnarl is twirling a net.
+~
+75 175 acdIJM c 2
+0 0 77 7 -1 -1
+D
+   The lime-green old ropesnarl is dressed in tattered canvas shorts and little
+else, save for the spare rope and netting slung around the shoulder.
+~
+F 15900
+T 15905
+T 15902
+T 15900
+S
+#15905
+goblin bonecounter bone-counter counter !#n~
+a goblin bonecounter~
+A goblin bonecounter is eyeing you up and down.
+~
+75 175 acdIJM c 2
+0 0 77 4 -1 -1
+D
+   The funny little bonecounter peers at you through comically oversized
+spectacles that magnify gold and jade eyes to the size of goblin saucers.
+~
+F 15900
+T 15905
+T 15902
+T 15900
+S
+#15906
+goblin shellpicker shell-picker picker !#n~
+a goblin shellpicker~
+A goblin shellpicker is gleaming in the light.
+~
+75 175 acdIJM c 2
+0 0 0 5 -1 -1
+D
+   The shellpicker is tall for a goblin and decked out in hundreds of shells,
+forming a rather clattering dress.
+~
+F 15900
+T 15905
+T 15902
+T 15900
+S
+#15907
+goblin lootcaller loot-caller caller !#n~
+a goblin lootcaller~
+A goblin lootcaller is barking out orders.
+~
+75 175 acdIJM c 2
+0 0 0 17 -1 -1
+D
+   The little green lootcaller's pockets are absolutely bulging, giving a
+distinct, high-pitched rattle with each step.
+~
+F 15900
+T 15905
+T 15902
+T 15900
+S
+#15908
+goblin banner-lugger bannerlugger lugger !#n~
+a goblin banner-lugger~
+A goblin banner-lugger is standing here.
+~
+75 175 acdIJM c 2
+0 0 61 3 -1 -1
+D
+The gray-green goblin drags a tall banner across the field.
+~
+F 15900
+T 15905
+T 15902
+T 15900
+S
+#15909
+goblin flame-skulker flameskulker skulker !#n~
+a goblin flame-skulker~
+A goblin flame-skulker is lurking nearby.
+~
+75 175 acdIJM c 2
+0 0 77 12 -1 -1
+D
+   Unlike the other goblins, this flame-skulker has black skin without even the
+slightest hint of green. Wisps of soot flow behind, too, so perhaps this goblin
+is just very dirty.
+~
+F 15900
+T 15905
+T 15902
+T 15900
+S
+#15910
+goblin tarflinger tar-flinger flinger !#n~
+a goblin tarflinger~
+A goblin tarflinger is holding a bucket.
+~
+75 175 acdIJM c 2
+0 0 11 15 -1 -1
+D
+   As you're trying to work out what a tarflinger is, the goblin lobs a ball of
+tar in your direction.
+~
+F 15900
+T 15905
+T 15902
+T 15900
+S
+#15911
+goblin deadwright dead-wright wright !#n~
+a goblin deadwright~
+A goblin deadwright seems to be chanting something.
+~
+75 175 dxIJM c 2
+0 0 9 19 -1 -1
+D
+   The old goblin is draped in white robes that have so much extra material
+you can hardly see the green under them. Whispers echo in your ears, softly at
+first, but as you approach the deadwright, the sounds of the damned become
+deafening.
+~
+F 15900
+T 15905
+T 15902
+T 15900
+T 15911
+S
+$

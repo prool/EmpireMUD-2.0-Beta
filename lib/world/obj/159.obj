@@ -1,0 +1,37 @@
+#15900
+banner burning~
+a burning banner~
+A banner burns over the wreckage.~
+   The banner is too charred to make out what it might once have depicted. It
+crisps and crackles in the wind for quite a while; it must have been soaked in
+tallow or beeswax.
+~
+3 0 0 0 0 1
+0 0 0
+0 24
+T 9683
+S
+#15901
+trap another~
+another trap~
+Another trap is lying here.~
+~
+3 0 0 0 0 2
+0 0 0
+0 2
+T 15906
+S
+#15902
+pile debris~
+a debris pile~
+A debris pile is exploding!~
+It's exploding!
+~
+3 m 0 0 0 3
+0 0 0
+0 2
+C
+75 0
+T 15908
+S
+$
