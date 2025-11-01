@@ -331,7 +331,7 @@ if %avoid_sects% ~= %room.sector_vnum%
   return 0
   halt
 elseif %dist% >= %range% && %dist% < %range% + 1
-  if %tent_sects% ~= %room.sector_vnum%
+  if %tent_sects% ~= %room.sector_vnum% && !%room.empire%
     * tent here!
     nop %self.add_mob_flag(SENTINEL)%
     wait 2 s
