@@ -99,7 +99,7 @@ bool audit_trigger(trig_data *trig, char_data *ch) {
 	}
 	
 	if (links && !GET_TRIG_LINKS(trig)) {
-		olc_audit_msg(ch, GET_TRIG_VNUM(trig), "Contains ");
+		olc_audit_msg(ch, GET_TRIG_VNUM(trig), "Contains numbers but has no links");
 		problem = TRUE;
 	}
 	
