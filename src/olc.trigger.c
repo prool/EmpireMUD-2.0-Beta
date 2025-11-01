@@ -1050,7 +1050,7 @@ void build_trigger_link_page_display(char_data *ch, trig_data *trig, const char 
 	bitvector_t last_type = NOBITS;
 	char buf[MAX_STRING_LENGTH];
 	int count = 0, width;
-	struct page_display *line;
+	struct page_display *line = NULL;
 	struct trig_link *link;
 	
 	width = (ch && ch->desc && ch->desc->pProtocol->ScreenWidth > 15) ? (ch->desc->pProtocol->ScreenWidth - 1) : 79;
