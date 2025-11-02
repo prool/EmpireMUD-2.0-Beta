@@ -130,7 +130,7 @@ L h 18450
 ~
 *
 set max_dist 6
-set avoid_sects 5 6 8 30 32 33 52 57 251 253 10190 10191 10192 12368 18450
+set avoid_sects 5 6 8 30 32 33 52 251 253 10190 10191 10192 12368 18450
 *
 set start %instance.location%
 set room %self.room%
