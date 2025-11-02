@@ -1,6 +1,7 @@
 #900
 Shoddy Raft Drop~
-1 n 100
+1 n 100 1
+L r 923
 ~
 %load% veh 923
 set raft %self.room.vehicles%
@@ -11,7 +12,8 @@ end
 ~
 #916
 Harvest Beehive~
-5 c 0
+5 c 0 1
+L c 3069
 harvest check~
 if !%arg% || %actor.veh_target(%arg%)% != %self%
   return 0
@@ -69,7 +71,8 @@ end
 ~
 #917
 Convert Old Beehives~
-1 hn 100
+1 hn 100 1
+L r 916
 ~
 * default return is 1 -- unless we hit a particular condition
 return 1
@@ -86,7 +89,7 @@ wait 1
 ~
 #918
 Beehive Growth~
-5 ab 2
+5 ab 2 0
 ~
 * config: max honeycomb to store
 set max 24
@@ -123,7 +126,9 @@ end
 ~
 #919
 Start Axe Tutorial~
-2 u 0
+2 u 0 2
+L t 100
+L t 121
 ~
 * start flint tutorial
 if !%actor.completed_quest(100)% && !%actor.on_quest(100)%
@@ -136,7 +141,8 @@ end
 ~
 #921
 Caravan setup~
-5 o 100
+5 o 100 1
+L e 5518
 ~
 set inter %self.interior%
 if (!%inter%)
@@ -149,7 +155,7 @@ detach 921 %self.id%
 ~
 #929
 bloodletter arrows~
-1 s 25
+1 s 25 0
 ~
 set scale 100
 if !%target%
@@ -161,7 +167,8 @@ end
 ~
 #952
 Caravel setup~
-5 o 100
+5 o 100 1
+L e 5500
 ~
 set inter %self.interior%
 if (!%inter% || %inter.aft%)
@@ -172,7 +179,8 @@ detach 952 %self.id%
 ~
 #953
 Cog setup~
-5 o 100
+5 o 100 1
+L e 5502
 ~
 set inter %self.interior%
 if (!%inter% || %inter.down%)
@@ -183,7 +191,8 @@ detach 953 %self.id%
 ~
 #954
 Longship setup~
-5 o 100
+5 o 100 1
+L e 5500
 ~
 set inter %self.interior%
 if (!%inter% || %inter.aft%)
@@ -194,7 +203,9 @@ detach 954 %self.id%
 ~
 #955
 Brigantine setup~
-5 o 100
+5 o 100 2
+L e 5506
+L e 5512
 ~
 set inter %self.interior%
 if (!%inter%)
@@ -210,7 +221,9 @@ detach 955 %self.id%
 ~
 #956
 Carrack setup~
-5 o 100
+5 o 100 2
+L e 5506
+L e 5513
 ~
 set inter %self.interior%
 if (!%inter%)
@@ -226,7 +239,9 @@ detach 956 %self.id%
 ~
 #957
 Hulk setup~
-5 o 100
+5 o 100 2
+L e 5500
+L e 5502
 ~
 set inter %self.interior%
 if (!%inter%)

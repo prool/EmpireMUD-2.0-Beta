@@ -1,6 +1,8 @@
 #505
 Moon Rabbit Familiar Buffs~
-0 kt 100
+0 kt 100 2
+L w 500
+L w 505
 ~
 if %self.disabled%
   halt
@@ -81,7 +83,7 @@ done
 ~
 #506
 Moon Rabbit commands~
-0 ct 0
+0 ct 0 0
 order~
 set arg1 %arg.argument1%
 set arg2 %arg.argument2%
@@ -142,7 +144,10 @@ end
 ~
 #507
 Spirit Wolf Familiar Debuffs~
-0 kt 100
+0 kt 100 3
+L w 500
+L w 507
+L w 508
 ~
 if %self.disabled%
   halt
@@ -196,7 +201,7 @@ done
 ~
 #508
 Spirit Wolf commands~
-0 ct 0
+0 ct 0 0
 order~
 set arg1 %arg.argument1%
 set arg2 %arg.argument2%
@@ -257,7 +262,9 @@ end
 ~
 #509
 Phoenix Familiar Buffs~
-0 kt 100
+0 kt 100 2
+L w 500
+L w 509
 ~
 if %self.disabled%
   halt
@@ -345,7 +352,9 @@ done
 ~
 #510
 Scorpion Shadow Familiar Debuffs~
-0 kt 100
+0 kt 100 2
+L w 500
+L w 510
 ~
 if %self.disabled%
   halt
@@ -407,7 +416,9 @@ done
 ~
 #511
 Owl Shadow Familiar Buffs~
-0 kt 100
+0 kt 100 2
+L w 500
+L w 511
 ~
 if %self.disabled%
   halt
@@ -493,7 +504,9 @@ end
 ~
 #512
 Basilisk Familiar Debuffs~
-0 kt 100
+0 kt 100 2
+L w 500
+L w 512
 ~
 if %self.disabled%
   halt
@@ -561,7 +574,9 @@ nop %self.set_cooldown(500, 25)%
 ~
 #513
 Salamander Familiar Buffs~
-0 kt 100
+0 kt 100 2
+L w 500
+L w 513
 ~
 if %self.disabled%
   halt
@@ -641,7 +656,7 @@ nop %self.set_cooldown(500, 25)%
 ~
 #514
 Shadow Wolf Familiars: Hide with Player~
-0 ct 0
+0 ct 0 0
 hide~
 * never block command
 return 0
@@ -664,7 +679,9 @@ dg_affect %self% HIDDEN on -1
 ~
 #515
 Banshee Familiar Debuffs~
-0 kt 100
+0 kt 100 2
+L w 500
+L w 515
 ~
 if %self.disabled%
   halt
@@ -726,7 +743,7 @@ nop %self.set_cooldown(500, 25)%
 ~
 #516
 Phoenix commands~
-0 ct 0
+0 ct 0 0
 order~
 set arg1 %arg.argument1%
 set arg2 %arg.argument2%
@@ -787,7 +804,7 @@ end
 ~
 #517
 Scorpion Shadow commands~
-0 ct 0
+0 ct 0 0
 order~
 set arg1 %arg.argument1%
 set arg2 %arg.argument2%
@@ -848,7 +865,7 @@ end
 ~
 #518
 Owl Shadow commands~
-0 ct 0
+0 ct 0 0
 order~
 set arg1 %arg.argument1%
 set arg2 %arg.argument2%
@@ -909,7 +926,7 @@ end
 ~
 #519
 Basilisk commands~
-0 ct 0
+0 ct 0 0
 order~
 set arg1 %arg.argument1%
 set arg2 %arg.argument2%
@@ -970,7 +987,7 @@ end
 ~
 #520
 Salamander commands~
-0 ct 0
+0 ct 0 0
 order~
 set arg1 %arg.argument1%
 set arg2 %arg.argument2%
@@ -1031,7 +1048,7 @@ end
 ~
 #521
 Banshee commands~
-0 ct 0
+0 ct 0 0
 order~
 set arg1 %arg.argument1%
 set arg2 %arg.argument2%
@@ -1092,7 +1109,7 @@ end
 ~
 #550
 Dark Minion: Rescale on load~
-0 n 100
+0 n 100 0
 ~
 set actor %self.leader%
 if %actor%

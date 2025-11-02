@@ -1,6 +1,10 @@
 #9600
 SCF Script Fight: Setup dodge, interrupt, struggle (needs 9601, 9604)~
-0 c 0
+0 c 0 4
+L c 9602
+L f 9601
+L f 9604
+L w 9602
 scfight~
 * Also requires triggers 9601 and 9604 on the same mob
 * Uses a 'diff' var on the mob with 1=normal, 2=hard, 3=group, 4=boss
@@ -145,7 +149,11 @@ end
 ~
 #9601
 SCF Script Fight: Player dodges, interrupts~
-0 c 0
+0 c 0 4
+L f 9600
+L f 9604
+L w 9600
+L w 9601
 dodge interrupt~
 * Also requires triggers 9600 and 9604
 * handles dodge, interrupt
@@ -259,7 +267,9 @@ end
 ~
 #9602
 SCF Script Fight: Struggle to get free~
-1 c 2
+1 c 2 2
+L f 9600
+L w 9602
 *~
 * To use STRUGGLE: Mob must have trig 9600, then:
 *   scfight clear struggle
@@ -320,7 +330,8 @@ end
 ~
 #9603
 SCF Script Fight: Check struggle and remove~
-1 ab 100
+1 ab 100 1
+L w 9602
 ~
 * Ensures the 'struggle' handler does not stick around
 set ch %self.carried_by%
@@ -334,7 +345,9 @@ end
 ~
 #9604
 SCF Script Fight: Greeting setup~
-0 h 100
+0 h 100 2
+L f 9600
+L f 9601
 ~
 * Works with trigs 9600/9601 to ensure players who enter the room do not have
 * stale SCF data. Also sets diff variable.
@@ -365,7 +378,7 @@ end
 ~
 #9620
 Storytime using script1-5~
-0 bw 100
+0 bw 100 0
 ~
 * uses mob custom strings script1-script5 to tell short stories
 * usage: .custom add script# <command> <string>
@@ -480,7 +493,7 @@ wait %story_gap%
 ~
 #9680
 Force look after wait~
-1 n 100
+1 n 100 0
 ~
 wait 1
 if %self.carried_by% && %self.carried_by.position% != Sleeping
@@ -490,14 +503,14 @@ end
 ~
 #9681
 Vehicle: Set load time on-load~
-5 n 100
+5 n 100 0
 ~
 set load_time %timestamp%
 remote load_time %self.id%
 ~
 #9682
 Remove spawned NPCs in room~
-1 n 100
+1 n 100 0
 ~
 * Removes any spawned NPCs that aren't linked to an adventure
 * Uses:
@@ -517,7 +530,7 @@ done
 ~
 #9683
 Delayed Despawner: Attach to Obj with Timer~
-1 f 0
+1 f 0 0
 ~
 * Marks the adventure complete when the item decays.
 %adventurecomplete%

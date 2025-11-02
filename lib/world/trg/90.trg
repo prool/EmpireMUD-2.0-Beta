@@ -1,6 +1,6 @@
 #9000
 Cow Animation~
-0 bw 1
+0 bw 1 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * The cow will do a couple different things, so we do an if on a random generator.
@@ -17,7 +17,8 @@ end
 ~
 #9001
 Wolf Pack~
-0 n 100
+0 n 100 1
+L b 9003
 ~
 set num %random.2%
 while %num% > 0
@@ -27,7 +28,7 @@ done
 ~
 #9002
 Herd Cats~
-0 c 0
+0 c 0 0
 herd~
 * test targeting me
 if %actor.char_target(%arg.argument1%)% != %self%
@@ -40,7 +41,15 @@ return 1
 ~
 #9003
 Daily Quest Item Handout~
-2 u 100
+2 u 100 8
+L c 9010
+L c 9031
+L c 9034
+L c 9036
+L t 9009
+L t 9030
+L t 9033
+L t 9036
 ~
 if %questvnum% == 9009
   %load% obj 9010 %actor% inv
@@ -83,7 +92,7 @@ end
 ~
 #9004
 Sheep Animation~
-0 bw 1
+0 bw 1 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * The sheep will do a couple different things, so we do an if on a random generator.
@@ -100,7 +109,7 @@ end
 ~
 #9005
 No Herd~
-0 c 0
+0 c 0 0
 herd~
 * test targeting me
 if %actor.char_target(%arg.argument1%)% != %self%
@@ -113,7 +122,7 @@ return 1
 ~
 #9008
 Squirrel Animation~
-0 bw 4
+0 bw 4 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Get current terrain.
@@ -125,7 +134,7 @@ end
 ~
 #9009
 Cow Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * The cow will do a couple different things, so we do an if on a random generator.
@@ -142,7 +151,7 @@ end
 ~
 #9010
 Chicken Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Chicken Animation (9010)
@@ -167,7 +176,7 @@ done
 ~
 #9011
 Rooster Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Rooster Animation (9011)
@@ -192,7 +201,7 @@ done
 ~
 #9012
 Dog Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Dog Animation (9012)
@@ -245,7 +254,7 @@ done
 ~
 #9013
 Prairie Dog Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Prairie Dog Animation (9013)
@@ -265,7 +274,7 @@ done
 ~
 #9018
 Vulture Animation~
-0 bw 1
+0 bw 1 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Vulture Animation (9018)
@@ -273,7 +282,7 @@ Vulture Animation~
 ~
 #9020
 Quail Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Quail Animation (9020)
@@ -289,7 +298,7 @@ end
 ~
 #9021
 Donkey Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Donkey Animation (9021)
@@ -297,7 +306,7 @@ Donkey Animation~
 ~
 #9022
 Black Cat Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Black Cat Animation (9022)
@@ -325,7 +334,7 @@ done
 ~
 #9025
 Eagle Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Eagle Animation (9025)
@@ -347,7 +356,14 @@ done
 ~
 #9027
 Feed to Tame: Fruit/Veg/Grain~
-0 j 100
+0 j 100 7
+L w 6120
+L w 6130
+L w 6140
+L w 6150
+L w 6160
+L w 6170
+L w 9027
 ~
 * Amount of tameness required
 set target 5
@@ -395,7 +411,7 @@ mjunk all
 ~
 #9028
 Tameness Required to Tame~
-0 c 0
+0 c 0 0
 tame feed~
 * Amount of tameness required
 set target 5
@@ -437,7 +453,23 @@ end
 ~
 #9030
 Butcher detect~
-1 c 3
+1 c 3 16
+L b 9001
+L b 9002
+L b 9016
+L b 9017
+L b 9019
+L b 9059
+L b 9060
+L b 9102
+L b 9118
+L b 9143
+L b 9177
+L b 9213
+L b 9225
+L b 9231
+L b 9914
+L c 9030
 butcher~
 * Config list:
 set danger_vnums 9001 9002 9016 9017 9019 9059 9060 9100 9102 9114 9118 9143 9177 9213 9225 9231
@@ -490,7 +522,11 @@ halt
 ~
 #9033
 Fake pickpocket~
-1 c 2
+1 c 2 4
+L b 202
+L b 203
+L c 9033
+L t 9033
 pickpocket~
 set target %actor.char_target(%arg%)%
 if !%target%
@@ -538,7 +574,7 @@ end
 ~
 #9034
 Horse Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Horse Animation (9034)
@@ -556,7 +592,9 @@ done
 ~
 #9036
 Disenchant detector~
-1 p 100
+1 p 100 2
+L c 9036
+L o 180
 ~
 if %abilityname% != Disenchant
   return 1
@@ -577,7 +615,10 @@ return 1
 ~
 #9042
 Postmaster quest start~
-2 u 100
+2 u 100 3
+L c 9042
+L c 9043
+L c 9044
 ~
 eval vnum 9041+%random.3%
 %load% obj %vnum% %actor% inv
@@ -586,7 +627,15 @@ set item %actor.inventory(%vnum%)%
 ~
 #9043
 Postmaster daily letter delivery~
-1 i 100
+1 i 100 8
+L b 212
+L b 228
+L b 231
+L b 278
+L c 9042
+L c 9043
+L c 9044
+L t 9042
 ~
 switch %self.vnum%
   case 9042
@@ -626,7 +675,8 @@ end
 ~
 #9046
 Tame Sheep Evolution~
-0 ab 100
+0 ab 100 1
+L b 9004
 ~
 %load% mob 9004
 set sheep %self.room.people%
@@ -637,7 +687,9 @@ end
 ~
 #9047
 Chicken: Lay egg~
-0 b 1
+0 b 1 2
+L c 3202
+L w 9047
 ~
 if %self.cooldown(9047)%
   halt
@@ -652,7 +704,8 @@ end
 ~
 #9061
 Hypnotoad fight~
-0 k 75
+0 k 75 1
+L w 9061
 ~
 wait 1
 if (!%actor% || %actor.room% != %self.room%)
@@ -666,7 +719,7 @@ flee
 ~
 #9064
 Wandering Vampire combat~
-0 k 25
+0 k 25 0
 ~
 if !%self.vampire()%
   halt
@@ -716,7 +769,8 @@ end
 ~
 #9066
 Nerf bat random debuffs~
-0 bw 15
+0 bw 15 1
+L w 9066
 ~
 set effect %random.4%
 switch %effect%

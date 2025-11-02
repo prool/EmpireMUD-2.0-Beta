@@ -1,6 +1,7 @@
 #9501
 Combat: Ice Shard~
-0 k 15
+0 k 15 1
+L w 9501
 ~
 * Generic combat script: Ice Shard
 * Damage: 25% magic damage, 50% magic DoT for 30 seconds
@@ -21,7 +22,8 @@ end
 ~
 #9502
 Combat: Snow Flurry~
-0 k 15
+0 k 15 1
+L w 9502
 ~
 * Generic combat script: Snow Flurry
 * Effects: - (level/10) Dodge to all enemies for 15 seconds
@@ -48,7 +50,8 @@ done
 ~
 #9503
 Combat: Bull Rush~
-0 k 15
+0 k 15 1
+L w 9503
 ~
 * Generic combat script: Bull Rush
 * Damage: 50% physical
@@ -73,7 +76,8 @@ end
 ~
 #9504
 Combat: Minor Heal~
-0 k 15
+0 k 15 1
+L w 9504
 ~
 * Generic combat script: Minor Heal
 * Effects: 150% healing on self
@@ -87,7 +91,8 @@ nop %self.set_cooldown(9504, 15)%
 ~
 #9505
 Combat: Ankle Biter~
-0 k 15
+0 k 15 1
+L w 9505
 ~
 * Generic combat script: Ankle Biter
 * Damage: 50% physical DoT for 15 seconds
