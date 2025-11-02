@@ -546,7 +546,7 @@ int sort_trigger_links(struct trig_link *a, struct trig_link *b) {
 		return -1;
 	}
 	else {
-		return 0;
+		return a->vnum - b->vnum;
 	}
 }
 
