@@ -1217,7 +1217,7 @@ OLC_MODULE(tedit_links) {
 				CREATE(link, struct trig_link, 1);
 				link->type = BIT(pos);
 				link->vnum = vnum;
-				LL_APPEND(GET_TRIG_LINKS(trig), link);
+				LL_PREPEND(GET_TRIG_LINKS(trig), link);
 				LL_SORT(GET_TRIG_LINKS(trig), sort_trigger_links);
 				msg_to_char(ch, "Link added for %s [%d] %s.\r\n", buf, vnum, get_name_by_olc_type(BIT(pos), vnum));
 			}
