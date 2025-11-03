@@ -1,6 +1,7 @@
 #9229
 Feral Dog Pack~
-0 n 100
+0 n 100 1
+L b 9229
 ~
 if %self.leader%
   halt
@@ -17,7 +18,8 @@ done
 ~
 #9232
 Box Jellyfish Combat~
-0 k 100
+0 k 100 1
+L w 9232
 ~
 switch %random.3%
   case 1
@@ -36,7 +38,8 @@ done
 ~
 #9236
 Lion and friends combat script~
-0 k 33
+0 k 33 1
+L w 9236
 ~
 set max_summons 14
 set use_cooldown 20
@@ -84,7 +87,7 @@ end
 ~
 #9242
 Load pack animals (vnum + 1)~
-0 n 100
+0 n 100 0
 ~
 eval vnum %self.vnum% + 1
 set num %random.2%
@@ -95,7 +98,7 @@ done
 ~
 #9249
 Summon non-following copies on-load (1-2)~
-0 n 100
+0 n 100 0
 ~
 * Loads 1-2 copies if I'm the only one of me here
 * verify I'm alone
@@ -117,14 +120,14 @@ done
 ~
 #9250
 Load Mate (vnum + 1)~
-0 n 100
+0 n 100 0
 ~
 eval vnum %self.vnum% + 1
 %load% mob %vnum% ally
 ~
 #9252
 Summon duplicate followers on load (1-2)~
-0 n 100
+0 n 100 0
 ~
 Loads 1-2 copies of me as followers if alone
 * verify I'm alone
@@ -146,7 +149,8 @@ done
 ~
 #9255
 Snake: Deadly Venom~
-0 k 100
+0 k 100 1
+L w 9255
 ~
 * High-damage-over-time bite. Combine with a NO-ATTACK flag.
 %echo% ~%self% lunges forward and bites ~%actor%!
@@ -157,7 +161,7 @@ end
 ~
 #9259
 Summon duplicate followers on-load (3-4)~
-0 n 100
+0 n 100 0
 ~
 * Loads 3-4 copies if I'm the only one of me here
 * verify I'm alone
@@ -179,7 +183,7 @@ done
 ~
 #9274
 Chimp troop~
-0 n 100
+0 n 100 0
 ~
 set num %random.3%
 while %num% > 0
@@ -189,7 +193,9 @@ done
 ~
 #9275
 Bonobo troop~
-0 n 100
+0 n 100 2
+L b 9276
+L b 9277
 ~
 %load% mob 9276 ally
 set num %random.2%
@@ -200,7 +206,9 @@ done
 ~
 #9284
 Elephant herd~
-0 n 100
+0 n 100 2
+L b 9285
+L b 9286
 ~
 eval num 1 + %random.2%
 while %num% > 0
@@ -213,7 +221,9 @@ end
 ~
 #9296
 Dire-tusked Mammoth War Platform Leaves Mammoth on Death~
-5 f 100
+5 f 100 2
+L b 9296
+L r 9296
 ~
 %load% mob 9296
 set mob %self.room.people%
@@ -224,7 +234,8 @@ end
 ~
 #9297
 Dire-tusk mammoth to War Platform when barded~
-0 n 100
+0 n 100 1
+L r 9297
 ~
 wait 1
 %load% veh 9297

@@ -1194,6 +1194,7 @@ void do_stat_trigger(char_data *ch, trig_data *trig) {
 	}
 
 	build_page_display(ch, "Trigger Type: %s, Numeric Arg: %d, Arg list: %s", buf, GET_TRIG_NARG(trig), ((GET_TRIG_ARG(trig) && *GET_TRIG_ARG(trig)) ? GET_TRIG_ARG(trig) : "None"));
+	build_trigger_link_page_display(ch, trig, "Links:");
 
 	build_page_display(ch, "Commands:"); 
 	

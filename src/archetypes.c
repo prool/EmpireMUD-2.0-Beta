@@ -22,6 +22,7 @@
 #include "skills.h"
 #include "handler.h"
 #include "constants.h"
+#include "dg_scripts.h"
 
 /**
 * Contents:
@@ -902,6 +903,7 @@ void olc_fullsearch_archetype(char_data *ch, char *argument) {
 void olc_search_archetype(char_data *ch, any_vnum vnum) {
 	archetype_data *arch = archetype_proto(vnum);
 	quest_data *qiter, *next_qiter;
+	trig_data *trig, *next_trig;
 	int found;
 	bool any;
 	
@@ -921,6 +923,14 @@ void olc_search_archetype(char_data *ch, any_vnum vnum) {
 		if (any) {
 			++found;
 			build_page_display(ch, "QST [%5d] %s", QUEST_VNUM(qiter), QUEST_NAME(qiter));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_ARCHETYPE, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	
@@ -1803,6 +1813,7 @@ void olc_delete_archetype(char_data *ch, any_vnum vnum) {
 	archetype_data *arch;
 	descriptor_data *desc;
 	quest_data *qiter, *next_qiter;
+	trig_data *trig, *next_trig;
 	char name[256];
 	bool found;
 	
@@ -1828,6 +1839,16 @@ void olc_delete_archetype(char_data *ch, any_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_ARCHETYPE, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to archetype [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// remove from active editors
 	LL_FOREACH(descriptor_list, desc) {
 		if (GET_OLC_QUEST(desc)) {
@@ -1837,6 +1858,12 @@ void olc_delete_archetype(char_data *ch, any_vnum vnum) {
 			if (found) {
 				SET_BIT(QUEST_FLAGS(GET_OLC_QUEST(desc)), QST_IN_DEVELOPMENT);
 				msg_to_desc(desc, "An archetype rewarded by the quest you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_ARCHETYPE, vnum);
+			if (found) {
+				msg_to_desc(desc, "Archetype [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
 			}
 		}
 	}

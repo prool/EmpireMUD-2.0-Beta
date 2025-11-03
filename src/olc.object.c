@@ -495,6 +495,7 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 	char_data *mob, *next_mob, *chiter;
 	adv_data *adv, *next_adv;
 	bld_data *bld, *next_bld;
+	trig_data *trig, *next_trig;
 	descriptor_data *desc;
 	char name[256];
 	bool found, any_trades = FALSE;
@@ -889,6 +890,16 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_OBJECT, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to object [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// update vehicles
 	HASH_ITER(hh, vehicle_table, veh, next_veh) {
 		found = remove_thing_from_resource_list(&VEH_REGULAR_MAINTENANCE(veh), RES_OBJECT, vnum);
@@ -1102,6 +1113,12 @@ void olc_delete_object(char_data *ch, obj_vnum vnum) {
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
 				msg_to_desc(desc, "An object required by the social you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_OBJECT, vnum);
+			if (found) {
+				msg_to_desc(desc, "Object [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
 			}
 		}
 		if (GET_OLC_VEHICLE(desc)) {
@@ -1401,6 +1418,7 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 	adv_data *adv, *next_adv;
 	bld_data *bld, *next_bld;
 	obj_data *proto, *obj, *next_obj;
+	trig_data *trig, *next_trig;
 	struct resource_data *res;
 	int found;
 	bool any;
@@ -1693,6 +1711,14 @@ void olc_search_obj(char_data *ch, obj_vnum vnum) {
 		if (any) {
 			++found;
 			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_OBJECT, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	

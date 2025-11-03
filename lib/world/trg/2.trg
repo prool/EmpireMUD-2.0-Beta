@@ -1,6 +1,7 @@
 #205
 Bodyguard refresh and cooldown on death~
-0 ft 100
+0 ft 100 1
+L w 2030
 ~
 * partial copy of 9803
 * This script deletes a companion's entry when it dies.
@@ -14,21 +15,21 @@ end
 ~
 #221
 Stealth GM Bribe coins: Prevent~
-0 m 0
+0 m 0 0
 ~
 %send% %actor% ~%self% doesn't take bribes like that any more. Complete ^%self% quest instead.
 return 0
 ~
 #222
 Stealth GM Bribe item: Prevent~
-0 j 100
+0 j 100 0
 ~
 %send% %actor% ~%self% doesn't take bribes like that any more. Complete ^%self% quest instead.
 return 0
 ~
 #230
 Summon Thug load script~
-0 n 100
+0 n 100 0
 ~
 * cancels follow and sets loyalty to current room's empire
 if %self.leader%
@@ -44,7 +45,7 @@ detach 230 %self.id%
 ~
 #232
 Barrel of Fun: Setup command~
-1 c 6
+1 c 6 0
 setup~
 set room %actor.room%
 if %actor.obj_target(%arg.argument1%)% != %self%
@@ -87,7 +88,7 @@ detach 232 %self.id%
 ~
 #233
 Barrel of Fun: Block 2nd setup~
-1 c 4
+1 c 4 0
 setup~
 if %actor.obj_target(%arg.argument1%)% == %self%
   %send% %actor% It has already been set up.
@@ -98,7 +99,9 @@ end
 ~
 #250
 City Guard: Distract~
-0 k 50
+0 k 50 2
+L w 250
+L w 251
 ~
 if %self.cooldown(250)%
   halt
@@ -110,7 +113,8 @@ dg_affect #251 %actor% DISTRACTED on 30
 ~
 #251
 City Guard: Reinforcements~
-0 k 100
+0 k 100 1
+L w 250
 ~
 if %self.cooldown(250)%
   halt
@@ -161,7 +165,8 @@ done
 ~
 #256
 Hestian Trinket~
-1 c 2
+1 c 2 1
+L w 256
 use~
 * HESTIAN TRINKET: basic timed teleport home; paramenters:
 * val0: cooldown vnum (-1 for none, defaults to 256 if 0)
@@ -301,7 +306,9 @@ nop %actor.cancel_adventure_summon%
 ~
 #257
 Start Brick Tutorial~
-2 u 0
+2 u 0 2
+L t 102
+L t 2100
 ~
 * start chop tutorial
 if !%actor.completed_quest(2100)% && !%actor.on_quest(2100)%
@@ -314,7 +321,8 @@ end
 ~
 #258
 Peace Pipe Toker~
-1 c 2
+1 c 2 1
+L c 1201
 smoke~
 if !%arg%
   %send% %actor% Smoke what?
@@ -339,7 +347,8 @@ end
 ~
 #262
 Trinket of Conveyance~
-1 c 2
+1 c 2 1
+L w 262
 use~
 * TRINKET OF CONVEYANCE: teleports the player to a starting location; params:
 * val0: cooldown vnum (-1 for none, defaults to 262 if 0)
@@ -464,7 +473,7 @@ nop %actor.cancel_adventure_summon%
 ~
 #263
 Letheian Icon use~
-1 c 2
+1 c 2 0
 use~
 set item %arg.argument1%
 set sk %arg.argument2%

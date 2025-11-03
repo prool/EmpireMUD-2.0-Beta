@@ -1,6 +1,10 @@
 #9103
 Deprecated command trigger~
-0 c 0
+0 c 0 4
+L f 9104
+L f 9600
+L f 9601
+L f 9604
 struggle~
 * This was a helper for 9104 Snake: Constrict before b5.165
 * DEPRECATED: replace with new version instead
@@ -24,7 +28,13 @@ detach 9104 %self.id%
 ~
 #9104
 Snake: Constrict (requires 9600, 9601, 9604)~
-0 k 100
+0 k 100 6
+L f 9600
+L f 9601
+L f 9604
+L w 9103
+L w 9108
+L w 9602
 ~
 * Requires scripts 9600, 9601, and 9604. Optionally add 9108 for constrict damage.
 if %self.cooldown(9103)%
@@ -80,7 +90,8 @@ dg_affect #9108 %self% HARD-STUNNED on 30
 ~
 #9105
 Snake: Venom~
-0 k 100
+0 k 100 1
+L w 9105
 ~
 if %actor.has_tech(!Poison)% || !%hit%
   halt
@@ -89,7 +100,7 @@ end
 ~
 #9106
 Jungle Bird Animation~
-0 bw 20
+0 bw 20 0
 ~
 * Jungle Bird Animation (9106)
 switch (%random.8%)
@@ -112,14 +123,20 @@ done
 ~
 #9107
 Jungle Bird Speech~
-0 d 0
+0 d 0 0
 *~
 set last_phrase %speech%
 remote last_phrase %self.id%
 ~
 #9108
 Snake: Constrict Damage (requires 9104, 9600, 9601, 9604)~
-0 bw 100
+0 bw 100 6
+L f 9104
+L f 9600
+L f 9601
+L f 9604
+L w 9108
+L w 9602
 ~
 * Deals damage to constricted players every 6-7 seconds
 * This pairs with scripts 9104 to add damage to the struggle.
@@ -147,7 +164,7 @@ done
 ~
 #9117
 Animal Becomes Hidden Over Time~
-0 ab 20
+0 ab 20 0
 ~
 eval times_hidden %self.var(times_hidden,0)% + 1
 if %times_hidden% > 50
@@ -164,7 +181,7 @@ end
 ~
 #9118
 Mob Becomes Hostile on Interaction~
-0 e 1
+0 e 1 0
 you~
 * Mob becomes hostile after a player pays attention to it.
 if %actor.is_npc%
@@ -176,7 +193,7 @@ detach 9118 %self.id%
 ~
 #9121
 Wimpy Flee~
-0 l 20
+0 l 20 0
 ~
 if %self.disabled% || %self.aff_flagged(IMMOBILIZED)%
   halt
@@ -187,7 +204,8 @@ end
 ~
 #9131
 Scorpion: Venom~
-0 k 100
+0 k 100 1
+L w 9131
 ~
 if %actor.has_tech(!Poison)% || !%hit%
   halt
@@ -196,7 +214,7 @@ end
 ~
 #9133
 Great Horned Owl Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Great Horned Owl Animation (9133)
@@ -208,7 +226,7 @@ end
 ~
 #9148
 Songbird Animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * songbird Animation (9148)
@@ -219,7 +237,7 @@ end
 ~
 #9150
 woodpecker animation~
-0 bw 3
+0 bw 3 0
 ~
 * This script is no longer used. It was replaced by custom strings.
 * Woodpecker Animation (9150)
@@ -229,7 +247,8 @@ end
 ~
 #9183
 Penguin Kill Tracker~
-0 f 100
+0 f 100 1
+L b 9187
 ~
 if !%actor.is_pc%
   halt
@@ -249,14 +268,14 @@ remote penguins_killed %actor.id%
 ~
 #9188
 Tiny Critter Despawn~
-0 bw 10
+0 bw 10 0
 ~
 %echo% ~%self% vanishes down a hole.
 %purge% %self%
 ~
 #9198
 Critter Flutters Off~
-0 bw 10
+0 bw 10 0
 ~
 %echo% ~%self% flutters off.
 %purge% %self%

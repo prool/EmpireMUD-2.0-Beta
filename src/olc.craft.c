@@ -21,6 +21,7 @@
 #include "skills.h"
 #include "handler.h"
 #include "constants.h"
+#include "dg_scripts.h"
 
 /**
 * Contents:
@@ -254,7 +255,9 @@ void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 	descriptor_data *desc;
 	craft_data *craft;
 	char_data *iter;
+	trig_data *trig, *next_trig;
 	char name[256];
+	bool found;
 	
 	if (!(craft = craft_proto(vnum))) {
 		msg_to_char(ch, "There is no such craft %d.\r\n", vnum);
@@ -309,6 +312,16 @@ void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_CRAFT, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to craft [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// olc editor updates
 	for (desc = descriptor_list; desc; desc = desc->next) {
 		if (GET_OLC_OBJECT(desc)) {
@@ -321,6 +334,12 @@ void olc_delete_craft(char_data *ch, craft_vnum vnum) {
 			if (delete_progress_perk_from_list(&PRG_PERKS(GET_OLC_PROGRESS(desc)), PRG_PERK_CRAFT, vnum)) {
 				save_library_file_for_vnum(DB_BOOT_PRG, PRG_VNUM(GET_OLC_PROGRESS(desc)));
 				msg_to_char(desc->character, "A craft used by the progress goal you're editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_CRAFT, vnum);
+			if (found) {
+				msg_to_desc(desc, "Craft [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
 			}
 		}
 	}
@@ -485,6 +504,7 @@ void olc_search_craft(char_data *ch, craft_vnum vnum) {
 	craft_data *craft = craft_proto(vnum);
 	progress_data *prg, *next_prg;
 	obj_data *obj, *next_obj;
+	trig_data *trig, *next_trig;
 	int found;
 	
 	if (!craft) {
@@ -508,6 +528,14 @@ void olc_search_craft(char_data *ch, craft_vnum vnum) {
 		if (find_progress_perk_in_list(PRG_PERKS(prg), PRG_PERK_CRAFT, vnum)) {
 			++found;
 			build_page_display(ch, "PRG [%5d] %s", PRG_VNUM(prg), PRG_NAME(prg));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_CRAFT, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	

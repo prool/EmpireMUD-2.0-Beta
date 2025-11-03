@@ -1,31 +1,32 @@
 #1215
 Quaff bileberry juice~
-1 s 100
+1 s 100 1
+L w 1215
 ~
 * We warned you.
 %dot% #1215 %actor% 50 120
 ~
 #1250
 Basic Healing Potion~
-1 s 100
+1 s 100 0
 ~
 %heal% %actor% health 100
 ~
 #1252
 Basic Move Potion~
-1 s 100
+1 s 100 0
 ~
 %heal% %actor% move 100
 ~
 #1254
 Basic Mana Potion~
-1 s 100
+1 s 100 0
 ~
 %heal% %actor% mana 100
 ~
 #1264
 Searing Poison Hit~
-1 s 100
+1 s 100 0
 ~
 if !%target%
   return 0
@@ -42,7 +43,8 @@ end
 ~
 #1273
 Pain Poison Hit~
-1 s 100
+1 s 100 1
+L w 1273
 ~
 set scale 50
 if %actor.has_tech(Poison-Upgrade)%
