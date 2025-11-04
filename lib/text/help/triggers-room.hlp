@@ -153,6 +153,8 @@ variable include %actor.room% or %obj.room%. Access the below fields from a
 room variable like this: %room.coords%
 
 When using field - The variable returns:
+&cadd_built_with(vnum,amount,level)&0 - For buildings, adds to the list of
+   items used to build them (for later dismantle).
 &caff_flagged(AFF)&0 - True if the room has an affect flag on it.
    If called with no argument, lists current flags instead.
 &cbld_dir(dir)&0 - Rotates the given direction based on which way the building

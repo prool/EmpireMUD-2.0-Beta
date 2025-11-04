@@ -4039,6 +4039,24 @@ void apply_resource(char_data *ch, struct resource_data *res, struct resource_da
 
 
 /**
+* Counts how many things appear in a resource list, by amount. For example if
+* the list has 2 sticks and 3 logs, the total is 5.
+*
+* @param struct resource_data *list A list of resources.
+* @return int The sum of the amounts of all entries in the list.
+*/
+int count_resource_list_quantity(struct resource_data *list) {
+	struct resource_data *iter;
+	int num = 0;
+	 
+	LL_FOREACH(list, iter) {
+		num += iter->amount;
+	}
+	return num;
+}
+
+
+/**
 * Extract resources from the list, hopefully having checked has_resources, as
 * this function does not error if it runs out -- it just keeps extracting
 * until it's out of items, or hits its required limit.

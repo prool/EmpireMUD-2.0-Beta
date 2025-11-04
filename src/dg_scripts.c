@@ -5593,7 +5593,26 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 			*str = '\x1';
 			switch (LOWER(*field)) {
 				case 'a': {	// room.a*
-					if (!str_cmp(field, "aff_flagged")) {
+					if (!str_cmp(field, "add_built_with")) {
+						if (subfield && *subfield) {
+							char arg1[256], arg2[256], arg3[256], temp_arg[256];
+							int count, add;
+							
+							// add_built_with(vnum, amount, level)
+							comma_args(subfield, arg1, temp_arg);
+							comma_args(temp_arg, arg2, arg3);
+							
+							if (COMPLEX_DATA(r) && obj_proto(atoi(arg1)) && (add = atoi(arg2)) > 0) { 
+								count = count_resource_list_quantity(GET_BUILT_WITH(r));
+								if (count < 500) {
+									add_to_resource_list(&GET_BUILT_WITH(r), RES_OBJECT, atoi(arg1), MIN(add, 500 - count), atoi(arg3));
+									request_world_save(GET_ROOM_VNUM(r), WSAVE_ROOM);
+								}
+							}
+							*str = '\0';
+						}
+					}
+					else if (!str_cmp(field, "aff_flagged")) {
 						if (subfield && *subfield) {
 							bitvector_t pos = search_block(subfield, room_aff_bits, FALSE);
 							if (pos != NOTHING) {
@@ -6346,7 +6365,24 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 			*str = '\x1';
 			switch (LOWER(*field)) {
 				case 'a': {	// veh.a*
-					if (!str_cmp(field, "animals_harnessed")) {
+					if (!str_cmp(field, "add_built_with")) {
+						if (subfield && *subfield) {
+							char arg1[256], arg2[256], arg3[256], temp_arg[256];
+							int count, add;
+							
+							// add_built_with(vnum, amount, level)
+							comma_args(subfield, arg1, temp_arg);
+							comma_args(temp_arg, arg2, arg3);
+							
+							count = count_resource_list_quantity(VEH_BUILT_WITH(veh));
+							if (obj_proto(atoi(arg1)) && (add = atoi(arg2)) > 0 && count < 500) {
+								add_to_resource_list(&VEH_BUILT_WITH(v), RES_OBJECT, atoi(arg1), MIN(add, 500 - count), atoi(arg3));
+								request_vehicle_save_in_world(v);
+							}
+							*str = '\0';
+						}
+					}
+					else if (!str_cmp(field, "animals_harnessed")) {
 						safe_snprintf(str, slen, "%d", count_harnessed_animals(v));
 					}
 					else if (!str_cmp(field, "animals_required")) {
