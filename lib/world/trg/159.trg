@@ -212,7 +212,10 @@ elseif %room.building_vnum% == 15901
 elseif %room.sector_vnum% == 57
   %echo% ~%self% uses some of the wreckage to construct a barricade.
   %build% %room% 15901
-elseif %trap_sects% ~= %room.sector_vnum% && %self.var(traps,0)% > 0 && %dist% >= 4
+  nop %room.add_built_with(15905,10,1)%
+  nop %room.add_built_with(15903,12,1)%
+  nop %room.add_built_with(15904,12,1)%
+elseif %trap_sects% ~= %room.sector_vnum% && %self.var(traps,0)% > 0 && %dist% >= 4 && !%room.vehicles%
   %echo% ~%self% arranges some debris into piles.
   %build% %room% 15905
   eval traps %self.var(traps,1)% - 1
@@ -685,24 +688,61 @@ L b 15909
 L b 15910
 L b 15911
 ~
-* find and resurrect a goblin
+* find a dead goblin
 if %self.disabled%
   halt
 end
 set obj %self.room.contents%
-while %obj%
+set found 0
+while %obj% && !%found%
   if %obj.type% == CORPSE && %obj.val0% >= 15904 && %obj.val0% <= 15911
-    %load% mob %obj.val0%
-    set mob %self.room.people%
-    if %mob.vnum% == %obj.val0%
-nop %mob.add_mob_flag(!LOOT)%
-      %echo% ~%self% waves ^%self% hands over a corpse... There's a purple glow and ~%mob% is resurrected!
-      %mod% %mob% append-lookdesc There's a dull purple glow in %mob.hisher% eyes and a bit of drool on the chin.
-      %purge% %obj%
-      halt
-    end
+    set found %obj%
   end
   set obj %obj.next_in_list%
 done
+* did we find one?
+if !%found%
+  halt
+end
+* start
+%echo% A purple glow surrounds ~%self% as *%self% begins a throaty chant...
+nop %self.add_mob_flag(SENTINEL)%
+set id %found.id%
+set cycle 0
+while %cycle% <= 4
+  wait 3 s
+  switch %cycle%
+    case 0
+      say By the godlins strong and mighty...
+    break
+    case 1
+      say Neath the earth we work and render...
+    break
+    case 2
+      say Fill this green one with your lighty...
+    break
+    case 3
+      say Rise again in goblin splendor!
+    break
+    case 4
+      if %found% && %found.id% == %id%
+        %load% mob %found.val0%
+        set mob %self.room.people%
+        if %mob.vnum% == %found.val0%
+          nop %mob.add_mob_flag(!LOOT)%
+          %echo% A rich a purple glow emanates from ~%mob% as &%mob% is resurrected!
+          %mod% %mob% append-lookdesc There's a dull purple glow in %mob.hisher% eyes and a bit of drool on the chin.
+        else
+          say Oops... didn't work.
+        end
+        %purge% %found%
+      else
+        say Oops... didn't work.
+      end
+    break
+  done
+  eval cycle %cycle% + 1
+done
+nop %self.remove_mob_flag(SENTINEL)%
 ~
 $

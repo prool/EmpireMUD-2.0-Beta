@@ -38,6 +38,65 @@ torches up.'
 0 0 0
 0 8064
 S
+#18503
+block intricately carved~
+an intricately carved block~
+An intricately carved block has been left here.~
+   Worn by time and weather, the block has certainly seen better days. Still,
+the intricate carvings of symbols, animals, men, and gods remain visible
+beneath bits of moss and dark soil.
+~
+3 e a 0 0 8
+0 0 0
+1 0
+C
+1 1
+M
+0
+You carefully place an intricately carved stone block.~
+M
+1
+You carefully place an intricately carved stone block.~
+M
+6
+You carefully place an intricately carved stone block on $V.~
+M
+7
+$n carefully places an intricately carved stone block on $V.~
+O+ 1 6077
+R
+4 5117 0
+R
+4 5122 0
+S
+#18504
+apex bloodstone stone~
+the bloodstone apex~
+A bloodstone apex points to the sky.~
+   This gleaming red pyramid is nearly the size of a table, symmetrically
+constructed with exacting precision. It has the translucent red, veined surface
+of a common bloodstone, but it's significantly larger.
+   You can use this to build a 'jungletemple', with the right skill.
+~
+3 e a 0 0 2
+0 0 0
+1 0
+C
+1 1
+R
+4 5193 0
+S
+#18505
+jungle temple cleanup helper~
+jungle temple cleanup helper~
+Jungle temple cleanup helper is here.~
+This sets resources on the jungle temple when cleared.
+~
+3 0 0 0 0 2
+0 0 0
+0 2
+T 18518
+S
 #18506
 coins ancient pile~
 a pile of ancient coins~

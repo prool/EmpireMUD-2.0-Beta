@@ -34,4 +34,91 @@ C
 75 0
 T 15908
 S
+#15903
+lumber crude heap~
+a heap of crude lumber~
+Some crude lumber is heaped up on the ground.~
+   The lumber is roughly hewn from various woods, all unstained. Some of the
+boards seem to have been hacked off of armoirs, chests, and even doors.
+~
+3 e a 0 0 8
+0 0 0
+0 0
+C
+1 1
+I 11 1002 100.00 1  # LIGHT: roaring fire
+M
+0
+You tie some crude lumber in place.~
+M
+1
+$n ties some crude lumber in place.~
+M
+6
+You tie some crude lumber onto $V.~
+M
+7
+$n ties some crude lumber onto $V.~
+O+ 1 6000
+R
+4 5118 0
+R
+4 5134 0
+S
+#15904
+nails bag bent~
+a bag of bent nails~
+A bag of bent nails is spilling on the ground.~
+   The bag, which smells rather similar to a barnyard in a rainstorm, is
+stuffed so full of rusty, bent nails that it feels risky to even hold it.
+~
+3 0 a 0 c 8
+0 0 0
+2 0
+C
+1 1
+M
+0
+You cautiously hammer some bent nails into the wood.~
+M
+1
+$n cautiously hammers some bent nails into the wood.~
+M
+6
+$n cautiously hammers some bent nails into $V.~
+M
+7
+$n cautiously hammers some bent nails into $V.~
+O+ 1 6790
+R
+4 5134 0
+R
+4 5121 0
+R
+4 5610 0
+S
+#15905
+block round stone~
+a round stone block~
+A round stone block is lying on its side.~
+   Minor damage aside, the block has been cut perfectly round. It looks like it
+may have been removed from a column or perhaps pilings.
+~
+3 e a 0 0 8
+0 0 0
+1 0
+C
+1 1
+M
+0
+You roll a stone block over and tilt it into place.~
+M
+1
+$n rolls a stone block over and tilts it into place.~
+O+ 1 6077
+R
+4 5117 0
+R
+4 5122 0
+S
 $
