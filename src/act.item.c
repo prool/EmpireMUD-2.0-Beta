@@ -326,7 +326,7 @@ obj_data *get_obj_for_char_prefer_container(char_data *ch, char *name, int *numb
 
 
 /**
-* Finds an object for a character using hte 'light' command. This will prefer
+* Finds an object for a character using the 'light' command. This will prefer
 * an object they CAN light.
 *
 * @param char_data *ch The person who's looking.
