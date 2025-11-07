@@ -8,6 +8,7 @@ end
 set logs %self.var(logs,0)%
 set rough %self.var(rough,0)%
 set trop %self.var(trop,0)%
+set evergreen %self.var(evergreen,0)%
 set room %self.room%
 set gohome 0
 if (%room.template% == 18100)
@@ -97,6 +98,20 @@ elseif %room.sector_vnum% == 232
   %terraform% %room% %new_sector%
   eval trop %trop% + 1
   %echo% ~%self% fells the last tree with a mighty crash!
+elseif %room.sector_vnum% >= 10562 && %room.sector_vnum% <= 10565
+  * evergreen
+  nop %self.add_mob_flag(SENTINEL)%
+  eval new_sector %room.sector_vnum% - 1
+  if %new_sector% == 10561
+    set new_sector 10566
+  end
+  %terraform% %room% %new_sector%
+  eval evergreen %evergreen% + 1
+  if %room.sector_vnum% == 1
+    %echo% ~%self% fells the last tree with a mighty crash!
+  else
+    %echo% ~%self% fells a tree with a mighty crash!
+  end
 else
   * Tile is clear, can wander now
   nop %self.remove_mob_flag(SENTINEL)%
@@ -110,6 +125,7 @@ end
 remote logs %self.id%
 remote rough %self.id%
 remote trop %self.id%
+remote evergreen %self.id%
 ~
 #18101
 Lumberjack drop logs~
@@ -167,6 +183,24 @@ done
 while %trop% > 0
   %load% obj 129
   eval trop %trop% - 1
+done
+*
+* evergreens
+set evergreen %self.var(evergreen,0)%
+if %evergreen% > 75
+  set evergreen 75
+end
+while %evergreen% >= 5
+  %load% obj 10558
+  %load% obj 10558
+  %load% obj 10558
+  %load% obj 10558
+  %load% obj 10558
+  eval evergreen %evergreen% - 5
+done
+while %evergreen% > 0
+  %load% obj 10558
+  eval evergreen %evergreen% - 1
 done
 *
 if !%instance.start%
