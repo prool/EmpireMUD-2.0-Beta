@@ -242,9 +242,9 @@ else
     * stuck half an hour
     set loc %instance.location%
     if %loc% && %loc% != %room%
-      %echo% ~%name% lights a fuse... There's a moment of sparking and then &%self% blasts off!
+      %echo% ~%self% lights a fuse... There's a moment of sparking and then &%self% blasts off!
       mgoto %loc%
-      %echo% ~%name% comes flying in with a trail of smoke!
+      %echo% ~%self% comes flying in with a trail of smoke!
     end
   end
   halt
