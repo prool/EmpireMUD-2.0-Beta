@@ -609,7 +609,7 @@ It isn't polite to swing at a GOD!
 $n tries to take a swing at you -- how pathetic!
 $n pathetically tries to take a swing at $N - ha!
 
-M16 abc 0 +
+M16 ab 0 +
 magic fire~
 ~
 blast~
@@ -689,7 +689,7 @@ You raise your staff toward $N, but it seems to have no effect.
 $n raises $s staff at you, but you feel nothing.
 $n raises $s staff at $N, but it seems to have no effect.
 
-M20 abc 0 +
+M20 ab 0 +
 magic frost~
 ~
 chill~
@@ -709,7 +709,7 @@ You try to freeze $N, but nearly wind up frozen yourself!
 $n tries to freeze you, but nearly winds up frozen $mself.
 $n tries to freeze $N, but nearly winds up frozen $mself.
 
-M20 abc 0 
+M20 ab 0 
 magic frost~
 ~
 You grab $N, draining heat from $M until $E falls dead!
@@ -725,7 +725,7 @@ You try to freeze $N, but nearly wind up frozen yourself!
 $n tries to freeze you, but nearly winds up frozen $mself.
 $n tries to freeze $N, but nearly winds up frozen $mself.
 
-M21 abc 0 +
+M21 ab 0 +
 magic shock~
 ~
 shock~
@@ -745,7 +745,7 @@ Your bolt of electricity hits $N, to no avail.
 $n's bolt of electricity hits you, to no avail.
 $n's bolt of electricity hits $N, to no avail.
 
-M21 abc 0 
+M21 ab 0 
 magic shock~
 ~
 You hurl sparks at $N, cutting through $M, killing $M!
@@ -761,7 +761,7 @@ Your bolt of electricity hits $N, to no avail.
 $n's bolt of electricity hits you, to no avail.
 $n's bolt of electricity hits $N, to no avail.
 
-M22 abc 0 +
+M22 ab 0 +
 magic light~
 ~
 flash~
@@ -781,7 +781,7 @@ You try to shoot a flash of light at $N, but $E doesn't seem to mind.
 $n tries to shoot a flash of light at you, but it doesn't seem to affect you!
 $n tries to shoot a flash of light at $N, but $E doesn't seem to mind.
 
-M22 abc 0 
+M22 ab 0 
 magic light~
 ~
 You shoot a beam of light straight through $N, leaving a hole in $S chest!
@@ -1352,6 +1352,110 @@ $N ducks under $n's fist as $e takes a swing at $M.
 It isn't polite to swing at a GOD!
 $n tries to take a swing at you -- how pathetic!
 $n pathetically tries to take a swing at $N - ha!
+
+M38 abc 0 +
+net lash~
+~
+lash~
+lashes~
+net~
+0 0 3.0 3.2 3.4
+You fling your net around $N's neck and give it a sharp jerk; there's a crack and then $E falls to the ground!
+$n flings $s net around your neck and gives it a quick jerk... there's sharp crack and everything goes black!
+$n flings $s net around $N's neck and gives it a sharp jerk... there's a crack and then $E falls to the ground!
+You cast your net, but $N sidesteps and it flops to the ground.
+$n casts $s net, but you sidestep and it flops to the ground.
+$n casts $s net, but $N sidesteps and it flops to the ground.
+#
+#
+#
+Your net unravels in mid-air as you cast it toward $N!
+$n's net unravels in mid-air as $e casts it toward you!
+$n's net unravels in mid-air as $e casts it toward $N!
+
+M38 abc 0 
+net lash~
+~
+$N struggles to breathe in your net... until $E can't!
+You struggle to breathe in $n's net... until you can't! It all goes dark!
+$N struggles to breathe in $n's net... until $E can't!
+Your net sails wide, snagging on nothing but air.
+$n's net sails wide, snagging on nothing but air.
+$n's net sails wide, snagging on nothing but air.
+#
+#
+#
+Your net drifts toward $N, then changes its mind and falls politely to the ground.
+$n's net drifts toward you, then changes its mind and falls politely to the ground.
+$n's net drifts toward $N, then changes its mind and falls politely to the ground.
+
+M38 abc 0 
+net lash~
+~
+You whip your net at $N, hitting $M in the head with one of the weights and causing instant death!
+$n whips $s net at you, striking you right in the head... for the last time!
+$n whips $s net at $N, hitting $M in the head with one of the weights and causing instant death!
+You cast your net but $N slips free.
+$n casts $s net but you slip free.
+$n casts $s net but $N slips free.
+#
+#
+#
+$N holds up a hand and you get tangled in your own net!
+You hold up a hand and $N gets tangled in $S own net!
+$N holds up a hand and $n gets tangled in $s own net!
+
+M39 ab 0 +
+magic water~
+~
+blast~
+blasts~
+water blast~
+1 2 3.8 4.0 4.4
+You create a surge that swallows $N whole... when it recedes, $E lies drowned!
+$n creates a surge of water that swallows you whole... you gasp for breath, but there's none!
+$n creates a surge that swallows $N whole... when it recedes, $E lies drowned!
+You blast a jet of water toward $N, but it splashes harmlessly as $E dodges.
+$n blasts a jet of water toward you, but it splashes harmlessly as you dodge.
+$n blasts a jet of water toward $N, but it splashes harmlessly as $E dodges.
+#
+#
+#
+$N looks mildly inconvenienced as you splash $M with water.
+You feel mildly inconvenienced as $n splashes you with water.
+$N looks mildly inconvenienced as $n splashes $M with water.
+
+M39 ab 0 
+magic water~
+~
+$N gasps for breath as your magic drowns $M where $E stands!
+You gasp for breath as $n's magic drowns you where you stand!
+$N gasps for breath as $n's magic drowns $M where $E stands!
+You shoot a spray of water toward $N but $E's barely splashed.
+$n shoots a spray of water toward you, but you're barely splashed.
+$n shoots a spray of water toward $N, but $E's barely splashed.
+#
+#
+#
+Your jet of water arcs around $N and waters $S plants.
+$n's jet of water arcs around you and waters your plants.
+$n's jet of water arcs around $N and waters $S plants.
+
+M39 ab 0 
+magic water~
+~
+You raise your hand and conjure a blade of pure water to slice clean through $N!
+$n raises $s hand and conjures a blade of pure water which slices clean through you!
+$n raises $s hand and conjures a blade of pure water to slice clean through $N!
+A torrent of bubbles burst around $N, but doesn't seem to faze $M.
+A torrent of bubbles from $n bursts around you, with no effect.
+A torrent of bubbles from $n bursts around $N, but doesn't seem to faze $M.
+#
+#
+#
+Your water magic evaporates in $N's face.
+$n's water magic evaporates in your face.
+$n's water magic evaporates in $N's face.
 
 M50 e 0 
 Suffering~

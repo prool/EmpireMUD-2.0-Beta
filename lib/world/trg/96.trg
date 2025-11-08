@@ -378,7 +378,8 @@ end
 ~
 #9620
 Storytime using script1-5~
-0 bw 100 0
+0 bw 100 1
+L w 9621
 ~
 * uses mob custom strings script1-script5 to tell short stories
 * usage: .custom add script# <command> <string>
@@ -394,6 +395,14 @@ wait %random.30%
 if %self.disabled% || %self.fighting%
   halt
 end
+* ensure no other stories
+set ch %self.room.people%
+while %ch%
+  if %ch% != %self% && %ch.affect(9621)%
+    halt
+  end
+  set ch %ch.next_in_room%
+done
 * find story number
 if %self.varexists(story)%
   eval story %self.story% + 1
@@ -422,6 +431,7 @@ if !%ok%
   halt
 end
 * story detected: prepare (storing as variables prevents reboot issues)
+dg_affect #9621 %self% AGE 0 3600
 if !%self.mob_flagged(SENTINEL)%
   set no_sentinel 1
   remote no_sentinel %self.id%
@@ -482,6 +492,7 @@ while !%done%
 done
 remote story %self.id%
 * cancel sentinel/silent
+dg_affect #9621 %self% off
 if %self.var(no_sentinel,0)%
   nop %self.remove_mob_flag(SENTINEL)%
 end
@@ -493,7 +504,8 @@ wait %story_gap%
 ~
 #9621
 Storytime for Factions using script1-2 and script3-4~
-0 bw 100 0
+0 bw 100 1
+L w 9621
 ~
 * Faction-based variant of 9620 Storytime scipt
 *  - custom script1 and script2 (optional) are used in order as alternating
@@ -513,6 +525,14 @@ wait %random.30%
 if %self.disabled% || %self.fighting%
   halt
 end
+* ensure no other stories
+set ch %self.room.people%
+while %ch%
+  if %ch% != %self% && %ch.affect(9621)%
+    halt
+  end
+  set ch %ch.next_in_room%
+done
 * look for a player with rep
 set friend 0
 set ch %self.room.people%
@@ -544,6 +564,7 @@ if !%self.custom(script%story%,0)%
   halt
 end
 * story detected: prepare (storing as variables prevents reboot issues)
+dg_affect #9621 %self% AGE 0 3600
 if !%self.mob_flagged(SENTINEL)%
   set no_sentinel 1
   remote no_sentinel %self.id%
@@ -605,6 +626,7 @@ done
 remote story_friend %self.id%
 remote story_other %self.id%
 * cancel sentinel/silent
+dg_affect #9621 %self% off
 if %self.var(no_sentinel,0)%
   nop %self.remove_mob_flag(SENTINEL)%
 end

@@ -206,7 +206,7 @@ set dist %room.distance(%start%)%
 if %room.empire% || %self.fighting% || %self.disabled%
   * skip
   halt
-elseif %room.building_vnum% == 15901
+elseif %room.building_vnum% == 15901 && %room.health% < %room.maxhealth%
   %restore% %room%
   %echo% ~%self% repairs the barricades.
 elseif %room.sector_vnum% == 57
@@ -232,6 +232,21 @@ else
     end
     set veh %veh.next_in_room%
   done
+  * stuck check
+  if %self.var(last_room,0)% != %room.vnum%
+    set last_room %room.vnum%
+    set last_check %timestamp%
+    remote last_room %self.id%
+    remote last_check %self.id%
+  elseif (%timestamp% - %self.var(last_check,0)%) > 1800
+    * stuck half an hour
+    set loc %instance.location%
+    if %loc% && %loc% != %room%
+      %echo% ~%name% lights a fuse... There's a moment of sparking and then &%self% blasts off!
+      mgoto %loc%
+      %echo% ~%name% comes flying in with a trail of smoke!
+    end
+  end
   halt
 end
 ~
@@ -744,5 +759,15 @@ while %cycle% <= 4
   eval cycle %cycle% + 1
 done
 nop %self.remove_mob_flag(SENTINEL)%
+~
+#15915
+Shipwrecked Goblins: Pay to leave~
+2 v 0 2
+L i 15900
+L t 15915
+~
+if %questvnum% == 15915
+  %adventurecomplete%
+end
 ~
 $

@@ -29,7 +29,7 @@ the goblin wavewhisperer~
 The goblin wavewhisperer stares serenely off into the distance.
 ~
 75 175 adxyIJLM c 2
-2 0 86 22 -1 -1
+2 0 86 39 -1 -1
 D
    The old whisperer has a deep jade complexion, though she has smeared a light
 paste over her face and upper arms. Her violet cloth robes are stitched with
@@ -135,6 +135,21 @@ say Not very good food.~
 M
 10
 say But goblins not picky.~
+M
+0
+$n repairs a knot in $s net.~
+M
+0
+$n curses as $e pinches $s finger while fixing $s net.~
+M
+0
+$n spits on the ground.~
+M
+0
+$n tosses $s net up into the air to check for holes.~
+M
+0
+$n picks up a pebble and ties it in as a new net weight.~
 T 15905
 T 15902
 T 15900
@@ -189,6 +204,21 @@ say You sure got a lot of bones there...~
 M
 10
 say Let me know if you lose any of them. Lots to spare.~
+M
+0
+The goblin counts on $s fingers.~
+M
+0
+$n eyes you suspiciously.~
+M
+0
+$n sharpens $s knife on $s teeth.~
+M
+0
+$n picks at $s teeth.~
+M
+0
+$n holds $s nose as $e passes you.~
 T 15905
 T 15902
 T 15900
@@ -235,7 +265,7 @@ M
 emote $n picks up a shell and rubs it on $s shirt.~
 M
 9
-say Little shell down on the groundly,~
+say Little shell down on the groundy,~
 M
 9
 say Lost by someone, now I found ye.~
@@ -257,6 +287,21 @@ say All the shells are claimed. Even that one.~
 M
 10
 emote $n picks up a shell.~
+M
+0
+$n picks up a shell and inspects it.~
+M
+0
+$n picks up a shell but tosses it back.~
+M
+0
+$n picks up a shell and pockets it.~
+M
+0
+$n bumps into you while looking at the ground.~
+M
+0
+$n pushes your foot aside to pick up a shell.~
 T 15905
 T 15902
 T 15900
@@ -313,6 +358,18 @@ say You shoulda been born a goblin.~
 M
 10
 say You kinda got the ears for it.~
+M
+0
+Sparks fly as $n polishes $s staff.~
+M
+0
+$n holds $s staff up toward the sky, where little bolts of lightning crackle over it.~
+M
+0
+$n taps the ground with $s staff, sending thunderous tremors that can be felt several feet away.~
+M
+1
+Fish.~
 T 15905
 T 15902
 T 15900
@@ -353,6 +410,21 @@ emote $n plants $s banner in the ground and wipes $s brow.~
 M
 10
 say We gotta get one more goblin. New guy carries the banner.~
+M
+0
+Sweat drips down $n's gray-green brow.~
+M
+0
+$n stops to catch $s little breath.~
+M
+0
+$n sighs.~
+M
+0
+The little goblin struggles with the banner.~
+M
+1
+Why's it always me?~
 T 15905
 T 15902
 T 15900
@@ -404,6 +476,21 @@ emote $n plays with some firesteel, sending sparks flying.~
 M
 10
 say We gotta stop making friends and do more conquering.~
+M
+0
+$n plays with some firesteel, sending sparks flying.~
+M
+0
+$n tries to wipe off $s face, but it's no use.~
+M
+0
+$n shrieks as $e plays with fire.~
+M
+0
+$n applies some balm to $s burns.~
+M
+1
+Burn!~
 T 15905
 T 15902
 T 15900
