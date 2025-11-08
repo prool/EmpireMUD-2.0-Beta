@@ -685,10 +685,10 @@ void olc_fullsearch_attack_message(char_data *ch, char *argument) {
 		}
 		
 		FULLSEARCH_LIST("damagetype", only_damage, damage_types)
-		FULLSEARCH_FLAGS("flags", only_flags, action_bits)
-		FULLSEARCH_FLAGS("flagged", only_flags, action_bits)
+		FULLSEARCH_FLAGS("flags", only_flags, attack_message_flags)
+		FULLSEARCH_FLAGS("flagged", only_flags, attack_message_flags)
 		FULLSEARCH_DOUBLE("speed", speed, 0.1, 10.0)
-		FULLSEARCH_FLAGS("unflagged", not_flagged, action_bits)
+		FULLSEARCH_FLAGS("unflagged", not_flagged, attack_message_flags)
 		FULLSEARCH_INT("vmin", vmin, 0, INT_MAX)
 		FULLSEARCH_INT("vmax", vmax, 0, INT_MAX)
 		FULLSEARCH_LIST("weapontype", only_weapon, weapon_types)
