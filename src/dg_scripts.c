@@ -5944,6 +5944,15 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							safe_snprintf(str, slen, "0");	// no vnum provided
 						}
 					}
+					else if (!str_cmp(field, "hitp") || !str_cmp(field, "health")) {
+						room_data *home = HOME_ROOM(r);
+						if (GET_BUILDING(home)) {
+							safe_snprintf(str, slen, "%d", GET_BLD_MAX_DAMAGE(GET_BUILDING(home)) - (int)BUILDING_DAMAGE(home));
+						}
+						else {
+							safe_snprintf(str, slen, "0");
+						}
+					}
 					else if (!str_cmp(field, "height")) {
 						if (subfield && *subfield && isdigit(*subfield)) {
 							set_room_height(r, atoi(subfield));
@@ -6002,7 +6011,16 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 					break;
 				}
 				case 'm': {	// room.m*
-					if (!str_cmp(field, "max_citizens")) {
+					if (!str_cmp(field, "maxhealth") || !str_cmp(field, "maxhitp")) {
+						room_data *home = HOME_ROOM(r);
+						if (GET_BUILDING(home)) {
+							safe_snprintf(str, slen, "%d", GET_BLD_MAX_DAMAGE(GET_BUILDING(home)));
+						}
+						else {
+							safe_snprintf(str, slen, "0");
+						}
+					}
+					else if (!str_cmp(field, "max_citizens")) {
 						safe_snprintf(str, slen, "%d", GET_BUILDING(HOME_ROOM(r)) ? GET_BLD_CITIZENS(GET_BUILDING(HOME_ROOM(r))) : 0);
 					}
 					else if (!str_cmp(field, "mine_type")) {
