@@ -491,6 +491,129 @@ end
 * wait between stories
 wait %story_gap%
 ~
+#9621
+Storytime for Factions using script1-2 and script3-4~
+0 bw 100 0
+~
+* Faction-based variant of 9620 Storytime scipt
+*  - custom script1 and script2 (optional) are used in order as alternating
+*    greeting stories when the player is BELOW "Liked" reputation with this mob
+*  - script3 and script4 (optional) are used when at "Liked" or higher
+*  - script5 is not used
+* usage: .custom add script# <command> <string>
+* valid commands: say, emote, do (execute command), echo (script), and skip
+* also: vforce <mob vnum in room> <command>
+* also: set <line_gap|story_gap> <time> sec
+* NOTE: waits for %line_gap% (9 sec) after all commands EXCEPT do/vforce/set
+set line_gap 9 sec
+set story_gap 180 sec
+* random wait to offset competing scripts slightly
+wait %random.30%
+* ensure not fighting
+if %self.disabled% || %self.fighting%
+  halt
+end
+* look for a player with rep
+set friend 0
+set ch %self.room.people%
+while %ch% && !%friend%
+  if %ch.is_pc% && %ch.has_reputation(%self.allegiance%,Liked)%
+    set friend 1
+  end
+  set ch %ch.next_in_room%
+done
+* find story number
+if %friend%
+  eval story_friend %self.var(story_friend,2)% + 1
+  if %story_friend% > 4 || !%self.custom(script4,0)%
+    set story_friend 3
+  end
+  set story %story_friend%
+  set story_other %self.var(story_other,0)%
+else
+  eval story_other %self.var(story_other,0)% + 1
+  if %story_other% > 2 || !%self.custom(script2,0)%
+    set story_other 1
+  end
+  set story %story_other%
+  set story_friend %self.var(story_friend,2)%
+end
+* check if this story exists
+if !%self.custom(script%story%,0)%
+  wait %story_gap%
+  halt
+end
+* story detected: prepare (storing as variables prevents reboot issues)
+if !%self.mob_flagged(SENTINEL)%
+  set no_sentinel 1
+  remote no_sentinel %self.id%
+  nop %self.add_mob_flag(SENTINEL)%
+end
+if !%self.mob_flagged(SILENT)%
+  set no_silent 1
+  remote no_silent %self.id%
+  nop %self.add_mob_flag(SILENT)%
+end
+* tell story
+set pos 0
+set done 0
+while !%done%
+  set msg %self.custom(script%story%,%pos%)%
+  if %msg% && !%self.fighting% && !%self.disabled%
+    set mode %msg.car%
+    set msg %msg.cdr%
+    if %mode% == say
+      say %msg%
+      wait %line_gap%
+    elseif %mode% == do
+      %msg.process%
+      * no wait
+    elseif %mode% == echo
+      %echo% %msg.process%
+      wait %line_gap%
+    elseif %mode% == vforce
+      set vnum %msg.car%
+      set msg %msg.cdr%
+      set targ %self.room.people(%vnum%)%
+      if %targ%
+        %force% %targ% %msg.process%
+      end
+    elseif %mode% == emote
+      emote %msg%
+      wait %line_gap%
+    elseif %mode% == set
+      set subtype %msg.car%
+      set msg %msg.cdr%
+      if %subtype% == line_gap
+        set line_gap %msg%
+      elseif %subtype% == story_gap
+        set story_gap %msg%
+      else
+        %echo% ~%self%: Invalid set type '%subtype%' in storytime script.
+      end
+    elseif %mode% == skip
+      * nothing this round
+      wait %line_gap%
+    else
+      %echo% %self.name%: Invalid script message type '%mode%'.
+    end
+  else
+    set done 1
+  end
+  eval pos %pos% + 1
+done
+remote story_friend %self.id%
+remote story_other %self.id%
+* cancel sentinel/silent
+if %self.var(no_sentinel,0)%
+  nop %self.remove_mob_flag(SENTINEL)%
+end
+if %self.var(no_silent,0)%
+  nop %self.remove_mob_flag(SILENT)%
+end
+* wait between stories
+wait %story_gap%
+~
 #9680
 Force look after wait~
 1 n 100 0

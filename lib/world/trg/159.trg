@@ -161,6 +161,7 @@ L h 40
 L h 50
 L h 51
 L h 56
+L h 57
 L h 58
 L h 70
 L h 71
@@ -189,7 +190,6 @@ L h 10305
 L h 10306
 L h 10308
 L h 10311
-L h 57
 L r 15900
 L r 15901
 L r 15902
@@ -241,15 +241,22 @@ Shipwrecked Goblins: Tent setup and leash~
 L f 15904
 L f 15909
 L h 0
+L h 5
+L h 6
 L h 7
+L h 8
 L h 9
 L h 12
 L h 13
 L h 14
 L h 20
 L h 21
+L h 30
+L h 32
+L h 33
 L h 50
 L h 51
+L h 52
 L h 53
 L h 56
 L h 58
@@ -281,6 +288,8 @@ L h 247
 L h 248
 L h 249
 L h 250
+L h 251
+L h 253
 L h 601
 L h 602
 L h 603
@@ -299,15 +308,6 @@ L h 618
 L h 621
 L h 622
 L h 623
-L h 5
-L h 6
-L h 8
-L h 30
-L h 32
-L h 33
-L h 52
-L h 251
-L h 253
 L h 10190
 L h 10191
 L h 10192
@@ -489,8 +489,8 @@ end
 #15907
 Shipwrecked Goblins: Trap go boom~
 2 g 100 2
-L c 15902
 L c 15901
+L c 15902
 ~
 if %actor.is_npc%
   halt
@@ -525,52 +525,52 @@ wait 0
 #15909
 Shipwrecked Goblins: Choppin' trees~
 0 ab 10 46
-L h 24
-L h 37
-L h 38
-L h 45
-L h 47
-L h 81
-L h 89
-L h 212
-L h 10563
-L h 10564
-L h 10565
-L h 23
-L h 36
-L h 44
-L h 46
-L h 80
-L h 88
-L h 211
-L h 10562
+L h 0
 L h 1
-L h 39
 L h 2
 L h 3
 L h 4
 L h 9
+L h 20
+L h 21
+L h 23
+L h 24
+L h 26
+L h 36
+L h 37
+L h 38
+L h 39
+L h 40
+L h 44
+L h 45
+L h 46
+L h 47
+L h 50
 L h 54
 L h 59
+L h 80
+L h 81
+L h 88
+L h 89
 L h 90
 L h 200
-L h 222
-L h 26
-L h 10566
+L h 204
 L h 210
+L h 211
+L h 212
 L h 220
 L h 221
+L h 222
 L h 223
 L h 224
+L h 231
 L h 232
 L h 233
-L h 231
-L h 204
-L h 21
-L h 50
-L h 40
-L h 0
-L h 20
+L h 10562
+L h 10563
+L h 10564
+L h 10565
+L h 10566
 ~
 Commands:
 * This script terraforms forests to flat land
@@ -678,7 +678,7 @@ end
 ~
 #15911
 Shipwrecked Goblins: Deadwright resurrection~
-0 b 10 8
+0 b 20 8
 L b 15904
 L b 15905
 L b 15906

@@ -107,4 +107,23 @@ nop %self.set_cooldown(9505, 15)%
 %dot% %actor% 50 15 physical
 dg_affect %actor% DEXTERITY -1 15
 ~
+#9506
+Combat: Net immobilize (for attack 38 net lash)~
+0 k 12 1
+L A 38
+~
+if !%hit% || %actor.aff_flagged(IMMUNE-PHYSICAL-DEBUFFS)% || %self.aff_flagged(DISARMED)%
+  halt
+end
+set id %actor.id%
+wait 0
+if !%actor% || %actor.id% != %id% || %actor.dead% || %self.dead%
+  halt
+end
+if %actor.affect(9506)%
+  * already on me
+  halt
+end
+dg_affect %actor% IMMOBILIZED on 20
+~
 $
