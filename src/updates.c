@@ -1492,6 +1492,7 @@ void b5_47_mine_update(void) {
 		if (!(room = tile->room) || !room_has_function_and_city_ok(ROOM_OWNER(room), room, FNC_MINE)) {
 			remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_MINE_GLB_VNUM);
 			remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_MINE_AMOUNT);
+			remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT);
 			remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_PROSPECT_EMPIRE);
 		}
 	}

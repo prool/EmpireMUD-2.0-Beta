@@ -2139,6 +2139,7 @@ void end_action(char_data *ch);
 obj_data *has_tool(char_data *ch, bitvector_t flags);
 obj_data *has_all_tools(char_data *ch, bitvector_t flags);
 void process_build_action(char_data *ch);
+void show_prospect_result(char_data *ch, room_data *room);
 void start_action(char_data *ch, int type, int timer);
 void stop_room_action(room_data *room, int action);
 

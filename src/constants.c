@@ -4557,7 +4557,7 @@ const char *room_extra_types[] = {
 	"mine amount",
 	"fire remaining",
 	"seed time",
-	"tavern type",	// unused
+	"mine original amount",
 	"tavern brewing time",	// 5		// unused
 	"tavern available time",	// unused
 	"ruins icon",	// unused

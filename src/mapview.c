@@ -1444,6 +1444,7 @@ void look_at_room_by_loc(char_data *ch, room_data *room, bitvector_t options) {
 	int dist, can_see_in_dark_distance;
 	int x_offset = 0, y_offset = 0;
 	bool y_first, invert_x, invert_y, comma, junk, show_blocked, large_radius;
+	double fullness;
 	struct instance_data *inst;
 	player_index_data *index;
 	room_vnum **view_grid = NULL;
@@ -1973,13 +1974,19 @@ void look_at_room_by_loc(char_data *ch, room_data *room, bitvector_t options) {
 		}
 	}
 
-	if (room_has_function_and_city_ok(GET_LOYALTY(ch), room, FNC_MINE) && IS_COMPLETE(room)) {
+	if (room_has_function_and_city_ok(GET_LOYALTY(ch), room, FNC_MINE)) {
 		if (get_room_extra_data(room, ROOM_EXTRA_MINE_AMOUNT) <= 0) {
 			msg_to_char(ch, "This mine is depleted.\r\n");
 		}
 		else if (GET_LOYALTY(ch) && get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_PROSPECT_EMPIRE) == EMPIRE_VNUM(GET_LOYALTY(ch))) {
 			strcpy(locbuf, get_mine_type_name(room));
-			msg_to_char(ch, "This appears to be %s %s.\r\n", AN(locbuf), locbuf);
+			if (get_room_extra_data(room, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT) > 0) {
+				fullness = ((double) get_room_extra_data(room, ROOM_EXTRA_MINE_AMOUNT)) / get_room_extra_data(room, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT);
+				msg_to_char(ch, "This appears to be %s %s (%d%% full).\r\n", AN(locbuf), locbuf, (int) ceil(fullness));
+			}
+			else {
+				msg_to_char(ch, "This appears to be %s %s.\r\n", AN(locbuf), locbuf);
+			}
 		}
 	}
 	
