@@ -669,7 +669,7 @@ void show_prospect_result(char_data *ch, room_data *room) {
 	else {
 		if (get_room_extra_data(room, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT) > 0) {
 			fullness = ((double) get_room_extra_data(room, ROOM_EXTRA_MINE_AMOUNT)) / get_room_extra_data(room, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT);
-			safe_snprintf(full_buff, sizeof(full_buff), " (%d%% full)", (int) ceil(fullness));
+			safe_snprintf(full_buff, sizeof(full_buff), " (%d%% full)", (int) ceil(fullness * 100.0));
 		}
 		else {
 			*full_buff = '\0';

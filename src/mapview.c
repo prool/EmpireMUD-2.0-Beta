@@ -1982,7 +1982,7 @@ void look_at_room_by_loc(char_data *ch, room_data *room, bitvector_t options) {
 			strcpy(locbuf, get_mine_type_name(room));
 			if (get_room_extra_data(room, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT) > 0) {
 				fullness = ((double) get_room_extra_data(room, ROOM_EXTRA_MINE_AMOUNT)) / get_room_extra_data(room, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT);
-				msg_to_char(ch, "This appears to be %s %s (%d%% full).\r\n", AN(locbuf), locbuf, (int) ceil(fullness));
+				msg_to_char(ch, "This appears to be %s %s (%d%% full).\r\n", AN(locbuf), locbuf, (int) ceil(fullness * 100.0));
 			}
 			else {
 				msg_to_char(ch, "This appears to be %s %s.\r\n", AN(locbuf), locbuf);
