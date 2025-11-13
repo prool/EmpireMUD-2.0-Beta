@@ -4514,8 +4514,8 @@ const char *mine_levels[] = {
 	"exhausted",	// 0
 	"nearly-exhausted",
 	"low",
-	"half-empty",
-	"nearly-full",
+	"half-full",
+	"mostly-full",
 	"full",		// 5
 	"\n"
 };
