@@ -1726,9 +1726,9 @@ static inline int GET_SEASON(room_data *room) {
 #define REAL_HSSH(ch)  (MOB_FLAGGED((ch), MOB_PLURAL) ? "they" : (GET_REAL_SEX(ch) ? (GET_REAL_SEX(ch) == SEX_MALE ? "he" :"she") : "it"))
 #define REAL_HMHR(ch)  (MOB_FLAGGED((ch), MOB_PLURAL) ? "them" : (GET_REAL_SEX(ch) ? (GET_REAL_SEX(ch) == SEX_MALE ? "him":"her") : "it"))
 
-#define AN(string)  (strchr("aeiouAEIOU", *string) ? "an" : "a")
-#define SANA(obj)  (strchr("aeiouyAEIOUY", *(obj)->name) ? "an" : "a")
-#define ANA(obj)  (strchr("aeiouyAEIOUY", *(obj)->name) ? "An" : "A")
+#define AN(string)  (strchr("aeiouAEIOU", *(string)) ? "an" : "a")
+#define SANA(obj)  (strchr("aeiouyAEIOUY", *((obj)->name)) ? "an" : "a")
+#define ANA(obj)  (strchr("aeiouyAEIOUY", *((obj)->name)) ? "An" : "A")
 
 #define LOWER(c)  (((c)>='A'  && (c) <= 'Z') ? ((c)+('a'-'A')) : (c))
 #define UPPER(c)  (((c)>='a'  && (c) <= 'z') ? ((c)+('A'-'a')) : (c) )

@@ -4509,6 +4509,18 @@ const char banner_to_mapout_token[][2] = {
 };
 
 
+// for mines -- 0-5 relates to 0-100% ore
+const char *mine_levels[] = {
+	"exhausted",	// 0
+	"nearly-exhausted",
+	"low",
+	"half-empty",
+	"nearly-full",
+	"full",		// 5
+	"\n"
+};
+
+
 // ROAD_x
 const char *road_types[] = {
 	"ROAD",
