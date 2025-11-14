@@ -865,6 +865,9 @@ GLB_FUNCTION(run_global_mine_data) {
 		run_ability_hooks(ch, AHOOK_ABILITY, GET_GLOBAL_ABILITY(glb), 0, NULL, NULL, NULL, room, NOBITS);
 	}
 	
+	// after all modifiers
+	set_room_extra_data(room, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT, get_room_extra_data(room, ROOM_EXTRA_MINE_AMOUNT));
+	
 	return TRUE;
 }
 
@@ -1458,6 +1461,7 @@ void annual_update_map_tile(struct map_data *tile) {
 	if (!room || !room_has_function_and_city_ok(NULL, room, FNC_MINE)) {
 		remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_MINE_GLB_VNUM);
 		remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_MINE_AMOUNT);
+		remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT);
 		remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_PROSPECT_EMPIRE);
 		remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_WORKFORCE_PROSPECT);
 	}

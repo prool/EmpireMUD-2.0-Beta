@@ -3058,7 +3058,7 @@ typedef enum {
 #define ROOM_EXTRA_MINE_AMOUNT  1
 #define ROOM_EXTRA_FIRE_REMAINING  2
 #define ROOM_EXTRA_SEED_TIME  3
-	#define ROOM_EXTRA_UNUSED4  4	// formerly tavern type
+#define ROOM_EXTRA_MINE_ORIGINAL_AMOUNT  4
 	#define ROOM_EXTRA_UNUSED5  5	// formerly tavern brewing time
 	#define ROOM_EXTRA_UNUSED6  6	// formerly tavern available time
 	#define ROOM_EXTRA_UNUSED  7	// formerly ruins-icon

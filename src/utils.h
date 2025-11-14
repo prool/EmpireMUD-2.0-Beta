@@ -1726,9 +1726,9 @@ static inline int GET_SEASON(room_data *room) {
 #define REAL_HSSH(ch)  (MOB_FLAGGED((ch), MOB_PLURAL) ? "they" : (GET_REAL_SEX(ch) ? (GET_REAL_SEX(ch) == SEX_MALE ? "he" :"she") : "it"))
 #define REAL_HMHR(ch)  (MOB_FLAGGED((ch), MOB_PLURAL) ? "them" : (GET_REAL_SEX(ch) ? (GET_REAL_SEX(ch) == SEX_MALE ? "him":"her") : "it"))
 
-#define AN(string)  (strchr("aeiouAEIOU", *string) ? "an" : "a")
-#define SANA(obj)  (strchr("aeiouyAEIOUY", *(obj)->name) ? "an" : "a")
-#define ANA(obj)  (strchr("aeiouyAEIOUY", *(obj)->name) ? "An" : "A")
+#define AN(string)  (strchr("aeiouAEIOU", *(string)) ? "an" : "a")
+#define SANA(obj)  (strchr("aeiouyAEIOUY", *((obj)->name)) ? "an" : "a")
+#define ANA(obj)  (strchr("aeiouyAEIOUY", *((obj)->name)) ? "An" : "A")
 
 #define LOWER(c)  (((c)>='A'  && (c) <= 'Z') ? ((c)+('a'-'A')) : (c))
 #define UPPER(c)  (((c)>='a'  && (c) <= 'z') ? ((c)+('A'-'a')) : (c) )
@@ -2031,6 +2031,7 @@ bool wake_and_stand(char_data *ch);
 // resource functions from utils.c
 void add_to_resource_list(struct resource_data **list, int type, any_vnum vnum, int amount, int misc);
 void apply_resource(char_data *ch, struct resource_data *res, struct resource_data **list, obj_data *use_obj, int msg_type, vehicle_data *crafting_veh, struct resource_data **build_used_list);
+int count_resource_list_quantity(struct resource_data *list);
 void extract_resources(char_data *ch, struct resource_data *list, bool ground, struct resource_data **build_used_list);
 struct resource_data *get_next_resource(char_data *ch, struct resource_data *list, bool ground, bool left2right, obj_data **found_obj);
 char *get_resource_name(struct resource_data *res);
@@ -2138,6 +2139,7 @@ void end_action(char_data *ch);
 obj_data *has_tool(char_data *ch, bitvector_t flags);
 obj_data *has_all_tools(char_data *ch, bitvector_t flags);
 void process_build_action(char_data *ch);
+void show_prospect_result(char_data *ch, room_data *room);
 void start_action(char_data *ch, int type, int timer);
 void stop_room_action(room_data *room, int action);
 

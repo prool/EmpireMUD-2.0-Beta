@@ -153,6 +153,8 @@ variable include %actor.room% or %obj.room%. Access the below fields from a
 room variable like this: %room.coords%
 
 When using field - The variable returns:
+&cadd_built_with(vnum,amount,level)&0 - For buildings, adds to the list of
+   items used to build them (for later dismantle).
 &caff_flagged(AFF)&0 - True if the room has an affect flag on it.
    If called with no argument, lists current flags instead.
 &cbld_dir(dir)&0 - Rotates the given direction based on which way the building
@@ -191,6 +193,7 @@ When using field - The variable returns:
       %room.north(map)% - room variable for the map location in the dir
 &chas_evolution(type)&0 - Room has a given evolution available (SECTEDIT EVO).
 &chas_trigger(vnum)&0 - Has the specified trigger attached.
+&chealth&0 - Current buildings or their interiors, remaining health/damage.
 &cheight&0 - Get the current height of a map tile or set it with &cheight(num)&0.
    Use &cview_height&0 instead if you want to include things built on it.
 &cid&0 - The unique id of the room.
@@ -201,6 +204,7 @@ When using field - The variable returns:
 &cis_on_map&0 - True if the room is on the map (including closed buildings).
 &cis_outdoors&0 - True if it's on the map, in an outdoor adventure, etc.
 &cis_zenith_day&0 - True if it's the day of the sun's zenith passage here.
+&cmaxhealth&0 - For buildings or their interiors, maximum health/damage.
 &cmax_citizens&0 - If a building, the max number of citizens who can live here.
 &cmine_type&0 - If the room is a mine, gets the type name ("gold mine").
 &cmoon_phase(moon,*)&0 - Current phase of the moon (vnum or name). Optional 2nd

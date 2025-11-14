@@ -13,6 +13,9 @@ crammed into every pocket. Near him sit a bag of nails and a travois laden with
 scrapwood.
 ~
 F 15900
+M
+15
+The goblin scrapboss is wading through the water.~
 T 15905
 T 15902
 T 15900
@@ -26,7 +29,7 @@ the goblin wavewhisperer~
 The goblin wavewhisperer stares serenely off into the distance.
 ~
 75 175 adxyIJLM c 2
-2 0 86 22 -1 -1
+2 0 86 39 -1 -1
 D
    The old whisperer has a deep jade complexion, though she has smeared a light
 paste over her face and upper arms. Her violet cloth robes are stitched with
@@ -87,15 +90,71 @@ a goblin ropesnarl~
 A goblin ropesnarl is twirling a net.
 ~
 75 175 acdIJM c 2
-0 0 77 7 -1 -1
+0 0 77 38 -1 -1
 D
    The lime-green old ropesnarl is dressed in tattered canvas shorts and little
 else, save for the spare rope and netting slung around the shoulder.
 ~
 F 15900
+M
+7
+say Me gonna kill a human today!~
+M
+7
+say Hold still, me make it quick with the net.~
+M
+8
+say This is me net.~
+M
+8
+say Many nets like it, but this one is me's.~
+M
+9
+set line_gap 2 sec~
+M
+9
+say Me gonna kill a hu...~
+M
+9
+set line_gap 9 sec~
+M
+9
+say Uh, mongous elephant. That's what me meant.~
+M
+10
+say Me thought it was trouble, but just you again.~
+M
+10
+say You should be more careful around goblins.~
+M
+10
+say You look a lot like food.~
+M
+10
+say Not very good food.~
+M
+10
+say But goblins not picky.~
+M
+0
+$n repairs a knot in $s net.~
+M
+0
+$n curses as $e pinches $s finger while fixing $s net.~
+M
+0
+$n spits on the ground.~
+M
+0
+$n tosses $s net up into the air to check for holes.~
+M
+0
+$n picks up a pebble and ties it in as a new net weight.~
 T 15905
 T 15902
 T 15900
+T 9506
+T 9621
 S
 #15905
 goblin bonecounter bone-counter counter !#n~
@@ -109,9 +168,61 @@ D
 spectacles that magnify gold and jade eyes to the size of goblin saucers.
 ~
 F 15900
+M
+7
+say You sure got a lot of bones there...~
+M
+7
+say Shame if anything were to happen to them.~
+M
+8
+say You using all those bones?~
+M
+8
+say Could take some of them off of your hands for you.~
+M
+9
+set line_gap 2 sec~
+M
+9
+say Smells like filthy hu...~
+M
+9
+set line_gap 9 sec~
+M
+9
+say ...mpthing. Smells like filthy something.~
+M
+9
+say Definitely not you. You smells fine.~
+M
+9
+say Not at all like a goblin gong farm.~
+M
+10
+say You sure got a lot of bones there...~
+M
+10
+say Let me know if you lose any of them. Lots to spare.~
+M
+0
+The goblin counts on $s fingers.~
+M
+0
+$n eyes you suspiciously.~
+M
+0
+$n sharpens $s knife on $s teeth.~
+M
+0
+$n picks at $s teeth.~
+M
+0
+$n holds $s nose as $e passes you.~
 T 15905
 T 15902
 T 15900
+T 9621
 S
 #15906
 goblin shellpicker shell-picker picker !#n~
@@ -125,9 +236,76 @@ D
 forming a rather clattering dress.
 ~
 F 15900
+M
+7
+say You say something to me?~
+M
+7
+say People who say wrong things to me wind up dead.~
+M
+7
+say Save me trouble and die, ok?~
+M
+8
+say You using all them bones?~
+M
+8
+say Could make nice display rack for my shells.~
+M
+8
+say What's your favorite color?~
+M
+8
+say That's what color shells I put on your bones.~
+M
+9
+set line_gap 5 sec~
+M
+9
+emote $n picks up a shell and rubs it on $s shirt.~
+M
+9
+say Little shell down on the groundy,~
+M
+9
+say Lost by someone, now I found ye.~
+M
+9
+say Spit a bit and polish gently,~
+M
+9
+say Soon I'll sell ye and make money.~
+M
+10
+say Don't take any shells.~
+M
+10
+say Just 'cause we let you be here don't mean you can have shells.~
+M
+10
+say All the shells are claimed. Even that one.~
+M
+10
+emote $n picks up a shell.~
+M
+0
+$n picks up a shell and inspects it.~
+M
+0
+$n picks up a shell but tosses it back.~
+M
+0
+$n picks up a shell and pockets it.~
+M
+0
+$n bumps into you while looking at the ground.~
+M
+0
+$n pushes your foot aside to pick up a shell.~
 T 15905
 T 15902
 T 15900
+T 9621
 S
 #15907
 goblin lootcaller loot-caller caller !#n~
@@ -141,9 +319,61 @@ D
 distinct, high-pitched rattle with each step.
 ~
 F 15900
+M
+7
+emote $n considers $ chances at selling your gear.~
+M
+7
+say Lot o' nice stuff you've got.~
+M
+7
+say Shame if someone were to... take it.~
+M
+8
+say Fresh fish!~
+M
+8
+say Do us a favor, Fish.~
+M
+8
+say Take off all o' that gear and set it in a neat pile.~
+M
+8
+say And scratch in what you think it's worth.~
+M
+9
+emote $n considers $ chances at selling your gear.~
+M
+9
+say Could probably make a lot o' money off you.~
+M
+9
+say You're lucky I like you.~
+M
+9
+say Even if you are reeeeeal ugly.~
+M
+10
+say You shoulda been born a goblin.~
+M
+10
+say You kinda got the ears for it.~
+M
+0
+Sparks fly as $n polishes $s staff.~
+M
+0
+$n holds $s staff up toward the sky, where little bolts of lightning crackle over it.~
+M
+0
+$n taps the ground with $s staff, sending thunderous tremors that can be felt several feet away.~
+M
+1
+Fish.~
 T 15905
 T 15902
 T 15900
+T 9621
 S
 #15908
 goblin banner-lugger bannerlugger lugger !#n~
@@ -156,9 +386,49 @@ D
 The gray-green goblin drags a tall banner across the field.
 ~
 F 15900
+M
+7
+emote $n plants $s banner in the ground and wipes $s brow.~
+M
+7
+say You makin' that dumb face because you want to fight?~
+M
+8
+emote $n plants $s banner in the ground and wipes $s brow.~
+M
+8
+say Welcome to Goblinville, new home for goblins. You not welcome.~
+M
+9
+emote $n plants $s banner in the ground and wipes $s brow.~
+M
+9
+say Oh hey, you again.~
+M
+10
+emote $n plants $s banner in the ground and wipes $s brow.~
+M
+10
+say We gotta get one more goblin. New guy carries the banner.~
+M
+0
+Sweat drips down $n's gray-green brow.~
+M
+0
+$n stops to catch $s little breath.~
+M
+0
+$n sighs.~
+M
+0
+The little goblin struggles with the banner.~
+M
+1
+Why's it always me?~
 T 15905
 T 15902
 T 15900
+T 9621
 S
 #15909
 goblin flame-skulker flameskulker skulker !#n~
@@ -173,9 +443,58 @@ slightest hint of green. Wisps of soot flow behind, too, so perhaps this goblin
 is just very dirty.
 ~
 F 15900
+M
+7
+say You know what happens to a human caught on fire?~
+M
+7
+emote $n plays with some firesteel, sending sparks flying.~
+M
+7
+say Same thing as happens to everybody else!~
+M
+8
+emote You catch $n trying to set your clothes on fire.~
+M
+8
+say To every person, burn, burn, burn.~
+M
+9
+emote $n plays with some firesteel, sending sparks flying.~
+M
+9
+say Want to get lit?~
+M
+9
+say Probably doesn't mean what you think it means.~
+M
+9
+say Bet you'd smell good on fire.~
+M
+10
+emote $n plays with some firesteel, sending sparks flying.~
+M
+10
+say We gotta stop making friends and do more conquering.~
+M
+0
+$n plays with some firesteel, sending sparks flying.~
+M
+0
+$n tries to wipe off $s face, but it's no use.~
+M
+0
+$n shrieks as $e plays with fire.~
+M
+0
+$n applies some balm to $s burns.~
+M
+1
+Burn!~
 T 15905
 T 15902
 T 15900
+T 9621
 S
 #15910
 goblin tarflinger tar-flinger flinger !#n~
@@ -189,9 +508,61 @@ D
 tar in your direction.
 ~
 F 15900
+M
+7
+say I found one! I found one!~
+M
+7
+say How many teeth you got? Looks like a lot.~
+M
+7
+say Might double my collection.~
+M
+8
+emote $n juggles some balls of tar.~
+M
+8
+emote $n juggles some balls of tar.~
+M
+8
+emote $n juggles some balls of tar.~
+M
+8
+emote A tar ball comes down right on $n's head as $e tries to juggle.~
+M
+8
+say Should've been a sewer goblin.~
+M
+9
+say I found one! I found one!~
+M
+9
+emote $n takes a good look at your mouth.~
+M
+9
+say Oh, it's just you.~
+M
+9
+say Scrapboss says I can't have your teeth.~
+M
+10
+emote $n juggles some balls of tar.~
+M
+10
+emote $n juggles some balls of tar.~
+M
+10
+emote $n juggles some balls of tar.~
+M
+10
+emote A tar ball comes down right on $n's head as $e tries to juggle.~
+M
+10
+say Should've gone to that tower instead. Bet they got rich.~
 T 15905
 T 15902
 T 15900
+T 9621
 S
 #15911
 goblin deadwright dead-wright wright !#n~
@@ -207,9 +578,55 @@ first, but as you approach the deadwright, the sounds of the damned become
 deafening.
 ~
 F 15900
+M
+7
+say By the pricking of my bones...~
+M
+7
+say Something living this way comes.~
+M
+7
+say For now, that is.~
+M
+8
+say I sense death in the air.~
+M
+8
+say Yours, maybe. Mine, maybe.~
+M
+8
+say But either way, lots and lots of death.~
+M
+8
+say Just as the bones foretell.~
+M
+9
+say Fury of the Godlins guide us...~
+M
+9
+say Roil the grass and fell the treezy.~
+M
+9
+say Bring us goblins up to greatness...~
+M
+9
+say With these humans, should be easy.~
+M
+10
+say In the beginning, we were cut from jade.~
+M
+10
+say A sacred cleaving that cannot be undone.~
+M
+10
+say The ancestors tried once.~
+M
+10
+say It wasn't good.~
 T 15905
 T 15902
 T 15900
 T 15911
+T 9621
 S
 $

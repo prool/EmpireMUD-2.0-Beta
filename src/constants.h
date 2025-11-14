@@ -398,6 +398,7 @@ extern const char *island_bits[];
 extern const char *mapout_color_names[];
 extern const char mapout_color_tokens[];
 extern const char banner_to_mapout_token[][2];
+extern const char *mine_levels[];
 extern const char *road_types[];
 extern const char *room_aff_bits[];
 extern const char *room_extra_types[];

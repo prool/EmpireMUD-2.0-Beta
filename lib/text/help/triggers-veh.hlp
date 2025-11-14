@@ -107,6 +107,8 @@ The correct way to get a vehicle's short description in a send/echo is:
 @%veh% - short desc, something
 
 When using field  - The variable returns:
+&cadd_built_with(vnum,amount,level)&0 - Adds to the list of items used to build
+   the vehicle (for later dismantle).
 &canimals_harnessed&0 - Number of animals harnessed to the vehicle.
 &canimals_required&0 - Number of animals needed for the vehicle to move.
 &cburn&0 - Ignites the vehicle, if possible.

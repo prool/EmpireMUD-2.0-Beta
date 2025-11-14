@@ -64,7 +64,7 @@ void tog_pvp(char_data *ch);
 
 // Shown on the "version" command and sent over MSSP
 const char *version = "EmpireMUD 2.0 beta 5.196";
-const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.13";
+const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.14";
 
 
 // data for the built-in game levels -- this adapts itself if you reduce the number of immortal levels
@@ -4509,6 +4509,18 @@ const char banner_to_mapout_token[][2] = {
 };
 
 
+// for mines -- 0-5 relates to 0-100% ore
+const char *mine_levels[] = {
+	"exhausted",	// 0
+	"nearly-exhausted",
+	"low",
+	"half-full",
+	"mostly-full",
+	"full",		// 5
+	"\n"
+};
+
+
 // ROAD_x
 const char *road_types[] = {
 	"ROAD",
@@ -4557,7 +4569,7 @@ const char *room_extra_types[] = {
 	"mine amount",
 	"fire remaining",
 	"seed time",
-	"tavern type",	// unused
+	"mine original amount",
 	"tavern brewing time",	// 5		// unused
 	"tavern available time",	// unused
 	"ruins icon",	// unused

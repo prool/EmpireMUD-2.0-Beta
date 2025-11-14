@@ -660,15 +660,26 @@ obj_data *has_all_tools(char_data *ch, bitvector_t flags) {
 * @param room_data *room The room to prospect.
 */
 void show_prospect_result(char_data *ch, room_data *room) {
+	char full_buff[256];
+	int fullness;
+	
 	if (get_room_extra_data(room, ROOM_EXTRA_MINE_AMOUNT) <= 0 || !global_proto(get_room_extra_data(room, ROOM_EXTRA_MINE_GLB_VNUM))) {
 		msg_to_char(ch, "This area has already been mined for all it's worth.\r\n");
 	}
 	else {
-		if (is_deep_mine(room)) {
-			msg_to_char(ch, "You discover that this area is a deep %s.\r\n", get_mine_type_name(room));
+		if (get_room_extra_data(room, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT) > 0) {
+			fullness = (int) ceil(((double) get_room_extra_data(room, ROOM_EXTRA_MINE_AMOUNT)) / get_room_extra_data(room, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT) * 5.0);
+			safe_snprintf(full_buff, sizeof(full_buff), "%s ", mine_levels[fullness]);
 		}
 		else {
-			msg_to_char(ch, "You discover that this area is %s %s.\r\n", AN(get_mine_type_name(room)), get_mine_type_name(room));
+			*full_buff = '\0';
+		}
+		
+		if (is_deep_mine(room)) {
+			msg_to_char(ch, "You discover that this area is %s %sdeep %s.\r\n", AN(*full_buff ? full_buff : "deep"), full_buff, get_mine_type_name(room));
+		}
+		else {
+			msg_to_char(ch, "You discover that this area is %s %s%s.\r\n", AN(*full_buff ? full_buff : get_mine_type_name(room)), full_buff, get_mine_type_name(room));
 		}
 	}
 }

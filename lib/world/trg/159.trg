@@ -161,6 +161,7 @@ L h 40
 L h 50
 L h 51
 L h 56
+L h 57
 L h 58
 L h 70
 L h 71
@@ -189,7 +190,6 @@ L h 10305
 L h 10306
 L h 10308
 L h 10311
-L h 57
 L r 15900
 L r 15901
 L r 15902
@@ -206,13 +206,16 @@ set dist %room.distance(%start%)%
 if %room.empire% || %self.fighting% || %self.disabled%
   * skip
   halt
-elseif %room.building_vnum% == 15901
+elseif %room.building_vnum% == 15901 && %room.health% < %room.maxhealth%
   %restore% %room%
   %echo% ~%self% repairs the barricades.
 elseif %room.sector_vnum% == 57
   %echo% ~%self% uses some of the wreckage to construct a barricade.
   %build% %room% 15901
-elseif %trap_sects% ~= %room.sector_vnum% && %self.var(traps,0)% > 0 && %dist% >= 4
+  nop %room.add_built_with(15905,10,1)%
+  nop %room.add_built_with(15903,12,1)%
+  nop %room.add_built_with(15904,12,1)%
+elseif %trap_sects% ~= %room.sector_vnum% && %self.var(traps,0)% > 0 && %dist% >= 4 && !%room.vehicles%
   %echo% ~%self% arranges some debris into piles.
   %build% %room% 15905
   eval traps %self.var(traps,1)% - 1
@@ -229,6 +232,21 @@ else
     end
     set veh %veh.next_in_room%
   done
+  * stuck check
+  if %self.var(last_room,0)% != %room.vnum%
+    set last_room %room.vnum%
+    set last_check %timestamp%
+    remote last_room %self.id%
+    remote last_check %self.id%
+  elseif (%timestamp% - %self.var(last_check,0)%) > 1800
+    * stuck half an hour
+    set loc %instance.location%
+    if %loc% && %loc% != %room%
+      %echo% ~%self% lights a fuse... There's a moment of sparking and then &%self% blasts off!
+      mgoto %loc%
+      %echo% ~%self% comes flying in with a trail of smoke!
+    end
+  end
   halt
 end
 ~
@@ -238,15 +256,22 @@ Shipwrecked Goblins: Tent setup and leash~
 L f 15904
 L f 15909
 L h 0
+L h 5
+L h 6
 L h 7
+L h 8
 L h 9
 L h 12
 L h 13
 L h 14
 L h 20
 L h 21
+L h 30
+L h 32
+L h 33
 L h 50
 L h 51
+L h 52
 L h 53
 L h 56
 L h 58
@@ -278,6 +303,8 @@ L h 247
 L h 248
 L h 249
 L h 250
+L h 251
+L h 253
 L h 601
 L h 602
 L h 603
@@ -296,15 +323,6 @@ L h 618
 L h 621
 L h 622
 L h 623
-L h 5
-L h 6
-L h 8
-L h 30
-L h 32
-L h 33
-L h 52
-L h 251
-L h 253
 L h 10190
 L h 10191
 L h 10192
@@ -486,8 +504,8 @@ end
 #15907
 Shipwrecked Goblins: Trap go boom~
 2 g 100 2
-L c 15902
 L c 15901
+L c 15902
 ~
 if %actor.is_npc%
   halt
@@ -522,52 +540,52 @@ wait 0
 #15909
 Shipwrecked Goblins: Choppin' trees~
 0 ab 10 46
-L h 24
-L h 37
-L h 38
-L h 45
-L h 47
-L h 81
-L h 89
-L h 212
-L h 10563
-L h 10564
-L h 10565
-L h 23
-L h 36
-L h 44
-L h 46
-L h 80
-L h 88
-L h 211
-L h 10562
+L h 0
 L h 1
-L h 39
 L h 2
 L h 3
 L h 4
 L h 9
+L h 20
+L h 21
+L h 23
+L h 24
+L h 26
+L h 36
+L h 37
+L h 38
+L h 39
+L h 40
+L h 44
+L h 45
+L h 46
+L h 47
+L h 50
 L h 54
 L h 59
+L h 80
+L h 81
+L h 88
+L h 89
 L h 90
 L h 200
-L h 222
-L h 26
-L h 10566
+L h 204
 L h 210
+L h 211
+L h 212
 L h 220
 L h 221
+L h 222
 L h 223
 L h 224
+L h 231
 L h 232
 L h 233
-L h 231
-L h 204
-L h 21
-L h 50
-L h 40
-L h 0
-L h 20
+L h 10562
+L h 10563
+L h 10564
+L h 10565
+L h 10566
 ~
 Commands:
 * This script terraforms forests to flat land
@@ -675,7 +693,7 @@ end
 ~
 #15911
 Shipwrecked Goblins: Deadwright resurrection~
-0 b 10 8
+0 b 20 8
 L b 15904
 L b 15905
 L b 15906
@@ -685,24 +703,71 @@ L b 15909
 L b 15910
 L b 15911
 ~
-* find and resurrect a goblin
+* find a dead goblin
 if %self.disabled%
   halt
 end
 set obj %self.room.contents%
-while %obj%
+set found 0
+while %obj% && !%found%
   if %obj.type% == CORPSE && %obj.val0% >= 15904 && %obj.val0% <= 15911
-    %load% mob %obj.val0%
-    set mob %self.room.people%
-    if %mob.vnum% == %obj.val0%
-nop %mob.add_mob_flag(!LOOT)%
-      %echo% ~%self% waves ^%self% hands over a corpse... There's a purple glow and ~%mob% is resurrected!
-      %mod% %mob% append-lookdesc There's a dull purple glow in %mob.hisher% eyes and a bit of drool on the chin.
-      %purge% %obj%
-      halt
-    end
+    set found %obj%
   end
   set obj %obj.next_in_list%
 done
+* did we find one?
+if !%found%
+  halt
+end
+* start
+%echo% A purple glow surrounds ~%self% as *%self% begins a throaty chant...
+nop %self.add_mob_flag(SENTINEL)%
+set id %found.id%
+set cycle 0
+while %cycle% <= 4
+  wait 3 s
+  switch %cycle%
+    case 0
+      say By the Godlins strong and mighty...
+    break
+    case 1
+      say Neath the earth we work and render...
+    break
+    case 2
+      say Fill this green one with your lighty...
+    break
+    case 3
+      say Rise again in goblin splendor!
+    break
+    case 4
+      if %found% && %found.id% == %id%
+        %load% mob %found.val0%
+        set mob %self.room.people%
+        if %mob.vnum% == %found.val0%
+          nop %mob.add_mob_flag(!LOOT)%
+          %echo% A rich a purple glow emanates from ~%mob% as &%mob% is resurrected!
+          %mod% %mob% append-lookdesc There's a dull purple glow in %mob.hisher% eyes and a bit of drool on the chin.
+        else
+          say Oops... didn't work.
+        end
+        %purge% %found%
+      else
+        say Oops... didn't work.
+      end
+    break
+  done
+  eval cycle %cycle% + 1
+done
+nop %self.remove_mob_flag(SENTINEL)%
+~
+#15915
+Shipwrecked Goblins: Pay to leave~
+2 v 0 2
+L i 15900
+L t 15915
+~
+if %questvnum% == 15915
+  %adventurecomplete%
+end
 ~
 $
