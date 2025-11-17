@@ -113,6 +113,11 @@ bool audit_sector(sector_data *sect, char_data *ch) {
 		problem = TRUE;
 	}
 	
+	if (has_evolution_type(sect, EVO_BURNS_TO) && !has_evolution_type(sect, EVO_BURN_STUMPS)) {
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "Sector has BURNS-TO but not BURN-STUMPS evolution");
+		problem = TRUE;
+	}
+	
 	// look for things that magic-grow to me:
 	HASH_ITER(hh, sector_table, sect_iter, next_sect) {
 		if (has_evolution_type_to(sect_iter, EVO_MAGIC_GROWTH, GET_SECT_VNUM(sect)) && !sect_has_custom_message(sect, SECT_CUSTOM_MAGIC_GROWTH)) {
