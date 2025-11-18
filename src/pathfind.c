@@ -57,7 +57,10 @@ PATHFIND_VALIDATOR(pathfind_ocean) {
 	
 	if (room) {
 		if (ROOM_SECT_FLAGGED(room, SECTF_FRESH_WATER | SECTF_OCEAN) || ROOM_BLD_FLAGGED(room, BLD_SAIL)) {
-			if (!ROOM_IS_CLOSED(room)) {
+			if (veh && ((VEH_SIZE(veh) == 0 && ROOM_SMALL_VEHICLES(room) > 0 && ROOM_SMALL_VEHICLES(room) + 1 > config_get_int("vehicle_max_per_tile")) || (VEH_SIZE(veh) > 0 && ROOM_VEHICLE_SIZE(room) > 0 && ROOM_VEHICLE_SIZE(room) + VEH_SIZE(veh)) > config_get_int("vehicle_size_per_tile"))) {
+				return FALSE; // decline pathing due to full room
+			}
+			else if (!ROOM_IS_CLOSED(room)) {
 				return TRUE;	// open
 			}
 			else if (CHAR_OR_VEH_ROOM_PERMISSION(ch, veh, room, GUESTS_ALLOWED)) {
@@ -88,10 +91,13 @@ PATHFIND_VALIDATOR(pathfind_pilot) {
 	room_data *find;
 	
 	if (room) {
-		if (ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_FLY)) {
+		if (veh && ((VEH_SIZE(veh) == 0 && ROOM_SMALL_VEHICLES(room) > 0 && ROOM_SMALL_VEHICLES(room) + 1 > config_get_int("vehicle_max_per_tile")) || (VEH_SIZE(veh) > 0 && ROOM_VEHICLE_SIZE(room) > 0 && ROOM_VEHICLE_SIZE(room) + VEH_SIZE(veh)) > config_get_int("vehicle_size_per_tile"))) {
+			return FALSE; // decline pathing due to full room
+		}
+		else if (ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_FLY)) {
 			return FALSE;	// cannot fly there
 		}
-		if (!ROOM_IS_CLOSED(room) || (ROOM_BLD_FLAGGED(room, BLD_ATTACH_ROAD) && CHAR_OR_VEH_ROOM_PERMISSION(ch, veh, room, GUESTS_ALLOWED))) {
+		else if (!ROOM_IS_CLOSED(room) || (ROOM_BLD_FLAGGED(room, BLD_ATTACH_ROAD) && CHAR_OR_VEH_ROOM_PERMISSION(ch, veh, room, GUESTS_ALLOWED))) {
 			return TRUE;	// free to pass
 		}
 	}
@@ -116,7 +122,10 @@ PATHFIND_VALIDATOR(pathfind_road) {
 	room_data *find;
 	
 	if (room) {
-		if (IS_ROAD(room) || room == controller->end) {
+		if (veh && ((VEH_SIZE(veh) == 0 && ROOM_SMALL_VEHICLES(room) > 0 && ROOM_SMALL_VEHICLES(room) + 1 > config_get_int("vehicle_max_per_tile")) || (VEH_SIZE(veh) > 0 && ROOM_VEHICLE_SIZE(room) > 0 && ROOM_VEHICLE_SIZE(room) + VEH_SIZE(veh)) > config_get_int("vehicle_size_per_tile"))) {
+			return FALSE; // decline pathing due to full room
+		}
+		else if (IS_ROAD(room) || room == controller->end) {
 			return TRUE;	// real road
 		}
 		else if (!ROOM_BLD_FLAGGED(room, BLD_ATTACH_ROAD)) {

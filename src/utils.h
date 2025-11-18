@@ -1484,6 +1484,8 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define ROOM_PATHFIND_KEY(room)  ((room)->pathfind_key)
 #define ROOM_PEOPLE(room)  ((room)->people)
 #define ROOM_UNLOAD_EVENT(room)  ((room)->unload_event)
+#define ROOM_SMALL_VEHICLES(room)  ((room)->small_vehicles)
+#define ROOM_VEHICLE_SIZE(room)  ((room)->vehicle_size)
 #define ROOM_VEHICLES(room)  ((room)->vehicles)
 #define SECT(room)  ((room)->sector_type)
 #define GET_EXITS_HERE(room)  ((room)->exits_here)

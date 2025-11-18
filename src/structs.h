@@ -6485,6 +6485,8 @@ struct room_data {
 	struct shared_room_data *shared;	// data that could be local OR from the map tile
 	sh_int light;  // number of light sources
 	int exits_here;	// number of rooms that have complex->exits to this one
+	ubyte small_vehicles;	// live count of how many small vehicles are present
+	ubyte vehicle_size;	// live total of vehicle sizes in the room
 	
 	struct affected_type *af;  // room affects
 	
