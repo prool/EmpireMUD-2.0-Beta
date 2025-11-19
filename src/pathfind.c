@@ -50,6 +50,7 @@
 
 #define CHAR_OR_VEH_ROOM_PERMISSION(ch, veh, room, mode)  (!ROOM_OWNER(room) || ((ch) && can_use_room((ch), (room), (mode))) || ((veh) && VEH_OWNER(veh) && emp_can_use_room(VEH_OWNER(veh), (room), (mode))))
 #define CHAR_OR_VEH_ROOM_PERMISSION_SIMPLE(ch, veh, room, junk)  (!ROOM_OWNER(room) || ((ch) && GET_LOYALTY(ch) == ROOM_OWNER(room)) || ((veh) && VEH_OWNER(veh) == ROOM_OWNER(room)))
+#define ROOM_TOO_FULL_FOR_VEHICLE(room, veh)  ((veh) && (room) && ((VEH_SIZE(veh) == 0 && ROOM_SMALL_VEHICLES(room) > 0 && ROOM_SMALL_VEHICLES(room) + 1 > config_get_int("vehicle_max_per_tile")) || (VEH_SIZE(veh) > 0 && ROOM_VEHICLE_SIZE(room) > 0 && ROOM_VEHICLE_SIZE(room) + VEH_SIZE(veh)) > config_get_int("vehicle_size_per_tile")))
 
 // example: validator for ships
 PATHFIND_VALIDATOR(pathfind_ocean) {
@@ -57,7 +58,7 @@ PATHFIND_VALIDATOR(pathfind_ocean) {
 	
 	if (room) {
 		if (ROOM_SECT_FLAGGED(room, SECTF_FRESH_WATER | SECTF_OCEAN) || ROOM_BLD_FLAGGED(room, BLD_SAIL)) {
-			if (veh && ((VEH_SIZE(veh) == 0 && ROOM_SMALL_VEHICLES(room) > 0 && ROOM_SMALL_VEHICLES(room) + 1 > config_get_int("vehicle_max_per_tile")) || (VEH_SIZE(veh) > 0 && ROOM_VEHICLE_SIZE(room) > 0 && ROOM_VEHICLE_SIZE(room) + VEH_SIZE(veh)) > config_get_int("vehicle_size_per_tile"))) {
+			if (ROOM_TOO_FULL_FOR_VEHICLE(room, veh)) {
 				return FALSE; // decline pathing due to full room
 			}
 			else if (!ROOM_IS_CLOSED(room)) {
@@ -69,7 +70,10 @@ PATHFIND_VALIDATOR(pathfind_ocean) {
 		}
 	}
 	else if (map) {
-		if (SECT_FLAGGED(map->sector_type, SECTF_FRESH_WATER | SECTF_OCEAN)) {
+		if (ROOM_TOO_FULL_FOR_VEHICLE(map->room, veh)) {
+			return FALSE; // decline pathing due to full room
+		}
+		else if (SECT_FLAGGED(map->sector_type, SECTF_FRESH_WATER | SECTF_OCEAN)) {
 			return TRUE;	// true ocean
 		}
 		else if ((find = map->room) && ROOM_BLD_FLAGGED(find, BLD_SAIL)) {
@@ -91,7 +95,7 @@ PATHFIND_VALIDATOR(pathfind_pilot) {
 	room_data *find;
 	
 	if (room) {
-		if (veh && ((VEH_SIZE(veh) == 0 && ROOM_SMALL_VEHICLES(room) > 0 && ROOM_SMALL_VEHICLES(room) + 1 > config_get_int("vehicle_max_per_tile")) || (VEH_SIZE(veh) > 0 && ROOM_VEHICLE_SIZE(room) > 0 && ROOM_VEHICLE_SIZE(room) + VEH_SIZE(veh)) > config_get_int("vehicle_size_per_tile"))) {
+		if (ROOM_TOO_FULL_FOR_VEHICLE(room, veh)) {
 			return FALSE; // decline pathing due to full room
 		}
 		else if (ROOM_AFF_FLAGGED(room, ROOM_AFF_NO_FLY)) {
@@ -102,13 +106,16 @@ PATHFIND_VALIDATOR(pathfind_pilot) {
 		}
 	}
 	else if (map) {
-		if (IS_SET(map->shared->affects, ROOM_AFF_NO_FLY)) {
+		if (ROOM_TOO_FULL_FOR_VEHICLE(map->room, veh)) {
+			return FALSE;	// room full
+		}
+		else if (IS_SET(map->shared->affects, ROOM_AFF_NO_FLY)) {
 			return FALSE;	// can't fly there
 		}
-		if (!(find = map->room)) {
+		else if (!(find = map->room)) {
 			return TRUE;	// no real-real-room means not a building so we're ok now
 		}
-		if (!ROOM_IS_CLOSED(find) || (ROOM_BLD_FLAGGED(find, BLD_ATTACH_ROAD) && CHAR_OR_VEH_ROOM_PERMISSION(ch, veh, find, GUESTS_ALLOWED))) {
+		else if (!ROOM_IS_CLOSED(find) || (ROOM_BLD_FLAGGED(find, BLD_ATTACH_ROAD) && CHAR_OR_VEH_ROOM_PERMISSION(ch, veh, find, GUESTS_ALLOWED))) {
 			return TRUE; // free to pass
 		}
 	}
@@ -122,7 +129,7 @@ PATHFIND_VALIDATOR(pathfind_road) {
 	room_data *find;
 	
 	if (room) {
-		if (veh && ((VEH_SIZE(veh) == 0 && ROOM_SMALL_VEHICLES(room) > 0 && ROOM_SMALL_VEHICLES(room) + 1 > config_get_int("vehicle_max_per_tile")) || (VEH_SIZE(veh) > 0 && ROOM_VEHICLE_SIZE(room) > 0 && ROOM_VEHICLE_SIZE(room) + VEH_SIZE(veh)) > config_get_int("vehicle_size_per_tile"))) {
+		if (ROOM_TOO_FULL_FOR_VEHICLE(room, veh)) {
 			return FALSE; // decline pathing due to full room
 		}
 		else if (IS_ROAD(room) || room == controller->end) {
@@ -136,7 +143,10 @@ PATHFIND_VALIDATOR(pathfind_road) {
 		}
 	}
 	else if (map) {
-		if (SECT_FLAGGED(map->sector_type, SECTF_IS_ROAD) || map->vnum == GET_ROOM_VNUM(controller->end)) {
+		if (ROOM_TOO_FULL_FOR_VEHICLE(map->room, veh)) {
+			return FALSE;	// room full
+		}
+		else if (SECT_FLAGGED(map->sector_type, SECTF_IS_ROAD) || map->vnum == GET_ROOM_VNUM(controller->end)) {
 			return TRUE;	// true road
 		}
 		else if (!(find = map->room) || !ROOM_BLD_FLAGGED(find, BLD_ATTACH_ROAD)) {
