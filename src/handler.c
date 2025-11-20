@@ -12115,6 +12115,26 @@ void vehicle_from_room(vehicle_data *veh) {
 	veh->next_in_room = veh->prev_in_room = NULL;
 	IN_ROOM(veh) = NULL;
 	
+	// update vehicle count
+	if (VEH_SIZE(veh) > 0) {
+		if (ROOM_VEHICLE_SIZE(was_in) - VEH_SIZE(veh) >= 0) {
+			ROOM_VEHICLE_SIZE(was_in) -= VEH_SIZE(veh);
+		}
+		else {
+			// out of sync somehow-- recompute
+			ROOM_VEHICLE_SIZE(was_in) = total_vehicle_size_in_room(was_in, NULL);
+		}
+	}
+	else {	// no size
+		if (ROOM_SMALL_VEHICLES(was_in) > 0) {
+			ROOM_SMALL_VEHICLES(was_in) -= 1;
+		}
+		else {
+			// out of sync somehow -- recompute
+			ROOM_SMALL_VEHICLES(was_in) = total_small_vehicles_in_room(was_in, NULL);
+		}
+	}
+	
 	// update mapout if applicable
 	if (VEH_IS_VISIBLE_ON_MAPOUT(veh)) {
 		request_mapout_update(GET_ROOM_VNUM(was_in));
@@ -12143,6 +12163,14 @@ void vehicle_to_room(vehicle_data *veh, room_data *room) {
 	DL_PREPEND2(ROOM_VEHICLES(room), veh, prev_in_room, next_in_room);
 	IN_ROOM(veh) = room;
 	VEH_LAST_MOVE_TIME(veh) = time(0);
+	
+	// update vehicle count
+	if (VEH_SIZE(veh) > 0) {
+		SAFE_ADD(ROOM_VEHICLE_SIZE(room), VEH_SIZE(veh), 0, UCHAR_MAX, FALSE);
+	}
+	else {	// no size
+		SAFE_ADD(ROOM_SMALL_VEHICLES(room), 1, 0, UCHAR_MAX, FALSE);
+	}
 	
 	// apply-vehicle: only sets traits if the vehicle has moved to a new island/region
 	apply_vehicle_to_room(veh, room);

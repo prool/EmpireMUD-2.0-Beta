@@ -374,6 +374,9 @@ end
 Uninvited Guest: Vampire wake/sleep~
 0 b 50
 ~
+if %self.fighting% || %self.disabled%
+  halt
+end
 set room %self.room%
 set sun %room.sun%
 set affected %self.affect(10370)%
