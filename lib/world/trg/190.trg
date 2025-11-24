@@ -265,33 +265,30 @@ set item %room.contents%
 %echo% As ~%self% falls to the ground, &%self% pulls a cloth off the table, revealing a crystal ball!
 * Mark the adventure as complete
 %adventurecomplete%
-* For each player in the room (on hard+ only):
-if %self.mob_flagged(HARD)% || %self.mob_flagged(GROUP)%
-  set ch %self.room.people%
-  while %ch%
-    if %ch.is_pc%
-      * Token reward
-      set token_amount 1
-      if %self.mob_flagged(GROUP)%
-        eval token_amount %token_amount% * 2
-        if %self.mob_flagged(HARD)%
-          eval token_amount %token_amount% * 2
-        end
-      end
-      if %token_amount% > 1
-        set string %token_amount% %currency.19000(2)%
-        set pronoun them
-      else
-        set string a %currency.19000(1)%
-        set pronoun it
-      end
-      %send% %ch% Searching the room, you find %string%! You take %pronoun%.
-      nop %ch.give_currency(19000, %token_amount%)%
-      * Random item is handled by the loot replacer.
-    end
-    set ch %ch.next_in_room%
-  done
+* Rat tail tokens for each player in the room:
+set token_amount 1
+if %self.mob_flagged(HARD)%
+  eval token_amount %token_amount% + 1
 end
+if %self.mob_flagged(GROUP)%
+  eval token_amount %token_amount% + 2
+end
+set ch %self.room.people%
+while %ch%
+  if %ch.is_pc%
+    if %token_amount% > 1
+      set string %token_amount% %currency.19000(2)%
+      set pronoun them
+    else
+      set string a %currency.19000(1)%
+      set pronoun it
+    end
+    %send% %ch% Searching the room, you find %string%! You take %pronoun%.
+    nop %ch.give_currency(19000, %token_amount%)%
+    * Random item is handled by the loot replacer.
+  end
+  set ch %ch.next_in_room%
+done
 return 0
 ~
 #19009

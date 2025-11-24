@@ -701,7 +701,7 @@ mammoth skeletal bony huge~
 a skeletal mammoth~
 A huge, bony skeletal mammoth stands over you.
 ~
-100 120 dejy G 5
+100 120 dejy GU 5
 0 0 0 5 -1 -1
 D
 The mammoth is no less enormous without its fur and hide.
@@ -713,7 +713,7 @@ mammoth skeletal warmammoth huge~
 a skeletal warmammoth~
 A huge skeletal warmammoth looms down on you.
 ~
-100 120 dejy G 5
+100 120 dejy GU 5
 0 0 0 5 -1 -1
 D
 This mammoth of a skeleton has been outfitted with fine iron armor.

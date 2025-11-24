@@ -59,9 +59,9 @@ P 2013
 S
 #1904
 Mountain Engineering~
-   Your engineers have learned to build stable buildings into the sides of the
-mountains. This unlocks multiple mountain buildings and also grants you the
-'tunnel' command.
+   Your engineers have learned to build stable buildings and farms into the
+sides of the mountains. This unlocks multiple mountain buildings and also
+grants you the 'tunnel' command.
 ~
 4 1 70 0 b
 K 2 5170
@@ -72,6 +72,7 @@ K 2 5202
 K 2 5203
 K 2 5204
 K 2 5205
+K 2 5222
 K 0 16
 P 2013
 P 1005

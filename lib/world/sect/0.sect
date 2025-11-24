@@ -3566,4 +3566,93 @@ but wonder what this small plot of land will yield in the weeks and months to
 come.
 ~
 S
+#95
+Terraced Mountain~
+Upon a Terraced Mountainside~
+'^' 37 jm 35 adnvx c
+C
+pick~
+D0
+/-_\~
+&y~
+D0
+/_-\~
+&y~
+E
+8 0 100.00 96
+E
+22 0 0.25 8
+I 6 3015 100.00 25  # FORAGE: red berries
+I 7 1206 8.33 125 p  # PICK: iridescent blue iris
+I 7 1202 100.00 125 p  # PICK: twig of redthorn
+I+ 0 70  # Ability: Find Herbs
+I 7 123 100.00 125 p  # PICK: small flower
+U
+0
+The area seems to settle as plants start to grow.~
+X
+mountainside terraced terraces around~
+   Clever engineers have transformed the steep and craggy mountainside into a
+series of stepped terraces, each of which has a curved margin and forms an
+eyecatching pattern in which no two are alike.
+~
+X
+peaks range distance~
+Above the terraces, mountain peaks loom large.
+~
+Z1 7
+S
+#96
+Seeded Terraces~
+On the Seeded Mountain Terrace~
+'^' 37 jm 35 ajvx k
+D0
+/&t-_&?\~
+&y~
+D0
+/&t_-&?\~
+&y~
+E
+1 0 100.00 97
+E
+9 0 20.00 97
+E
+16 0 100.00 95
+E
+19 0 100.00 95
+E
+22 0 0.25 8
+I 6 3015 100.00 25  # FORAGE: red berries
+X
+peaks range distance~
+Above the terraces, mountain peaks loom large.
+~
+X
+mountainside terraces seeded fields ground around~
+The terraced mountainside is covered in germinating crops.
+~
+Z1 7
+S
+#97
+Terrace Crop~
+A Terrace Crop~
+'^' 37 jm 35 jkvx k
+D0
+/&g??&y\~
+&y~
+E
+16 0 100.00 95
+E
+19 0 100.00 95
+E
+22 0 0.25 8
+U
+0
+The area seems to settle as plants start to grow.~
+X
+peaks range distance~
+Above the terraces, mountain peaks loom large.
+~
+Z1 7
+S
 $

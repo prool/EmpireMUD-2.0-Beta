@@ -34,7 +34,8 @@ D
    The old whisperer has a deep jade complexion, though she has smeared a light
 paste over her face and upper arms. Her violet cloth robes are stitched with
 gleaming silver, though the edges are frayed and torn. Her face bears a serene
-demeanor and her eyes never fix on a single point as she looks off.
+demeanor and her eyes never fix on a single point as she looks off. There's a
+glass water pipe tucked under her arm.
 ~
 F 15900
 T 15905
@@ -628,5 +629,115 @@ T 15902
 T 15900
 T 15911
 T 9621
+S
+#15912
+#n tender crabherd herd~
+the crabherd~
+#n is tending the crab pens.
+~
+20 50 bdqvI 0 3
+0 0 0 15 -1 -1
+D
+   This effervescent fellow has been stuck with the odious task of mucking out
+the crab pens.
+~
+M
+0
+$n pins $s nose.~
+M
+0
+$n mucks out one of the pens.~
+M
+0
+$n tosses a dead crab in the bin.~
+M
+0
+$n leans out of the pens in a futile search for fresh air.~
+M
+0
+You can almost see the stink lines over the crab pens.~
+M
+0
+Something skitters past you.~
+M
+0
+Something pinches your ankle.~
+M
+0
+The odor threatens to overpower you.~
+S
+#15913
+crab skittering~
+a skittering crab~
+A crab skitters around.
+~
+25 50 djloz cGU 1
+0 0 8 3 -1 -1
+D
+   The red-orange crab skitters around on four pairs of pointed legs, stopping
+from time to time to snip at something with its outsized claws.
+~
+I 0 15913 100.00 1  # BUTCHER: delectable crabmeat
+M
+6
+A crab is scuttling along sideways.~
+M
+6
+A crab is here, waving one claw.~
+M
+6
+A crab lurks nearby.~
+M
+6
+A crab is here, trying to dig a shallow pit.~
+M
+6
+A crab scuttles about.~
+M
+6
+A crab skitters around.~
+M
+6
+A crab darts over your foot.~
+M
+6
+A crab snaps at you.~
+S
+#15914
+crab skittering~
+a skittering crab~
+A crab skitters around.
+~
+25 50 bdjloz cGU 1
+0 0 8 3 -1 -1
+D
+   The red-orange crab skitters around on four pairs of pointed legs, stopping
+from time to time to snip at something with its outsized claws.
+~
+I 0 15913 100.00 1  # BUTCHER: delectable crabmeat
+M
+6
+A crab is scuttling along sideways.~
+M
+6
+A crab is here, waving one claw.~
+M
+6
+A crab lurks nearby.~
+M
+6
+A crab is here, trying to dig a shallow pit.~
+M
+6
+A crab scuttles about.~
+M
+6
+A crab skitters around.~
+M
+6
+A crab darts over your foot.~
+M
+6
+A crab snaps at you.~
 S
 $
