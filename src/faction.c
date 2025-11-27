@@ -778,7 +778,7 @@ void gain_reputation(char_data *ch, any_vnum vnum, int amount, bool is_kill, boo
 	// seems ok
 	old_val = pfd->value;
 	old_rep = pfd->rep;
-	SAFE_ADD(pfd->value, amount, MIN_REPUTATION, MAX_REPUTATION, FALSE);
+	SAFE_ADD(pfd->value, amount, min_rep, max_rep, FALSE);
 	
 	// detect new rep now
 	do {
