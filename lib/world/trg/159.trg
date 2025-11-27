@@ -760,6 +760,64 @@ while %cycle% <= 4
 done
 nop %self.remove_mob_flag(SENTINEL)%
 ~
+#15912
+Shipwreck Goblins: Learn a random hat~
+1 c 2 6
+L a 15908
+L a 15909
+L a 15910
+L a 15911
+L a 15919
+L o 54
+learn~
+set recipes 15908 15909 15910 15911 15919
+set count 5
+*
+if %actor.obj_target(%arg.argument1%)% != %self%
+  return 0
+  halt
+elseif !%actor.ability(54)%
+  %send% %actor% You require the Jewelry ability to learn these patterns.
+  halt
+end
+* pick at random until we have one the player doesn't know
+set list %recipes%
+set tot %count%
+set found 0
+while !%found% && %tot% > 0 && %list%
+  eval pos %%random.%tot%%%
+  * find pos in list
+  set new_list
+  set cur 0
+  while %pos% > 0
+    set cur %list.car%
+    set list %list.cdr%
+    if %pos% > 1
+      set new_list %new_list% %cur%
+    else
+      set new_list %new_list% %list%
+    end
+    eval pos %pos% - 1
+  done
+  if %cur% && !%actor.learned(%cur%)%
+    * found 1 to learn
+    set found %cur%
+  else
+    * just keep trying
+    eval tot %tot% - 1
+    set list %new_list%
+  end
+done
+* did we find one to learn?
+if %found%
+  nop %actor.add_learned(%found%)%
+  %send% %actor% You study @%self% and learn to make %_obj.name(%found%)%!
+  %echoaround% %actor% ~%actor% studies @%self% and learns a new craft!
+  %purge% %self%
+else
+  %send% %actor% There's nothing left for you to learn from @%self%.
+end
+~
 #15915
 Shipwrecked Goblins: Pay to leave~
 2 v 0 2
@@ -769,5 +827,130 @@ L t 15915
 if %questvnum% == 15915
   %adventurecomplete%
 end
+~
+#15922
+Shipwrecked Goblins: Buy haberdasher services~
+1 n 100 2
+L b 15922
+L f 15923
+~
+set clothes_list 15923 15924 15925 15926 15927 15928 15929 15930 15931 15932 15933 15934
+wait 1
+set actor %self.carried_by%
+if !%actor%
+  %purge% %self%
+  halt
+end
+* check if we already have one?
+if %actor.has_companion(15922)%
+  %send% %actor% You already have a goblin haberdasher companion; buying another won't help.
+  %send% %actor% The wavewhisper shouts, 'No refunds!'
+  %purge% %self%
+  halt
+end
+* add haberdasher
+nop %actor.add_companion(15922)%
+%mod% %actor% companion 15922
+%send% %actor% Your haberdasher arrives. He is now your companion and may be re-summoned later with the companion command.
+set mob %self.room.people%
+if %mob.vnum% == 15922 && %mob.leader% == %actor%
+  remote clothes_list %mob.id%
+  %force% %mob% haberdash
+end
+%purge% %self%
+~
+#15923
+Shipwrecked Goblins: Haberdash command~
+0 ct 0 12
+L c 15923
+L c 15924
+L c 15925
+L c 15926
+L c 15927
+L c 15928
+L c 15929
+L c 15930
+L c 15931
+L c 15932
+L c 15933
+L c 15934
+haberdash~
+set ch %actor.companion%
+set clothes_list %self.var(clothes_list)%
+if %actor% != %self%
+  * not me
+  return 0
+  halt
+elseif !%ch% || %ch.is_npc% || %ch.room% != %self.room%
+  * gone
+  halt
+elseif %ch.carrying% >= %ch.maxcarrying%
+  * full inventory
+  halt
+elseif !%clothes_list%
+  * done!
+  say Done with this job.
+  nop %ch.remove_companion(%self.vnum%)%
+  %purge% %sefl%
+  halt
+elseif %timestamp% - %self.var(last_time,0)% < 43200
+  * too soon
+  halt
+end
+* count remaining
+set temp %clothes_list%
+set count 0
+while %temp%
+  set temp %temp.cdr%
+  eval count %count% + 1
+done
+* random item
+set temp %clothes_list%
+eval pos %%random.%count%%%
+set clothes_list
+set found 0
+while %pos% > 0
+  set this %temp.car%
+  set temp %temp.cdr%
+  if %pos% == 1
+    set found %this%
+  else
+    set clothes_list %clothes_list% %this%
+  end
+  eval pos %pos% - 1
+done
+set clothes_list %clothes_list% %temp%
+remote clothes_list %self.id%
+* ok?
+if !%found%
+  say Having trouble making new clothes.
+  halt
+end
+* ok!
+%load% obj %found% %ch% inv
+set obj %ch.inventory%
+if %obj.vnum% == %found%
+  * success!
+  %send% %ch% ~%self% finishes making @%obj% and gives them to you!
+  %echoaround% %ch% ~%self% finishes making @%obj% and gives them to ~%ch%.
+  set last_time %timestamp%
+  remote last_time %self.id%
+end
+~
+#15924
+Shipwrecked Goblins: Haberdasher random check~
+0 bt 5 1
+L f 15923
+~
+* Periodically tries to haberdash
+haberdash
+~
+#15925
+Shipwrecked Goblins: Haberdasher fight and flight~
+0 kt 100 0
+~
+wait 1
+%echo% ~%self% flees for ^%self% life!
+%purge% %self%
 ~
 $

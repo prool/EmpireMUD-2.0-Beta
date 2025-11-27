@@ -109,7 +109,9 @@ dg_affect %actor% DEXTERITY -1 15
 ~
 #9506
 Combat: Net immobilize (for attack 38 net lash)~
-0 k 12 1
+0 k 12 3
+L b 9506
+L w 9506
 L A 38
 ~
 if !%hit% || %actor.aff_flagged(IMMUNE-PHYSICAL-DEBUFFS)% || %self.aff_flagged(DISARMED)%
@@ -124,6 +126,37 @@ if %actor.affect(9506)%
   * already on me
   halt
 end
-dg_affect %actor% IMMOBILIZED on 20
+dg_affect #9506 @%actor% %actor% IMMOBILIZED on 20
+%load% mob 9506
+~
+#9507
+Net immobilize cut free helper~
+0 c 0 2
+L f 9506
+L w 9506
+cut~
+if !%actor.affect(9506)%
+  return 0
+  halt
+end
+if !%arg%
+  %send% %actor% Cut what?
+  return 1
+  halt
+elseif %arg% != net && %arg% != free
+  %send% %actor% You can't cut that right now.
+  return 1
+  halt
+end
+set knife %actor.tool(knife)%
+if !%knife%
+  %send% %actor% You need a knife to cut yourself free.
+  return 1
+  halt
+end
+* looks ok
+dg_affect #9506 %actor% off silent
+%send% %actor% You use @%knife% to cut yourself free of the net.
+%echoaround% %actor% ~%actor% uses @%knife% to cut *%person%self free of the net.
 ~
 $
