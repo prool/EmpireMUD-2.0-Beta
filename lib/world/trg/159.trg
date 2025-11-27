@@ -852,6 +852,7 @@ end
 nop %actor.add_companion(15922)%
 %mod% %actor% companion 15922
 %send% %actor% Your haberdasher arrives. He is now your companion and may be re-summoned later with the companion command.
+%echoaround% %actor% |%actor% haberdasher arrives.
 set mob %self.room.people%
 if %mob.vnum% == 15922 && %mob.leader% == %actor%
   remote clothes_list %mob.id%
