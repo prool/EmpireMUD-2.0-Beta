@@ -489,7 +489,7 @@ switch %self.vnum%
 done
 ~
 #15906
-Shipwrecked Goblin: Another trap~
+Shipwrecked Goblins: Another trap~
 1 n 100 1
 L b 15900
 ~
@@ -528,7 +528,7 @@ if %room.distance(%start%)% < 10
 end
 ~
 #15908
-Goblin Shipwreck: Trap damage~
+Shipwrecked Goblins: Trap damage~
 1 n 100 0
 ~
 wait 0
@@ -761,7 +761,7 @@ done
 nop %self.remove_mob_flag(SENTINEL)%
 ~
 #15912
-Shipwreck Goblins: Learn a random hat~
+Shipwrecked Goblins: Learn a random hat~
 1 c 2 6
 L a 15908
 L a 15909
