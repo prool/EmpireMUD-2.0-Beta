@@ -242,6 +242,7 @@ S
 spice~
 6 a
 0 6183 0 0
+R 6193
 T0
 spices~
 S
@@ -249,6 +250,7 @@ S
 herb~
 6 a
 0 6184 0 0
+R 6193
 T0
 herbs~
 S
@@ -263,8 +265,6 @@ S
 herb or spice~
 6 a
 0 -1 0 0
-R 6183
-R 6184
 T0
 herbs or spices~
 S

@@ -826,6 +826,88 @@ L t 15915
 ~
 if %questvnum% == 15915
   %adventurecomplete%
+  * also shut off aggro flags
+  set vnum 15904
+  while %vnum% <= 15910
+    set mob %instance.mob(%vnum%)%
+    if %mob%
+      nop %mob.remove_mob_flag(AGGR)%
+    end
+    eval vnum %vnum% + 1
+  done
+end
+~
+#15916
+Shipwrecked Goblins: Mob quest finish speech~
+0 v 0 5
+L b 15901
+L b 15902
+L b 15903
+L t 15916
+L t 15917
+~
+if %questvnum% == 15916
+  * goblin trinkets
+  wait 1
+  switch %self.vnum%
+    case 15901
+      * wavewhisperer
+      say This a big old treasure.
+      wait 2 s
+      say Where you get this? Grand greatmother had one like this.
+      wait 2 s
+      say Not be thinking any of these were left.
+      wait 2 s
+      say You human seem all right.
+    break
+    case 15902
+      * crabherd
+      say Not even believing you have these!
+      wait 2 s
+      say Elders going to be real surprised.
+      wait 2 s
+      say Good surprise this time, not like when we landed.
+    break
+    case 15903
+      * raidscribe
+      say I had some like this as a little boy.
+      wait 2 s
+      say I'm sure you only had these trinkets because you looted them from one of our ruins.
+      wait 2 s
+      say Nevertheless, that you'd return them to us. You have my thanks.
+    break
+  done
+elseif %questvnum% == 15917
+  * jade tear
+  wait 1
+  switch %self.vnum%
+    case 15901
+      * wavewhisperer
+      say Never before seen one like this.
+      wait 2 s
+      say Where you get this? Nobody has this!
+      wait 2 s
+      say You must be some kind of seeker to have this.
+    break
+    case 15902
+      * crabherd
+      say Jade!
+      wait 2 s
+      say Not expecting to find any jade.
+      wait 2 s
+      say Everything's coming up crabherd!
+    break
+    case 15903
+      * raidscribe
+      say Oh, my.
+      wait 2 s
+      say Oh, my, indeed. This is extraordinary.
+      wait 2 s
+      say You can almost taste the ancestors in this rough work. Oh, my.
+      wait 2 s
+      say You've made a rare friend here, human.
+    break
+  done
 end
 ~
 #15922
