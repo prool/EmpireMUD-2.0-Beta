@@ -458,6 +458,7 @@ void clear_faction(faction_data *fct) {
 	memset((char *) fct, 0, sizeof(faction_data));
 	
 	FCT_VNUM(fct) = NOTHING;
+	FCT_REP_LOSS_PER_KILL(fct) = default_rep_per_kill;
 }
 
 
@@ -573,6 +574,16 @@ void parse_faction(FILE *fl, any_vnum vnum) {
 			exit(1);
 		}
 		switch (*line) {
+			case 'A': {	// amount of reputation lost
+				if (sscanf(line, "A %d", &int_in[0]) != 1) {
+					log("SYSERR: Format error in line A of %s", error);
+					exit(1);
+				}
+				
+				FCT_REP_LOSS_PER_KILL(fct) = int_in[0];
+	
+				break;
+			}
 			case 'R': {	// relations
 				if (sscanf(line, "R %d %s", &int_in[0], str_in) != 2) {
 					log("SYSERR: Format error in line R of %s", error);
@@ -653,6 +664,11 @@ void write_faction_to_file(FILE *fl, faction_data *fct) {
 	
 	// 4. rep
 	fprintf(fl, "%d %d %d\n", FCT_MIN_REP(fct), FCT_MAX_REP(fct), FCT_STARTING_REP(fct));
+	
+	// 'A': amount of rep lost
+	if (FCT_REP_LOSS_PER_KILL(fct) != default_rep_per_kill) {
+		fprintf(fl, "A %d\n", FCT_REP_LOSS_PER_KILL(fct));
+	}
 	
 	// 'R': relations
 	HASH_ITER(hh, FCT_RELATIONS(fct), rel, next_rel) {
@@ -1375,6 +1391,10 @@ void do_stat_faction(char_data *ch, faction_data *fct) {
 	sprintbit(FCT_FLAGS(fct), faction_flags, part, TRUE);
 	build_page_display(ch, "Flags: \tg%s\t0", part);
 	
+	if (FACTION_FLAGGED(fct, FCT_REP_FROM_KILLS)) {
+		build_page_display(ch, "Reputation per kill: \tc%d\t0", FCT_REP_LOSS_PER_KILL(fct));
+	}
+	
 	build_page_display_str(ch, "Relations:");
 	show_faction_relation_display(ch, FCT_RELATIONS(fct), FALSE);
 	
@@ -1431,6 +1451,8 @@ void olc_show_faction(char_data *ch) {
 	build_page_display(ch, "<%sminreputation\t0> %s", OLC_LABEL_VAL(FCT_MIN_REP(fct), default_min_rep), get_reputation_name(FCT_MIN_REP(fct)));
 	build_page_display(ch, "<%smaxreputation\t0> %s", OLC_LABEL_VAL(FCT_MAX_REP(fct), default_max_rep), get_reputation_name(FCT_MAX_REP(fct)));
 	build_page_display(ch, "<%sstartingreuptation\t0> %s", OLC_LABEL_VAL(FCT_STARTING_REP(fct), default_starting_rep), get_reputation_name(FCT_STARTING_REP(fct)));
+	
+	build_page_display(ch, "<%srepperkill\t0> %d%s", OLC_LABEL_VAL(FCT_REP_LOSS_PER_KILL(fct), default_rep_per_kill), FCT_REP_LOSS_PER_KILL(fct), (FACTION_FLAGGED(fct, FCT_REP_FROM_KILLS) ? "" : " (not used)"));
 	
 	build_page_display(ch, "Relationships: <%srelation\t0>, <%smatchrelations\t0>", OLC_LABEL_PTR(FCT_RELATIONS(fct)), OLC_LABEL_PTR(FCT_RELATIONS(fct)));
 	if (FCT_RELATIONS(fct)) {
@@ -1588,6 +1610,17 @@ OLC_MODULE(fedit_minreputation) {
 OLC_MODULE(fedit_name) {
 	faction_data *fct = GET_OLC_FACTION(ch->desc);
 	olc_process_string(ch, argument, "name", &FCT_NAME(fct));
+}
+
+
+
+OLC_MODULE(fedit_rep_per_kill) {
+	faction_data *fct = GET_OLC_FACTION(ch->desc);
+	
+	FCT_REP_LOSS_PER_KILL(fct) = olc_process_number(ch, argument, "reputation per kill", "repperkill", 0, MAX_REPUTATION, FCT_REP_LOSS_PER_KILL(fct));
+	if (!FACTION_FLAGGED(fct, FCT_REP_FROM_KILLS)) {
+		msg_to_char(ch, "Note: This will have no effect unless you add the REP-FROM-KILLS flag.\r\n");
+	}
 }
 
 

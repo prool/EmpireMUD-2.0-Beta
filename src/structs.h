@@ -5885,6 +5885,9 @@ struct faction_data {
 	int starting_rep;	// REP_ initial reputation for players
 	struct faction_relation *relations;	// hash table
 	
+	// optional traits
+	int rep_loss_per_kill;	// amount of change when killing a mob of this faction
+	
 	// lists
 	UT_hash_handle hh;	// faction_table hash handle
 	UT_hash_handle sorted_hh;	// sorted_factions hash handle

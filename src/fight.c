@@ -1387,7 +1387,7 @@ obj_data *die(char_data *ch, char_data *killer) {
 			// if in same room, give faction rep
 			if (IN_ROOM(player) == IN_ROOM(ch)) {
 				if (MOB_FACTION(ch)) {
-					gain_reputation(player, FCT_VNUM(MOB_FACTION(ch)), -1, TRUE, TRUE);
+					gain_reputation(player, FCT_VNUM(MOB_FACTION(ch)), -1 * FCT_REP_LOSS_PER_KILL(MOB_FACTION(ch)), TRUE, TRUE);
 				}
 			}
 		}
