@@ -944,7 +944,7 @@ end
 ~
 #15923
 Shipwrecked Goblins: Haberdash command~
-0 ct 0 12
+0 ct 0 13
 L c 15923
 L c 15924
 L c 15925
@@ -957,6 +957,7 @@ L c 15931
 L c 15932
 L c 15933
 L c 15934
+L c 15935
 haberdash~
 set ch %actor.companion%
 set clothes_list %self.var(clothes_list)%
@@ -972,7 +973,12 @@ elseif %ch.carrying% >= %ch.maxcarrying%
   halt
 elseif !%clothes_list%
   * done!
-  say Done with this job.
+  say Done with this job. But one last outfit for my best customer...
+  %load% obj 15935 %ch% inv
+  set obj %ch.inventory%
+  if %obj.vnum% == 15935
+    %echo% ~%actor% gives you ~%ch% @%obj%.
+  end
   nop %ch.remove_companion(%self.vnum%)%
   %purge% %sefl%
   halt
