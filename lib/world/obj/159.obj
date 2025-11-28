@@ -331,7 +331,7 @@ a tiny dirigible, all the more so because it floats.
 dirigible, a vehicle held aloft by a giant leather balloon and the enchantment
 from this trinket.
 ~
-3 0 a 0 0 1
+3 0 a 0 0 2
 0 0 0
 12 0
 C
@@ -706,5 +706,29 @@ You somehow wrap yourself in the deadwright shrouds.~
 M
 9
 $n somehow wraps $mself in $p.~
+S
+#15935
+finery haberdasher set~
+haberdasher finery~
+A fine haberdasher set is lying here.~
+   These fine clothes were clearly made by a skilled haberdasher with nimble
+fingers. They are the height of fashion -- or perhaps beyond it.
+~
+2 p ad 0 0 20
+0 0 0
+11 0
+A
+5 1 0
+C
+1 1
+M
+12
+$n the haberdasher stands here in $s finery.~
+M
+8
+You spiff yourself up and put on your finest clothes.~
+M
+9
+$n puts on $s $p and looks quite fine.~
 S
 $
