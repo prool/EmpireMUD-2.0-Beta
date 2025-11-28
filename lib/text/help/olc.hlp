@@ -5056,6 +5056,18 @@ rep with related factions when at these limits.
 
 See also: OLC FACTIONS, OLC LEVELS, REPUTATIONS
 #d
+"FEDIT REPPERKILL" "FEDIT REP PER KILL" "REP PER KILL" "REPUTATION PER KILL" "FEDIT REP-FROM-KILLS" REP-FROM-KILLS
+
+Usage:  .repperkill <number>
+        .flags add rep-from-kills
+
+By adding the REP-FROM-KILLS flag and setting the repperkill (reputation per
+kill) property, you can control how many reputation points are lost from
+killing a mob of this faction, or how many are gained for a rival faction if
+you kill a member of this faction.
+
+See also: OLC FACTIONS, FEDIT FLAGS, REPUTATIONS
+#d
 "FEDIT RELATION" "FEDIT RELATIONS" "FEDIT RELATIONSHIPS" "RELATIONSHIP FLAGS"
 
 Usage:  .relation <name/vnum> flags [which flags]

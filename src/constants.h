@@ -482,6 +482,7 @@ extern const struct gen_craft_data_t gen_craft_data[];
 extern const int base_hit_chance;
 extern const int base_player_pools[NUM_POOLS];
 extern const char *book_name_list[];
+extern const int default_rep_per_kill;
 extern struct file_lookup_struct file_lookup[];
 extern const double hit_per_dex;
 extern const char *pk_modes[];

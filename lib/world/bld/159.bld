@@ -45,6 +45,12 @@ E
 muck~
 You'd rather not get too close.
 ~
+M
+15914 100.00 0
+M
+15914 20.00 0
+M
+15913 20.00 0
 S
 #15903
 Scribe's Tent~
@@ -92,5 +98,64 @@ Best step carefully.
 R
 6790 12 1 0
 T 15907
+S
+#15912
+Crab Pens~
+The Crab Pens~
+&o|CC|~
+8 0 bdp 0
+0 0 0 15912
+C
+inventory, retrieve, store~
+E
+pens building around~
+   The pens already show signs of repeated repair -- along with many tiny
+clawmarks near the ground. There's muck in here you don't want to step in, but
+all this trouble will be worthwhile when you bite into those succulent crabby
+patties.
+~
+I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
+I 31 15913 6.00 180 p  # PRODUCTION: delectable crabmeat
+M
+15914 90.00 0
+M
+15913 20.00 0
+R
+1002 1 5 0
+R
+6402 1 1 0
+S
+#15917
+Sharkfold~
+A Small Sharkfold~
+&w(&?~~&w)~
+10 0 bdnDQ 0
+0 0 0 15918
+E
+sharkfold fold building around water~
+   A stone enclosure sits just off the land, making it possible to block
+swimming animals in for farming, training, or any other strange uses that might
+come to mind.
+~
+F
+w
+I 29 5010 100.00 1 r  # RUINS-TO-BLD: Flooded Ruins
+I 31 9019 12.00 80 p  # PRODUCTION: slab of shark meat
+I 31 1354 4.00 20 p  # PRODUCTION: shark skin
+I+ 7 11  # Depletion: secondary
+R
+6050 2 1 0
+R
+6000 1 1 0
+S
+#15918
+Aboard the Patchwork Dirigible~
+Aboard the Patchwork Dirigible~
+&0[  ]~
+1 0 abR 0
+0 0 0 -1
+D
+You are standing in the basket of the dirigible, high above the ground.
+~
 S
 $

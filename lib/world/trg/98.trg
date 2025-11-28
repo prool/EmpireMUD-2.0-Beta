@@ -1,6 +1,6 @@
 #9800
 Generic No Sacrifice~
-1 h 100
+1 h 100 0
 ~
 if %command% == sacrifice
   %send% %actor% @%self% cannot be sacrificed.
@@ -11,7 +11,7 @@ return 1
 ~
 #9801
 Read looks at target~
-1 c 6
+1 c 6 0
 read~
 if %actor.obj_target(%arg%)% == %self%
   %force% %actor% look %arg%
@@ -22,14 +22,14 @@ end
 ~
 #9802
 Give rejection~
-0 j 100
+0 j 100 0
 ~
 %send% %actor% You can't give items to ~%self%.
 return 0
 ~
 #9803
 Companion dies permanently~
-0 f 100
+0 ft 100 0
 ~
 * This script deletes a companion's entry when it dies.
 * If the companion comes from an ability (like Bodyguard) the player will
@@ -41,7 +41,7 @@ end
 ~
 #9804
 Cancel follow on load (for summons)~
-0 n 100
+0 n 100 0
 ~
 * Summons enter the game following (silentyl). This cancels that.
 if %self.leader%
@@ -51,7 +51,7 @@ detach 9804 %self.id%
 ~
 #9805
 Summoned mob is charmed~
-0 n 100
+0 n 100 0
 ~
 * Adds a CHARMED flag to the mob
 if %self.leader%
@@ -61,7 +61,7 @@ detach 9805 %self.id%
 ~
 #9806
 Detect stop command (objects)~
-1 c 7
+1 c 7 0
 stop~
 * Detects that a player has typed 'stop' for the purpose of a script.
 * You must intialize the player's 'stop_command' variable to 0 (use set and remote)
@@ -111,7 +111,7 @@ end
 ~
 #9807
 No pickpocket while unkillable~
-0 c 0
+0 c 0 0
 pickpocket~
 if !%arg% || %actor.char_target(%arg.argument1%)% != %self%
   return 0
@@ -126,7 +126,7 @@ end
 ~
 #9808
 Detect stop command (room)~
-2 c 0
+2 c 0 0
 stop~
 * Detects that a player has typed 'stop' for the purpose of a script.
 * You must intialize the player's 'stop_command' variable to 0 (use set and remote)
@@ -176,7 +176,7 @@ end
 ~
 #9850
 Equip imm-only~
-1 j 0
+1 j 0 0
 ~
 if !%actor.is_immortal%
   %send% %actor% You can't wear ~%self%.
@@ -187,7 +187,7 @@ end
 ~
 #9851
 Obj rescale on load~
-1 n 100
+1 n 100 0
 ~
 %scale% %self% %self.level%
 ~

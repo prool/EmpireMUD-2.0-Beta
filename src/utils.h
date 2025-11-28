@@ -725,7 +725,9 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 #define FCT_MIN_REP(fct)  ((fct)->min_rep)
 #define FCT_NAME(fct)  ((fct)->name)
 #define FCT_RELATIONS(fct)  ((fct)->relations)
+#define FCT_REP_LOSS_PER_KILL(fct)  ((fct)->rep_loss_per_kill)
 #define FCT_STARTING_REP(fct)  ((fct)->starting_rep)
+
 
 // helpers
 #define FACTION_FLAGGED(fct, flag)  IS_SET(FCT_FLAGS(fct), (flag))

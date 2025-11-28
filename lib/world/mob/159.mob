@@ -43,6 +43,7 @@ T 15900
 T 15901
 T 15904
 T 15909
+T 15916
 S
 #15902
 goblin crabherd crab-herd herd~
@@ -63,6 +64,7 @@ T 15900
 T 15901
 T 15904
 T 15909
+T 15916
 S
 #15903
 goblin raidscribe raid-scribe scribe~
@@ -84,6 +86,7 @@ T 15900
 T 15901
 T 15904
 T 15909
+T 15916
 S
 #15904
 goblin ropesnarl rope-snarl snarl !#n~
@@ -739,5 +742,110 @@ A crab darts over your foot.~
 M
 6
 A crab snaps at you.~
+S
+#15915
+deck-rat deckrat rat privateer~
+a deck-rat privateer~
+A deck-rat privateer sniffs the air in its little jacket.
+~
+1 1 bdo n 3
+0 0 11 9 -1 -1
+D
+   The scruffy little rat is decked out in its own little captain's jacket and
+tricorne. It sits on its hind legs, sniffing the air with an upturned nose that
+gives it an almost human erudition.
+~
+M
+0
+$n cleans $s whiskers.~
+M
+0
+$n takes off $s hat and brushes $s head with one paw.~
+M
+0
+$n squeaks out an order.~
+M
+0
+$n squeaks.~
+M
+0
+$n lets out a little squeak.~
+M
+0
+$n nibbles an olive.~
+M
+0
+$n sniffs at your leg.~
+S
+#15916
+manatee trained~
+a trained manatee~
+A trained manatee rolls around on the ground.
+~
+100 125 bdejl 0 4
+0 0 6 9 -1 -1
+D
+   This bulky gray-green creature has tiny, sad eyes, which seem to watch you
+rather intently. It smells of salt and spoiled fish, particularly when it opens
+its mouth. It bears saddle marks and doesn't flee from your presence, so its
+seems as if it's been trained for riding. Imagine how good it look if you put
+some armor on it!
+~
+I 0 3012 100.00 4  # BUTCHER: fillet of raw meat
+I 1 1357 100.00 2  # SKIN: large piece of leather
+I 3 15917 100.00 1  # BARDE: manatee o' war
+M
+15
+A trained manatee floats idly just below the surface.~
+S
+#15917
+manatee o' war~
+a manatee o' war~
+A manatee o' war stands on makeshift legs.
+~
+100 125 bdej L 4
+0 0 6 9 -1 -1
+D
+   Someone has outfitted this trained manatee with articulated legs made from
+bits of metal and rough wood. Still stranger, the creature has learned to
+operate them and now functions on both land and see as a powerful mount.
+~
+I 0 3012 100.00 4  # BUTCHER: fillet of raw meat
+I 1 1357 100.00 2  # SKIN: large piece of leather
+M
+15
+A manatee o' war lurks just beneath the surface.~
+S
+#15918
+#n sharkherd herd~
+#n the sharkherd~
+The sharkherd, #n, watches from a small raft.
+~
+20 40 bdqI 0 3
+1 0 3 5 -1 -1
+D
+   The sharkherd is a small, green fellow, seated on a raft. Though he seems to
+be a goblin, he has taken a human name and is dutifully tending the empire's
+sea creatures.
+~
+I 4 3812 100.00 1  # LOOT: fillet of grilled fish
+S
+#15922
+haberdasher goblin~
+a goblin haberdasher~
+A goblin haberdasher stands here in his finery.
+~
+0 175 bdovG cm 3
+1 0 0 4 -1 -1
+D
+   This little goblin is bedazzled with gleaming sequins that cover his suit,
+his hat, his shoes, and even his gloves. He drags with him a kit full of
+threads, buttons, and cloths and he works industriously to turn them into fine
+goblincraft clothing.
+~
+T 9803
+T 15925
+T 15924
+T 15923
 S
 $

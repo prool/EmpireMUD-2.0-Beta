@@ -276,6 +276,7 @@ OLC_MODULE(fedit_maxreputation);
 OLC_MODULE(fedit_minreputation);
 OLC_MODULE(fedit_name);
 OLC_MODULE(fedit_relation);
+OLC_MODULE(fedit_rep_per_kill);
 OLC_MODULE(fedit_startingreputation);
 
 // generic modules
@@ -855,6 +856,7 @@ const struct olc_command_data olc_data[] = {
 	{ "minreputation", fedit_minreputation, OLC_FACTION, OLC_CF_EDITOR },
 	{ "name", fedit_name, OLC_FACTION, OLC_CF_EDITOR },
 	{ "relationship", fedit_relation, OLC_FACTION, OLC_CF_EDITOR },
+	{ "repperkill", fedit_rep_per_kill, OLC_FACTION, OLC_CF_EDITOR },
 	{ "startingreputation", fedit_startingreputation, OLC_FACTION, OLC_CF_EDITOR },
 	
 	// generic commands

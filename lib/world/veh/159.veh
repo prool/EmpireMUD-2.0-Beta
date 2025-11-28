@@ -77,4 +77,45 @@ D
 P
 2
 S
+#15918
+dirigible patchwork~
+the patchwork dirigible~
+A patchwork dirigible floats overhead.~
+   Though it looks like it's held together by a lot of leather and a little
+hope, the dirigible actually seems to be floating quite well. A rope ladder
+descends from the side of the basket.
+~
+&t(&g&u-&o-&0&T)~
+dimqt 27 32 200 0 0 1 0 0 0 -1 0
+B0
+&t(&T)~
+B1
+&tO~
+C
+75 200
+D
+15918 0 0
+K
+3
+$n grabs the rope ladder and climbs up into $V.~
+K
+2
+$n climbs into $V.~
+K
+4
+$n descends the rope ladder out of $V.~
+K
+5
+$n climbs down the rope ladder out of $V.~
+P
+1
+R
+15915 1 5 0
+R
+15916 1 5 0
+R
+15917 1 5 0
+R
+15918 1 5 0
+S
 $
