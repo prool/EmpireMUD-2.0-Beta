@@ -121,6 +121,36 @@ R
 R
 4 5122 0
 S
+#15906
+tent goblin mess~
+a goblin mess tent~
+A bundled up goblin mess tent is lying here.~
+   It's a collapsed goblin mess tent, or at least, part of one. It's going to
+require some additional resources to set it up. You can still smell the aroma
+of smoked meat on it.
+
+Usage: build goblin mess tent
+Items stored here: cannery, granary, larder, root cellar, smokehouse
+~
+3 e a 0 0 7
+0 0 0
+7 0
+S
+#15907
+tent goblin construction~
+a goblin construction tent~
+A goblin construction tent lies bundled on the ground.~
+   The tent is tightly bundled and rather unwieldy. It will require more
+materials to set it up properly as it's quite large when finished. There's some
+sawdust on it; these tents are used to store large amounts of raw material.
+
+Usage: build goblin construction tent
+Items stored here: gravel pit, lumber yard, utility shed
+~
+3 e a 0 0 8
+0 0 0
+7 0
+S
 #15908
 hat raider's raiders hacksilver-plated plated silver~
 a hacksilver-plated raider's hat~
@@ -730,5 +760,55 @@ You spiff yourself up and put on your finest clothes.~
 M
 9
 $n puts on $s $p and looks quite fine.~
+S
+#15936
+fish frenzy stick~
+frenzy fish on a stick~
+There's a stick with some frenzy fish on the ground.~
+   This heavily-seasoned fish smells like it's past its prime. Though it
+probably wasn't very appetizing in the first place, goblin raiders swear by
+this stuff.
+~
+6 gE a 0 0 13
+12 0 0
+7 336
+B
+q
+C
+1 1
+O+ 1 6223
+R
+4 5619 0
+R
+4 5119 0
+S
+#15937
+recipe frenzy fish~
+the frenzy fish recipe~
+The frenzy fish recipe is on the ground.~
+   The recipe is scribbled in charcoal on sealskin, so it's quite delicate
+and you'll need to commit it to memory. It shows a pair of fish on a stick,
+coated judiciously in spices.
+   'Learn' this recipe and it will enable you to cook 'vrenzy fish', a new buff
+food that briefly grants you haste.
+~
+7 0 a 0 0 1
+15936 0 0
+0 0
+S
+#15938
+tent hoard goblin~
+a goblin hoard tent~
+A goblin hoard tent is lying here.~
+   This bundled mass of leather and sticks is a goblin hoard tent. Setting it
+up will require more resources, but it's made to shelter all manner of pilfered
+treasures and gems.
+
+Usage: build goblin hoard tent
+Items stored here: cabinet of curiosities, sorcery tower
+~
+3 e a 0 0 8
+0 0 0
+7 0
 S
 $

@@ -693,7 +693,7 @@ end
 ~
 #15911
 Shipwrecked Goblins: Deadwright resurrection~
-0 b 20 8
+0 b 33 8
 L b 15904
 L b 15905
 L b 15906
