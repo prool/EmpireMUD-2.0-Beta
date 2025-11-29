@@ -938,7 +938,7 @@ nop %actor.add_companion(15922)%
 set mob %self.room.people%
 if %mob.vnum% == 15922 && %mob.leader% == %actor%
   remote clothes_list %mob.id%
-  %force% %mob% haberdash
+  %force% %mob% !haberdash
 end
 %purge% %self%
 ~
@@ -958,7 +958,7 @@ L c 15932
 L c 15933
 L c 15934
 L c 15935
-haberdash~
+!haberdash~
 set ch %actor.companion%
 set clothes_list %self.var(clothes_list)%
 if %actor% != %self%
@@ -980,7 +980,7 @@ elseif !%clothes_list%
     %echo% ~%actor% gives you ~%ch% @%obj%.
   end
   nop %ch.remove_companion(%self.vnum%)%
-  %purge% %sefl%
+  %purge% %self%
   halt
 elseif %timestamp% - %self.var(last_time,0)% < 43200
   * too soon
@@ -1032,7 +1032,7 @@ Shipwrecked Goblins: Haberdasher random check~
 L f 15923
 ~
 * Periodically tries to haberdash
-haberdash
+!haberdash
 ~
 #15925
 Shipwrecked Goblins: Haberdasher fight and flight~
