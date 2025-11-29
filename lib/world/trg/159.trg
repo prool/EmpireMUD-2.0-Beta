@@ -977,7 +977,7 @@ elseif !%clothes_list%
   %load% obj 15935 %ch% inv
   set obj %ch.inventory%
   if %obj.vnum% == 15935
-    %echo% ~%actor% gives you ~%ch% @%obj%.
+    %echo% ~%actor% gives ~%ch% @%obj%.
   end
   nop %ch.remove_companion(%self.vnum%)%
   %purge% %self%
