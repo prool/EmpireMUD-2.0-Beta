@@ -295,7 +295,7 @@ a manatee aquatic mount whistle~
 An aquatic mount whistle for a manatee is dangling here.~
    This little reed whistle bears a rough cut in its upper surface to give it
 just the right pitch to call a manatee! This aquatic mount can only move on
-water with it, but it will ferry you from island to island.
+water, but it will ferry you from island to island.
    Type 'use whistle' to summon the manatee.
 ~
 3 ep a 0 0 8
@@ -307,7 +307,7 @@ S
 schematic sharkfold~
 the sharkfold schematic~
 The sharkfold schematic is on the ground.~
-   The schematic is writting in charcoal on sealskin, so it's quite delicate
+   The schematic is sketched in charcoal on sealskin, so it's quite delicate
 and you'll need to commit it to memory. It depicts a round structure,
 mostly-submerged, forming a pen for sharks and other sea life.
    'Learn' this schematic and it will enable you to build a 'sharkfold', a new
@@ -365,7 +365,7 @@ S
 schematic sea barricade~
 the sea barricade schematic~
 The sea barricade schematic is on the ground.~
-   The schematic is writting in charcoal on sealskin, so it's quite delicate
+   The schematic is sketched in charcoal on sealskin, so it's quite delicate
 and you'll need to commit it to memory. It depicts a rather unique way of using
 debris and weights to build off-shore barricades that function like walls.
    'Learn' this schematic and it will enable you to build a 'sea barricade', a
@@ -381,7 +381,7 @@ S
 schematic crab pens~
 the crab pens schematic~
 The crab pens schematic is on the ground.~
-   The schematic is writting in charcoal on sealskin, so it's quite delicate
+   The schematic is sketched in charcoal on sealskin, so it's quite delicate
 and you'll need to commit it to memory. It depicts a simple idea: building pens
 to farm crabs.
    'Learn' this schematic and it will enable you to build a 'crab pens', new
@@ -609,10 +609,10 @@ M
 $n slips into $p.~
 S
 #15931
-raiments set banner-lugger bannerlugger lugger~
-banner-lugger raiments~
-A set of banner-lugger raiments are lying here.~
-   These glorious raiments are finely stitched by tiny hands. This sort of
+raiment set banner-lugger bannerlugger lugger~
+banner-lugger raiment~
+A set of banner-lugger raiment is lying here.~
+   This glorious raiment is finely stitched by tiny hands. This sort of
 outfit is traditionally worn by the goblin who drags the group's banner through
 the melee during a siege.
 ~
@@ -625,18 +625,18 @@ C
 1 1
 M
 12
-Banner-lugger $n stands proudly in $s raiments.~
+Banner-lugger $n stands proudly in $s raiment.~
 M
 8
-You proudly don the banner-lugger raiments.~
+You proudly don the banner-lugger raiment.~
 M
 9
 $n dons $p.~
 S
 #15932
 garb set flame-skulker flameskulker skulker~
-a set of flame-skulker garb is smouldering in a heap.~
-A set of banner-lugger raiments are lying here.~
+flame-skulker garb~
+A set of flame-skulker garb is smouldering in a heap.~
    The clothing -- if there's enough left to call it that -- is blackened
 almost beyond recognition with soot that somehow forms a cloud when you smack
 it, but also remains permanently embedded in the fabric.
