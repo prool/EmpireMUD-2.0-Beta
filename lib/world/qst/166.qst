@@ -806,6 +806,42 @@ Summon and fight the demon~
 Z
 4 16603
 S
+#16687
+Winter Wonderland: Santa's Little Helper~
+   The one thing Santa loves more than spreading holiday cheer is getting
+others to join him in the mission. Now he's enlisting you to deliver gifts, but
+not to just your own empire -- no, you have to deliver to at least three others
+outside of your own, too! Deliver gifts to four houses within your own empire,
+and two houses in each of three empires outside your own for a total of 10
+total presents delivered to empty the sack.
+   You can deliver from inside any house by typing 'deliver' or from outside by
+typing 'deliver <direction>'.
+~
+   And finally the sack is empty and your belly full of delicious treats left
+for Father Christmas! The empty sack seems to fold in on itself, disappearing
+back to the North Pole in a miniature snow flurry. You roll your back and
+shoulders, relieving the ache that built up, but are satisfied with a job well
+done. You are sure Father Christmas is grateful for your assistance in
+spreading holiday cheer, too.
+~
+8 ej 0 0 -1
+A
+1 10703
+R
+9 10700 10
+R
+2 16678 1
+T 16602
+W
+36 10700 0 1 a
+W+
+11 0 0 10 a
+Deliver the presents~
+Z
+2 16687
+Z
+4 16687
+S
 #16690
 Winter Wonderland: Feed the Polar Vortex~
    A Frostwarden -- one of the Guardians of Winter -- appears and warns you
