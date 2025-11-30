@@ -4096,11 +4096,11 @@ if %room% == %actor.room%
   %echoaround% %actor% ~%actor% carefully hides a gift from a large sack of presents!
   if %actor.hunger% > 1
     %send% %actor% You eat some cookies from off of a plate.
-    nop %actor.hunger(0)%
+    nop %actor.hunger(-8)%
   end
   if %actor.thirst% > 1
     %send% %actor% You drink some milk you find on the table.
-    nop %actor.thirst(0)%
+    nop %actor.thirst(-8)%
   end
 else
   %send% %actor% You pull a present from the sack and toss it into the chimney to the %actor.dir(%dir%)%!
