@@ -829,9 +829,10 @@ end
 ~
 #15915
 Shipwrecked Goblins: Pay to leave~
-2 v 0 2
+2 v 0 3
 L i 15900
 L t 15915
+L y 15901
 ~
 if %questvnum% == 15915
   %adventurecomplete%
