@@ -4073,7 +4073,7 @@ elseif !%room.empire.has_tech(Citizens)%
   halt
 end
 * validate empire
-set eid %room.empire_id%
+set eid %room.empire.vnum%
 set count 0
 set list %self.var(empire_list)%
 while %list%
@@ -4083,10 +4083,10 @@ while %list%
     eval count %count% + 1
   end
 done
-if %count% >= 4 && %eid% == %actor.empire.id%
+if %count% >= 4 && %eid% == %actor.empire.vnum%
   %send% %actor% You've already delivered enough gifts to your own empire.
   halt
-elseif %count% >= 2 && %eid% != %actor.empire.id%
+elseif %count% >= 2 && %eid% != %actor.empire.vnum%
   %send% %actor% You've already delivered enough gifts to %this% empire.
   halt
 end
