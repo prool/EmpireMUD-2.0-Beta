@@ -4042,9 +4042,17 @@ if %actor.quest_finished(16687)%
 end
 * check target
 set room 0
+set veh %actor.veh_target(%arg.argument1)%
 if !%arg%
   set room %actor.room%
   set this this
+elseif %veh%
+  set room %veh.interior%
+  set this that
+  if !%room%
+    %send% %actor% You can't deliver to @%veh% -- that's not a house.
+    halt
+  end
 else
   set dir %actor.parse_dir(%arg.argument1%)%
   set this that
@@ -4102,6 +4110,10 @@ if %room% == %actor.room%
     %send% %actor% You drink some milk you find on the table.
     nop %actor.thirst(-8)%
   end
+elseif %veh%
+  %send% %actor% You pull a present from the sack and toss it into the chimney of @%veh%!
+  %echoaround% %actor% ~%actor% pulls a present from a larger sack and tosses it into the chimney of @%veh%!
+  %at% %room% %echo% A present tumbles out of the fireplace and carefully hides itself!
 else
   %send% %actor% You pull a present from the sack and toss it into the chimney to the %actor.dir(%dir%)%!
   %echoaround% %actor% ~%actor% pulls a present from a larger sack and tosses it into a nearby chimney!
