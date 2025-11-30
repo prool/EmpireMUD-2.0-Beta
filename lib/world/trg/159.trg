@@ -835,6 +835,13 @@ if %questvnum% == 15915
     end
     eval vnum %vnum% + 1
   done
+  * and pay-off progress goal if possible
+  if %actor%
+    set emp %actor.empire%
+    if %emp%
+      nop %emp.add_progress(15901)%
+    end
+  end
 end
 ~
 #15916
