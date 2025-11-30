@@ -13,6 +13,13 @@ crammed into every pocket. Near him sit a bag of nails and a travois laden with
 scrapwood.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 M
 15
 The goblin scrapboss is wading through the water.~
@@ -38,6 +45,13 @@ demeanor and her eyes never fix on a single point as she looks off. There's a
 glass water pipe tucked under her arm.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 T 15905
 T 15900
 T 15901
@@ -59,6 +73,13 @@ crustacean claws. She has also tied her long red hair up out of reach of the
 little crawlers.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 T 15905
 T 15900
 T 15901
@@ -81,6 +102,13 @@ wooden pole with a series of notched and grooved patterns, and it looks like
 he's finishing the work.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 T 15905
 T 15900
 T 15901
@@ -100,6 +128,13 @@ D
 else, save for the spare rope and netting slung around the shoulder.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 M
 7
 say Me gonna kill a human today!~
@@ -172,6 +207,13 @@ D
 spectacles that magnify gold and jade eyes to the size of goblin saucers.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 M
 7
 say You sure got a lot of bones there...~
@@ -240,6 +282,13 @@ D
 forming a rather clattering dress.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 M
 7
 say You say something to me?~
@@ -323,6 +372,13 @@ D
 distinct, high-pitched rattle with each step.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 M
 7
 emote $n considers $s chances at selling your gear.~
@@ -390,6 +446,13 @@ D
 The gray-green goblin drags a tall banner across the field.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 M
 7
 emote $n plants $s banner in the ground and wipes $s brow.~
@@ -447,6 +510,13 @@ slightest hint of green. Wisps of soot flow behind, too, so perhaps this goblin
 is just very dirty.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 M
 7
 say You know what happens to a human caught on fire?~
@@ -512,6 +582,13 @@ D
 tar in your direction.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 M
 7
 say I found one! I found one!~
@@ -582,6 +659,13 @@ first, but as you approach the deadwright, the sounds of the damned become
 deafening.
 ~
 F 15900
+I 4 15945 0.20 1 a  # LOOT: chest of silver
+I 4 15941 0.30 1 a  # LOOT: calendar stick
+I 4 15939 0.50 1 a  # LOOT: True Fragment of Waur
+I 4 15944 0.50 1 a  # LOOT: modified brass chamberpot
+I 4 15943 1.50 1 a  # LOOT: goblin art bone
+I 4 15940 3.50 1 a  # LOOT: cracked ceramic gnome
+I 4 15942 3.50 1 a  # LOOT: up-market brass doorknob
 M
 7
 say By the pricking of my bones...~

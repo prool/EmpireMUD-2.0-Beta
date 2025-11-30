@@ -425,10 +425,10 @@ The crab pens schematic is on the ground.~
    The schematic is sketched in charcoal on sealskin, so it's quite delicate
 and you'll need to commit it to memory. It depicts a simple idea: building pens
 to farm crabs.
-   'Learn' this schematic and it will enable you to build a 'crab pens', new
+   'Learn' this schematic and it will enable you to build 'crabpens', new
 pastoral buildings that produce crab meat.
 ~
-7 0 a 0 0 2
+7 0 a 0 0 3
 15912 0 0
 0 0
 C
@@ -827,5 +827,104 @@ Items stored here: cabinet of curiosities, sorcery tower
 7 0
 C
 75 75
+S
+#15939
+fragment true Waur~
+a True Fragment of Waur~
+A True Fragment of Waur lies on the ground.~
+   Though you know what it's called, it just looks like a chunk of rock that
+someone chiseled out of a quarry.
+~
+15 0 a 0 0 6
+8 2 0
+1 0
+R
+4 5193 0
+S
+#15940
+gnome cracked ceramic~
+a cracked ceramic gnome~
+A cracked ceramic gnome is lying here.~
+   This delicate, painted ceramic figure has the shape of a gnome: it's a small
+man with a large, round nose and a red pileus cap. Despite a crack down its
+back side, it's quite finely made and may be worth some money.
+~
+15 0 a 0 0 7
+4 2 0
+6 0
+R
+4 5193 0
+S
+#15941
+gnome cracked ceramic~
+a calendar stick~
+A calendar stick is lying here.~
+   This long, straight stick bears rough notches and carvings at regular
+intervals, divided by solid lines. The markings don't mean much to you, but
+this one stick might hold months or even years of precious records from a
+village somewhere.
+~
+15 0 a 0 0 8
+16 2 0
+0 0
+R
+4 5193 0
+S
+#15942
+knob doorknob up-market upmarket market brass~
+an up-market brass doorknob~
+An up-market brass doorknob is lying here.~
+   Splinters of wood remain where this elegant knob was prised from its door.
+The workmanship is excellent though, at the end of the day, it's still just a
+doorknob.
+~
+15 0 a 0 0 12
+4 0 0
+13 0
+R
+4 5193 0
+S
+#15943
+bone art goblin~
+a goblin art bone~
+A goblin art bone is sticking up.~
+   Based on the ends, you'd say this is a femur. It's longer than your arm,
+though it has been made thin through intricate carving, including some fine bas
+relief. This work was done by tiny hands. The carvings appear to depict a ship,
+a crowd of people, and a lot of graves. Symbols for different currencies appear
+at the top of the scene as if they're floating in the sky.
+~
+15 0 a 0 0 11
+6 2 0
+14 0
+R
+4 5193 0
+S
+#15944
+chamberpot pot modified brass~
+a modified brass chamberpot~
+A modified brass chamberpot is rolling around.~
+   This slightly dented chamberpot nevertheless appears to be made of fine
+brass. The only concerning part is that someone has riveted it at the edges and
+attached what appears to be a chin strap.
+~
+15 0 a 0 0 13
+8 0 0
+13 0
+R
+4 5193 0
+S
+#15945
+chest silver~
+a chest of silver~
+A chest of silver is half-covered here.~
+   You open the chest expecting riches, but it's completely empty. Luckily it
+has been cast from pure silver.
+~
+15 0 a 0 0 14
+24 0 0
+3 0
+R
+4 5193 0
 S
 $
