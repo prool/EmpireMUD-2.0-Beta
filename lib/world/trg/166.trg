@@ -4111,7 +4111,7 @@ set room_list %self.var(room_list)% %room.vnum%
 remote room_list %self.id%
 set empire_list %self.var(empire_list)% %eid%
 remote empire_list %self.id%
-nop %actor.trigger_quest(16687)%
+%quest% %actor% trigger 16687
 if %actor.quest_finished(16687)%
   %quest% %actor% finish 16687
 end
