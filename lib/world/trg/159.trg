@@ -691,6 +691,15 @@ switch %sect%
   break
 end
 ~
+#15910
+Shipwrecked Goblins: Start progress goal~
+0 h 100 1
+L y 15900
+~
+if %actor.is_pc% && %actor.empire%
+  nop %actor.empire.start_progress(15900)%
+end
+~
 #15911
 Shipwrecked Goblins: Deadwright resurrection~
 0 b 33 8
