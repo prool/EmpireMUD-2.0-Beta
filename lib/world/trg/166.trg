@@ -4086,7 +4086,7 @@ done
 if %count% >= 4 && %eid% == %actor.empire.id%
   %send% %actor% You've already delivered enough gifts to your own empire.
   halt
-elseif %count% >= 2
+elseif %count% >= 2 && %eid% != %actor.empire.id%
   %send% %actor% You've already delivered enough gifts to %this% empire.
   halt
 end
