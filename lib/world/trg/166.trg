@@ -3567,6 +3567,9 @@ elseif %roll% <= 585
 elseif %roll% <= 835
   * 25% chance: some thumbprint cookies (+move regen)
   set vnum 16662
+elseif %roll% <= 885
+  * 5% chance of lumps of coal
+  set vnum 10728
 else
   * Remaining %: small resource shipment
   set vnum 11513
