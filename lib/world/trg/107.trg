@@ -467,7 +467,7 @@ if (%mob% && %mob.vnum% == %self.val0%)
 end
 ~
 #10729
-Winter Wonderland minipet whistle (random order) 2021-2024~
+Winter Wonderland minipet whistle (random order) 2021-2025~
 1 c 2
 use~
 * List of vnums granted by this whistle (minipet mobs)

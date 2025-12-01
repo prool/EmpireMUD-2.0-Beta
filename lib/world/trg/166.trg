@@ -3527,7 +3527,7 @@ if %actor.quest_finished(%questid%)%
 end
 ~
 #16678
-Open Stocking (winter wonderland dailies) 2021-2024~
+Open Stocking (winter wonderland dailies) 2021-2025~
 1 c 2 0
 open~
 if !%arg% || %actor.obj_target(%arg.argument1%)% != %self%
@@ -3567,8 +3567,8 @@ elseif %roll% <= 585
 elseif %roll% <= 835
   * 25% chance: some thumbprint cookies (+move regen)
   set vnum 16662
-elseif %roll% <= 885
-  * 5% chance of lumps of coal
+elseif %roll% <= 875
+  * 4% chance of lumps of coal
   set vnum 10728
 else
   * Remaining %: small resource shipment
