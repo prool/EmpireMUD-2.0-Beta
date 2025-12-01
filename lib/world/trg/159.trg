@@ -691,9 +691,18 @@ switch %sect%
   break
 end
 ~
+#15910
+Shipwrecked Goblins: Start progress goal~
+0 h 100 1
+L y 15900
+~
+if %actor.is_pc% && %actor.empire%
+  nop %actor.empire.start_progress(15900)%
+end
+~
 #15911
 Shipwrecked Goblins: Deadwright resurrection~
-0 b 20 8
+0 b 33 8
 L b 15904
 L b 15905
 L b 15906
@@ -820,9 +829,10 @@ end
 ~
 #15915
 Shipwrecked Goblins: Pay to leave~
-2 v 0 2
+2 v 0 3
 L i 15900
 L t 15915
+L y 15901
 ~
 if %questvnum% == 15915
   %adventurecomplete%
@@ -835,6 +845,13 @@ if %questvnum% == 15915
     end
     eval vnum %vnum% + 1
   done
+  * and pay-off progress goal if possible
+  if %actor%
+    set emp %actor.empire%
+    if %emp%
+      nop %emp.add_progress(15901)%
+    end
+  end
 end
 ~
 #15916
@@ -938,7 +955,7 @@ nop %actor.add_companion(15922)%
 set mob %self.room.people%
 if %mob.vnum% == 15922 && %mob.leader% == %actor%
   remote clothes_list %mob.id%
-  %force% %mob% haberdash
+  %force% %mob% !haberdash
 end
 %purge% %self%
 ~
@@ -958,7 +975,7 @@ L c 15932
 L c 15933
 L c 15934
 L c 15935
-haberdash~
+!haberdash~
 set ch %actor.companion%
 set clothes_list %self.var(clothes_list)%
 if %actor% != %self%
@@ -977,10 +994,10 @@ elseif !%clothes_list%
   %load% obj 15935 %ch% inv
   set obj %ch.inventory%
   if %obj.vnum% == 15935
-    %echo% ~%actor% gives you ~%ch% @%obj%.
+    %echo% ~%actor% gives ~%ch% @%obj%.
   end
   nop %ch.remove_companion(%self.vnum%)%
-  %purge% %sefl%
+  %purge% %self%
   halt
 elseif %timestamp% - %self.var(last_time,0)% < 43200
   * too soon
@@ -1032,7 +1049,7 @@ Shipwrecked Goblins: Haberdasher random check~
 L f 15923
 ~
 * Periodically tries to haberdash
-haberdash
+!haberdash
 ~
 #15925
 Shipwrecked Goblins: Haberdasher fight and flight~

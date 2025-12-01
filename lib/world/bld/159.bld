@@ -129,7 +129,7 @@ S
 Sharkfold~
 A Small Sharkfold~
 &w(&?~~&w)~
-10 0 bdnDQ 0
+10 0 bdjnDQ 0
 0 0 0 15918
 E
 sharkfold fold building around water~
@@ -156,6 +156,14 @@ Aboard the Patchwork Dirigible~
 0 0 0 -1
 D
 You are standing in the basket of the dirigible, high above the ground.
+~
+E
+down~
+You're floating pretty high up here; best not to look down.
+~
+E
+basket~
+The basket seems sturdy enough.
 ~
 S
 $
