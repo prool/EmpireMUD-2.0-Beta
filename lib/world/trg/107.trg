@@ -73,8 +73,8 @@ Christmas Gift open~
 1 c 2
 open~
 * gifts are given in order
-set gift_list 10717 16666 10728 10719 10720 16657 16696 10704 10710 16656
-set first_gift 10717
+set gift_list 16617 10717 16666 10719 10720 16657 16696 10704 10710 16656
+set first_gift 16617
 * targ check
 if %actor.obj_target(%arg%)% != %self%
   return 0
