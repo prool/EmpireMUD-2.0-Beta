@@ -1,6 +1,6 @@
 #5107
 Mine Rename Based on Type~
-2 o 100
+2 o 100 0
 ~
 wait 0
 set type %room.mine_type%
@@ -13,7 +13,8 @@ detach 5107 %room.id%
 ~
 #5138
 Tavern Hideout Completion~
-2 o 100
+2 o 100 1
+L e 5510
 ~
 if !%room.down(room)%
   * Add Secret Hidout
@@ -31,7 +32,12 @@ detach 5138 %room.id%
 ~
 #5139
 Bartender: List drinks from empire inventory~
-0 c 0
+0 c 0 5
+L c 232
+L c 233
+L c 234
+L c 235
+L c 236
 list~
 set empire %self.empire%
 set room %self.room%
@@ -76,7 +82,12 @@ end
 ~
 #5140
 Bartender: Buy drink from empire inventory~
-0 c 0
+0 c 0 5
+L c 232
+L c 233
+L c 234
+L c 235
+L c 236
 buy~
 set empire %self.empire%
 set room %self.room%
@@ -126,7 +137,7 @@ end
 ~
 #5141
 Tavern: Charge a differnet price~
-2 c 0
+2 c 0 0
 price~
 set empire %self.empire%
 set cost %room.var(tavern_cost,50)%
@@ -161,7 +172,8 @@ end
 ~
 #5142
 Chant of Magic (gain natural magic at a henge)~
-2 c 0
+2 c 0 1
+L q 3
 chant~
 * Chant of Magic gains the player their 1st point of natural magic
 if !(magic /= %arg%)
@@ -278,7 +290,7 @@ done
 ~
 #5143
 Chant of Magics 2nd person (denial)~
-2 c 0
+2 c 0 0
 chant~
 if !(magic /= %arg%)
   return 0
@@ -288,7 +300,7 @@ end
 ~
 #5149
 Library commands~
-2 c 0
+2 c 0 0
 browse checkout shelve~
 * just passes through commands to the library command
 return 1
@@ -304,7 +316,8 @@ end
 ~
 #5156
 Swamp Platform~
-2 o 100
+2 o 100 1
+L h 200
 ~
 %echo% The platform is complete and the area is now a grassland.
 %terraform% %room% 200
@@ -312,7 +325,8 @@ return 0
 ~
 #5161
 Baths: Clothes / bathing process~
-1 ab 100
+1 ab 100 1
+L w 5162
 ~
 * this runs in a loop
 while %self.val1% > 0
@@ -367,7 +381,8 @@ done
 ~
 #5162
 Baths: Bathe command~
-2 c 0
+2 c 0 1
+L c 5162
 bathe~
 set valid_positions Standing Sitting Resting
 if %actor.action% || %actor.fighting% || !(%valid_positions% ~= %actor.position%)
@@ -408,7 +423,8 @@ end
 ~
 #5164
 Sorcery Tower Completion~
-2 o 100
+2 o 100 1
+L e 5511
 ~
 if !%room.up(room)%
   * Add Top of the Tower
@@ -418,7 +434,12 @@ detach 5164 %room.id%
 ~
 #5186
 Haven Interior~
-2 o 100
+2 o 100 5
+L e 5601
+L e 5605
+L e 5608
+L e 5612
+L e 5620
 ~
 eval firsthall %%room.%room.enter_dir%(room)%%
 * Add first hallway
@@ -461,7 +482,11 @@ detach 5186 %room.id%
 ~
 #5187
 Tunnel Haven Interior~
-2 o 100
+2 o 100 4
+L e 5601
+L e 5608
+L e 5612
+L e 5620
 ~
 eval firsthall %%room.%room.enter_dir%(room)%%
 * Add first tunnel
@@ -504,7 +529,8 @@ detach 5187 %room.id%
 ~
 #5191
 Oasis Drainage: Completing building converts to Dry Oasis~
-2 o 100
+2 o 100 1
+L h 82
 ~
 %echo% The drainage is complete. The plants begin to die as the oasis dries up.
 %terraform% %room% 82
@@ -512,7 +538,12 @@ return 0
 ~
 #5195
 Equipment Cruncher: shatter~
-2 c 0
+2 c 0 5
+L w 5100
+L w 5101
+L w 5102
+L w 5103
+L w 5104
 shatter~
 eval target %%actor.obj_target(%arg%)%%
 if !%target%

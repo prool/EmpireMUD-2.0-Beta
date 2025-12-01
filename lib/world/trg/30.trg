@@ -1,6 +1,7 @@
 #3053
 Single calabash drying timer (deprecated)~
-1 f 0
+1 f 0 1
+L c 3056
 ~
 * this is replaced by simple decays-to interactions
 if %self.carried_by%
@@ -15,7 +16,9 @@ return 0
 ~
 #3054
 Calabash drying timer (deprecated)~
-1 f 0
+1 f 0 2
+L c 3055
+L c 3056
 ~
 * this is replaced by simple decays-to interactions
 if %self.carried_by%

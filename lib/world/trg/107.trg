@@ -73,8 +73,8 @@ Christmas Gift open~
 1 c 2
 open~
 * gifts are given in order
-set gift_list 10717 16666 10728 10719 10720 16657 16696 10704 10710 16656
-set first_gift 10717
+set gift_list 16617 10717 16666 10719 10720 16657 16696 10704 10710 16656
+set first_gift 16617
 * targ check
 if %actor.obj_target(%arg%)% != %self%
   return 0
@@ -467,13 +467,13 @@ if (%mob% && %mob.vnum% == %self.val0%)
 end
 ~
 #10729
-Winter Wonderland minipet whistle (random order) 2021-2024~
+Winter Wonderland minipet whistle (random order) 2021-2025~
 1 c 2
 use~
 * List of vnums granted by this whistle (minipet mobs)
-set list 10709 16657 16658 10723 10724 10725 10726 16653 16654 16655 16656 16666 16667 16668 16669 10706 16670 16671
+set list 10709 16657 16658 10723 10724 10725 10726 16653 16654 16655 16656 16666 16667 16668 16669 10706 16670 16671 16672
 * length is used to shuffle the start point of the list
-set length 17
+set length 19
 *
 * Check targeting
 if %actor.obj_target(%arg.argument1%)% != %self%

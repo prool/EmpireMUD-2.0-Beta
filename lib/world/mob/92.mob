@@ -67,7 +67,7 @@ crab horseshoe~
 a horseshoe crab~
 A horseshoe crab sits at the water's edge.
 ~
-10 15 bdjoz G 1
+10 15 bdjoz GU 1
 0 0 8 3 -1 -1
 D
    This strange little creature looks like a crab with a long tail, until you
@@ -157,7 +157,7 @@ crab mud~
 a mud crab~
 A mud crab pokes its head up.
 ~
-10 15 djloz cG 1
+10 15 djloz cGU 1
 0 0 6 3 -1 -1
 D
    This little brown crab has buried itself in the mud, perhaps to wait for
@@ -2078,7 +2078,6 @@ S
 spider goliath birdeater bird-eater eater~
 a goliath birdeater spider~
 A goliath birdeater spider peeks out of its burrow.
-
 ~
 65 90 bdjo c 3
 0 0 17 9 -1 -1

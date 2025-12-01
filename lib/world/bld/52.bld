@@ -469,7 +469,7 @@ troughs~
 Troughs are filled with slop and equally-brown water for the pigs.
 ~
 I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
-I 31 3201 6.00 360 p  # PRODUCTION: slab of pork
+I 31 3201 6.00 360 p  # PRODUCTION: slab of raw pork
 M
 9048 90.00 0
 M
@@ -566,5 +566,20 @@ I 31 109 5.00 60 p  # PRODUCTION: chunk of rock salt
 I+ 7 0  # Depletion: dig
 R
 1000 1 5 0
+S
+#5222
+Terracing~
+A Terrace Under Construction~
+&y/\-\~
+2 0 dn 0
+0 0 0 -1
+E
+terrace terracing construction building around~
+   Workers have begun cutting enormous stepped terraces into the mountainside
+and reinforcing them with rocks.
+~
+R
+1000 1 5 0
+T 5222
 S
 $

@@ -511,8 +511,11 @@ char *list_one_adventure(adv_data *adv, bool detail) {
 */
 void olc_delete_adventure(char_data *ch, adv_vnum vnum) {
 	adv_data *adv;
+	bool found;
 	char name[256];
 	int live = 0;
+	descriptor_data *desc;
+	trig_data *trig, *next_trig;
 	
 	if (!(adv = adventure_proto(vnum))) {
 		msg_to_char(ch, "There is no such adventure zone %d.\r\n", vnum);
@@ -535,6 +538,26 @@ void olc_delete_adventure(char_data *ch, adv_vnum vnum) {
 	// save index and adventure file now
 	save_index(DB_BOOT_ADV);
 	save_library_file_for_vnum(DB_BOOT_ADV, vnum);
+	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_ADVENTURE, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to adventure [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
+	// olc editor updates
+	LL_FOREACH(descriptor_list, desc) {
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_ADVENTURE, vnum);
+			if (found) {
+				msg_to_desc(desc, "Adventure [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
+			}
+		}
+	}
 	
 	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted adventure zone %d %s", GET_NAME(ch), vnum, name);
 	msg_to_char(ch, "Adventure zone %d (%s) deleted.\r\n", vnum, name);

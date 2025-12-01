@@ -21,6 +21,7 @@
 #include "skills.h"
 #include "handler.h"
 #include "constants.h"
+#include "dg_scripts.h"
 
 /**
 * Contents:
@@ -188,6 +189,7 @@ void olc_delete_crop(char_data *ch, crop_vnum vnum) {
 	struct map_data *map;
 	room_data *room;
 	crop_data *crop;
+	trig_data *trig, *next_trig;
 	bool found;
 	char name[256];
 	int count;
@@ -245,6 +247,16 @@ void olc_delete_crop(char_data *ch, crop_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_CROP, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to crop [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// olc editors
 	for (desc = descriptor_list; desc; desc = desc->next) {
 		if (GET_OLC_ADVENTURE(desc)) {
@@ -259,6 +271,12 @@ void olc_delete_crop(char_data *ch, crop_vnum vnum) {
 			if (OBJ_FLAGGED(GET_OLC_OBJECT(desc), OBJ_PLANTABLE) && GET_OBJ_VAL(GET_OLC_OBJECT(desc), VAL_FOOD_CROP_TYPE) == vnum) {
 				set_obj_val(GET_OLC_OBJECT(desc), VAL_FOOD_CROP_TYPE, NOTHING);
 				msg_to_char(desc->character, "The crop planted by the object you're editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_CROP, vnum);
+			if (found) {
+				msg_to_desc(desc, "Crop [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
 			}
 		}
 	}
@@ -431,6 +449,7 @@ void olc_search_crop(char_data *ch, crop_vnum vnum) {
 	struct adventure_link_rule *link;
 	adv_data *adv, *next_adv;
 	obj_data *obj, *next_obj;
+	trig_data *trig, *next_trig;
 	int found;
 	
 	if (!crop) {
@@ -460,6 +479,14 @@ void olc_search_crop(char_data *ch, crop_vnum vnum) {
 		if (OBJ_FLAGGED(obj, OBJ_PLANTABLE) && GET_OBJ_VAL(obj, VAL_FOOD_CROP_TYPE) == vnum) {
 			++found;
 			build_page_display(ch, "OBJ [%5d] %s", GET_OBJ_VNUM(obj), GET_OBJ_SHORT_DESC(obj));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_CROP, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	

@@ -21,6 +21,7 @@
 #include "skills.h"
 #include "handler.h"
 #include "constants.h"
+#include "dg_scripts.h"
 
 /**
 * Contents:
@@ -229,7 +230,10 @@ char *list_one_global(struct global_data *glb, bool detail) {
 */
 void olc_delete_global(char_data *ch, any_vnum vnum) {
 	struct global_data *glb;
+	descriptor_data *desc;
+	trig_data *trig, *next_trig;
 	char name[256];
+	bool found;
 	
 	if (!(glb = global_proto(vnum))) {
 		msg_to_char(ch, "There is no such global %d.\r\n", vnum);
@@ -250,6 +254,26 @@ void olc_delete_global(char_data *ch, any_vnum vnum) {
 	save_index(DB_BOOT_GLB);
 	save_library_file_for_vnum(DB_BOOT_GLB, vnum);
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_GLOBAL, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to global [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
+	// update olc editors
+	LL_FOREACH(descriptor_list, desc) {
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_GLOBAL, vnum);
+			if (found) {
+				msg_to_desc(desc, "Global [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
+			}
+		}
+	}
+	
 	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted global %d %s", GET_NAME(ch), vnum, name);
 	msg_to_char(ch, "Global %d (%s) deleted.\r\n", vnum, name);
 	
@@ -266,6 +290,7 @@ void olc_delete_global(char_data *ch, any_vnum vnum) {
 void olc_search_global(char_data *ch, any_vnum vnum) {
 	struct global_data *glb = global_proto(vnum);
 	int found;
+	trig_data *trig, *next_trig;
 	
 	if (!glb) {
 		msg_to_char(ch, "There is no global %d.\r\n", vnum);
@@ -275,7 +300,13 @@ void olc_search_global(char_data *ch, any_vnum vnum) {
 	found = 0;
 	build_page_display(ch, "Occurrences of global %d (%s):", vnum, GET_GLOBAL_NAME(glb));
 	
-	// globals are not actually used anywhere else
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_GLOBAL, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
+		}
+	}
 	
 	if (found > 0) {
 		build_page_display(ch, "%d location%s shown", found, PLURAL(found));

@@ -852,6 +852,34 @@ A serragon is a massive worm-like creature with serrated scales and the
 appetite of a dragon. There are two known types of serragons: the hoarfrost
 serragons of the deserts, and the ribbon serragons of the forest.
 #
+"SHIPWRECKED GOBLIN HORDE" "GOBLIN HORDE" "THE GOBLIN HORDE" "SHIPWRECKED HORDE" "SHIPWRECKED GOBLINS" SGH
+
+Shipwrecked Goblin Horde (level 75-175 adventure)
+
+   The remains of a wooden bow stand watch over seaside like a tombstone. A
+horde of goblins have hit the coast and they intend to keep hitting. There are
+only two choices here: fight them off or trade with them and earn their trust.
+
+Three goblins sell items to people they like.
+
+The wavewhisperer sells:
+ sea barricade schematic - a wall for shallow sea tiles
+ services of a fine haberdasher - a tailor companion
+ frenzy fish recipe - food that will quicken your blood
+ goblin mess tent - a new storage building
+
+The crabherd sells:
+  deck-rat privateer minipet whistle - a minipet
+  manatee aquatic mount whistle - an aquatic mount
+  crab pens schematic - a building that produces crab meat
+  sharkfold schematic - houses animals and produces shark skin and meat
+
+The raidscribe sells:
+  schematic for one of the hacksilver crowns - teaches a new crown item
+  hovering jade trinket in the shape of a dirigible - a flying vehicle
+  goblin construction tent - a new storage building
+  goblin hoard tent - a new storage building
+#
 SKYCLEAVE "SKY CLEAVE" "TOWER SKYCLEAVE" "THE TOWER SKYCLEAVE" "ASHES OF HISTORY" "TOWER SKYCLEAVE: ASHES OF HISTORY" "THE TOWER SKYCLEAVE: ASHES OF HISTORY" "TOWER SKYCLEAVE ASHES OF HISTORY"
 
 The Tower Skycleave: Ashes of History (levels 150-250)
@@ -914,9 +942,9 @@ The Swamp Hag (level 100-150 adventure)
 This strange, raised hut towers over the swamp. What sort of person would be
 at home in the swamp?
 
-This adventure uses rat tails as currency. Earn them by defeating the swamp hag
-on hard (1 tail), group (2 tails), or boss difficulty (4 tails). After you
-complete the adventure, you can spend rat tails to buy various items:
+This adventure uses rat tails as currency. Earn 1 to 4 tails per victory,
+depending on which difficulty you choose. After you complete the adventure, you
+can spend rat tails to buy various items:
 
 Other:
   Minipet: swamp rat whistle

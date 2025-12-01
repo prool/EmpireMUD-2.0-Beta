@@ -7497,18 +7497,30 @@ void write_trig_protos_to_file(FILE *fl, char letter, struct trig_proto_list *li
 * @param trig_data *trig The thing to save.
 */
 void write_trigger_to_file(FILE *fl, trig_data *trig) {
+	int num_links = 0;
 	struct cmdlist_element *cmd;
 	char lbuf[MAX_CMD_LENGTH+1];
+	struct trig_link *link;
 	
 	if (!fl || !trig) {
 		syslog(SYS_ERROR, LVL_START_IMM, TRUE, "SYSERR: write_trigger_to_file called without %s", !fl ? "file" : "trigger");
 		return;
 	}
 	
+	LL_COUNT(GET_TRIG_LINKS(trig), link, num_links);
+	
 	fprintf(fl, "#%d\n", GET_TRIG_VNUM(trig));
 	
 	fprintf(fl, "%s~\n", NULLSAFE(GET_TRIG_NAME(trig)));
-	fprintf(fl, "%d %s %d\n", trig->attach_type, bitv_to_alpha(GET_TRIG_TYPE(trig)), GET_TRIG_NARG(trig));
+	fprintf(fl, "%d %s %d %d\n", trig->attach_type, bitv_to_alpha(GET_TRIG_TYPE(trig)), GET_TRIG_NARG(trig), num_links);
+	
+	// only print links if number of links were specified
+	if (num_links > 0) {
+		LL_FOREACH(GET_TRIG_LINKS(trig), link) {
+			fprintf(fl, "L %s %d\n", bitv_to_alpha(link->type), link->vnum);
+		}
+	}
+	
 	fprintf(fl, "%s~\n", NULLSAFE(GET_TRIG_ARG(trig)));
 
 	// Build the text for the script

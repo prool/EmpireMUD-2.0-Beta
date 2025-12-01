@@ -22,6 +22,7 @@
 #include "skills.h"
 #include "handler.h"
 #include "constants.h"
+#include "dg_scripts.h"
 
 /**
 * Contents:
@@ -612,6 +613,7 @@ char *list_one_shop(shop_data *shop, bool detail) {
 */
 void olc_search_shop(char_data *ch, any_vnum vnum) {
 	shop_data *shop = real_shop(vnum);
+	trig_data *trig, *next_trig;
 	int found;
 	
 	if (!shop) {
@@ -622,7 +624,13 @@ void olc_search_shop(char_data *ch, any_vnum vnum) {
 	found = 0;
 	build_page_display(ch, "Occurrences of shop %d (%s):", vnum, SHOP_NAME(shop));
 	
-	// none yet
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_SHOP, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
+		}
+	}
 	
 	if (found > 0) {
 		build_page_display(ch, "%d location%s shown", found, PLURAL(found));
@@ -936,7 +944,10 @@ shop_data *create_shop_table_entry(any_vnum vnum) {
 */
 void olc_delete_shop(char_data *ch, any_vnum vnum) {
 	shop_data *shop;
+	descriptor_data *desc;
+	trig_data *trig, *next_trig;
 	char name[256];
+	bool found;
 	
 	if (!(shop = real_shop(vnum))) {
 		msg_to_char(ch, "There is no such shop %d.\r\n", vnum);
@@ -957,7 +968,25 @@ void olc_delete_shop(char_data *ch, any_vnum vnum) {
 	// delete from lookups
 	add_or_remove_all_shop_lookups_for(shop, FALSE);
 	
-	// removing from prototypes goes here
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_SHOP, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to shop [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
+	// live olc editors
+	LL_FOREACH(descriptor_list, desc) {
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_SHOP, vnum);
+			if (found) {
+				msg_to_desc(desc, "Shop [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
+			}
+		}
+	}
 	
 	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted shop %d %s", GET_NAME(ch), vnum, name);
 	msg_to_char(ch, "Shop %d (%s) deleted.\r\n", vnum, name);

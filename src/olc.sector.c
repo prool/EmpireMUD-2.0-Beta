@@ -21,6 +21,7 @@
 #include "skills.h"
 #include "handler.h"
 #include "constants.h"
+#include "dg_scripts.h"
 
 /**
 * Contents:
@@ -109,6 +110,11 @@ bool audit_sector(sector_data *sect, char_data *ch) {
 	
 	if (!GET_SECT_EX_DESCS(sect)) {
 		olc_audit_msg(ch, GET_SECT_VNUM(sect), "Sector has no extra descriptions");
+		problem = TRUE;
+	}
+	
+	if (has_evolution_type(sect, EVO_BURNS_TO) && !has_evolution_type(sect, EVO_BURN_STUMPS)) {
+		olc_audit_msg(ch, GET_SECT_VNUM(sect), "Sector has BURNS-TO but not BURN-STUMPS evolution");
 		problem = TRUE;
 	}
 	
@@ -252,6 +258,7 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 	social_data *soc, *next_soc;
 	descriptor_data *desc;
 	adv_data *adv, *next_adv;
+	trig_data *trig, *next_trig;
 	struct map_data *map;
 	room_data *room;
 	int count, x, y;
@@ -376,6 +383,16 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_SECTOR, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to sector [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// olc editors
 	for (desc = descriptor_list; desc; desc = desc->next) {
 		// update evolutions in olc editors
@@ -419,6 +436,12 @@ void olc_delete_sector(char_data *ch, sector_vnum vnum) {
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
 				msg_to_desc(desc, "A sector required by the social you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_SECTOR, vnum);
+			if (found) {
+				msg_to_desc(desc, "Sector [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
 			}
 		}
 	}
@@ -594,6 +617,7 @@ void olc_search_sector(char_data *ch, sector_vnum vnum) {
 	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
 	adv_data *adv, *next_adv;
+	trig_data *trig, *next_trig;
 	int found;
 	bool any;
 	
@@ -663,6 +687,14 @@ void olc_search_sector(char_data *ch, sector_vnum vnum) {
 		if (any) {
 			++found;
 			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_SECTOR, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	

@@ -3168,6 +3168,7 @@ void olc_search_skill(char_data *ch, any_vnum vnum) {
 	struct class_skill_req *clsk;
 	struct synergy_ability *syn;
 	social_data *soc, *next_soc;
+	trig_data *trig, *next_trig;
 	class_data *cls, *next_cls;
 	int found;
 	bool any;
@@ -3253,6 +3254,14 @@ void olc_search_skill(char_data *ch, any_vnum vnum) {
 		if (any) {
 			++found;
 			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_SKILL, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	
@@ -3760,6 +3769,7 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 	progress_data *prg, *next_prg;
 	social_data *soc, *next_soc;
 	class_data *cls, *next_cls;
+	trig_data *trig, *next_trig;
 	descriptor_data *desc;
 	skill_data *skill, *sk, *next_sk;
 	char_data *chiter;
@@ -3868,6 +3878,16 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_SKILL, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to skill [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// remove from live players
 	DL_FOREACH2(player_character_list, chiter, next_plr) {
 		found = FALSE;
@@ -3943,6 +3963,12 @@ void olc_delete_skill(char_data *ch, any_vnum vnum) {
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
 				msg_to_desc(desc, "A skill required by the social you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_SKILL, vnum);
+			if (found) {
+				msg_to_desc(desc, "Skill [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
 			}
 		}
 	}

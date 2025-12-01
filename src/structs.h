@@ -3058,7 +3058,7 @@ typedef enum {
 #define ROOM_EXTRA_MINE_AMOUNT  1
 #define ROOM_EXTRA_FIRE_REMAINING  2
 #define ROOM_EXTRA_SEED_TIME  3
-	#define ROOM_EXTRA_UNUSED4  4	// formerly tavern type
+#define ROOM_EXTRA_MINE_ORIGINAL_AMOUNT  4
 	#define ROOM_EXTRA_UNUSED5  5	// formerly tavern brewing time
 	#define ROOM_EXTRA_UNUSED6  6	// formerly tavern available time
 	#define ROOM_EXTRA_UNUSED  7	// formerly ruins-icon
@@ -5885,6 +5885,9 @@ struct faction_data {
 	int starting_rep;	// REP_ initial reputation for players
 	struct faction_relation *relations;	// hash table
 	
+	// optional traits
+	int rep_loss_per_kill;	// amount of change when killing a mob of this faction
+	
 	// lists
 	UT_hash_handle hh;	// faction_table hash handle
 	UT_hash_handle sorted_hh;	// sorted_factions hash handle
@@ -6485,6 +6488,8 @@ struct room_data {
 	struct shared_room_data *shared;	// data that could be local OR from the map tile
 	sh_int light;  // number of light sources
 	int exits_here;	// number of rooms that have complex->exits to this one
+	ubyte small_vehicles;	// live count of how many small vehicles are present
+	ubyte vehicle_size;	// live total of vehicle sizes in the room
 	
 	struct affected_type *af;  // room affects
 	

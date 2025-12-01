@@ -1374,7 +1374,7 @@ bool validate_vehicle_move(char_data *ch, vehicle_data *veh, room_data *to_room,
 	}
 	
 	// barrier?
-	if (ROOM_BLD_FLAGGED(to_room, BLD_BARRIER)) {
+	if (ROOM_BLD_FLAGGED(to_room, BLD_BARRIER) && (!VEH_FLAGGED(veh, VEH_FLYING) || ROOM_AFF_FLAGGED(to_room, ROOM_AFF_NO_FLY))) {
 		if (ch) {
 			act("$V can't move that close to the barrier.", FALSE, ch, NULL, veh, TO_CHAR | ACT_VEH_VICT);
 		}
@@ -2373,6 +2373,9 @@ ACMD(do_exit) {
 	else if (GET_POS(ch) < POS_STANDING) {
 		// if we got here but aren't standing, alert
 		send_low_pos_msg(ch);
+	}
+	else if (ROOM_BLD_FLAGGED(to_room, BLD_BARRIER)) {
+		msg_to_char(ch, "You cannot exit onto a barrier.\r\n");
 	}
 	else {
 		perform_move(ch, NO_DIR, to_room, MOVE_EXIT);

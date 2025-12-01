@@ -239,6 +239,7 @@
 #define GET_TRIG_VARS(t)		((t)->var_list)
 #define GET_TRIG_WAIT(t)		((t)->wait_event)
 #define GET_TRIG_DEPTH(t)		((t)->depth)
+#define GET_TRIG_LINKS(t)		((t)->links)
 #define GET_TRIG_LOOPS(t)		((t)->loops)
 
 #define SCRIPT(o)				((o)->script)
@@ -288,6 +289,13 @@ struct trig_var_data {
 	struct trig_var_data *next;
 };
 
+// links to other things to help with fullsearch
+struct trig_link {
+	bitvector_t type;		// OLC_ type
+	any_vnum vnum;		// vnum of something in that type
+	struct trig_link *next;
+};
+
 /* structure for triggers */
 struct trig_data {
 	trig_vnum vnum;	// trigger's vnum
@@ -307,6 +315,7 @@ struct trig_data {
 	
 	struct script_data *attached_to;	// reference to what I'm on
 	struct dg_owner_purged_tracker_type *purge_tracker;	// detects if the attached thing is purged
+	struct trig_link *links;	// LL: things I reference
 	
 	struct trig_data *next;	// next on assigned SCRIPT()
 	struct trig_data *next_in_world;    /* next in the global trigger list */
@@ -506,9 +515,12 @@ void remove_all_triggers(void *thing, int type);
 bool remove_live_script_by_vnum(struct script_data *script, trig_vnum vnum);
 void free_proto_scripts(struct trig_proto_list **list);
 void free_trigger(trig_data *trig);
+void free_trigger_links(struct trig_link **list);
 void free_var_el(struct trig_var_data *var);
 struct trig_proto_list *copy_trig_protos(struct trig_proto_list *list);
 void copy_script(void *source, void *dest, int type);
+struct trig_link *copy_trigger_links(struct trig_link *from);
+int sort_trigger_links(struct trig_link *a, struct trig_link *b);
 void trig_data_copy(trig_data *this_data, const trig_data *trg);
 void trig_data_init(trig_data *this_data);
 
@@ -518,6 +530,7 @@ void add_trigger_to_global_lists(trig_data *trig);
 bool has_trigger(struct script_data *sc, any_vnum vnum);
 trig_data *read_trigger(int nr);
 void add_var(struct trig_var_data **var_list, char *name, char *value, int id);
+bool delete_trigger_links(trig_data *trig, bitvector_t type, any_vnum vnum);
 room_data *dg_room_of_obj(obj_data *obj);
 room_data *do_dg_add_room_dir(room_data *from, int dir, bld_data *bld);
 void do_dg_affect(void *go, struct script_data *sc, trig_data *trig, int type, char *cmd);
@@ -537,6 +550,7 @@ bool script_message_should_queue(char **string);
 void script_modify(char *argument);
 void sub_write(char *arg, char_data *ch, byte find_invis, int targets);
 void sub_write_to_room(char *str, room_data *room, bool use_queue);
+bool trigger_has_link(trig_data *trig, bitvector_t type, any_vnum vnum);
 
 void obj_command_interpreter(obj_data *obj, char *argument);
 void vehicle_command_interpreter(vehicle_data *veh, char *argument);

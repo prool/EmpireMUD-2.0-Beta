@@ -776,6 +776,13 @@ Military:  5
 A mountain outpost is a safe place constructed in the middle of the mountains.
 It has no other purpose.
 #
+MOUNTAINTERRACE "MOUNTAIN TERRACE" "MOUNTAIN FARMING" TERRACE TERRACES TERRACING
+
+&y/\-\ /-_\&0  Mountain Terrace  (Mountain Engineering goal)
+
+By digging and reinforcing stepped terraces in the mountainside, you gain the
+ability to plant farms along the edges of your mountain ranges.
+#
 MOUNTAINWELL "MOUNTAIN WELL"
 
 &y(&c~~&y)&0  Mountain Well  (Mountain Engineering goal)

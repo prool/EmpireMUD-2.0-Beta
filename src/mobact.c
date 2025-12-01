@@ -567,6 +567,10 @@ EVENTFUNC(mob_move_event) {
 		// things that cancel movement entirely
 		remove = TRUE;
 	}
+	else if (MOB_FLAGGED(mob, MOB_ANIMAL | MOB_MOUNTABLE) && room_has_function_and_city_ok(NULL, IN_ROOM(mob), FNC_STABLE)) {
+		// animals and mounts stay in stables
+		remove = TRUE;
+	}
 	else if ((MOB_FLAGGED(mob, MOB_PURSUE) && MOB_PURSUIT(mob)) || MOB_IS_BUSY(mob)) {
 		remove = FALSE;	// various busy flags -- re-enqueue
 	}

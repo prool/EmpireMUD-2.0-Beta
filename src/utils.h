@@ -453,7 +453,7 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 #define EFFECTIVELY_SWIMMING(ch)  (EFFECTIVELY_SWIMMING_WITHOUT_MOUNT(ch) || EFFECTIVELY_FLYING(ch) || (IS_RIDING(ch) && (MOUNT_FLAGGED((ch), MOUNT_AQUATIC) || has_player_tech((ch), PTECH_RIDING_UPGRADE))))
 #define FREE_TO_CARRY(obj)  (IS_COINS(obj) || GET_OBJ_REQUIRES_QUEST(obj) != NOTHING)
 #define HAS_INFRA(ch)  AFF_FLAGGED(ch, AFF_INFRAVISION)
-#define HAS_WATERWALKING(ch)  (AFF_FLAGGED((ch), AFF_WATERWALKING) || MOUNT_FLAGGED((ch), MOUNT_WATERWALKING))
+#define HAS_WATERWALKING(ch)  (AFF_FLAGGED((ch), AFF_WATERWALKING) || (IS_RIDING(ch) && MOUNT_FLAGGED((ch), MOUNT_WATERWALKING)))
 #define IS_HASTENED(ch)  (AFF_FLAGGED((ch), AFF_HASTE) && !AFF_FLAGGED((ch), AFF_SLOW))
 #define IS_HUMAN(ch)  (!IS_VAMPIRE(ch))
 #define IS_MAGE(ch)  (IS_NPC(ch) ? MOB_FLAGGED((ch), MOB_CASTER) : (has_skill_flagged((ch), SKILLF_CASTER) > 0))
@@ -725,7 +725,9 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 #define FCT_MIN_REP(fct)  ((fct)->min_rep)
 #define FCT_NAME(fct)  ((fct)->name)
 #define FCT_RELATIONS(fct)  ((fct)->relations)
+#define FCT_REP_LOSS_PER_KILL(fct)  ((fct)->rep_loss_per_kill)
 #define FCT_STARTING_REP(fct)  ((fct)->starting_rep)
+
 
 // helpers
 #define FACTION_FLAGGED(fct, flag)  IS_SET(FCT_FLAGS(fct), (flag))
@@ -1484,6 +1486,8 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define ROOM_PATHFIND_KEY(room)  ((room)->pathfind_key)
 #define ROOM_PEOPLE(room)  ((room)->people)
 #define ROOM_UNLOAD_EVENT(room)  ((room)->unload_event)
+#define ROOM_SMALL_VEHICLES(room)  ((room)->small_vehicles)
+#define ROOM_VEHICLE_SIZE(room)  ((room)->vehicle_size)
 #define ROOM_VEHICLES(room)  ((room)->vehicles)
 #define SECT(room)  ((room)->sector_type)
 #define GET_EXITS_HERE(room)  ((room)->exits_here)
@@ -1726,9 +1730,9 @@ static inline int GET_SEASON(room_data *room) {
 #define REAL_HSSH(ch)  (MOB_FLAGGED((ch), MOB_PLURAL) ? "they" : (GET_REAL_SEX(ch) ? (GET_REAL_SEX(ch) == SEX_MALE ? "he" :"she") : "it"))
 #define REAL_HMHR(ch)  (MOB_FLAGGED((ch), MOB_PLURAL) ? "them" : (GET_REAL_SEX(ch) ? (GET_REAL_SEX(ch) == SEX_MALE ? "him":"her") : "it"))
 
-#define AN(string)  (strchr("aeiouAEIOU", *string) ? "an" : "a")
-#define SANA(obj)  (strchr("aeiouyAEIOUY", *(obj)->name) ? "an" : "a")
-#define ANA(obj)  (strchr("aeiouyAEIOUY", *(obj)->name) ? "An" : "A")
+#define AN(string)  (strchr("aeiouAEIOU", *(string)) ? "an" : "a")
+#define SANA(obj)  (strchr("aeiouyAEIOUY", *((obj)->name)) ? "an" : "a")
+#define ANA(obj)  (strchr("aeiouyAEIOUY", *((obj)->name)) ? "An" : "A")
 
 #define LOWER(c)  (((c)>='A'  && (c) <= 'Z') ? ((c)+('a'-'A')) : (c))
 #define UPPER(c)  (((c)>='a'  && (c) <= 'z') ? ((c)+('A'-'a')) : (c) )
@@ -2031,6 +2035,7 @@ bool wake_and_stand(char_data *ch);
 // resource functions from utils.c
 void add_to_resource_list(struct resource_data **list, int type, any_vnum vnum, int amount, int misc);
 void apply_resource(char_data *ch, struct resource_data *res, struct resource_data **list, obj_data *use_obj, int msg_type, vehicle_data *crafting_veh, struct resource_data **build_used_list);
+int count_resource_list_quantity(struct resource_data *list);
 void extract_resources(char_data *ch, struct resource_data *list, bool ground, struct resource_data **build_used_list);
 struct resource_data *get_next_resource(char_data *ch, struct resource_data *list, bool ground, bool left2right, obj_data **found_obj);
 char *get_resource_name(struct resource_data *res);
@@ -2138,6 +2143,7 @@ void end_action(char_data *ch);
 obj_data *has_tool(char_data *ch, bitvector_t flags);
 obj_data *has_all_tools(char_data *ch, bitvector_t flags);
 void process_build_action(char_data *ch);
+void show_prospect_result(char_data *ch, room_data *room);
 void start_action(char_data *ch, int type, int timer);
 void stop_room_action(room_data *room, int action);
 

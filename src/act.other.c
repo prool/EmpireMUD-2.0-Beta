@@ -479,7 +479,7 @@ void perform_alternate(char_data *old, char_data *new) {
 */
 void perform_herd(char_data *ch, char_data *mob, room_data *to_room, int dir, vehicle_data *into_veh) {
 	room_data *was_in;
-	bool out;
+	bool out = (dir == NO_DIR && !into_veh);
 	
 	if (!mob || !to_room) {
 		msg_to_char(ch, "Herd failed for unknown reason.\r\n");
@@ -495,11 +495,14 @@ void perform_herd(char_data *ch, char_data *mob, room_data *to_room, int dir, ve
 	else if (ROOM_SECT_FLAGGED(to_room, SECTF_ROUGH) && !MOB_FLAGGED(mob, MOB_MOUNTAINWALK)) {
 		msg_to_char(ch, "You find it impossible to herd it into that terrain.\r\n");
 	}
-	else if (ROOM_IS_CLOSED(to_room) && !ROOM_BLD_FLAGGED(to_room, BLD_HERD))
+	else if (ROOM_IS_CLOSED(to_room) && !ROOM_BLD_FLAGGED(to_room, BLD_HERD)) {
 		msg_to_char(ch, "You can't herd an animal in there.\r\n");
+	}
+	else if (out && ROOM_BLD_FLAGGED(to_room, BLD_BARRIER)) {
+		msg_to_char(ch, "You can't herd anything out onto a barrier.\r\n");
+	}
 	else {
 		was_in = IN_ROOM(ch);
-		out = (dir == NO_DIR && !into_veh);
 		
 		// update spawn time: delay despawn due to interaction
 		if (MOB_FLAGGED(mob, MOB_SPAWNED)) {

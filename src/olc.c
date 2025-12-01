@@ -276,6 +276,7 @@ OLC_MODULE(fedit_maxreputation);
 OLC_MODULE(fedit_minreputation);
 OLC_MODULE(fedit_name);
 OLC_MODULE(fedit_relation);
+OLC_MODULE(fedit_rep_per_kill);
 OLC_MODULE(fedit_startingreputation);
 
 // generic modules
@@ -558,6 +559,7 @@ OLC_MODULE(tedit_argtype);
 OLC_MODULE(tedit_attaches);
 OLC_MODULE(tedit_commands);
 OLC_MODULE(tedit_costs);
+OLC_MODULE(tedit_links);
 OLC_MODULE(tedit_location);
 OLC_MODULE(tedit_name);
 OLC_MODULE(tedit_percent);
@@ -854,6 +856,7 @@ const struct olc_command_data olc_data[] = {
 	{ "minreputation", fedit_minreputation, OLC_FACTION, OLC_CF_EDITOR },
 	{ "name", fedit_name, OLC_FACTION, OLC_CF_EDITOR },
 	{ "relationship", fedit_relation, OLC_FACTION, OLC_CF_EDITOR },
+	{ "repperkill", fedit_rep_per_kill, OLC_FACTION, OLC_CF_EDITOR },
 	{ "startingreputation", fedit_startingreputation, OLC_FACTION, OLC_CF_EDITOR },
 	
 	// generic commands
@@ -1144,6 +1147,7 @@ const struct olc_command_data olc_data[] = {
 	{ "attaches", tedit_attaches, OLC_TRIGGER, OLC_CF_EDITOR },
 	{ "commands", tedit_commands, OLC_TRIGGER, OLC_CF_EDITOR },
 	{ "costs", tedit_costs, OLC_TRIGGER, OLC_CF_EDITOR },
+	{ "links", tedit_links, OLC_TRIGGER, OLC_CF_EDITOR },
 	{ "location", tedit_location, OLC_TRIGGER, OLC_CF_EDITOR },
 	{ "name", tedit_name, OLC_TRIGGER, OLC_CF_EDITOR },
 	{ "percent", tedit_percent, OLC_TRIGGER, OLC_CF_EDITOR },
@@ -5454,6 +5458,123 @@ int find_olc_type(char *name) {
 		}
 	}
 	return type;
+}
+
+
+/**
+* Gets the name of a thing using a single OLC type flag and a vnum. Note that
+* if you accidentally provide more than 1 flag, it will only name the first.
+*
+* @param bitvector_t type Exactly 1 OLC_ type flag.
+* @param any_vnum vnum A vnum for that type.
+*/
+const char *get_name_by_olc_type(bitvector_t type, any_vnum vnum) {
+	// OLC_x: name lookups by type
+	if (IS_SET(type, OLC_CRAFT)) {
+		craft_data *craft = craft_proto(vnum);
+		return craft ? GET_CRAFT_NAME(craft) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_MOBILE)) {
+		return get_mob_name_by_proto(vnum, FALSE);
+	}
+	else if (IS_SET(type, OLC_OBJECT)) {
+		return get_obj_name_by_proto(vnum);
+	}
+	else if (IS_SET(type, OLC_MAP)) {
+		return "Unknown";
+	}
+	else if (IS_SET(type, OLC_BUILDING)) {
+		bld_data *bld = building_proto(vnum);
+		return bld ? GET_BLD_NAME(bld) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_TRIGGER)) {
+		trig_data *trig = real_trigger(vnum);
+		return trig ? GET_TRIG_NAME(trig) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_CROP)) {
+		crop_data *crop = crop_proto(vnum);
+		return crop ? GET_CROP_NAME(crop) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_SECTOR)) {
+		sector_data *sect = sector_proto(vnum);
+		return sect ? GET_SECT_NAME(sect) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_ADVENTURE)) {
+		adv_data *adv = adventure_proto(vnum);
+		return adv ? GET_ADV_NAME(adv) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_ROOM_TEMPLATE)) {
+		room_template *rmt = room_template_proto(vnum);
+		return rmt ? GET_RMT_TITLE(rmt) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_GLOBAL)) {
+		struct global_data *glb = global_proto(vnum);
+		return glb ? GET_GLOBAL_NAME(glb) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_BOOK)) {
+		book_data *book = book_proto(vnum);
+		return book ? BOOK_TITLE(book) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_AUGMENT)) {
+		augment_data *aug = augment_proto(vnum);
+		return aug ? GET_AUG_NAME(aug) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_ARCHETYPE)) {
+		archetype_data *arch = archetype_proto(vnum);
+		return arch ? GET_ARCH_NAME(arch) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_ABILITY)) {
+		ability_data *abil = find_ability_by_vnum(vnum);
+		return abil ? ABIL_NAME(abil) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_CLASS)) {
+		class_data *cls = find_class_by_vnum(vnum);
+		return cls ? CLASS_NAME(cls) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_SKILL)) {
+		skill_data *skill = find_skill_by_vnum(vnum);
+		return skill ? SKILL_NAME(skill) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_VEHICLE)) {
+		return get_vehicle_name_by_proto(vnum);
+	}
+	else if (IS_SET(type, OLC_MORPH)) {
+		morph_data *morph = morph_proto(vnum);
+		return morph ? MORPH_SHORT_DESC(morph) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_QUEST)) {
+		quest_data *quest = quest_proto(vnum);
+		return quest ? QUEST_NAME(quest) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_SOCIAL)) {
+		social_data *soc = social_proto(vnum);
+		return soc ? SOC_NAME(soc) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_FACTION)) {
+		return get_faction_name_by_vnum(vnum);
+	}
+	else if (IS_SET(type, OLC_GENERIC)) {
+		return get_generic_name_by_vnum(vnum);
+	}
+	else if (IS_SET(type, OLC_SHOP)) {
+		shop_data *shop = real_shop(vnum);
+		return shop ? SHOP_NAME(shop) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_PROGRESS)) {
+		progress_data *prg = real_progress(vnum);
+		return prg ? PRG_NAME(prg) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_EVENT)) {
+		event_data *event = find_event_by_vnum(vnum);
+		return event ? EVT_NAME(event) : "Unknown";
+	}
+	else if (IS_SET(type, OLC_ATTACK)) {
+		attack_message_data *amd = real_attack_message(vnum);
+		return amd ? ATTACK_NAME(amd) : "Unknown";
+	}
+	else {
+		return "ERROR";
+	}
 }
 
 

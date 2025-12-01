@@ -2059,6 +2059,7 @@ void olc_search_vehicle(char_data *ch, any_vnum vnum) {
 	room_template *rmt, *next_rmt;
 	social_data *soc, *next_soc;
 	shop_data *shop, *next_shop;
+	trig_data *trig, *next_trig;
 	struct adventure_spawn *asp;
 	struct bld_relation *relat;
 	bld_data *bld, *next_bld;
@@ -2188,6 +2189,14 @@ void olc_search_vehicle(char_data *ch, any_vnum vnum) {
 		if (any) {
 			++found;
 			build_page_display(ch, "SOC [%5d] %s", SOC_VNUM(soc), SOC_NAME(soc));
+		}
+	}
+	
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_VEHICLE, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
 		}
 	}
 	
@@ -3615,6 +3624,7 @@ void olc_delete_vehicle(char_data *ch, any_vnum vnum) {
 	shop_data *shop, *next_shop;
 	bld_data *bld, *next_bld;
 	obj_data *obj, *next_obj;
+	trig_data *trig, *next_trig;
 	descriptor_data *desc;
 	char name[256];
 	bool found;
@@ -3756,6 +3766,16 @@ void olc_delete_vehicle(char_data *ch, any_vnum vnum) {
 		}
 	}
 	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_VEHICLE, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to vehicle [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
 	// update vehicles
 	HASH_ITER(hh, vehicle_table, iter, next_iter) {
 		found = delete_from_interaction_list(&VEH_INTERACTIONS(iter), TYPE_VEH, vnum);
@@ -3849,6 +3869,12 @@ void olc_delete_vehicle(char_data *ch, any_vnum vnum) {
 			if (found) {
 				SET_BIT(SOC_FLAGS(GET_OLC_SOCIAL(desc)), SOC_IN_DEVELOPMENT);
 				msg_to_desc(desc, "A vehicle required by the social you are editing was deleted.\r\n");
+			}
+		}
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_VEHICLE, vnum);
+			if (found) {
+				msg_to_desc(desc, "Vehicle [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
 			}
 		}
 		if (GET_OLC_VEHICLE(desc)) {

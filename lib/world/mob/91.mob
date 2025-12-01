@@ -65,7 +65,7 @@ anaconda giant snake~
 a giant anaconda~
 A giant anaconda is draping from the tree!
 ~
-100 150 cdgjo cs 4
+100 150 cdgjo csU 4
 0 0 5 5 -1 -1
 D
    The snake is as long as a boat, and as big around as a dog. It's capable of
@@ -492,7 +492,7 @@ scorpion giant~
 a giant scorpion~
 A giant scorpion skitters toward cover.
 ~
-5 15 djoz c 1
+5 15 djoz cU 1
 0 0 8 3 -1 -1
 D
 Though giant for a scorpion, it's still quite small.
@@ -1031,7 +1031,7 @@ whale right huge~
 the right whale~
 A huge right whale surfaces nearby!
 ~
-30 50 djloy c 6
+30 50 djloy cU 6
 0 0 6 5 -1 -1
 D
    This type of whale is known as a the right whale to hunt. The whale slowly
@@ -1046,7 +1046,7 @@ whale fin gigantic~
 the fin whale~
 A gigantic fin whale swims up alongside you!
 ~
-30 50 djloy c 6
+30 50 djloy cU 6
 0 0 6 5 -1 -1
 D
    Cruising just below the surface, the fin whale is barely visible as it pulls
@@ -1062,7 +1062,7 @@ shark whale huge spotted~
 the whale shark~
 A huge, spotted whale shark swims just below the surface.
 ~
-30 50 djloy c 5
+30 50 djloy cU 5
 0 0 6 5 -1 -1
 D
    The whale shark is unmistakably a fish, and yet it is the size of a whale!
@@ -1080,7 +1080,7 @@ shark basking~
 the basking shark~
 A basking shark swims slowly, with its mouth wide open.
 ~
-30 50 djloy c 5
+30 50 djloy cU 5
 0 0 6 5 -1 -1
 D
    Though large, the basking shark isn't exceptionally big, for a shark. It
@@ -1226,7 +1226,7 @@ narwhal narwal huge~
 a narwhal~
 A huge narwhal breaks the surface of the water.
 ~
-50 75 djloy c 4
+50 75 djloy cU 4
 0 0 6 5 -1 -1
 D
    The narwhal is smaller than most whales you've seen, but still larger than
@@ -1334,7 +1334,7 @@ seal elephant large~
 a large elephant seal~
 A large elephant seal bellows nearby.
 ~
-75 100 adjoA c 4
+75 100 adjoA cU 4
 0 0 13 5 -1 -1
 D
    Although it's easily the largest seal you've ever seen, the most impressive

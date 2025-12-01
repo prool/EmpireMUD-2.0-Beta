@@ -1393,6 +1393,9 @@ ACMD(do_disembark) {
 	else if (VEH_FLAGGED(veh, VEH_BUILDING)) {
 		msg_to_char(ch, "You can only disembark from vehicles. Try 'exit'.\r\n");
 	}
+	else if (ROOM_BLD_FLAGGED(to_room, BLD_BARRIER)) {
+		msg_to_char(ch, "You cannot disembark on a barrier.\r\n");
+	}
 	else {
 		// shares MOVE_EXIT, which overrides the text with 'disembark' if it's a non-building vehicle
 		perform_move(ch, NO_DIR, to_room, MOVE_EXIT);
@@ -2483,6 +2486,9 @@ ACMD(do_unload_vehicle) {
 	}
 	else if (!VEH_IS_COMPLETE(cont)) {
 		act("You must finish constructing $V before anything can be unloaded.", FALSE, ch, NULL, cont, TO_CHAR | ACT_VEH_VICT);
+	}
+	else if (ROOM_BLD_FLAGGED(IN_ROOM(cont), BLD_BARRIER)) {
+		msg_to_char(ch, "You can't unload anything on a barrier.\r\n");
 	}
 	else if (VEH_FLAGGED(cont, VEH_ON_FIRE)) {
 		msg_to_char(ch, "You can't load anything while there's a fire!\r\n");

@@ -1492,6 +1492,7 @@ void b5_47_mine_update(void) {
 		if (!(room = tile->room) || !room_has_function_and_city_ok(ROOM_OWNER(room), room, FNC_MINE)) {
 			remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_MINE_GLB_VNUM);
 			remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_MINE_AMOUNT);
+			remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT);
 			remove_extra_data(&tile->shared->extra_data, ROOM_EXTRA_PROSPECT_EMPIRE);
 		}
 	}
@@ -4406,6 +4407,7 @@ PLAYER_UPDATE_FUNC(b5_189_molds_update_plr) {
 }
 
 
+// b5.194: adjust tropics for new terrains
 void b5_194_tropical_terrain_overhaul(void) {
 	struct map_data *map;
 	int iter;
@@ -4619,6 +4621,44 @@ void b5_194_tropical_terrain_overhaul(void) {
 }
 
 
+// b5.196 pt 1: Set fullness data on mine tiles
+void b5_196_mine_data(void) {
+	int amt;
+	room_data *iter;
+	struct map_data *map;
+	
+	// land_map
+	LL_FOREACH(land_map, map) {
+		if ((amt = get_extra_data(map->shared->extra_data, ROOM_EXTRA_MINE_AMOUNT)) > 0) {
+			set_extra_data(&map->shared->extra_data, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT, amt);
+			request_world_save(map->vnum, WSAVE_ROOM | WSAVE_MAP);
+		}
+	}
+	
+	// interior
+	DL_FOREACH2(interior_room_list, iter, next_interior) {
+		if ((amt = get_room_extra_data(iter, ROOM_EXTRA_MINE_AMOUNT)) > 0) {
+			set_room_extra_data(iter, ROOM_EXTRA_MINE_ORIGINAL_AMOUNT, amt);
+		}
+	}
+}
+
+
+// b5.196 pt 2: Additional Mountain Engineering benefit
+void b5_196_mountain_eng(void) {
+	empire_data *emp, *next_emp;
+	
+	const any_vnum MOUNTAIN_ENGINEERING_PROG = 1904;
+	const any_vnum TERRACED_MOUNTAIN_CRAFT = 5222;
+	
+	HASH_ITER(hh, empire_table, emp, next_emp) {
+		if (empire_has_completed_goal(emp, MOUNTAIN_ENGINEERING_PROG)) {
+			add_learned_craft_empire(emp, TERRACED_MOUNTAIN_CRAFT);
+		}
+	}
+}
+
+
 // ADD HERE, above: more beta 5 update functions
 
 
@@ -4737,6 +4777,8 @@ const struct {
 	{ "b5.183a", b5_183_molten_fiend_update, NULL, "Updating Molten Fiend adventure from 281 to 18000" },
 	{ "b5.189", b5_189_molds_update, b5_189_molds_update_plr, "Updating old molds to use trigger 12144" },
 	{ "b5.194", b5_194_tropical_terrain_overhaul, NULL, "Updating tropical tiles to new terrain vnums 200-260" },
+	{ "b5.196", b5_196_mine_data, NULL, "Updating mines with fullness data" },
+	{ "b5.196a", b5_196_mountain_eng, NULL, "Updating empires with Mountain Engineering" },
 	
 	// ADD HERE, above: more beta 5 update lines
 	

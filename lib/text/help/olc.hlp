@@ -5056,6 +5056,18 @@ rep with related factions when at these limits.
 
 See also: OLC FACTIONS, OLC LEVELS, REPUTATIONS
 #d
+"FEDIT REPPERKILL" "FEDIT REP PER KILL" "REP PER KILL" "REPUTATION PER KILL" "FEDIT REP-FROM-KILLS" REP-FROM-KILLS
+
+Usage:  .repperkill <number>
+        .flags add rep-from-kills
+
+By adding the REP-FROM-KILLS flag and setting the repperkill (reputation per
+kill) property, you can control how many reputation points are lost from
+killing a mob of this faction, or how many are gained for a rival faction if
+you kill a member of this faction.
+
+See also: OLC FACTIONS, FEDIT FLAGS, REPUTATIONS
+#d
 "FEDIT RELATION" "FEDIT RELATIONS" "FEDIT RELATIONSHIPS" "RELATIONSHIP FLAGS"
 
 Usage:  .relation <name/vnum> flags [which flags]
@@ -9989,6 +10001,27 @@ Examples:
  > .t fullsearch -type Random -type Global
  > .t fullsearch i11234 -vmin 11200 -vmax 11299
  > .t fullsearch %force%
+#d
+"TRIGEDIT LINKS"
+
+Usage:  .link add <type> <vnum>
+        .link remove <type> <vnum | all>
+        .link remove all
+
+Trigger links are used internally to help the game detect which other 'things'
+a trigger is connected to. This is primarily used with the '.olc search' system
+which would have trouble finding linked items using the trigger command text.
+
+For example, if trigger 9600 has a link to generic 9602:
+ > .gen search 9602
+ Occurrences of generic 9602 (struggling):
+ TRG [ 9104] Snake: Constrict
+ TRG [ 9108] Snake: Constrict Damage
+ TRG [ 9600] SCF Script Fight: Setup dodge, interrupt, struggle
+ TRG [ 9602] SCF Script Fight: Struggle to get free
+ TRG [ 9603] SCF Script Fight: Check struggle and remove
+ 
+See also: OLC TRIGGERS
 #d
 "TRIGEDIT NAME"
 

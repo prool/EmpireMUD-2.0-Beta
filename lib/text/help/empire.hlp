@@ -920,6 +920,7 @@ Rewards the following buildings:
   &y[**]&0  mountainhall
   &y(==)&0  mountainlodge
   &y.&0/\&y.&0  mountainoutpost
+  &y/\-\&0  mountainterrace
   &y(&c~~&y)&0  mountainwell
   &y/&0OO&y\&0  Tunnel  (tunnel command)
   &y(FF)&0  volcanicforge

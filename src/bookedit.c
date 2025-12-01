@@ -310,8 +310,11 @@ void olc_fullsearch_book(char_data *ch, char *argument) {
 */
 void olc_delete_book(char_data *ch, book_vnum vnum) {
 	book_data *book;
+	descriptor_data *desc;
+	trig_data *trig, *next_trig;
 	char name[256];
 	int author;
+	bool found;
 	
 	if (!(book = book_proto(vnum))) {
 		msg_to_char(ch, "There is no such book %d.\r\n", vnum);
@@ -329,6 +332,26 @@ void olc_delete_book(char_data *ch, book_vnum vnum) {
 	// save without it
 	author = BOOK_AUTHOR(book);
 	save_author_books(author);
+	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_BOOK, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to book [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
+	// live olc editors
+	LL_FOREACH(descriptor_list, desc) {
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_BOOK, vnum);
+			if (found) {
+				msg_to_desc(desc, "Book [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
+			}
+		}
+	}
 
 	if (ch) {	
 		syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted book %d %s", GET_NAME(ch), vnum, name);

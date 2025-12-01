@@ -22,6 +22,7 @@
 #include "skills.h"
 #include "olc.h"
 #include "constants.h"
+#include "dg_scripts.h"
 
 /**
 * Contents:
@@ -758,6 +759,7 @@ char *list_one_class(class_data *cls, bool detail) {
 */
 void olc_search_class(char_data *ch, any_vnum vnum) {
 	class_data *cls = find_class_by_vnum(vnum);
+	trig_data *trig, *next_trig;
 	int found;
 	
 	if (!cls) {
@@ -768,7 +770,13 @@ void olc_search_class(char_data *ch, any_vnum vnum) {
 	found = 0;
 	build_page_display(ch, "Occurrences of class %d (%s):", vnum, CLASS_NAME(cls));
 	
-	// classes are not actually used anywhere else
+	// triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		if (trigger_has_link(trig, OLC_CLASS, vnum)) {
+			++found;
+			build_page_display(ch, "TRG [%5d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig));
+		}
+	}
 	
 	if (found > 0) {
 		build_page_display(ch, "%d location%s shown", found, PLURAL(found));
@@ -1219,7 +1227,10 @@ class_data *create_class_table_entry(any_vnum vnum) {
 void olc_delete_class(char_data *ch, any_vnum vnum) {
 	char_data *chiter;
 	class_data *cls;
+	descriptor_data *desc;
+	trig_data *trig, *next_trig;
 	char name[256];
+	bool found;
 	
 	if (!(cls = find_class_by_vnum(vnum))) {
 		msg_to_char(ch, "There is no such class %d.\r\n", vnum);
@@ -1245,6 +1256,26 @@ void olc_delete_class(char_data *ch, any_vnum vnum) {
 	// save index and class file now
 	save_index(DB_BOOT_CLASS);
 	save_library_file_for_vnum(DB_BOOT_CLASS, vnum);
+	
+	// update triggers
+	HASH_ITER(hh, trigger_table, trig, next_trig) {
+		found = trigger_has_link(trig, OLC_CLASS, vnum);
+		if (found) {
+			syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: Trigger %d %s lost link to class [%d] %s", GET_TRIG_VNUM(trig), GET_TRIG_NAME(trig), vnum, name);
+			// Doesn't delete
+			// save_library_file_for_vnum(DB_BOOT_TRG, GET_TRIG_VNUM(trig));
+		}
+	}
+	
+	// live olc editors
+	LL_FOREACH(descriptor_list, desc) {
+		if (GET_OLC_TRIGGER(desc)) {
+			found = trigger_has_link(GET_OLC_TRIGGER(desc), OLC_CLASS, vnum);
+			if (found) {
+				msg_to_desc(desc, "Class [%d] %s was deleted but remains in the link list for the trigger you're editing.", vnum, name);
+			}
+		}
+	}
 	
 	syslog(SYS_OLC, GET_INVIS_LEV(ch), TRUE, "OLC: %s has deleted class %d %s", GET_NAME(ch), vnum, name);
 	msg_to_char(ch, "Class %d (%s) deleted.\r\n", vnum, name);
