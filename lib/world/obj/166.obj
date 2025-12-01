@@ -220,6 +220,22 @@ in your empire and 'craft giant straw goat'.
 0 0
 Q 16660
 S
+#16617
+winds winter~
+the winds of winter~
+The winds of winter blow in the air.~
+   It's all quite ethereal, this. It's a gust of wind you can pick up and carry
+with you, an ephemeral reminder of winters past. A pleasant chill runs from
+your toes to your nose as you touch the wind.
+   Type 'use winds' to teleport to the nearest North Portal, if the season is
+right. When you're done there, use it again to return home. But it will only
+work in a city.
+~
+3 p a 0 0 2
+0 0 0
+10 0
+T 16654
+S
 #16618
 outfit reindeer set~
 a reindeer outfit set~

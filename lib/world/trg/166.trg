@@ -2655,6 +2655,83 @@ elseif %move% == 3
 end
 nop %self.remove_mob_flag(NO-ATTACK)%
 ~
+#16654
+Winds of Winter teleporter~
+1 c 2 3
+L i 10700
+L j 10701
+L w 16654
+use~
+set room %actor.room%
+if %actor.obj_target(%arg.argument1%)% != %self%
+  return 0
+  halt
+elseif %actor.fighting% || %actor.disabled% || %actor.position% == Sleeping
+  %send% %actor% You can't use the winds of winter right now.
+  halt
+elseif !%actor.can_teleport_room(%room%)%
+  %send% %actor% You can't use the winds of winter here.
+  halt
+end
+if %room.template% >= 10700 && %room.template% <= 10706
+  * TELEPORT OUT
+  if %actor.adventure_summoned_from%
+    %send% %actor% You throw the winds of winter into the air and are whisked back whence you came!
+    %echoaround% %actor% ~%actor% throws the winds of winter into the air...
+    nop %actor.end_adventure_summon%
+    * friends
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %ch.is_npc% && %ch.leader% == %actor%
+        %at% %room% %echo% ~%ch% is whisked away!
+        %teleport% %ch% %actor.room%
+        %echo% ~%ch% arrives in a whirl of wind!
+      end
+      set ch %next_ch%
+    done
+  else
+    %send% %actor% You can only use this to return if you used it to get here or were summoned in.
+  end
+elseif %actor.cooldown(16654)% > 0
+  %send% %actor% You can't use that until your %cooldown.16654% cooldown expires.
+elseif %actor.adventure_summoned_from%
+  %send% %actor% You can't use the winds of winter while adventure-summoned.
+else
+  * TELEPORT IN
+  set to_room %instance.nearest_rmt(10701)%
+  if !%to_room%
+    %send% %actor% There isn't a North Portal open to teleport to.
+    halt
+  elseif !%room.in_city%
+    %send% %actor% You need to use the winds of winter from a claimed city location.
+    halt
+  elseif !%actor.canuseroom_ally(%room%)%
+    %send% %actor% You can't use that in this empire's territory.
+    halt
+  end
+  * ok
+  nop %actor.mark_adventure_summoned_from%
+  %send% %actor% You throw the winds of winter into the air and are whisked away!
+  %echoaround% %actor% ~%actor% throws the winds of winter into the air and is whisked away!
+  %teleport% %actor% %to_room%
+  %echoaround% %actor% ~%actor% arrives on a gust of wintry wind!
+  %load% obj 9680 %actor% inv
+  nop %actor.set_cooldown(16654,900)%
+  nop %actor.link_adventure_summon%
+  * friends
+  set ch %room.people%
+  while %ch%
+    set next_ch %ch.next_in_room%
+    if %ch.is_npc% && %ch.leader% == %actor%
+      %at% %room% %echo% ~%ch% is whisked away, too!
+      %teleport% %ch% %to_room%
+      %echo% ~%ch% arrives in a whirl of wind!
+    end
+    set ch %next_ch%
+  done
+end
+~
 #16655
 Upgrade Glitter: upgrade Winter Wonderland items~
 1 c 2 0
