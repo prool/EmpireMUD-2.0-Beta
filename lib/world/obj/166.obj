@@ -231,7 +231,7 @@ your toes to your nose as you touch the wind.
 right. When you're done there, use it again to return home. But it will only
 work in a city.
 ~
-3 p a 0 0 3
+3 p a 0 0 4
 0 0 0
 10 576
 M
@@ -240,6 +240,9 @@ $p blow away.~
 M
 18
 $p blow away.~
+M
+33
+'Use' the winds of winter to teleport into and out of the North Portal for the holiday event.~
 T 16654
 S
 #16618
