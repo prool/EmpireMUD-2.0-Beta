@@ -1039,16 +1039,23 @@ if %actor.on_quest(16618)%
   set questnum 16618
   set horse_list horse warhose
   set camel_list camel warcamel
-  if %target.is_pc% || !(%horse_list% ~= %target.pc_name.car% || %camel_list% ~= %target.pc_name.car%)
-    %send% %actor% You're going to need a horse or camel for this outfit.
+  set zebu_list zebu
+  set buffalo_list buffalo
+  set check %target.pc_name.car%
+  if %target.is_pc%
+    %send% %actor% You're going to need a horse, camel, buffalo, or zebu for this outfit.
     halt
+  elseif %horse_list% ~= %check%
+    set morphnum 16618
+  elseif %camel_list% ~= %check%
+    set morphnum 16619
+  elseif %zebu_list% ~= %check%
+    set morphnum 16620
+  elseif %buffalo_list% ~= %check%
+    set morphnum 16621
   else
-    * determine morph num
-    if (%horse_list% ~= %target.pc_name.car%)
-      set morphnum 16618
-    else
-      set morphnum 16619
-    end
+    %send% %actor% You're going to need a horse, camel, buffalo, or zebu for this outfit.
+    halt
   end
 end
 %send% %actor% You dress ~%target% with @%self%.
