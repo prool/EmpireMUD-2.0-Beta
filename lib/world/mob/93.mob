@@ -6,7 +6,7 @@ A spectacled flying fox swoops past.
 65 90 djo cm 1
 0 0 2 9 -1 -1
 D
-   This curious creature has the face of a fox with the wings of a bat. 
+   This curious creature has the face of a fox with the wings of a bat.
 Straw-colored fur around its eyes gives it the appearance that it's wearing a
 pair of spectacles. There's also light fur on its shoulders and part of its
 body, but the predominant color is black.
@@ -47,5 +47,222 @@ I 1 1351 100.00 1  # SKIN: large skin
 M
 15
 A burly beaver weaves through the water.~
+S
+#9303
+buffalo water wild~
+a wild water buffalo~
+A wild water buffalo stands here, chewing.
+~
+50 75 djo 0 4
+0 0 70 27 -1 -1
+D
+   It's a broad, powerful anmial with a thick, mud-colored hide that glistens
+faintly from recent wallowing. Heavy-lidded eyes watch you carefully. You might
+be able to tame the water buffalo, if you can earn its trust.
+~
+I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 2  # SKIN: large skin
+I 24 9304 100.00 1  # TAME: water buffalo
+M
+0
+$n shakes its massive head.~
+M
+0
+$n lets out a deep, rumbling grunt.~
+M
+0
+$n lowers its head to graze.~
+M
+0
+$n flicks its tail sharply.~
+M
+0
+$n huffs a misty breath.~
+M
+0
+$n flaps $s ears.~
+T 9028
+T 9027
+T 9503
+S
+#9304
+buffalo water~
+a water buffalo~
+A water buffalo stands here, chewing.
+~
+50 75 defjo 0 4
+0 0 70 27 -1 -1
+D
+   The water buffalo is a thick creature with a dark hide. Its sweeping horns
+curve outward, with more than enough each to ruin the day of anybody standing
+too close when it becomes alarmed.
+~
+I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
+I 3 9305 100.00 1 x  # BARDE: armored water buffalo
+M
+0
+$n shakes its massive head.~
+M
+0
+$n lets out a deep, rumbling grunt.~
+M
+0
+$n lowers its head to graze.~
+M
+0
+$n flicks its tail sharply.~
+M
+0
+$n huffs a misty breath.~
+M
+0
+$n flaps $s ears.~
+M
+6
+A water buffalo stands here, chewing.~
+M
+6
+A water buffalo plods along slowly.~
+M
+6
+A water buffalo stands patiently nearby.~
+M
+6
+A water buffalo stands here, snorting at you.~
+M
+6
+A water buffalo swishes its tail lazily.~
+M
+6
+A water buffalo stands quietly.~
+M
+15
+A water buffalo is wallowing here.~
+T 9503
+S
+#9305
+buffalo water armored~
+an armored water buffalo~
+An armored water buffalo stands proudly nearby.
+~
+75 100 defjo 0 4
+0 0 70 27 -1 -1
+D
+   The broad water buffalo wears heavy plates of armor with no sign of slowing
+down. A stampeding water buffalo is hard to stop; an armored one is impossible.
+~
+I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
+I 4 175 100.00 4  # LOOT: iron ingot
+I 4 175 75.00 2  # LOOT: iron ingot
+I 4 175 50.00 2  # LOOT: iron ingot
+I 4 175 50.00 2  # LOOT: iron ingot
+T 9503
+S
+#9306
+zebu wild~
+a wild zebu~
+A wild zebu trots by.
+~
+50 75 djo 0 4
+0 0 70 27 -1 -1
+D
+   The zebu is a sleek bull with a pronounced hump rising proudly between its
+shoulders. Its horns curve elegantly above its head, giving it a regal, almost
+statuesque presence.
+~
+I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 2  # SKIN: large skin
+I 24 9307 100.00 1  # TAME: hump-backed zebu
+M
+0
+$n flicks its long ears.~
+M
+0
+$n lowers its head to sniff at the ground.~
+M
+0
+$n shifts its weight and adjusts its stance.~
+M
+0
+$n shakes its coat, sending dust into the air.~
+M
+0
+$n lifts a hoof and shakes something off of it.~
+M
+0
+$n chews slowly.~
+T 9028
+T 9027
+T 9503
+S
+#9307
+zebu hump-backed humpbacked backed~
+a hump-backed zebu~
+A zebu stands here, staring at you.
+~
+50 75 dejo 0 4
+0 0 70 27 -1 -1
+D
+   The mighty zebu is a silver-gray bull with tall, curving horns sprouting
+like a crown above its head. Just behind the horns, a large hump rises
+prominently over its shoulders.
+~
+I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
+I 3 9308 100.00 1 x  # BARDE: mighty armored zebu
+M
+0
+$n flicks its long ears.~
+M
+0
+$n lowers its head to sniff at the ground.~
+M
+0
+$n shifts its weight and adjusts its stance.~
+M
+0
+$n shakes its coat, sending dust into the air.~
+M
+0
+$n lifts a hoof and shakes something off of it.~
+M
+0
+$n chews slowly.~
+M
+6
+A zebu stands here, staring at you.~
+M
+6
+A zebu lowers its head and sniffs at the ground.~
+M
+6
+A zebu raises its head and sniffs at the air.~
+M
+6
+A zebu ambles along nearby.~
+M
+6
+A zebu stands calmly, chewing.~
+M
+6
+A zebu is standing here.~
+T 9503
+S
+#9308
+zebu armored mighty~
+a mighty armored zebu~
+A mighty armored zebu stands tall.
+~
+75 100 dejo 0 4
+0 0 70 27 -1 -1
+D
+   The hefty zebu is all the heavier for the armor it has been dressed in. 
+Even its signature shoulder hump is plated for protection in battle.
+~
+I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
+I 4 175 100.00 4  # LOOT: iron ingot
+I 4 175 75.00 2  # LOOT: iron ingot
+I 4 175 50.00 2  # LOOT: iron ingot
+I 4 175 50.00 2  # LOOT: iron ingot
+T 9503
 S
 $
