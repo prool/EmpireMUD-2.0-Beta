@@ -858,12 +858,13 @@ mmove
 Frost flower fake plant~
 1 c 2
 plant~
+set valid_sects 4 45 54 90 
 if %actor.obj_target(%arg%)% != %self%
   return 0
   halt
 end
 set room %actor.room%
-if %room.sector% != Overgrown Forest
+if !(%valid_sects% ~= %room.sector_vnum%)
   return 0
   halt
 end
