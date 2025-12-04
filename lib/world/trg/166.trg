@@ -4007,7 +4007,7 @@ elseif %move% == 4
     nop %self.remove_mob_flag(NO-ATTACK)%
     halt
   end
-  if %self.var(sfinterrupt_count,0)% < %requires%
+  if %self.var(count_scfinterrupt,0)% < %requires%
     %echo% &&G**** &&Z~%self% shouts incoherently as the rage builds up within *%self%... ****&&0 (interrupt)
   end
   wait 4 s
@@ -4015,7 +4015,7 @@ elseif %move% == 4
     nop %self.remove_mob_flag(NO-ATTACK)%
     halt
   end
-  if %self.var(sfinterrupt_count,0)% >= %requires%
+  if %self.var(count_scfinterrupt,0)% >= %requires%
     %echo% &&G~%self% is distracted from whatever &%self% was doing... thankfully!&&0
     if %diff% == 1
       dg_affect #16687 %self% HARD-STUNNED on 5
