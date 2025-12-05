@@ -426,7 +426,7 @@ xmas tree chopping~
 1 c 2 0
 chop~
 * config valid sects (must also update trig 16609)
-set valid_sects 4 26 45 54 71 72 80 81 89 104 145 154 210 224 232 220 221 602 603 604 612 613 614 617 618 10562 10563 10564 10565 11989 11990 11991 16698 16699
+set valid_sects 4 26 45 54 71 72 79 80 81 89 104 145 154 210 224 232 220 221 602 603 604 612 613 614 617 618 10562 10563 10564 10565 11989 11990 11991 16698 16699
 return 0
 if %actor.inventory(16606)%
   %send% %actor% You really should get this tree back to your city center and plant it.
@@ -473,7 +473,7 @@ if !(%valid_tree_types% ~= %tree_type%)
 end
 * chances of success: each entry should end in a colon
 set 30_percent_sects 4: 26: 71: 10562: 10563:
-set 40_percent_sects 72: 210: 220: 221: 224: 232: 45: 54: 602: 612: 10564:
+set 40_percent_sects 72: 79: 89: 210: 220: 221: 224: 232: 45: 54: 602: 612: 10564:
 set 50_percent_sects 603: 613:
 set 60_percent_sects 604: 614: 10565:
 set 100_percent_sects 16698: 16699:
@@ -1039,16 +1039,23 @@ if %actor.on_quest(16618)%
   set questnum 16618
   set horse_list horse warhose
   set camel_list camel warcamel
-  if %target.is_pc% || !(%horse_list% ~= %target.pc_name.car% || %camel_list% ~= %target.pc_name.car%)
-    %send% %actor% You're going to need a horse or camel for this outfit.
+  set zebu_list zebu
+  set buffalo_list buffalo
+  set check %target.pc_name.car%
+  if %target.is_pc%
+    %send% %actor% You're going to need a horse, camel, buffalo, or zebu for this outfit.
     halt
+  elseif %horse_list% ~= %check%
+    set morphnum 16618
+  elseif %camel_list% ~= %check%
+    set morphnum 16619
+  elseif %zebu_list% ~= %check%
+    set morphnum 16620
+  elseif %buffalo_list% ~= %check%
+    set morphnum 16621
   else
-    * determine morph num
-    if (%horse_list% ~= %target.pc_name.car%)
-      set morphnum 16618
-    else
-      set morphnum 16619
-    end
+    %send% %actor% You're going to need a horse, camel, buffalo, or zebu for this outfit.
+    halt
   end
 end
 %send% %actor% You dress ~%target% with @%self%.
@@ -4000,7 +4007,7 @@ elseif %move% == 4
     nop %self.remove_mob_flag(NO-ATTACK)%
     halt
   end
-  if %self.var(sfinterrupt_count,0)% < %requires%
+  if %self.var(count_scfinterrupt,0)% < %requires%
     %echo% &&G**** &&Z~%self% shouts incoherently as the rage builds up within *%self%... ****&&0 (interrupt)
   end
   wait 4 s
@@ -4008,7 +4015,7 @@ elseif %move% == 4
     nop %self.remove_mob_flag(NO-ATTACK)%
     halt
   end
-  if %self.var(sfinterrupt_count,0)% >= %requires%
+  if %self.var(count_scfinterrupt,0)% >= %requires%
     %echo% &&G~%self% is distracted from whatever &%self% was doing... thankfully!&&0
     if %diff% == 1
       dg_affect #16687 %self% HARD-STUNNED on 5
@@ -4206,6 +4213,26 @@ remote empire_list %self.id%
 %quest% %actor% trigger 16687
 if %actor.quest_finished(16687)%
   %quest% %actor% finish 16687
+end
+~
+#16688
+Santa Bot: Combat~
+0 c 0 0
+!naughty !merry !tinsel !jingleshock~
+%echo% &&PDebug:&0 '%arg%' '~%arg%' '%cmd%'
+set targ %arg%
+if %actor% != %self% || !%targ% || %targ.id% == %self.id%
+  halt
+elseif %cmd% == !naughty
+  %echo% &&PNaughty&&0 ~%targ%
+elseif %cmd% == !merry
+  %echo% &&PMerry&&0 ~%targ%
+elseif %cmd% == !tinsel
+  %echo% &&PTinsel&&0 ~%targ%
+elseif %cmd% == !jingleshock
+  %echo% &&PJingleshock&&0 ~%targ%
+else
+  %echo% &&POops!&&0 ~%targ% %cmd%
 end
 ~
 #16690
