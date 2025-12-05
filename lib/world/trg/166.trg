@@ -4215,6 +4215,26 @@ if %actor.quest_finished(16687)%
   %quest% %actor% finish 16687
 end
 ~
+#16688
+Santa Bot: Combat~
+0 c 0 0
+!naughty !merry !tinsel !jingleshock~
+%echo% &&PDebug:&0 '%arg%' '~%arg%' '%cmd%'
+set targ %arg%
+if %actor% != %self% || !%targ% || %targ.id% == %self.id%
+  halt
+elseif %cmd% == !naughty
+  %echo% &&PNaughty&&0 ~%targ%
+elseif %cmd% == !merry
+  %echo% &&PMerry&&0 ~%targ%
+elseif %cmd% == !tinsel
+  %echo% &&PTinsel&&0 ~%targ%
+elseif %cmd% == !jingleshock
+  %echo% &&PJingleshock&&0 ~%targ%
+else
+  %echo% &&POops!&&0 ~%targ% %cmd%
+end
+~
 #16690
 feed the vortex~
 1 c 2 0

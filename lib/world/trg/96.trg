@@ -376,6 +376,130 @@ else
   rdelete needs_scfinterrupt %actor.id%
 end
 ~
+#9608
+SCF Script Fight: Fight move controller using script4 (needs 9601, 9604)~
+0 k 100 4
+L f 9600
+L f 9601
+L f 9604
+L w 9600
+~
+* Requires SCF triggers 9601, 9604, and possibly 9600
+* Set the list of commands as script4 with spaces between them like 'bash kick special'
+* Each command in that list will be called with %actor% as the first arg
+if %self.cooldown(9603)% || %self.disabled%
+  halt
+end
+* detect moves
+set moves_left %self.var(moves_left,)%
+if !%moves_left%
+  set moves_left %self.custom(script4)%
+  if !%moves_left%
+    %log% syslog Trigger 9609 on mob %self.vnum% has no move list in script4.
+  end
+end
+* detect count
+set num_left %self.var(num_left,)%
+if !%num_left%
+  set list %moves_left%
+  set num_left 0
+  while %list%
+    eval num_left %num_left% + 1
+    set list %list.cdr%
+  done
+end
+* pick
+eval which %%random.%num_left%%%
+set old %moves_left%
+set moves_left
+set move 0
+while %which% > 0
+  set move %old.car%
+  if %which% != 1
+    set moves_left %moves_left% %move%
+  end
+  set old %old.cdr%
+  eval which %which% - 1
+done
+set moves_left %moves_left% %old%
+* store
+eval num_left %num_left% - 1
+remote moves_left %self.id%
+remote num_left %self.id%
+* very short delay
+set id %self.id%
+set actor_id %actor.id%
+wait 1
+if !%actor% || %actor.id% != %actor_id% || %self.id% != %id% || %self.disabled%
+  * lost it
+  halt
+end
+* perform move
+scfight lockout 9603 30 35
+%move% %actor%
+~
+#9609
+SCF Script Fight: Fight move controller using script5 (needs 9601, 9604)~
+0 k 100 4
+L f 9600
+L f 9601
+L f 9604
+L w 9600
+~
+* Requires SCF triggers 9601, 9604, and possibly 9600
+* Set the list of commands as script5 with spaces between them like 'bash kick special'
+* Each command in that list will be called with %actor% as the first arg
+if %self.cooldown(9603)% || %self.disabled%
+  halt
+end
+* detect moves
+set moves_left %self.var(moves_left,)%
+if !%moves_left%
+  set moves_left %self.custom(script5)%
+  if !%moves_left%
+    %log% syslog Trigger 9609 on mob %self.vnum% has no move list in script5.
+  end
+end
+* detect count
+set num_left %self.var(num_left,)%
+if !%num_left%
+  set list %moves_left%
+  set num_left 0
+  while %list%
+    eval num_left %num_left% + 1
+    set list %list.cdr%
+  done
+end
+* pick
+eval which %%random.%num_left%%%
+set old %moves_left%
+set moves_left
+set move 0
+while %which% > 0
+  set move %old.car%
+  if %which% != 1
+    set moves_left %moves_left% %move%
+  end
+  set old %old.cdr%
+  eval which %which% - 1
+done
+set moves_left %moves_left% %old%
+* store
+eval num_left %num_left% - 1
+remote moves_left %self.id%
+remote num_left %self.id%
+* very short delay
+set id %self.id%
+set actor_id %actor.id%
+wait 1
+if !%actor% || %actor.id% != %actor_id% || %self.id% != %id% || %self.disabled%
+  * lost it
+  halt
+end
+* perform move
+scfight lockout 9603 30 35
+%move% %actor%
+~
 #9620
 Storytime using script1-5~
 0 bw 100 1
