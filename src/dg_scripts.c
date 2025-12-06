@@ -2170,6 +2170,35 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd, char *
 		safe_snprintf(str, slen, "%s", temp);
 		return TRUE;
 	}
+	else if (!str_cmp(field, "substr")) {
+		// %string.substr(start,len)%
+		if (subfield && *subfield) {
+			char arg1[256], arg2[256];
+			int sub_start, sub_len;
+			
+			comma_args(subfield, arg1, arg2);
+			if (*arg1) {
+				if ((sub_start = atoi(arg1)) < strlen(vd->value)) {
+					safe_snprintf(str, slen, "%s", vd->value + sub_start);
+				}
+				else {
+					// past the end
+					strcpy(str,"");
+				}
+				
+				// cut short?
+				if (*arg2 && (sub_len = atoi(arg2)) > 0) {
+					if (sub_len < strlen(str)) {
+						str[sub_len] = '\0';
+					}
+				}
+			}
+		}
+		else {
+			// no limits requested, send whole str
+			safe_snprintf(str, slen, "%s", vd->value);
+		}
+	}
 	
 	return FALSE;
 }
