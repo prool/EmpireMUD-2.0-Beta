@@ -2099,6 +2099,7 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd, char *
 		else {
 			safe_snprintf(str, slen, "0");
 		}
+		return TRUE;
 	}
 	else if (!str_cmp(field, "contains")) {            /* contains  */
 		if (str_str(vd->value, subfield)) {
@@ -2145,6 +2146,7 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd, char *
 		else {
 			safe_snprintf(str, slen, "-1");
 		}
+		return TRUE;
 	}
 	else if (!str_cmp(field, "mudcommand")) {
 		/* find the mud command returned from this text */
@@ -2199,6 +2201,7 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd, char *
 			// no limits requested, send whole str
 			safe_snprintf(str, slen, "%s", vd->value);
 		}
+		return TRUE;
 	}
 	
 	return FALSE;
