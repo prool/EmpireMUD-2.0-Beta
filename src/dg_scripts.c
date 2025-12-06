@@ -2187,11 +2187,12 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd, char *
 				}
 				
 				// cut short?
-				if (*arg2 && (sub_len = atoi(arg2)) > 0) {
-					if (sub_len < strlen(str)) {
-						str[sub_len] = '\0';
-					}
+				if (*arg2 && (sub_len = atoi(arg2)) > 0 && sub_len < strlen(str)) {
+					str[sub_len] = '\0';
 				}
+			}
+			else {
+				safe_snprintf(str, slen, "%s", vd->value);
 			}
 		}
 		else {
