@@ -383,4 +383,21 @@ Type "board" to get onto the ship.
 4 0 0
 0 1
 S
+#980
+flowers bouquet~
+a bouquet of flowers~
+A bouquet of flowers is lying here.~
+   The fragrant flowers are neatly arranged into a bouquet, wrapped in cloth,
+and tied with a ribbon.
+   Type 'customize bouquet <text>' to change this description.
+~
+3 0 a 0 0 2
+0 0 0
+0 0
+C
+1 1
+R
+4 5223 0
+T 980
+S
 $
