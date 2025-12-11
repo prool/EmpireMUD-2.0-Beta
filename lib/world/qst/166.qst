@@ -469,9 +469,10 @@ S
 Winter Wonderland: Replica Reindeer Wrangling~
    While standing in your stable, you get the great idea that the animals of
 the empire should get into the holiday spirit as well. So, you take some
-reindeer outfits and begin your search for five horses or camels to dress up
-around your city.
-Type: dress <horse | camel>
+reindeer outfits and begin your search for five domestic horses, camels, zebu,
+or water buffalo to dress up around your city (depending on what region it's
+in).
+Type: dress <horse | camel | zebu | buffalo>
 ~
    There! Now even the animals of your empire are in the holiday mood, whether
 they want to be or not.
@@ -493,7 +494,7 @@ W
 36 10700 0 1 a
 W+
 11 0 0 5 a
-Dress up horses or camels~
+Dress up beasts of burden~
 Z
 4 16618
 S

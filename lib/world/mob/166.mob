@@ -774,7 +774,7 @@ M
 A goblin in a lumpy sweater is picking at a loose thread.~
 M
 6
-A goblin in a lumpy is here, somewhere between cozy and annoyed.~
+A goblin in a lumpy is sweater here, somewhere between cozy and annoyed.~
 M
 6
 A goblin is waddling around in a lumpy sweater.~
@@ -966,6 +966,39 @@ The burning straw goat stops, drops, and rolls.~
 M
 0
 The burning straw goat catches an ember on its tongue.~
+S
+#16688
+santa bot~
+santa bot~
+Santa bot is here
+~
+25 400 bdoK cqEG 3
+1 0 0 28 -1 -1
+D
+tba
+~
+I 4 16663 14.00 1 l  # LOOT: rocking horse saddle
+I 4 16670 13.00 1 l  # LOOT: hearty Christmas spirit
+I 4 16671 13.00 1 l  # LOOT: generous Christmas spirit
+I 4 16672 13.00 1 l  # LOOT: serene Christmas spirit
+I 4 16673 13.00 1 l  # LOOT: warm Christmas spirit
+I 4 16674 13.00 1 l  # LOOT: anxious Christmas spirit
+I 4 16675 13.00 1 l  # LOOT: nostalgic Christmas spirit
+I 4 16679 4.00 1 l  # LOOT: tiny krampus whistle
+I 4 16685 4.00 1 l  # LOOT: burning straw goat whistle
+M
+11
+!naughty !merry !tinsel !jingleshock~
+T 16603
+T 9600
+T 9601
+T 9604
+T 16621
+T 16688
+T 9600
+T 9601
+T 9604
+T 9609
 S
 #16698
 raven enchanted~

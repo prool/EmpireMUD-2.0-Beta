@@ -1063,7 +1063,7 @@ R
 4 5210 0
 S
 #3058
-grain handful~
+grain handful wheat~
 a handful of grain~
 A handful of grain is scattered on the ground.~
    This grain is hard to identify but it looks like you could snack on it. Or
@@ -1081,7 +1081,7 @@ R
 S
 #3059
 kernels handful~
-a handful of kernels~
+a handful of kernels corn~
 Some kernels are scattered here.~
    These kernels are too hard to eat on their own, but perhaps you could toast
 them. You might also be able to plant them.
@@ -1098,7 +1098,7 @@ R
 4 5210 0
 S
 #3060
-seeds handful~
+seeds handful hops~
 a handful of seeds~
 Some seeds are scattered on the ground.~
    You can't tell what kind of seeds these are, but it looks like you could
@@ -1115,7 +1115,7 @@ R
 4 5210 0
 S
 #3061
-seeds handful~
+seeds handful cotton~
 a handful of seeds~
 Some seeds are scattered on the ground.~
    You can't tell exactly what kind of seeds these are, but they taste toxic so
@@ -1131,7 +1131,7 @@ R
 4 5210 0
 S
 #3062
-seeds handful~
+seeds handful barley~
 a handful of seeds~
 Some seeds are scattered on the ground.~
    You can't tell what kind of seeds these are, but it looks like you could
@@ -1330,7 +1330,7 @@ R
 4 5116 0
 S
 #3073
-grain handful~
+grain handful sugarcane cane~
 a handful of grain~
 A handful of grain is scattered on the ground.~
    This grain is hard to identify but it looks like you could snack on it. Or

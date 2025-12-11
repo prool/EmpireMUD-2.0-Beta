@@ -436,6 +436,8 @@ E
 17 200 0.30 224
 E
 17 0 0.60 39
+E
+20 20160 0.01 225
 I 6 3081 10.00 25 f  # FORAGE: colorful bird egg
 I 6 3086 5.00 25 f  # FORAGE: tree frog
 I 6 3017 20.00 25 f  # FORAGE: plump fig
@@ -443,8 +445,7 @@ I 6 3069 20.00 25 f  # FORAGE: honeycomb
 I 6 3085 20.00 25 f  # FORAGE: fern tips
 I 9 133 90.00 50 g  # GATHER: tangle of vines
 I 9 121 10.00 50 g  # GATHER: sticks and leaves
-I 20 149 6.00 1 c  # CHOP: tremendous jungle tree
-I 20 128 94.00 1 c  # CHOP: massive jungle tree
+I 20 128 100.00 1 c  # CHOP: massive jungle tree
 U
 0
 More and more trees burst from the ground, twisting their way up to the sky and spreading a wide canopy!~
@@ -726,6 +727,98 @@ jungle edge trees forest grassland plains around~
 of sounds from the trees meets the chirps of insects that live in tall grass.
 In one direction, trees tower to the sky. In the other, you see tranquil, open
 space.
+~
+S
+#225
+Dense Jungle~
+A Dense Jungle~
+'^' 13 lq 16 ad g
+C
+chop, gather~
+D0
+^^^%~
+&G~
+D0
+^^%^~
+&G~
+D0
+^%^^~
+&G~
+D0
+%^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+E
+0 1 100.00 220
+E
+2 32 2.00 252
+E
+2 57 10.00 232
+E
+3 225 5.00 220
+E
+7 5 2.00 250
+E
+17 70 0.80 72
+E
+17 240 0.30 224
+E
+17 241 1.00 224
+E
+17 244 1.00 224
+E
+17 231 1.00 232
+E
+17 230 0.30 232
+E
+17 210 0.60 224
+E
+17 204 1.00 224
+E
+17 200 0.30 224
+E
+17 0 0.60 39
+E
+17 243 0.30 224
+I 6 3081 10.00 25 f  # FORAGE: colorful bird egg
+I 6 3086 5.00 25 f  # FORAGE: tree frog
+I 6 3017 20.00 25 f  # FORAGE: plump fig
+I 6 3069 20.00 25 f  # FORAGE: honeycomb
+I 6 3085 20.00 25 f  # FORAGE: fern tips
+I 9 133 90.00 50 g  # GATHER: tangle of vines
+I 9 121 10.00 50 g  # GATHER: sticks and leaves
+I 20 149 100.00 1 c  # CHOP: tremendous jungle tree
+U
+0
+More and more trees burst from the ground, twisting their way up to the sky and spreading a wide canopy!~
+X
+jungle trees forest around canopy~
+   You're standing in a jungle where both the canopy and the undergrowth are
+dense and nigh-impenetrable. The humid air is thick with the scent of plant
+life, protected by the layer of green above.
 ~
 S
 #230
