@@ -1041,7 +1041,9 @@ if %actor.on_quest(16618)%
   set camel_list camel warcamel
   set zebu_list zebu
   set buffalo_list buffalo
-  set check %target.pc_name.car%
+  * 2-step name-shortening because '-' in the pc_name can cause this to fail when chained
+  set check %target.pc_name%
+  set check %check.car%
   if %target.is_pc%
     %send% %actor% You're going to need a horse, camel, buffalo, or zebu for this outfit.
     halt
@@ -2670,11 +2672,17 @@ L j 10701
 L w 16654
 use~
 set room %actor.room%
+set time_check %self.var(time_check,0)%
 if %actor.obj_target(%arg.argument1%)% != %self%
   return 0
   halt
 elseif %actor.fighting% || %actor.disabled% || %actor.position% == Sleeping
   %send% %actor% You can't use the winds of winter right now.
+  halt
+elseif %time_check% > 0 && %timestamp% - %time_check% > 950400
+  * 11 days passed
+  %send% %actor% As you go to use the winds of winter, they blow away!
+  %purge% %self%
   halt
 elseif !%actor.can_teleport_room(%room%)%
   %send% %actor% You can't use the winds of winter here.
@@ -2716,6 +2724,11 @@ else
   elseif !%actor.canuseroom_ally(%room%)%
     %send% %actor% You can't use that in this empire's territory.
     halt
+  end
+  * track 1st use time
+  if %time_check% == 0
+    set time_check %timestamp%
+    remote time_check %self.id%
   end
   * ok
   nop %actor.mark_adventure_summoned_from%
@@ -3177,6 +3190,17 @@ switch %random.4%
     %echoaround% %actor% ~%actor% heads toward the %vandal%, who sees *%actor% coming and runs off.
   break
 done
+~
+#16662
+Winds of Winter: check time-out and expire~
+1 ab 5 0
+~
+set time_check %self.var(time_check,0)%
+if %time_check% > 0 && %timestamp% - %time_check% > 950400
+  %send% %actor% The winds of winter blow away, right out of your inevntory!
+  %purge% %self%
+  halt
+end
 ~
 #16666
 Floating lantern expiry~
@@ -4219,21 +4243,130 @@ end
 Santa Bot: Combat~
 0 c 0 0
 !naughty !merry !tinsel !jingleshock~
-%echo% &&PDebug:&0 '%arg%' '~%arg%' '%cmd%'
 set targ %arg%
+set room %self.room%
+set diff %self.var(diff,1)%
+set cmd %cmd.substr(1)%
 if %actor% != %self% || !%targ% || %targ.id% == %self.id%
   halt
-elseif %cmd% == !naughty
-  %echo% &&PNaughty&&0 ~%targ%
-elseif %cmd% == !merry
-  %echo% &&PMerry&&0 ~%targ%
-elseif %cmd% == !tinsel
+elseif %cmd% == naughty
+  * Naughty List Judgment (group dodge)
+  scfight clear dodge
+  %echo% &&G~%self% booms, 'I judge you... naughty! Your mistletoe is no match for my TOW missiles.'&&0
+  eval dodge %diff% * 40
+  dg_affect #16691 %self% DODGE %dodge% 20
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  if %self.disabled%
+    dg_affect #16691 %self% off
+    nop %self.remove_mob_flag(NO-ATTACK)%
+    halt
+  end
+  %echo% &&G**** &&Z|%self% torso opens like a hinge and a cluster of metal barrels poke out... ****&&0 (dodge)
+  set cycle 1
+  set hit 0
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup dodge all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfdodge)%
+          set hit 1
+          %echo% &&GThere's a burst of snow as a missile from |%self% chest explodes into ~%ch%!&&0
+          if !%ch.affect(16690)%
+            dg_affect #16690 %ch% SLOW on 25
+          end
+          %damage% %ch% 100 magical
+        elseif %ch.is_pc%
+          %send% %ch% &&GA missile whizzes over your head, trailing a wire behind it.&&0
+          if %diff% == 1
+            dg_affect #16686 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&G**** It looks like he's about to fire another round... ****&&0 (dodge)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear dodge
+    eval cycle %cycle% + 1
+  done
+  dg_affect #16691 %self% off
+  if !%hit%
+    if %diff% < 3
+      %echo% &&G~%self% stomps around, shouting, 'How could they all miss?!'&&0
+      dg_affect #16687 %self% HARD-STUNNED on 10
+    end
+  end
+  wait 8 s
+elseif %cmd% == merry
+  * Merry Massacre (group duck)
+  scfight clear duck
+  %echo% &&G~%self% booms, 'Ho... ho... ho... Time for a merry massacre!'&&0
+  eval dodge %diff% * 40
+  dg_affect #16691 %self% DODGE %dodge% 20
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  if %self.disabled%
+    dg_affect #16691 %self% off
+    nop %self.remove_mob_flag(NO-ATTACK)%
+    halt
+  end
+  %echo% &&G**** &&ZSaw blades whir out from |%self% arms as &%self% starts to spin! ****&&0 (duck)
+  set cycle 1
+  set hit 0
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup duck all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfduck)%
+          set hit 1
+          %echo% &&G~%self% chuckles as &%self% gashes ~%ch% with the whirring sawblades!&&0
+          %dot% %ch% 100 30 physical 4
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&G~%self% spins past you, sawblades whirring just above your head!&&0
+          if %diff% == 1
+            dg_affect #16686 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&G**** He's not done spinning... The sawblades are coming back toward you! ****&&0 (duck)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear duck
+    eval cycle %cycle% + 1
+  done
+  dg_affect #16692 %self% off
+  if !%hit%
+    if %diff% < 3
+      %echo% &&G~%self% holds ^%self% head in ^%self% hands, saying, 'How could it have gone so wrong?'&&0
+      dg_affect #16687 %self% HARD-STUNNED on 10
+    end
+  end
+  wait 8 s
+elseif %cmd% == tinsel
   %echo% &&PTinsel&&0 ~%targ%
-elseif %cmd% == !jingleshock
+elseif %cmd% == jingleshock
   %echo% &&PJingleshock&&0 ~%targ%
 else
   %echo% &&POops!&&0 ~%targ% %cmd%
 end
+nop %self.remove_mob_flag(NO-ATTACK)%
 ~
 #16690
 feed the vortex~
