@@ -5750,6 +5750,21 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							safe_snprintf(str, slen, "0");
 						}
 					}
+					else if (!str_cmp(field, "climate")) {
+						if (subfield && *subfield) {
+							bitvector_t pos = search_block(subfield, climate_flags, FALSE);
+							if (pos != NOTHING) {
+								safe_snprintf(str, slen, "%d", IS_SET(get_climate(r), BIT(pos)) ? 1 : 0);
+							}
+							else {
+								safe_snprintf(str, slen, "0");
+							}
+						}
+						else {	// no subfield
+							ordered_sprintbit(get_climate(r), climate_flags, climate_flags_order, TRUE, buf);
+							safe_snprintf(str, slen, "%s", buf);
+						}
+					}
 					else if (!str_cmp(field, "complete")) {
 						safe_snprintf(str, slen, "%d", IS_COMPLETE(r) ? 1 : 0);
 					}
