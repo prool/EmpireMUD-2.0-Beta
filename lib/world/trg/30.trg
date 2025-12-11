@@ -37,4 +37,42 @@ end
 return 0
 %purge% %self%
 ~
+#3090
+Plant wildflowers based on climate~
+1 c 2 3
+L g 3088
+L g 3091
+L g 3093
+plant~
+* temporarily becomes plantable, then changes back
+return 0
+*
+if %actor.obj_target(%arg.argument1%)% != %self%
+  halt
+end
+*
+if %self.room.climate(temperate)%
+  set vnum 3088
+elseif %self.room.climate(arid)%
+  set vnum 3091
+elseif %self.room.climate(tropical)%
+  set vnum 3093
+else
+  * nothing to plant here
+  if %self.is_flagged(PLANTABLE)%
+    nop %self.flag(PLANTABLE)%
+  end
+  halt
+end
+*
+nop %self.val1(%vnum%)%
+if !%self.is_flagged(PLANTABLE)%
+  nop %self.flag(PLANTABLE)%
+end
+*
+* set back if still here
+wait 1
+nop %self.val1(0)%
+nop %self.flag(PLANTABLE)%
+~
 $
