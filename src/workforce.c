@@ -809,7 +809,8 @@ bool can_gain_chore_resource_from_interaction_room(empire_data *emp, room_data *
 	bool found_any = FALSE;
 	crop_data *cp;
 	
-	static const bool highest_only = TRUE;
+	// warning: changing highest_only to TRUE will block crops that give straw 100% of the time from giving fruit if it's at 20%
+	static const bool highest_only = FALSE;
 	
 	found_any |= can_gain_chore_resource_from_interaction_list(emp, room, chore, GET_SECT_INTERACTIONS(SECT(room)), interaction_type, highest_only);
 	if (!found_any && ROOM_SECT_FLAGGED(room, SECTF_CROP) && (cp = ROOM_CROP(room))) {
