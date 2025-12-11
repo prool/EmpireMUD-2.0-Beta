@@ -255,4 +255,19 @@ if (!%inter.down%)
 end
 detach 957 %self.id%
 ~
+#980
+Customize look description~
+1 c 7 0
+customize~
+if %actor.obj_target(%arg.car%)% != %self%
+  return 0
+  halt
+elseif !%arg.cdr%
+  %send% %actor% Usage: customize %arg.car% <text>
+  halt
+end
+* ok
+%mod% %self% lookdesc %arg.cdr%
+%send% %actor% You customize @%self%.
+~
 $

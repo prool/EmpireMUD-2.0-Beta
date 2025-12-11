@@ -1570,13 +1570,15 @@ A bundle of delicate flowers is piled here.~
    An assortment of fresh, delicate flowers in shades of violet, yellow, and
 blue. They smell like a spring day after the rain.
 ~
-3 g a 0 0 14
+3 g a 0 0 15
 0 0 0
 7 0
 C
 1 1
 I 25 3089 100.00 1  # SEED: assortment of flower seeds
 O+ 1 6425
+R
+4 5223 0
 S
 #3089
 seeds flowers assortment~
@@ -1625,13 +1627,15 @@ A basket of thorny flowers is stacked here.~
    The basket has a melodious variety of orange, red, and blue flowers on pale
 green, thorny stems. There's a dusty, earthy fragrance to them.
 ~
-3 g a 0 0 15
+3 g a 0 0 16
 0 0 0
 7 0
 C
 1 1
 I 25 3092 100.00 1  # SEED: pouch of flower seeds
 O+ 1 6425
+R
+4 5223 0
 S
 #3092
 seeds flowers pouch~
@@ -1659,13 +1663,15 @@ A bundle of orchids lies on the ground.~
 Violet, indigo, and white dominate the assortment, but orchids of all colors
 appear here.
 ~
-3 g a 0 0 16
+3 g a 0 0 17
 0 0 0
 7 0
 C
 1 1
 I 25 3094 100.00 1  # SEED: envelope of tiny seeds
 O+ 1 6425
+R
+4 5223 0
 S
 #3094
 seeds envelope tiny flowers~

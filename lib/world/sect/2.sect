@@ -41,7 +41,7 @@ I 6 3080 20.00 25 f  # FORAGE: lizard tail
 I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
 I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 91.67 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 140 100.00 50  # GATHER: bundle of long grass
@@ -217,7 +217,7 @@ I 6 3081 15.00 25 f  # FORAGE: colorful bird egg
 I 6 3087 25.00 25 f  # FORAGE: crisp wild leaves
 I 6 3069 25.00 25 f  # FORAGE: honeycomb
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 44.00 50 g  # GATHER: sticks and leaves
@@ -862,7 +862,7 @@ I 5 107 100.00 25 d  # DIG: bag of sand
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 140 100.00 50  # GATHER: bundle of long grass
@@ -967,7 +967,7 @@ I 6 3084 20.00 25 x  # FORAGE: brittlegill mushroom
 I 6 3051 30.00 25 x  # FORAGE: sea urchin
 I 6 3052 30.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 88.00 25 g  # GATHER: sticks and leaves
@@ -1007,7 +1007,7 @@ E
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
@@ -1054,7 +1054,7 @@ I 6 3051 33.33 25 x  # FORAGE: sea urchin
 I 6 3052 33.34 25 x  # FORAGE: clam
 I 6 3083 33.33 25 x  # FORAGE: river snail
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
@@ -1257,7 +1257,7 @@ I 6 3080 20.00 25 f  # FORAGE: lizard tail
 I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 6 3083 20.00 25 f  # FORAGE: river snail
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 140 100.00 50  # GATHER: bundle of long grass
@@ -1438,7 +1438,7 @@ I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
 I 6 3080 20.00 25 f  # FORAGE: lizard tail
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 140 100.00 50  # GATHER: bundle of long grass

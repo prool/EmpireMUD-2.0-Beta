@@ -33,7 +33,7 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3013 33.00 25  # FORAGE: handful of nuts
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 140 100.00 50  # GATHER: bundle of long grass
@@ -84,7 +84,7 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3015 33.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 85.00 50 g  # GATHER: sticks and leaves
@@ -139,7 +139,7 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3015 33.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 85.00 50 g  # GATHER: sticks and leaves
@@ -193,7 +193,7 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3015 33.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 85.00 50 g  # GATHER: sticks and leaves
@@ -290,7 +290,7 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3015 33.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 85.00 50 g  # GATHER: sticks and leaves
@@ -504,7 +504,7 @@ I 5 102 15.00 125 X  # DIG: flint stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3015 100.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1202 100.00 125 p  # PICK: twig of redthorn
+I 7 1202 87.00 125 p  # PICK: twig of redthorn
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 U
@@ -833,7 +833,7 @@ I 5 102 15.00 125 X  # DIG: flint stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3014 50.00 25  # FORAGE: dry beans
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I 7 1204 87.00 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 139 92.00 50 g  # GATHER: bundle of long leaves
@@ -875,7 +875,7 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3014 25.00 25  # FORAGE: dry beans
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I 7 1203 87.00 125 p  # PICK: magewhisper sepals
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 134 8.00 50 g  # GATHER: thorny sapling
@@ -972,7 +972,7 @@ I 5 102 15.00 125 X  # DIG: flint stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3014 50.00 25  # FORAGE: dry beans
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I 7 1204 87.00 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 134 8.00 50 g  # GATHER: thorny sapling
@@ -1028,7 +1028,7 @@ I 5 102 15.00 125 X  # DIG: flint stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3016 50.00 25  # FORAGE: handful of dates
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I 7 1204 87.00 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 134 8.00 50 g  # GATHER: thorny sapling
@@ -1083,7 +1083,7 @@ I 5 102 15.00 125 X  # DIG: flint stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3016 50.00 25  # FORAGE: handful of dates
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I 7 1204 87.00 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 134 8.00 50 g  # GATHER: thorny sapling
@@ -1129,7 +1129,7 @@ I 5 102 15.00 125 X  # DIG: flint stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3016 50.00 25  # FORAGE: handful of dates
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I 7 1204 87.00 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 132 85.00 50 g  # GATHER: thorny branches
@@ -1589,7 +1589,7 @@ I 5 100 9.00 125 x  # DIG: rock
 I 5 101 100.00 125 x  # DIG: lump of clay
 I 6 3013 25.00 25  # FORAGE: handful of nuts
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 140 100.00 50  # GATHER: bundle of long grass
@@ -1623,7 +1623,7 @@ E
 E
 15 0 20.00 40
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 21 1300 20.00 125 f  # FISH: glowing green seashell
@@ -1671,7 +1671,7 @@ E
 15 0 20.00 44
 I 6 3015 75.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 20 120 100.00 1  # CHOP: large tree
@@ -1719,7 +1719,7 @@ E
 15 0 20.00 45
 I 6 3015 75.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 20 120 100.00 1  # CHOP: large tree
@@ -1790,7 +1790,7 @@ I 5 100 9.00 125 x  # DIG: rock
 I 5 101 100.00 125 x  # DIG: lump of clay
 I 6 3015 25.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 85.00 50 g  # GATHER: sticks and leaves
@@ -1851,7 +1851,7 @@ I 5 100 9.00 125 x  # DIG: rock
 I 5 101 100.00 125 x  # DIG: lump of clay
 I 6 3015 25.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 85.00 50 g  # GATHER: sticks and leaves
@@ -1904,7 +1904,7 @@ I 5 100 9.00 125 X  # DIG: rock
 I 5 101 100.00 125 X  # DIG: lump of clay
 I 6 3013 25.00 25  # FORAGE: handful of nuts
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 X
@@ -1964,7 +1964,7 @@ I 5 100 9.00 125 X  # DIG: rock
 I 5 101 100.00 125 X  # DIG: lump of clay
 I 6 3015 25.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 20 131 100.00 1  # CHOP: green sapling
@@ -2018,7 +2018,7 @@ I 5 107 65.00 125 x  # DIG: bag of sand
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 X
@@ -2062,7 +2062,7 @@ I 5 107 63.00 125 x  # DIG: bag of sand
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 U
@@ -2105,7 +2105,7 @@ I 5 102 15.00 125 X  # DIG: flint stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3015 100.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1202 100.00 125 p  # PICK: twig of redthorn
+I 7 1202 87.00 125 p  # PICK: twig of redthorn
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 X
@@ -2196,7 +2196,7 @@ I 5 101 73.00 125 x  # DIG: lump of clay
 I 6 3051 40.00 25 x  # FORAGE: sea urchin
 I 6 3052 40.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 85.00 50 g  # GATHER: sticks and leaves
@@ -2264,7 +2264,7 @@ I 5 101 73.00 125 x  # DIG: lump of clay
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 X
@@ -2330,7 +2330,7 @@ I 5 109 9.00 125 x  # DIG: chunk of rock salt
 I 5 101 73.00 125 x  # DIG: lump of clay
 I 6 3013 33.00 25  # FORAGE: handful of nuts
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 140 100.00 50  # GATHER: bundle of long grass
@@ -2395,7 +2395,7 @@ I 5 101 73.00 125 x  # DIG: lump of clay
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 X
@@ -2456,7 +2456,7 @@ I 5 101 73.00 125 x  # DIG: lump of clay
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 20 131 100.00 1  # CHOP: green sapling
@@ -2607,9 +2607,9 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3048 100.00 25 f  # FORAGE: tasty weeds
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I 7 1201 43.33 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
-I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I 7 1204 43.34 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 134 8.00 50 g  # GATHER: thorny sapling
@@ -2682,9 +2682,9 @@ I 5 103 8.00 125 X  # DIG: yellow lightning stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3048 100.00 25 f  # FORAGE: tasty weeds
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I 7 1201 43.33 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
-I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I 7 1204 43.34 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 85.00 50 g  # GATHER: sticks and leaves
@@ -2762,9 +2762,9 @@ I 5 103 8.00 125 X  # DIG: yellow lightning stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3048 100.00 25 f  # FORAGE: tasty weeds
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I 7 1201 43.33 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
-I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I 7 1204 43.34 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 123 85.00 50 g  # GATHER: small flower
@@ -2813,9 +2813,9 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3048 100.00 25 f  # FORAGE: tasty weeds
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I 7 1201 43.33 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
-I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I 7 1204 43.34 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 134 8.00 50 g  # GATHER: thorny sapling
@@ -2864,9 +2864,9 @@ I 5 103 8.00 125 X  # DIG: yellow lightning stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3048 100.00 25 f  # FORAGE: tasty weeds
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I 7 1201 43.33 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
-I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I 7 1204 43.34 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 20 131 100.00 1  # CHOP: green sapling
@@ -2912,9 +2912,9 @@ I 5 103 8.00 125 X  # DIG: yellow lightning stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3048 100.00 25 f  # FORAGE: tasty weeds
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I 7 1201 43.33 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
-I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I 7 1204 43.34 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 X
@@ -2967,9 +2967,9 @@ I 5 103 8.00 125 X  # DIG: yellow lightning stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3048 100.00 25 f  # FORAGE: tasty weeds
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I 7 1201 43.33 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
-I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I 7 1204 43.34 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 20 135 100.00 1  # CHOP: reaching sapling
@@ -3082,9 +3082,9 @@ I 5 103 8.00 125 X  # DIG: yellow lightning stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3048 100.00 25 f  # FORAGE: tasty weeds
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 45.83 125 p  # PICK: sack of fiveleaf
+I 7 1201 43.33 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
-I 7 1204 45.84 125 p  # PICK: daggerbite frond
+I 7 1204 43.34 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 85.00 50 g  # GATHER: sticks and leaves
@@ -3131,7 +3131,7 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3014 25.00 25  # FORAGE: dry beans
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I 7 1203 87.00 125 p  # PICK: magewhisper sepals
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 134 15.00 50 g  # GATHER: thorny sapling
@@ -3170,7 +3170,7 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3014 25.00 25  # FORAGE: dry beans
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I 7 1203 87.00 125 p  # PICK: magewhisper sepals
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 132 35.00 50 g  # GATHER: thorny branches
@@ -3222,7 +3222,7 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3014 50.00 25  # FORAGE: dry beans
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1204 100.00 125 p  # PICK: daggerbite frond
+I 7 1204 87.00 125 p  # PICK: daggerbite frond
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 139 92.00 50 g  # GATHER: bundle of long leaves
@@ -3394,7 +3394,7 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3048 100.00 25 f  # FORAGE: tasty weeds
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I 7 1203 87.00 125 p  # PICK: magewhisper sepals
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 134 8.00 50 g  # GATHER: thorny sapling
@@ -3433,7 +3433,7 @@ I 5 101 15.00 125 X  # DIG: lump of clay
 I 5 100 100.00 125 X  # DIG: rock
 I 6 3048 100.00 25 f  # FORAGE: tasty weeds
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1203 100.00 125 p  # PICK: magewhisper sepals
+I 7 1203 87.00 125 p  # PICK: magewhisper sepals
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 134 8.00 50 g  # GATHER: thorny sapling
@@ -3515,7 +3515,7 @@ E
 17 0 0.60 39
 I 6 3015 25.00 25  # FORAGE: red berries
 I 7 1206 16.66 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 85.00 50 g  # GATHER: sticks and leaves
@@ -3584,7 +3584,7 @@ E
 22 0 0.25 8
 I 6 3015 100.00 25  # FORAGE: red berries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1202 100.00 125 p  # PICK: twig of redthorn
+I 7 1202 87.00 125 p  # PICK: twig of redthorn
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 U
