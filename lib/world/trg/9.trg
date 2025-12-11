@@ -265,9 +265,42 @@ if %actor.obj_target(%arg.car%)% != %self%
 elseif !%arg.cdr%
   %send% %actor% Usage: customize %arg.car% <text>
   halt
+elseif %self.room.empire% && %self.room.empire% != %actor.empire% && !%self.carried_by% && !%self.worn_by%
+  %send% %actor% You can't customize that here.
+  halt
 end
 * ok
 %mod% %self% lookdesc %arg.cdr%
 %send% %actor% You customize @%self%.
+~
+#981
+Wreath drop setup~
+1 h 100 0
+~
+* 1 per room, not in unclaimed territory
+set room %self.room%
+if %command% == put
+  %send% %actor% You can't put the wreath in anything.
+  return 0
+  halt
+elseif %command% != drop
+  * ok
+  halt
+end
+* checks
+if !%room.empire% || %room.empire% != %actor.empire%
+  %send% %actor% You can only hang the wreath in your own empire.
+  return 0
+  halt
+elseif %room.contents(%self.vnum%)%
+  %send% %actor% There is already a wreath hanging here.
+  return 0
+  halt
+end
+* ok, allow
+wait 1
+if !%self.carried_by% && !%self.in_obj%
+  otimer 4032
+end
 ~
 $

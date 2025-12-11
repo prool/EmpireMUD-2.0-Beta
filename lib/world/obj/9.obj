@@ -391,7 +391,7 @@ A bouquet of flowers is lying here.~
 and tied with a ribbon.
    Type 'customize bouquet <text>' to change this description.
 ~
-3 0 a 0 0 2
+3 0 ao 0 0 3
 0 0 0
 0 0
 C
@@ -399,5 +399,30 @@ C
 R
 4 5223 0
 T 980
+S
+#981
+wreath lovely~
+a lovely wreath~
+There's a wreath hanging here.~
+   Flowers and boughs are arranged in a lovely circle and made to hang up
+somewhere.
+   Type 'customize wreath <text>' to change this description. Dropping the
+wreath will set it up, where it will last several days.
+~
+3 v a 0 0 7
+0 0 0
+0 0
+C
+1 1
+M
+18
+The wreath wilts and you throw it away.~
+M
+17
+The wreath wilts and you throw it away.~
+R
+4 5223 0
+T 980
+T 981
 S
 $
