@@ -384,12 +384,12 @@ Type "board" to get onto the ship.
 0 1
 S
 #980
-flowers bouquet~
+bouquet flowers~
 a bouquet of flowers~
 A bouquet of flowers is lying here.~
    The fragrant flowers are neatly arranged into a bouquet, wrapped in cloth,
 and tied with a ribbon.
-   Type 'customize bouquet <text>' to change this description.
+   Edit with: customize bouquet <shortdesc | longdesc | lookdesc | lock> [text]
 ~
 3 0 ao 0 0 3
 0 0 0
@@ -406,8 +406,8 @@ a lovely wreath~
 There's a wreath hanging here.~
    Flowers and boughs are arranged in a lovely circle and made to hang up
 somewhere.
-   Type 'customize wreath <text>' to change this description. Dropping the
-wreath will set it up, where it will last several days.
+   Dropping the wreath will set it up, where it will last several days.
+   Edit with: customize wreath <shortdesc | longdesc | lookdesc | lock> [text]
 ~
 3 v a 0 0 7
 0 0 0
@@ -429,9 +429,9 @@ S
 crown floral~
 a floral crown~
 A floral crown is lying here, in bloom.~
-   Long-stemmed flowers of all covers are woven together to form this elegant
+   Long-stemmed flowers of all colors are woven together to form this elegant
 crown.
-   Type 'customize bouquet <text>' to change this description.
+   Edit with: customize floral <shortdesc | longdesc | lookdesc | lock> [text]
 ~
 2 o ae 0 0 5
 0 0 0
@@ -448,5 +448,6 @@ M
 $n dons $p.~
 R
 4 5617 0
+T 980
 S
 $

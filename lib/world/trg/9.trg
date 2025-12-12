@@ -259,19 +259,48 @@ detach 957 %self.id%
 Customize look description~
 1 c 7 0
 customize~
-if %actor.obj_target(%arg.car%)% != %self%
+set targ %arg.car%
+if %actor.obj_target(%targ%)% != %self%
   return 0
   halt
-elseif !%arg.cdr%
-  %send% %actor% Usage: customize %arg.car% <text>
-  halt
+end
+* more processing
+set arg %arg.cdr%
+set type %arg.car%
+set text %arg.cdr%
+set keywords %self.keywords%
+if !%type%
+  %send% %actor% Usage: customize %arg.car% <shortdesc | longdesc | lookdesc | lock> [text]
 elseif %self.room.empire% && %self.room.empire% != %actor.empire% && !%self.carried_by% && !%self.worn_by%
   %send% %actor% You can't customize that here.
-  halt
+elseif %type% == lock
+  %send% %actor% You finalize the text on @%self%.
+  detach 980 %self.id%
+elseif !%text%
+  %send% %actor% Usage: customize %arg.car% <shortdesc | longdesc | lookdesc | lock> [text]
+elseif lookdescription /= %type%
+  %mod% %self% lookdesc %text%
+  %send% %actor% You customize the look description for @%self%.
+elseif !(%text% ~= %keywords.car%)
+  %send% %actor% You must include the word '%keywords.car%' in that customization.
+elseif shortdescription /= %type%
+  %mod% %self% shortdesc %text%
+  %send% %actor% You customize the short description for @%self%.
+  * also update keywords
+  set new_kw %keywords.car%
+  set text %text.skip_filler%
+  while %text%
+    set word %text.car%
+    set text %text.cdr%
+    set new_kw %new_kw% %word.skip_filler%
+  done
+  %mod% %self% keywords %new_kw%
+elseif longdescription /= %type%
+  %mod% %self% longdesc %text%
+  %send% %actor% You customize the long description for @%self%.
+else
+  %send% %actor% Usage: customize %arg.car% <shortdesc | longdesc | lookdesc | lock> [text]
 end
-* ok
-%mod% %self% lookdesc %arg.cdr%
-%send% %actor% You customize @%self%.
 ~
 #981
 Wreath drop setup~
