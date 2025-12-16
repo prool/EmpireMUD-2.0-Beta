@@ -1202,8 +1202,8 @@ S
 tester boss winter wonderland~
 the Winter Wonderland boss tester~
 The Winter Wonderland boss tester is here.~
-This item will summon a grinchy demon or krampus demon for testing.
-Usage: test <grinch | krampus> <normal | hard | group | boss>
+This item will summon a grinchy demon, krampus demon, or clockwork santa for testing.
+Usage: test <grinch | krampus | santa> <normal | hard | group | boss>
 ~
 3 p a 0 0 1
 0 0 0
