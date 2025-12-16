@@ -824,6 +824,7 @@ D0
 &A:&Yo&A:&Yo~
 &t~
 I 6 3095 100.00 25  # FORAGE: edible buds
+I 7 3088 100.00 5  # PICK: bundle of delicate flowers
 I 8 3088 33.33 4 H  # HARVEST: bundle of delicate flowers
 I 8 3088 33.33 5 H  # HARVEST: bundle of delicate flowers
 I 8 3088 33.34 6 H  # HARVEST: bundle of delicate flowers
@@ -882,6 +883,7 @@ D0
 &JlL&RlL~
 &y~
 I 6 3095 100.00 25  # FORAGE: edible buds
+I 7 3091 100.00 5  # PICK: basket of thorny flowers
 I 8 3091 33.33 4 H  # HARVEST: basket of thorny flowers
 I 8 3091 33.33 5 H  # HARVEST: basket of thorny flowers
 I 8 3091 33.34 6 H  # HARVEST: basket of thorny flowers
@@ -976,6 +978,7 @@ D0
 &W`&G|&V^&G|~
 &t~
 I 6 3095 100.00 25  # FORAGE: edible buds
+I 7 3093 100.00 5  # PICK: bundle of orchids
 I 8 3093 33.33 4 H  # HARVEST: bundle of orchids
 I 8 3093 33.33 5 H  # HARVEST: bundle of orchids
 I 8 3093 33.34 6 H  # HARVEST: bundle of orchids

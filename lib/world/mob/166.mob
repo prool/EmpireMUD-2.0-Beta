@@ -917,6 +917,18 @@ T 9604
 T 16684
 T 16621
 S
+#16681
+krampus tiny~
+a tiny krampus~
+A tiny krampus is stalking you.
+~
+1 1 bdoD n 2
+0 0 9 15 -1 -1
+D
+   It's a little krampus -- a bizarre goat-man who keeps children in line in
+the winter season.
+~
+S
 #16682
 mobile new~
 snow mother~
@@ -968,14 +980,16 @@ M
 The burning straw goat catches an ember on its tongue.~
 S
 #16688
-santa bot~
-santa bot~
-Santa bot is here
+santa clockwork demonic~
+the Clockwork Santa~
+A demonic Clockwork Santa takes aim with his toy blaster!
 ~
 25 400 bdoK cqEG 3
-1 0 0 28 -1 -1
+1 0 0 16688 -1 -1
 D
-tba
+   Though he has the mirthy belly, white beard, and red outfit of Santa Claus,
+this clockwork automaton is no jolly old elf. His red eyes and sharp clockwork
+teeth reveal his true motive: destruction!
 ~
 I 4 16663 14.00 1 l  # LOOT: rocking horse saddle
 I 4 16670 13.00 1 l  # LOOT: hearty Christmas spirit
