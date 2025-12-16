@@ -3033,4 +3033,56 @@ Blood wells from $N's puncture wounds.
 #
 #
 
+M16688 abc 32 +
+toy blaster~
+~
+blast~
+blasts~
+toy blaster~
+0 0 3.6 3.8 4.8
+$N jerks as your toy blaster fires a bolt of light straight through $S chest!
+You jerk as $n's toy blaster fires a bolt of light straight through your chest!
+$N jerks as $n's toy blaster fires a bolt of light straight through $S chest!
+Your toy blaster whines and fires, but the shot zips harmlessly past $N.
+$n's toy blaster whines and fires, but the shot zips past you.
+$n's toy blaster whines and fires, but the shot flies wide past $N.
+#
+#
+#
+Your glowing blast fizzles and stops cold before $N.
+A glowing blast from $n fizzles and stops before you.
+A glowing blast from $n fizzles and stops before $N.
+
+M16688 abc 32 
+toy blaster~
+~
+Your toy blaster rattles and fires, blasting through $N's chest in a spray of sparks!
+$n's toy blaster rattles and fires, blasting through your chest in a spray of sparks!
+$n's toy blaster rattles and fires, blasting through $N's chest in a spray of sparks!
+Your toy blaster rattles, but the shot skitters past $N.
+$n fires a rattling toy blaster at you, but misses.
+$n fires a rattling toy blaster at $N, but misses.
+#
+#
+#
+Your rattling toy blast sparks and halts before $N.
+A rattling toy blast from $n sparks and halts before you.
+A rattling toy blast from $n sparks and halts before $N.
+
+M16688 abc 32 
+toy blaster~
+~
+You unleash a festive barrage, blasting straight through $N's chest!
+$n unleashes a festive barrage, blasting straight through your chest!
+$n unleashes a festive barrage, blasting straight through $N's chest!
+Your toy blaster unleashes a festive barrage, but every shot misses $N.
+$n unleashes a festive barrage at you, but misses.
+$n unleashes a festive barrage at $N, but misses.
+#
+#
+#
+Your festive blasts stop short of $N, hanging uselessly in the air.
+Festive blasts from $n stop short of you, hanging uselessly in the air.
+Festive blasts from $n stop short of $N, hanging uselessly in the air.
+
 $
