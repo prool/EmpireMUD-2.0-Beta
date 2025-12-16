@@ -18,9 +18,9 @@ scfight~
 *    set scf_dodge_mode [leap | roll | swim]  * dodge messaging modes
 * Optional vars you can set on the player (remote them to the player):
 *    set scf_strug_char <string>  * shown to self when struggling
-*    set scf_strug_room <string>  * to room when struggling
+*    set scf_strug_room <string>  * to room when struggling, use %%actor%% var
 *    set scf_free_char <string>  * to self when I get free
-*    set scf_free_room <string>  * to room when I get free
+*    set scf_free_room <string>  * to room when I get free, use %%actor%% var
 * To ensure nobody else is also acting:
 *    scfight lockout <cooldown vnum> <my cooldown> <everyone else's cooldown>
 if %actor% != %self%

@@ -597,9 +597,9 @@ switch %move%
     scfight setup struggle %targ% 20
     if %targ.affect(9602)%
       set scf_strug_char You struggle against the fiend's claws...
-      set scf_strug_room ~%%targ%% struggles against the fiend's claws...
+      set scf_strug_room ~%%actor%% struggles against the fiend's claws...
       set scf_free_char You slip out of the fiend's grip!
-      set scf_free_room ~%%targ%% slips out of the fiend's grip!
+      set scf_free_room ~%%actor%% slips out of the fiend's grip!
       remote scf_strug_char %targ.id%
       remote scf_strug_room %targ.id%
       remote scf_free_char %targ.id%

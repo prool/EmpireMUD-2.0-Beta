@@ -3955,12 +3955,12 @@ elseif %move% == 2 && !%self.aff_flagged(BLIND)%
   * messages
   set scf_strug_char You try to wiggle out of the burlap sack...
   set scf_strug_room You hear ~%%actor%% trying to wiggle out of the burlap sack...
-  remote scf_strug_char %actor.id%
-  remote scf_strug_room %actor.id%
+  remote scf_strug_char %targ.id%
+  remote scf_strug_room %targ.id%
   set scf_free_char You wiggle out of the burlap sack!
   set scf_free_room ~%%actor%% manages to wiggle out of the burlap sack!
-  remote scf_free_char %actor.id%
-  remote scf_free_room %actor.id%
+  remote scf_free_char %targ.id%
+  remote scf_free_room %targ.id%
   set cycle 0
   set done 0
   while %cycle% < 5 && !%done%
