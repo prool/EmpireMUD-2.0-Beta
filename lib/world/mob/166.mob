@@ -918,16 +918,41 @@ T 16684
 T 16621
 S
 #16681
-krampus tiny~
-a tiny krampus~
-A tiny krampus is stalking you.
+automaton wicked little~
+a wicked little automaton~
+A wicked little automaton runs around festively.
 ~
-1 1 bdoD n 2
-0 0 9 15 -1 -1
+1 1 bdoD n 1
+1 0 11 15 -1 -1
 D
-   It's a little krampus -- a bizarre goat-man who keeps children in line in
-the winter season.
+   This little clockwork man is running around dressed as Santa Claus, with his
+red suit and white fur trim. His eyes fume with red smoke, mixing a sinister
+demeanor with his festive holiday clothes.
 ~
+M
+1
+Ho, ho, ho! Time to get jolly on your naughty butts!~
+M
+1
+I'm going to shove coal so far up your stocking you'll be coughing up diamonds!~
+M
+1
+I perform over fifty mega-checks per second, and you're naughty!~
+M
+1
+The scammers cheated me out of my naughty list to use it for teleport-marketing. Can you imagine the harm they could do with that? I wanted to do that harm!~
+M
+1
+Season's greetings! Hold still next year so I don't miss.~
+M
+0
+$n mutters a sinister 'ho, ho, ho' as $e plots.~
+M
+0
+$n whirs and smokes.~
+M
+0
+$n's gears tick loudly... and ominously.~
 S
 #16682
 mobile new~
@@ -944,6 +969,48 @@ A new mobile is standing here.
 ~
 0 0 d 0 3
 0 0 0 15 -1 -1
+S
+#16684
+Charlie-in-the-box box~
+a Charlie-in-the-box~
+A Charlie-in-the-box is bobbling around.
+~
+1 1 bdoD n 1
+1 0 15 15 -1 -1
+D
+   It's a violet wooden box with a handle on the side. The lid is open, with a
+long-bodied Christmas clown bobbling out the top. He wears a white costume with
+a many-colored diamond pattern, large white poms on the front, and a red Santa
+hat. His fat cheeks are permanently rosy, but his permanent scowl prevents any
+sense of mirth.
+~
+M
+1
+I am the official sentry.~
+M
+1
+We're all broken or smashed in some way.~
+M
+1
+Why am I such a misfit?~
+M
+1
+I'm not just a nitwit.~
+M
+1
+No child wants to play with a Charlie-in-the-box.~
+M
+1
+Have you seen King Moonracer?~
+M
+0
+$n hops around.~
+M
+0
+$n watches you sternly.~
+M
+0
+$n ducks into $s box and then pops out.~
 S
 #16685
 goat straw burning~
@@ -987,9 +1054,9 @@ A demonic Clockwork Santa takes aim with his toy blaster!
 25 400 bdoK cqEG 3
 1 0 0 16688 -1 -1
 D
-   Though he has the mirthy belly, white beard, and red outfit of Santa Claus,
-this clockwork automaton is no jolly old elf. His red eyes and sharp clockwork
-teeth reveal his true motive: destruction!
+   Though he has the mirthy belly, white beard, and fuming red outfit of Santa
+Claus, this clockwork automaton is no jolly old elf. His red eyes and sharp
+clockwork teeth reveal his true motive: destruction!
 ~
 I 4 16663 14.00 1 l  # LOOT: rocking horse saddle
 I 4 16670 13.00 1 l  # LOOT: hearty Christmas spirit
@@ -998,11 +1065,35 @@ I 4 16672 13.00 1 l  # LOOT: serene Christmas spirit
 I 4 16673 13.00 1 l  # LOOT: warm Christmas spirit
 I 4 16674 13.00 1 l  # LOOT: anxious Christmas spirit
 I 4 16675 13.00 1 l  # LOOT: nostalgic Christmas spirit
-I 4 16679 4.00 1 l  # LOOT: tiny krampus whistle
-I 4 16685 4.00 1 l  # LOOT: burning straw goat whistle
+I 4 16681 4.00 1 l  # LOOT: wicked little automaton minipet whistle
+I 4 16684 4.00 1 l  # LOOT: Charlie-in-the-box minipet
 M
 11
 !naughty !merry !tinsel !jingleshock~
+M
+1
+Ho, ho, ho! Time to get jolly on your naughty butts!~
+M
+1
+I'm going to shove coal so far up your stocking you'll be coughing up diamonds!~
+M
+1
+I perform over fifty mega-checks per second, and you're naughty!~
+M
+1
+The scammers cheated me out of my naughty list to use it for teleport-marketing. Can you imagine the harm they could do with that? I wanted to do that harm!~
+M
+1
+Season's greetings! Hold still next year so I don't miss.~
+M
+0
+$n mutters a sinister 'ho, ho, ho' as $e plots.~
+M
+0
+$n whirs and smokes.~
+M
+0
+$n's gears tick loudly... and ominously.~
 T 16603
 T 9600
 T 9601
