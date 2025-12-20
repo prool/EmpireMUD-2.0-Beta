@@ -4643,7 +4643,7 @@ ACMD(do_survey) {
 	}
 	
 	// mine?
-	if (((HAS_FUNCTION(IN_ROOM(ch), FNC_MINE) || room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_MINE)) || (get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_MINE_GLB_VNUM) > 0 && GET_LOYALTY(ch) && get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_PROSPECT_EMPIRE) == EMPIRE_VNUM(GET_LOYALTY(ch)))) && can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED)) {
+	if (((HAS_FUNCTION(IN_ROOM(ch), FNC_MINE) || room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_MINE)) && (get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_MINE_GLB_VNUM) > 0 && GET_LOYALTY(ch) && get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_PROSPECT_EMPIRE) == EMPIRE_VNUM(GET_LOYALTY(ch)))) && can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED)) {
 		show_prospect_result(ch, IN_ROOM(ch));
 	}
 	

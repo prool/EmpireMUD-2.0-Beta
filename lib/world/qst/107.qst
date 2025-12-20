@@ -10,9 +10,10 @@ that citizens live) to finish this quest.
 collect. By time you've turned around, the cookies are gone and a left-over
 gift has replaced them.
 ~
-18 dej 0 0 -1
+19 dej 0 0 -1
 A
 1 10702
+D 10700
 P
 36 10700 0 1 -
 R
@@ -26,6 +27,37 @@ W
 36 10700 0 1 a
 Z
 2 10716
+S
+#10701
+Winter Wonderland: A Proper Roasting~
+   The cheerful little elves are preparing for one of their favorite winter
+activities: They're having a roast! The elves will be taking turns making jokes
+about Santa as some sort of twisted polar team-building activity. They just
+need their favorite snack. Bake 20 bowls of roast chestnuts and leave them in
+any home where the elves will collect them while delivering presents.
+(If you don't have chestnuts, try opening more gifts.)
+~
+   You leave the freshly roasted chestnuts in a pile of neatly-stacked bowls on
+the table for the elves to collect. By the time you turn around, they're gone!
+There's a stocking in their place, and it has your name on it.
+~
+20 dej 0 0 -1
+A
+1 10702
+D 10700
+P
+36 10700 0 1 -
+R
+9 10700 10
+R
+2 16678 1
+T 10700
+W
+2 10722 0 1 a
+W
+36 10700 0 1 a
+Z
+2 10722
 S
 #10730
 Hey Diddle Diddle~

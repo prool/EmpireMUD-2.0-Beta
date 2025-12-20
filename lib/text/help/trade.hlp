@@ -26,6 +26,7 @@ See also: CRAFT, IDENTIFY, FORGE, SEWING, POTTERY, WOODWORKING, SHIPBUILDING,
 Advanced Woodworking (Trade ability)
 
 With Advanced Woodworking you can craft:
+  wreath
   beehive*
   carriage*
   wagon*
@@ -391,7 +392,9 @@ See also: FORGE, WEAPONCRAFTING, IRON BLADES
 Exquisite Woodworking (Trade ability)
 
 With Exquisite Woodworking you can craft:
-  caravan*                        elegant handle
+  elegant handle
+  floral crown
+  caravan*
 
 * Crafts marked with an asterisk require the Carpenter building.
 
@@ -1214,6 +1217,7 @@ This ability lets you craft items from wood, and lets you saw or scrape trees
 faster.
 
 With Woodworking you can craft:
+  bouquet
   flute
   shortbow
   lyre

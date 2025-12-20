@@ -125,6 +125,7 @@ Basic buildings granted by the Build ability:
   vvvv fence
   vxvv gate
   {CC} cannery -- store fruits
+  |FF| flower racks -- store flowers
   {FF} foundry -- store metals
   {GG} granary -- store grains
   {PP} gravelpit -- store rocks
@@ -470,6 +471,18 @@ supplies more fish than a normal water tile.
 Fisheries cannot be painted.
 
 See also: FISH
+#
+"FLOWER RACKS"
+
+|FF|  Flower Racks  (Build ability)
+
+Stored here:  flowers
+
+Each flower rack is a storage facility for the empire's flowers. Like all of
+the storage buildings, all flower racks on the same island are linked together
+and you can retrieve from any of them.
+
+See also: STORAGE
 #
 FOUNDRY
 

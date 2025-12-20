@@ -776,4 +776,224 @@ healthy. As you look closer, you notice the plump cucumbers, each one a deep
 green and glossy, waiting to be harvested.
 ~
 S
+#3088
+flowers~
+The Flower Gardens~
+6 j cgh
+0 100 0 100
+D0
+&V*&Lv&Yo&A:~
+&t~
+D0
+&V*&Yo&Lv&A:~
+&t~
+D0
+&A:&Lv&V*&Yo~
+&t~
+D0
+&A:&V*&Lv&Yo~
+&t~
+D0
+&Yo&Lv&V*&A:~
+&t~
+D0
+&Yo&V*&Lv&A:~
+&t~
+D0
+&A&Lv:&Yo&V*~
+&t~
+D0
+&A:&Yo&Lv&V*~
+&t~
+D0
+&V*&Yo&V*&Yo~
+&t~
+D0
+&Yo&V*&Yo&V*~
+&t~
+D0
+&V*&A:&V*&A:~
+&t~
+D0
+&A:&V*&A:&V*~
+&t~
+D0
+&Yo&A:&Yo&A:~
+&t~
+D0
+&A:&Yo&A:&Yo~
+&t~
+I 6 3095 100.00 25  # FORAGE: edible buds
+I 7 3088 100.00 5  # PICK: bundle of delicate flowers
+I 8 3088 33.33 4 H  # HARVEST: bundle of delicate flowers
+I 8 3088 33.33 5 H  # HARVEST: bundle of delicate flowers
+I 8 3088 33.34 6 H  # HARVEST: bundle of delicate flowers
+U
+0
+Color explodes from the ground as flower after flower bursts open!~
+U
+1
+Beautiful flower-shaped embers float off into the air as the gardens burn away to ash.~
+X
+flowers gardens crop field plants around~
+   Rows of carefully planted flower gardens stretch out before you. Violet,
+blue, yellow and green paint an enchanting landscape, streaked with walking
+paths where you can enjoy the delicate aroma.
+~
+S
+#3091
+flowers~
+The Flower Gardens~
+6 k cgh
+0 100 0 100
+D0
+&RlL&OlL~
+&y~
+D0
+&RlL&ClL~
+&y~
+D0
+&RlL&JlL~
+&y~
+D0
+&OlL&RlL~
+&y~
+D0
+&OlL&ClL~
+&y~
+D0
+&OlL&JlL~
+&y~
+D0
+&ClL&OlL~
+&y~
+D0
+&ClL&RlL~
+&y~
+D0
+&ClL&JlL~
+&y~
+D0
+&JlL&OlL~
+&y~
+D0
+&JlL&ClL~
+&y~
+D0
+&JlL&RlL~
+&y~
+I 6 3095 100.00 25  # FORAGE: edible buds
+I 7 3091 100.00 5  # PICK: basket of thorny flowers
+I 8 3091 33.33 4 H  # HARVEST: basket of thorny flowers
+I 8 3091 33.33 5 H  # HARVEST: basket of thorny flowers
+I 8 3091 33.34 6 H  # HARVEST: basket of thorny flowers
+U
+0
+The desert comes to life as hundreds of bright flowers stretch open!~
+U
+1
+The thorny flower gardens turn to ash and sink back into the desert as dust.~
+X
+flowers gardens crop field plants around~
+   Bright flowers in reds, oranges, and blues rise on pale, thorny stalks to
+decorate the desert in long, fragrant rows. Walking paths allow a peaceful tour
+for those in search of a calm moment.
+~
+S
+#3093
+flowers~
+The Flower Gardens~
+6 l cgh
+0 100 0 100
+D0
+&V^&G|&B`&G|~
+&t~
+D0
+&V^&G|&A`&G|~
+&t~
+D0
+&V^&G|&W`&G|~
+&t~
+D0
+&V`&G|&B^&G|~
+&t~
+D0
+&V`&G|&A^&G|~
+&t~
+D0
+&V`&G|&W^&G|~
+&t~
+D0
+&B^&G|&V`&G|~
+&t~
+D0
+&B^&G|&A`&G|~
+&t~
+D0
+&B^&G|&W`&G|~
+&t~
+D0
+&B`&G|&V^&G|~
+&t~
+D0
+&B`&G|&A^&G|~
+&t~
+D0
+&B`&G|&W^&G|~
+&t~
+D0
+&A^&G|&B`&G|~
+&t~
+D0
+&A^&G|&V`&G|~
+&t~
+D0
+&A^&G|&W`&G|~
+&t~
+D0
+&A`&G|&B^&G|~
+&t~
+D0
+&A`&G|&V^&G|~
+&t~
+D0
+&A`&G|&W^&G|~
+&t~
+D0
+&W^&G|&B`&G|~
+&t~
+D0
+&W^&G|&A`&G|~
+&t~
+D0
+&W^&G|&V`&G|~
+&t~
+D0
+&W`&G|&B^&G|~
+&t~
+D0
+&W`&G|&A^&G|~
+&t~
+D0
+&W`&G|&V^&G|~
+&t~
+I 6 3095 100.00 25  # FORAGE: edible buds
+I 7 3093 100.00 5  # PICK: bundle of orchids
+I 8 3093 33.33 4 H  # HARVEST: bundle of orchids
+I 8 3093 33.33 5 H  # HARVEST: bundle of orchids
+I 8 3093 33.34 6 H  # HARVEST: bundle of orchids
+U
+0
+Green stems rise from the soil before bursting with orchids in all colors!~
+U
+1
+The orchids sizzle and pop as steam and smoke cloud the air.~
+X
+flowers gardens crop field plants around~
+   Orchids rise from the thick tropical soil to form long rows of rich blue,
+violet, and white flowers, interspersed with the occasional flame-bright orange
+or brilliant pink. Paths lead through the tranquil gardens, giving you a moment
+to reflect.
+~
+S
 $

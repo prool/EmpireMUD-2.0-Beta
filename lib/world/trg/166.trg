@@ -239,6 +239,9 @@ switch %self.vnum%
   break
   case 16680
   break
+  case 16688
+    %echo% ~%self% says, 'Ho, ho,' over and over, fainter each time, as he powers down.
+  break
 done
 set person %self.room.people%
 while %person%
@@ -3637,7 +3640,7 @@ end
 * check if mob present
 set ch %room.people%
 while %ch%
-  if (%ch.vnum% == 16613 || %ch.vnum% == 16680)
+  if (%ch.vnum% == 16613 || %ch.vnum% == 16680 || %ch.vnum% == 16688)
     %send% %actor% You better deal with the demon that's already here before invoking another one.
     halt
   end
@@ -3672,13 +3675,16 @@ else
   halt
   return 1
 end
-eval WhichDemon %random.2%
+eval WhichDemon %random.3%
 switch %WhichDemon%
   case 1
     set WhichDemon 16613
   break
   case 2
     set WhichDemon 16680
+  break
+  case 3
+    set WhichDemon 16688
   break
 done
 set cycles_left 3
@@ -3706,6 +3712,8 @@ while %cycles_left% >= 0
         set DemonDesc tall
       elseif %WhichDemon% == 16680
         set DemonDesc broad
+      elseif %WhichDemon% == 16688
+        set DemonDesc wide
       end
       %echo% A shadow of someone or something %DemonDesc% can be seen in the middle of the cave.
     break
@@ -3721,7 +3729,7 @@ done
 %load% mob %WhichDemon%
 %load% obj 16614 room
 set mob %room.people%
-if %mob.vnum% != 16613 && %mob.vnum% != 16680
+if %mob.vnum% != %WhichDemon%
   %echo% Something went wrong...
   halt
 end
@@ -3947,12 +3955,12 @@ elseif %move% == 2 && !%self.aff_flagged(BLIND)%
   * messages
   set scf_strug_char You try to wiggle out of the burlap sack...
   set scf_strug_room You hear ~%%actor%% trying to wiggle out of the burlap sack...
-  remote scf_strug_char %actor.id%
-  remote scf_strug_room %actor.id%
+  remote scf_strug_char %targ.id%
+  remote scf_strug_room %targ.id%
   set scf_free_char You wiggle out of the burlap sack!
   set scf_free_room ~%%actor%% manages to wiggle out of the burlap sack!
-  remote scf_free_char %actor.id%
-  remote scf_free_room %actor.id%
+  remote scf_free_char %targ.id%
+  remote scf_free_room %targ.id%
   set cycle 0
   set done 0
   while %cycle% < 5 && !%done%
@@ -4067,7 +4075,7 @@ Winter Wonderland: Boss fight tester~
 test~
 return 1
 if !%arg% || !%arg.cdr%
-  %send% %actor% Usage: test <grinch \| krampus> <normal \| hard \| group \| boss>
+  %send% %actor% Usage: test <grinch \| krampus \| santa> <normal \| hard \| group \| boss>
   halt
 end
 * mob?
@@ -4076,8 +4084,10 @@ if grinchy /= %which%
   set vnum 16613
 elseif krampus /= %which%
   set vnum 16680
+elseif santa /= %which%
+  set vnum 16688
 else
-  %send% %actor% Usage: test <grinch \| krampus> <normal \| hard \| group \| boss>
+  %send% %actor% Usage: test <grinch \| krampus \| santa> <normal \| hard \| group \| boss>
   halt
 end
 * diff?
@@ -4091,7 +4101,7 @@ elseif group /= %arg2%
 elseif boss /= %arg2%
   set diff 4
 else
-  %send% %actor% Usage: test <grinch \| krampus> <normal \| hard \| group \| boss>
+  %send% %actor% Usage: test <grinch \| krampus \| santa> <normal \| hard \| group \| boss>
   halt
 end
 * remove old mob?
@@ -4102,6 +4112,11 @@ if %old%
   %purge% %old%
 end
 set old %room.people(16680)%
+if %old%
+  %echo% ~%old% vanishes...
+  %purge% %old%
+end
+set old %room.people(16688)%
 if %old%
   %echo% ~%old% vanishes...
   %purge% %old%
@@ -4240,8 +4255,15 @@ if %actor.quest_finished(16687)%
 end
 ~
 #16688
-Santa Bot: Combat~
-0 c 0 0
+Clockwork Santa combat: Naughty List Judgment, Merry Massacre, Tinsel Cannon Snare, Jingleshock~
+0 c 0 7
+L w 9602
+L w 16686
+L w 16687
+L w 16690
+L w 16691
+L w 16692
+L w 16693
 !naughty !merry !tinsel !jingleshock~
 set targ %arg%
 set room %self.room%
@@ -4300,6 +4322,7 @@ elseif %cmd% == naughty
   dg_affect #16691 %self% off
   if !%hit%
     if %diff% < 3
+      wait 1 s
       %echo% &&G~%self% stomps around, shouting, 'How could they all miss?!'&&0
       dg_affect #16687 %self% HARD-STUNNED on 10
     end
@@ -4310,13 +4333,13 @@ elseif %cmd% == merry
   scfight clear duck
   %echo% &&G~%self% booms, 'Ho... ho... ho... Time for a merry massacre!'&&0
   eval dodge %diff% * 40
-  dg_affect #16691 %self% DODGE %dodge% 20
+  dg_affect #16692 %self% DODGE %dodge% 20
   if %diff% == 1
     nop %self.add_mob_flag(NO-ATTACK)%
   end
   wait 3 s
   if %self.disabled%
-    dg_affect #16691 %self% off
+    dg_affect #16692 %self% off
     nop %self.remove_mob_flag(NO-ATTACK)%
     halt
   end
@@ -4354,15 +4377,104 @@ elseif %cmd% == merry
   dg_affect #16692 %self% off
   if !%hit%
     if %diff% < 3
+      wait 1 s
       %echo% &&G~%self% holds ^%self% head in ^%self% hands, saying, 'How could it have gone so wrong?'&&0
       dg_affect #16687 %self% HARD-STUNNED on 10
     end
   end
   wait 8 s
 elseif %cmd% == tinsel
-  %echo% &&PTinsel&&0 ~%targ%
+  * Tinsel Cannon Snare (struggle)
+  scfight clear struggle
+  %echo% &&G~%self% pulls out an enormous tinsel cannon...&&0
+  wait 3 s
+  if %self.disabled%
+    halt
+  end
+  if %diff% == 1
+    dg_affect #16687 %self% HARD-STUNNED on 20
+  end
+  %echo% &&G**** &&Z~%self% fires tinsel into the air! It wraps around you, snaring you in place! ****&&0 (struggle)
+  set ch %room.people%
+  while %ch%
+    set next_ch %ch.next_in_room%
+    if %self.is_enemy(%ch%)%
+      scfight setup struggle %ch% 20
+      * messages
+      set scf_strug_char You try to wiggle out of the burlap sack...
+      set scf_strug_room You hear ~%%actor%% trying to wiggle out of the burlap sack...
+      remote scf_strug_char %ch.id%
+      remote scf_strug_room %ch.id%
+      set scf_free_char You wiggle out of the burlap sack!
+      set scf_free_room ~%%actor%% manages to wiggle out of the burlap sack!
+      remote scf_free_char %ch.id%
+      remote scf_free_room %ch.id%
+    end
+    set ch %next_ch%
+  done
+  set cycle 0
+  set count 1
+  while %cycle% < 5 && %count% > 0
+    wait 4 s
+    set count 0
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if %ch.affect(9602)%
+          %send% %ch% &&G**** The tinsel sparks and crackles as it zaps you with lightning! ****&&0 (struggle)
+          %echoaround% %ch% &&G~%ch% jolts as &%ch%'s zapped with lightning by the tinsel!&&0
+          eval count %count% + 1
+        end
+      end
+      set ch %next_ch%
+    done
+    eval cycle %cycle% + 1
+  done
+  scfight clear struggle
+  dg_affect #16687 %self% off
 elseif %cmd% == jingleshock
-  %echo% &&PJingleshock&&0 ~%targ%
+  * Jingleshock (interrupt)
+  scfight clear interrupt
+  %echo% &&G**** &&Z~%self% pulls out an enormous bell and shouts, 'Time for a Jingleshock!' ****&&0 (interrupt)
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  scfight setup interrupt all
+  wait 4 s
+  if %self.disabled%
+    nop %self.remove_mob_flag(NO-ATTACK)%
+    halt
+  end
+  if %self.var(count_scfinterrupt,0)% < %room.players_present%
+    %echo% &&G**** &&Z~%self% roars as &%self% prepares to throw the bell... ****&&0 (interrupt)
+  end
+  wait 4 s
+  if %self.disabled%
+    nop %self.remove_mob_flag(NO-ATTACK)%
+    halt
+  end
+  if %self.var(count_scfinterrupt,0)% >= %room.players_present%
+    %echo% &&G~%self% is distracted and drops the jingle bell, which clangs and rolls away!&&0
+    if %diff% == 1
+      dg_affect #16687 %self% HARD-STUNNED on 5
+    end
+    wait 30 s
+  else
+    %echo% &&GThe jingle bell lands near your feet, letting out a deafening jingleshock!&&0
+    eval amount %self.level% / (6 - %diff%)
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        dg_affect #16693 %ch% RESIST-PHYSICAL -%amount% 30
+        dg_affect #16693 %ch% RESIST-MAGICAL -%amount% 30 silent
+        %damage% %ch% 100 direct
+      end
+      set ch %next_ch%
+    done
+  end
+  scfight clear interrupt
 else
   %echo% &&POops!&&0 ~%targ% %cmd%
 end

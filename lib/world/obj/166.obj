@@ -1168,6 +1168,17 @@ the evil as you read it.
 Q 16680
 T 16680
 S
+#16681
+whistle minipet wicked little automaton~
+a wicked little automaton minipet whistle~
+A wicked little automaton minipet whistle is dangling here.~
+   This festive clockwork whistle will grant you the wicket little automaton
+minipet. Type 'use whistle' to add it to your list.
+~
+19 p a 0 0 10
+16681 0 0
+10 0
+S
 #16683
 object new~
 snow cube~
@@ -1176,6 +1187,17 @@ A new object is sitting here.~
 0 0 a 0 0 1
 0 0 0
 0 0
+S
+#16684
+Charlie-in-the-box box minipet~
+a Charlie-in-the-box minipet~
+A Charlie-in-the-box is closed on the ground.~
+   It's a violet box with a crank on the side. Type 'use Charlie-in-the-box' to
+add it to your minipet list.
+~
+19 p a 0 0 11
+16684 0 0
+10 0
 S
 #16685
 whistle burning straw goat~
@@ -1192,8 +1214,8 @@ S
 tester boss winter wonderland~
 the Winter Wonderland boss tester~
 The Winter Wonderland boss tester is here.~
-This item will summon a grinchy demon or krampus demon for testing.
-Usage: test <grinch | krampus> <normal | hard | group | boss>
+This item will summon a grinchy demon, krampus demon, or clockwork santa for testing.
+Usage: test <grinch | krampus | santa> <normal | hard | group | boss>
 ~
 3 p a 0 0 1
 0 0 0

@@ -1,17 +1,22 @@
 #10700
-cookie turn in~
-2 v 0
+Cookie or Chestnut quest turn in~
+2 v 0 0
 ~
 if %room.max_citizens% < 1
   return 0
-  %send% %actor% You need to leave Christmas cookies in a house for the elves to collect.
+  if %questvnum% == 10700
+    set name Christmas cookies
+  else
+    set name chestnuts
+  end
+  %send% %actor% You need to leave %name% in a house for the elves to collect.
   %send% %actor% (Go to any place where citizens live and try to finish this quest again.)
   halt
 end
 ~
 #10701
 Carolers caroling a'merrily~
-0 g 100
+0 g 100 0
 ~
 wait 5
 switch %random.3%
@@ -70,7 +75,7 @@ done
 ~
 #10702
 Christmas Gift open~
-1 c 2
+1 c 2 0
 open~
 * gifts are given in order
 set gift_list 16617 10717 16666 10719 10720 16657 16696 10704 10710 16656
@@ -123,7 +128,7 @@ end
 ~
 #10703
 Father Christmas gift give~
-0 g 100
+0 g 100 0
 ~
 if !%actor.is_pc%
   halt
@@ -162,14 +167,14 @@ done
 ~
 #10704
 Completer~
-0 f 100
+0 f 100 0
 ~
 * This formerly completed the adventure at the end of the frost elf fight.
 %adventurecomplete%
 ~
 #10706
 Christmas present minipet: Open present~
-0 ct 0
+0 ct 0 0
 open~
 if %actor.obj_target(%arg.argument1%)%
   return 0
@@ -191,7 +196,7 @@ nop %actor.command_lag(ABILITY)%
 ~
 #10710
 Faster Hestian Trinket (snowglobe)~
-1 c 2
+1 c 2 0
 use~
 * This is basically a [252] HESTIAN TRINKET with custom strings
 * checks
@@ -270,7 +275,7 @@ nop %actor.cancel_adventure_summon%
 ~
 #10712
 bottomless gift sack: spawn elf on claimed land~
-1 bw 3
+1 bw 3 0
 ~
 * Randomly spawns an elf while worn (on claimed land)
 set ch %self.worn_by%
@@ -290,7 +295,7 @@ end
 ~
 #10713
 Reindeer spawner~
-0 h 100
+0 h 100 0
 ~
 if !%actor.varexists(last_christmas_reindeer_day)%
   set last_christmas_reindeer_day 0
@@ -323,7 +328,7 @@ end
 ~
 #10714
 Elf despawner~
-0 b 10
+0 b 10 0
 ~
 if %self.fighting% || %self.disabled%
   halt
@@ -333,7 +338,7 @@ end
 ~
 #10715
 Reindeer mount response~
-0 c 0
+0 c 0 0
 mount ride~
 * This marks last-reindeer-spawn-day when mounted, IF in the adventure
 return 0
@@ -344,7 +349,7 @@ end
 ~
 #10727
 Winter Wonderland minipet whistle (random order) pre-2021~
-1 c 2
+1 c 2 0
 use~
 * NOTE: This is the pre-2021 version and has a shorter minipet list, for people who hoarded old whistles.
 * List of vnums granted by this whistle (minipet mobs)
@@ -394,7 +399,7 @@ end
 ~
 #10728
 Magical coal use~
-1 c 2
+1 c 2 0
 use~
 if %actor.obj_target(%arg%)% != %self%
   return 0
@@ -468,7 +473,7 @@ end
 ~
 #10729
 Winter Wonderland minipet whistle (random order) 2021-2025~
-1 c 2
+1 c 2 0
 use~
 * List of vnums granted by this whistle (minipet mobs)
 set list 10709 16657 16658 10723 10724 10725 10726 16653 16654 16655 16656 16666 16667 16668 16669 10706 16670 16671 16672
@@ -518,7 +523,7 @@ end
 ~
 #10730
 Hey Diddle Diddle~
-0 bw 10
+0 bw 10 0
 ~
 switch %random.3%
   case 1
@@ -534,14 +539,14 @@ done
 ~
 #10731
 Give rejection~
-0 j 100
+0 j 100 0
 ~
 %send% %actor% ~%self% does not want that.
 return 0
 ~
 #10732
 Jack~
-0 bw 10
+0 bw 10 0
 ~
 switch %random.3%
   case 1
@@ -557,7 +562,7 @@ done
 ~
 #10733
 Jill find Jack on reboot~
-0 x 0
+0 x 0 0
 ~
 set jack %instance.mob(10732)%
 if !%jack%
@@ -568,7 +573,7 @@ mfollow %jack%
 ~
 #10734
 Jack Be Nimble~
-0 bw 10
+0 bw 10 0
 ~
 switch %random.3%
   case 1
@@ -584,7 +589,7 @@ done
 ~
 #10735
 Drop Other Candle Quest~
-2 u 100
+2 u 100 0
 ~
 if %actor%
   %quest% %actor% drop 10734
@@ -592,7 +597,7 @@ end
 ~
 #10736
 Jill~
-0 bw 10
+0 bw 10 0
 ~
 switch %random.3%
   case 1
@@ -608,7 +613,7 @@ done
 ~
 #10737
 Jack Sprat~
-0 bw 10
+0 bw 10 0
 ~
 switch %random.3%
   case 1
@@ -624,7 +629,7 @@ done
 ~
 #10738
 Mother Goose Teleport~
-1 c 2
+1 c 2 0
 use~
 if %actor.obj_target(%arg%)% != %self%
   return 0
@@ -698,7 +703,7 @@ nop %actor.cancel_adventure_summon%
 ~
 #10739
 Jack Horner~
-0 bw 10
+0 bw 10 0
 ~
 switch %random.3%
   case 1
@@ -714,7 +719,7 @@ done
 ~
 #10740
 Mother goose mutually exclusive quests~
-2 v 0
+2 v 0 0
 ~
 switch %questvnum%
   case 10732
@@ -733,7 +738,7 @@ done
 ~
 #10741
 Miss Muffet~
-0 bw 10
+0 bw 10 0
 ~
 switch %random.3%
   case 1
@@ -749,7 +754,7 @@ done
 ~
 #10743
 Mary~
-0 bw 10
+0 bw 10 0
 ~
 switch %random.3%
   case 1
@@ -765,7 +770,7 @@ done
 ~
 #10744
 Minipet use - little lamb bell version~
-1 c 3
+1 c 3 0
 ring~
 if %actor.obj_target(%arg%)% != %self% && !(%self.is_name(%arg%)% && %self.worn_by%)
   return 0
@@ -781,7 +786,7 @@ end
 ~
 #10746
 Old Woman who lived in a shoe~
-0 bw 10
+0 bw 10 0
 ~
 switch %random.3%
   case 1
@@ -797,7 +802,7 @@ done
 ~
 #10748
 Mother Goose spawn~
-0 n 100
+0 n 100 0
 ~
 if (!%instance.location% || %self.room.template% != 10730)
   halt
@@ -819,7 +824,7 @@ end
 ~
 #10749
 Mother Goose: Breadcrumbs teleport you home~
-1 c 2
+1 c 2 0
 use~
 * breadcrumb trinket: shorter copy of hestian trinket
 if %actor.obj_target(%arg%)% != %self%
@@ -897,7 +902,7 @@ nop %actor.cancel_adventure_summon%
 ~
 #10750
 Sell spider parts to Miner Nynar~
-1 c 2
+1 c 2 0
 sell~
 * Test keywords
 if !%self.is_name(%arg%)%
@@ -924,7 +929,7 @@ nop %actor.give_coins(5)%
 ~
 #10751
 Sell spider meat to Miner Meena~
-1 c 2
+1 c 2 0
 sell~
 * Test keywords
 if !%self.is_name(%arg%)%
@@ -951,7 +956,7 @@ nop %actor.give_coins(5)%
 ~
 #10752
 Goblin Mine Shops~
-0 c 0
+0 c 0 0
 buy~
 set vnum -1
 set named a thing
@@ -1052,7 +1057,7 @@ end
 ~
 #10753
 Buy Potion/Nynar~
-0 c 0
+0 c 0 0
 buy~
 set vnum -1
 set named a thing
@@ -1078,7 +1083,7 @@ set coinstr %actor.charge_coins(30)%
 ~
 #10754
 Nynar env~
-0 bw 10
+0 bw 10 0
 ~
 * NO LONGER USED -- replaced by mob custom msgs
 switch %random.4%
@@ -1100,7 +1105,7 @@ done
 ~
 #10755
 Meena env~
-0 bw 10
+0 bw 10 0
 ~
 * NO LONGER USED - replaced by mob custom messages
 switch %random.4%
@@ -1122,7 +1127,7 @@ done
 ~
 #10756
 Goblin Miner Spawn~
-0 n 100
+0 n 100 0
 ~
 if (!%instance.location% || %self.room.template% != 10750)
   halt
@@ -1143,7 +1148,7 @@ mmove
 ~
 #10757
 Widow Spider Complete~
-0 f 100
+0 f 100 0
 ~
 %buildingecho% %self.room% You hear the terrifying skree of the widow spider dying!
 %load% obj 10769
@@ -1151,7 +1156,7 @@ return 0
 ~
 #10758
 Buy Coffin/Blacklung~
-0 c 0
+0 c 0 0
 buy~
 set vnum -1
 set named a thing
@@ -1177,7 +1182,7 @@ set coinstr %actor.charge_coins(50)%
 ~
 #10759
 Buy Raft/Hanx~
-0 c 0
+0 c 0 0
 buy~
 set vnum -1
 set named a thing
@@ -1210,7 +1215,7 @@ end
 ~
 #10760
 Widow Spider: Bind~
-0 k 100
+0 k 100 0
 ~
 if %self.cooldown(10761)%
   halt
@@ -1250,7 +1255,7 @@ dg_affect #10760 %actor% STUNNED on 15
 ~
 #10761
 Widow Struggle Bind Struggle~
-0 c 0
+0 c 0 0
 struggle~
 set break_free_at 1
 if !%actor.affect(10760)%
@@ -1279,13 +1284,13 @@ end
 ~
 #10769
 Delayed Completer~
-1 f 0
+1 f 0 0
 ~
 %adventurecomplete%
 ~
 #10770
 Instant tomb cooldown~
-1 s 100
+1 s 100 0
 ~
 if %command% != build
   halt
@@ -1302,7 +1307,7 @@ return 1
 ~
 #10771
 Goblin gravesite decay timer~
-1 f 0
+1 f 0 0
 ~
 if %self.room.building% == Goblin Gravesite
   %build% %self.room% demolish
@@ -1310,7 +1315,7 @@ end
 ~
 #10772
 Goblin gravesite setup timer~
-2 o 100
+2 o 100 0
 ~
 set obj %room.contents%
 while %obj%
@@ -1324,7 +1329,7 @@ done
 ~
 #10773
 Goblin raft replacer~
-1 n 100
+1 n 100 0
 ~
 %load% veh 10771
 set raft %self.room.vehicles%
@@ -1335,7 +1340,7 @@ end
 ~
 #10775
 Fog Bank Environment~
-2 bw 10
+2 bw 10 0
 ~
 switch %random.4%
   case 1
@@ -1354,7 +1359,7 @@ done
 ~
 #10776
 Dust Storm Environment~
-2 bw 10
+2 bw 10 0
 ~
 switch %random.4%
   case 1
@@ -1373,13 +1378,13 @@ done
 ~
 #10777
 Fruit of Knowledge consume~
-1 s 100
+1 s 100 0
 ~
 %load% obj 10780 %actor% inv
 ~
 #10778
 Tree of Knowledge spawner~
-2 e 100
+2 e 100 0
 ~
 if %room.building_vnum% == 10775
   %build% %room% 10778
@@ -1389,7 +1394,7 @@ end
 ~
 #10779
 Pick fruit of knowledge~
-2 c 0
+2 c 0 0
 pick~
 *
 set forest_list 4 90 104 10565
@@ -1416,7 +1421,7 @@ return 1
 ~
 #10780
 Tree of Knowledge skill gain~
-1 n 100
+1 n 100 0
 ~
 * Script is called by a temporary item on a VERY short delay
 wait 1

@@ -164,6 +164,8 @@ When using field - The variable returns:
 &cbuilding&0 - The name of the building on the room, if any.
 &cbuilding_vnum&0 - The vnum of the building on the room, if any.
 &ccan_build(FLAG)&0 - True if the room has the given build flags.
+&cclimate&0 or &cclimate(FLAG)&0 - Get the list of climates or check if 1 climate
+   is in the list (CLIMATE FLAGS).
 &ccomplete&0 - True if the room/building is complete (finished building).
 &ccontents&0 - The id of the first obj in the room.
 &ccontents(vnum)&0 - The id of the first obj in the room that has that vnum.
