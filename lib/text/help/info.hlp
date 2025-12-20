@@ -893,6 +893,9 @@ Tropical river crops (fertile soil near river):
 Newbie island crops:
  &G@@@@&0  Lettuce             &goooo&0  Calabash gourds
 
+Flower crops:
+ &Yo&A:&Yo&A:&0  Temperate           &OlL&ClL  Arid                 &A^&G|&V`&G|&0  Tropical
+
 Most crops are used to make food and drink. Some, like cotton, have other uses.
 Make sure you claim all your map tiles that have crops as unclaimed crops may
 vanish on their own. Crops can be burnt to remove them, even when they're still
@@ -904,7 +907,7 @@ flavorings.
 See also: BURN, CHOP, COOK, FORAGE, HARVEST, MILL, PICK, PLANT, TAVERN, WEAVE,
    IRRIGATION, SPICES
 #
-APRICOTS CUCUMBERS GARLIC LEMONS SUGARCANE
+APRICOTS CUCUMBERS GARLIC LEMONS SUGARCANE FLOWERS
 
 See also: CROPS
 #
