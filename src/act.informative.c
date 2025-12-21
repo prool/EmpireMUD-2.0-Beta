@@ -3656,7 +3656,7 @@ ACMD(do_inventory) {
 		}
 		
 		// home info
-		if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS) && ROOM_PRIVATE_OWNER(IN_ROOM(ch)) == GET_IDNUM(ch)) {
+		if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS) && ROOM_PRIVATE_OWNER(HOME_ROOM(IN_ROOM(ch))) == GET_IDNUM(ch)) {
 			build_page_display_str(ch, "\r\nUse 'home inventory' to see your unique item storage.");
 		}
 		
