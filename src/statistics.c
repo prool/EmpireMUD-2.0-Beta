@@ -406,6 +406,9 @@ void mudstats_world(char_data *ch, char *argument) {
 	if (active_accounts_week == active_accounts) {
 		build_page_display(ch, "Active players: %d", active_accounts);
 	}
+	else if (active_accounts_week > active_accounts) {
+		build_page_display(ch, "Active players: %d-%d", active_accounts, active_accounts_week);
+	}
 	else {
 		build_page_display(ch, "Active players: %d-%d", active_accounts_week, active_accounts);
 	}
@@ -414,8 +417,11 @@ void mudstats_world(char_data *ch, char *argument) {
 	if (active_min == active_max) {
 		build_page_display(ch, "Active empires: %d", active_min);
 	}
-	else {
+	else if (active_max > active_min) {
 		build_page_display(ch, "Active empires: %d-%d", active_min, active_max);
+	}
+	else {
+		build_page_display(ch, "Active empires: %d-%d", active_max, active_min);
 	}
 	
 	// basic empire stats
