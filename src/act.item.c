@@ -8018,7 +8018,7 @@ ACMD(do_seed) {
 	two_arguments(argument, arg, arg2);
 	obj_dotmode = find_all_dots(arg);
 	
-	if (!str_cmp(arg2, "junk")) {
+	if (!str_cmp(arg2, "junk") || !str_cmp(arg2, "-junk") || !str_cmp(arg2, "+junk")) {
 		junk = TRUE;
 	}
 	
