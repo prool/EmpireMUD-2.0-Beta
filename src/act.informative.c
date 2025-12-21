@@ -3650,8 +3650,14 @@ ACMD(do_inventory) {
 		build_page_display(ch, "You are carrying %d/%d items:", IS_CARRYING_N(ch), CAN_CARRY_N(ch));
 		list_obj_to_char(ch->carrying, ch, OBJ_DESC_INVENTORY, TRUE, TRUE);
 
+		// empire inventory
 		if (GET_LOYALTY(ch)) {
 			show_local_einv(ch, IN_ROOM(ch), FALSE, TRUE);
+		}
+		
+		// home info
+		if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS) && ROOM_PRIVATE_OWNER(IN_ROOM(ch)) == GET_IDNUM(ch)) {
+			build_page_display_str(ch, "\r\nUse 'home inventory' to see your unique item storage.");
 		}
 		
 		send_page_display(ch);
