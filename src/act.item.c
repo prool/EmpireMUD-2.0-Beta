@@ -8040,7 +8040,7 @@ ACMD(do_seed) {
 			if (run_interactions(ch, GET_OBJ_INTERACTIONS(obj), INTERACT_SEED, IN_ROOM(ch), NULL, obj, NULL, seed_obj_interact)) {
 				SET_BIT(GET_OBJ_EXTRA(obj), OBJ_SEEDED | OBJ_NO_BASIC_STORAGE);
 				
-				if (junk) {
+				if (junk && !OBJ_FLAGGED(obj, OBJ_KEEP)) {
 					perform_drop(ch, obj, SCMD_JUNK, "junk");
 				}
 				else {
@@ -8065,7 +8065,7 @@ ACMD(do_seed) {
 				any = TRUE;
 				if (run_interactions(ch, GET_OBJ_INTERACTIONS(obj), INTERACT_SEED, IN_ROOM(ch), NULL, obj, NULL, seed_obj_interact)) {
 					SET_BIT(GET_OBJ_EXTRA(obj), OBJ_SEEDED | OBJ_NO_BASIC_STORAGE);
-					if (junk) {
+					if (junk && !OBJ_FLAGGED(obj, OBJ_KEEP)) {
 						perform_drop(ch, obj, SCMD_JUNK, "junk");
 					}
 					else {
