@@ -1646,15 +1646,15 @@ INTERACTION_FUNC(seed_obj_interact) {
 	
 	if (interaction->quantity) {
 		safe_snprintf(to_char, sizeof(to_char), "You seed %s and get %s (x%d)!", GET_OBJ_SHORT_DESC(inter_item), get_obj_name_by_proto(interaction->vnum), interaction->quantity);
-		act(to_char, FALSE, ch, NULL, NULL, TO_CHAR);
+		act(to_char, FALSE, ch, NULL, NULL, TO_CHAR | TO_QUEUE);
 		safe_snprintf(to_room, sizeof(to_room), "$n seeds %s and gets %s (x%d)!", GET_OBJ_SHORT_DESC(inter_item), get_obj_name_by_proto(interaction->vnum), interaction->quantity);
-		act(to_room, TRUE, ch, NULL, NULL, TO_ROOM);
+		act(to_room, TRUE, ch, NULL, NULL, TO_ROOM | TO_QUEUE);
 	}
 	else {
 		safe_snprintf(to_char, sizeof(to_char), "You seed %s and get %s!", GET_OBJ_SHORT_DESC(inter_item), get_obj_name_by_proto(interaction->vnum));
-		act(to_char, FALSE, ch, NULL, NULL, TO_CHAR);
+		act(to_char, FALSE, ch, NULL, NULL, TO_CHAR | TO_QUEUE);
 		safe_snprintf(to_room, sizeof(to_room), "$n seeds %s and gets %s!", GET_OBJ_SHORT_DESC(inter_item), get_obj_name_by_proto(interaction->vnum));
-		act(to_room, TRUE, ch, NULL, NULL, TO_ROOM);
+		act(to_room, TRUE, ch, NULL, NULL, TO_ROOM | TO_QUEUE);
 	}
 	
 	if (GET_LOYALTY(ch)) {
@@ -8010,31 +8010,63 @@ ACMD(do_roadsign) {
 
 
 ACMD(do_seed) {
+	bool any = FALSE;
 	char arg[MAX_INPUT_LENGTH];
-	obj_data *obj;
+	int obj_dotmode;
+	obj_data *obj, *next_obj;
 	
 	one_argument(argument, arg);
+	obj_dotmode = find_all_dots(arg);
 	
 	if (!*arg) {
 		msg_to_char(ch, "Remove the seeds from what?\r\n");
 	}
-	else if (!(obj = get_obj_in_list_vis_prefer_interaction(ch, arg, NULL, ch->carrying, INTERACT_SEED))) {
-		msg_to_char(ch, "You don't have %s %s.\r\n", AN(arg), arg);
-	}
-	else if (!has_interaction(GET_OBJ_INTERACTIONS(obj), INTERACT_SEED)) {
-		msg_to_char(ch, "You can't seed that!\r\n");
-	}
-	else if (OBJ_FLAGGED(obj, OBJ_SEEDED)) {
-		msg_to_char(ch, "It has already been seeded.\r\n");
-	}
-	else {		
-		if (run_interactions(ch, GET_OBJ_INTERACTIONS(obj), INTERACT_SEED, IN_ROOM(ch), NULL, obj, NULL, seed_obj_interact)) {
-			SET_BIT(GET_OBJ_EXTRA(obj), OBJ_SEEDED | OBJ_NO_BASIC_STORAGE);
-			request_obj_save_in_world(obj);
+	else if (obj_dotmode == FIND_INDIV) {
+		if (!(obj = get_obj_in_list_vis_prefer_interaction(ch, arg, NULL, ch->carrying, INTERACT_SEED))) {
+			msg_to_char(ch, "You don't have %s %s.\r\n", AN(arg), arg);
+		}
+		else if (!has_interaction(GET_OBJ_INTERACTIONS(obj), INTERACT_SEED)) {
+			msg_to_char(ch, "You can't seed that!\r\n");
+		}
+		else if (OBJ_FLAGGED(obj, OBJ_SEEDED)) {
+			msg_to_char(ch, "It has already been seeded.\r\n");
 		}
 		else {
-			act("You fail to seed $p.", FALSE, ch, obj, NULL, TO_CHAR);
+			// ok: seed individual
+			if (run_interactions(ch, GET_OBJ_INTERACTIONS(obj), INTERACT_SEED, IN_ROOM(ch), NULL, obj, NULL, seed_obj_interact)) {
+				SET_BIT(GET_OBJ_EXTRA(obj), OBJ_SEEDED | OBJ_NO_BASIC_STORAGE);
+				request_obj_save_in_world(obj);
+			}
+			else {
+				act("You fail to seed $p.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
+			}
+			command_lag(ch, WAIT_OTHER);
 		}
+	}
+	else {
+		// seed all or all.name
+		if (obj_dotmode == FIND_ALLDOT && !*arg) {
+			msg_to_char(ch, "Seed all of what?\r\n");
+			return;
+		}
+		DL_FOREACH_SAFE2(ch->carrying, obj, next_obj, next_content) {
+			if (!OBJ_FLAGGED(obj, OBJ_SEEDED) && has_interaction(GET_OBJ_INTERACTIONS(obj), INTERACT_SEED) && CAN_SEE_OBJ(ch, obj) && (obj_dotmode == FIND_ALL || isname(arg, GET_OBJ_KEYWORDS(obj)))) {
+				// ok: seed 1 of many
+				any = TRUE;
+				if (run_interactions(ch, GET_OBJ_INTERACTIONS(obj), INTERACT_SEED, IN_ROOM(ch), NULL, obj, NULL, seed_obj_interact)) {
+					SET_BIT(GET_OBJ_EXTRA(obj), OBJ_SEEDED | OBJ_NO_BASIC_STORAGE);
+					request_obj_save_in_world(obj);
+				}
+				else {
+					act("You fail to seed $p.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
+				}
+			}
+		}
+		
+		if (!any) {
+			msg_to_char(ch, "You don't have anything you can seed.\r\n");
+		}
+		
 		command_lag(ch, WAIT_OTHER);
 	}
 }

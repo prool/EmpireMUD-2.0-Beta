@@ -2540,10 +2540,11 @@ See also: HIDE, SEARCH ABILITY, SENSE LIFE RITUAL
 #
 SEED SEEDS SEEDING DESEED DE-SEED "REMOVE SEEDS" "SEED COMMAND"
 
-Usage:  seed <fruit>
+Usage:  seed <fruit | flower>
+        seed all
 
-This command allows you to remove the seeds from a fruit, usually to plant
-them. Most fruits can still be eaten afterwards. Some fruits can also be
+This command allows you to remove the seeds from a fruit or flower, usually to
+plant them. Most fruits can still be eaten afterwards. Some fruits can also be
 planted without removing the seeds first.
 
 See also: PLANT, CROPS, SEED COMPONENT
