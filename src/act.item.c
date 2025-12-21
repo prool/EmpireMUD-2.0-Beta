@@ -8010,13 +8010,17 @@ ACMD(do_roadsign) {
 
 
 ACMD(do_seed) {
-	bool any = FALSE;
-	char arg[MAX_INPUT_LENGTH];
+	bool any = FALSE, junk = FALSE;
+	char arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	int obj_dotmode;
 	obj_data *obj, *next_obj;
 	
-	one_argument(argument, arg);
+	two_arguments(argument, arg, arg2);
 	obj_dotmode = find_all_dots(arg);
+	
+	if (!str_cmp(arg2, "junk")) {
+		junk = TRUE;
+	}
 	
 	if (!*arg) {
 		msg_to_char(ch, "Remove the seeds from what?\r\n");
@@ -8035,7 +8039,13 @@ ACMD(do_seed) {
 			// ok: seed individual
 			if (run_interactions(ch, GET_OBJ_INTERACTIONS(obj), INTERACT_SEED, IN_ROOM(ch), NULL, obj, NULL, seed_obj_interact)) {
 				SET_BIT(GET_OBJ_EXTRA(obj), OBJ_SEEDED | OBJ_NO_BASIC_STORAGE);
-				request_obj_save_in_world(obj);
+				
+				if (junk) {
+					perform_drop(ch, obj, SCMD_JUNK, "junk");
+				}
+				else {
+					request_obj_save_in_world(obj);
+				}
 			}
 			else {
 				act("You fail to seed $p.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
@@ -8055,7 +8065,12 @@ ACMD(do_seed) {
 				any = TRUE;
 				if (run_interactions(ch, GET_OBJ_INTERACTIONS(obj), INTERACT_SEED, IN_ROOM(ch), NULL, obj, NULL, seed_obj_interact)) {
 					SET_BIT(GET_OBJ_EXTRA(obj), OBJ_SEEDED | OBJ_NO_BASIC_STORAGE);
-					request_obj_save_in_world(obj);
+					if (junk) {
+						perform_drop(ch, obj, SCMD_JUNK, "junk");
+					}
+					else {
+						request_obj_save_in_world(obj);
+					}
 				}
 				else {
 					act("You fail to seed $p.", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);

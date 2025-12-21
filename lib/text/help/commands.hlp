@@ -2547,7 +2547,10 @@ This command allows you to remove the seeds from a fruit or flower, usually to
 plant them. Most fruits can still be eaten afterwards. Some fruits can also be
 planted without removing the seeds first.
 
-See also: PLANT, CROPS, SEED COMPONENT
+Automatically junk (discard) items after seeding them by adding 'junk' as the
+final argument, e.g. 'seed all.flower junk'.
+
+See also: PLANT, CROPS, JUNK, SEED COMPONENT
 #
 SELFDELETE "SELF DELETE" SELF-DELETE DELETE
 
