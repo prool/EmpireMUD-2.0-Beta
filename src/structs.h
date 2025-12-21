@@ -705,7 +705,7 @@ typedef struct vehicle_data vehicle_data;
 #define BLD_NO_ABANDON_WHEN_RUINED  BIT(22)	// won't auto-abandon when it becomes ruins
 #define BLD_SHOW_VEHICLES  BIT(23)	// can show vehicle icons in the room rather than overriding the building icon (only if OPEN)
 #define BLD_IMMUNE_DAMAGE  BIT(24)	// building cannot be damaged
-// #define BLD_UNUSED13  BIT(25)
+#define BLD_HIDE_STORAGE_UNOWNED  BIT(25)	// only shows as storage when identifying objects if owned
 // #define BLD_UNUSED14  BIT(26)
 // #define BLD_UNUSED15  BIT(27)
 // #define BLD_UNUSED16  BIT(28)
@@ -2829,6 +2829,7 @@ typedef enum {
 #define VEH_HAS_INSTANCE  BIT(38)	// M. instance is attached to vehicle
 #define VEH_TEMPORARY  BIT(39)	// N. vehicle will be removed when instance ends
 #define VEH_TINY  BIT(40)	// O. vehicle is small enough to ignore no-vehicle rooms (e.g. furniture)
+#define VEH_HIDE_STORAGE_UNOWNED  BIT(41)	// P. only shows as storage when identifying objects if owned
 
 
 // VEH_CUSTOM_x: custom message types

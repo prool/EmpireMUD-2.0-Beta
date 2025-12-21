@@ -3896,7 +3896,7 @@ const char *bld_flags[] = {
 	"NO-ABANDON-WHEN-RUINED",
 	"SHOW-VEHICLES",
 	"IMMUNE-DAMAGE",
-	"*",	// 25
+	"HIDE-STORAGE-UNOWNED",	// 25
 	"*",
 	"*",
 	"*",
@@ -5592,6 +5592,7 @@ const char *vehicle_flags[] = {
 	"*INSTANCE",
 	"*TEMPORARY",
 	"TINY",	// 40
+	"HIDE-STORAGE-UNOWNED",
 	"\n"
 };
 
@@ -5638,7 +5639,8 @@ const char *identify_vehicle_flags[] = {
 	"",	// OBSCURE-VISION
 	"",	// *INSTANCE
 	"",	// *TEMPORARY
-	"",	// TINY
+	"",	// TINY	// 40
+	"",	// HIDE-STORAGE-UNOWNED
 	"\n"
 };
 

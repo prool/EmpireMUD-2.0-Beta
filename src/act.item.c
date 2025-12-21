@@ -706,14 +706,14 @@ void identify_obj_to_char(obj_data *obj, char_data *ch, bool simple) {
 				// check stores-like relations
 				HASH_ITER(hh, building_table, bld_iter, next_bld) {
 					LL_FOREACH(GET_BLD_RELATIONS(bld_iter), relat) {
-						if (relat->type == BLD_REL_STORES_LIKE_BLD && relat->vnum == GET_BLD_VNUM(bld)) {
+						if (relat->type == BLD_REL_STORES_LIKE_BLD && relat->vnum == GET_BLD_VNUM(bld) && (!BLD_FLAGGED(bld_iter, BLD_HIDE_STORAGE_UNOWNED) || PRF_FLAGGED(ch, PRF_HOLYLIGHT) || (GET_LOYALTY(ch) && count_owned_buildings(GET_LOYALTY(ch), GET_BLD_VNUM(bld_iter)) >= 1))) {
 							add_string_hash(&str_hash, GET_BLD_NAME(bld_iter), 1);
 						}
 					}
 				}
 				HASH_ITER(hh, vehicle_table, veh_iter, next_veh) {
 					LL_FOREACH(VEH_RELATIONS(veh_iter), relat) {
-						if (relat->type == BLD_REL_STORES_LIKE_BLD && relat->vnum == GET_BLD_VNUM(bld)) {
+						if (relat->type == BLD_REL_STORES_LIKE_BLD && relat->vnum == GET_BLD_VNUM(bld) && (!VEH_FLAGGED(veh_iter, VEH_HIDE_STORAGE_UNOWNED) || PRF_FLAGGED(ch, PRF_HOLYLIGHT) || (GET_LOYALTY(ch) && count_owned_vehicles(GET_LOYALTY(ch), VEH_VNUM(veh_iter)) >= 1))) {
 							add_string_hash(&str_hash, skip_filler(VEH_SHORT_DESC(veh_iter)), 1);
 						}
 					}
@@ -725,14 +725,14 @@ void identify_obj_to_char(obj_data *obj, char_data *ch, bool simple) {
 				// check stores-like relations
 				HASH_ITER(hh, building_table, bld_iter, next_bld) {
 					LL_FOREACH(GET_BLD_RELATIONS(bld_iter), relat) {
-						if (relat->type == BLD_REL_STORES_LIKE_VEH && relat->vnum == VEH_VNUM(veh)) {
+						if (relat->type == BLD_REL_STORES_LIKE_VEH && relat->vnum == VEH_VNUM(veh) && (!BLD_FLAGGED(bld_iter, BLD_HIDE_STORAGE_UNOWNED) || PRF_FLAGGED(ch, PRF_HOLYLIGHT) || (GET_LOYALTY(ch) && count_owned_buildings(GET_LOYALTY(ch), GET_BLD_VNUM(bld_iter)) >= 1))) {
 							add_string_hash(&str_hash, GET_BLD_NAME(bld_iter), 1);
 						}
 					}
 				}
 				HASH_ITER(hh, vehicle_table, veh_iter, next_veh) {
 					LL_FOREACH(VEH_RELATIONS(veh_iter), relat) {
-						if (relat->type == BLD_REL_STORES_LIKE_VEH && relat->vnum == VEH_VNUM(veh)) {
+						if (relat->type == BLD_REL_STORES_LIKE_VEH && relat->vnum == VEH_VNUM(veh) && (!VEH_FLAGGED(veh_iter, VEH_HIDE_STORAGE_UNOWNED) || PRF_FLAGGED(ch, PRF_HOLYLIGHT) || (GET_LOYALTY(ch) && count_owned_vehicles(GET_LOYALTY(ch), VEH_VNUM(veh_iter)) >= 1))) {
 							add_string_hash(&str_hash, skip_filler(VEH_SHORT_DESC(veh_iter)), 1);
 						}
 					}

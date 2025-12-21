@@ -3736,6 +3736,7 @@ Available flags:
     icons on the tile.
  &cIMMUNE-DAMAGE&0 - building cannot be damaged normally (can still be burned
     if BURNABLE is set; only takes yearly decay if resources are set)
+ &cHIDE-STORAGE-UNOWNED&0 - only shows as storage when identifying objects if owned
  &cSAIL&0 - can enter this building with a boat
  &cITEM-LIMIT&0 - only a certain number of items can be dropped here
  &cLONG-AUTOSTORE&0 - autostore takes 72 hours instead of 3 here
@@ -10879,6 +10880,7 @@ Available flags:
  *INSTANCE - vehicle has an instance attached
  *TEMPORARY - vehicle will be removed when the instance ends
  TINY - like furniture, can go be made/moved places vehicles normally can't go
+ HIDE-STORAGE-UNOWNED - only shows as storage when identifying objects if owned
 
 ** The DRIVING/SAILING/FLYING flags each enable specific commands for moving
 the vehicle. If it has more than one of these, each command will work. Usually
