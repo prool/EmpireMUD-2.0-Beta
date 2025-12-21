@@ -48,6 +48,9 @@ int active_accounts = 0;	// not timed out (at least 1 char)
 int active_accounts_week = 0;	// just this week (at least 1 char)
 int max_players_this_uptime = 0;
 
+// local functions
+void update_account_stats();
+
 
  //////////////////////////////////////////////////////////////////////////////
 //// STATS DISPLAYS //////////////////////////////////////////////////////////
@@ -352,6 +355,76 @@ void mudstats_time(char_data *ch, char *argument) {
 	else {
 		build_page_display(ch, "World reset (maintenance and depletion): imminent");
 	}
+	
+	send_page_display(ch);
+}
+
+
+/**
+* do_mudstats: world population stats
+*
+* @param char_data *ch Person to show it to.
+* @param char *argument In case some stats have sub-categories.
+*/
+void mudstats_world(char_data *ch, char *argument) {
+	int count;
+	int active_max = 0, active_min = 0, cities = 0, claimed = 0, homeless = 0, members = 0, population = 0, wealth = 0;
+	empire_data *emp, *next_emp;
+	struct empire_city_data *city;
+	struct empire_homeless_citizen *ehc;
+	
+	// build stats
+	HASH_ITER(hh, empire_table, emp, next_emp) {
+		if (EMPIRE_MEMBERS(emp) > 0) {
+			// count members even if timed out
+			++active_max;
+		}
+		
+		if (EMPIRE_IS_TIMED_OUT(emp)) {
+			continue;
+		}
+		
+		// various counts:
+		++active_min;
+		LL_COUNT(EMPIRE_CITY_LIST(emp), city, count);
+		SAFE_ADD(cities, count, 0, INT_MAX, FALSE);
+		
+		LL_COUNT(EMPIRE_HOMELESS_CITIZENS(emp), ehc, count);
+		SAFE_ADD(homeless, count, 0, INT_MAX, FALSE);
+		
+		SAFE_ADD(claimed, EMPIRE_TERRITORY(emp, TER_TOTAL), 0, INT_MAX, FALSE);
+		SAFE_ADD(members, EMPIRE_MEMBERS(emp), 0, INT_MAX, FALSE);
+		SAFE_ADD(population, EMPIRE_POPULATION(emp), 0, INT_MAX, FALSE);
+		SAFE_ADD(wealth, GET_TOTAL_WEALTH(emp), 0, INT_MAX, FALSE);
+	}
+	
+	// start display
+	build_page_display_str(ch, "World stats:");
+	
+	// active players
+	update_account_stats();
+	if (active_accounts_week == active_accounts) {
+		build_page_display(ch, "Active players: %d", active_accounts);
+	}
+	else {
+		build_page_display(ch, "Active players: %d-%d", active_accounts_week, active_accounts);
+	}
+	
+	// active empires
+	if (active_min == active_max) {
+		build_page_display(ch, "Active empires: %d", active_min);
+	}
+	else {
+		build_page_display(ch, "Active empires: %d-%d", active_min, active_max);
+	}
+	
+	// basic empire stats
+	build_page_display(ch, "World cities: %d", cities);
+	build_page_display(ch, "Claimed land: %d", claimed);
+	build_page_display(ch, "Empire members: %d", members);
+	build_page_display(ch, "Empire citizens: %d", population);
+	build_page_display(ch, "Homeless citizens: %d", homeless);
+	build_page_display(ch, "Global Wealth: %d", wealth);
 	
 	send_page_display(ch);
 }
