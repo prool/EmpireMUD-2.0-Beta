@@ -8064,7 +8064,12 @@ ACMD(do_seed) {
 		}
 		
 		if (!any) {
-			msg_to_char(ch, "You don't have anything you can seed.\r\n");
+			if (*arg) {
+				msg_to_char(ch, "You don't have any '%s' you can seed.\r\n", arg);
+			}
+			else {
+				msg_to_char(ch, "You don't have anything you can seed.\r\n");
+			}
 		}
 		
 		command_lag(ch, WAIT_OTHER);
