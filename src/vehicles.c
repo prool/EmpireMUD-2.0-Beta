@@ -2028,10 +2028,17 @@ void link_and_check_vehicles(void) {
 */
 char *list_one_vehicle(vehicle_data *veh, bool detail) {
 	static char output[MAX_STRING_LENGTH];
-	// char part[MAX_STRING_LENGTH], applies[MAX_STRING_LENGTH];
-	
+	char flags[MAX_STRING_LENGTH];
+		
 	if (detail) {
-		safe_snprintf(output, sizeof(output), "[%5d] %s", VEH_VNUM(veh), VEH_SHORT_DESC(veh));
+		if (VEH_FLAGS(veh)) {
+			sprintbit(VEH_FLAGS(veh), vehicle_flags, flags, TRUE);
+		}
+		else {
+			*flags = '\0';
+		}
+		
+		safe_snprintf(output, sizeof(output), "[%5d] %s (%s) [%d health] %s", VEH_VNUM(veh), VEH_SHORT_DESC(veh), level_range_string(VEH_MIN_SCALE_LEVEL(veh), VEH_MAX_SCALE_LEVEL(veh), 0), VEH_MAX_HEALTH(veh), flags);
 	}
 	else {
 		safe_snprintf(output, sizeof(output), "[%5d] %s", VEH_VNUM(veh), VEH_SHORT_DESC(veh));
