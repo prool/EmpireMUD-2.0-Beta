@@ -1355,7 +1355,7 @@ S
 Great Shipyard~
 A Great Shipyard~
 @w&0[]@e~
-48 4 bdn 0
+48 4 bdnz 0
 0 0 0 216
 C
 board, manufacture~
@@ -2065,7 +2065,7 @@ S
 Secret Cache~
 A Secret Cache~
 .&0{}&?.~
-128 0 0 0
+128 0 z 0
 0 0 0 -1
 A
 d
@@ -2351,7 +2351,7 @@ S
 Celestial Forge~
 The Celestial Forge~
 &W[FF]~
-48 5 0 0
+48 5 z 0
 0 0 0 212
 C
 forge, smelt, shatter <item to destroy>~
