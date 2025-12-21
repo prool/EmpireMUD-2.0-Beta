@@ -1644,7 +1644,7 @@ INTERACTION_FUNC(seed_obj_interact) {
 	obj_data *new_obj;
 	int iter;
 	
-	if (interaction->quantity) {
+	if (interaction->quantity != 1) {
 		safe_snprintf(to_char, sizeof(to_char), "You seed %s and get %s (x%d)!", GET_OBJ_SHORT_DESC(inter_item), get_obj_name_by_proto(interaction->vnum), interaction->quantity);
 		act(to_char, FALSE, ch, NULL, NULL, TO_CHAR | TO_QUEUE);
 		safe_snprintf(to_room, sizeof(to_room), "$n seeds %s and gets %s (x%d)!", GET_OBJ_SHORT_DESC(inter_item), get_obj_name_by_proto(interaction->vnum), interaction->quantity);
