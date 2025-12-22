@@ -1205,6 +1205,7 @@ const char *preference_bits[] = {
 	"!EXITS",	// 40
 	"SHORT-EXITS",
 	"NO-FRIENDS",
+	"HIDE-KEEP-ITEMS",
 	"\n"
 };
 
@@ -1277,10 +1278,11 @@ const struct toggle_data_type toggle_data[] = {
 	{ "item-quality", TOG_ONOFF, PRF_ITEM_QUALITY, 0, NULL },
 	
 	{ "no-empire", TOG_ONOFF, PRF_NOEMPIRE, 0, NULL },
+	{ "no-friends", TOG_ONOFF, PRF_NO_FRIENDS, 0, NULL },
+	{ "hide-keep", TOG_ONOFF, PRF_HIDE_KEEP, 0, NULL },
+	
 	{ "exits", TOG_OFFON, PRF_NO_EXITS, 0, NULL },
 	{ "short-exits", TOG_ONOFF, PRF_SHORT_EXITS, 0, NULL },
-	
-	{ "no-friends", TOG_ONOFF, PRF_NO_FRIENDS, 0, NULL },
 	
 	// imm section
 	{ "wiznet", TOG_OFFON, PRF_NOWIZ, LVL_START_IMM, NULL },

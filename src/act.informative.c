@@ -2241,12 +2241,17 @@ char *get_obj_desc(obj_data *obj, char_data *ch, int mode) {
 void list_obj_to_char(obj_data *list, char_data *ch, int mode, bool show_empty, bool use_page_display) {
 	char buf[MAX_STRING_LENGTH];
 	obj_data *i, *j = NULL;
-	bool found = FALSE;
+	bool found = FALSE, hide_keep = FALSE;
 	int num;
 	
 	DL_FOREACH2(list, i, next_content) {
 		num = 0;
 		
+		if (mode == OBJ_DESC_INVENTORY && !IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HIDE_KEEP) && OBJ_FLAGGED(i, OBJ_KEEP)) {
+			// skip keep
+			hide_keep = TRUE;
+			continue;
+		}
 		if (OBJ_CAN_STACK(i)) {
 			// look for a previous matching item
 			
@@ -2303,9 +2308,15 @@ void list_obj_to_char(obj_data *list, char_data *ch, int mode, bool show_empty, 
 	if (!found && show_empty) {
 		if (use_page_display) {
 			build_page_display_str(ch, " Nothing.");
+			if (hide_keep && !IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+				build_page_display_str(ch, " (Use 'inventory -k' to see items with keep flags)");
+			}
 		}
 		else {
 			send_to_char(" Nothing.\r\n", ch);
+			if (hide_keep && !IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+				msg_to_char(ch, " (Use 'inventory -k' to see items with keep flags)\r\n");
+			}
 		}
 	}
 }

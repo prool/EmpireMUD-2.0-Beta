@@ -1320,6 +1320,18 @@ term has multiple word, put it "in quotes".
 
 See also: HELP
 #
+HIDE-KEEP "TOGGLE HIDE-KEEP" "HIDE KEEP"
+
+Usage:  toggle hide-keep [on/off]
+
+This option will hide items with (keep) flags from your basic inventory
+command, allowing you to see a much shorter version of your inventory without
+the items you always keep with you.
+
+You can still use 'inventory -k' to see (keep) items with this flag on.
+
+See also: INVENTORY, KEEP, TOGGLES
+#
 IDENTIFY
 
 Usage:  identify [inv] <item | vehicle>
@@ -1437,6 +1449,9 @@ to your "pack" slot, you can carry more items.
 If you're trying to see what you're wearing instead, type EQUIPMENT. Items do
 not take up inventory space when equipped (except containers and their
 contents).
+
+Several toggles affect your inventory display including hide-keep,
+item-details, and item-quality.
 
 See also: EQUIPMENT, GRAB, HOLD, REMOVE, WEAR, STORE, RETRIEVE, WIELD, SWAP,
    TOGGLE, LEVEL COLORS
@@ -2952,6 +2967,7 @@ Toggles:
   compact - no extra newlines
   exits - shows or hides exits and directions when you 'look'
   extra-spacing - adds an extra blank line after you type a command
+  hide-keep - basic inventory command won't show items with (keep) flags
   informative - informative map coloring -- HELP INFORMATIVE
   item-details - shows level and some other information in inventory/equipment
   item-quality - shows superior/hard/group/boss info in inventory/equipment

@@ -524,10 +524,13 @@ your inventory.
 can use this to avoid wasting more precious components when you have cheaper
 ones available.
 
+If you 'toggle hide-keep on', items with (keep) flags won't show up on your
+basic inventory command.
+
 Note: If you 'keep' an item, it can't be turned in as part of a quest and won't
 be counted by the quest tracker. Unkeep it for it to appear.
 
-See also: COMPONENT, QUEST
+See also: COMPONENT, QUEST, TOGGLE HIDE-KEEP
 #
 KNIFE KNIVES
 

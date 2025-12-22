@@ -2462,6 +2462,7 @@ typedef enum {
 #define PRF_NO_EXITS  BIT(40)	// hides exits on look and auto-look
 #define PRF_SHORT_EXITS  BIT(41)	// shows circlemud-style exits
 #define PRF_NO_FRIENDS  BIT(42)	// this alt will not appear on friends lists
+#define PRF_HIDE_KEEP  BIT(43)	// inventory won't show items with (keep) by default
 // note: if you add prefs, consider adding them to alt_import_preferences()
 
 
