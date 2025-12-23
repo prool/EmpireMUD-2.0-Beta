@@ -4262,6 +4262,7 @@ Available flags:
  &cSKILLED-LABOR&0 - workforce cannot work this craft unless you have Skilled Labor
  &cSKIP-CONSUMES-TO&0 - won't run consumes-to interactions on any of the resources
     (for example: if you're mixing paints and don't want to refund the jars)
+ &cDARK-OK&0 - craft can be done in the dark
  &cFIRE&0 - requires cooking fire
  &cSOUP&0 - requires a container of water and creates a liquid instead of an item
  &cIN-DEVELOPMENT&0 - only immortals can use this recipe
