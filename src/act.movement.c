@@ -1158,7 +1158,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "You can't ride on such rough terrain.\r\n");
+			msg_to_char(ch, "You can't ride on such rough terrain%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
@@ -1168,7 +1168,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "Your mount won't ride into the ocean.\r\n");
+			msg_to_char(ch, "Your mount won't ride into the ocean%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
@@ -1177,7 +1177,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "Your mount won't ride into the water.\r\n");
+			msg_to_char(ch, "Your mount won't ride into the water%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
@@ -1186,7 +1186,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "Your mount won't go onto the land.\r\n");
+			msg_to_char(ch, "Your mount won't go onto the land%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
@@ -1195,7 +1195,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "You can't ride there.\r\n");
+			msg_to_char(ch, "You can't ride there%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
@@ -1206,7 +1206,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "You can't ride indoors.\r\n");
+			msg_to_char(ch, "You can't ride indoors%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
