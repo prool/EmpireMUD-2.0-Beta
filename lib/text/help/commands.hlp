@@ -2509,12 +2509,12 @@ The "mapsize" command will determine how far away you can see things. It sets
 the number of tiles you see in each direction on commands like look and scan.
 
 Available options:
- * toggle informative - If on, tiles will indicate if they are being built
+ - toggle informative - If on, tiles will indicate if they are being built
      or dismantled, need repair, and some other status types.
- * toggle political - Indicates who owns each map tile.
- * fightmessages - Reduce combat spam.
- * statusmessages - Turn off some status messages.
- * /leave and /join - Control which slash-channels you're on.
+ - toggle political - Indicates who owns each map tile.
+ - fightmessages - Reduce combat spam.
+ - statusmessages - Turn off some status messages.
+ - /leave and /join - Control which slash-channels you're on.
 
 Tips:
  - If you're having trouble finding the entrance to a building, try looking in
