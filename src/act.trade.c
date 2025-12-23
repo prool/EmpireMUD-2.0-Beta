@@ -883,6 +883,9 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 			if (VEH_MAX_ROOMS(veh) > 0) {
 				safe_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s%d rooms", (*buf ? ", " : ""), VEH_MAX_ROOMS(veh) + 1);
 			}
+			if (VEH_CAPACITY(veh) > 0) {
+				safe_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%scargo: %d", (*buf ? ", " : ""), VEH_CAPACITY(veh));
+			}
 			if (VEH_ANIMALS_REQUIRED(veh) > 0) {
 				safe_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%srequires %d animal%s", (*buf ? ", " : ""), VEH_ANIMALS_REQUIRED(veh), PLURAL(VEH_ANIMALS_REQUIRED(veh)));
 			}
