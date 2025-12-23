@@ -1972,8 +1972,13 @@ int perform_drop(char_data *ch, obj_data *obj, byte mode, const char *sname) {
 	}
 	
 	// can't junk kept items
-	if (mode == SCMD_JUNK && OBJ_FLAGGED(obj, OBJ_KEEP)) {
-		act("$p: You can't junk items with (keep).", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
+	if (OBJ_FLAGGED(obj, OBJ_KEEP)) {
+		if (mode == SCMD_JUNK) {
+			act("$p: You can't junk items with (keep).", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
+		}
+		else {
+			act("$p: You can't drop items with (keep).", FALSE, ch, obj, NULL, TO_CHAR | TO_QUEUE);
+		}
 		return 0;
 	}
 	
