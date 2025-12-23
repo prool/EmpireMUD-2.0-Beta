@@ -2411,10 +2411,10 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 	
 	if (mode == OBJ_DESC_INVENTORY || (mode == OBJ_DESC_LONG && CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
 		if (can_get_quest_from_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s quest available%s", (*tags ? "," : ""), PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
+			sprintf(tags + strlen(tags), "%s quest start", (*tags ? "," : ""));
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s finished quest%s", (*tags ? "," : ""), PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
+			sprintf(tags + strlen(tags), "%s finished quest", (*tags ? "," : ""));
 		}
 	}
 	
