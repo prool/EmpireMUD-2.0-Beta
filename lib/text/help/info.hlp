@@ -1156,6 +1156,18 @@ a level difference. The colors are:
 
 See also: COLORS, CONSIDER, IDENTIFY, NEARBY, QUEST
 #
+"LIMITED CROWD CONTROL" "LIMIT CROWD CONTROL" "CROWN CONTROL" CROWN-CONTROL
+
+The term "crowd control" refers to abilities that can reduce the number of
+enemies hitting you. For example, "sap" stuns someone for a while, giving you
+time to deal with other NPCs in the room.
+
+When an ability says "limited crowd control", this means you can only use the
+ability on 1 person at a time. For example, if you sap a second mob in the same
+room, the first one will un-stun.
+
+See also: SAP
+#
 LINK LINKDEAD
 
 A lot of players have problems with their links to the game. This can be very
