@@ -4401,12 +4401,12 @@ elseif %cmd% == tinsel
     if %self.is_enemy(%ch%)%
       scfight setup struggle %ch% 20
       * messages
-      set scf_strug_char You try to wiggle out of the burlap sack...
-      set scf_strug_room You hear ~%%actor%% trying to wiggle out of the burlap sack...
+      set scf_strug_char You struggle to free yourself from the tinsel...
+      set scf_strug_room ~%%actor%% struggles to free *%%actor%%self from the tinsel...
       remote scf_strug_char %ch.id%
       remote scf_strug_room %ch.id%
-      set scf_free_char You wiggle out of the burlap sack!
-      set scf_free_room ~%%actor%% manages to wiggle out of the burlap sack!
+      set scf_free_char You cut yourself free of the tinsel!
+      set scf_free_room ~%%actor%% cuts *%%actor%%self free of the tinsel!
       remote scf_free_char %ch.id%
       remote scf_free_room %ch.id%
     end
