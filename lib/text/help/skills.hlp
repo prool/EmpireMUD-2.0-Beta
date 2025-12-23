@@ -652,8 +652,9 @@ This command allows you to voluntary give up points in one of your skills.
 You might do this because you accidentally raised one from 0, or because you
 want to try a different specialty.
 
-Once you use this command, those skill points are gone forever. You will also
-lose any abilities you purchased above the new level.
+There is no way to undo this command. If you drop skill points, you will have
+to re-earn them. You will also lose any abilities you purchased above the new
+level.
 
 Some skills cannot be dropped all the way to zero voluntarily.
 
