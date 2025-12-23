@@ -223,6 +223,9 @@ void mudstats_configs(char_data *ch, char *argument) {
 		append_page_display_line(line, ", Hiring: %s", (config_get_bool("hiring_builders") && config_get_bool("hiring_coders")) ? "builders and coders" : (config_get_bool("hiring_builders") ? "builders" : "coders"));
 	}
 	
+	// world size
+	build_page_display(ch, "World size: %d x %d", MAP_WIDTH, MAP_HEIGHT);
+	
 	// time
 	build_page_display(ch, "Game time: %.2f minutes per game hour, %.2f hours per day, %.2f days per year", SECS_PER_MUD_HOUR / (double)SECS_PER_REAL_MIN, SECS_PER_MUD_DAY / (double) SECS_PER_REAL_HOUR, SECS_PER_MUD_YEAR / (double) SECS_PER_REAL_DAY);
 	
