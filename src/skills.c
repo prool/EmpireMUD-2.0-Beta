@@ -1376,7 +1376,7 @@ char *get_skill_gain_display(char_data *ch) {
 char *get_skill_row_display(char_data *ch, skill_data *skill) {
 	static char out[MAX_STRING_LENGTH];
 	struct player_skill_data *skdata;
-	char experience[256], gain_part[256];
+	char avail[256], experience[256], gain_part[256];
 	int points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill));
 	
 	skdata = get_skill_data(ch, SKILL_VNUM(skill), FALSE);
@@ -1398,7 +1398,14 @@ char *get_skill_row_display(char_data *ch, skill_data *skill) {
 		safe_snprintf(gain_part, sizeof(gain_part), "\tcgaining\t0");
 	}
 	
-	sprintf(out, "[%3d] %s%s\t0 (%s%s%s) - %s\r\n", (skdata ? skdata->level : 0), IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill)) ? "\tg" : "\ty", SKILL_NAME(skill), gain_part, experience, (points > 0 ? ", points available" : ""), SKILL_DESC(skill));
+	if (points > 0) {
+		safe_snprintf(avail, sizeof(avail), ", %d point%s available", points, PLURAL(points));
+	}
+	else {
+		*avail = '\0';
+	}
+	
+	sprintf(out, "[%3d] %s%s\t0 (%s%s%s) - %s\r\n", (skdata ? skdata->level : 0), IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill)) ? "\tg" : "\ty", SKILL_NAME(skill), gain_part, experience, avail, SKILL_DESC(skill));
 	return out;
 }
 
@@ -2343,7 +2350,7 @@ ACMD(do_skills) {
 		build_page_display_str(ch, get_skill_row_display(ch, skill));
 		
 		points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill));
-		if (points > 0) {
+		if (points > 0 && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
 			build_page_display(ch, "You have %d ability point%s to spend. Type 'skill buy <ability>' to purchase a new ability.", points, (points != 1 ? "s" : ""));
 		}
 		
