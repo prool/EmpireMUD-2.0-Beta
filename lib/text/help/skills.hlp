@@ -350,7 +350,7 @@ Building:  (MM)  Mill  (must be by a river; Build ability)
 Stored at the mill:  cornmeal, flour, salt
 Command:  mill [number] <item>
           mill info <item>
-Tool:  grinding  stone
+Tool:  grinding stone
 
 You can mill:
   wheat into flour
