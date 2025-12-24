@@ -54,7 +54,7 @@ a wild water buffalo~
 A wild water buffalo stands here, chewing.
 ~
 50 75 djo 0 4
-0 0 70 27 -1 -1
+0 0 70 42 -1 -1
 D
    It's a broad, powerful anmial with a thick, mud-colored hide that glistens
 faintly from recent wallowing. Heavy-lidded eyes watch you carefully. You might
@@ -91,7 +91,7 @@ a water buffalo~
 A water buffalo stands here, chewing.
 ~
 50 75 defjo 0 4
-0 0 70 27 -1 -1
+0 0 70 42 -1 -1
 D
    The water buffalo is a thick creature with a dark hide. Its sweeping horns
 curve outward, with more than enough each to ruin the day of anybody standing
@@ -146,7 +146,7 @@ an armored water buffalo~
 An armored water buffalo stands proudly nearby.
 ~
 75 100 defjo 0 4
-0 0 70 27 -1 -1
+0 0 70 42 -1 -1
 D
    The broad water buffalo wears heavy plates of armor with no sign of slowing
 down. A stampeding water buffalo is hard to stop; an armored one is impossible.
@@ -164,7 +164,7 @@ a wild zebu~
 A wild zebu trots by.
 ~
 50 75 djo 0 4
-0 0 70 27 -1 -1
+0 0 70 9021 -1 -1
 D
    The zebu is a sleek bull with a pronounced hump rising proudly between its
 shoulders. Its horns curve elegantly above its head, giving it a regal, almost
@@ -201,7 +201,7 @@ a hump-backed zebu~
 A zebu stands here, staring at you.
 ~
 50 75 dejo 0 4
-0 0 70 27 -1 -1
+0 0 70 9021 -1 -1
 D
    The mighty zebu is a silver-gray bull with tall, curving horns sprouting
 like a crown above its head. Just behind the horns, a large hump rises
@@ -253,9 +253,9 @@ a mighty armored zebu~
 A mighty armored zebu stands tall.
 ~
 75 100 dejo 0 4
-0 0 70 27 -1 -1
+0 0 70 9021 -1 -1
 D
-   The hefty zebu is all the heavier for the armor it has been dressed in. 
+   The hefty zebu is all the heavier for the armor it has been dressed in.
 Even its signature shoulder hump is plated for protection in battle.
 ~
 I 0 3012 100.00 3  # BUTCHER: fillet of raw meat

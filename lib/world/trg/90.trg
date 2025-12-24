@@ -453,7 +453,7 @@ end
 ~
 #9030
 Butcher detect~
-1 c 3 16
+1 c 3 33
 L b 9001
 L b 9002
 L b 9016
@@ -461,13 +461,30 @@ L b 9017
 L b 9019
 L b 9059
 L b 9060
+L b 9100
 L b 9102
+L b 9114
 L b 9118
 L b 9143
 L b 9177
 L b 9213
 L b 9225
 L b 9231
+L b 9236
+L b 9242
+L b 9243
+L b 9246
+L b 9247
+L b 9258
+L b 9262
+L b 9263
+L b 9264
+L b 9265
+L b 9266
+L b 9270
+L b 9279
+L b 9288
+L b 9298
 L b 9914
 L c 9030
 butcher~

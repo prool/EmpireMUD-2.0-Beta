@@ -136,7 +136,7 @@ a wandering wyvern~
 A wyvern is flying lazily above you.
 ~
 125 175 dgxyALM cm 6
-0 0 2 27 -1 -1
+0 0 2 9 -1 -1
 D
    Though it isn't the largest dragon on the landscape, this wyvern still cases
 a long shadow as it soars. It seems lost, or perhaps like it's looking for
@@ -170,7 +170,7 @@ a bull dragon~
 A bull dragon is stomping around.
 ~
 125 175 dgkxyALM c 6
-1 0 9 27 -1 -1
+1 0 9 42 -1 -1
 D
    Though it has wings, the bull dragon seems to spend more of its time on the
 ground as it roots through dirt and plants alike. It seems like it might be
@@ -204,7 +204,7 @@ a dragon guardian~
 A dragon guardian stands proudly before you.
 ~
 125 175 dgxyALM cm 6
-0 0 2 27 -1 -1
+0 0 2 44 -1 -1
 D
    Unlike most dragons, the guardian stands on its hind legs with its front
 claws and tremendous teeth poised to attack. It looks a bit lost here, and that
@@ -238,7 +238,7 @@ an emerald dragon~
 An emerald dragon is flying above you.
 ~
 125 175 dgxyALM cm 6
-0 0 2 27 -1 -1
+0 0 2 44 -1 -1
 D
    This shimmering green dragon's translucent scales have all the luster of
 emeralds. It casts a brilliant green shadow as it flies across the sky, but it
@@ -299,7 +299,7 @@ a dragonguard~
 A dragonguard is patrolling.
 ~
 125 175 bdtuAD c 4
-1 0 2 27 -1 -1
+1 0 2 10 -1 -1
 D
    As tall as an ogre and stronger than an ox, the dragonguard silently patrols
 the city, ever vigilant.

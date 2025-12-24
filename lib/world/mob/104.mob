@@ -178,7 +178,7 @@ the skeletal mammoth~
 A skeletal mammoth blocks the entire street!
 ~
 0 0 bdyAE G 5
-0 0 0 27 -1 -1
+0 0 0 43 -1 -1
 D
    Without its fur and flesh, the mammoth is still truly mammoth. Its long
 tusks give it a reach you can hardly contend with, and its trunk-like leg bones
@@ -725,7 +725,7 @@ a skeletal terrosaur~
 A skeletal terrosaur soars overhead.
 ~
 100 120 dej mG 5
-0 0 2 27 -1 -1
+0 0 2 44 -1 -1
 D
    This enormous flying beast has died, rotted, and been brought back! The
 terrosaur's eyes glow a misty blue from the magic that holds its bones together
@@ -739,7 +739,7 @@ an armored skeletal terrosaur~
 An armored skeletal terrosaur swoops low overhead.
 ~
 100 120 dejy mG 5
-0 0 2 27 -1 -1
+0 0 2 44 -1 -1
 D
    This enormous flying beast has died, rotted, and been brought back! The
 terrosaur's eyes glow a misty blue from the magic that holds its bones together

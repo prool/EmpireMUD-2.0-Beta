@@ -4,7 +4,7 @@ a boar~
 A boar snuffles the ground nearby.
 ~
 10 20 djo 0 3
-0 0 0 27 -1 -1
+0 0 0 43 -1 -1
 D
    Though it resembles the pig in shape, this wild boar is thinner, larger, and
 considerably scruffier. It sniffs along the ground, perhaps looking for fungi
@@ -609,7 +609,7 @@ a wild yak~
 A hairy yak seems to have been separated from the herd.
 ~
 20 30 djkoy 0 4
-0 0 0 27 -1 -1
+0 0 0 42 -1 -1
 D
    The yak is a large, hairy cow that lives high in the mountains. They mainly
 eat grains, but will eat whatever small plant material is available.
@@ -633,7 +633,7 @@ a yak~
 A hairy yak is chewing some grass.
 ~
 20 30 dfjkoy 0 4
-0 0 0 27 -1 -1
+0 0 0 42 -1 -1
 D
    The yak is like a large, hairy cow. The yak seems tame. You could probably
 herd it into a stable and milk or shear it.
@@ -748,7 +748,7 @@ a tusked warthog~
 A tusked warthog forages for grubs.
 ~
 100 150 djo c 3
-0 0 0 27 -1 -1
+0 0 0 43 -1 -1
 D
    This wild pig has a thick, bristly mane running down its back and a large,
 flattened head dominated by pronounced, bony warts on its cheeks. Two pairs of
@@ -776,7 +776,7 @@ an armored rhino~
 A well-armored rhinoceros munches on some grass.
 ~
 125 150 djouyA c 4
-0 0 39 27 -1 -1
+0 0 39 41 -1 -1
 D
    The rhinoceros is enormous; you could hide a small army inside it. At a
 distance, it looks as if it's been plated by a blacksmith, but when you get
@@ -928,7 +928,7 @@ a great kudu~
 A great kudu surveys the grassland.
 ~
 100 125 djo 0 4
-0 0 11 27 -1 -1
+0 0 11 42 -1 -1
 D
    This mighty kudu has a brown coat with vertical white stripes along its
 body. Its horns, a pair of curled helixes, rich high behind its head. It
@@ -1284,7 +1284,7 @@ a gazelle~
 A gazelle is browsing on low plants.
 ~
 100 125 djo 0 4
-0 0 11 27 -1 -1
+0 0 11 42 -1 -1
 D
    This small antelope has a beige-orange back and a white belly. Its horns,
 though not overly long, are still longer than its head. The horns curve apart
@@ -1501,7 +1501,7 @@ a brindled gnu~
 A brindled gnu roams the grassland.
 ~
 100 125 djo 0 4
-0 0 11 27 -1 -1
+0 0 11 42 -1 -1
 D
    Despite the name, the creature is closer to grayish-brown, with vertical
 black stripes on its neck and shoulders. Its face, dark at the front and tan at
@@ -1663,7 +1663,7 @@ a hefty buffalo~
 A hefty buffalo is roaming around.
 ~
 125 150 dfjoy c 4
-0 0 0 27 -1 -1
+0 0 0 42 -1 -1
 D
    The buffalo is a thick, muscled herbivor with a pair of upward-curving horns
 that seem to say 'I may not want to eat you, but you're still about to die.'
@@ -2064,7 +2064,7 @@ a hungry hippopotamus~
 A hippopotamus is ready to attack!
 ~
 125 150 cdjoy c 5
-0 0 0 27 -1 -1
+0 0 0 9 -1 -1
 D
    A colossal hippopotamus emerges from the water, its massive, smooth body a
 slick, gray-brown barrel of brute force. Its huge, broad head is dominated by

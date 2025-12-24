@@ -1457,6 +1457,222 @@ Your water magic evaporates in $N's face.
 $n's water magic evaporates in your face.
 $n's water magic evaporates in $N's face.
 
+M40 b 27 +
+antler gore~
+~
+gore~
+gores~
+antlers~
+0 0 3.9 4.1 4.3
+You drive your antlers into $N's chest, piercing straight through the heart!
+$n drives $s antlers into your chest, piercing straight through the heart!
+$n drives $s antlers into $N's chest, piercing straight through the heart!
+You lower your antlers and charge, but $N slips away at the last moment!
+$n lowers $s antlers and charges, but you dodge aside!
+$n lowers $s antlers and charges, but $N dodges aside!
+#
+#
+#
+You lower your antlers toward $N, but instead bow your head in reverence.
+$n lowers $s antlers toward you, but instead bows $s head in reverence.
+$n lowers $s antlers toward $N, but instead bows $s head in reverence.
+
+M40 b 27 
+antler gore~
+~
+You slam your antlers into $N in a brutal charge, tearing deep -- $E is dead!
+$n slams $s antlers into you in a brutal charge, tearing deep -- you are dead!
+$n slams $s antlers into $N in a brutal charge, tearing deep -- $E is dead!
+You charge past $N with lowered antlers, missing by inches!
+$n charges past you with lowered antlers, missing by inches!
+$n charges past $N with lowered antlers, missing by inches!
+#
+#
+#
+You lower your antlers toward $N, but instead bow your head in worship.
+$n lowers $s antlers toward you, but instead bows $s head in worship.
+$n lowers $s antlers toward $N, but instead bows $s head in worship.
+
+M41 b 27 +
+one horn gore~
+~
+gore~
+gores~
+horn~
+0 0 3.9 4.1 4.3
+You drive your horn straight into $N's chest, punching through the heart!
+$n drives $s horn straight into your chest, punching through the heart!
+$n drives $s horn straight into $N's chest, punching through the heart!
+You thrust your horn at $N, but skid past without landing the blow!
+$n thrusts $s horn at you, but skids past without landing the blow!
+$n thrusts $s horn at $N, but skids past without landing the blow!
+#
+#
+#
+You lower your horn toward $N, but instead dip your head in reverence.
+$n lowers $s horn toward you, but instead dips $s head in reverence.
+$n lowers $s horn toward $N, but instead dips $s head in reverence.
+
+M41 b 27 
+one horn gore~
+~
+You spear $N with your horn in a crushing charge, tearing deep -- $E is dead!
+$n spears you with $s horn in a crushing charge, tearing deep -- you are dead!
+$n spears $N with $s horn in a crushing charge, tearing deep -- $E is dead!
+You thunder past $N with your horn lowered, missing entirely!
+$n thunders past you with $s horn lowered, missing entirely!
+$n thunders past $N with $s horn lowered, missing entirely!
+#
+#
+#
+You lower your horn toward $N, but instead dip your head in reverence.
+$n lowers $s horn toward you, but instead dips $s head in reverence.
+$n lowers $s horn toward $N, but instead dips $s head in reverence.
+
+M42 b 27 +
+horns gore~
+~
+gore~
+gores~
+horns~
+0 0 3.9 4.1 4.3
+You drive your horns into $N's chest, crushing straight through the heart!
+$n drives $s horns into your chest, crushing straight through the heart!
+$n drives $s horns into $N's chest, crushing straight through the heart!
+You lower your horns and charge at $N, but $E slips aside!
+$n lowers $s horns and charges at you, but you slip aside!
+$n lowers $s horns and charges at $N, but $E slips aside!
+#
+#
+#
+You lower your horns toward $N, but instead bow your head in reverence.
+$n lowers $s horns toward you, but instead bows $s head in reverence.
+$n lowers $s horns toward $N, but instead bows $s head in reverence.
+
+M42 b 27 
+horns gore~
+~
+You gore $N with a devastating horned charge, tearing through flesh -- $E is dead!
+$n gores you with a devastating horned charge, tearing through flesh -- you are dead!
+$n gores $N with a devastating horned charge, tearing through flesh -- $E is dead!
+You thunder past $N with sweeping horns, missing your mark!
+$n thunders past you with sweeping horns, missing you!
+$n thunders past $N with sweeping horns, missing $M!
+#
+#
+#
+You lower your horns toward $N, but instead bow your head in reverence.
+$n lowers $s horns toward you, but instead bows $s head in reverence.
+$n lowers $s horns toward $N, but instead bows $s head in reverence.
+
+M43 b 27 +
+tusks gore~
+~
+gore~
+gores~
+tusks~
+0 0 3.9 4.1 4.3
+You drive your tusks into $N's chest, ripping straight through the heart!
+$n drives $s tusks into your chest, ripping straight through the heart!
+$n drives $s tusks into $N's chest, ripping straight through the heart!
+You lunge at $N with bared tusks, but $E dodges aside!
+$n lunges at you with bared tusks, but you dodge aside!
+$n lunges at $N with bared tusks, but $E dodges aside!
+#
+#
+#
+You lower your tusks toward $N, but instead dip your head in reverence.
+$n lowers $s tusks toward you, but instead dips $s head in reverence.
+$n lowers $s tusks toward $N, but instead dips $s head in reverence.
+
+M43 b 27 
+tusks gore~
+~
+You gore $N with a brutal tusk strike, tearing deep -- $E is dead!
+$n gores you with a brutal tusk strike, tearing deep -- you are dead!
+$n gores $N with a brutal tusk strike, tearing deep -- $E is dead!
+You rush past $N with slashing tusks, missing entirely!
+$n rushes past you with slashing tusks, missing entirely!
+$n rushes past $N with slashing tusks, missing entirely!
+#
+#
+#
+You lower your tusks toward $N, but instead dip your head in reverence.
+$n lowers $s tusks toward you, but instead dips $s head in reverence.
+$n lowers $s tusks toward $N, but instead dips $s head in reverence.
+
+M44 abd 10 +
+massive claws~
+~
+claw~
+claws~
+massive claws~
+0 1 2.4 2.6 2.8
+You bring your massive claws down on $N, obliterating $S face in a single blow!
+$n brings $s massive claws down on you, obliterating your face in a single blow!
+$n brings $s massive claws down on $N, obliterating $S face in a single blow!
+You swing your massive claws at $N, but they crash down just short!
+$n swings $s massive claws at you, but they crash down just short!
+$n swings $s massive claws at $N, but they crash down just short!
+#
+#
+#
+You dummy! Not the claws, the claws!
+$n must be insane -- trying to claw at you!
+$n must be insane -- trying to claw at $N!
+
+M44 abd 10 
+massive claws~
+~
+Your colossal claws tear into $N, rending $M wide open!
+$n's colossal claws tear into you, rending you wide open!
+$n's colossal claws tear into $N, rending $M wide open!
+You heave your massive claws at $N, but nearly overbalance yourself!
+$n heaves $s massive claws at you, but nearly overbalances $mself!
+$n heaves $s massive claws at $N, but nearly overbalances $mself!
+#
+#
+#
+You dummy! Not the claws, the claws!
+$n must be insane -- trying to claw at you!
+$n must be insane -- trying to claw at $N!
+
+M45 b 9 +
+massive bite~
+~
+bite~
+bites~
+massive bite~
+0 1 2.2 2.4 2.6
+You sink your teeth deep into $N's neck -- blood sprays everywhere!
+$n sinks $s teeth deep into your neck, tearing your jugular vein to bits!
+$n sinks $s teeth deep into $N's neck, tearing $S jugular vein to bits!
+You snap your teeth at $N but miss $M.
+$n snaps $s teeth at you fiercely but misses.
+$n fiercely snaps $s teeth at $N but misses the mark.
+#
+#
+#
+You attempt to bite $N. Ouch!  That hurt!
+$n tries to bite you, how funny.
+$n tries to bite $N - funny, huh?
+
+M45 b 9 
+massive bite~
+~
+You bite $N through $S ribcage and into $S heart -- $e falls to the ground in agony.
+$n bites through your ribcage and into your heart -- you fall to the ground writhing in agony...
+$n's powerful jaw bites through $N's ribcage into $S heart -- $E falls to the ground writhing in agony!
+You try to bite $N but bite your tongue instead.
+$n tries to bite you but bites $s tongue instead!
+$n tries to bite $N but bites $s own tongue instead!
+#
+#
+#
+Aren't you trying to bite off more than you can chew?
+$n snaps at you but realizes $e is biting off more than $e can chew.
+$n stupidly tries to bite off more than $e can chew by snapping at $N.
+
 M50 e 0 
 Suffering~
 has died at~

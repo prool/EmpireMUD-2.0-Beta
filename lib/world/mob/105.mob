@@ -428,7 +428,7 @@ a rabid caribou~
 A rabid caribou charges at you, spraying frozen foam from its mouth!
 ~
 0 0 bdj 0 4
-0 0 0 27 -1 -1
+0 0 0 40 -1 -1
 D
    This husky deer is foaming at the mouth and has its long antler aimed
 squarely at you.
@@ -603,7 +603,7 @@ a frost wyvern~
 A frost wyvern is perched nearby.
 ~
 100 125 dej m 5
-0 0 2 10 -1 -1
+0 0 2 44 -1 -1
 D
 This gorgeous wyvern has light blue scales and tufts of long white fur.
 ~

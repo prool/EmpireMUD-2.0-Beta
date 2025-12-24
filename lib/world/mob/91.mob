@@ -334,7 +334,7 @@ a mule deer~
 A mule deer is alerted.
 ~
 10 20 djo 0 4
-0 0 0 27 -1 -1
+0 0 0 40 -1 -1
 D
    The pale brown deer almost disappears against the brush, but its enormous
 ears give it away. It stands perfectly still, watching you, unsure what to do.
@@ -613,7 +613,7 @@ a white rhino~
 A white rhinoceros stomps around.
 ~
 20 40 djoA c 4
-0 0 0 27 -1 -1
+0 0 0 41 -1 -1
 D
    The massive rhinoceros is large, even by its own standards. It has a great
 horn on its nose, and a smaller horn behind it. Its armored skin and heavy
@@ -823,7 +823,7 @@ a bull~
 A bull is grazing here.
 ~
 20 40 djo 0 4
-0 0 0 27 -1 -1
+0 0 0 42 -1 -1
 D
    The bull is grazing peacefully, as if it doesn't know its head is crowned
 with a pair of murderhorns.
@@ -1175,7 +1175,7 @@ a reindeer~
 A reindeer raises its head from grazing.
 ~
 50 75 dejo c 4
-0 0 14 27 -1 -1
+0 0 14 40 -1 -1
 D
    This heavy creature is a reindeer, found only in the coldest parts of the
 world. It has a dull gray coat with a white belly, a short tail, and two
@@ -1192,7 +1192,7 @@ a barded reindeer~
 A barded reindeer waits regally nearby.
 ~
 50 75 bdej c 4
-0 0 14 27 -1 -1
+0 0 14 40 -1 -1
 D
    This heavy creature is a reindeer, found only in the coldest parts of the
 world. It has a dull gray coat with a white belly, a short tail, and two
@@ -1256,7 +1256,7 @@ a huge walrus~
 A huge walrus bellows nearby.
 ~
 75 100 djoA c 4
-0 0 13 27 -1 -1
+0 0 13 43 -1 -1
 D
    This massive creature, which looks to be half seal and half bear, bears
 tusks the size of broadswords. Its body is truly huge, and it stands its ground
