@@ -2388,7 +2388,7 @@ ACMD(do_learn) {
 	else if (!IS_IMMORTAL(ch) && IS_SET(GET_CRAFT_FLAGS(recipe), CRAFT_IN_DEVELOPMENT)) {
 		msg_to_char(ch, "That recipe is not currently available to learn.\r\n");
 	}
-	else if (GET_CRAFT_ABILITY(recipe) != NO_ABIL && !has_ability(ch, GET_CRAFT_ABILITY(recipe))) {
+	else if (GET_CRAFT_ABILITY(recipe) != NO_ABIL && !has_ability_in_any_set(ch, GET_CRAFT_ABILITY(recipe))) {
 		msg_to_char(ch, "You require the %s ability to learn that recipe.\r\n", get_ability_name_by_vnum(GET_CRAFT_ABILITY(recipe)));
 	}
 	
