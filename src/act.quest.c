@@ -138,6 +138,11 @@ void complete_quest(char_data *ch, struct player_quest *pq, empire_data *giver_e
 		return;
 	}
 	
+	// flush any queued output first -- this prevents things from appearing AFTER
+	if (ch->desc) {
+		send_stacked_msgs(ch->desc);
+	}
+	
 	// take objs if necessary
 	if (QUEST_FLAGGED(quest, QST_EXTRACT_TASK_OBJECTS)) {
 		extract_required_items(ch, pq->tracker);
