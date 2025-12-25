@@ -4619,6 +4619,11 @@ ACMD(do_survey) {
 		ordered_sprintbit(get_climate(IN_ROOM(ch)), climate_flags, climate_flags_order, FALSE, buf);
 		msg_to_char(ch, "Climate: %s\r\n", buf);
 	}
+	
+	if (BASE_SECT(IN_ROOM(ch)) != SECT(IN_ROOM(ch))) {
+		msg_to_char(ch, "Terrain: %s\r\n", GET_SECT_NAME(BASE_SECT(IN_ROOM(ch))));
+	}
+	
 	msg_to_char(ch, "Temperature: %s\r\n", temperature_to_string(get_room_temperature(IN_ROOM(ch))));
 	
 	/* Not currently showing elevation
