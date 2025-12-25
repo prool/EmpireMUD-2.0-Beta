@@ -1988,7 +1988,7 @@ void free_descriptor(descriptor_data *desc) {
 	if (desc->showstr_head) {
 		free(desc->showstr_head);
 	}
-	if (desc->showstr_count) {
+	if (desc->showstr_count && desc->showstr_vector) {
 		free(desc->showstr_vector);
 	}
 	if (desc->backstr) {

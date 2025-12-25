@@ -696,6 +696,33 @@ static inline bool has_ability_in_set(char_data *ch, any_vnum abil_id, int skill
 
 
 /**
+* Variant of has_ability_in_set() and has_ability() that checks ANY set.
+* 
+* @param char_data *ch The player to check.
+* @param any_vnum abil_id Any valid ability.
+* @return bool TRUE if the player has the ability in any skill set; FALSE if not.
+*/
+static inline bool has_ability_in_any_set(char_data *ch, any_vnum abil_id) {
+	struct player_ability_data *data;
+	int iter;
+	
+	if (IS_NPC(ch)) {
+		return FALSE;
+	}
+	
+	data = get_ability_data(ch, abil_id, 0);
+	if (data) {
+		for (iter = 0; iter < NUM_SKILL_SETS; ++iter) {
+			if (data->purchased[iter]) {
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
+
+/**
 * Look up skill in the player's current set.
 *
 * @param char_data *ch The player to check.

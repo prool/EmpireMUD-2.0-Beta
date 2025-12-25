@@ -883,6 +883,9 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 			if (VEH_MAX_ROOMS(veh) > 0) {
 				safe_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%s%d rooms", (*buf ? ", " : ""), VEH_MAX_ROOMS(veh) + 1);
 			}
+			if (VEH_CAPACITY(veh) > 0) {
+				safe_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%scargo: %d", (*buf ? ", " : ""), VEH_CAPACITY(veh));
+			}
 			if (VEH_ANIMALS_REQUIRED(veh) > 0) {
 				safe_snprintf(buf + strlen(buf), sizeof(buf) - strlen(buf), "%srequires %d animal%s", (*buf ? ", " : ""), VEH_ANIMALS_REQUIRED(veh), PLURAL(VEH_ANIMALS_REQUIRED(veh)));
 			}
@@ -2385,7 +2388,7 @@ ACMD(do_learn) {
 	else if (!IS_IMMORTAL(ch) && IS_SET(GET_CRAFT_FLAGS(recipe), CRAFT_IN_DEVELOPMENT)) {
 		msg_to_char(ch, "That recipe is not currently available to learn.\r\n");
 	}
-	else if (GET_CRAFT_ABILITY(recipe) != NO_ABIL && !has_ability(ch, GET_CRAFT_ABILITY(recipe))) {
+	else if (GET_CRAFT_ABILITY(recipe) != NO_ABIL && !has_ability_in_any_set(ch, GET_CRAFT_ABILITY(recipe))) {
 		msg_to_char(ch, "You require the %s ability to learn that recipe.\r\n", get_ability_name_by_vnum(GET_CRAFT_ABILITY(recipe)));
 	}
 	

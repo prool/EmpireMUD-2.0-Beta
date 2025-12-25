@@ -3512,8 +3512,9 @@ INTERACTION_FUNC(finish_gen_interact_room) {
 * @param int dir Which direction the player is doing it toward (may be NO_DIR for "this room").
 * @param room_data *room Which room the player is doing it to (may be same as current room).
 * @param const struct gen_interact_data_t *data A pointer to the gen_interact_data[].
+* @param bool is_repeat If TRUE, this was an automatic repeat; FALSE means the character is just starting.
 */
-void start_gen_interact_room(char_data *ch, int dir, room_data *room, const struct gen_interact_data_t *data) {
+void start_gen_interact_room(char_data *ch, int dir, room_data *room, const struct gen_interact_data_t *data, bool is_repeat) {
 	int timer;
 	
 	if (!data || !can_gen_interact_room(ch, room, data)) {
@@ -3532,11 +3533,14 @@ void start_gen_interact_room(char_data *ch, int dir, room_data *room, const stru
 		GET_ACTION_TIMER(ch) /= 2;
 	}
 	
-	if (data->msg.start[0]) {
-		act(data->msg.start[0], FALSE, ch, NULL, NULL, TO_CHAR);
-	}
-	if (data->msg.start[1]) {
-		act(data->msg.start[1], FALSE, ch, NULL, NULL, TO_ROOM);
+	// message on the initial start only
+	if (!is_repeat) {
+		if (data->msg.start[0]) {
+			act(data->msg.start[0], FALSE, ch, NULL, NULL, TO_CHAR);
+		}
+		if (data->msg.start[1]) {
+			act(data->msg.start[1], FALSE, ch, NULL, NULL, TO_ROOM);
+		}
 	}
 }
 
@@ -3637,7 +3641,7 @@ void process_gen_interact_room(char_data *ch) {
 			
 			// character is still there? repeat
 			if (IN_ROOM(ch) == in_room && GET_ACTION(ch) == ACT_NONE) {
-				start_gen_interact_room(ch, dir, to_room, data);
+				start_gen_interact_room(ch, dir, to_room, data, TRUE);
 			}
 		}
 		else {
@@ -3655,14 +3659,14 @@ void process_gen_interact_room(char_data *ch) {
 		
 				// check if we failed to repeat but should repeat anyway:
 				if (IS_SET(data->flags, GI_CONTINUE_WHEN_DEPLETED) && IN_ROOM(ch) == in_room && GET_ACTION(ch) == ACT_NONE) {
-					start_gen_interact_room(ch, dir, to_room, data);
+					start_gen_interact_room(ch, dir, to_room, data, TRUE);
 				}
 			}
 			else {
-				// TODO should this have a message like "You find nothing" ? Player currently just sees the start message again.
+				// TODO should this have a message like "You find nothing" ? Player currently sees no message
 				
 				// not depleted, just came up empty: auto-repeat
-				start_gen_interact_room(ch, dir, to_room, data);
+				start_gen_interact_room(ch, dir, to_room, data, TRUE);
 			}
 		}
 	}
@@ -3709,6 +3713,6 @@ ACMD(do_gen_interact_room) {
 		// sends own message
 	}
 	else {
-		start_gen_interact_room(ch, dir, room, data);
+		start_gen_interact_room(ch, dir, room, data, FALSE);
 	}
 }

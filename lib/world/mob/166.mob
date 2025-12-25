@@ -303,7 +303,7 @@ a red-nosed reindeer~
 A red-nosed reindeer flies overhead!
 ~
 30 70 dej m 4
-0 0 2 27 -1 -1
+0 0 2 40 -1 -1
 D
    This reindeer has a shiny nose. Now that you can see it, you would even say
 it glows!
@@ -894,7 +894,7 @@ the Krampus demon~
 The Krampus demon stands on mismatched legs, brandishing a switch.
 ~
 25 400 bdoK cqEG 3
-1 0 14 27 -1 -1
+1 0 14 42 -1 -1
 D
    This demonic figure is half goat and half human, with the division down the
 center of his body. One side sports a hoof at the end of his leg, and the other

@@ -63,7 +63,7 @@ void tog_pvp(char_data *ch);
 //// EMPIREMUD CONSTANTS /////////////////////////////////////////////////////
 
 // Shown on the "version" command and sent over MSSP
-const char *version = "EmpireMUD 2.0 beta 5.199";
+const char *version = "EmpireMUD 2.0 beta 5.200";
 const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.15";
 
 
@@ -1205,6 +1205,7 @@ const char *preference_bits[] = {
 	"!EXITS",	// 40
 	"SHORT-EXITS",
 	"NO-FRIENDS",
+	"HIDE-KEEP-ITEMS",
 	"\n"
 };
 
@@ -1277,10 +1278,11 @@ const struct toggle_data_type toggle_data[] = {
 	{ "item-quality", TOG_ONOFF, PRF_ITEM_QUALITY, 0, NULL },
 	
 	{ "no-empire", TOG_ONOFF, PRF_NOEMPIRE, 0, NULL },
+	{ "no-friends", TOG_ONOFF, PRF_NO_FRIENDS, 0, NULL },
+	{ "hide-keep", TOG_ONOFF, PRF_HIDE_KEEP, 0, NULL },
+	
 	{ "exits", TOG_OFFON, PRF_NO_EXITS, 0, NULL },
 	{ "short-exits", TOG_ONOFF, PRF_SHORT_EXITS, 0, NULL },
-	
-	{ "no-friends", TOG_ONOFF, PRF_NO_FRIENDS, 0, NULL },
 	
 	// imm section
 	{ "wiznet", TOG_OFFON, PRF_NOWIZ, LVL_START_IMM, NULL },
@@ -3896,7 +3898,7 @@ const char *bld_flags[] = {
 	"NO-ABANDON-WHEN-RUINED",
 	"SHOW-VEHICLES",
 	"IMMUNE-DAMAGE",
-	"*",	// 25
+	"HIDE-STORAGE-UNOWNED",	// 25
 	"*",
 	"*",
 	"*",
@@ -5592,6 +5594,7 @@ const char *vehicle_flags[] = {
 	"*INSTANCE",
 	"*TEMPORARY",
 	"TINY",	// 40
+	"HIDE-STORAGE-UNOWNED",
 	"\n"
 };
 
@@ -5638,7 +5641,8 @@ const char *identify_vehicle_flags[] = {
 	"",	// OBSCURE-VISION
 	"",	// *INSTANCE
 	"",	// *TEMPORARY
-	"",	// TINY
+	"",	// TINY	// 40
+	"",	// HIDE-STORAGE-UNOWNED
 	"\n"
 };
 

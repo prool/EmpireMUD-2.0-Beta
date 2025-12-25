@@ -2,7 +2,7 @@
 Volcanic Forge~
 A Volcanic Forge in the Mountainside~
 &y(FF)~
-64 0 e 0
+64 0 ez 0
 0 0 0 278
 C
 forge, smelt~
@@ -592,8 +592,9 @@ C
 inventory, retrieve, store~
 E
 flowers racks building around~
-   Wooden racks full of flowers are neatly arranged to display all the fresh
-flowers. Your nose tingles at the dusty floral aroma as you browse.
+   Wooden racks full of fresh flowers have been arranged to display all the
+brightly-colored blooms. Your nose tingles at the dusty floral aroma as you
+browse.
 ~
 I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
 R

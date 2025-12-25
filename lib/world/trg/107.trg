@@ -315,8 +315,8 @@ if %random.100% <= 14
 else
   %load% mob 10705
 end
-wait 1
 set mob %self.room.people%
+wait 1
 if %mob.vnum% == 10705
   * success: send a message
   %echo% ~%mob% walks up from lower on the mountain.

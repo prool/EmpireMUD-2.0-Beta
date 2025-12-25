@@ -4,7 +4,7 @@ a boar~
 A boar snuffles the ground nearby.
 ~
 10 20 djo 0 3
-0 0 0 27 -1 -1
+0 0 0 43 -1 -1
 D
    Though it resembles the pig in shape, this wild boar is thinner, larger, and
 considerably scruffier. It sniffs along the ground, perhaps looking for fungi
@@ -169,7 +169,7 @@ pirate salty~
 a salty pirate~
 A salty pirate stands atop a half-buried chest.
 ~
-75 100 bdvyzI c 3
+75 100 bdovyzI c 3
 1 0 0 1 -1 -1
 D
    The pirate looks like he's had a rough life. He's missing an eye, a leg, and
@@ -454,7 +454,7 @@ lizard monitor~
 a monitor lizard~
 A monitor lizard flicks its tongue impatiently.
 ~
-10 20 dj c 1
+10 20 djo c 1
 0 0 0 9 -1 -1
 D
    This large lizard is the infamous monitor, whose toxic bite is know to leave
@@ -609,7 +609,7 @@ a wild yak~
 A hairy yak seems to have been separated from the herd.
 ~
 20 30 djkoy 0 4
-0 0 0 27 -1 -1
+0 0 0 42 -1 -1
 D
    The yak is a large, hairy cow that lives high in the mountains. They mainly
 eat grains, but will eat whatever small plant material is available.
@@ -633,7 +633,7 @@ a yak~
 A hairy yak is chewing some grass.
 ~
 20 30 dfjkoy 0 4
-0 0 0 27 -1 -1
+0 0 0 42 -1 -1
 D
    The yak is like a large, hairy cow. The yak seems tame. You could probably
 herd it into a stable and milk or shear it.
@@ -748,7 +748,7 @@ a tusked warthog~
 A tusked warthog forages for grubs.
 ~
 100 150 djo c 3
-0 0 0 27 -1 -1
+0 0 0 43 -1 -1
 D
    This wild pig has a thick, bristly mane running down its back and a large,
 flattened head dominated by pronounced, bony warts on its cheeks. Two pairs of
@@ -776,7 +776,7 @@ an armored rhino~
 A well-armored rhinoceros munches on some grass.
 ~
 125 150 djouyA c 4
-0 0 39 27 -1 -1
+0 0 39 41 -1 -1
 D
    The rhinoceros is enormous; you could hide a small army inside it. At a
 distance, it looks as if it's been plated by a blacksmith, but when you get
@@ -928,7 +928,7 @@ a great kudu~
 A great kudu surveys the grassland.
 ~
 100 125 djo 0 4
-0 0 11 27 -1 -1
+0 0 11 42 -1 -1
 D
    This mighty kudu has a brown coat with vertical white stripes along its
 body. Its horns, a pair of curled helixes, rich high behind its head. It
@@ -1284,7 +1284,7 @@ a gazelle~
 A gazelle is browsing on low plants.
 ~
 100 125 djo 0 4
-0 0 11 27 -1 -1
+0 0 11 42 -1 -1
 D
    This small antelope has a beige-orange back and a white belly. Its horns,
 though not overly long, are still longer than its head. The horns curve apart
@@ -1447,7 +1447,7 @@ elephant bull rampaging~
 a rampaging bull elephant~
 A bull elephant is on a dangerous rampage!
 ~
-125 150 acdjyA c 3
+125 150 acdjoyA c 3
 1 0 68 9044 -1 -1
 D
    A towering bull elephant barrels toward you, a thunderous mass of muscle and
@@ -1501,7 +1501,7 @@ a brindled gnu~
 A brindled gnu roams the grassland.
 ~
 100 125 djo 0 4
-0 0 11 27 -1 -1
+0 0 11 42 -1 -1
 D
    Despite the name, the creature is closer to grayish-brown, with vertical
 black stripes on its neck and shoulders. Its face, dark at the front and tan at
@@ -1573,7 +1573,7 @@ lizard clouded monitor~
 a clouded monitor lizard~
 A clouded monitor lizard is resting nearby.
 ~
-100 125 dj c 2
+100 125 djo c 2
 0 0 9 9 -1 -1
 D
    Though this creature is unusually large for a lizard, it would be a fairly
@@ -1663,7 +1663,7 @@ a hefty buffalo~
 A hefty buffalo is roaming around.
 ~
 125 150 dfjoy c 4
-0 0 0 27 -1 -1
+0 0 0 42 -1 -1
 D
    The buffalo is a thick, muscled herbivor with a pair of upward-curving horns
 that seem to say 'I may not want to eat you, but you're still about to die.'
@@ -1839,7 +1839,7 @@ sloth moving slow-moving slowmoving~
 a slow-moving sloth~
 A slow-moving sloth looks for a place to nap.
 ~
-65 90 bdj s 3
+65 90 bdjo s 3
 0 0 58 10 -1 -1
 D
    You encounter a creature covered in thick, shaggy fur with a strange green
@@ -2011,7 +2011,7 @@ caiman spectacled~
 a spectacled caiman~
 A spectacled caiman lerks here waiting for prey.
 ~
-125 150 bcdgj c 3
+125 150 bcdgjo c 3
 0 0 79 9114 -1 -1
 D
    A small, armored spectacled caiman lies motionless near the murky water's
@@ -2037,7 +2037,7 @@ eagle harpy large~
 a large harpy eagle~
 A large harpy eagle hunts for prey.
 ~
-100 125 djz cm 3
+100 125 djoz cm 3
 0 0 2 10 -1 -1
 D
    You glimpse the immense harpy eagle, the most powerful eagle of the skies.
@@ -2064,7 +2064,7 @@ a hungry hippopotamus~
 A hippopotamus is ready to attack!
 ~
 125 150 cdjoy c 5
-0 0 0 27 -1 -1
+0 0 0 9 -1 -1
 D
    A colossal hippopotamus emerges from the water, its massive, smooth body a
 slick, gray-brown barrel of brute force. Its huge, broad head is dominated by
@@ -2093,7 +2093,7 @@ lemur ring-tailed ringtailed tailed~
 a ring-tailed lemur~
 A ring-tailed lemur gazes at you from a branch.
 ~
-100 125 dj c 2
+100 125 djo c 2
 0 0 71 9 -1 -1
 D
    You observe a striking ring-tailed lemur with soft gray fur and a sharp,
@@ -2212,7 +2212,7 @@ lizard monitor water large~
 a water monitor~
 A large lizard swims nearby.
 ~
-100 125 bcdj c 2
+100 125 bcdjo c 2
 0 0 9 9 -1 -1
 D
    This dangerously large lizard has a blackish-brown back with pale yellow
@@ -2366,7 +2366,7 @@ otherworlder predator~
 an otherworld predator~
 An otherworld predator stalks through the underbrush.
 ~
-125 150 cdyAIJ ci 4
+125 150 cdoyAIJ ci 4
 0 0 106 4 -1 -1
 D
    The otherworlder is a sight to behold: it's taller than a human, with

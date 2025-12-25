@@ -340,7 +340,7 @@ M
 You place $p on $V.~
 M
 7
-You place $p on $V.~
+$n places $p on $V.~
 M
 34
 This is a common building and crafting material.~
@@ -658,7 +658,7 @@ M
 You place $p on $V.~
 M
 7
-You place $p on $V.~
+$n places $p on $V.~
 M
 34
 This is a common building and crafting material.~

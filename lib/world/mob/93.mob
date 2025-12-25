@@ -54,7 +54,7 @@ a wild water buffalo~
 A wild water buffalo stands here, chewing.
 ~
 50 75 djo 0 4
-0 0 70 27 -1 -1
+0 0 70 42 -1 -1
 D
    It's a broad, powerful anmial with a thick, mud-colored hide that glistens
 faintly from recent wallowing. Heavy-lidded eyes watch you carefully. You might
@@ -91,7 +91,7 @@ a water buffalo~
 A water buffalo stands here, chewing.
 ~
 50 75 defjo 0 4
-0 0 70 27 -1 -1
+0 0 70 42 -1 -1
 D
    The water buffalo is a thick creature with a dark hide. Its sweeping horns
 curve outward, with more than enough each to ruin the day of anybody standing
@@ -146,7 +146,7 @@ an armored water buffalo~
 An armored water buffalo stands proudly nearby.
 ~
 75 100 defjo 0 4
-0 0 70 27 -1 -1
+0 0 70 42 -1 -1
 D
    The broad water buffalo wears heavy plates of armor with no sign of slowing
 down. A stampeding water buffalo is hard to stop; an armored one is impossible.
@@ -164,7 +164,7 @@ a wild zebu~
 A wild zebu trots by.
 ~
 50 75 djo 0 4
-0 0 70 27 -1 -1
+0 0 70 9021 -1 -1
 D
    The zebu is a sleek bull with a pronounced hump rising proudly between its
 shoulders. Its horns curve elegantly above its head, giving it a regal, almost
@@ -201,7 +201,7 @@ a hump-backed zebu~
 A zebu stands here, staring at you.
 ~
 50 75 dejo 0 4
-0 0 70 27 -1 -1
+0 0 70 9021 -1 -1
 D
    The mighty zebu is a silver-gray bull with tall, curving horns sprouting
 like a crown above its head. Just behind the horns, a large hump rises
@@ -253,9 +253,9 @@ a mighty armored zebu~
 A mighty armored zebu stands tall.
 ~
 75 100 dejo 0 4
-0 0 70 27 -1 -1
+0 0 70 9021 -1 -1
 D
-   The hefty zebu is all the heavier for the armor it has been dressed in. 
+   The hefty zebu is all the heavier for the armor it has been dressed in.
 Even its signature shoulder hump is plated for protection in battle.
 ~
 I 0 3012 100.00 3  # BUTCHER: fillet of raw meat
@@ -264,5 +264,141 @@ I 4 175 75.00 2  # LOOT: iron ingot
 I 4 175 50.00 2  # LOOT: iron ingot
 I 4 175 50.00 2  # LOOT: iron ingot
 T 9503
+S
+#9309
+kangaroo ornery~
+an ornery kangaroo~
+An ornery kangaroo searches for someone to fight.
+~
+100 150 cdjoz 0 4
+0 0 15 11 -1 -1
+D
+   This odd creature has the head of a deer, the ears of a rabbit, and the legs
+of a kick-boxer. It stands upright with its tail braced like a tripod, watching
+you closely and giving the ground an impatient thump.
+~
+I 0 3012 100.00 2  # BUTCHER: fillet of raw meat
+I 1 1351 100.00 1  # SKIN: large skin
+M
+0
+$n holds up $s hands in a fighting stance.~
+M
+0
+$n braces $s tail against the ground and squares up.~
+M
+0
+$n gives the ground a sharp warning thump.~
+M
+0
+$n snorts and flexes $s claws.~
+S
+#9310
+peahen demure hen bird~
+a demure peahen~
+A demure peahen searches through the grass.
+~
+65 90 djo 0 3
+0 0 0 26 -1 -1
+D
+   You see a brownish peahen foraging nearby. It is a large, sturdy bird, but
+its plumage is mostly a subdued, earth-toned mix of grey and brown. Its only
+significant ornament is a small, spiky Crest atop its head. Unlike the male, it
+has a short, manageable tail and moves with a quiet, cautious grace.
+~
+I 0 3200 100.00 2  # BUTCHER: cut of poultry
+I 1 9025 100.00 1  # SKIN: bird feathers
+M
+0
+$n listens for a nearby peacock's call.~
+M
+0
+$n looks for a flash of color in the distance.~
+M
+0
+$n tilts $s head, listening intently.~
+M
+0
+$n gives a soft, questioning call.~
+M
+0
+$n smooths a few feathers with careful nips.~
+S
+#9311
+peacock fancy-looking fancylooking cock bird~
+a fancy peacock~
+A fancy-looking peacock struts its stuff.
+~
+65 90 djo 0 2
+0 0 87 26 -1 -1
+D
+   A blue peacock is present, displaying its iridescent sapphire plumage. Its
+extended train consists of green feathers adorned with numerous black and blue
+eye-shaped patterns. The bird shakes its feathers and emits a distinct, loud
+call.
+~
+I 0 3200 100.00 2  # BUTCHER: cut of poultry
+I 1 9025 100.00 1  # SKIN: bird feathers
+M
+0
+$n fans out $s colorful tail feathers.~
+M
+0
+$n lets out a rather annoying call.~
+M
+0
+$n struts a slow circle, head held high.~
+M
+0
+$n angles for attention.~
+M
+0
+$n shakes $s tail in a brief shimmer of color.~
+M
+0
+$n flares $s wings dramatically as it hops a short distance.~
+M
+0
+$n preens meticulously, never breaking $s regal posture.~
+S
+#9312
+toucan juggles fruit bird~
+a toucan~
+A toucan juggles a piece of fruit with its beak.
+~
+65 90 abdjo 0 3
+0 0 2 9 -1 -1
+D
+   A vibrant toucan sits high on a branch, its glossy black body set off by a
+white throat and colorful markings around its face. Its large, curved rainbow
+beak-yellow, orange, and green-stands out.
+~
+I 0 3200 100.00 1  # BUTCHER: cut of poultry
+I 1 9025 100.00 1  # SKIN: bird feathers
+S
+#9313
+hornbill golden-crested goldencrested crested~
+a golden-crested hornbill~
+A golden-crested hornbill lets out a cackling call.
+~
+65 90 dj m 3
+0 0 2 26 -1 -1
+D
+   You spot a golden-crested hornbill, a large black-and-white bird with a
+massive beak and a helmet-like structure marked in yellow and red. Its sharp
+red eyes are ringed by thick lashes, and it calls out with a loud echoing
+cackle every few seconds. Powerful wings allow it to glide easily through the
+tropical air.
+~
+I 0 3200 100.00 2  # BUTCHER: cut of poultry
+I 1 9025 50.00 1  # SKIN: bird feathers
+M
+0
+$n forages through the trees for fruit.~
+M
+0
+$n shows off $s brightly colored crest.~
+M
+0
+$n lets out a loud, cackling call.~
 S
 $
