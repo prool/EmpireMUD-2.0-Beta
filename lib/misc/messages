@@ -1644,34 +1644,34 @@ bite~
 bites~
 massive bite~
 0 1 2.2 2.4 2.6
-You sink your teeth deep into $N's neck -- blood sprays everywhere!
-$n sinks $s teeth deep into your neck, tearing your jugular vein to bits!
-$n sinks $s teeth deep into $N's neck, tearing $S jugular vein to bits!
-You snap your teeth at $N but miss $M.
-$n snaps $s teeth at you fiercely but misses.
-$n fiercely snaps $s teeth at $N but misses the mark.
+You clamp your massive jaws around $N's neck -- blood erupts as bone and flesh give way!
+$n clamps $s massive jaws around your neck, crushing bone and tearing flesh!
+$n clamps $s massive jaws around $N's neck, crushing bone and tearing flesh!
+You snap your enormous jaws at $N, but $E slips free just in time!
+$n snaps $s enormous jaws at you, but you slip free!
+$n snaps $s enormous jaws at $N, but $E slips free!
 #
 #
 #
-You attempt to bite $N. Ouch!  That hurt!
-$n tries to bite you, how funny.
-$n tries to bite $N - funny, huh?
+You attempt to bite $N, but only manage to snap your jaws shut harmlessly.
+$n tries to bite you, but only snaps $s jaws shut in the air.
+$n tries to bite $N, but only snaps $s jaws shut in the air.
 
 M45 b 9 
 massive bite~
 ~
 You bite $N through $S ribcage and into $S heart -- $e falls to the ground in agony.
-$n bites through your ribcage and into your heart -- you fall to the ground writhing in agony...
-$n's powerful jaw bites through $N's ribcage into $S heart -- $E falls to the ground writhing in agony!
-You try to bite $N but bite your tongue instead.
-$n tries to bite you but bites $s tongue instead!
-$n tries to bite $N but bites $s own tongue instead!
+$n bites down on you with titanic force, crushing through bone and into your heart -- you collapse in agony!
+$n's titanic jaws crush through $N's body and into $S heart -- $E collapses in agony!
+You lunge to bite $N, but your massive jaws snap shut too soon!
+$n lunges to bite you, but $s massive jaws snap shut too soon!
+$n lunges to bite $N, but $s massive jaws snap shut too soon!
 #
 #
 #
 Aren't you trying to bite off more than you can chew?
-$n snaps at you but realizes $e is biting off more than $e can chew.
-$n stupidly tries to bite off more than $e can chew by snapping at $N.
+$n snaps at you, then hesitates -- that bite was a bit much.
+$n snaps at $N, clearly biting off more than $e can chew.
 
 M50 e 0 
 Suffering~

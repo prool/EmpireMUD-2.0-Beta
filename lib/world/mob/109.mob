@@ -154,7 +154,7 @@ a crimson serpent~
 A crimson serpent is coiled here.
 ~
 100 125 dej 0 2
-0 0 5 9 -1 -1
+0 0 5 45 -1 -1
 D
    This stunning creature resembles a legless dragon. Its crimson scales are
 warm to the touch, and it seems docile enough to ride.
@@ -181,7 +181,7 @@ a crimson sea dragon~
 A crimson sea dragon splashes around.
 ~
 100 125 dejl 0 2
-0 0 6 9 -1 -1
+0 0 6 45 -1 -1
 D
    This elegant dragon has tall fins in place of wings. With webbed feet and a
 flattened tail, it seems to have taken to the sea.
@@ -194,7 +194,7 @@ a viscous muck dragon~
 A viscous muck dragon coils through the water.
 ~
 225 325 dghuBLM choCDL 6
-0 0 5 9 -1 -1
+0 0 5 45 -1 -1
 D
    You can only see the fins and head of the dragon as it moves through the
 water, but it is enormous! The muck dragon's turquoise scales drip mud as its
