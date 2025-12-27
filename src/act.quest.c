@@ -284,9 +284,15 @@ void count_quest_tasks(struct req_data *list, int *complete, int *total) {
 				HASH_ADD_INT(cqd_list, group, cqd);
 			}
 			
-			cqd->total += 1;
-			if (task->current >= task->needed) {
-				cqd->complete += 1;
+			if (requirement_amt_type[task->type] == REQ_AMT_NUMBER) {
+				cqd->complete += MIN(task->current, task->needed);
+				cqd->total += task->needed;
+			}
+			else {
+				cqd->total += 1;
+				if (task->current >= task->needed) {
+					cqd->complete += 1;
+				}
 			}
 		}
 	}
