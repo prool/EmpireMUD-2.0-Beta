@@ -1,0 +1,143 @@
+#12810
+lodestone ring of restoration~
+12810 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+175 2 0 0
+R
+1300 2 0 0
+S
+#12812
+lodestone earrings of restoration~
+12812 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+175 2 0 0
+R
+1300 2 0 0
+S
+#12814
+lodestone ring of fortitude~
+12814 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+175 2 0 0
+R
+103 2 0 0
+S
+#12816
+lodestone earrings of fortitude~
+12816 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+175 2 0 0
+R
+103 2 0 0
+S
+#12818
+lodestone ring of wrath~
+12818 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+175 2 0 0
+R
+104 2 0 0
+S
+#12820
+lodestone earrings of wrath~
+12820 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+175 2 0 0
+R
+104 2 0 0
+S
+#12822
+lodestone ring of arcana~
+12822 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+175 2 0 0
+R
+1206 2 0 0
+S
+#12824
+lodestone earrings of arcana~
+12824 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+175 2 0 0
+R
+1206 2 0 0
+S
+#12826
+lodestone ring of valor~
+12826 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+175 2 0 0
+R
+6600 2 1 0
+S
+#12828
+lodestone earrings of valor~
+12828 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+175 2 0 0
+R
+6600 2 1 0
+S
+#12830
+lodestone wreath~
+12830 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+175 10 0 0
+R
+1206 1 0 0
+R
+104 1 0 0
+R
+103 1 0 0
+R
+1300 1 0 0
+S
+#12838
+iron training dummy~
+12838 1
+1 12810 q 6 -1 0 0
+R
+12809 1 0 0
+R
+6000 1 1 0
+R
+6790 1 1 0
+R
+6420 10 1 0
+R
+6720 6 1 0
+S
+$
