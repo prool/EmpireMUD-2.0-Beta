@@ -252,7 +252,7 @@ void show_ability_info(char_data *ch, ability_data *abil, ability_data *parent, 
 	build_page_display_str(ch, lbuf);
 	
 	if (ABIL_MASTERY_ABIL(abil) != NOTHING) {
-		build_page_display(ch, "Mastery ability: %s%s\t0%s", ability_color(ch, abil), get_ability_name_by_vnum(ABIL_MASTERY_ABIL(abil)), (PRF_FLAGGED(ch, PRF_SCREEN_READER) && !has_ability(ch, ABIL_VNUM(abil))) ? " (not known)" : "");
+		build_page_display(ch, "Mastery ability: %s%s\t0%s", ability_color(ch, find_ability_by_vnum(ABIL_MASTERY_ABIL(abil))), get_ability_name_by_vnum(ABIL_MASTERY_ABIL(abil)), (PRF_FLAGGED(ch, PRF_SCREEN_READER) && !has_ability(ch, ABIL_VNUM(abil))) ? " (not known)" : "");
 	}
 	
 	if (ABIL_ASSIGNED_SKILL(abil) && !parent) {
