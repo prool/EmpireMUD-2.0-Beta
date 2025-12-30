@@ -969,6 +969,7 @@ void generate_adventure_instances(void) {
 	struct adventure_link_rule *rule, *rule_iter;
 	adv_data *iter, *next_iter;
 	room_data *loc;
+	bool done_any = FALSE;
 	int try, num_rules, dir = NO_DIR;
 	adv_vnum start_vnum;
 	
@@ -986,6 +987,11 @@ void generate_adventure_instances(void) {
 			}
 			// skip past the last adventure we instanced
 			if (GET_ADV_VNUM(iter) <= last_adv_vnum) {
+				continue;
+			}
+			
+			// check if this adventure lets us bypass the 1-per-cycle limit
+			if (done_any && !ADVENTURE_FLAGGED(iter, ADV_FASTER_INSTANCING)) {
 				continue;
 			}
 			
@@ -1007,9 +1013,12 @@ void generate_adventure_instances(void) {
 					if ((loc = find_location_for_rule(iter, rule, &dir))) {
 						// make it so!
 						if (build_instance_loc(iter, rule, loc, dir)) {
-							last_adv_vnum = GET_ADV_VNUM(iter);
-							// only 1 instance per cycle
-							return;
+							// store last_adv_vnum ONLY if this was the first one
+							if (!done_any) {
+								last_adv_vnum = GET_ADV_VNUM(iter);
+							}
+							// only 1 regular instance per cycle
+							done_any = TRUE;
 						}
 					}
 				}

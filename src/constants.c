@@ -648,6 +648,7 @@ const char *adventure_flags[] = {
 	"CHECK-OUTSIDE-FIGHTS",
 	"GLOBAL-NEARBY",
 	"DETECTABLE",	// 15
+	"FASTER-INSTANCING",
 	"\n"
 };
 

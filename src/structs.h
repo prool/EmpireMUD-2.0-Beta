@@ -570,6 +570,7 @@ typedef struct vehicle_data vehicle_data;
 #define ADV_CHECK_OUTSIDE_FIGHTS  BIT(13)	// n. looks for mobs in combat before despawning
 #define ADV_GLOBAL_NEARBY  BIT(14)	// o. will show the closest one no matter how far away
 #define ADV_DETECTABLE  BIT(15)	// p. can be found with the ability action "detect adventures around"
+#define ADV_FASTER_INSTANCING  BIT(16)	// q. overrides the 1-instance-per-cycle to instance this one faster and more often
 
 
 // ADV_LINK_x: adventure link rule types

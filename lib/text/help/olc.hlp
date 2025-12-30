@@ -2299,6 +2299,7 @@ The following adventure flags are available:
  &c   outside the adventure, before despawning.
  &cGLOBAL-NEARBY&0 - Shows the nearest location from any distance.
  &cDETECTABLE&0 - Can be detected with the ability action "detect adventures around".
+ &cFASTER-INSTANCING&0 - Overrides the 1-adventure-per-cycle limit for the instancer.
 
 See also: ADVEDIT MINLEVEL, OLC ADVENTURES, OLC REMOVEINDEV
 #d
