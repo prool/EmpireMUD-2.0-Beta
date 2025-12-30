@@ -471,6 +471,7 @@ ACMD(do_meters) {
 
 
 ACMD(do_respawn) {
+	room_data *was_in = IN_ROOM(ch);
 	struct affected_type *af;
 	
 	if (!IS_DEAD(ch) && !IS_INJURED(ch, INJ_STAKED)) {
@@ -490,7 +491,7 @@ ACMD(do_respawn) {
 		char_to_room(ch, find_load_room(ch));
 		GET_LAST_DIR(ch) = NO_DIR;
 		qt_visit_room(ch, IN_ROOM(ch));
-		pre_greet_mtrigger(ch, IN_ROOM(ch), NO_DIR, "respawn");	// cannot pre-greet for respawn
+		pre_greet_mtrigger(ch, IN_ROOM(ch), NO_DIR, "respawn", was_in);	// cannot pre-greet for respawn
 		
 		syslog(SYS_DEATH, GET_INVIS_LEV(ch), TRUE, "%s has respawned at %s", GET_NAME(ch), room_log_identifier(IN_ROOM(ch)));
 		act("$n rises from the dead!", TRUE, ch, NULL, NULL, TO_ROOM);
@@ -498,8 +499,8 @@ ACMD(do_respawn) {
 		
 		affect_total(ch);
 		queue_delayed_update(ch, CDU_SAVE);
-		enter_triggers(ch, NO_DIR, "respawn", FALSE);
-		greet_triggers(ch, NO_DIR, "respawn", FALSE);
+		enter_triggers(ch, NO_DIR, "respawn", FALSE, was_in);
+		greet_triggers(ch, NO_DIR, "respawn", FALSE, was_in);
 		
 		// temporary safety effect after a respawn
 		af = create_flag_aff(ATYPE_BRIEF_RESPITE, 30, AFF_IMMUNE_TEMPERATURE, ch);

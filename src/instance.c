@@ -1233,14 +1233,14 @@ void empty_instance_vehicle(struct instance_data *inst, vehicle_data *veh, room_
 				char_from_room(ch);
 				char_to_room(ch, to_room);
 				GET_LAST_DIR(ch) = NO_DIR;
-				pre_greet_mtrigger(ch, IN_ROOM(ch), NO_DIR, "system");	// cannot pre-greet for this
-				enter_triggers(ch, NO_DIR, "system", FALSE);
+				pre_greet_mtrigger(ch, IN_ROOM(ch), NO_DIR, "system", NULL);	// cannot pre-greet for this
+				enter_triggers(ch, NO_DIR, "system", FALSE, NULL);
 				look_at_room(ch);
 				
 				// and announce
 				act("$n arrives.", TRUE, ch, NULL, NULL, TO_ROOM);
 				
-				greet_triggers(ch, NO_DIR, "system", FALSE);
+				greet_triggers(ch, NO_DIR, "system", FALSE, NULL);
 			}
 		}
 	}

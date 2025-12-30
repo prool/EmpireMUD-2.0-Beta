@@ -111,6 +111,7 @@ Variables:
   &c%direction%&0 - The direction the character came from, if any.
   &c%method%&0 - Type of movement (see METHOD LIST).
   &c%room%&0 - The room being entered.
+  &c%was_in&0 - Room the character was in before, if any (may be empty).
 
 You can add the "Player-in-Room" modifier.
 

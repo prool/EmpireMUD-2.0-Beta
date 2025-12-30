@@ -121,10 +121,13 @@ void perform_unapprove(char_data *ch) {
 */
 static void perform_goto(char_data *ch, room_data *to_room) {
 	char_data *t;
+	room_data *was_in;
 	
 	if (!ch || !to_room) {
 		return;
 	}
+	
+	was_in = IN_ROOM(ch);
 	
 	if (!IS_NPC(ch) && POOFOUT(ch)) {
 		if (!strstr(POOFOUT(ch), "$n"))
@@ -175,8 +178,8 @@ static void perform_goto(char_data *ch, room_data *to_room) {
 	
 	qt_visit_room(ch, IN_ROOM(ch));
 	look_at_room(ch);
-	enter_triggers(ch, NO_DIR, "goto", FALSE);
-	greet_triggers(ch, NO_DIR, "goto", FALSE);
+	enter_triggers(ch, NO_DIR, "goto", FALSE, was_in);
+	greet_triggers(ch, NO_DIR, "goto", FALSE, was_in);
 	msdp_update_room(ch);	// once we're sure we're staying
 }
 
@@ -8490,7 +8493,7 @@ ACMD(do_trans) {
 	struct shipping_data *shipd, *next_shipd;
 	descriptor_data *i;
 	char_data *victim;
-	room_data *to_room = IN_ROOM(ch);
+	room_data *to_room = IN_ROOM(ch), *was_in;
 	vehicle_data *veh;
 
 	argument = one_argument(argument, buf);
@@ -8520,6 +8523,7 @@ ACMD(do_trans) {
 				if (GET_ACCESS_LEVEL(victim) >= GET_ACCESS_LEVEL(ch))
 					continue;
 				act("$n disappears in a mushroom cloud.", FALSE, victim, 0, 0, TO_ROOM | DG_NO_TRIG);
+				was_in = IN_ROOM(victim);
 				char_from_room(victim);
 				char_to_room(victim, to_room);
 				GET_LAST_DIR(victim) = NO_DIR;
@@ -8527,8 +8531,8 @@ ACMD(do_trans) {
 				act("$n has transferred you!", FALSE, ch, 0, victim, TO_VICT | DG_NO_TRIG);
 				qt_visit_room(victim, IN_ROOM(victim));
 				look_at_room(victim);
-				enter_triggers(victim, NO_DIR, "transfer", FALSE);
-				greet_triggers(victim, NO_DIR, "transfer", FALSE);
+				enter_triggers(victim, NO_DIR, "transfer", FALSE, was_in);
+				greet_triggers(victim, NO_DIR, "transfer", FALSE, was_in);
 				RESET_LAST_MESSAGED_TEMPERATURE(victim);
 				msdp_update_room(victim);	// once we're sure we're staying
 			}
@@ -8550,6 +8554,7 @@ ACMD(do_trans) {
 			}
 
 			act("$n disappears in a mushroom cloud.", FALSE, victim, 0, 0, TO_ROOM | DG_NO_TRIG);
+			was_in = IN_ROOM(victim);
 			char_from_room(victim);
 			char_to_room(victim, to_room);
 			GET_LAST_DIR(victim) = NO_DIR;
@@ -8557,8 +8562,8 @@ ACMD(do_trans) {
 			act("$n has transferred you!", FALSE, ch, 0, victim, TO_VICT | DG_NO_TRIG);
 			qt_visit_room(victim, IN_ROOM(victim));
 			look_at_room(victim);
-			enter_triggers(victim, NO_DIR, "transfer", FALSE);
-			greet_triggers(victim, NO_DIR, "transfer", FALSE);
+			enter_triggers(victim, NO_DIR, "transfer", FALSE, was_in);
+			greet_triggers(victim, NO_DIR, "transfer", FALSE, was_in);
 			RESET_LAST_MESSAGED_TEMPERATURE(victim);
 			msdp_update_room(victim);	// once we're sure we're staying
 			send_config_msg(ch, "ok_string");
