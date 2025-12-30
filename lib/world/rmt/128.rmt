@@ -10,6 +10,7 @@ The Mining Tunnel of a Bygone Age~
 fireflies that scatter as you approach. At one end, rocky steps rise up through
 a narrow hole where the air smells of warm, spicy incense. At the other, the
 tunnel ends abruptly.
+Commands: Type 'return' to leave.
 ~
 ci 0 0 12810
 D8
@@ -47,6 +48,8 @@ The end of the tunnel is a curved rocky wall cut by miners' picks.
 ~
 T 12803
 T 12810
+T 12802
+T 12801
 S
 #12811
 The Lodestone Forge~
@@ -125,6 +128,7 @@ A hole in the floor contains stone steps that lead down into the tunnel.
 ~
 M 0 12811 100.00 1
 T 12803
+T 12802
 S
 #12812
 The Lodestone Forge~
@@ -180,6 +184,7 @@ lodestone, which seems to tug at the chain as it pulls upward and to the north.
 ~
 M 0 12812 100.00 1
 T 12803
+T 12802
 S
 #12813
 The Lodestone Forge~
@@ -238,6 +243,7 @@ iron chain as it pulls to the north.
 ~
 M 0 12813 100.00 1
 T 12803
+T 12802
 S
 #12814
 The Lodestone Forge~
@@ -294,6 +300,7 @@ Iron lanterns hang along the walls, casting shadows around the tools.
 ~
 M 0 12814 100.00 1
 T 12803
+T 12802
 S
 #12815
 The Lodestone Forge~
@@ -361,5 +368,6 @@ Barrels are stacked so high you can hardly see the lanterns on the wall.
 ~
 M 0 12815 100.00 1
 T 12803
+T 12802
 S
 $

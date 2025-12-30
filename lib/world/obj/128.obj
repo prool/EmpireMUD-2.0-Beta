@@ -72,7 +72,7 @@ you get it close to another piece of iron.
 into a trapeze shape and oriented in the same direction to create a shape long-
 associated with healing.
 ~
-2 amo ab 0 0 3
+2 amo ab 0 0 4
 0 0 0
 2 0
 A
@@ -83,6 +83,7 @@ A
 15 1 3
 C
 1 100
+T 12811
 S
 #12811
 inspiration lodestone ring of restoration~
@@ -141,7 +142,7 @@ you get it close to another piece of iron.
    An oversized step-cut yellow gem adorns the top of the ring, set over an
 incised diagram of a shield.
 ~
-2 amo ab 0 0 3
+2 amo ab 0 0 4
 0 0 0
 2 0
 A
@@ -152,6 +153,7 @@ A
 11 1 3
 C
 1 100
+T 12811
 S
 #12815
 inspiration lodestone ring of fortitude~
@@ -213,7 +215,7 @@ you get it close to another piece of iron.
 blood-red gems, all arranged tip-to-tip. When the light catches in the gems,
 they look like glinting drops of blood.
 ~
-2 amo ab 0 0 4
+2 amo ab 0 0 5
 0 0 0
 2 0
 A
@@ -224,6 +226,7 @@ A
 15 1 0
 C
 1 100
+T 12811
 S
 #12819
 inspiration lodestone ring of wrath~
@@ -284,7 +287,7 @@ you get it close to another piece of iron.
 gem in such a deep blue color that light seems to vanish into it with only the
 briefest twinkle.
 ~
-2 amo ab 0 0 3
+2 amo ab 0 0 4
 0 0 0
 2 0
 A
@@ -295,6 +298,7 @@ A
 15 1 3
 C
 1 100
+T 12811
 S
 #12823
 inspiration lodestone ring of arcana~
@@ -354,7 +358,7 @@ you get it close to another piece of iron.
 the light only when there's no finger present. When worn, the gems dig slightly
 into the skin.
 ~
-2 amo ab 0 0 4
+2 amo ab 0 0 5
 0 0 0
 2 0
 A
@@ -367,6 +371,7 @@ A
 18 1 3
 C
 1 100
+T 12811
 S
 #12827
 inspiration lodestone ring of valor~

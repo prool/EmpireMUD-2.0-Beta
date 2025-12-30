@@ -66,6 +66,143 @@ if %outport% && %outport.vnum% == 12806
   %at% %toroom% %echo% A portal whirls open!
 end
 ~
+#12801
+Celestial Forge: Request exit~
+2 c 0 5
+L c 9680
+L c 12800
+L c 12806
+L e 5195
+L j 12810
+return~
+if %actor.is_npc%
+  * possibly immortal trying to return
+  return 0
+  halt
+end
+* try adventure summon
+if %actor.adventure_summoned_from%
+  nop %actor.end_adventure_summon%
+  halt
+end
+* try portal
+set cf_return %actor.var(cf_return)%
+if %cf_return%
+  makeuid toroom room %cf_return%
+  if %toroom% && %toroom.building_vnum% == 5195 && %actor.canuseroom_guest(%toroom%)%
+    * valid location! check existing portals
+    set obj %room.contents%
+    while %obj%
+      if %obj.type% == PORTAL && %obj.val0% == %toroom.vnum%
+        * oops
+        %send% %actor% There's already a portal open for you!
+        halt
+      end
+      set obj %obj.next_content%
+    done
+    * if we got here, make a portal
+    switch %room.template%
+      case 12810
+        set in_vnum 12800
+      break
+      default
+        set in_vnum 0
+      break
+    done
+    * success?
+    if %in_vnum%
+      * portal out
+      %load% obj 12806
+      set outport %room.contents%
+      if %outport.vnum% == 12806
+        nop %outport.val0(%toroom.vnum%)%
+        set emp %toroom.empire_name%
+        if %emp%
+          %mod% %outport% shortdesc the portal back to %emp%
+          %mod% %outport% longdesc The portal back to %emp% is open here.
+          %mod% %outport% keywords portal back %emp%
+          %echo% A portal back to %emp% whirls open!
+        else
+          %echo% A portal whirls open!
+        end
+      end
+      * portal back here
+      %load% obj %in_vnum% %toroom%
+      set inport %toroom.contents%
+      if %inport.vnum% == %in_vnum%
+        nop %inport.val0(%room.vnum%)%
+        %at% %toroom% %echo% A portal whirls open!
+      end
+      halt
+    end
+  end
+end
+* if we got this far, explore other options
+set tele -1
+if %actor.home%
+  set tele %actor.home%
+else
+  set tele %startloc%
+end
+if %tele% != -1
+  %send% %actor% You're whisked away in a flash of starlight!
+  %echoaround% %actor% ~%actor% is whisked away in a flash of starlight!
+  %teleport% %actor% %tele%
+  %echoaround% %actor% ~%actor% arrives in a flash!
+  %load% obj 9680 %actor% inv
+  * friends
+  set ch %room.people%
+  while %ch%
+    set next_ch %ch.next_in_room%
+    if %ch.is_npc% && %ch.leader% == %actor%
+      %at% %room% %echo% ~%ch% is whisked away, too!
+      %teleport% %ch% %tele%
+      %echo% ~%ch% arrives in a flash!
+    end
+    set ch %next_ch%
+  done
+else
+  %send% %actor% You can't seem to find a way to return. Surely this is a bug.
+end
+~
+#12802
+Celestial Forge: Detect player entry, Grant abilities~
+2 g 100 6
+L e 5195
+L i 12800
+L j 12810
+L j 12815
+L o 12810
+L q 6
+~
+if %actor.is_npc%
+  halt
+end
+* Ensure ability first, if over 75 Trade
+if %actor.skill(6)% >= 76
+  if %room.template% >= 12810 && %room.template% <= 12815
+    if !%actor.has_bonus_ability(12810)%
+      nop %actor.add_bonus_ability(12810)%
+    end
+  end
+end
+* Track origin
+if !%was_in%
+  halt
+end
+if %was_in.template% >= 12800 && %was_in.template% <= 12999
+  * inside same adventure
+  halt
+end
+if %was_in.building_vnum% == 5195
+  * Celestial Forge
+  set cf_return %was_in.vnum%
+  remote cf_return %actor.id%
+else
+  * no return location available
+  rdelete cf_return %actor.id%
+end
+~
 #12803
 Celestial Forge: Time and Weather commands~
 2 c 0 1
@@ -297,6 +434,42 @@ Celestial Forge: Mine attempt~
 2 c 0 0
 mine~
 %send% %actor% There doesn't seem to be anything left here to mine.
+~
+#12811
+Celestial Forge: Unique item exclusion~
+1 j 0 5
+L c 12810
+L c 12814
+L c 12818
+L c 12822
+L c 12826
+~
+set ring_list 12810 12814 12818 12822 12826
+set ring_pos rfinger lfinger
+set pos_list
+*
+if %ring_list% ~= %self.vnum%
+  set pos_list %ring_pos%
+  set vnum_list %ring_list%
+end
+*
+if %pos_list% && %vnum_list%
+  while %pos_list%
+    set pos %pos_list.car%
+    set pos_list %pos_list.cdr%
+    set obj %actor.eq(%pos%)%
+    if %obj%
+      if %vnum_list% ~= %obj.vnum%
+        * oops
+        %send% %actor% You can't equip @%self% while wearing @%obj%.
+        return 0
+        halt
+      end
+    end
+  done
+end
+* ok
+return 1
 ~
 #12832
 Lodestone Firefly: Northward pull~
@@ -614,10 +787,29 @@ Celestial Forge: Expire training dummy~
 if %self.fighting%
   halt
 end
+set ch %self.room.people%
+while %ch%
+  if %ch.is_pc%
+    halt
+  end
+  set ch %ch.next_in_room%
+done
 if (%timestamp% - %self.var(time,0)%) > 64800
   %echo% ~%self% breaks down and collapses in a heap.
   %purge% %self%
   halt
+end
+~
+#12840
+Celestial Forge: Mobs can't start combat with dummies~
+0 B 0 0
+~
+if %actor.is_npc% && !%self.fighting%
+  %send% %actor% Mobs can't start combat against this dummy.
+  return 0
+  halt
+else
+  return 1
 end
 ~
 $
