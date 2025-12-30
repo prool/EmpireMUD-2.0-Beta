@@ -1840,6 +1840,7 @@ ACMD(do_skills) {
 	bool found, any, line;
 	bool sort_alpha = FALSE, sort_level = FALSE, want_min = FALSE, want_max = FALSE, want_all = FALSE, show_all_info = FALSE;
 	int min_level = -1, max_level = -1;
+	struct player_bonus_ability *bonus_abil, *next_bonus_abil;
 	
 	// attempt to parse the args first, to get -l [range] or -a
 	if (*argument) {
@@ -2041,6 +2042,14 @@ ACMD(do_skills) {
 				continue;	// only looking for abilities with parents
 			}
 			
+			safe_snprintf(lbuf + strlen(lbuf), sizeof(lbuf) - strlen(lbuf), "%s%s%s\t0", *lbuf ? ", ": "", ability_color(ch, abil), ABIL_NAME(abil));
+		}
+		HASH_ITER(hh, GET_BONUS_ABILITIES(ch), bonus_abil, next_bonus_abil) {
+			if (!(abil = ability_proto(bonus_abil->vnum))) {
+				continue;	// no ability?
+			}
+			
+			// show it
 			safe_snprintf(lbuf + strlen(lbuf), sizeof(lbuf) - strlen(lbuf), "%s%s%s\t0", *lbuf ? ", ": "", ability_color(ch, abil), ABIL_NAME(abil));
 		}
 		if (*lbuf) {
