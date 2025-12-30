@@ -483,7 +483,7 @@ When using field  - The variable returns:
 &cend_adventure_summon&0 - Returns a pc to where they were summoned from, if any.
 &ceq()&0 - This will return the identifier (id) for the object equipped in
    position, if any. The specified position may be either a position number
-   (0-18) or the name of the location * checks all positions. &yHELP %LOAD%&0
+   (0-23) or the name of the location * checks all positions. &yHELP %LOAD%&0
 &cevent_points(vnum)&0 - The character's score in the event, if it's running.
 &cfaction_name&0 - The name of the mob's 'allegiance' faction, if any.
 &cfighting&0 - The unique id of the mob fighting the actor.
