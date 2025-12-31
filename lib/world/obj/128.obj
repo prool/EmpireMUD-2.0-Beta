@@ -361,17 +361,17 @@ you get it close to another piece of iron.
 the light only when there's no finger present. When worn, the gems dig slightly
 into the skin.
 ~
-2 amo ab 0 0 5
+2 amo ab 0 0 6
 0 0 0
 2 0
 A
-15 1 0
+11 1 0
 A
-2 1 0
+6 1 0
 A
-9 1 0
+19 2 0
 A
-18 1 3
+15 1 3
 C
 1 100
 T 12811
@@ -382,9 +382,10 @@ the inspiration for a lodestone ring of valor~
 The inspiration for a lodestone ring of valor is on the ground.~
    You find yourself inspired by the blacksmiths of old, who hammered away for
 long hours in their hot forges to shape sturdy iron.
-   This inspiration will teach you to forge: lodestone ring of valor.
+   This inspiration will teach you to forge: lodestone ring of valor, a unique
+ring for overseers and laborers.
 ~
-7 0 a 0 0 1
+7 0 a 0 0 2
 12826 0 0
 0 0
 S
@@ -397,17 +398,17 @@ in the air below iron studs. They seem to pull subtly to the north.
    Tiny gem fragments circle the lodestones in the air, flickering as they spin
 in the light.
 ~
-2 mo am 0 0 4
+2 mo am 0 0 5
 0 0 0
 2 0
 A
-2 1 0
+15 1 0
 A
-18 1 0
+19 1 0
 A
-17 1 0
+11 1 0
 A
-15 1 3
+27 1 3
 C
 1 100
 S
@@ -417,9 +418,10 @@ the inspiration for some lodestone earrings of valor~
 The inspiration for some lodestone earrings of valor is on the ground.~
    You find yourself inspired by the blacksmiths of old, who hammered away for
 long hours in their hot forges to shape sturdy iron.
-   This inspiration will teach you to forge: lodestone earrings of valor.
+   This inspiration will teach you to forge: lodestone earrings of valor. These
+earrings are made for overseers and laborers of the empire.
 ~
-7 0 a 0 0 1
+7 0 a 0 0 2
 12828 0 0
 0 0
 S
@@ -535,7 +537,7 @@ kit to use for combat training for a short time. It will expire if you defeat
 it in combat, or will expire after a certain number of hours.
    Type 'use dummy' to set this up for combat training.
 ~
-3 e a 0 0 2
+3 e a 0 0 3
 12838 0 0
 2 0
 C
@@ -543,6 +545,21 @@ C
 M
 33
 Type 'use dummy' to set this up for combat training.~
+R
+4 5171 0
 T 12838
+S
+#12839
+inspiration iron age chariot~
+the iron age chariot inspiration~
+The iron age chariot inspiration is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to craft: iron age chariot, a small vehicle
+for one rider with two animals.
+~
+7 0 a 0 0 1
+12839 0 0
+0 0
 S
 $
