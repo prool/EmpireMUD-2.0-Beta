@@ -166,14 +166,15 @@ else
 end
 ~
 #12802
-Celestial Forge: Detect player entry, Grant abilities~
-2 g 100 6
+Celestial Forge: Detect player entry, Grant abilities, Start progress~
+2 g 100 7
 L e 5195
 L i 12800
 L j 12810
 L j 12815
 L o 12810
 L q 6
+L y 12810
 ~
 if %actor.is_npc%
   halt
@@ -183,6 +184,9 @@ if %actor.skill(6)% >= 76
   if %room.template% >= 12810 && %room.template% <= 12815
     if !%actor.has_bonus_ability(12810)%
       nop %actor.add_bonus_ability(12810)%
+    end
+    if %actor.empire%
+      nop %actor.empire.start_progress(12810)%
     end
   end
 end
