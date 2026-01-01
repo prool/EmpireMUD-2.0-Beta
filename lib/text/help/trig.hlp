@@ -662,6 +662,8 @@ such as %dailycycle%.
 When using field - The variable returns: 
 &cself&0 - The mob, item, or room running the script. Normal fields may be 
                 used with this.
+&cability.name(ab)&0 - The full name of a ability vnum or one abbreviated by ab.
+&cability.validate(ab)&0 - Returns true if ab is a valid ability name or vnum.
 &ccomponent.<vnum>(amt)&0 - Gets the component name by vnum. The amt is used to
    determine whether to use the singular or plural name.
 &ccooldown.<vnum>&0 - Get the name of a cooldown, by vnum.
