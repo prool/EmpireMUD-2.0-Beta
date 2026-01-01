@@ -498,6 +498,52 @@ while %ch%
   set ch %ch.next_in_room%
 done
 ~
+#12833
+Celestial Forge: Buy mastery item~
+1 n 100 3
+L o 12810
+L o 12811
+L w 5100
+~
+set actor %self.carried_by%
+if !%actor%
+  %purge% %self%
+  halt
+end
+switch %self.vnum%
+  case 12833
+    set requires 12810
+    set grants 12811
+    set shard 5100
+    set refund 1000
+  break
+  default
+    %echo% @%self% is not implemented.
+    %purge% %self%
+    halt
+  break
+done
+*
+set do_refund 0
+if %actor.is_npc%
+  * oops
+elseif !%actor.ability(%requires%)%
+  %send% %actor% You require %ability.name(%requires%)% to buy this.
+  set do_refund 1
+elseif %actor.ability(%grants%)%
+  %send% %actor% You already know %ability.name(%grants%)%.
+  set do_refund 1
+else
+  %send% %actor% You're inspired! You learn %ability.name(%grants%)%!
+  nop %actor.add_bonus_ability(%grants%)%
+end
+if %do_refund%
+  nop %actor.give_currency(%shard%,%refund%)%
+  eval curname %%currency.%shard%(%refund%)%%
+  %send% %actor% You're refunded %refund% %curname%.
+end
+%purge% %self%
+~
 #12834
 Celestial Forge: Buy shard companion~
 1 n 100 7

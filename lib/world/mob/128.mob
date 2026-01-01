@@ -4,7 +4,7 @@ Starsmith #n~
 Starsmith #n is tending the forge.
 ~
 100 150 bdqvI 0 3
-0 0 0 6 -1 -1
+0 4 0 6 -1 -1
 D
    The starsmith is dressed in a leather robe embossed with constellations both
 known and unknown. You can donate shards to open a portal to one of the great
@@ -12,6 +12,27 @@ celestial forges: donate <which forge>
  Iron / Lodestone Forge
 ~
 I 4 2105 100.00 1  # LOOT: hammer
+M
+0
+$n looks upward.~
+M
+0
+Steel rings out as $n hammers at the anvil.~
+M
+0
+$n checks the balance of $s sword.~
+M
+0
+$n hammers away at a sword.~
+M
+0
+$n wipes $s brow.~
+M
+0
+$n pounds the anvil with a CLANG CLANG CLANG.~
+M
+0
+$n places the sword in the fire for a moment.~
 T 12800
 S
 #12811
@@ -39,6 +60,36 @@ say All are welcome here.~
 M
 8
 say What a pleasure to see you again.~
+M
+0
+$n folds $s hands.~
+M
+0
+$n brushes off $s tunic.~
+M
+0
+$n smiles at you.~
+M
+0
+$n's eyes gleam in the light of the forge.~
+M
+1
+Feel free to look around.~
+M
+1
+A lot of great smiths find inspiration here.~
+M
+1
+Lodestones were the first compasses.~
+M
+1
+In China, lodestone was believed to be the mother of iron, and that was why iron clings to it.~
+M
+1
+In Greece, sailors believed in magnetic islands that pulled iron nails from ships, causing them to sink.~
+M
+1
+They say Cleopatra slept on a lodestone to maintain youthful skin.~
 T 12807
 S
 #12812

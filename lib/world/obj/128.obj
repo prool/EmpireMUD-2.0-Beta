@@ -473,6 +473,21 @@ summon one of your minipets.
 C
 1 1
 S
+#12833
+mastery lodestone inspiration~
+the inspiration for Lodestone Mastery~
+The inspiration for Lodestone Mastery is in the air.~
+   Purchase this and be inspired to forge superior lodestone items. This
+requires that you already have the Lodestone Forging ability, and will grant
+you Lodestone Mastery. Each character can only buy this item once.
+~
+3 p a 0 0 2
+0 0 0
+2 0
+C
+100 100
+T 12833
+S
 #12834
 companion plated iron elemental~
 a plated iron elemental companion~
