@@ -1090,8 +1090,12 @@ void command_interpreter(char_data *ch, char *argument) {
 	 * special case to handle one-character, non-alphanumeric commands;
 	 * requested by many people so "'hi" or ";godnet test" is possible.
 	 * Patch sent by Eric Green and Stefan Wasilewski.
+	 *
+	 * Now ignores '!' which cannot be typed by players (it causes a repeated
+	 * command at a lower code level). This allows ! to be used for npc-only
+	 * command triggers. -paul 12/6/2025
 	 */
-	if (!isalpha(*argument)) {
+	if (!isalpha(*argument) && *argument != '!') {
 		arg[0] = argument[0];
 		arg[1] = '\0';
 		line = argument + 1;

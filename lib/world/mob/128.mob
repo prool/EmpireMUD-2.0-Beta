@@ -29,22 +29,16 @@ soot from the forge.
 ~
 M
 7
-say Testing once-ever greeting 1~
+say It is my immense pleasure to welcome you to Lodestone Forge.~
 M
 7
-say once-ever 2~
+say The finest smiths under the stars reside within.~
 M
 7
-say once-ever 3~
+say All are welcome here.~
 M
 8
-say testing repeat visit greet 1~
-M
-8
-say testing repeat visit greet 2~
-M
-8
-say testing repeat visit greet 3~
+say What a pleasure to see you again.~
 T 12807
 S
 #12812
@@ -60,6 +54,22 @@ delicate craftwork, are folded in front of his waist as he greets you. His dark
 black hair is short and tousled, falling just above his brown eyes, which
 shimmer in the starlight.
 ~
+M
+7
+say Oho, a new face!~
+M
+7
+say It's rings over here, if you're interested.~
+M
+7
+say Don't forget to see Bo for a lodestone.~
+M
+8
+say Did ye make one of the rings?~
+M
+8
+say Never too late for greatness.~
+T 12807
 S
 #12813
 Laila Brigidine~
@@ -74,6 +84,25 @@ stacks of patterns and designs. Her dark brown hair is loosely braided and
 hangs over her left shoulder. Above her brown eyes, the red dot of a bindi
 marks the spot between her eyebrows.
 ~
+M
+7
+say Don't think I've seen you here before.~
+M
+7
+say Your ears look a bit red.~
+M
+7
+say Best use some iron to cool them down.~
+M
+8
+say Lovely to see you.~
+M
+8
+say I've still got more earring designs.~
+M
+8
+say Be sure to stop by from time to time.~
+T 12807
 S
 #12814
 Aulia Thorian~
@@ -89,6 +118,31 @@ cheekbones and stern face wrapped in a red scarf that covers her hair. Her
 white blouse and red dress are covered with a leather apron that shows the
 marks of many years of use.
 ~
+M
+7
+say Oh!~
+M
+7
+emote $n wraps a scarf around a swollen finger.~
+M
+7
+say Didn't mean to do that.~
+M
+7
+say Oh, didn't see you there.~
+M
+7
+say I've got some ideas you might like. Have a look.~
+M
+8
+say Glad you came back for more.~
+M
+8
+say Have you tried the elemental companion?~
+M
+8
+say This might be my best work.~
+T 12807
 S
 #12815
 Bo Ptahite~
@@ -105,5 +159,90 @@ and straightens his shiny red jacket as you approach.
 M
 0
 Some supplies appear from thin air and $n places them in a barrel.~
+M
+7
+say Overstocked again...~
+M
+7
+say Oh! A new face. I was just saying we don't see enough new smiths these days.~
+M
+7
+say How wonderful that you're carrying on the tradition.~
+M
+8
+say Long time, no see.~
+M
+8
+say We just got new poles.~
+M
+8
+say Not sure who's sacrificing so many poles to the forge.~
+T 12807
+S
+#12832
+firefly fly lodestone~
+a lodestone firefly~
+A lodestone firefly twinkles in the air.
+~
+1 1 bdoD mn 1
+0 0 2 5 -1 -1
+D
+   The teensy lodestone flits around in the air, wingless, propelled by some
+unseen force. It flickers in the light, almost like a firefly, as it inspects
+every passing sword or piece of iron armor, sometimes landing on them for a few
+seconds before taking off again.
+~
+M
+0
+$n flickers in the light.~
+M
+0
+$n flits around in the air.~
+M
+0
+$n lands on you for a second, then takes off again.~
+T 12832
+S
+#12834
+elemental iron~
+an iron elemental~
+An iron elemental is here.
+~
+1 125 dhoG cmG 3
+0 0 80 6 -1 -1
+D
+The elemental is a swirling mass of iron.
+~
+T 12836
+T 12835
+S
+#12838
+dummy training iron-plated ironplated plated~
+an iron-plated dummy~
+An iron-plated training dummy has been set up here.
+~
+1 100 bdhnyDJK 0 3
+0 0 0 15 -1 -1
+D
+   Though it's little more than a suit of crude armor on a weighted wooden
+stand, the training dummy remains a valuable tool for combat instruction. It
+bobbles back and forth, never striking back after a blow or arrow.
+~
+M
+13
+This training dummy will not attack back.~
+T 12839
+T 12840
+S
+#12844
+elemental imperium~
+an imperium elemental~
+An imperium elemental is here.
+~
+1 225 dhoG cmG 3
+0 0 85 6 -1 -1
+D
+The elemental is a glimmering mass of imperium.
+~
 S
 $

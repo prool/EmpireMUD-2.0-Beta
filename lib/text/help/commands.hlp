@@ -1320,6 +1320,18 @@ term has multiple word, put it "in quotes".
 
 See also: HELP
 #
+HIDE-KEEP "TOGGLE HIDE-KEEP" "HIDE KEEP"
+
+Usage:  toggle hide-keep [on/off]
+
+This option will hide items with (keep) flags from your basic inventory
+command, allowing you to see a much shorter version of your inventory without
+the items you always keep with you.
+
+You can still use 'inventory -k' to see (keep) items with this flag on.
+
+See also: INVENTORY, KEEP, TOGGLES
+#
 IDENTIFY
 
 Usage:  identify [inv] <item | vehicle>
@@ -1437,6 +1449,9 @@ to your "pack" slot, you can carry more items.
 If you're trying to see what you're wearing instead, type EQUIPMENT. Items do
 not take up inventory space when equipped (except containers and their
 contents).
+
+Several toggles affect your inventory display including hide-keep,
+item-details, and item-quality.
 
 See also: EQUIPMENT, GRAB, HOLD, REMOVE, WEAR, STORE, RETRIEVE, WIELD, SWAP,
    TOGGLE, LEVEL COLORS
@@ -2494,12 +2509,12 @@ The "mapsize" command will determine how far away you can see things. It sets
 the number of tiles you see in each direction on commands like look and scan.
 
 Available options:
- * toggle informative - If on, tiles will indicate if they are being built
+ - toggle informative - If on, tiles will indicate if they are being built
      or dismantled, need repair, and some other status types.
- * toggle political - Indicates who owns each map tile.
- * fightmessages - Reduce combat spam.
- * statusmessages - Turn off some status messages.
- * /leave and /join - Control which slash-channels you're on.
+ - toggle political - Indicates who owns each map tile.
+ - fightmessages - Reduce combat spam.
+ - statusmessages - Turn off some status messages.
+ - /leave and /join - Control which slash-channels you're on.
 
 Tips:
  - If you're having trouble finding the entrance to a building, try looking in
@@ -2540,13 +2555,17 @@ See also: HIDE, SEARCH ABILITY, SENSE LIFE RITUAL
 #
 SEED SEEDS SEEDING DESEED DE-SEED "REMOVE SEEDS" "SEED COMMAND"
 
-Usage:  seed <fruit>
+Usage:  seed <fruit | flower>
+        seed all
 
-This command allows you to remove the seeds from a fruit, usually to plant
-them. Most fruits can still be eaten afterwards. Some fruits can also be
+This command allows you to remove the seeds from a fruit or flower, usually to
+plant them. Most fruits can still be eaten afterwards. Some fruits can also be
 planted without removing the seeds first.
 
-See also: PLANT, CROPS, SEED COMPONENT
+Automatically junk (discard) items after seeding them by adding 'junk' as the
+final argument, e.g. 'seed all.flower junk'.
+
+See also: PLANT, CROPS, JUNK, SEED COMPONENT
 #
 SELFDELETE "SELF DELETE" SELF-DELETE DELETE
 
@@ -2948,6 +2967,7 @@ Toggles:
   compact - no extra newlines
   exits - shows or hides exits and directions when you 'look'
   extra-spacing - adds an extra blank line after you type a command
+  hide-keep - basic inventory command won't show items with (keep) flags
   informative - informative map coloring -- HELP INFORMATIVE
   item-details - shows level and some other information in inventory/equipment
   item-quality - shows superior/hard/group/boss info in inventory/equipment

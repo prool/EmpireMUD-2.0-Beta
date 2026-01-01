@@ -383,4 +383,71 @@ Type "board" to get onto the ship.
 4 0 0
 0 1
 S
+#980
+bouquet flowers~
+a bouquet of flowers~
+A bouquet of flowers is lying here.~
+   The fragrant flowers are neatly arranged into a bouquet, wrapped in cloth,
+and tied with a ribbon.
+   Edit with: customize bouquet <shortdesc | longdesc | lookdesc | lock> [text]
+~
+3 0 ao 0 0 3
+0 0 0
+0 0
+C
+1 1
+R
+4 5223 0
+T 980
+S
+#981
+wreath lovely~
+a lovely wreath~
+There's a wreath hanging here.~
+   Flowers and boughs are arranged in a lovely circle and made to hang up
+somewhere.
+   Dropping the wreath will set it up, where it will last several days.
+   Edit with: customize wreath <shortdesc | longdesc | lookdesc | lock> [text]
+~
+3 v a 0 0 7
+0 0 0
+0 0
+C
+1 1
+M
+18
+The wreath wilts and you throw it away.~
+M
+17
+The wreath wilts and you throw it away.~
+R
+4 5223 0
+T 980
+T 981
+S
+#982
+crown floral~
+a floral crown~
+A floral crown is lying here, in bloom.~
+   Long-stemmed flowers of all colors are woven together to form this elegant
+crown.
+   Edit with: customize floral <shortdesc | longdesc | lookdesc | lock> [text]
+~
+2 mo ae 0 0 6
+0 0 0
+0 0
+A
+5 1 3
+C
+50 50
+M
+8
+You don the floral crown.~
+M
+9
+$n dons $p.~
+R
+4 5617 0
+T 980
+S
 $

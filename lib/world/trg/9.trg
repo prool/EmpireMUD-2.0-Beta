@@ -255,4 +255,81 @@ if (!%inter.down%)
 end
 detach 957 %self.id%
 ~
+#980
+Customize look description~
+1 c 7 0
+customize~
+set targ %arg.car%
+if %actor.obj_target(%targ%)% != %self%
+  return 0
+  halt
+end
+* more processing
+set arg %arg.cdr%
+set type %arg.car%
+set text %arg.cdr%
+set keywords %self.keywords%
+if !%type%
+  %send% %actor% Usage: customize %arg.car% <shortdesc | longdesc | lookdesc | lock> [text]
+elseif %self.room.empire% && %self.room.empire% != %actor.empire% && !%self.carried_by% && !%self.worn_by%
+  %send% %actor% You can't customize that here.
+elseif %type% == lock
+  %send% %actor% You finalize the text on @%self%.
+  detach 980 %self.id%
+elseif !%text%
+  %send% %actor% Usage: customize %arg.car% <shortdesc | longdesc | lookdesc | lock> [text]
+elseif lookdescription /= %type%
+  %mod% %self% lookdesc %text%
+  %send% %actor% You customize the look description for @%self%.
+elseif !(%text% ~= %keywords.car%)
+  %send% %actor% You must include the word '%keywords.car%' in that customization.
+elseif shortdescription /= %type%
+  %mod% %self% shortdesc %text%
+  %send% %actor% You customize the short description for @%self%.
+  * also update keywords
+  set new_kw %keywords.car%
+  set text %text.skip_filler%
+  while %text%
+    set word %text.car%
+    set text %text.cdr%
+    set new_kw %new_kw% %word.skip_filler%
+  done
+  %mod% %self% keywords %new_kw%
+elseif longdescription /= %type%
+  %mod% %self% longdesc %text%
+  %send% %actor% You customize the long description for @%self%.
+else
+  %send% %actor% Usage: customize %arg.car% <shortdesc | longdesc | lookdesc | lock> [text]
+end
+~
+#981
+Wreath drop setup~
+1 h 100 0
+~
+* 1 per room, not in unclaimed territory
+set room %self.room%
+if %command% == put
+  %send% %actor% You can't put the wreath in anything.
+  return 0
+  halt
+elseif %command% != drop
+  * ok
+  halt
+end
+* checks
+if !%room.empire% || %room.empire% != %actor.empire%
+  %send% %actor% You can only hang the wreath in your own empire.
+  return 0
+  halt
+elseif %room.contents(%self.vnum%)%
+  %send% %actor% There is already a wreath hanging here.
+  return 0
+  halt
+end
+* ok, allow
+wait 1
+if !%self.carried_by% && !%self.in_obj%
+  otimer 4032
+end
+~
 $

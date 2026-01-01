@@ -41,7 +41,7 @@ I 6 3080 20.00 25 f  # FORAGE: lizard tail
 I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
 I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 91.67 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 140 100.00 50  # GATHER: bundle of long grass
@@ -217,7 +217,7 @@ I 6 3081 15.00 25 f  # FORAGE: colorful bird egg
 I 6 3087 25.00 25 f  # FORAGE: crisp wild leaves
 I 6 3069 25.00 25 f  # FORAGE: honeycomb
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 44.00 50 g  # GATHER: sticks and leaves
@@ -436,6 +436,8 @@ E
 17 200 0.30 224
 E
 17 0 0.60 39
+E
+20 20160 0.01 225
 I 6 3081 10.00 25 f  # FORAGE: colorful bird egg
 I 6 3086 5.00 25 f  # FORAGE: tree frog
 I 6 3017 20.00 25 f  # FORAGE: plump fig
@@ -443,8 +445,7 @@ I 6 3069 20.00 25 f  # FORAGE: honeycomb
 I 6 3085 20.00 25 f  # FORAGE: fern tips
 I 9 133 90.00 50 g  # GATHER: tangle of vines
 I 9 121 10.00 50 g  # GATHER: sticks and leaves
-I 20 149 6.00 1 c  # CHOP: tremendous jungle tree
-I 20 128 94.00 1 c  # CHOP: massive jungle tree
+I 20 128 100.00 1 c  # CHOP: massive jungle tree
 U
 0
 More and more trees burst from the ground, twisting their way up to the sky and spreading a wide canopy!~
@@ -728,6 +729,98 @@ In one direction, trees tower to the sky. In the other, you see tranquil, open
 space.
 ~
 S
+#225
+Dense Jungle~
+A Dense Jungle~
+'^' 13 lq 16 ad g
+C
+chop, gather~
+D0
+^^^%~
+&G~
+D0
+^^%^~
+&G~
+D0
+^%^^~
+&G~
+D0
+%^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+D0
+^^^^~
+&G~
+E
+0 1 100.00 220
+E
+2 32 2.00 252
+E
+2 57 10.00 232
+E
+3 225 5.00 220
+E
+7 5 2.00 250
+E
+17 70 0.80 72
+E
+17 240 0.30 224
+E
+17 241 1.00 224
+E
+17 244 1.00 224
+E
+17 231 1.00 232
+E
+17 230 0.30 232
+E
+17 210 0.60 224
+E
+17 204 1.00 224
+E
+17 200 0.30 224
+E
+17 0 0.60 39
+E
+17 243 0.30 224
+I 6 3081 10.00 25 f  # FORAGE: colorful bird egg
+I 6 3086 5.00 25 f  # FORAGE: tree frog
+I 6 3017 20.00 25 f  # FORAGE: plump fig
+I 6 3069 20.00 25 f  # FORAGE: honeycomb
+I 6 3085 20.00 25 f  # FORAGE: fern tips
+I 9 133 90.00 50 g  # GATHER: tangle of vines
+I 9 121 10.00 50 g  # GATHER: sticks and leaves
+I 20 149 100.00 1 c  # CHOP: tremendous jungle tree
+U
+0
+More and more trees burst from the ground, twisting their way up to the sky and spreading a wide canopy!~
+X
+jungle trees forest around canopy~
+   You're standing in a jungle where both the canopy and the undergrowth are
+dense and nigh-impenetrable. The humid air is thick with the scent of plant
+life, protected by the layer of green above.
+~
+S
 #230
 Grassy Seaside~
 A Grassy Seaside~
@@ -769,7 +862,7 @@ I 5 107 100.00 25 d  # DIG: bag of sand
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 140 100.00 50  # GATHER: bundle of long grass
@@ -874,7 +967,7 @@ I 6 3084 20.00 25 x  # FORAGE: brittlegill mushroom
 I 6 3051 30.00 25 x  # FORAGE: sea urchin
 I 6 3052 30.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 88.00 25 g  # GATHER: sticks and leaves
@@ -914,7 +1007,7 @@ E
 I 6 3051 50.00 25 x  # FORAGE: sea urchin
 I 6 3052 50.00 25 x  # FORAGE: clam
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
@@ -961,7 +1054,7 @@ I 6 3051 33.33 25 x  # FORAGE: sea urchin
 I 6 3052 33.34 25 x  # FORAGE: clam
 I 6 3083 33.33 25 x  # FORAGE: river snail
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1200 100.00 125 p  # PICK: handful of whitegrass
+I 7 1200 87.00 125 p  # PICK: handful of whitegrass
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 10 9279 0.90 1  # ENCOUNTER: spectacled caiman
@@ -1164,7 +1257,7 @@ I 6 3080 20.00 25 f  # FORAGE: lizard tail
 I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 6 3083 20.00 25 f  # FORAGE: river snail
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 140 100.00 50  # GATHER: bundle of long grass
@@ -1345,7 +1438,7 @@ I 6 3087 35.00 25 f  # FORAGE: crisp wild leaves
 I 6 3081 20.00 25 f  # FORAGE: colorful bird egg
 I 6 3080 20.00 25 f  # FORAGE: lizard tail
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1205 100.00 125 p  # PICK: bileberries
+I 7 1205 87.00 125 p  # PICK: bileberries
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 140 100.00 50  # GATHER: bundle of long grass

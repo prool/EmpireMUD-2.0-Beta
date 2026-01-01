@@ -252,7 +252,7 @@ void show_ability_info(char_data *ch, ability_data *abil, ability_data *parent, 
 	build_page_display_str(ch, lbuf);
 	
 	if (ABIL_MASTERY_ABIL(abil) != NOTHING) {
-		build_page_display(ch, "Mastery ability: %s%s\t0%s", ability_color(ch, abil), get_ability_name_by_vnum(ABIL_MASTERY_ABIL(abil)), (PRF_FLAGGED(ch, PRF_SCREEN_READER) && !has_ability(ch, ABIL_VNUM(abil))) ? " (not known)" : "");
+		build_page_display(ch, "Mastery ability: %s%s\t0%s", ability_color(ch, find_ability_by_vnum(ABIL_MASTERY_ABIL(abil))), get_ability_name_by_vnum(ABIL_MASTERY_ABIL(abil)), (PRF_FLAGGED(ch, PRF_SCREEN_READER) && !has_ability(ch, ABIL_VNUM(abil))) ? " (not known)" : "");
 	}
 	
 	if (ABIL_ASSIGNED_SKILL(abil) && !parent) {
@@ -5580,7 +5580,7 @@ DO_ABIL(do_teleport_ability) {
 			// failure (will message as a fail on the ability)
 			// fall through to log infiltrate attempt
 		}
-		else if (!pre_greet_mtrigger(ch, to_room, NO_DIR, "ability")) {
+		else if (!pre_greet_mtrigger(ch, to_room, NO_DIR, "ability", was_in)) {
 			// no message (will message as a fail on the ability)
 			return;
 		}
@@ -5594,7 +5594,7 @@ DO_ABIL(do_teleport_ability) {
 			char_from_room(ch);
 			char_to_room(ch, to_room);
 			
-			if (!enter_triggers(ch, NO_DIR, "ability", TRUE)) {
+			if (!enter_triggers(ch, NO_DIR, "ability", TRUE, was_in)) {
 				char_from_room(ch);
 				char_to_room(ch, was_in);
 				return;
@@ -5604,7 +5604,7 @@ DO_ABIL(do_teleport_ability) {
 			
 			send_ability_special_messages(ch, vict, ovict, abil, data, NULL, 0);
 			
-			if (!greet_triggers(ch, NO_DIR, "ability", TRUE)) {
+			if (!greet_triggers(ch, NO_DIR, "ability", TRUE, was_in)) {
 				char_from_room(ch);
 				char_to_room(ch, was_in);
 				look_at_room(ch);
@@ -5623,7 +5623,7 @@ DO_ABIL(do_teleport_ability) {
 				char_to_room(GET_COMPANION(ch), IN_ROOM(ch));
 				send_ability_special_messages(GET_COMPANION(ch), vict, ovict, abil, data, NULL, 0);
 				
-				if (!enter_triggers(GET_COMPANION(ch), NO_DIR, "ability", TRUE) || !greet_triggers(GET_COMPANION(ch), NO_DIR, "ability", TRUE)) {
+				if (!enter_triggers(GET_COMPANION(ch), NO_DIR, "ability", TRUE, was_in) || !greet_triggers(GET_COMPANION(ch), NO_DIR, "ability", TRUE, was_in)) {
 					char_from_room(GET_COMPANION(ch));
 					char_to_room(GET_COMPANION(ch), was_in);
 				}

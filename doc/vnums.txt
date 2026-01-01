@@ -116,6 +116,7 @@ Included Adventure Zones
 [12100] Antara Golden's Spices and Recipes [12100-12199] (0) 1 mob, 43 objs, 0 rooms
 [12030] Binding Circle: Ba'al Hadad [12030-12059] (225-325) 5 mobs, 25 objs, 2 rooms
 [12200] Ribbon Serragon [12200-12229] (25-125) 9 mobs, 21 objs, 1 room
+[12250] Elephant Stomping Grounds [12250-12299] (100-150) 6 mobs, 2 objs, 1 room
 [12300] Fur Dragon [12300-12349] (225-325) 5 mobs, 40 objs, 1 room
 [12350] Hoarfrost Serragon [12350-12399] (100-200) 9 mobs, 21 objs, 2 rooms
 [12400] The Golden Goblin [12400-12499] (50-150) 24 mobs, 62 objs, 21 rooms

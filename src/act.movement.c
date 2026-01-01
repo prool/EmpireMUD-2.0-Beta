@@ -875,13 +875,13 @@ void perform_transport(char_data *ch, room_data *to_room) {
 	char_to_room(ch, to_room);
 	qt_visit_room(ch, to_room);
 	GET_LAST_DIR(ch) = NO_DIR;
-	pre_greet_mtrigger(ch, IN_ROOM(ch), NO_DIR, "transport");	// cannot pre-greet for transport
+	pre_greet_mtrigger(ch, IN_ROOM(ch), NO_DIR, "transport", was_in);	// cannot pre-greet for transport
 	look_at_room(ch);
 
 	act("$n materializes in front of you!", TRUE, ch, 0, 0, TO_ROOM);
 	
-	enter_triggers(ch, NO_DIR, "transport", FALSE);
-	greet_triggers(ch, NO_DIR, "transport", FALSE);
+	enter_triggers(ch, NO_DIR, "transport", FALSE, was_in);
+	greet_triggers(ch, NO_DIR, "transport", FALSE, was_in);
 	RESET_LAST_MESSAGED_TEMPERATURE(ch);
 	msdp_update_room(ch);	// once we're sure we're staying
 
@@ -1158,7 +1158,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "You can't ride on such rough terrain.\r\n");
+			msg_to_char(ch, "You can't ride on such rough terrain%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
@@ -1168,7 +1168,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "Your mount won't ride into the ocean.\r\n");
+			msg_to_char(ch, "Your mount won't ride into the ocean%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
@@ -1177,7 +1177,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "Your mount won't ride into the water.\r\n");
+			msg_to_char(ch, "Your mount won't ride into the water%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
@@ -1186,7 +1186,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "Your mount won't go onto the land.\r\n");
+			msg_to_char(ch, "Your mount won't go onto the land%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
@@ -1195,7 +1195,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "You can't ride there.\r\n");
+			msg_to_char(ch, "You can't ride there%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
@@ -1206,7 +1206,7 @@ bool player_can_move(char_data *ch, int dir, room_data *to_room, bitvector_t fla
 			do_dismount(ch, "", 0, 0);
 		}
 		else {
-			msg_to_char(ch, "You can't ride indoors.\r\n");
+			msg_to_char(ch, "You can't ride indoors%s.\r\n", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (dismount first)"));
 			return FALSE;
 		}
 	}
@@ -1433,7 +1433,7 @@ void char_through_portal(char_data *ch, obj_data *portal, bool following) {
 	}
 	
 	// pre-greet can cancel the whole thing
-	if (!pre_greet_mtrigger(ch, to_room, NO_DIR, "portal")) {
+	if (!pre_greet_mtrigger(ch, to_room, NO_DIR, "portal", was_in)) {
 		return;
 	}
 	
@@ -1455,7 +1455,7 @@ void char_through_portal(char_data *ch, obj_data *portal, bool following) {
 	
 	// move them first, then move them back if they aren't allowed to go.
 	// see if an entry trigger disallows the move
-	if (!enter_triggers(ch, NO_DIR, "portal", TRUE)) {
+	if (!enter_triggers(ch, NO_DIR, "portal", TRUE, was_in)) {
 		char_from_room(ch);
 		char_to_room(ch, was_in);
 		return;
@@ -1463,7 +1463,7 @@ void char_through_portal(char_data *ch, obj_data *portal, bool following) {
 	
 	look_at_room(ch);
 	
-	if (!greet_triggers(ch, NO_DIR, "portal", TRUE)) {
+	if (!greet_triggers(ch, NO_DIR, "portal", TRUE, was_in)) {
 		char_from_room(ch);
 		char_to_room(ch, was_in);
 		look_at_room(ch);
@@ -1586,7 +1586,7 @@ bool do_simple_move(char_data *ch, int dir, room_data *to_room, bitvector_t flag
 	REMOVE_BIT(AFF_FLAGS(ch), AFF_HIDDEN);
 	
 	// lastly, check pre-greet trigs
-	if (!pre_greet_mtrigger(ch, to_room, dir, move_flags_to_method(flags))) {
+	if (!pre_greet_mtrigger(ch, to_room, dir, move_flags_to_method(flags), was_in)) {
 		return FALSE;
 	}
 	
@@ -1597,7 +1597,7 @@ bool do_simple_move(char_data *ch, int dir, room_data *to_room, bitvector_t flag
 
 	/* move them first, then move them back if they aren't allowed to go. */
 	/* see if an entry trigger disallows the move */
-	if (!enter_triggers(ch, dir, move_flags_to_method(flags), TRUE)) {
+	if (!enter_triggers(ch, dir, move_flags_to_method(flags), TRUE, was_in)) {
 		char_from_room(ch);
 		char_to_room(ch, was_in);
 		return FALSE;
@@ -1618,7 +1618,7 @@ bool do_simple_move(char_data *ch, int dir, room_data *to_room, bitvector_t flag
 	}
 	
 	// greet trigger section: this can send the player back
-	if (!greet_triggers(ch, dir, move_flags_to_method(flags), TRUE)) {
+	if (!greet_triggers(ch, dir, move_flags_to_method(flags), TRUE, was_in)) {
 		char_from_room(ch);
 		char_to_room(ch, was_in);
 		look_at_room(ch);
@@ -2207,7 +2207,7 @@ ACMD(do_circle) {
 	}
 	
 	// lastly, check pre-greet trigs
-	if (!pre_greet_mtrigger(ch, found_room, dir, "move")) {
+	if (!pre_greet_mtrigger(ch, found_room, dir, "move", was_in)) {
 		return;
 	}
 	
@@ -2235,7 +2235,7 @@ ACMD(do_circle) {
 	char_from_room(ch);
 	char_to_room(ch, found_room);
 	
-	if (!enter_triggers(ch, dir, "move", TRUE)) {
+	if (!enter_triggers(ch, dir, "move", TRUE, was_in)) {
 		char_from_room(ch);
 		char_to_room(ch, was_in);
 		return;
@@ -2249,7 +2249,7 @@ ACMD(do_circle) {
 	command_lag(ch, WAIT_MOVEMENT);
 	
 	// triggers?
-	if (!greet_triggers(ch, dir, "move", TRUE)) {
+	if (!greet_triggers(ch, dir, "move", TRUE, was_in)) {
 		char_from_room(ch);
 		char_to_room(ch, was_in);
 		if (ch->desc) {

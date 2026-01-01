@@ -43,6 +43,7 @@ ACMD(do_weather);
 void mudstats_configs(char_data *ch, char *argument);
 void mudstats_empires(char_data *ch, char *argument);
 void mudstats_time(char_data *ch, char *argument);
+void mudstats_world(char_data *ch, char *argument);
 
 // local protos
 void list_one_char(char_data *i, char_data *ch, int num);
@@ -2240,12 +2241,17 @@ char *get_obj_desc(obj_data *obj, char_data *ch, int mode) {
 void list_obj_to_char(obj_data *list, char_data *ch, int mode, bool show_empty, bool use_page_display) {
 	char buf[MAX_STRING_LENGTH];
 	obj_data *i, *j = NULL;
-	bool found = FALSE;
+	bool found = FALSE, hide_keep = FALSE;
 	int num;
 	
 	DL_FOREACH2(list, i, next_content) {
 		num = 0;
 		
+		if (mode == OBJ_DESC_INVENTORY && !IS_NPC(ch) && PRF_FLAGGED(ch, PRF_HIDE_KEEP) && OBJ_FLAGGED(i, OBJ_KEEP)) {
+			// skip keep
+			hide_keep = TRUE;
+			continue;
+		}
 		if (OBJ_CAN_STACK(i)) {
 			// look for a previous matching item
 			
@@ -2302,9 +2308,15 @@ void list_obj_to_char(obj_data *list, char_data *ch, int mode, bool show_empty, 
 	if (!found && show_empty) {
 		if (use_page_display) {
 			build_page_display_str(ch, " Nothing.");
+			if (hide_keep && !IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+				build_page_display_str(ch, " (Use 'inventory -k' to see items with keep flags)");
+			}
 		}
 		else {
 			send_to_char(" Nothing.\r\n", ch);
+			if (hide_keep && !IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+				msg_to_char(ch, " (Use 'inventory -k' to see items with keep flags)\r\n");
+			}
 		}
 	}
 }
@@ -2399,10 +2411,10 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 	
 	if (mode == OBJ_DESC_INVENTORY || (mode == OBJ_DESC_LONG && CAN_WEAR(obj, ITEM_WEAR_TAKE))) {
 		if (can_get_quest_from_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s quest available%s", (*tags ? "," : ""), PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (start)");
+			sprintf(tags + strlen(tags), "%s quest start", (*tags ? "," : ""));
 		}
 		if (can_turn_quest_in_to_obj(ch, obj, NULL)) {
-			sprintf(tags + strlen(tags), "%s finished quest%s", (*tags ? "," : ""), PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (finish)");
+			sprintf(tags + strlen(tags), "%s finished quest", (*tags ? "," : ""));
 		}
 	}
 	
@@ -3657,8 +3669,14 @@ ACMD(do_inventory) {
 		build_page_display(ch, "You are carrying %d/%d items:", IS_CARRYING_N(ch), CAN_CARRY_N(ch));
 		list_obj_to_char(ch->carrying, ch, OBJ_DESC_INVENTORY, TRUE, TRUE);
 
+		// empire inventory
 		if (GET_LOYALTY(ch)) {
 			show_local_einv(ch, IN_ROOM(ch), FALSE, TRUE);
+		}
+		
+		// home info
+		if (!IS_NPC(ch) && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS) && ROOM_PRIVATE_OWNER(HOME_ROOM(IN_ROOM(ch))) == GET_IDNUM(ch)) {
+			build_page_display_str(ch, "\r\nUse 'home inventory' to see your unique item storage.");
 		}
 		
 		send_page_display(ch);
@@ -4143,6 +4161,7 @@ ACMD(do_mudstats) {
 		{ "configs", mudstats_configs },
 		{ "empires", mudstats_empires },
 		{ "time", mudstats_time },
+		{ "world", mudstats_world },
 		
 		// last
 		{ "\n", NULL }
@@ -4594,7 +4613,7 @@ ACMD(do_survey) {
 	
 	msg_to_char(ch, "You survey the area:\r\n");
 	
-	if ((island = GET_ISLAND(IN_ROOM(ch)))) {
+	if (!RMT_FLAGGED(IN_ROOM(ch), RMT_NO_LOCATION) && (island = GET_ISLAND(IN_ROOM(ch)))) {
 		// find out if it has a local name
 		if (GET_LOYALTY(ch) && island->id != NO_ISLAND && (eisle = get_empire_island(GET_LOYALTY(ch), island->id)) && eisle->name && str_cmp(eisle->name, island->name)) {
 			msg_to_char(ch, "Location: %s (%s)%s%s\r\n", get_island_name_for(island->id, ch), island->name, IS_SET(island->flags, ISLE_NEWBIE) ? " (newbie island)" : "", IS_SET(island->flags, ISLE_CONTINENT) ? " (continent)" : "");
@@ -4608,6 +4627,11 @@ ACMD(do_survey) {
 		ordered_sprintbit(get_climate(IN_ROOM(ch)), climate_flags, climate_flags_order, FALSE, buf);
 		msg_to_char(ch, "Climate: %s\r\n", buf);
 	}
+	
+	if (BASE_SECT(IN_ROOM(ch)) != SECT(IN_ROOM(ch))) {
+		msg_to_char(ch, "Terrain: %s\r\n", GET_SECT_NAME(BASE_SECT(IN_ROOM(ch))));
+	}
+	
 	msg_to_char(ch, "Temperature: %s\r\n", temperature_to_string(get_room_temperature(IN_ROOM(ch))));
 	
 	/* Not currently showing elevation
@@ -4651,7 +4675,7 @@ ACMD(do_survey) {
 	}
 	
 	// mine?
-	if (((HAS_FUNCTION(IN_ROOM(ch), FNC_MINE) || room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_MINE)) || (get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_MINE_GLB_VNUM) > 0 && GET_LOYALTY(ch) && get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_PROSPECT_EMPIRE) == EMPIRE_VNUM(GET_LOYALTY(ch)))) && can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED)) {
+	if (((HAS_FUNCTION(IN_ROOM(ch), FNC_MINE) || room_has_function_and_city_ok(GET_LOYALTY(ch), IN_ROOM(ch), FNC_MINE)) && (get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_MINE_GLB_VNUM) > 0 && GET_LOYALTY(ch) && get_room_extra_data(IN_ROOM(ch), ROOM_EXTRA_PROSPECT_EMPIRE) == EMPIRE_VNUM(GET_LOYALTY(ch)))) && can_use_room(ch, IN_ROOM(ch), GUESTS_ALLOWED)) {
 		show_prospect_result(ch, IN_ROOM(ch));
 	}
 	

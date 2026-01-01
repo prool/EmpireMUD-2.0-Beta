@@ -1,5 +1,5 @@
 #9600
-SCF Script Fight: Setup dodge, interrupt, struggle (needs 9601, 9604)~
+SCF Script Fight: Setup dodge, interrupt, struggle, duck, jump (needs 9601, 9604)~
 0 c 0 4
 L c 9602
 L f 9601
@@ -11,16 +11,16 @@ scfight~
 *    diff is set automatically by script 9604 unless you set it ahead of time,
 *    for example to make scripts harder on 'normal' trash mobs in a dungeon.
 * To initialize or clear data:
-*    scfight clear <all | dodge | interrupt | struggle>
+*    scfight clear <all | dodge | interrupt | struggle | duck | jump>
 * To set up players for a response command:
-*    scfight setup <dodge | interrupt | struggle> <all | player>
+*    scfight setup <dodge | interrupt | struggle | duck | jump> <all | player>
 * Optional vars you can set on the mob (remote them to the mob):
 *    set scf_dodge_mode [leap | roll | swim]  * dodge messaging modes
 * Optional vars you can set on the player (remote them to the player):
 *    set scf_strug_char <string>  * shown to self when struggling
-*    set scf_strug_room <string>  * to room when struggling
+*    set scf_strug_room <string>  * to room when struggling, use %%actor%% var
 *    set scf_free_char <string>  * to self when I get free
-*    set scf_free_room <string>  * to room when I get free
+*    set scf_free_room <string>  * to room when I get free, use %%actor%% var
 * To ensure nobody else is also acting:
 *    scfight lockout <cooldown vnum> <my cooldown> <everyone else's cooldown>
 if %actor% != %self%
@@ -32,7 +32,7 @@ set mode %arg.car%
 set arg %arg.cdr%
 if %mode% == clear
   * Clear data
-  * usage: scfight clear <all | dodge | interrupt | struggle>
+  * usage: scfight clear <all | dodge | interrupt | struggle | duck | jump>
   set ch %self.room.people%
   while %ch%
     if %arg% == dodge || %arg% == all
@@ -47,6 +47,14 @@ if %mode% == clear
       dg_affect #9602 %ch% off
       rdelete did_scfstruggle %ch.id%
       rdelete needs_scfstruggle %ch.id%
+    end
+    if %arg% == duck || %arg% == all
+      rdelete did_scfduck %ch.id%
+      rdelete needs_scfduck %ch.id%
+    end
+    if %arg% == jump || %arg% == all
+      rdelete did_scfjump %ch.id%
+      rdelete needs_scfjump %ch.id%
     end
     set ch %ch.next_in_room%
   done
@@ -68,9 +76,21 @@ if %mode% == clear
     remote count_scfstruggle %self.id%
     remote wants_scfstruggle %self.id%
   end
+  if %arg% == duck || %arg% == all
+    set count_scfduck 0
+    set wants_scfduck 0
+    remote count_scfduck %self.id%
+    remote wants_scfduck %self.id%
+  end
+  if %arg% == jump || %arg% == all
+    set count_scfjump 0
+    set wants_scfjump 0
+    remote count_scfjump %self.id%
+    remote wants_scfjump %self.id%
+  end
 elseif %mode% == setup
   * Prepare for a response
-  * usage: scfight setup <dodge | interrupt | struggle> <all | player>
+  * usage: scfight setup <dodge | interrupt | struggle | duck | jump> <all | player>
   set diff %self.var(diff,1)%
   set type %arg.car%
   set arg %arg.cdr%
@@ -148,15 +168,17 @@ elseif %mode% == lockout
 end
 ~
 #9601
-SCF Script Fight: Player dodges, interrupts~
-0 c 0 4
+SCF Script Fight: Player dodges, interrupts, duck, jumpss~
+0 c 0 6
 L f 9600
 L f 9604
 L w 9600
 L w 9601
-dodge interrupt~
+L w 9604
+L w 9605
+dodge interrupt duck jump~
 * Also requires triggers 9600 and 9604
-* handles dodge, interrupt
+* handles dodge, interrupt, duck, jump
 return 1
 if dodge /= %cmd%
   set type dodge
@@ -168,6 +190,12 @@ elseif interrupt /= %cmd%
   end
   set type interrupt
   set past interrupted
+elseif duck /= %cmd%
+  set type duck
+  set past ducked
+elseif jump /= %cmd%
+  set type jump
+  set past jumped
 else
   return 0
   halt
@@ -195,6 +223,12 @@ if %actor.affect(9600)%
   halt
 elseif %actor.affect(9601)%
   %send% %actor% You're still distracted from that last interrupt.
+  halt
+elseif %actor.affect(9604)%
+  %send% %actor% You're still distracted from last time you ducked.
+  halt
+elseif %actor.affect(9605)%
+  %send% %actor% You're still recovering from the last jump.
   halt
 end
 * setup
@@ -235,6 +269,14 @@ if %no_need%
     %send% %actor% You look for something to interrupt...
     %echoaround% %actor% ~%actor% looks around for something...
     dg_affect #9601 %actor% DODGE -%penalty% 20
+  elseif %type% == duck
+    %send% %actor% You duck below... nothing! You look around trying to figure out what's going on.
+    %echoaround% %actor% ~%actor% ducks, for no particular reason.
+    dg_affect #9604 %actor% DODGE -%penalty% 20
+  elseif %type% == jump
+    %send% %actor% You jump over nothing and manage to fall in the process.
+    %echoaround% %actor% ~%actor% jumps over nothing and falls to the ground.
+    dg_affect #9605 %actor% DODGE -%penalty% 20
   end
   halt
 end
@@ -263,6 +305,12 @@ if %type% == dodge
 elseif %type% == interrupt
   %send% %actor% You prepare to interrupt ~%self%...
   %echoaround% %actor% ~%actor% prepares to interrupt ~%self%...
+elseif %type% == duck
+  %send% %actor% You duck!
+  %echoaround% %actor% ~%actor% ducks!
+elseif %type% == jump
+  %send% %actor% You prepare to jump...
+  %echoaround% %actor% ~%actor% prepares to jump...
 end
 ~
 #9602
@@ -375,6 +423,142 @@ else
   rdelete did_scfinterrupt %actor.id%
   rdelete needs_scfinterrupt %actor.id%
 end
+if %self.var(wants_scfduck,0)%
+  scfight setup duck %actor%
+else
+  rdelete did_scfduck %actor.id%
+  rdelete needs_scfduck %actor.id%
+end
+if %self.var(wants_scfjump,0)%
+  scfight setup jump %actor%
+else
+  rdelete did_scfjump %actor.id%
+  rdelete needs_scfjump %actor.id%
+end
+~
+#9608
+SCF Script Fight: Fight move controller using script4 (needs 9601, 9604)~
+0 k 100 4
+L f 9600
+L f 9601
+L f 9604
+L w 9600
+~
+* Requires SCF triggers 9601, 9604, and possibly 9600
+* Set the list of commands as script4 with spaces between them like 'bash kick special'
+* Each command in that list will be called with %actor% as the first arg
+if %self.cooldown(9603)% || %self.disabled%
+  halt
+end
+* detect moves
+set moves_left %self.var(moves_left,)%
+if !%moves_left%
+  set moves_left %self.custom(script4)%
+  if !%moves_left%
+    %log% syslog Trigger 9609 on mob %self.vnum% has no move list in script4.
+  end
+end
+* detect count
+set num_left %self.var(num_left,)%
+if !%num_left%
+  set list %moves_left%
+  set num_left 0
+  while %list%
+    eval num_left %num_left% + 1
+    set list %list.cdr%
+  done
+end
+* pick
+eval which %%random.%num_left%%%
+set old %moves_left%
+set moves_left
+set move 0
+while %which% > 0
+  set move %old.car%
+  if %which% != 1
+    set moves_left %moves_left% %move%
+  end
+  set old %old.cdr%
+  eval which %which% - 1
+done
+set moves_left %moves_left% %old%
+* store
+eval num_left %num_left% - 1
+remote moves_left %self.id%
+remote num_left %self.id%
+* very short delay
+set id %self.id%
+set actor_id %actor.id%
+wait 1
+if !%actor% || %actor.id% != %actor_id% || %self.id% != %id% || %self.disabled%
+  * lost it
+  halt
+end
+* perform move
+scfight lockout 9603 30 35
+%move% %actor%
+~
+#9609
+SCF Script Fight: Fight move controller using script5 (needs 9601, 9604)~
+0 k 100 4
+L f 9600
+L f 9601
+L f 9604
+L w 9600
+~
+* Requires SCF triggers 9601, 9604, and possibly 9600
+* Set the list of commands as script5 with spaces between them like 'bash kick special'
+* Each command in that list will be called with %actor% as the first arg
+if %self.cooldown(9603)% || %self.disabled%
+  halt
+end
+* detect moves
+set moves_left %self.var(moves_left,)%
+if !%moves_left%
+  set moves_left %self.custom(script5)%
+  if !%moves_left%
+    %log% syslog Trigger 9609 on mob %self.vnum% has no move list in script5.
+  end
+end
+* detect count
+set num_left %self.var(num_left,)%
+if !%num_left%
+  set list %moves_left%
+  set num_left 0
+  while %list%
+    eval num_left %num_left% + 1
+    set list %list.cdr%
+  done
+end
+* pick
+eval which %%random.%num_left%%%
+set old %moves_left%
+set moves_left
+set move 0
+while %which% > 0
+  set move %old.car%
+  if %which% != 1
+    set moves_left %moves_left% %move%
+  end
+  set old %old.cdr%
+  eval which %which% - 1
+done
+set moves_left %moves_left% %old%
+* store
+eval num_left %num_left% - 1
+remote moves_left %self.id%
+remote num_left %self.id%
+* very short delay
+set id %self.id%
+set actor_id %actor.id%
+wait 1
+if !%actor% || %actor.id% != %actor_id% || %self.id% != %id% || %self.disabled%
+  * lost it
+  halt
+end
+* perform move
+scfight lockout 9603 30 35
+%move% %actor%
 ~
 #9620
 Storytime using script1-5~

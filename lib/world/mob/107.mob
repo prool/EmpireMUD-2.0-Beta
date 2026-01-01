@@ -4,7 +4,7 @@ a reindeer~
 A flying reindeer prances above the ground.
 ~
 30 70 dej m 4
-0 0 2 27 -1 -1
+0 0 2 40 -1 -1
 D
 This stunning slate-gray reindeer is hovering a few feet above the ground!
 ~
@@ -161,7 +161,7 @@ a reindeer~
 A reindeer raises its head from grazing.
 ~
 30 70 dej 0 4
-0 0 14 27 -1 -1
+0 0 14 40 -1 -1
 D
 The reindeer is a beautiful slate-gray color, with long, strong antlers.
 ~
@@ -751,7 +751,7 @@ a great buffalo~
 A great buffalo grazes below the green boughs.
 ~
 100 125 dejo 0 4
-0 0 0 27 -1 -1
+0 0 0 42 -1 -1
 D
    This majestic animal stands head and shoulders above you. Its shaggy
 shoulders look like a mountain from down here, and its short horns are plenty
@@ -768,7 +768,7 @@ an armored war buffalo~
 An armored war buffalo is grazing under heavy armor.
 ~
 200 225 bdejo 0 4
-0 0 0 27 -1 -1
+0 0 0 42 -1 -1
 D
    This majestic armored animal stands head and shoulders above you. Its shaggy
 shoulders look like a mountain from down here, and its short horns are plenty

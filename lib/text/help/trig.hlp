@@ -370,6 +370,7 @@ Variables:
   &c%actor%&0 - The character entering the room.
   &c%direction%&0 - The direction the character came from, or 'none'.
   &c%method%&0 - Type of movement (see METHOD LIST).
+  &c%was_in&0 - Room the character was in before, if any (may be empty).
 
 You can add the "Player-in-Room" modifier.
 
@@ -502,6 +503,7 @@ Note: Entry triggers attached to charmed mobs will not fire unless the trigger
 
 Variables:
   &c%method%&0 - Type of movement (see METHOD LIST).
+  &c%was_in&0 - Room the character was in before, if any (may be empty).
 
 You can add the "Player-in-Room" modifier.
 
@@ -567,6 +569,7 @@ Variables:
   &c%actor%&0 - The character entering the room.
   &c%direction%&0 - The direction the character came from, or 'none'.
   &c%method%&0 - Type of movement (see METHOD LIST).
+  &c%was_in&0 - Room the character was in before, if any (may be empty).
 
 You can add the "Player-in-Room" modifier. However, this will make the trigger
 fire only when a player is ALREADY in the room with the pre-greet trigger.
@@ -812,6 +815,8 @@ When using field - The variable returns
 &ccontains()&0 - Subfield used for comparison.
 &cindex_of(char)&0 - Returns the first position of a given character in the
    string, or -1 if it's not found.
+&csubstr(start,length)&0 - Returns the substring starting at position 'start'
+   and (optionally) cut to a length of 'length'.
 &cempty&0 - Return true if the variable is an empty string or only contains '0'.
 &cmudcommand&0 - Returns the mud command the string is shorthand for. Used to make 
    sure the command you react to is the one you want: For %text%="o"

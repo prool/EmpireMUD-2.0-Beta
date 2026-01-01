@@ -574,6 +574,7 @@ void show_string(descriptor_data *d, char *input) {
 	/* Q is for quit. :) */
 	if (LOWER(*buf) == 'q') {
 		free(d->showstr_vector);
+		d->showstr_vector = NULL;
 		d->showstr_count = 0;
 		if (d->showstr_head) {
 			free(d->showstr_head);
@@ -613,6 +614,7 @@ void show_string(descriptor_data *d, char *input) {
 	if (d->showstr_page + 1 >= d->showstr_count) {
 		send_to_char(d->showstr_vector[d->showstr_page], d->character);
 		free(d->showstr_vector);
+		d->showstr_vector = NULL;
 		d->showstr_count = 0;
 		if (d->showstr_head) {
 			free(d->showstr_head);

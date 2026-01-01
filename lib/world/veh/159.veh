@@ -86,7 +86,7 @@ above. Perhaps surprisingly, the area beneath the tent is an orderly collection
 of foods of all types, from canned fruit to smoked meat.
 ~
 @.&0MM&?@.~
-hmuw 19 10 0 0 0 0 0 2 fw -1 0
+hmuwP 19 10 0 0 0 0 0 2 fw -1 0
 B0
 &0MM~
 B1
@@ -120,7 +120,7 @@ open at the sides, but the top is stitched tight to prevent any of it from
 getting wet.
 ~
 @.&0MM&?@.~
-hmuw 19 10 0 0 0 0 0 4 fw -1 0
+hmuwP 19 10 0 0 0 0 0 4 fw -1 0
 B0
 &0MM~
 B1
@@ -194,7 +194,7 @@ neatly for all to see. Though it's clearly goblincraft, it's in much better
 condition than most goblin items you come across.
 ~
 @.&0MM&?@.~
-hmuw 19 10 0 0 0 0 0 2 fw -1 0
+hmuwP 19 10 0 0 0 0 0 2 fw -1 0
 B0
 &0MM~
 B1

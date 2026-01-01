@@ -239,6 +239,9 @@ switch %self.vnum%
   break
   case 16680
   break
+  case 16688
+    %echo% ~%self% says, 'Ho, ho,' over and over, fainter each time, as he powers down.
+  break
 done
 set person %self.room.people%
 while %person%
@@ -426,7 +429,7 @@ xmas tree chopping~
 1 c 2 0
 chop~
 * config valid sects (must also update trig 16609)
-set valid_sects 4 26 45 54 71 72 80 81 89 104 145 154 210 224 232 220 221 602 603 604 612 613 614 617 618 10562 10563 10564 10565 11989 11990 11991 16698 16699
+set valid_sects 4 26 45 54 71 72 79 80 81 89 104 145 154 210 224 232 220 221 602 603 604 612 613 614 617 618 10562 10563 10564 10565 11989 11990 11991 16698 16699
 return 0
 if %actor.inventory(16606)%
   %send% %actor% You really should get this tree back to your city center and plant it.
@@ -473,7 +476,7 @@ if !(%valid_tree_types% ~= %tree_type%)
 end
 * chances of success: each entry should end in a colon
 set 30_percent_sects 4: 26: 71: 10562: 10563:
-set 40_percent_sects 72: 210: 220: 221: 224: 232: 45: 54: 602: 612: 10564:
+set 40_percent_sects 72: 79: 89: 210: 220: 221: 224: 232: 45: 54: 602: 612: 10564:
 set 50_percent_sects 603: 613:
 set 60_percent_sects 604: 614: 10565:
 set 100_percent_sects 16698: 16699:
@@ -1039,16 +1042,25 @@ if %actor.on_quest(16618)%
   set questnum 16618
   set horse_list horse warhose
   set camel_list camel warcamel
-  if %target.is_pc% || !(%horse_list% ~= %target.pc_name.car% || %camel_list% ~= %target.pc_name.car%)
-    %send% %actor% You're going to need a horse or camel for this outfit.
+  set zebu_list zebu
+  set buffalo_list buffalo
+  * 2-step name-shortening because '-' in the pc_name can cause this to fail when chained
+  set check %target.pc_name%
+  set check %check.car%
+  if %target.is_pc%
+    %send% %actor% You're going to need a horse, camel, buffalo, or zebu for this outfit.
     halt
+  elseif %horse_list% ~= %check%
+    set morphnum 16618
+  elseif %camel_list% ~= %check%
+    set morphnum 16619
+  elseif %zebu_list% ~= %check%
+    set morphnum 16620
+  elseif %buffalo_list% ~= %check%
+    set morphnum 16621
   else
-    * determine morph num
-    if (%horse_list% ~= %target.pc_name.car%)
-      set morphnum 16618
-    else
-      set morphnum 16619
-    end
+    %send% %actor% You're going to need a horse, camel, buffalo, or zebu for this outfit.
+    halt
   end
 end
 %send% %actor% You dress ~%target% with @%self%.
@@ -2663,11 +2675,17 @@ L j 10701
 L w 16654
 use~
 set room %actor.room%
+set time_check %self.var(time_check,0)%
 if %actor.obj_target(%arg.argument1%)% != %self%
   return 0
   halt
 elseif %actor.fighting% || %actor.disabled% || %actor.position% == Sleeping
   %send% %actor% You can't use the winds of winter right now.
+  halt
+elseif %time_check% > 0 && %timestamp% - %time_check% > 950400
+  * 11 days passed
+  %send% %actor% As you go to use the winds of winter, they blow away!
+  %purge% %self%
   halt
 elseif !%actor.can_teleport_room(%room%)%
   %send% %actor% You can't use the winds of winter here.
@@ -2709,6 +2727,11 @@ else
   elseif !%actor.canuseroom_ally(%room%)%
     %send% %actor% You can't use that in this empire's territory.
     halt
+  end
+  * track 1st use time
+  if %time_check% == 0
+    set time_check %timestamp%
+    remote time_check %self.id%
   end
   * ok
   nop %actor.mark_adventure_summoned_from%
@@ -3171,6 +3194,17 @@ switch %random.4%
   break
 done
 ~
+#16662
+Winds of Winter: check time-out and expire~
+1 ab 5 0
+~
+set time_check %self.var(time_check,0)%
+if %time_check% > 0 && %timestamp% - %time_check% > 950400
+  %send% %actor% The winds of winter blow away, right out of your inevntory!
+  %purge% %self%
+  halt
+end
+~
 #16666
 Floating lantern expiry~
 1 f 0 0
@@ -3606,7 +3640,7 @@ end
 * check if mob present
 set ch %room.people%
 while %ch%
-  if (%ch.vnum% == 16613 || %ch.vnum% == 16680)
+  if (%ch.vnum% == 16613 || %ch.vnum% == 16680 || %ch.vnum% == 16688)
     %send% %actor% You better deal with the demon that's already here before invoking another one.
     halt
   end
@@ -3641,13 +3675,16 @@ else
   halt
   return 1
 end
-eval WhichDemon %random.2%
+eval WhichDemon %random.3%
 switch %WhichDemon%
   case 1
     set WhichDemon 16613
   break
   case 2
     set WhichDemon 16680
+  break
+  case 3
+    set WhichDemon 16688
   break
 done
 set cycles_left 3
@@ -3675,6 +3712,8 @@ while %cycles_left% >= 0
         set DemonDesc tall
       elseif %WhichDemon% == 16680
         set DemonDesc broad
+      elseif %WhichDemon% == 16688
+        set DemonDesc wide
       end
       %echo% A shadow of someone or something %DemonDesc% can be seen in the middle of the cave.
     break
@@ -3690,7 +3729,7 @@ done
 %load% mob %WhichDemon%
 %load% obj 16614 room
 set mob %room.people%
-if %mob.vnum% != 16613 && %mob.vnum% != 16680
+if %mob.vnum% != %WhichDemon%
   %echo% Something went wrong...
   halt
 end
@@ -3916,12 +3955,12 @@ elseif %move% == 2 && !%self.aff_flagged(BLIND)%
   * messages
   set scf_strug_char You try to wiggle out of the burlap sack...
   set scf_strug_room You hear ~%%actor%% trying to wiggle out of the burlap sack...
-  remote scf_strug_char %actor.id%
-  remote scf_strug_room %actor.id%
+  remote scf_strug_char %targ.id%
+  remote scf_strug_room %targ.id%
   set scf_free_char You wiggle out of the burlap sack!
   set scf_free_room ~%%actor%% manages to wiggle out of the burlap sack!
-  remote scf_free_char %actor.id%
-  remote scf_free_room %actor.id%
+  remote scf_free_char %targ.id%
+  remote scf_free_room %targ.id%
   set cycle 0
   set done 0
   while %cycle% < 5 && !%done%
@@ -4000,7 +4039,7 @@ elseif %move% == 4
     nop %self.remove_mob_flag(NO-ATTACK)%
     halt
   end
-  if %self.var(sfinterrupt_count,0)% < %requires%
+  if %self.var(count_scfinterrupt,0)% < %requires%
     %echo% &&G**** &&Z~%self% shouts incoherently as the rage builds up within *%self%... ****&&0 (interrupt)
   end
   wait 4 s
@@ -4008,7 +4047,7 @@ elseif %move% == 4
     nop %self.remove_mob_flag(NO-ATTACK)%
     halt
   end
-  if %self.var(sfinterrupt_count,0)% >= %requires%
+  if %self.var(count_scfinterrupt,0)% >= %requires%
     %echo% &&G~%self% is distracted from whatever &%self% was doing... thankfully!&&0
     if %diff% == 1
       dg_affect #16687 %self% HARD-STUNNED on 5
@@ -4036,7 +4075,7 @@ Winter Wonderland: Boss fight tester~
 test~
 return 1
 if !%arg% || !%arg.cdr%
-  %send% %actor% Usage: test <grinch \| krampus> <normal \| hard \| group \| boss>
+  %send% %actor% Usage: test <grinch \| krampus \| santa> <normal \| hard \| group \| boss>
   halt
 end
 * mob?
@@ -4045,8 +4084,10 @@ if grinchy /= %which%
   set vnum 16613
 elseif krampus /= %which%
   set vnum 16680
+elseif santa /= %which%
+  set vnum 16688
 else
-  %send% %actor% Usage: test <grinch \| krampus> <normal \| hard \| group \| boss>
+  %send% %actor% Usage: test <grinch \| krampus \| santa> <normal \| hard \| group \| boss>
   halt
 end
 * diff?
@@ -4060,7 +4101,7 @@ elseif group /= %arg2%
 elseif boss /= %arg2%
   set diff 4
 else
-  %send% %actor% Usage: test <grinch \| krampus> <normal \| hard \| group \| boss>
+  %send% %actor% Usage: test <grinch \| krampus \| santa> <normal \| hard \| group \| boss>
   halt
 end
 * remove old mob?
@@ -4071,6 +4112,11 @@ if %old%
   %purge% %old%
 end
 set old %room.people(16680)%
+if %old%
+  %echo% ~%old% vanishes...
+  %purge% %old%
+end
+set old %room.people(16688)%
 if %old%
   %echo% ~%old% vanishes...
   %purge% %old%
@@ -4207,6 +4253,232 @@ remote empire_list %self.id%
 if %actor.quest_finished(16687)%
   %quest% %actor% finish 16687
 end
+~
+#16688
+Clockwork Santa combat: Naughty List Judgment, Merry Massacre, Tinsel Cannon Snare, Jingleshock~
+0 c 0 7
+L w 9602
+L w 16686
+L w 16687
+L w 16690
+L w 16691
+L w 16692
+L w 16693
+!naughty !merry !tinsel !jingleshock~
+set targ %arg%
+set room %self.room%
+set diff %self.var(diff,1)%
+set cmd %cmd.substr(1)%
+if %actor% != %self% || !%targ% || %targ.id% == %self.id%
+  halt
+elseif %cmd% == naughty
+  * Naughty List Judgment (group dodge)
+  scfight clear dodge
+  %echo% &&G~%self% booms, 'I judge you... naughty! Your mistletoe is no match for my TOW missiles.'&&0
+  eval dodge %diff% * 40
+  dg_affect #16691 %self% DODGE %dodge% 20
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  if %self.disabled%
+    dg_affect #16691 %self% off
+    nop %self.remove_mob_flag(NO-ATTACK)%
+    halt
+  end
+  %echo% &&G**** &&Z|%self% torso opens like a hinge and a cluster of metal barrels poke out... ****&&0 (dodge)
+  set cycle 1
+  set hit 0
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup dodge all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfdodge)%
+          set hit 1
+          %echo% &&GThere's a burst of snow as a missile from |%self% chest explodes into ~%ch%!&&0
+          if !%ch.affect(16690)%
+            dg_affect #16690 %ch% SLOW on 25
+          end
+          %damage% %ch% 100 magical
+        elseif %ch.is_pc%
+          %send% %ch% &&GA missile whizzes over your head, trailing a wire behind it.&&0
+          if %diff% == 1
+            dg_affect #16686 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&G**** It looks like he's about to fire another round... ****&&0 (dodge)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear dodge
+    eval cycle %cycle% + 1
+  done
+  dg_affect #16691 %self% off
+  if !%hit%
+    if %diff% < 3
+      wait 1 s
+      %echo% &&G~%self% stomps around, shouting, 'How could they all miss?!'&&0
+      dg_affect #16687 %self% HARD-STUNNED on 10
+    end
+  end
+  wait 8 s
+elseif %cmd% == merry
+  * Merry Massacre (group duck)
+  scfight clear duck
+  %echo% &&G~%self% booms, 'Ho... ho... ho... Time for a merry massacre!'&&0
+  eval dodge %diff% * 40
+  dg_affect #16692 %self% DODGE %dodge% 20
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  if %self.disabled%
+    dg_affect #16692 %self% off
+    nop %self.remove_mob_flag(NO-ATTACK)%
+    halt
+  end
+  %echo% &&G**** &&ZSaw blades whir out from |%self% arms as &%self% starts to spin! ****&&0 (duck)
+  set cycle 1
+  set hit 0
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup duck all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfduck)%
+          set hit 1
+          %echo% &&G~%self% chuckles as &%self% gashes ~%ch% with the whirring sawblades!&&0
+          %dot% %ch% 100 30 physical 4
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&G~%self% spins past you, sawblades whirring just above your head!&&0
+          if %diff% == 1
+            dg_affect #16686 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&G**** He's not done spinning... The sawblades are coming back toward you! ****&&0 (duck)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear duck
+    eval cycle %cycle% + 1
+  done
+  dg_affect #16692 %self% off
+  if !%hit%
+    if %diff% < 3
+      wait 1 s
+      %echo% &&G~%self% holds ^%self% head in ^%self% hands, saying, 'How could it have gone so wrong?'&&0
+      dg_affect #16687 %self% HARD-STUNNED on 10
+    end
+  end
+  wait 8 s
+elseif %cmd% == tinsel
+  * Tinsel Cannon Snare (struggle)
+  scfight clear struggle
+  %echo% &&G~%self% pulls out an enormous tinsel cannon...&&0
+  wait 3 s
+  if %self.disabled%
+    halt
+  end
+  if %diff% == 1
+    dg_affect #16687 %self% HARD-STUNNED on 20
+  end
+  %echo% &&G**** &&Z~%self% fires tinsel into the air! It wraps around you, snaring you in place! ****&&0 (struggle)
+  set ch %room.people%
+  while %ch%
+    set next_ch %ch.next_in_room%
+    if %self.is_enemy(%ch%)%
+      scfight setup struggle %ch% 20
+      * messages
+      set scf_strug_char You struggle to free yourself from the tinsel...
+      set scf_strug_room ~%%actor%% struggles to free *%%actor%%self from the tinsel...
+      remote scf_strug_char %ch.id%
+      remote scf_strug_room %ch.id%
+      set scf_free_char You cut yourself free of the tinsel!
+      set scf_free_room ~%%actor%% cuts *%%actor%%self free of the tinsel!
+      remote scf_free_char %ch.id%
+      remote scf_free_room %ch.id%
+    end
+    set ch %next_ch%
+  done
+  set cycle 0
+  set count 1
+  while %cycle% < 5 && %count% > 0
+    wait 4 s
+    set count 0
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if %ch.affect(9602)%
+          %send% %ch% &&G**** The tinsel sparks and crackles as it zaps you with lightning! ****&&0 (struggle)
+          %echoaround% %ch% &&G~%ch% jolts as &%ch%'s zapped with lightning by the tinsel!&&0
+          eval count %count% + 1
+        end
+      end
+      set ch %next_ch%
+    done
+    eval cycle %cycle% + 1
+  done
+  scfight clear struggle
+  dg_affect #16687 %self% off
+elseif %cmd% == jingleshock
+  * Jingleshock (interrupt)
+  scfight clear interrupt
+  %echo% &&G**** &&Z~%self% pulls out an enormous bell and shouts, 'Time for a Jingleshock!' ****&&0 (interrupt)
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  scfight setup interrupt all
+  wait 4 s
+  if %self.disabled%
+    nop %self.remove_mob_flag(NO-ATTACK)%
+    halt
+  end
+  if %self.var(count_scfinterrupt,0)% < %room.players_present%
+    %echo% &&G**** &&Z~%self% roars as &%self% prepares to throw the bell... ****&&0 (interrupt)
+  end
+  wait 4 s
+  if %self.disabled%
+    nop %self.remove_mob_flag(NO-ATTACK)%
+    halt
+  end
+  if %self.var(count_scfinterrupt,0)% >= %room.players_present%
+    %echo% &&G~%self% is distracted and drops the jingle bell, which clangs and rolls away!&&0
+    if %diff% == 1
+      dg_affect #16687 %self% HARD-STUNNED on 5
+    end
+    wait 30 s
+  else
+    %echo% &&GThe jingle bell lands near your feet, letting out a deafening jingleshock!&&0
+    eval amount %self.level% / (6 - %diff%)
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        dg_affect #16693 %ch% RESIST-PHYSICAL -%amount% 30
+        dg_affect #16693 %ch% RESIST-MAGICAL -%amount% 30 silent
+        %damage% %ch% 100 direct
+      end
+      set ch %next_ch%
+    done
+  end
+  scfight clear interrupt
+else
+  %echo% &&POops!&&0 ~%targ% %cmd%
+end
+nop %self.remove_mob_flag(NO-ATTACK)%
 ~
 #16690
 feed the vortex~

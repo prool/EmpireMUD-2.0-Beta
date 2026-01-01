@@ -360,11 +360,13 @@ though, wouldn't it?'
 you have firmly established your family's legacy as prized artisans of the
 empire!
 ~
-9 f 100 0 -1
+10 f 100 0 -1
 A
 1 212
 A
 1 278
+A
+1 12800
 P
 9 6 0 51 -
 R
@@ -381,6 +383,8 @@ Z
 1 212
 Z
 1 278
+Z
+1 12800
 S
 #1507
 Vampire: Return After Dark~

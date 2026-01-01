@@ -45,6 +45,25 @@ M
 $p snaps shut!~
 T 12806
 S
+#12809
+lodestone stone small~
+a small lodestone~
+A small lodestone is stuck here.~
+   At first, it's just a dark gray rock. But then you notice it snaps toward
+anything iron and you realize: this is lodestone! Though it resembles iron,
+lodestone is magnetic! This must have myriad uses.
+   The small lodestone is a crafting material for Celestial Ironworking.
+~
+3 0 a 0 0 1
+0 0 0
+2 0
+C
+75 75
+R
+4 5108 0
+R
+4 5115 0
+S
 #12810
 ring lodestone restoration~
 a lodestone ring of restoration~
@@ -52,13 +71,35 @@ A lodestone ring of restoration is lying on the ground.~
    The ring, heavy for its small size, is forged from iron, with silvery
 lodestones embedded around the full circle. You can feel a slight pull whenever
 you get it close to another piece of iron.
-tba
+   A pair of green gemstones have been set into the top of the ring, both cut
+into a trapeze shape and oriented in the same direction to create a shape long-
+associated with healing.
 ~
-2 amo ab 0 0 1
+2 amo ab 0 0 4
 0 0 0
 2 0
+A
+16 2 0
+A
+23 3 0
+A
+15 1 3
 C
 1 100
+T 12811
+S
+#12811
+inspiration lodestone ring of restoration~
+the inspiration for a lodestone ring of restoration~
+The inspiration for a lodestone ring of restoration is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: lodestone ring of restoration, a
+unique ring for healers.
+~
+7 0 a 0 0 1
+12810 0 0
+0 0
 S
 #12812
 earrings restoration lodestone~
@@ -66,13 +107,33 @@ lodestone earrings of restoration~
 Lodestone earrings of restoration are lying here.~
    The earrings have been fashioned from tiny, silvery lodestones suspended
 in the air below iron studs. They seem to pull subtly to the north.
-tba
+   The lodestones glisten bright green as every stray mote of light is caught
+by the gem shards embedded in them.
 ~
-2 mo am 0 0 2
+2 mo am 0 0 3
 0 0 0
 2 0
+A
+8 1 0
+A
+23 2 0
+A
+16 1 3
 C
 1 100
+S
+#12813
+inspiration lodestone earrings of restoration~
+the inspiration for some lodestone earrings of restoration~
+The inspiration for some lodestone earrings of restoration is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: lodestone earrings of restoration,
+earrings for healers.
+~
+7 0 a 0 0 1
+12812 0 0
+0 0
 S
 #12814
 ring lodestone fortitude~
@@ -81,13 +142,34 @@ A lodestone ring of fortitude is lying on the ground.~
    The ring, heavy for its small size, is forged from iron, with silvery
 lodestones embedded around the full circle. You can feel a slight pull whenever
 you get it close to another piece of iron.
-tba
+   An oversized step-cut yellow gem adorns the top of the ring, set over an
+incised diagram of a shield.
 ~
-2 amo ab 0 0 2
+2 amo ab 0 0 4
 0 0 0
 2 0
+A
+15 2 0
+A
+18 3 0
+A
+11 1 3
 C
 1 100
+T 12811
+S
+#12815
+inspiration lodestone ring of fortitude~
+the inspiration for a lodestone ring of fortitude~
+The inspiration for a lodestone ring of fortitude is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: lodestone ring of fortitude, a
+unique ring for tanks.
+~
+7 0 a 0 0 1
+12814 0 0
+0 0
 S
 #12816
 earrings fortitude lodestone~
@@ -95,13 +177,35 @@ lodestone earrings of fortitude~
 Lodestone earrings of fortitude are lying here.~
    The earrings have been fashioned from tiny, silvery lodestones suspended
 in the air below iron studs. They seem to pull subtly to the north.
-tba
+   The iron studs are set with step-cut yellow gems that catch every spare
+flicker of light such that the gleam from any angle.
 ~
-2 mo am 0 0 3
+2 mo am 0 0 4
 0 0 0
 2 0
+A
+2 1 0
+A
+18 1 0
+A
+13 1 0
+A
+15 1 3
 C
 1 100
+S
+#12817
+inspiration lodestone earrings of fortitude~
+the inspiration for some lodestone earrings of fortitude~
+The inspiration for some lodestone earrings of fortitude is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: lodestone earrings of fortitude,
+earrings for tanks.
+~
+7 0 a 0 0 1
+12816 0 0
+0 0
 S
 #12818
 ring lodestone wrath~
@@ -110,13 +214,35 @@ A lodestone ring of wrath is lying on the ground.~
    The ring, heavy for its small size, is forged from iron, with silvery
 lodestones embedded around the full circle. You can feel a slight pull whenever
 you get it close to another piece of iron.
-tba
+   Around the full circumference of the ring, there is a chain of navette-cut
+blood-red gems, all arranged tip-to-tip. When the light catches in the gems,
+they look like glinting drops of blood.
 ~
-2 amo ab 0 0 2
+2 amo ab 0 0 5
 0 0 0
 2 0
+A
+11 2 0
+A
+21 3 0
+A
+15 1 0
 C
 1 100
+T 12811
+S
+#12819
+inspiration lodestone ring of wrath~
+the inspiration for a lodestone ring of wrath~
+The inspiration for a lodestone ring of wrath is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: lodestone ring of wrath, a unique
+ring for melee dps.
+~
+7 0 a 0 0 1
+12818 0 0
+0 0
 S
 #12820
 earrings wrath lodestone~
@@ -124,13 +250,34 @@ lodestone earrings of wrath~
 Lodestone earrings of wrath are lying here.~
    The earrings have been fashioned from tiny, silvery lodestones suspended
 in the air below iron studs. They seem to pull subtly to the north.
-tba
+   Below the lodestones, swinging with them despite being visibly disconnected,
+are a pair of navettte-cut red gems that, when the light strikes them, look
+like falling droplets of blood.
 ~
-2 mo am 0 0 3
+2 mo am 0 0 4
 0 0 0
 2 0
+A
+1 1 0
+A
+21 2 0
+A
+11 1 3
 C
 1 100
+S
+#12821
+inspiration lodestone earrings of wrath~
+the inspiration for some lodestone earrings of wrath~
+The inspiration for some lodestone earrings of wrath is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: lodestone earrings of wrath,
+earrings for melee dps.
+~
+7 0 a 0 0 1
+12820 0 0
+0 0
 S
 #12822
 ring lodestone arcana~
@@ -139,13 +286,35 @@ A lodestone ring of arcana is lying on the ground.~
    The ring, heavy for its small size, is forged from iron, with silvery
 lodestones embedded around the full circle. You can feel a slight pull whenever
 you get it close to another piece of iron.
-tba
+   In an iron setting on top of the ring, there is a single, large, radiant-cut
+gem in such a deep blue color that light seems to vanish into it with only the
+briefest twinkle.
 ~
-2 amo ab 0 0 2
+2 amo ab 0 0 4
 0 0 0
 2 0
+A
+16 2 0
+A
+22 3 0
+A
+15 1 3
 C
 1 100
+T 12811
+S
+#12823
+inspiration lodestone ring of arcana~
+the inspiration for a lodestone ring of arcana~
+The inspiration for a lodestone ring of arcana is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: lodestone ring of arcana, a unique
+ring for caster dps.
+~
+7 0 a 0 0 1
+12822 0 0
+0 0
 S
 #12824
 earrings arcana lodestone~
@@ -153,13 +322,33 @@ lodestone earrings of arcana~
 Lodestone earrings of arcana are lying here.~
    The earrings have been fashioned from tiny, silvery lodestones suspended
 in the air below iron studs. They seem to pull subtly to the north.
-tba
+   Both lodestones are attached to pendulous pampel-cut blue gem, deeper than
+a sapphire, which glints now and then when the light strikes it just right.
 ~
-2 mo am 0 0 3
+2 mo am 0 0 4
 0 0 0
 2 0
+A
+8 1 0
+A
+22 2 0
+A
+16 1 3
 C
 1 100
+S
+#12825
+inspiration lodestone earrings of arcana~
+the inspiration for some lodestone earrings of arcana~
+The inspiration for some lodestone earrings of arcana is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: lodestone earrings of arcana,
+earrings for caster dps.
+~
+7 0 a 0 0 1
+12824 0 0
+0 0
 S
 #12826
 ring lodestone valor~
@@ -168,13 +357,37 @@ A lodestone ring of valor is lying on the ground.~
    The ring, heavy for its small size, is forged from iron, with silvery
 lodestones embedded around the full circle. You can feel a slight pull whenever
 you get it close to another piece of iron.
-tba
+   The inner rim of the ring is studded with fragments of gemstone that catch
+the light only when there's no finger present. When worn, the gems dig slightly
+into the skin.
 ~
-2 amo ab 0 0 2
+2 amo ab 0 0 6
 0 0 0
 2 0
+A
+11 1 0
+A
+6 1 0
+A
+19 2 0
+A
+15 1 3
 C
 1 100
+T 12811
+S
+#12827
+inspiration lodestone ring of valor~
+the inspiration for a lodestone ring of valor~
+The inspiration for a lodestone ring of valor is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: lodestone ring of valor, a unique
+ring for overseers and laborers.
+~
+7 0 a 0 0 2
+12826 0 0
+0 0
 S
 #12828
 earrings valor lodestone~
@@ -182,12 +395,171 @@ lodestone earrings of valor~
 Lodestone earrings of valor are lying here.~
    The earrings have been fashioned from tiny, silvery lodestones suspended
 in the air below iron studs. They seem to pull subtly to the north.
-tba
+   Tiny gem fragments circle the lodestones in the air, flickering as they spin
+in the light.
 ~
-2 mo am 0 0 3
+2 mo am 0 0 5
+0 0 0
+2 0
+A
+15 1 0
+A
+19 1 0
+A
+11 1 0
+A
+27 1 3
+C
+1 100
+S
+#12829
+inspiration lodestone earrings of valor~
+the inspiration for some lodestone earrings of valor~
+The inspiration for some lodestone earrings of valor is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: lodestone earrings of valor. These
+earrings are made for overseers and laborers of the empire.
+~
+7 0 a 0 0 2
+12828 0 0
+0 0
+S
+#12830
+wreath lodestone~
+a lodestone wreath~
+A lodestone wreath is stuck to the ground.~
+   Dozens of tiny iron lodestones stick together in the shape of a wreath.
+Each stone can be pulled free with some effort, but they snap back to the
+wreath as if drawn by a mystic force. When worn on the head, it hovers slightly
+above, and makes you feel lighter.
+~
+2 mo ae 0 0 3
+0 0 0
+2 0
+A
+5 1 0
+A
+19 1 3
+C
+1 100
+S
+#12831
+inspiration lodestone wreath~
+the lodestone wreath inspiration~
+The lodestone wreath inspiration is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: lodestone wreath, a majestic piece
+of headwear that boosts your Greatness.
+~
+7 0 a 0 0 1
+12830 0 0
+0 0
+S
+#12832
+whistle minipet firefly lodestone~
+a lodestone firefly minipet whistle~
+A lodestone firefly minipet whistle is lying here.~
+   The little tube whistle is made from silvery gray lodestone, and seems to
+stick to any iron it's placed near. It can summon a lodestone firefly.
+   Type 'use whistle' to permanently add a new non-combat minipet to your list.
+You can have one minipet out at a time; type 'minipets' to list, manage, and
+summon one of your minipets.
+~
+19 p a 0 0 6
+12832 0 0
+2 0
+C
+1 1
+S
+#12834
+companion plated iron elemental~
+a plated iron elemental companion~
+A plated iron elemental companion is here.~
+Buys or adds tanking to your temporary companion.
+TBA write description for list id. Temporary companions are incomplete.
+~
+3 p a 0 0 1
 0 0 0
 2 0
 C
-1 100
+125 125
+T 12834
+S
+#12835
+companion jagged iron elemental~
+a jagged iron elemental companion~
+A jagged iron elemental companion is here.~
+Buys or adds melee attacks to your temporary companion.
+TBA write description for list id. Temporary companions are incomplete.
+~
+3 p a 0 0 2
+0 0 0
+2 0
+C
+125 125
+T 12834
+S
+#12836
+companion magnetic iron elemental~
+a magnetic iron elemental companion~
+A magnetic iron elemental is here.~
+Buys or adds magic to your temporary companion.
+TBA write description for list id. Temporary companions are incomplete.
+~
+3 p a 0 0 3
+0 0 0
+2 0
+C
+125 125
+T 12834
+S
+#12837
+inspiration iron training dummy~
+the iron training dummy inspiration~
+The iron training dummy inspiration is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to forge: iron training dummy. This dummy
+is for training combat abilities for levels 1-100.
+~
+7 0 a 0 0 1
+12838 0 0
+0 0
+S
+#12838
+kit training iron dummy~
+an iron training dummy kit~
+An iron training dummy kit is lying here.~
+   The kit has lumber, crude iron armor, and a heavy base. You can set up this
+kit to use for combat training for a short time. It will expire if you defeat
+it in combat, or will expire after a certain number of hours.
+   Type 'use dummy' to set this up for combat training.
+~
+3 e a 0 0 3
+12838 0 0
+2 0
+C
+1 1
+M
+33
+Type 'use dummy' to set this up for combat training.~
+R
+4 5171 0
+T 12838
+S
+#12839
+inspiration iron age chariot~
+the iron age chariot inspiration~
+The iron age chariot inspiration is on the ground.~
+   You find yourself inspired by the blacksmiths of old, who hammered away for
+long hours in their hot forges to shape sturdy iron.
+   This inspiration will teach you to craft: iron age chariot, a small vehicle
+for one rider with two animals.
+~
+7 0 a 0 0 1
+12839 0 0
+0 0
 S
 $

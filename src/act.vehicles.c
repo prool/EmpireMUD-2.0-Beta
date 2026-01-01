@@ -352,9 +352,9 @@ bool move_vehicle(char_data *ch, vehicle_data *veh, int dir, int subcmd) {
 			act(buf, FALSE, VEH_SITTING_ON(veh), NULL, veh, TO_CHAR | ACT_VEH_VICT);
 		}
 		
-		pre_greet_mtrigger(VEH_SITTING_ON(veh), to_room, dir, "move");	// cannot pre-greet for this
-		enter_triggers(VEH_SITTING_ON(veh), dir, "move", FALSE);
-		greet_triggers(VEH_SITTING_ON(veh), dir, "move", FALSE);
+		pre_greet_mtrigger(VEH_SITTING_ON(veh), to_room, dir, "move", was_in);	// cannot pre-greet for this
+		enter_triggers(VEH_SITTING_ON(veh), dir, "move", FALSE, was_in);
+		greet_triggers(VEH_SITTING_ON(veh), dir, "move", FALSE, was_in);
 		msdp_update_room(VEH_SITTING_ON(veh));
 		
 		LL_FOREACH_SAFE(VEH_SITTING_ON(veh)->followers, fol, next_fol) {
@@ -526,6 +526,8 @@ bool perform_put_obj_in_vehicle(char_data *ch, obj_data *obj, vehicle_data *veh)
 * @param room_data *to_room Where to put the item in cont.
 */
 void perform_load_mob(char_data *ch, char_data *mob, vehicle_data *cont, room_data *to_room) {
+	room_data *was_in = IN_ROOM(mob);
+	
 	safe_snprintf(buf, sizeof(buf), "You load $N %sto $v.", IN_OR_ON(cont));
 	act(buf, FALSE, ch, cont, mob, TO_CHAR | ACT_VEH_OBJ);
 	safe_snprintf(buf, sizeof(buf), "$n loads you %sto $v.", IN_OR_ON(cont));
@@ -534,7 +536,7 @@ void perform_load_mob(char_data *ch, char_data *mob, vehicle_data *cont, room_da
 	act(buf, FALSE, ch, cont, mob, TO_NOTVICT | ACT_VEH_OBJ);
 	
 	char_to_room(mob, to_room);
-	pre_greet_mtrigger(mob, IN_ROOM(mob), NO_DIR, "enter");	// cannot pre-greet for this
+	pre_greet_mtrigger(mob, IN_ROOM(mob), NO_DIR, "enter", was_in);	// cannot pre-greet for this
 	if (mob->desc) {
 		look_at_room(mob);
 	}
@@ -547,8 +549,8 @@ void perform_load_mob(char_data *ch, char_data *mob, vehicle_data *cont, room_da
 	safe_snprintf(buf, sizeof(buf), "$n is loaded %sto $V.", IN_OR_ON(cont));
 	act(buf, FALSE, mob, NULL, cont, TO_ROOM | ACT_VEH_VICT);
 	
-	enter_triggers(mob, NO_DIR, "enter", FALSE);
-	greet_triggers(mob, NO_DIR, "enter", FALSE);
+	enter_triggers(mob, NO_DIR, "enter", FALSE, was_in);
+	greet_triggers(mob, NO_DIR, "enter", FALSE, was_in);
 	msdp_update_room(mob);	// is this possibly a person?
 }
 
@@ -587,12 +589,14 @@ void perform_load_vehicle(char_data *ch, vehicle_data *veh, vehicle_data *cont, 
 * @param vehicle_data *cont The containing vehicle.
 */
 void perform_unload_mob(char_data *ch, char_data *mob, vehicle_data *cont) {
+	room_data *was_in = IN_ROOM(mob);
+	
 	act("You unload $N from $v.", FALSE, ch, cont, mob, TO_CHAR | ACT_VEH_OBJ);
 	act("$n unloads you from $v.", FALSE, ch, cont, mob, TO_VICT | ACT_VEH_OBJ);
 	act("$n unloads $N from $v.", FALSE, ch, cont, mob, TO_NOTVICT | ACT_VEH_OBJ);
 	
 	char_to_room(mob, IN_ROOM(cont));
-	pre_greet_mtrigger(mob, IN_ROOM(mob), NO_DIR, "exit");	// cannot pre-greet for this
+	pre_greet_mtrigger(mob, IN_ROOM(mob), NO_DIR, "exit", was_in);	// cannot pre-greet for this
 	if (mob->desc) {
 		look_at_room(mob);
 	}
@@ -604,8 +608,8 @@ void perform_unload_mob(char_data *ch, char_data *mob, vehicle_data *cont) {
 	
 	act("$n is unloaded from $V.", FALSE, mob, NULL, cont, TO_ROOM | ACT_VEH_VICT);
 	
-	enter_triggers(mob, NO_DIR, "exit", FALSE);
-	greet_triggers(mob, NO_DIR, "exit", FALSE);
+	enter_triggers(mob, NO_DIR, "exit", FALSE, was_in);
+	greet_triggers(mob, NO_DIR, "exit", FALSE, was_in);
 	msdp_update_room(mob);	// is this possibly a person?
 }
 

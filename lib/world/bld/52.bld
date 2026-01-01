@@ -2,7 +2,7 @@
 Volcanic Forge~
 A Volcanic Forge in the Mountainside~
 &y(FF)~
-64 0 e 0
+64 0 ez 0
 0 0 0 278
 C
 forge, smelt~
@@ -581,5 +581,23 @@ and reinforcing them with rocks.
 R
 1000 1 5 0
 T 5222
+S
+#5223
+Flower Racks~
+The Flower Racks~
+&0|FF|~
+8 0 bdp 0
+0 0 0 -1
+C
+inventory, retrieve, store~
+E
+flowers racks building around~
+   Wooden racks full of fresh flowers have been arranged to display all the
+brightly-colored blooms. Your nose tingles at the dusty floral aroma as you
+browse.
+~
+I 29 5006 100.00 1 r  # RUINS-TO-BLD: Ruins
+R
+1002 2 5 0
 S
 $

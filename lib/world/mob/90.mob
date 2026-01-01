@@ -130,7 +130,7 @@ a deer~
 A white-tailed deer is grazing here.
 ~
 10 20 djo 0 4
-0 0 0 27 -1 -1
+0 0 0 40 -1 -1
 D
    The flecked brown deer strolls warily through the grass, keeping one eye on
 you as it slowly grazes.
@@ -1083,7 +1083,7 @@ the jackalope~
 A horned jackalope is prancing about.
 ~
 50 75 djko c 2
-0 0 0 27 -1 -1
+0 0 0 40 -1 -1
 D
    The strange and previously-mythical jackalope sits on its haunches and looks
 at you warily, occasionally scratching one of its antlers with its paw.
@@ -1166,7 +1166,7 @@ a massive green dragon~
 A massive green dragon is here!
 ~
 200 200 cdjouxB c 6
-0 0 0 9 -1 -1
+0 0 0 45 -1 -1
 D
    The enormous dragon is the size of a large keep or a small castle. Its
 forest green scales dance in the light, and you think you see the glimmer of
@@ -1239,7 +1239,7 @@ a feral vampire~
 A starving, feral vampire stalks through the shadows nearby.
 ~
 75 100 cdvwI c 3
-1 0 9 10 -1 -1
+1 0 9 13 -1 -1
 D
    The vampire looks emaciated, perhaps near death -- again. It sees you and
 crouches low, preparing to strike.

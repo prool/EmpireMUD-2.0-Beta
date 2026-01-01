@@ -125,6 +125,7 @@ Basic buildings granted by the Build ability:
   vvvv fence
   vxvv gate
   {CC} cannery -- store fruits
+  |FF| flower racks -- store flowers
   {FF} foundry -- store metals
   {GG} granary -- store grains
   {PP} gravelpit -- store rocks
@@ -259,25 +260,30 @@ CELESTIALFORGE "CELESTIAL FORGE" SHATTER SHARD SHARDS
 
 [FF]  Celestial Forge  (Renown goal)
 
-Command:  shatter <item to destroy>
+Commands:  shatter <item to destroy>
+           donate <shard type>
 Fame:  5
 Temperature:  always comfortable
 
-The celestial forge is a place not only to forge gear, but to destroy gear you
+Your celestial forge is a place not only to forge gear, but to destroy gear you
 no longer need and recycle it into shards. The number and type of shards you
 get are based on the level and quality of the item.
 
 You can see how many shards you have by typing 'coins'.
 
-The shards do not yet have a purpose, but in the future they will allow you to
-enhance your gear or buy other items.
+Each celestial forge in your empire is also linked to the divine celestial
+forges that sell crafting recipes and items in exchange for shards. To reach
+these forges, visit the Starsmith at your celestial forge and 'donate' a shard
+of any type. This will take you to the forge that matches the shard.
 
-Shard types:
-  iron shards  (level 1-75)
-  imperium shards  (level 76-175)
-  argentine shards  (level 176-275)
-  meteorite shards  (level 276-375)
-  celestial shards  (level 376-475)
+Shard types and celstial forges:
+  Lodestone Forge:  iron shards  (level 1-100)
+  imperium shards  (level 101-200)
+  argentine shards  (level 201-300)
+  meteorite shards  (level 301-400)
+  celestial shards  (level 401-500)
+
+Higher celestial forges are not yet implemented.
 
 See also: CURRENCY
 #
@@ -470,6 +476,18 @@ supplies more fish than a normal water tile.
 Fisheries cannot be painted.
 
 See also: FISH
+#
+"FLOWER RACKS"
+
+|FF|  Flower Racks  (Build ability)
+
+Stored here:  flowers
+
+Each flower rack is a storage facility for the empire's flowers. Like all of
+the storage buildings, all flower racks on the same island are linked together
+and you can retrieve from any of them.
+
+See also: STORAGE
 #
 FOUNDRY
 
@@ -1171,7 +1189,7 @@ The swamp walk, though never very stable, makes travel through the swamp
 much easier. Swamp animals may still harass you, but you will avoid random
 attacks by crocodilians. This can also be built on marshes.
 
-Clay pits count as in-city territory when built in the outskirts (4x radius).
+Swamp walks count as in-city territory when built in the outskirts (4x radius).
 
 Cannot be painted.
 

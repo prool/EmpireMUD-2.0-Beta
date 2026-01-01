@@ -340,7 +340,7 @@ M
 You place $p on $V.~
 M
 7
-You place $p on $V.~
+$n places $p on $V.~
 M
 34
 This is a common building and crafting material.~
@@ -382,9 +382,10 @@ a small flower~
 A small flower has been dropped here.~
 It's a very pretty flower.
 ~
-3 kl a 0 0 1
+3 kl a 0 0 2
 0 0 0
 7 64
+I 25 3090 100.00 1  # SEED: pocketful of wildflower seeds
 S
 #124
 heavy-log log logs heavy pillars~
@@ -657,7 +658,7 @@ M
 You place $p on $V.~
 M
 7
-You place $p on $V.~
+$n places $p on $V.~
 M
 34
 This is a common building and crafting material.~

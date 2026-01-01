@@ -138,6 +138,11 @@ void complete_quest(char_data *ch, struct player_quest *pq, empire_data *giver_e
 		return;
 	}
 	
+	// flush any queued output first -- this prevents things from appearing AFTER
+	if (ch->desc) {
+		send_stacked_msgs(ch->desc);
+	}
+	
 	// take objs if necessary
 	if (QUEST_FLAGGED(quest, QST_EXTRACT_TASK_OBJECTS)) {
 		extract_required_items(ch, pq->tracker);
@@ -279,9 +284,15 @@ void count_quest_tasks(struct req_data *list, int *complete, int *total) {
 				HASH_ADD_INT(cqd_list, group, cqd);
 			}
 			
-			cqd->total += 1;
-			if (task->current >= task->needed) {
-				cqd->complete += 1;
+			if (requirement_amt_type[task->type] == REQ_AMT_NUMBER) {
+				cqd->complete += MIN(task->current, task->needed);
+				cqd->total += task->needed;
+			}
+			else {
+				cqd->total += 1;
+				if (task->current >= task->needed) {
+					cqd->complete += 1;
+				}
 			}
 		}
 	}
@@ -610,6 +621,7 @@ char *show_daily_quest_line(char_data *ch) {
 * @param quest_data *qst The quest to show.
 */
 void show_quest_info(char_data *ch, quest_data *qst) {
+	bool shown_group_compl = FALSE;
 	char buf[MAX_STRING_LENGTH], *buf2, vstr[128];
 	struct quest_giver *giver;
 	struct player_quest *pq;
@@ -683,11 +695,18 @@ void show_quest_info(char_data *ch, quest_data *qst) {
 			free(buf2);
 		}
 		
-		build_page_display(ch, "Turn in at: %s%s", buf, QUEST_FLAGGED(qst, QST_IN_CITY_ONLY) ? " (in-city only)" : "");
+		build_page_display(ch, "Turn in at: %s%s%s", buf, (QUEST_FLAGGED(qst, QST_IN_CITY_ONLY) ? " (in-city only)" : ""), ((QUEST_FLAGGED(qst, QST_GROUP_COMPLETION) && PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) ? " (group completion)" : ""));
+		shown_group_compl = TRUE;
 	}
 	
+	// may have been shown above instead
 	if (QUEST_FLAGGED(qst, QST_GROUP_COMPLETION)) {
-		build_page_display_str(ch, "Group completion: This quest will auto-complete if any member of your group completes it while you're present.");
+		if (!PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
+			build_page_display_str(ch, "Group completion: This quest will auto-complete if any member of your group completes it while you're present.");
+		}
+		else if (!shown_group_compl) {
+			build_page_display_str(ch, "(Group completion)");
+		}
 	}
 	
 	// completed AND not on it again?

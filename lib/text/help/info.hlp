@@ -517,8 +517,7 @@ CITIZEN CITIZENS
 
 Citizens will move into homes in your empire once you have unlocked the
 Thriving Community goal. Adding a bedroom to any building will also allow a
-citizen to move in. It takes up to an hour (real time) for a new citizen to
-move in.
+citizen to move in. It takes up to two game days for citizens to move in.
 
 Eventually your empire can learn to put citizens to work. Citizens work chores
 within 20 tiles of their homes.
@@ -893,6 +892,9 @@ Tropical river crops (fertile soil near river):
 Newbie island crops:
  &G@@@@&0  Lettuce             &goooo&0  Calabash gourds
 
+Flower crops:
+ &Yo&A:&Yo&A:&0  Temperate           &OlL&ClL  Arid                 &A^&G|&V`&G|&0  Tropical
+
 Most crops are used to make food and drink. Some, like cotton, have other uses.
 Make sure you claim all your map tiles that have crops as unclaimed crops may
 vanish on their own. Crops can be burnt to remove them, even when they're still
@@ -904,7 +906,7 @@ flavorings.
 See also: BURN, CHOP, COOK, FORAGE, HARVEST, MILL, PICK, PLANT, TAVERN, WEAVE,
    IRRIGATION, SPICES
 #
-APRICOTS CUCUMBERS GARLIC LEMONS SUGARCANE
+APRICOTS CUCUMBERS GARLIC LEMONS SUGARCANE FLOWERS
 
 See also: CROPS
 #
@@ -1153,6 +1155,18 @@ a level difference. The colors are:
 
 See also: COLORS, CONSIDER, IDENTIFY, NEARBY, QUEST
 #
+"LIMITED CROWD CONTROL" "LIMIT CROWD CONTROL" "CROWN CONTROL" CROWN-CONTROL
+
+The term "crowd control" refers to abilities that can reduce the number of
+enemies hitting you. For example, "sap" stuns someone for a while, giving you
+time to deal with other NPCs in the room.
+
+When an ability says "limited crowd control", this means you can only use the
+ability on 1 person at a time. For example, if you sap a second mob in the same
+room, the first one will un-stun.
+
+See also: SAP
+#
 LINK LINKDEAD
 
 A lot of players have problems with their links to the game. This can be very
@@ -1337,8 +1351,9 @@ This command displays various statistics about this EmpireMUD.
 
 Options:
  configs: Shows how the game is configured.
- empires: Shows averages for the numbers used to compute empire scores.
- time: Shows time left until events such as the next daily cycle.
+ empires: Averages for the numbers used to compute empire scores.
+ time: Time left until events such as the next daily cycle.
+ world: Stats on empires and players.
 #
 MULTIPLAYING MULTI-PLAYING "MULTI PLAYING"
 

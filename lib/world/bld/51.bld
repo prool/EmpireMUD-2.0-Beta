@@ -1355,7 +1355,7 @@ S
 Great Shipyard~
 A Great Shipyard~
 @w&0[]@e~
-48 4 bdn 0
+48 4 bdnz 0
 0 0 0 216
 C
 board, manufacture~
@@ -1807,6 +1807,8 @@ pride and glory, lest they be unprepared when war comes.
 I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
 R
 6075 2 1 0
+U
+1 5171
 S
 #5173
 Gatehouse~
@@ -2065,7 +2067,7 @@ S
 Secret Cache~
 A Secret Cache~
 .&0{}&?.~
-128 0 0 0
+128 0 z 0
 0 0 0 -1
 A
 d
@@ -2351,8 +2353,8 @@ S
 Celestial Forge~
 The Celestial Forge~
 &W[FF]~
-48 5 0 0
-0 0 0 212
+48 5 z 0
+0 0 0 12800
 C
 forge, smelt, shatter <item to destroy>~
 D

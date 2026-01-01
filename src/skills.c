@@ -413,6 +413,10 @@ char *ability_color(char_data *ch, ability_data *abil) {
 	bool can_buy, has_bought, has_maxed;
 	struct skill_ability *skab;
 	
+	if (!abil) {
+		return "\tr";
+	}
+	
 	has_bought = has_ability(ch, ABIL_VNUM(abil));
 	can_buy = (ABIL_ASSIGNED_SKILL(abil) && get_skill_level(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) >= ABIL_SKILL_LEVEL(abil)) && (skab = find_skill_ability(ABIL_ASSIGNED_SKILL(abil), abil)) && (skab->prerequisite == NO_ABIL || has_ability(ch, skab->prerequisite));
 	has_maxed = has_bought && (levels_gained_from_ability(ch, abil) >= GAINS_PER_ABILITY || (!ABIL_ASSIGNED_SKILL(abil) || IS_ANY_SKILL_CAP(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) || !can_gain_skill_from(ch, abil)));
@@ -1376,7 +1380,7 @@ char *get_skill_gain_display(char_data *ch) {
 char *get_skill_row_display(char_data *ch, skill_data *skill) {
 	static char out[MAX_STRING_LENGTH];
 	struct player_skill_data *skdata;
-	char experience[256], gain_part[256];
+	char avail[256], experience[256], gain_part[256];
 	int points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill));
 	
 	skdata = get_skill_data(ch, SKILL_VNUM(skill), FALSE);
@@ -1398,7 +1402,14 @@ char *get_skill_row_display(char_data *ch, skill_data *skill) {
 		safe_snprintf(gain_part, sizeof(gain_part), "\tcgaining\t0");
 	}
 	
-	sprintf(out, "[%3d] %s%s\t0 (%s%s%s) - %s\r\n", (skdata ? skdata->level : 0), IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill)) ? "\tg" : "\ty", SKILL_NAME(skill), gain_part, experience, (points > 0 ? ", points available" : ""), SKILL_DESC(skill));
+	if (points > 0) {
+		safe_snprintf(avail, sizeof(avail), ", %d point%s available", points, PLURAL(points));
+	}
+	else {
+		*avail = '\0';
+	}
+	
+	sprintf(out, "[%3d] %s%s\t0 (%s%s%s) - %s\r\n", (skdata ? skdata->level : 0), IS_ANY_SKILL_CAP(ch, SKILL_VNUM(skill)) ? "\tg" : "\ty", SKILL_NAME(skill), gain_part, experience, avail, SKILL_DESC(skill));
 	return out;
 }
 
@@ -1833,6 +1844,7 @@ ACMD(do_skills) {
 	bool found, any, line;
 	bool sort_alpha = FALSE, sort_level = FALSE, want_min = FALSE, want_max = FALSE, want_all = FALSE, show_all_info = FALSE;
 	int min_level = -1, max_level = -1;
+	struct player_bonus_ability *bonus_abil, *next_bonus_abil;
 	
 	// attempt to parse the args first, to get -l [range] or -a
 	if (*argument) {
@@ -2034,6 +2046,14 @@ ACMD(do_skills) {
 				continue;	// only looking for abilities with parents
 			}
 			
+			safe_snprintf(lbuf + strlen(lbuf), sizeof(lbuf) - strlen(lbuf), "%s%s%s\t0", *lbuf ? ", ": "", ability_color(ch, abil), ABIL_NAME(abil));
+		}
+		HASH_ITER(hh, GET_BONUS_ABILITIES(ch), bonus_abil, next_bonus_abil) {
+			if (!(abil = ability_proto(bonus_abil->vnum))) {
+				continue;	// no ability?
+			}
+			
+			// show it
 			safe_snprintf(lbuf + strlen(lbuf), sizeof(lbuf) - strlen(lbuf), "%s%s%s\t0", *lbuf ? ", ": "", ability_color(ch, abil), ABIL_NAME(abil));
 		}
 		if (*lbuf) {
@@ -2343,7 +2363,7 @@ ACMD(do_skills) {
 		build_page_display_str(ch, get_skill_row_display(ch, skill));
 		
 		points = get_ability_points_available_for_char(ch, SKILL_VNUM(skill));
-		if (points > 0) {
+		if (points > 0 && !PRF_FLAGGED(ch, PRF_NO_TUTORIALS)) {
 			build_page_display(ch, "You have %d ability point%s to spend. Type 'skill buy <ability>' to purchase a new ability.", points, (points != 1 ? "s" : ""));
 		}
 		

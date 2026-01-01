@@ -870,12 +870,12 @@ OFFER_FINISH(ofin_summon) {
 	char_to_room(ch, loc);
 	GET_LAST_DIR(ch) = NO_DIR;
 	qt_visit_room(ch, IN_ROOM(ch));
-	pre_greet_mtrigger(ch, IN_ROOM(ch), NO_DIR, "summon");	// cannot pre-greet for summon
-	enter_triggers(ch, NO_DIR, "summon", FALSE);
+	pre_greet_mtrigger(ch, IN_ROOM(ch), NO_DIR, "summon", was_in);	// cannot pre-greet for summon
+	enter_triggers(ch, NO_DIR, "summon", FALSE, was_in);
 	look_at_room(ch);
 	act("$n appears in a swirl of light!", TRUE, ch, NULL, NULL, TO_ROOM);
 	
-	greet_triggers(ch, NO_DIR, "summon", FALSE);
+	greet_triggers(ch, NO_DIR, "summon", FALSE, was_in);
 	msdp_update_room(ch);	// once we're sure we're staying
 	
 	// followers?
@@ -884,12 +884,12 @@ OFFER_FINISH(ofin_summon) {
 			act("$n vanishes in a swirl of light!", TRUE, fol->follower, NULL, NULL, TO_ROOM);
 			char_to_room(fol->follower, IN_ROOM(ch));
 			GET_LAST_DIR(fol->follower) = NO_DIR;
-			pre_greet_mtrigger(fol->follower, IN_ROOM(fol->follower), NO_DIR, "summon");	// cannot pre-greet for summon
-			enter_triggers(fol->follower, NO_DIR, "summon", FALSE);
+			pre_greet_mtrigger(fol->follower, IN_ROOM(fol->follower), NO_DIR, "summon", was_in);	// cannot pre-greet for summon
+			enter_triggers(fol->follower, NO_DIR, "summon", FALSE, was_in);
 			look_at_room(fol->follower);
 			act("$n appears in a swirl of light!", TRUE, fol->follower, NULL, NULL, TO_ROOM);
 			
-			greet_triggers(fol->follower, NO_DIR, "summon", FALSE);
+			greet_triggers(fol->follower, NO_DIR, "summon", FALSE, was_in);
 		}
 	}
 	

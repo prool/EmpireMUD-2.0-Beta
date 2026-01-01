@@ -7548,10 +7548,10 @@ ACMD(do_progress) {
 			if (found) {
 				if (!any) {
 					line = build_page_display(ch, "Leads to: %s", PRG_NAME(prg_iter));
+					any = TRUE;
 				}
 				else {
 					append_page_display_line(line, ", %s", PRG_NAME(prg_iter));
-					any = TRUE;
 				}
 			}
 		}

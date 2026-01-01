@@ -570,6 +570,7 @@ typedef struct vehicle_data vehicle_data;
 #define ADV_CHECK_OUTSIDE_FIGHTS  BIT(13)	// n. looks for mobs in combat before despawning
 #define ADV_GLOBAL_NEARBY  BIT(14)	// o. will show the closest one no matter how far away
 #define ADV_DETECTABLE  BIT(15)	// p. can be found with the ability action "detect adventures around"
+#define ADV_FASTER_INSTANCING  BIT(16)	// q. overrides the 1-instance-per-cycle to instance this one faster and more often
 
 
 // ADV_LINK_x: adventure link rule types
@@ -705,7 +706,7 @@ typedef struct vehicle_data vehicle_data;
 #define BLD_NO_ABANDON_WHEN_RUINED  BIT(22)	// won't auto-abandon when it becomes ruins
 #define BLD_SHOW_VEHICLES  BIT(23)	// can show vehicle icons in the room rather than overriding the building icon (only if OPEN)
 #define BLD_IMMUNE_DAMAGE  BIT(24)	// building cannot be damaged
-// #define BLD_UNUSED13  BIT(25)
+#define BLD_HIDE_STORAGE_UNOWNED  BIT(25)	// only shows as storage when identifying objects if owned
 // #define BLD_UNUSED14  BIT(26)
 // #define BLD_UNUSED15  BIT(27)
 // #define BLD_UNUSED16  BIT(28)
@@ -2462,6 +2463,7 @@ typedef enum {
 #define PRF_NO_EXITS  BIT(40)	// hides exits on look and auto-look
 #define PRF_SHORT_EXITS  BIT(41)	// shows circlemud-style exits
 #define PRF_NO_FRIENDS  BIT(42)	// this alt will not appear on friends lists
+#define PRF_HIDE_KEEP  BIT(43)	// inventory won't show items with (keep) by default
 // note: if you add prefs, consider adding them to alt_import_preferences()
 
 
@@ -2829,6 +2831,7 @@ typedef enum {
 #define VEH_HAS_INSTANCE  BIT(38)	// M. instance is attached to vehicle
 #define VEH_TEMPORARY  BIT(39)	// N. vehicle will be removed when instance ends
 #define VEH_TINY  BIT(40)	// O. vehicle is small enough to ignore no-vehicle rooms (e.g. furniture)
+#define VEH_HIDE_STORAGE_UNOWNED  BIT(41)	// P. only shows as storage when identifying objects if owned
 
 
 // VEH_CUSTOM_x: custom message types

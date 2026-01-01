@@ -2099,6 +2099,7 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd, char *
 		else {
 			safe_snprintf(str, slen, "0");
 		}
+		return TRUE;
 	}
 	else if (!str_cmp(field, "contains")) {            /* contains  */
 		if (str_str(vd->value, subfield)) {
@@ -2145,6 +2146,7 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd, char *
 		else {
 			safe_snprintf(str, slen, "-1");
 		}
+		return TRUE;
 	}
 	else if (!str_cmp(field, "mudcommand")) {
 		/* find the mud command returned from this text */
@@ -2168,6 +2170,37 @@ int text_processed(char *field, char *subfield, struct trig_var_data *vd, char *
 		char temp[MAX_INPUT_LENGTH];
 		var_subst(go, sc, trig, type, vd->value, temp);
 		safe_snprintf(str, slen, "%s", temp);
+		return TRUE;
+	}
+	else if (!str_cmp(field, "substr")) {
+		// %string.substr(start,len)%
+		if (subfield && *subfield) {
+			char arg1[256], arg2[256];
+			int sub_start, sub_len;
+			
+			comma_args(subfield, arg1, arg2);
+			if (*arg1) {
+				if ((sub_start = atoi(arg1)) < strlen(vd->value)) {
+					safe_snprintf(str, slen, "%s", vd->value + sub_start);
+				}
+				else {
+					// past the end
+					strcpy(str,"");
+				}
+				
+				// cut short?
+				if (*arg2 && (sub_len = atoi(arg2)) > 0 && sub_len < strlen(str)) {
+					str[sub_len] = '\0';
+				}
+			}
+			else {
+				safe_snprintf(str, slen, "%s", vd->value);
+			}
+		}
+		else {
+			// no limits requested, send whole str
+			safe_snprintf(str, slen, "%s", vd->value);
+		}
 		return TRUE;
 	}
 	
@@ -5715,6 +5748,21 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 						}
 						else {
 							safe_snprintf(str, slen, "0");
+						}
+					}
+					else if (!str_cmp(field, "climate")) {
+						if (subfield && *subfield) {
+							bitvector_t pos = search_block(subfield, climate_flags, FALSE);
+							if (pos != NOTHING) {
+								safe_snprintf(str, slen, "%d", IS_SET(get_climate(r), BIT(pos)) ? 1 : 0);
+							}
+							else {
+								safe_snprintf(str, slen, "0");
+							}
+						}
+						else {	// no subfield
+							ordered_sprintbit(get_climate(r), climate_flags, climate_flags_order, TRUE, buf);
+							safe_snprintf(str, slen, "%s", buf);
 						}
 					}
 					else if (!str_cmp(field, "complete")) {

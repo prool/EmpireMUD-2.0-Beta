@@ -3,6 +3,7 @@ Hydra Load~
 0 n 100
 ~
 dg_affect #16100 %self% IMMUNE-DAMAGE on -1
+%echo% &&AThe flickering light begins to once again play over the hydra's skin.&&0 (Hydra is immune!)
 set HydraBuffCounter 0
 global HydraBuffCounter
 if %instance.location%
@@ -70,6 +71,7 @@ if %headcount% <= 2
 end
 if %hydranum.aff_flagged(IMMUNE-DAMAGE)%
   dg_affect #16100 %hydranum% off
+  %echo% &&AThe flickering light on the hydra's body fades.&&0 (Target the hydra!)
   set LostImmunity %timestamp%
   remote LostImmunity %hydranum.id%
 end
@@ -106,6 +108,7 @@ if %self.varexists(LostImmunity)%
   eval SinceImmunity %timestamp% - %LostImmunity%
   if %SinceImmunity% >= 90
     dg_affect #16100 %self% IMMUNE-DAMAGE on -1
+    %echo% &&AThe flickering light begins to once again play over the hydra's skin.&&0 (Hydra is immune!)
     rdelete LostImmunity %self.id%
   end
 end
@@ -155,6 +158,7 @@ while %person%
 done
 if !%self.aff_flagged(IMMUNE-DAMAGE)%
   dg_affect #16100 %self% IMMUNE-DAMAGE on -1
+  %echo% &&AThe flickering light begins to once again play over the hydra's skin.&&0 (Hydra is immune!)
 end
 if %headcount% == 0
   eval randomhead 16101 + %random.3%

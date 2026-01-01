@@ -228,7 +228,7 @@ I 5 102 15.00 125 X  # DIG: flint stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 10552 75.00 25  # FORAGE: arctic brambleberries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 100.00 50  # GATHER: sticks and leaves
@@ -302,7 +302,7 @@ I 5 102 15.00 125 X  # DIG: flint stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 10552 75.00 25  # FORAGE: arctic brambleberries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 100.00 50  # GATHER: sticks and leaves
@@ -353,7 +353,7 @@ I 5 102 15.00 125 X  # DIG: flint stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 10552 75.00 25  # FORAGE: arctic brambleberries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 100.00 50  # GATHER: sticks and leaves
@@ -397,6 +397,8 @@ D4
 E
 0 1 100.00 10564
 E
+17 90 0.03 10565
+E
 17 200 0.30 224
 E
 17 204 1.00 224
@@ -434,7 +436,7 @@ I 5 102 15.00 125 X  # DIG: flint stone
 I 5 100 100.00 125 X  # DIG: rock
 I 6 10552 75.00 25  # FORAGE: arctic brambleberries
 I 7 1206 8.33 125 p  # PICK: iridescent blue iris
-I 7 1201 100.00 125 p  # PICK: sack of fiveleaf
+I 7 1201 87.00 125 p  # PICK: sack of fiveleaf
 I+ 0 70  # Ability: Find Herbs
 I 7 123 100.00 125 p  # PICK: small flower
 I 9 121 100.00 50  # GATHER: sticks and leaves

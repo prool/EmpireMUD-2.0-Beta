@@ -194,9 +194,10 @@ int word_check(char *str, char *wordlist) {
 * @param room_data *room The room they are trying to enter.
 * @param int dir The direction they are moving.
 * @param char *method How they are moving.
+* @param room_data *was_in Optional: A room pointer that the character was previously in, to pass through as vnum to the trigger (may be NULL).
 * @return int 1 to allow; 0 to try to prevent the movement.
 */
-int pre_greet_mtrigger(char_data *actor, room_data *room, int dir, char *method) {
+int pre_greet_mtrigger(char_data *actor, room_data *room, int dir, char *method, room_data *was_in) {
 	trig_data *t, *next_t;
 	char_data *ch;
 	char buf[MAX_INPUT_LENGTH];
@@ -239,6 +240,12 @@ int pre_greet_mtrigger(char_data *actor, room_data *room, int dir, char *method)
 				}
 				ADD_UID_VAR(buf, t, char_script_id(actor), "actor", 0);
 				add_var(&GET_TRIG_VARS(t), "method", method ? method : "none", 0);
+				if (was_in) {
+					ADD_UID_VAR(buf, t, room_script_id(was_in), "was_in", 0);
+				}
+				else {
+					add_var(&GET_TRIG_VARS(t), "was_in", "", 0);
+				}
 				sdd.c = ch;
 				intermediate = script_driver(&sdd, t, MOB_TRIGGER, TRIG_NEW);
 				if (!intermediate) {
@@ -446,11 +453,13 @@ void entry_memory_mtrigger(char_data *ch) {
 *
 * @param char_data *ch The mob who moved.
 * @param char *method The way the mob entered.
+* @param room_data *was_in Optional: A room pointer that the character was previously in, to pass through as vnum to the trigger (may be NULL).
 * @return int 1 to allow the entry; 0 to try to send it back.
 */
-int entry_mtrigger(char_data *ch, char *method) {
+int entry_mtrigger(char_data *ch, char *method, room_data *was_in) {
 	union script_driver_data_u sdd;
 	trig_data *t, *next_t;
+	char buf[MAX_INPUT_LENGTH];
 	int any_in_room = -1, val;
 	bool multi = FALSE;
 
@@ -480,6 +489,12 @@ int entry_mtrigger(char_data *ch, char *method) {
 		
 		// ok:
 		add_var(&GET_TRIG_VARS(t), "method", method ? method : "none", 0);
+		if (was_in) {
+			ADD_UID_VAR(buf, t, room_script_id(was_in), "was_in", 0);
+		}
+		else {
+			add_var(&GET_TRIG_VARS(t), "was_in", "", 0);
+		}
 		sdd.c = ch;
 		val = script_driver(&sdd, t, MOB_TRIGGER, TRIG_NEW);
 		
@@ -628,9 +643,10 @@ void greet_memory_mtrigger(char_data *actor) {
 * @param char_data *ch The person who moved.
 * @param int dir Which direction they moved.
 * @param char *method The way the person entered.
+* @param room_data *was_in Optional: A room pointer that the character was previously in, to pass through as vnum to the trigger (may be NULL).
 * @return int 1 to allow the entry; 0 to try to send them back.
 */
-int greet_mtrigger(char_data *actor, int dir, char *method) {
+int greet_mtrigger(char_data *actor, int dir, char *method, room_data *was_in) {
 	trig_data *t, *next_t;
 	char_data *ch;
 	char buf[MAX_INPUT_LENGTH];
@@ -676,6 +692,12 @@ int greet_mtrigger(char_data *actor, int dir, char *method) {
 				}
 				ADD_UID_VAR(buf, t, char_script_id(actor), "actor", 0);
 				add_var(&GET_TRIG_VARS(t), "method", method ? method : "none", 0);
+				if (was_in) {
+					ADD_UID_VAR(buf, t, room_script_id(was_in), "was_in", 0);
+				}
+				else {
+					add_var(&GET_TRIG_VARS(t), "was_in", "", 0);
+				}
 				sdd.c = ch;
 				intermediate = script_driver(&sdd, t, MOB_TRIGGER, TRIG_NEW);
 				if (!intermediate) {
@@ -1563,9 +1585,10 @@ int finish_quest_otrigger(char_data *actor, quest_data *quest, struct instance_d
 * @param char_data *actor The person who has entered the room.
 * @param int dir Which direction the character moved.
 * @param char *method Method of movement.
+* @param room_data *was_in Optional: A room pointer that the character was previously in, to pass through as vnum to the trigger (may be NULL).
 * @return int 1 to allow the character here, 0 to attempt to send them back.
 */
-int greet_otrigger(char_data *actor, int dir, char *method) {
+int greet_otrigger(char_data *actor, int dir, char *method, room_data *was_in) {
 	int intermediate, final = TRUE, any_in_room = -1;
 	obj_data *obj, *next_obj;
 	char buf[MAX_INPUT_LENGTH];
@@ -1604,6 +1627,12 @@ int greet_otrigger(char_data *actor, int dir, char *method) {
 				}
 				ADD_UID_VAR(buf, t, char_script_id(actor), "actor", 0);
 				add_var(&GET_TRIG_VARS(t), "method", method ? method : "none", 0);
+				if (was_in) {
+					ADD_UID_VAR(buf, t, room_script_id(was_in), "was_in", 0);
+				}
+				else {
+					add_var(&GET_TRIG_VARS(t), "was_in", "", 0);
+				}
 				sdd.o = obj;
 				intermediate = script_driver(&sdd, t, OBJ_TRIGGER, TRIG_NEW);
 				if (!intermediate) {
@@ -2611,9 +2640,10 @@ int dismantle_wtrigger(room_data *room, char_data *actor, bool preventable) {
 * @param char_data *actor The person who entered.
 * @param int dir Which direction they moved.
 * @param char *method The way the person entered.
+* @param room_data *was_in Optional: A room pointer that the character was previously in, to pass through as vnum to the trigger (may be NULL).
 * @return int 1 to allow the entry; 0 to try to send them back.
 */
-int enter_wtrigger(room_data *room, char_data *actor, int dir, char *method) {
+int enter_wtrigger(room_data *room, char_data *actor, int dir, char *method, room_data *was_in) {
 	union script_driver_data_u sdd;
 	trig_data *t, *next_t;
 	char buf[MAX_INPUT_LENGTH];
@@ -2646,6 +2676,12 @@ int enter_wtrigger(room_data *room, char_data *actor, int dir, char *method) {
 		
 		// ok:
 		ADD_UID_VAR(buf, t, room_script_id(room), "room", 0);
+		if (was_in) {
+			ADD_UID_VAR(buf, t, room_script_id(was_in), "was_in", 0);
+		}
+		else {
+			add_var(&GET_TRIG_VARS(t), "was_in", "", 0);
+		}
 		if (dir>=0 && dir < NUM_OF_DIRS) {
 			add_var(&GET_TRIG_VARS(t), "direction", (char *)dirs[rev_dir[dir]], 0);
 		}
@@ -2654,6 +2690,12 @@ int enter_wtrigger(room_data *room, char_data *actor, int dir, char *method) {
 		}
 		ADD_UID_VAR(buf, t, char_script_id(actor), "actor", 0);
 		add_var(&GET_TRIG_VARS(t), "method", method ? method : "none", 0);
+		if (was_in) {
+			ADD_UID_VAR(buf, t, room_script_id(was_in), "was_in", 0);
+		}
+		else {
+			add_var(&GET_TRIG_VARS(t), "was_in", "", 0);
+		}
 		sdd.r = room;
 		this = script_driver(&sdd, t, WLD_TRIGGER, TRIG_NEW);
 		val = MIN(val, this);
@@ -3681,9 +3723,10 @@ int finish_quest_vtrigger(char_data *actor, quest_data *quest, struct instance_d
 * @param char_data *ch The person who moved.
 * @param int dir Which direction they moved.
 * @param char *method The way the person entered.
+* @param room_data *was_in Optional: A room pointer that the character was previously in, to pass through as vnum to the trigger (may be NULL).
 * @return int 1 to allow the entry; 0 to try to send them back.
 */
-int greet_vtrigger(char_data *actor, int dir, char *method) {
+int greet_vtrigger(char_data *actor, int dir, char *method, room_data *was_in) {
 	int intermediate, final = TRUE, any_in_room = -1;
 	vehicle_data *veh, *next_veh;
 	char buf[MAX_INPUT_LENGTH];
@@ -4186,13 +4229,14 @@ int check_start_quest_trigger(char_data *actor, quest_data *quest, struct instan
 * @param int dir Which direction the character came from.
 * @param char *method Method of movement.
 * @param bool preventable TRUE if the character can be sent back; FALSE if not.
+* @param room_data *was_in Optional: A room pointer that the character was previously in, to pass through as vnum to the trigger (may be NULL).
 * @return int 1 to allow the character here, 0 to attempt to send them back.
 */
-int enter_triggers(char_data *ch, int dir, char *method, bool preventable) {
-	if (!entry_mtrigger(ch, method) && preventable) {
+int enter_triggers(char_data *ch, int dir, char *method, bool preventable, room_data *was_in) {
+	if (!entry_mtrigger(ch, method, was_in) && preventable) {
 		return 0;
 	}
-	else if (!enter_wtrigger(IN_ROOM(ch), ch, dir, method) && preventable) {
+	else if (!enter_wtrigger(IN_ROOM(ch), ch, dir, method, was_in) && preventable) {
 		return 0;
 	}
 
@@ -4212,16 +4256,17 @@ int enter_triggers(char_data *ch, int dir, char *method, bool preventable) {
 * @param int dir Which direction the character came from.
 * @param char *method Method of movement.
 * @param bool preventable TRUE if the character can be sent back; FALSE if not.
+* @param room_data *was_in Optional: A room pointer that the character was previously in, to pass through as vnum to the trigger (may be NULL).
 * @return int 1 to allow the character here, 0 to attempt to send them back.
 */
-int greet_triggers(char_data *ch, int dir, char *method, bool preventable) {
-	if (!greet_mtrigger(ch, dir, method) && preventable) {
+int greet_triggers(char_data *ch, int dir, char *method, bool preventable, room_data *was_in) {
+	if (!greet_mtrigger(ch, dir, method, was_in) && preventable) {
 		return 0;
 	}
-	else if (!greet_vtrigger(ch, dir, method) && preventable) {
+	else if (!greet_vtrigger(ch, dir, method, was_in) && preventable) {
 		return 0;
 	}
-	else if (!greet_otrigger(ch, dir, method) && preventable) {
+	else if (!greet_otrigger(ch, dir, method, was_in) && preventable) {
 		return 0;
 	}
 	
