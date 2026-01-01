@@ -153,6 +153,27 @@ say I've still got more earring designs.~
 M
 8
 say Be sure to stop by from time to time.~
+M
+0
+$n picks up a pattern and moves it to another stack.~
+M
+0
+$n picks up a design and examines it, then puts it in a new pile.~
+M
+0
+$n studies a pattern and then puts it in the right stack.~
+M
+1
+Now where did I put it...~
+M
+1
+I simply have too many of these designs.~
+M
+1
+Be with you in a moment.~
+M
+0
+$n scratches $s head as $e shuffles through a stack of designs.~
 T 12807
 S
 #12814
@@ -193,6 +214,24 @@ say Have you tried the elemental companion?~
 M
 8
 say This might be my best work.~
+M
+0
+$n tosses a spoonful of incense into the smelting pit, where it crackles and sizzles.~
+M
+0
+The smelting pit sizzles.~
+M
+0
+The warm, earthy aroma of incense comes from the smelting pit.~
+M
+0
+The warm, earthy aroma of incense comes from the smelting pit.~
+M
+0
+The warm, earthy aroma of incense comes from the smelting pit.~
+M
+0
+$n adjusts $s scarf.~
 T 12807
 S
 #12815
@@ -228,6 +267,27 @@ say We just got new poles.~
 M
 8
 say Not sure who's sacrificing so many poles to the forge.~
+M
+0
+Some poles appear from thin air and $n places them in a barrel.~
+M
+0
+A shipment of nails appears from thin air and $n stacks it in the corner.~
+M
+0
+$n rearranges some of the supplies.~
+M
+0
+Stacks of leather appear from thin air and $n piles them in the corner.~
+M
+0
+$n pries lodestones off a larger stone, one by one.~
+M
+0
+$n steps aside as a small lodestone flies through the air and attaches it to a larger lodestone at $s feet.~
+M
+0
+$n carefully arranges panes of glass in a rack.~
 T 12807
 S
 #12832
