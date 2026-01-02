@@ -10,7 +10,9 @@ set room %self.room%
 set which 0
 set dest 0
 * validate argument
-if !%arg%
+if !%actor.canuseroom_guest(%room%)%
+  %send% %actor% You don't have permission to do that here.
+elseif !%arg%
   %send% %actor% Donate to which celestial forge? (iron, ...)
 elseif iron forge /= %arg% || lodestone forge /= %arg%
   set which 12800
@@ -270,7 +272,7 @@ Celestial Forge: Require permission to enter portal~
 1 c 4 0
 enter~
 return 0
-if %actor.obj_target(%arg.argument1%)% != %self% || %self.val0% <= 0
+if %actor.obj_target(%arg.argument1%)% != %self% || %self.val0% <= 0 || %actor.is_immortal%
   halt
 end
 * find target
