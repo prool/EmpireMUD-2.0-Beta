@@ -528,13 +528,13 @@ set do_refund 0
 if %actor.is_npc%
   * oops
 elseif !%actor.ability(%requires%)%
-  %send% %actor% You require %ability.name(%requires%)% to buy this.
+  %send% %actor% You require %_abil.name(%requires%)% to buy this.
   set do_refund 1
 elseif %actor.ability(%grants%)%
-  %send% %actor% You already know %ability.name(%grants%)%.
+  %send% %actor% You already know %_abil.name(%grants%)%.
   set do_refund 1
 else
-  %send% %actor% You're inspired! You learn %ability.name(%grants%)%!
+  %send% %actor% You're inspired! You learn %_abil.name(%grants%)%!
   nop %actor.add_bonus_ability(%grants%)%
 end
 if %do_refund%
