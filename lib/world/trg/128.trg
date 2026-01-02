@@ -548,9 +548,10 @@ end
 ~
 #12834
 Celestial Forge: Buy shard companion~
-1 n 100 7
+1 n 100 8
 L b 12834
 L b 12844
+L f 12837
 L w 5100
 L w 5101
 L w 5102
@@ -660,9 +661,14 @@ end
 ~
 #12835
 Celestial Forge: Shard companion load script~
-0 nt 100 0
+0 nt 100 1
+L f 12837
 ~
 %echo% ~%self% assembles itself and whirs to life!
+* also verify setup
+if !%self.has_trigger(12837)%
+  attach 12837 %self.id%
+end
 ~
 #12836
 Celestial Forge: Shard companion dies~
@@ -703,12 +709,14 @@ eval curname %%currency.%genv%(%cost%)%%
 nop %actor.remove_companion(%self.vnum%)%
 ~
 #12837
-Celestial Forge: Companion renamer~
+Celestial Forge: Shard companion setup and update~
 0 bt 100 2
 L b 12834
 L b 12844
 ~
+* handles naming and stats on purchase or summon
 set order 1
+set changed 0
 *
 * upgrade portion
 set tank %self.var(tank,0)%
@@ -717,6 +725,7 @@ set caster %self.var(caster,0)%
 if %tank%
   nop %self.add_mob_flag(CHAMPION)%
   nop %self.add_mob_flag(TANK)%
+  nop %self.add_mob_flag(NO-ATTACK)%
 end
 if %dps%
   nop %self.remove_mob_flag(NO-ATTACK)%
@@ -772,18 +781,36 @@ switch %self.vnum%
   break
 done
 *
-* actual naming
-%mod% %self% keyword elemental %name% %metal%
+* prepare for naming
+set kws elemental %name% %metal%
 if %order% == 1
-  %mod% %self% shortdesc %name.ana% %name% %metal% elemental
-  %mod% %self% longdesc &Z%name.ana% %name% %metal% elemental %pose%.
+  set shortd %name.ana% %name% %metal% elemental
+  set longd &Z%name.ana% %name% %metal% elemental %pose%.
 elseif %order% == 2
-  %mod% %self% shortdesc %metal.ana% %metal% %name% elemental
-  %mod% %self% longdesc &Z%metal.ana% %metal% %name% elemental %pose%.
+  set shortd %metal.ana% %metal% %name% elemental
+  set longd &Z%metal.ana% %metal% %name% elemental %pose%.
+end
+*
+* set names and check for changes
+if %kws% != %self.pc_name%
+  %mod% %self% keyword %kws%
+  set changed 1
+end
+if %shortd% != %self.name%
+  %mod% %self% shortdesc %shortd%
+  set changed 1
+end
+if %longd% != %self.longdesc%
+  %mod% %self% longdesc %longd%
+  set changed 1
+end
+*
+* messaging
+if %changed%
+  %echo% ~%self% clacks and clangs as it upgrades itself.
 end
 *
 * and detach
-%echo% ~%self% clacks and clangs as it upgrades itself.
 detach 12837 %self.id%
 ~
 #12838
