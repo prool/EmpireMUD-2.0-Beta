@@ -90,6 +90,12 @@ In Greece, sailors believed in magnetic islands that pulled iron nails from ship
 M
 1
 They say Cleopatra slept on a lodestone to maintain youthful skin.~
+M
+0
+The stars twinkle above you.~
+M
+0
+Warm incense wafts past your nose.~
 T 12807
 S
 #12812
@@ -120,6 +126,24 @@ say Did ye make one of the rings?~
 M
 8
 say Never too late for greatness.~
+M
+0
+Hammers tap in the distance.~
+M
+0
+The stars twinkle above you.~
+M
+0
+The forge crackles and sizzles.~
+M
+0
+$n rubs one of $s rings against $s apron to polish it.~
+M
+0
+The aroma of incense warms your nose and lungs.~
+M
+1
+All that hammering has a nice ring to it.~
 T 12807
 S
 #12813
@@ -174,6 +198,12 @@ Be with you in a moment.~
 M
 0
 $n scratches $s head as $e shuffles through a stack of designs.~
+M
+0
+The forge crackles and spits.~
+M
+0
+$n glances up at the stars for a moment.~
 T 12807
 S
 #12814
