@@ -169,7 +169,8 @@ end
 ~
 #12802
 Celestial Forge: Detect player entry, Grant abilities, Start progress~
-2 g 100 7
+2 g 100 8
+L c 9684
 L e 5195
 L i 12800
 L j 12810
@@ -185,7 +186,12 @@ end
 if %actor.skill(6)% >= 76
   if %room.template% >= 12810 && %room.template% <= 12815
     if !%actor.has_bonus_ability(12810)%
-      nop %actor.add_bonus_ability(12810)%
+      * grant the ability after a short delay
+      %load% obj 9684 %actor%
+      set obj %actor.inventory%
+      if %obj.vnum% == 9684
+        nop %obj.val0(12810)%
+      end
     end
     if %actor.empire%
       nop %actor.empire.start_progress(12810)%
@@ -547,7 +553,7 @@ end
 %purge% %self%
 ~
 #12834
-Celestial Forge: Buy shard companion~
+Shard companion: Buy shard companion~
 1 n 100 8
 L b 12834
 L b 12844
@@ -671,7 +677,7 @@ end
 %purge% %self%
 ~
 #12835
-Celestial Forge: Shard companion load script~
+Shard companion: Load script~
 0 nt 100 1
 L f 12837
 ~
@@ -682,8 +688,8 @@ if !%self.has_trigger(12837)%
 end
 ~
 #12836
-Celestial Forge: Shard companion dies~
-0 ft 100 7
+Shard companion: Death trigger~
+0 ft 100 8
 L b 12834
 L b 12844
 L w 5100
@@ -691,13 +697,20 @@ L w 5101
 L w 5102
 L w 5103
 L w 5104
+L w 12833
 ~
 set actor %self.companion%
 if !%actor% || %actor.is_npc%
   halt
 end
 *
+* cancel ability cooldown
+if %actor.cooldown(12833)%
+  nop %actor.set_cooldown(12833,0)%
+end
+*
 * check for refund?
+set tier 0
 switch %self.vnum%
   case 12834
     set tier 1
@@ -705,28 +718,32 @@ switch %self.vnum%
   case 12844
     set tier 2
   break
-  default
-    nop %actor.remove_companion(%self.vnum%)%
-    halt
-  break
 done
-eval genv 5100 + %tier% - 1
-eval cost %random.100%
-nop %actor.give_currency(%genv%,%cost%)%
-eval curname %%currency.%genv%(%cost%)%%
-%send% %actor% You scavenge %cost% %curname% as ~%self% falls apart.
+if %tier%
+  eval genv 5100 + %tier% - 1
+  eval cost %random.100%
+  nop %actor.give_currency(%genv%,%cost%)%
+  eval curname %%currency.%genv%(%cost%)%%
+  %send% %actor% You scavenge %cost% %curname% as ~%self% falls apart.
+end
 *
 * and delete me
 nop %actor.remove_companion(%self.vnum%)%
 ~
 #12837
-Celestial Forge: Shard companion setup and update~
-0 bt 100 4
+Shard companion: Setup and update~
+0 bt 100 8
 L b 12834
 L b 12844
 L c 12808
+L w 12834
 L w 12835
+L w 12836
+L w 12837
+L w 12838
 ~
+* list of triggers available
+set trigger_list 12841 12842 12843
 * handles naming and stats on purchase or summon
 set order 1
 set changed 0
@@ -735,6 +752,7 @@ set changed 0
 set tank %self.var(tank,0)%
 set dps %self.var(dps,0)%
 set caster %self.var(caster,0)%
+set use_triggers
 *
 * set traits and attach scripts
 nop %self.add_mob_flag(NO-ATTACK)%
@@ -744,10 +762,16 @@ if %tank% >= 1
   nop %self.add_mob_flag(TANK)%
 end
 if %tank% >= 2
-  * TODO: boost resists
+  eval amount %self.level% / 25
+  dg_affect #12836 %self% off
+  dg_affect #12836 %self% RESIST-PHYSICAL %amount% -1
+  dg_affect #12836 %self% RESIST-MAGICAL %amount% -1
 end
 if %tank% >= 3
-  * TODO: interactive heal, boost, or debuff enemy
+  dg_affect #12841 %self% off
+  dg_affect #12841 %self% CRAFTING 1 -1
+  set use_triggers %use_triggers% 12841
+  * TODO: interactive boost, or debuff enemy
 end
 * damage
 if %dps% >= 1
@@ -757,7 +781,12 @@ if %dps% >= 1
   end
 end
 if %dps% >= 2
-  * TODO: interactive debuffs
+  eval amount %self.level% / 100 + 1
+  dg_affect #12834 %self% off
+  dg_affect #12836 %self% BONUS-PHYSICAL %amount% -1
+  dg_affect #12836 %self% BONUS-MAGICAL %amount% -1
+  set use_triggers %use_triggers% 12842
+  * TODO: more interactive debuffs
 end
 if %dps% >= 3
   nop %self.add_mob_flag(DPS)%
@@ -768,10 +797,15 @@ end
 * caster
 if %caster% >= 1
   nop %self.add_mob_flag(CASTER)%
-  * TODO: interactive buffs
+  set use_triggers %use_triggers% 12843
+  dg_affect #12837 %self% off
+  dg_affect #12837 %self% CRAFTING 1 -1
 end
 if %caster% >= 2
-  * TODO: bigger buffs
+  eval amount %self.level% / 100 + 1
+  dg_affect #12838 %self% off
+  dg_affect #12838 %self% BONUS-PHYSICAL %amount% -1
+  dg_affect #12838 %self% BONUS-MAGICAL %amount% -1
   if !%self.eq(wield)%
     * magic attack
     %load% obj 12808 %self% wield
@@ -780,6 +814,19 @@ end
 if %caster% >= 3
   * TODO: buffs become automatic not interactive
 end
+*
+* check triggers
+while %trigger_list%
+  set trig %trigger_list.car%
+  set trigger_list %trigger_list.cdr%
+  if %use_triggers% ~= %trig%
+    if !%self.has_trigger(%trig%)%
+      attach %trig% %self.id%
+    end
+  elseif %self.has_trigger(%trig%)%
+    detach %trig% %self.id%
+  end
+done
 *
 * determine names
 if %tank% && %dps% && %caster%
@@ -870,6 +917,7 @@ elseif %order% == 2
 end
 *
 * set names and check for changes
+set oldname %self.name%
 if %kws% != %self.pc_name%
   %mod% %self% keyword %kws%
   set changed 1
@@ -885,10 +933,13 @@ end
 *
 * messaging
 if %changed%
-  %echo% ~%self% clacks and clangs as it upgrades itself.
+  %echo% %oldname% clacks and clangs as it reconfigures itself into %self.name%!
+else
+  %echo% ~%self% clacks and clangs as it configures itself.
 end
 *
-* and detach
+* rescale and detach
+%scale% %self% %self.level%
 detach 12837 %self.id%
 ~
 #12838
@@ -967,6 +1018,154 @@ if %actor.is_npc% && !%self.fighting%
   halt
 else
   return 1
+end
+~
+#12841
+Shard companion: Tank tier 3 commands: Rebuild~
+0 ct 0 2
+L w 12832
+L w 12833
+rebuild~
+if %actor% != %self%
+  return 0
+  halt
+end
+set actor %self.companion%
+if !%actor%
+  halt
+end
+if %self.cooldown(12833)%
+  %send% %actor% Your elemental companion is still recharging.
+  halt
+end
+*
+if %cmd% == rebuild
+  * heal 10% over 15 seconds
+  eval amount %self.maxhealth% / 30
+  dg_affect #12832 %self% HEAL-OVER-TIME %amount% 15
+  set cooldown 60
+  %echo% &&Y~%self% begins rebuilding itself from shards!&&0
+end
+if %cooldown%
+  nop %self.set_cooldown(12833,%cooldown%)%
+  nop %actor.set_cooldown(12833,%cooldown%)%
+end
+~
+#12842
+Shard companion: DPS tier 2 commands: breach~
+0 ct 0 2
+L w 12833
+L w 12842
+rebuild~
+if %actor% != %self%
+  return 0
+  halt
+end
+set actor %self.companion%
+if !%actor%
+  halt
+end
+if %self.cooldown(12833)%
+  %send% %actor% Your elemental companion is still recharging.
+  halt
+end
+*
+set enemy %self.fighting%
+*
+if %cmd% == breach
+  * debuff target's resistances
+  if !%enemy%
+    %send% %actor% Your elemental companion isn't fighting anything.
+    halt
+  end
+  eval amount %self.level% / 8
+  dg_affect #12842 @%self% %enemy% off
+  dg_affect #12842 %enemy% RESIST-PHYSICAL -%amount% 30
+  dg_affect #12842 %enemy% RESIST-MAGICAL -%amount% 30
+  %echo% &&Y~%self% jabs ~%enemy% with shard after shard, breaching ^%enemy% defenses!&&0
+  set cooldown 30
+end
+if %cooldown%
+  nop %self.set_cooldown(12833,%cooldown%)%
+  nop %actor.set_cooldown(12833,%cooldown%)%
+end
+~
+#12843
+Shard companion: Caster tier 1 and 2 magnetize move~
+0 ct 0 3
+L w 12833
+L w 12843
+L w 12844
+magnetize~
+if %actor% != %self%
+  return 0
+  halt
+end
+set actor %self.companion%
+if !%actor%
+  halt
+end
+if %self.cooldown(12833)%
+  %send% %actor% Your elemental companion is still recharging.
+  halt
+end
+*
+set enemy %self.fighting%
+if !%enemy%
+  %send% %actor% Your elemental companion can only magnetize when engaged in combat.
+  halt
+end
+*
+set caster %self.var(caster,1)%
+if %caster% > 1
+  set duration 120
+else
+  set duration 30
+end
+*
+eval last_cmd %self.var(last_cmd,0)% + 1
+if %last_cmd% > 4
+  set last_cmd 1
+end
+remote last_cmd %self.id%
+*
+if %last_cmd% == 1
+  * Haste IF player isn't already hastened
+  if %actor.affect(HASTE)%
+    set last_cmd 2
+    remote last_cmd %self.id%
+  else
+    * Electromagnetic (haste buff)
+    if %caster% > 1
+      set duration 120
+    else
+      set duration 30
+    end
+    %echo% &&YBits of iron hang in the air as a magnetic pulse from ~%self% passes over ~%actor%!&&0
+    dg_affect #12843 %actor% HASTE on %duration%
+    set cooldown 30
+  end
+end
+if %last_cmd% == 2
+  * To-Hit boost (may have cascaded from 1)
+  if %caster% > 1
+    eval amount %self.level% / 8
+  else
+    eval amount %self.level% / 10
+  end
+  %echo% &&YWave after wave of energy from ~%self% flow over ~%actor%!&&0
+  dg_affect #12844 %actor% TO-HIT %amount% %duration%
+  set cooldown 30
+elseif %last_cmd% == 3
+  * boosts
+  %echo% &&YMove not implemented.&&0
+elseif %last_cmd% == 4
+  * resists?
+  %echo% &&YMove not implemented.&&0
+end
+if %cooldown%
+  nop %self.set_cooldown(12833,%cooldown%)%
+  nop %actor.set_cooldown(12833,%cooldown%)%
 end
 ~
 $
