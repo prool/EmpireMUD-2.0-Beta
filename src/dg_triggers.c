@@ -332,6 +332,9 @@ int buy_mtrigger(char_data *actor, char_data *shopkeeper, obj_data *buying, int 
 /**
 * Command trigger (mob).
 *
+* This will temporarily remove the ORDERED effect if the Charmed flag is set
+* on the trigger, allowing full trigger features in this rare case.
+*
 * @param char_data *actor The person typing a command.
 * @param char *cmd The command as-typed (first word).
 * @param char *argument Any arguments (remaining text).
@@ -339,6 +342,7 @@ int buy_mtrigger(char_data *actor, char_data *shopkeeper, obj_data *buying, int 
 * @return int 1 if a trigger ran (stop); 0 if not (ok to continue).
 */
 int command_mtrigger(char_data *actor, char *cmd, char *argument, int mode) {
+	bool ordered = FALSE;
 	char_data *ch, *ch_next;
 	trig_data *t, *next_t;
 	char buf[MAX_INPUT_LENGTH];
@@ -368,6 +372,9 @@ int command_mtrigger(char_data *actor, char *cmd, char *argument, int mode) {
 				}
 				
 				if (match_command_trig(cmd, GET_TRIG_ARG(t), mode)) {
+					ordered = (AFF_FLAGGED(ch, AFF_ORDERED) ? TRUE : FALSE);
+					
+					REMOVE_BIT(AFF_FLAGS(ch), AFF_ORDERED);
 					union script_driver_data_u sdd;
 					ADD_UID_VAR(buf, t, char_script_id(actor), "actor", 0);
 					skip_spaces(&argument);
@@ -377,7 +384,15 @@ int command_mtrigger(char_data *actor, char *cmd, char *argument, int mode) {
 					sdd.c = ch;
 
 					if (script_driver(&sdd, t, MOB_TRIGGER, TRIG_NEW)) {
+						if (ordered) {
+							SET_BIT(AFF_FLAGS(ch), AFF_ORDERED);
+						}
 						return 1;
+					}
+					
+					if (ordered) {
+						// restore order(ed)
+						SET_BIT(AFF_FLAGS(ch), AFF_ORDERED);
 					}
 				}
 			}
