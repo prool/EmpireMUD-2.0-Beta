@@ -619,6 +619,7 @@ When using field  - The variable returns:
 &cresist_physical&0 - Returns the amount of physical resistance the player has.
 &cresist_poison&0 - Returns TRUE if the player has Resist Poison.
 &criding&0 - TRUE if the character is currently mounted.
+&crole&0 - One of the class roles, or "none". (&yHELP CLASS ROLE&0)
 &croom&0 - The room the actor is in as a room variable.
 &cset_cooldown(vnum, seconds)&0 - Sets the character's cooldown time.
 &cset_reputation(faction,rep)&0 - Sets reputation to a given level ("Liked").

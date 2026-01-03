@@ -4762,6 +4762,9 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							safe_snprintf(str, slen, "0");
 						}
 					}
+					else if (!str_cmp(field, "role")) {
+						safe_snprintf(str, slen, "%s", class_role[IS_NPC(c) ? ROLE_NONE : GET_CLASS_ROLE(c)]);
+					}
 					else if (!str_cmp(field, "room")) {
 						safe_snprintf(str, slen, "%c%d",UID_CHAR, GET_ROOM_VNUM(IN_ROOM(c)) + ROOM_ID_BASE);
 					}
