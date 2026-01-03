@@ -349,9 +349,13 @@ int command_mtrigger(char_data *actor, char *cmd, char *argument, int mode) {
 	}
 	
 	DL_FOREACH_SAFE2(ROOM_PEOPLE(IN_ROOM(actor)), ch, ch_next, next_in_room) {
-		if (SCRIPT_CHECK(ch, MTRIG_COMMAND) && (actor != ch || !AFF_FLAGGED(ch, AFF_ORDERED))) {
+		if (SCRIPT_CHECK(ch, MTRIG_COMMAND)) {
 			LL_FOREACH_SAFE(TRIGGERS(SCRIPT(ch)), t, next_t) {
 				if (AFF_FLAGGED(ch, AFF_CHARM) && !TRIGGER_CHECK(t, MTRIG_CHARMED)) {
+					continue;
+				}
+				if (actor == ch && AFF_FLAGGED(ch, AFF_ORDERED) && !TRIGGER_CHECK(t, MTRIG_CHARMED)) {
+					// can't be ordered to use tyour own triggers without the charmed flag
 					continue;
 				}
 				if (!TRIGGER_CHECK(t, MTRIG_COMMAND)) {
