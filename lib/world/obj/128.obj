@@ -499,11 +499,16 @@ C
 T 12833
 S
 #12834
-companion plated iron elemental~
-a plated iron elemental companion~
+parts companion plated iron elemental~
+plated iron elemental companion parts~
 A plated iron elemental companion is here.~
-Buys or adds tanking to your temporary companion.
-TBA write description for list id. Temporary companions are incomplete.
+   These modular companion parts are used to construct an iron elemental
+companion, which you can summon and dismiss like any other companion. This
+companion lasts until it dies. Each companion is built from up to 3 modules.
+   This module adds tanking capabilities to your elemental companion. With one
+tanking module, the elemental gains more health and will rescue you in combat.
+A second tanking module boosts its resistances. A third tanking module gives it
+self-healing and boosting capabilities.
 ~
 3 p a 0 0 1
 0 0 0
@@ -516,8 +521,14 @@ S
 companion jagged iron elemental~
 a jagged iron elemental companion~
 A jagged iron elemental companion is here.~
-Buys or adds melee attacks to your temporary companion.
-TBA write description for list id. Temporary companions are incomplete.
+   These modular companion parts are used to construct an iron elemental
+companion, which you can summon and dismiss like any other companion. This
+companion lasts until it dies. Each companion is built from up to 3 modules.
+   This module adds melee combat capabilities to your elemental companion. With
+one melee module, the elemental gains the ability to attack in combat. A second
+melee module gives it the ability to debuff the enemy. A third melee module
+increases its damage and makes it immune to being disarmed. Combining a melee
+and casting module will also boost its damage.
 ~
 3 p a 0 0 2
 0 0 0
@@ -530,8 +541,15 @@ S
 companion magnetic iron elemental~
 a magnetic iron elemental companion~
 A magnetic iron elemental is here.~
-Buys or adds magic to your temporary companion.
-TBA write description for list id. Temporary companions are incomplete.
+   These modular companion parts are used to construct an iron elemental
+companion, which you can summon and dismiss like any other companion. This
+companion lasts until it dies. Each companion is built from up to 3 modules.
+   This module adds casting capabilities to your elemental companion. With one
+casting module, the elemental gains the ability to buff you. A second casting
+module increases the potency of its buffs and, if combined with a melee module,
+changes the melee attack to a magical one. A third casting module makes the
+buffs automatic and makes them happen more often. Combining a melee and casting
+module will also boost the companion's damage.
 ~
 3 p a 0 0 3
 0 0 0
