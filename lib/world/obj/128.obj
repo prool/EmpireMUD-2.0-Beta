@@ -45,6 +45,16 @@ M
 $p snaps shut!~
 T 12806
 S
+#12808
+field magnetic sparking~
+a sparking magnetic field~
+A sparking magnetic field fills the area.~
+This item upgrades the shard companion with a magic attack.
+~
+1 gm an 0 0 2
+0 1 12808
+2 0
+S
 #12809
 lodestone stone small~
 a small lodestone~

@@ -620,32 +620,43 @@ if %has_tier% && (!%actor.companion% || %actor.companion.vnum% != %vnum%)
 end
 *
 * Validate
-if !%error%
-  if %has_tier% > %tier%
-    %send% %actor% You already have a higher level Celestial Forge companion!
-    set error 1
-  elseif %has_tier% == %tier% && %actor.companion.var(%upgrade%,0)%
-    %send% %actor% You already have that upgrade.
-    set error 1
-  end
+if !%error% && %has_tier% > %tier%
+  %send% %actor% You already have a higher level Celestial Forge companion!
+  set error 1
 end
 *
 * check new companion
 if !%error% && %tier% > %has_tier%
   nop %actor.remove_companion(%has_vnum%)%
   nop %actor.add_companion(%new_vnum%)%
-  %mod% %actor% companion %new_vnum%
-  if !%actor.companion% || %actor.companion.vnum% != %new_vnum%
-    %send% %actor% There was an error updating your shard. Please report this as a bug (2).
-    set error 1
-  end
 end
 *
-* upgrades
+* ensure we have him loaded and then upgrade him
 if !%error%
-  set %upgrade% 1
-  remote %upgrade% %actor.companion.id%
-  attach 12837 %actor.companion.id%
+  if !%actor.companion% || %actor.companion.vnum% != %new_vnum%
+    %mod% %actor% companion %new_vnum%
+  end
+  if !%actor.companion% || %actor.companion.vnum% != %new_vnum%
+    %send% %actor% There was an error updating your shard companion. Please report this as a bug (2).
+    set error 1
+  end
+  *
+  * find upgrades
+  set comp %actor.companion%
+  set tank %comp.var(tank,0)%
+  set dps %comp.var(dps,0)%
+  set caster %comp.var(caster,0)%
+  * test first
+  if (%tank% + %dps% + %caster%) >= 3
+    %send% %actor% Your shard companion is already fully upgraded.
+    set error 1
+  else
+    eval %upgrade% %%%upgrade%%% + 1
+    remote %upgrade% %comp.id%
+    if !%comp.has_trigger(12837)%
+      attach 12837 %comp.id%
+    end
+  end
 end
 *
 * Refund?
@@ -710,31 +721,64 @@ nop %actor.remove_companion(%self.vnum%)%
 ~
 #12837
 Celestial Forge: Shard companion setup and update~
-0 bt 100 2
+0 bt 100 4
 L b 12834
 L b 12844
+L c 12808
+L w 12835
 ~
 * handles naming and stats on purchase or summon
 set order 1
 set changed 0
 *
-* upgrade portion
+* detect upgrades
 set tank %self.var(tank,0)%
 set dps %self.var(dps,0)%
 set caster %self.var(caster,0)%
-if %tank%
+*
+* set traits and attach scripts
+nop %self.add_mob_flag(NO-ATTACK)%
+* tank
+if %tank% >= 1
   nop %self.add_mob_flag(CHAMPION)%
   nop %self.add_mob_flag(TANK)%
-  nop %self.add_mob_flag(NO-ATTACK)%
 end
-if %dps%
+if %tank% >= 2
+  * TODO: boost resists
+end
+if %tank% >= 3
+  * TODO: interactive heal, boost, or debuff enemy
+end
+* damage
+if %dps% >= 1
   nop %self.remove_mob_flag(NO-ATTACK)%
+  if %caster% >= 1
+    nop %self.add_mob_flag(DPS)%
+  end
 end
-if %caster%
-  nop %self.add_mob_flag(CASTER)%
+if %dps% >= 2
+  * TODO: interactive debuffs
 end
-if %caster% && %dps%
+if %dps% >= 3
   nop %self.add_mob_flag(DPS)%
+  if !%self.affect(12835)%
+    dg_affect #12835 %self% !DISARM on -1
+  end
+end
+* caster
+if %caster% >= 1
+  nop %self.add_mob_flag(CASTER)%
+  * TODO: interactive buffs
+end
+if %caster% >= 2
+  * TODO: bigger buffs
+  if !%self.eq(wield)%
+    * magic attack
+    %load% obj 12808 %self% wield
+  end
+end
+if %caster% >= 3
+  * TODO: buffs become automatic not interactive
 end
 *
 * determine names
@@ -742,24 +786,58 @@ if %tank% && %dps% && %caster%
   set name maelstone
   set pose whirls chaotically around you
   set order 2
+elseif %tank% == 2 && %dps%
+  set name crusher
+  set pose grinds forward ahead of you
+  set order 2
+elseif %dps% == 2 && %tank%
+  set name mauler
+  set pose hammers violently around the area
+  set order 2
 elseif %tank% && %dps%
   set name shrapnel
   set pose bristles and creaks before you
   set order 2
+elseif %tank% == 2 && %caster%
+  set name anchor
+  set pose stills the air around you
+  set order 2
+elseif %caster% == 2 && %tank%
+  set name gravitic
+  set pose swirls with flying shards
 elseif %tank% && %caster%
   set name bulwark
   set pose stands immovable before you
+  set order 2
+elseif %dps% == 2 && %caster%
+  set name stormrending
+  set pose whirs with spinning blades
+elseif %caster% == 2 && %dps%
+  set name fluxshard
+  set pose spasms with unstable magnetic surges
   set order 2
 elseif %dps% && %caster%
   set name stormcoil
   set pose crackles and sparks above you
   set order 2
+elseif %tank% >= 3
+  set name bastion
+  set pose stands like an unbreakable wall
+  set order 2
 elseif %tank%
   set name plated
   set pose towers grimly over you
+elseif %dps% >= 3
+  set name shardmaw
+  set pose thrashes and roars around you
+  set order 2
 elseif %dps%
   set name jagged
   set pose gnashes and roils before you
+elseif %caster% >= 3
+  set name magnetar
+  set pose churns and screeches in the air
+  set order 2
 elseif %caster%
   set name magnetic
   set pose whirls in the air above you
