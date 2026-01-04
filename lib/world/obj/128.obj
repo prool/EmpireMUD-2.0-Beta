@@ -505,10 +505,10 @@ A plated iron elemental companion is here.~
    These modular companion parts are used to construct an iron elemental
 companion, which you can summon and dismiss like any other companion. This
 companion lasts until it dies. Each companion is built from up to 3 modules.
-   This module adds tanking capabilities to your elemental companion. With one
-tanking module, the elemental gains more health and will rescue you in combat.
-A second tanking module boosts its resistances. A third tanking module gives it
-self-healing and boosting capabilities.
+This module adds tanking capabilities to your elemental companion:
+   1 plated module: It gains more health and will rescue you in combat.
+   2 plated modules: Boosts its damage resistance.
+   3 plated modules: Adds 'order companion rebuild' for 20% healing.
 ~
 3 p a 0 0 1
 0 0 0
@@ -524,11 +524,12 @@ A jagged iron elemental companion is here.~
    These modular companion parts are used to construct an iron elemental
 companion, which you can summon and dismiss like any other companion. This
 companion lasts until it dies. Each companion is built from up to 3 modules.
-   This module adds melee combat capabilities to your elemental companion. With
-one melee module, the elemental gains the ability to attack in combat. A second
-melee module gives it the ability to debuff the enemy. A third melee module
-increases its damage and makes it immune to being disarmed. Combining a melee
-and casting module will also boost its damage.
+This module adds melee combat capabilities to your elemental companion:
+   1 jagged module: It gains the ability to attack in combat.
+   2 jagged modules: Increasese its damage and adds 'order companion breach' to
+      debuff the enemy.
+   3 jagged modules: Increases its damage and makes it immune to disarm.
+   Combining a jagged and magnetic module will also boost its damage.
 ~
 3 p a 0 0 2
 0 0 0
@@ -544,12 +545,13 @@ A magnetic iron elemental is here.~
    These modular companion parts are used to construct an iron elemental
 companion, which you can summon and dismiss like any other companion. This
 companion lasts until it dies. Each companion is built from up to 3 modules.
-   This module adds casting capabilities to your elemental companion. With one
-casting module, the elemental gains the ability to buff you. A second casting
-module increases the potency of its buffs and, if combined with a melee module,
-changes the melee attack to a magical one. A third casting module makes the
-buffs automatic and makes them happen more often. Combining a melee and casting
-module will also boost the companion's damage.
+This module adds casting capabilities to your elemental companion.
+   1 magnetic module: Adds 'order companion magnetize', which buffs you during
+      combat.
+   2 magnetic modules: Increases the potency of its buffs and, if combined with
+      a jagged module, changes the melee attack to a magical one.
+   3 magnetic modules: Increases the buffs again and makes them automatic.
+   Combining a jagged and magnetic module will also boost its damage.
 ~
 3 p a 0 0 3
 0 0 0
