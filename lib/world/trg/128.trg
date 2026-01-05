@@ -681,6 +681,7 @@ Shard companion: Load script~
 0 nt 100 1
 L f 12837
 ~
+wait 1
 %echo% ~%self% assembles itself and whirs to life!
 * also verify setup
 if !%self.has_trigger(12837)%
@@ -783,8 +784,8 @@ end
 if %dps% >= 2
   eval amount %self.level% / 100 + 1
   dg_affect #12834 %self% off
-  dg_affect #12836 %self% BONUS-PHYSICAL %amount% -1
-  dg_affect #12836 %self% BONUS-MAGICAL %amount% -1
+  dg_affect #12834 %self% BONUS-PHYSICAL %amount% -1
+  dg_affect #12834 %self% BONUS-MAGICAL %amount% -1
   set use_triggers %use_triggers% 12842
   * TODO: more interactive debuffs
 end
@@ -892,17 +893,45 @@ else
   set name rough
   set pose is here
 end
+* descs
+if %tank%
+  set desc_class It's a towering figure with massive, broad shoulders supporting a helm with narrow, slitted eyes that emit a dim, steady light.
+end
+if %tank% >= 3
+  set desc_ext %desc_ext% Plates of iron are interlocked seamlessly, creating an impenetrable fortress of a body. It exudes an aura of unyielding defense.
+elseif %tank% >= 2
+  set desc_ext %desc_ext% It exudes an aura of unyielding defense.
+end
+if %dps%
+  set desc_class %desc_class% Its angular limbs are adorned with razor-sharp edges; each movement is accompanied by a sharp, metallic hiss, the sound of frictionless precision.
+end
+if %dps% >= 3
+  set desc_ext %desc_ext% Eyes like incandescent coals burn with intense focus, locked onto the target.
+elseif %dps% >= 2
+  set desc_ext %desc_ext% Glistening iron muscles ripple with latent power, ready to unleash swift, brutal force.
+end
+if %caster%
+  set desc_class %desc_class% Every part of the elemental is intricately covered in arcane symbols, glowing with an ethereal blue light. Its frame is edged with filigree that seems to shift and shimmer.
+end
+if %caster% >= 3
+  set desc_ext %desc_ext% Its eyes are twin orbs of swirling light, constantly shifting in color and intensity.
+elseif %caster% >= 2
+  set desc_ext %desc_ext% An aura of otherworldly power envelops it.
+end
 *
 * type portion
 switch %self.vnum%
   case 12834
     set metal iron
+    set desc_base The heavy, dark gray elemental is build from interlocking shards of iron.
   break
   case 12844
     set metal imperium
+    set desc_base The elemental gleams bright white, reflecting every stray beam of light that touches it.
   break
   default
     set metal tin
+    set desc_base The elemental looks to be made from old tin.
   break
 done
 *
@@ -930,6 +959,9 @@ if %longd% != %self.longdesc%
   %mod% %self% longdesc %longd%
   set changed 1
 end
+* desc
+%mod% %self% lookdesc %desc_base% %desc_class% %desc_ext%
+%mod% %self% append-lookdesc-noformat &0   The elemental will accept commands via 'order companion'.
 *
 * messaging
 if %changed%
@@ -1040,8 +1072,8 @@ if %self.cooldown(12833)%
 end
 *
 if %cmd% == rebuild
-  * heal 10% over 15 seconds
-  eval amount %self.maxhealth% / 30
+  * heal 20% over 15 seconds
+  eval amount %self.maxhealth% / 15
   dg_affect #12832 %self% HEAL-OVER-TIME %amount% 15
   set cooldown 60
   %echo% &&Y~%self% begins rebuilding itself from shards!&&0

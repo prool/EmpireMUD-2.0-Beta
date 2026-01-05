@@ -864,4 +864,23 @@ Delayed Despawner: Attach to Obj with Timer~
 * Marks the adventure complete when the item decays.
 %adventurecomplete%
 ~
+#9684
+Bonus Ability: grant abilities after wait~
+1 n 100 0
+~
+wait 1
+set actor %self.carried_by%
+if %actor%
+  set num 0
+  while %num% <= 2
+    eval vnum %%self.val%num%%%
+    if %vnum% > 0 && %_abil.exists(%vnum%)% && !%actor.has_bonus_ability(%vnum%)%
+      nop %actor.add_bonus_ability(%vnum%)%
+      %send% %actor% &&YYou gain the %_abil.name(%vnum%)% ability!&&0
+    end
+    eval num %num% + 1
+  done
+end
+%purge% %self%
+~
 $
