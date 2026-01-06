@@ -744,7 +744,7 @@ L w 12837
 L w 12838
 ~
 * list of triggers available
-set trigger_list 12841 12842 12843
+set trigger_list 12841 12842 12843 12844
 * handles naming and stats on purchase or summon
 set order 1
 set changed 0
@@ -813,7 +813,7 @@ if %caster% >= 2
   end
 end
 if %caster% >= 3
-  * TODO: buffs become automatic not interactive
+  set use_triggers %use_triggers% 12844
 end
 *
 * check triggers
@@ -1142,12 +1142,6 @@ if %self.cooldown(12833)%
   halt
 end
 *
-set enemy %self.fighting%
-if !%enemy%
-  %send% %actor% Your elemental companion can only magnetize when engaged in combat.
-  halt
-end
-*
 set caster %self.var(caster,1)%
 if %caster% > 1
   set duration 120
@@ -1156,48 +1150,94 @@ else
 end
 *
 eval last_cmd %self.var(last_cmd,0)% + 1
-if %last_cmd% > 4
+if %last_cmd% > 5 || (%last_cmd% > 4 && !%self.var(allow_cmd_5)%)
+  * commands 1-4 unless player meets requirements, then it allows 5
   set last_cmd 1
 end
 remote last_cmd %self.id%
 *
 if %last_cmd% == 1
-  * Haste IF player isn't already hastened
-  if %actor.affect(HASTE)%
+  * Haste IF player isn't already hastened OR is already fighting
+  if %actor.affect(HASTE)% || %actor.fighting%
     set last_cmd 2
     remote last_cmd %self.id%
+    set allow_cmd_5 1
+    remote allow_cmd_5 %self.id%
   else
     * Electromagnetic (haste buff)
-    if %caster% > 1
-      set duration 120
-    else
-      set duration 30
-    end
-    %echo% &&YBits of iron hang in the air as a magnetic pulse from ~%self% passes over ~%actor%!&&0
+    %echo% The air crackles with static as ~%self% begins to glow...
+    %echo% &&YBits of iron hang in the air as a magnetic pulse passes over ~%actor%!&&0
+    dg_affect #12843 %actor% off silent
     dg_affect #12843 %actor% HASTE on %duration%
     set cooldown 30
   end
 end
 if %last_cmd% == 2
   * To-Hit boost (may have cascaded from 1)
-  if %caster% > 1
+  if %caster% >= 3
+    eval amount %self.level% / 5
+  elseif %caster% >= 2
     eval amount %self.level% / 8
   else
     eval amount %self.level% / 10
   end
-  %echo% &&YWave after wave of energy from ~%self% flow over ~%actor%!&&0
+    %echo% ~%self% hums with arcane energy as the symbols on its body glow brighter...
+  %echo% &&YWave after wave of energy flows over ~%actor%!&&0
+  dg_affect #12844 %actor% off silent
   dg_affect #12844 %actor% TO-HIT %amount% %duration%
   set cooldown 30
 elseif %last_cmd% == 3
-  * boosts
-  %echo% &&YMove not implemented.&&0
+  * boosts damage
+  set weap %actor.eq(wield)%
+  if %weap%
+    if %weap.magic%
+      set field BONUS-MAGICAL
+      set desc glowing
+    else
+      set field BONUS-PHYSICAL
+      set desc jagged
+    end
+  else
+    set field BONUS-PHYSICAL
+    set desc jagged
+  end
+  eval amount %self.level% / 25
+    %echo% ~%self% draws delicate symbols in the air using solid light...
+  %echo% &&YDozens of tiny %desc% shards attach themselves to ~%actor%!&&0
+  dg_affect #12845 %actor% off silent
+  dg_affect #12845 %actor% %field% %amount% %duration%
+  set cooldown 30
 elseif %last_cmd% == 4
   * resists?
   %echo% &&YMove not implemented.&&0
+elseif %last_cmd% == 5
+  * special 5th move IF player has haste
+  %echo% &&YMove not implemented.&&0
+  * only allowed once
+  rdelete allow_cmd_5 %self.id%
 end
 if %cooldown%
   nop %self.set_cooldown(12833,%cooldown%)%
   nop %actor.set_cooldown(12833,%cooldown%)%
+end
+~
+#12844
+Shard companion: Caster tier 3 auto-cast~
+0 k 67 1
+L w 12833
+~
+* this ONLY appears on the Caster 3 module
+* This just periodically triggers the 'magnetize' command trigger.
+set actor %self.companion%
+if !%actor%
+  halt
+elseif %self.cooldown(12833)%
+  * cooldown
+  halt
+else
+  * just trigger my command script
+  wait 1
+  magnetize
 end
 ~
 $
