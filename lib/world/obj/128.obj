@@ -501,11 +501,11 @@ S
 #12834
 parts companion plated iron elemental~
 plated iron elemental companion parts~
-A plated iron elemental companion is here.~
-   These modular companion parts are used to construct an iron elemental
-companion, which you can summon and dismiss like any other companion. This
-companion lasts until it dies. Each companion is built from up to 3 modules.
-This module adds tanking capabilities to your elemental companion:
+Some plated iron elemental companion parts are here.~
+   These modular parts are used to construct an iron elemental companion, which
+you can summon and dismiss like any other companion. This elemental lasts until
+it is destroyed. Each elemental is built from up to 3 modules. This module adds
+tanking capabilities:
    1 plated module: It gains more health and will rescue you in combat.
    2 plated modules: Boosts its damage resistance.
    3 plated modules: Adds 'order companion rebuild' for 20% healing.
@@ -518,13 +518,13 @@ C
 T 12834
 S
 #12835
-companion jagged iron elemental~
-a jagged iron elemental companion~
-A jagged iron elemental companion is here.~
-   These modular companion parts are used to construct an iron elemental
-companion, which you can summon and dismiss like any other companion. This
-companion lasts until it dies. Each companion is built from up to 3 modules.
-This module adds melee combat capabilities to your elemental companion:
+parts companion jagged iron elemental~
+jagged iron elemental companion parts~
+Some jagged iron elemental companion parts are here.~
+   These modular parts are used to construct an iron elemental companion, which
+you can summon and dismiss like any other companion. This elemental lasts until
+it is destroyed. Each elemental is built from up to 3 modules. This module adds
+melee combat capabilities:
    1 jagged module: It gains the ability to attack in combat.
    2 jagged modules: Increasese its damage and adds 'order companion breach' to
       debuff the enemy.
@@ -540,12 +540,12 @@ T 12834
 S
 #12836
 companion magnetic iron elemental~
-a magnetic iron elemental companion~
-A magnetic iron elemental is here.~
-   These modular companion parts are used to construct an iron elemental
-companion, which you can summon and dismiss like any other companion. This
-companion lasts until it dies. Each companion is built from up to 3 modules.
-This module adds casting capabilities to your elemental companion.
+magnetic iron elemental companion parts~
+Some magnetic iron elemental parts are here.~
+   These modular parts are used to construct an iron elemental companion, which
+you can summon and dismiss like any other companion. This elemental lasts until
+it is destroyed. Each elemental is built from up to 3 modules. This module adds
+casting capabilities:
    1 magnetic module: Adds 'order companion magnetize', which buffs you during
       combat.
    2 magnetic modules: Increases the potency of its buffs and, if combined with
