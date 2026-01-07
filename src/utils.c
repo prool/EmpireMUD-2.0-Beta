@@ -2651,7 +2651,7 @@ void change_look_desc(char_data *ch, char *str, bool format) {
 		
 		// update companion data
 		if (GET_COMPANION(ch) && (cd = has_companion(GET_COMPANION(ch), GET_MOB_VNUM(ch)))) {
-			add_companion_mod(cd, CMOD_LOOK_DESC, 0, str);
+			add_companion_mod(cd, CMOD_LOOK_DESC, 0, NULLSAFE(GET_LOOK_DESC(ch)));
 			queue_delayed_update(GET_COMPANION(ch), CDU_SAVE);
 		}
 	}
@@ -2708,7 +2708,7 @@ void change_look_desc_append(char_data *ch, char *str, bool format) {
 		
 		// update companion data
 		if (GET_COMPANION(ch) && (cd = has_companion(GET_COMPANION(ch), GET_MOB_VNUM(ch)))) {
-			add_companion_mod(cd, CMOD_LOOK_DESC, 0, str);
+			add_companion_mod(cd, CMOD_LOOK_DESC, 0, NULLSAFE(GET_LOOK_DESC(ch)));
 			queue_delayed_update(GET_COMPANION(ch), CDU_SAVE);
 		}
 	}
