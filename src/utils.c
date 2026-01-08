@@ -2651,7 +2651,7 @@ void change_look_desc(char_data *ch, char *str, bool format) {
 		
 		// update companion data
 		if (GET_COMPANION(ch) && (cd = has_companion(GET_COMPANION(ch), GET_MOB_VNUM(ch)))) {
-			add_companion_mod(cd, CMOD_LOOK_DESC, 0, str);
+			add_companion_mod(cd, CMOD_LOOK_DESC, 0, NULLSAFE(GET_LOOK_DESC(ch)));
 			queue_delayed_update(GET_COMPANION(ch), CDU_SAVE);
 		}
 	}
@@ -2708,7 +2708,7 @@ void change_look_desc_append(char_data *ch, char *str, bool format) {
 		
 		// update companion data
 		if (GET_COMPANION(ch) && (cd = has_companion(GET_COMPANION(ch), GET_MOB_VNUM(ch)))) {
-			add_companion_mod(cd, CMOD_LOOK_DESC, 0, str);
+			add_companion_mod(cd, CMOD_LOOK_DESC, 0, NULLSAFE(GET_LOOK_DESC(ch)));
 			queue_delayed_update(GET_COMPANION(ch), CDU_SAVE);
 		}
 	}
@@ -7389,12 +7389,12 @@ void relocate_players(room_data *room, room_data *to_room) {
 			}
 			
 			char_to_room(ch, target);
-			enter_triggers(ch, NO_DIR, "system", FALSE);
+			enter_triggers(ch, NO_DIR, "system", FALSE, NULL);
 			qt_visit_room(ch, IN_ROOM(ch));
 			GET_LAST_DIR(ch) = NO_DIR;
 			look_at_room(ch);
 			act("$n arrives.", TRUE, ch, NULL, NULL, TO_ROOM);
-			greet_triggers(ch, NO_DIR, "system", FALSE);
+			greet_triggers(ch, NO_DIR, "system", FALSE, NULL);
 			msdp_update_room(ch);
 		}
 	}

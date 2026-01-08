@@ -545,9 +545,9 @@ L w 5102
 L w 5103
 L w 5104
 shatter~
-eval target %%actor.obj_target(%arg%)%%
+eval target %%actor.obj_target(%arg.argument1%)%%
 if !%target%
-  %send% %actor% Convert what into shards?
+  %send% %actor% You don't see that to shatter here.
   halt
 end
 if !%target.carried_by%
@@ -563,29 +563,30 @@ if %target.is_flagged(*keep)%
   halt
 end
 * 26 ~ 200
-eval level_modified %target.level% + 25
+eval level_modified %target.level%
 eval level_in_range (%level_modified% // 100)
 if %level_in_range% == 0
   set level_in_range 100
 end
-eval shard_value %level_in_range% + 25
+eval shard_value %level_in_range%
 if %target.is_flagged(HARD-DROP)%
   eval shard_value %shard_value% + 25
 end
 if %target.is_flagged(GROUP-DROP)%
   eval shard_value %shard_value% + 50
 end
-* 0~75: 5100
-* 76~175: 5101
-* 176~275: 5102
-* 276~375: 5103
+* 0~100: 5100
+* 101~200: 5101
+* 201~300: 5102
+* 301~400: 5103
+* 401~500: 5104
 eval shard_type 5100 + ((%level_modified%-1) / 100)
 eval currency_name %%currency.%shard_type%%%
 if !%currency_name% || %currency_name% == UNKNOWN
-  %send% %actor% @%target% is too high level to convert into any current type of shards!
+  %send% %actor% @%target% is too high level to shatter into any current type of shard!
   halt
 end
-if %shard_value% < 1 || %target.quest% || %target.level% < 25
+if %shard_value% < 1 || %target.quest%
   %send% %actor% @%target% can't be converted into shards.
   halt
 end

@@ -370,6 +370,7 @@ Variables:
   &c%actor%&0 - The character entering the room.
   &c%direction%&0 - The direction the character came from, or 'none'.
   &c%method%&0 - Type of movement (see METHOD LIST).
+  &c%was_in&0 - Room the character was in before, if any (may be empty).
 
 You can add the "Player-in-Room" modifier.
 
@@ -502,6 +503,7 @@ Note: Entry triggers attached to charmed mobs will not fire unless the trigger
 
 Variables:
   &c%method%&0 - Type of movement (see METHOD LIST).
+  &c%was_in&0 - Room the character was in before, if any (may be empty).
 
 You can add the "Player-in-Room" modifier.
 
@@ -567,6 +569,7 @@ Variables:
   &c%actor%&0 - The character entering the room.
   &c%direction%&0 - The direction the character came from, or 'none'.
   &c%method%&0 - Type of movement (see METHOD LIST).
+  &c%was_in&0 - Room the character was in before, if any (may be empty).
 
 You can add the "Player-in-Room" modifier. However, this will make the trigger
 fire only when a player is ALREADY in the room with the pre-greet trigger.
@@ -718,7 +721,7 @@ When using field - The variable returns:
 Additional data helpers:
 &c_obj.exists(VNUM)&0 - Whether or not this vnum exists.
 &c_obj.name(VNUM)&0 - The name of the one with this vnum.
-(Also available for: &c%_adv%, %_mob%&0)
+(Also available for: &c%_abil%, %_adv%, %_mob%&0)
 
 Names and pronouns:
 &c~%var%&0 - name, someone, you

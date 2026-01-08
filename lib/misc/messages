@@ -3249,6 +3249,42 @@ Blood wells from $N's puncture wounds.
 #
 #
 
+M12808 abc 21 +
+magic shock (disarmable)~
+~
+shock~
+shocks~
+shock~
+1 2 2.6 2.8 3.0
+You create an arc of electricity straight through $N, stopping $S heart!
+$n creates an arc of electricity straight through you, stopping your heart!
+$n creates an arc of electricity straight through $N, stopping $S heart!
+You shoot sparks at $N, but nothing connects.
+$n shoots sparks at you, to no effect.
+$n shoots sparks at $N, to no effect.
+#
+#
+#
+Your bolt of electricity hits $N, to no avail.
+$n's bolt of electricity hits you, to no avail.
+$n's bolt of electricity hits $N, to no avail.
+
+M12808 abc 21 
+magic shock (disarmable)~
+~
+You hurl sparks at $N, cutting through $M, killing $M!
+$n hurls sparks at you, cutting through you, until it kills you!
+$n hurls sparks at $N, cutting through $M, until it kills $M!
+You try to shock $N, but $E dodges!
+$n tries to shock you, but you dodge!
+$n tries to shock $N, but $E dodges!
+#
+#
+#
+Your bolt of electricity hits $N, to no avail.
+$n's bolt of electricity hits you, to no avail.
+$n's bolt of electricity hits $N, to no avail.
+
 M16688 abc 32 +
 toy blaster~
 ~

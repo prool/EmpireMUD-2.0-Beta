@@ -413,6 +413,10 @@ char *ability_color(char_data *ch, ability_data *abil) {
 	bool can_buy, has_bought, has_maxed;
 	struct skill_ability *skab;
 	
+	if (!abil) {
+		return "\tr";
+	}
+	
 	has_bought = has_ability(ch, ABIL_VNUM(abil));
 	can_buy = (ABIL_ASSIGNED_SKILL(abil) && get_skill_level(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) >= ABIL_SKILL_LEVEL(abil)) && (skab = find_skill_ability(ABIL_ASSIGNED_SKILL(abil), abil)) && (skab->prerequisite == NO_ABIL || has_ability(ch, skab->prerequisite));
 	has_maxed = has_bought && (levels_gained_from_ability(ch, abil) >= GAINS_PER_ABILITY || (!ABIL_ASSIGNED_SKILL(abil) || IS_ANY_SKILL_CAP(ch, SKILL_VNUM(ABIL_ASSIGNED_SKILL(abil))) || !can_gain_skill_from(ch, abil)));
@@ -1840,6 +1844,7 @@ ACMD(do_skills) {
 	bool found, any, line;
 	bool sort_alpha = FALSE, sort_level = FALSE, want_min = FALSE, want_max = FALSE, want_all = FALSE, show_all_info = FALSE;
 	int min_level = -1, max_level = -1;
+	struct player_bonus_ability *bonus_abil, *next_bonus_abil;
 	
 	// attempt to parse the args first, to get -l [range] or -a
 	if (*argument) {
@@ -2041,6 +2046,14 @@ ACMD(do_skills) {
 				continue;	// only looking for abilities with parents
 			}
 			
+			safe_snprintf(lbuf + strlen(lbuf), sizeof(lbuf) - strlen(lbuf), "%s%s%s\t0", *lbuf ? ", ": "", ability_color(ch, abil), ABIL_NAME(abil));
+		}
+		HASH_ITER(hh, GET_BONUS_ABILITIES(ch), bonus_abil, next_bonus_abil) {
+			if (!(abil = ability_proto(bonus_abil->vnum))) {
+				continue;	// no ability?
+			}
+			
+			// show it
 			safe_snprintf(lbuf + strlen(lbuf), sizeof(lbuf) - strlen(lbuf), "%s%s%s\t0", *lbuf ? ", ": "", ability_color(ch, abil), ABIL_NAME(abil));
 		}
 		if (*lbuf) {

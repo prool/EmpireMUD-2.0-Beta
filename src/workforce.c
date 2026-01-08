@@ -2731,6 +2731,7 @@ void do_chore_fire_brigade(empire_data *emp, room_data *room) {
 		
 			// compute how many in order to put it out before it burns down (giving the mob an hour to spawn)
 			total_ticks = (int)(get_burn_down_time_seconds(room) / SECS_PER_MUD_HOUR) - 2;
+			total_ticks = MAX(1, total_ticks);	// prevent div-0 error
 			per_hour = ceil(config_get_int("fire_extinguish_value") / total_ticks) + 1;
 			per_hour = MAX(1, per_hour);	// for safety
 		

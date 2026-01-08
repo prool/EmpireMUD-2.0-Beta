@@ -1128,7 +1128,7 @@ ACMD(do_mquest) {
 /* lets the mobile goto any location it wishes that is not private */
 ACMD(do_mgoto) {
 	char arg[MAX_INPUT_LENGTH];
-	room_data *location;
+	room_data *location, *was_in;
 
 	if (!MOB_OR_IMPL(ch)) {
 		send_config_msg(ch, "huh_string");
@@ -1153,10 +1153,12 @@ ACMD(do_mgoto) {
 	if (FIGHTING(ch))
 		stop_fighting(ch);
 
+	was_in = IN_ROOM(ch);
+	
 	char_from_room(ch);
 	char_to_room(ch, location);
-	enter_triggers(ch, NO_DIR, "script", FALSE);
-	greet_triggers(ch, NO_DIR, "script", FALSE);
+	enter_triggers(ch, NO_DIR, "script", FALSE, was_in);
+	greet_triggers(ch, NO_DIR, "script", FALSE, was_in);
 	msdp_update_room(ch);
 }
 
@@ -1390,7 +1392,7 @@ ACMD(do_mrestore) {
 */
 ACMD(do_mteleport) {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
-	room_data *target;
+	room_data *target, *was_in;
 	char_data *vict, *next_ch;
 	struct instance_data *inst;
 	vehicle_data *veh;
@@ -1426,13 +1428,14 @@ ACMD(do_mteleport) {
 			return;
 		}
 		
-		DL_FOREACH_SAFE2(ROOM_PEOPLE(IN_ROOM(ch)), vict, next_ch, next_in_room) {
+		was_in = IN_ROOM(ch);
+		DL_FOREACH_SAFE2(ROOM_PEOPLE(was_in), vict, next_ch, next_in_room) {
 			if (valid_dg_target(vict, DG_ALLOW_GODS)) {
 				GET_LAST_DIR(vict) = NO_DIR;
 				char_from_room(vict);
 				char_to_room(vict, target);
-				enter_triggers(vict, NO_DIR, "script", FALSE);
-				greet_triggers(vict, NO_DIR, "script", FALSE);
+				enter_triggers(vict, NO_DIR, "script", FALSE, was_in);
+				greet_triggers(vict, NO_DIR, "script", FALSE, was_in);
 				qt_visit_room(vict, IN_ROOM(vict));
 				RESET_LAST_MESSAGED_TEMPERATURE(vict);
 				msdp_update_room(vict);
@@ -1460,11 +1463,12 @@ ACMD(do_mteleport) {
 					
 					// teleport players and their followers
 					if (!IS_NPC(vict) || (GET_LEADER(vict) && !IS_NPC(GET_LEADER(vict)))) {
+						was_in = IN_ROOM(vict);
 						char_from_room(vict);
 						char_to_room(vict, target);
 						GET_LAST_DIR(vict) = NO_DIR;
-						enter_triggers(vict, NO_DIR, "script", FALSE);
-						greet_triggers(vict, NO_DIR, "script", FALSE);
+						enter_triggers(vict, NO_DIR, "script", FALSE, was_in);
+						greet_triggers(vict, NO_DIR, "script", FALSE, was_in);
 						qt_visit_room(vict, IN_ROOM(vict));
 						RESET_LAST_MESSAGED_TEMPERATURE(vict);
 						msdp_update_room(vict);
@@ -1481,11 +1485,12 @@ ACMD(do_mteleport) {
 				return;
 			}
 			if (valid_dg_target(vict, DG_ALLOW_GODS)) {
+				was_in = IN_ROOM(vict);
 				GET_LAST_DIR(vict) = NO_DIR;
 				char_from_room(vict);
 				char_to_room(vict, target);
-				enter_triggers(vict, NO_DIR, "script", FALSE);
-				greet_triggers(vict, NO_DIR, "script", FALSE);
+				enter_triggers(vict, NO_DIR, "script", FALSE, was_in);
+				greet_triggers(vict, NO_DIR, "script", FALSE, was_in);
 				qt_visit_room(vict, IN_ROOM(vict));
 				RESET_LAST_MESSAGED_TEMPERATURE(vict);
 				msdp_update_room(vict);

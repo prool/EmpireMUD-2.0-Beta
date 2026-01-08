@@ -1054,8 +1054,8 @@ OCMD(do_oteleport) {
 			char_from_room(ch);
 			char_to_room(ch, target);
 			GET_LAST_DIR(ch) = NO_DIR;
-			enter_triggers(ch, NO_DIR, "script", FALSE);
-			greet_triggers(ch, NO_DIR, "script", FALSE);
+			enter_triggers(ch, NO_DIR, "script", FALSE, orm);
+			greet_triggers(ch, NO_DIR, "script", FALSE, orm);
 			qt_visit_room(ch, IN_ROOM(ch));
 			RESET_LAST_MESSAGED_TEMPERATURE(ch);
 			msdp_update_room(ch);
@@ -1085,8 +1085,8 @@ OCMD(do_oteleport) {
 						char_from_room(ch);
 						char_to_room(ch, target);
 						GET_LAST_DIR(ch) = NO_DIR;
-						enter_triggers(ch, NO_DIR, "script", FALSE);
-						greet_triggers(ch, NO_DIR, "script", FALSE);
+						enter_triggers(ch, NO_DIR, "script", FALSE, orm);
+						greet_triggers(ch, NO_DIR, "script", FALSE, orm);
 						qt_visit_room(ch, IN_ROOM(ch));
 						RESET_LAST_MESSAGED_TEMPERATURE(ch);
 						msdp_update_room(ch);
@@ -1105,8 +1105,8 @@ OCMD(do_oteleport) {
 				char_from_room(ch);
 				char_to_room(ch, target);
 				GET_LAST_DIR(ch) = NO_DIR;
-				enter_triggers(ch, NO_DIR, "script", FALSE);
-				greet_triggers(ch, NO_DIR, "script", FALSE);
+				enter_triggers(ch, NO_DIR, "script", FALSE, orm);
+				greet_triggers(ch, NO_DIR, "script", FALSE, orm);
 				qt_visit_room(ch, IN_ROOM(ch));
 				RESET_LAST_MESSAGED_TEMPERATURE(ch);
 				msdp_update_room(ch);

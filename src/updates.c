@@ -4659,6 +4659,45 @@ void b5_196_mountain_eng(void) {
 }
 
 
+// b5.201: Replace artisan in celestial forges
+void b5_201_starsmith(void) {
+	bool found_new;
+	empire_data *emp, *next_emp;
+	struct empire_npc_data *npc, *next_npc;
+	struct empire_territory_data *ter, *next_ter;
+	
+	const bld_vnum CELESTIAL_FORGE = 5195;
+	const mob_vnum OLD_ARTISAN = 212;
+	const mob_vnum NEW_ARTISAN = 12800;
+	
+	HASH_ITER(hh, empire_table, emp, next_emp) {
+		HASH_ITER(hh, EMPIRE_TERRITORY_LIST(emp), ter, next_ter) {
+			if (!GET_BUILDING(ter->room) || GET_BLD_VNUM(GET_BUILDING(ter->room)) != CELESTIAL_FORGE) {
+				continue;	// not a celestial forge
+			}
+			
+			found_new = FALSE;
+			
+			// detect npcs
+			LL_FOREACH_SAFE(ter->npcs, npc, next_npc) {
+				if (npc->vnum == OLD_ARTISAN) {
+					// delete old artisan
+					delete_territory_npc(ter, npc);
+				}
+				else if (npc->vnum == NEW_ARTISAN) {
+					found_new = TRUE;
+				}
+			}
+			
+			// populate a new one if needed?
+			if (!found_new) {
+				populate_npc(ter->room, NULL, TRUE);
+			}
+		}
+	}
+}
+
+
 // ADD HERE, above: more beta 5 update functions
 
 
@@ -4779,6 +4818,7 @@ const struct {
 	{ "b5.194", b5_194_tropical_terrain_overhaul, NULL, "Updating tropical tiles to new terrain vnums 200-260" },
 	{ "b5.196", b5_196_mine_data, NULL, "Updating mines with fullness data" },
 	{ "b5.196a", b5_196_mountain_eng, NULL, "Updating empires with Mountain Engineering" },
+	{ "b5.201", b5_201_starsmith, NULL, "Updating Celestial Forges with new artisan" },
 	
 	// ADD HERE, above: more beta 5 update lines
 	

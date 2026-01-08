@@ -41,7 +41,7 @@ any home where the elves will collect them while delivering presents.
 the table for the elves to collect. By the time you turn around, they're gone!
 There's a stocking in their place, and it has your name on it.
 ~
-20 dej 0 0 -1
+21 dej 0 0 -1
 A
 1 10702
 D 10700
@@ -53,7 +53,7 @@ R
 2 16678 1
 T 10700
 W
-2 10722 0 1 a
+2 10722 0 20 a
 W
 36 10700 0 1 a
 Z

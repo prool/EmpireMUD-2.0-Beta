@@ -637,21 +637,21 @@ ACMD(do_infiltrate) {
 		if (!has_player_tech(ch, PTECH_INFILTRATE_UPGRADE) && !player_tech_skill_check(ch, PTECH_INFILTRATE, (emp && EMPIRE_HAS_TECH(emp, TECH_LOCKS)) ? DIFF_RARELY : DIFF_HARD)) {
 			msg_to_char(ch, "You fail.\r\n");
 		}
-		else if (!pre_greet_mtrigger(ch, to_room, dir, "move")) {
+		else if (!pre_greet_mtrigger(ch, to_room, dir, "move", was_in)) {
 			// no message
 		}
 		else {
 			char_from_room(ch);
 			char_to_room(ch, to_room);
 			
-			if (!enter_triggers(ch, dir, "move", TRUE)) {
+			if (!enter_triggers(ch, dir, "move", TRUE, was_in)) {
 				char_to_room(ch, was_in);
 				return;
 			}
 			
 			look_at_room(ch);
 			
-			if (!greet_triggers(ch, dir, "move", TRUE)) {
+			if (!greet_triggers(ch, dir, "move", TRUE, was_in)) {
 				char_to_room(ch, was_in);
 				look_at_room(ch);
 				return;

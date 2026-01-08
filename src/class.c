@@ -52,7 +52,7 @@ int sort_class_abilities(struct class_ability *a, struct class_ability *b);
 /**
 * Checks that the player has the correct set of abilities from their class,
 * role, synergy, etc; and removes any they shouldn't have. This also applies
-* bonus abilities. This function ignores immortals.
+* bonus abilities. This function will NOT remove abilities from immortals.
 *
 * @param char_data *ch The player to check.
 * @param class_data *cls Optional: Any player class, or NULL to detect from the player.
@@ -78,7 +78,7 @@ void assign_class_and_extra_abilities(char_data *ch, class_data *cls, int role) 
 	struct player_bonus_ability *bonus_abil, *next_bonus_abil;
 
 	// simple sanity
-	if (IS_NPC(ch) || IS_IMMORTAL(ch)) {
+	if (IS_NPC(ch)) {
 		return;
 	}
 	
@@ -210,7 +210,7 @@ void assign_class_and_extra_abilities(char_data *ch, class_data *cls, int role) 
 	// STEP 5: assign/remove abilities
 	HASH_ITER(hh, hash, aat, next_aat) {
 		// remove any they shouldn't have
-		if (has_ability(ch, aat->vnum) && !aat->can_have) {
+		if (has_ability(ch, aat->vnum) && !aat->can_have && !IS_IMMORTAL(ch)) {
 			remove_ability(ch, aat->ptr, FALSE);
 			check_skill_sell(ch, aat->ptr);
 			qt_change_ability(ch, aat->vnum);

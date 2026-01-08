@@ -10,6 +10,7 @@ The Mining Tunnel of a Bygone Age~
 fireflies that scatter as you approach. At one end, rocky steps rise up through
 a narrow hole where the air smells of warm, spicy incense. At the other, the
 tunnel ends abruptly.
+Commands: return
 ~
 ci 0 0 12810
 D8
@@ -47,9 +48,11 @@ The end of the tunnel is a curved rocky wall cut by miners' picks.
 ~
 T 12803
 T 12810
+T 12802
+T 12801
 S
 #12811
-The Lodestone Forge~
+Lodestone Forge~
    An echoing, high-pitched tap follows each step you take on the iron floor.
 Around you, weapons and shields of all sorts hang on bright red walls, lit by
 iron lanterns. Above, the roof is open, showing the infinite expanse of a
@@ -125,9 +128,10 @@ A hole in the floor contains stone steps that lead down into the tunnel.
 ~
 M 0 12811 100.00 1
 T 12803
+T 12802
 S
 #12812
-The Lodestone Forge~
+Lodestone Forge~
    The tap-tap-tap of light hammering echoes in time with the twinkling stars
 overhead. A trio of small anvils sit on wooden blocks that do little to dampen
 the sound. Between them, a red-hot pit smoulders with spiced smoke from
@@ -180,9 +184,10 @@ lodestone, which seems to tug at the chain as it pulls upward and to the north.
 ~
 M 0 12812 100.00 1
 T 12803
+T 12802
 S
 #12813
-The Lodestone Forge~
+Lodestone Forge~
    A pair of small anvils stand side-by-side atop a wooden block in front of
 a smelting pit that sparks and crackles as fresh incense sends up smoke with a
 warm, spicy aroma that rises upward and out of the open roof. The iron tiles
@@ -236,11 +241,17 @@ lodestone stone chain~
    At the center of the forge, a huge, silvery lodestone strains against its
 iron chain as it pulls to the north.
 ~
+E
+stacks piles designs patterns~
+   There are stacks of patterns and designs for various earrings all over, but
+you can't really understand the notes scrawled on them.
+~
 M 0 12813 100.00 1
 T 12803
+T 12802
 S
 #12814
-The Lodestone Forge~
+Lodestone Forge~
    A mammoth anvil looms over an open smelting pit, wreathed in the warm, smoky
 incense that has been sprinkled over the coals. Tools of every sort hang
 between lanterns on the red wall, some so close to the open roof that they're
@@ -294,9 +305,10 @@ Iron lanterns hang along the walls, casting shadows around the tools.
 ~
 M 0 12814 100.00 1
 T 12803
+T 12802
 S
 #12815
-The Lodestone Forge~
+Lodestone Forge~
    Cast iron barrels are stacked from the iron floor to the open top of the red
 walls, forming heavy walls of their own. Each is marked in fiery red letters,
 no two labeled alike. Wisps of smoke weave their way between them, carrying the
@@ -361,5 +373,6 @@ Barrels are stacked so high you can hardly see the lanterns on the wall.
 ~
 M 0 12815 100.00 1
 T 12803
+T 12802
 S
 $

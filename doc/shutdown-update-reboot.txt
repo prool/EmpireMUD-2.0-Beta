@@ -20,7 +20,7 @@ Usage:  shutdown [now | timer | cancel] [normal | pause | die | complete]
 Timing:
 - now: Shuts down immediately.
 - timer: Provide a number of minutes; the shutdown will happen after that.
-- cancel: Cancles a shutdown timer.
+- cancel: Cancels a shutdown timer.
 
 Types:
 - normal: The MUD will shut down, but if the autorun script is still going, it

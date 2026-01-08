@@ -1807,6 +1807,8 @@ pride and glory, lest they be unprepared when war comes.
 I 29 5007 100.00 1 r  # RUINS-TO-BLD: Ruins
 R
 6075 2 1 0
+U
+1 5171
 S
 #5173
 Gatehouse~
@@ -2352,14 +2354,14 @@ Celestial Forge~
 The Celestial Forge~
 &W[FF]~
 48 5 z 0
-0 0 0 212
+0 0 0 12800
 C
 forge, smelt, shatter <item to destroy>~
 D
    The towering stone walls of the celestial forge are offset just enough that
 light comes cascading through thousands of crevices, forming stars that dance
-around the room as the sun crosses the sky. The forge is so hot that you begin
-sweating instantly, unable to escape the powerful furnace.
+around the room as the sun crosses the sky. The forge burns as hot as the sun
+but mercifully, you feel no blistering heat.
 ~
 F
 hv
