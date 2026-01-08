@@ -1124,6 +1124,7 @@ elseif %self.fighting% != %enemy% && (!%actor.can_fight(%enemy%)% || !%self.can_
   halt
 end
 *
+set dps %self.var(dps)%
 set move %random.4%
 *
 if %move% == 1
@@ -1138,7 +1139,54 @@ if %move% == 1
   end
   set cooldown 30
 elseif %move% == 2
-  
+  * shard pin: immobilize / stun
+  %echo% &&Y~%self% launches jagged shards at ~%enemy%, pinning *%enemy% down!&&0
+  if %enemy.aff_flagged(IMMUNE-PHYSICAL-DEBUFFS)%
+    * alternate move (immune)
+    eval amount %self.level% / 10
+    dg_affect #12831 @%self% %enemy% off silent
+    dg_affect #12831 %enemy% DODGE -%amount% 30
+  elseif %dps% >= 3 && !%enemy.aff_flagged(!STUN)%
+    * stun
+    dg_affect #12831 @%self% %enemy% off silent
+    dg_affect #12831 %enemy% STUNNED on 5
+  else
+    * immobilize
+    dg_affect #12831 @%self% %enemy% off silent
+    dg_affect #12831 %enemy% IMMOBILIZED on 15
+  end
+  if !%self.fighting%
+    mkill %enemy%
+  end
+  set cooldown 30
+elseif %move% == 3
+  * shard flurry: slow target
+  if %dps% >= 3
+    eval duration 30
+  else
+    eval duration 20
+  end
+  dg_affect #12830 @%self% %enemy% off
+  dg_affect #12830 %enemy% SLOW on %durtion%
+  %echo% &&Y~%self% unleashes a shard flurry at ~%enemy%, slowing ^%enemy% advance considerably!&&0
+  if !%self.fighting%
+    mkill %enemy%
+  end
+  set cooldown 30
+elseif %move% == 4
+  * shard pen: reduce dodge
+  if %dps% >= 3
+    eval amount %self.level% / 8
+  else
+    eval amount %self.level% / 10
+  end
+  dg_affect #12829 @%self% %enemy% off
+  dg_affect #12829 %enemy% DODGE -%amount% 30
+  %echo% &&Y~%self% creates a pen around ~%enemy% using shards from its body!&&0
+  if !%self.fighting%
+    mkill %enemy%
+  end
+  set cooldown 30
 end
 if %cooldown%
   nop %self.set_cooldown(12833,%cooldown%)%
