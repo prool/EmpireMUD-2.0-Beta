@@ -1085,7 +1085,10 @@ end
 ~
 #12842
 Shard companion: DPS tier 2 command: actuate~
-0 ct 0 2
+0 ct 0 5
+L w 12829
+L w 12830
+L w 12831
 L w 12833
 L w 12842
 actuate~
