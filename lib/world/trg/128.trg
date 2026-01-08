@@ -772,7 +772,6 @@ if %tank% >= 3
   dg_affect #12841 %self% off
   dg_affect #12841 %self% CRAFTING 1 -1
   set use_triggers %use_triggers% 12841
-  * TODO: interactive boost, or debuff enemy
 end
 * damage
 if %dps% >= 1
@@ -787,7 +786,6 @@ if %dps% >= 2
   dg_affect #12834 %self% BONUS-PHYSICAL %amount% -1
   dg_affect #12834 %self% BONUS-MAGICAL %amount% -1
   set use_triggers %use_triggers% 12842
-  * TODO: more interactive debuffs
 end
 if %dps% >= 3
   nop %self.add_mob_flag(DPS)%
