@@ -564,8 +564,7 @@ L w 5102
 L w 5103
 L w 5104
 ~
-* TODO fix cost
-set cost 111
+set cost 150
 *
 * list in order from highest to lowest, count=max
 set comp_list 12844 12834
@@ -721,8 +720,16 @@ switch %self.vnum%
   break
 done
 if %tier%
+  * refund shard type
   eval genv 5100 + %tier% - 1
-  eval cost %random.100%
+  * refund amount based on levels
+  eval number %self.var(tank,0)% + %self.var(dps,0)% + %self.var(caster,0)%
+  set cost 0
+  while %number% > 0
+    eval cost %cost% + %random.90% + 10
+    eval number %number% - 1
+  done
+  * refund
   nop %actor.give_currency(%genv%,%cost%)%
   eval curname %%currency.%genv%(%cost%)%%
   %send% %actor% You scavenge %cost% %curname% as ~%self% falls apart.
