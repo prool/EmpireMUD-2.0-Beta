@@ -45,6 +45,24 @@ enhanced field~
 T4
 Its magnetic field has been enhanced with tremendous power.~
 S
+#12839
+resonance field~
+4 0
+0 0 0 0
+T0
+Your resonance field dissipates and your regeneration returns to normal.~
+T2
+You feel uplifted by the resonance!~
+S
+#12840
+magnetic deflection~
+4 0
+0 0 0 0
+T0
+Your magnetic deflection field ends.~
+T2
+The magnetic field seems to be deflecting attacks!~
+S
 #12841
 advanced defense~
 4 0
@@ -80,5 +98,12 @@ T0
 Your weapon is no longer guided as the waves of energy fade.~
 T2
 The waves of energy seem to guide your weapon!~
+S
+#12845
+shard-covered~
+4 0
+0 0 0 0
+T0
+The shards drop off of you and your damage returns to normal.~
 S
 $

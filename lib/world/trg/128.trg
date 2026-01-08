@@ -1124,10 +1124,13 @@ end
 ~
 #12843
 Shard companion: Caster tier 1 and 2 magnetize move~
-0 ct 0 3
+0 ct 0 6
 L w 12833
+L w 12839
+L w 12840
 L w 12843
 L w 12844
+L w 12845
 magnetize~
 if %actor% != %self%
   return 0
@@ -1181,12 +1184,25 @@ if %last_cmd% == 2
   else
     eval amount %self.level% / 10
   end
-    %echo% ~%self% hums with arcane energy as the symbols on its body glow brighter...
+  %echo% ~%self% hums with arcane energy as the symbols on its body glow brighter...
   %echo% &&YWave after wave of energy flows over ~%actor%!&&0
   dg_affect #12844 %actor% off silent
   dg_affect #12844 %actor% TO-HIT %amount% %duration%
   set cooldown 30
 elseif %last_cmd% == 3
+  * dodge
+  if %caster% >= 3
+    eval amount %self.level% / 5 * 1.43
+  elseif %caster% >= 2
+    eval amount %self.level% / 5
+  else
+    eval amount %self.level% / 10
+  end
+  %echo% &&Y~%self% extends its magnetic deflection field over ~%actor%!&&0
+  dg_affect #12840 %actor% off silent
+  dg_affect #12840 %actor% DODGE %amount% %duration%
+  set cooldown 30
+elseif %last_cmd% == 4
   * boosts damage
   set weap %actor.eq(wield)%
   if %weap%
@@ -1202,17 +1218,33 @@ elseif %last_cmd% == 3
     set desc jagged
   end
   eval amount %self.level% / 25
-    %echo% ~%self% draws delicate symbols in the air using solid light...
+  %echo% ~%self% draws delicate symbols in the air using solid light...
   %echo% &&YDozens of tiny %desc% shards attach themselves to ~%actor%!&&0
   dg_affect #12845 %actor% off silent
   dg_affect #12845 %actor% %field% %amount% %duration%
   set cooldown 30
-elseif %last_cmd% == 4
-  * resists?
-  %echo% &&YMove not implemented.&&0
 elseif %last_cmd% == 5
-  * special 5th move IF player has haste
-  %echo% &&YMove not implemented.&&0
+  * special regen move IF player had haste (skipped otherwise)
+  if %actor.role% == Caster || %actor.role% == Healer
+    set field MANA-REGEN
+  elseif %actor.role% == Tank || %actor.role == Melee
+    set field MOVE-REGEN
+  elseif %actor.mana% < %actor.maxmana%
+    set field MANA-REGEN
+  else
+    set field MOVE-REGEN
+  end
+  if %caster% >= 3
+    eval amount %self.level% / 10
+  elseif %caster% >= 2
+    eval amount %self.level% / 15
+  else
+    eval amount %self.level% / 30
+  end
+  %echo% &&Y~%self% vibrates near ~%actor% with a strong magnetic resonance!&&0
+  dg_affect #12839 %actor% off silent
+  dg_affect #12839 %actor% %field% %amount% %duration%
+  set cooldown 30
   * only allowed once
   rdelete allow_cmd_5 %self.id%
 end
