@@ -508,7 +508,8 @@ it is destroyed. Each elemental is built from up to 3 modules. This module adds
 tanking capabilities:
    1 plated module: It gains more health and will rescue you in combat.
    2 plated modules: Boosts its damage resistance.
-   3 plated modules: Adds 'order companion rebuild' for 20% healing.
+   3 plated modules: Adds 'order companion' options for healing, dodging,
+      taunting, and clearing itself of debuffs.
 ~
 3 p a 0 0 1
 0 0 0

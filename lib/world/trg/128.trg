@@ -1053,11 +1053,11 @@ else
 end
 ~
 #12841
-Shard companion: Tank tier 3 commands: Rebuild~
+Shard companion: Tank tier 3 commands: Rebuild, Reinforce, Reproach, Reset~
 0 ct 0 2
 L w 12832
 L w 12833
-rebuild~
+rebuild reinforce reproach reset~
 if %actor% != %self%
   return 0
   halt
@@ -1073,10 +1073,45 @@ end
 *
 if %cmd% == rebuild
   * heal 20% over 15 seconds
+  if %actor.cooldown(12827)% || %self.cooldown(12827)%
+    %send% %actor% Your elemental companion is still rebuilding.
+    halt
+  end
   eval amount %self.maxhealth% / 15
   dg_affect #12832 %self% HEAL-OVER-TIME %amount% 15
-  set cooldown 60
   %echo% &&Y~%self% begins rebuilding itself from shards!&&0
+  * special cooldown
+  nop %self.set_cooldown(12827,60)%
+  nop %actor.set_cooldown(12827,60)%
+  * and a normal one
+  set cooldown 30
+elseif %cmd% == reinforce
+  * boost resists
+  eval amount %self.level% / 8
+  dg_affect #12828 %self% off
+  dg_affect #12828 %self% RESIST-PHYSICAL %amount% 30
+  dg_affect #12828 %self% RESIST-MAGICAL %amount% 30
+  %echo% &&Y~%self% hardens its shards and reinforces itself!&&0
+  set cooldown 30
+elseif %cmd% == reproach
+  * super-taunt
+  %echo% &&Y~%self% grinds and roars in a mighty reproach!&&0
+  set ch %self.room.people%
+  while %ch%
+    set next_ch %ch.next_in_room%
+    if %ch% != %self% && %ch% != %actor% && !%actor.is_ally(%ch%)% && %self.can_fight(%ch%)% && %actor.can_fight(%ch%)%
+      if !%ch.fighting% || %ch.fighting% != %self%
+        %force% %ch% mkill %self%
+      end
+    end
+    set ch %ch.next_in_room%
+  done
+  set cooldown 30
+elseif %cmd% == reset
+  * remove debuffs
+  %echo% &&YA shard from ~%self% dissolves into a ball if gleaming metallic mana...&&0
+  cleanse
+  set cooldown 30
 end
 if %cooldown%
   nop %self.set_cooldown(12833,%cooldown%)%
