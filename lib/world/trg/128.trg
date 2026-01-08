@@ -1084,11 +1084,11 @@ if %cooldown%
 end
 ~
 #12842
-Shard companion: DPS tier 2 commands: breach~
+Shard companion: DPS tier 2 command: actuate~
 0 ct 0 2
 L w 12833
 L w 12842
-rebuild~
+actuate~
 if %actor% != %self%
   return 0
   halt
@@ -1104,7 +1104,7 @@ end
 *
 set enemy %self.fighting%
 *
-if %cmd% == breach
+if %cmd% == actuate
   * debuff target's resistances
   if !%enemy%
     %send% %actor% Your elemental companion isn't fighting anything.
