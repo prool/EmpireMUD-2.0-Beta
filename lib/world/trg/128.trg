@@ -1054,7 +1054,9 @@ end
 ~
 #12841
 Shard companion: Tank tier 3 commands: Rebuild, Reinforce, Reproach, Reset~
-0 ct 0 2
+0 ct 0 4
+L w 12827
+L w 12828
 L w 12832
 L w 12833
 rebuild reinforce reproach reset~
