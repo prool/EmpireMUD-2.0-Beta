@@ -1102,20 +1102,43 @@ if %self.cooldown(12833)%
   halt
 end
 *
-set enemy %self.fighting%
-*
-if %cmd% == actuate
-  * debuff target's resistances
+if %arg%
+  set enemy %self.char_target(%arg%)%
+  if !%enemy%
+    %send% %actor% No one by that name for your companion to target.
+    halt
+  end
+else
+  set enemy %self.fighting%
   if !%enemy%
     %send% %actor% Your elemental companion isn't fighting anything.
     halt
   end
+end
+*
+if %self.is_ally(%enemy%)%
+  %send% %actor% Your elemental companion can't do that to ~%enemy%.
+  halt
+elseif %self.fighting% != %enemy% && (!%actor.can_fight(%enemy%)% || !%self.can_fight(%enemy%)%)
+  %send% %actor% Your elemental companion can't attack ~%enemy%.
+  halt
+end
+*
+set move %random.4%
+*
+if %move% == 1
+  * breach: debuff target's resistances
   eval amount %self.level% / 8
   dg_affect #12842 @%self% %enemy% off
   dg_affect #12842 %enemy% RESIST-PHYSICAL -%amount% 30
   dg_affect #12842 %enemy% RESIST-MAGICAL -%amount% 30
   %echo% &&Y~%self% jabs ~%enemy% with shard after shard, breaching ^%enemy% defenses!&&0
+  if !%self.fighting%
+    mkill %enemy%
+  end
   set cooldown 30
+elseif %move% == 2
+  
 end
 if %cooldown%
   nop %self.set_cooldown(12833,%cooldown%)%
