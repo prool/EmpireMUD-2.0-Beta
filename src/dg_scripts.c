@@ -3367,18 +3367,6 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 					break;
 				}
 				case 'c': {	// char.c*
-					/*
-					else if (!str_cmp(field, "coins")) {
-						// TODO possibly a way to specify coin type or do it by actor's loyalty?
-						// nop %c.coins(10)%
-						if (subfield && *subfield) {
-							int addition = atoi(subfield);
-							increase_coins(c, OTHER_COIN, addition);
-						}
-						// snprintf(str, slen, "%d", GET_GOLD(c));
-					}
-					*/
-					
 					if (!str_cmp(field, "can_act")) {
 						if (!AFF_FLAGGED(c, AFF_DISTRACTED) && GET_POS(c) == POS_STANDING && !FIGHTING(c) && (IS_NPC(c) || GET_ACTION(c) == ACT_NONE) && !EXTRACTED(c) && !GET_FEEDING_FROM(c) && !GET_FED_ON_BY(c) && !IS_DEAD(c) && !AFF_FLAGGED(c, AFF_STUNNED | AFF_HARD_STUNNED)) {
 							strcpy(str, "1");
@@ -3395,6 +3383,15 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							else {
 								safe_snprintf(str, slen, "0");
 							}
+						}
+						else {
+							safe_snprintf(str, slen, "0");
+						}
+					}
+					else if (!str_cmp(field, "can_fight")) {
+						if (subfield && *subfield) {
+							char_data *targ = (*subfield == UID_CHAR) ? get_char(subfield) : get_char_vis(c, subfield, NULL, FIND_CHAR_WORLD);
+							safe_snprintf(str, slen, "%d", (targ && can_fight(c, targ)) ? 1 : 0);
 						}
 						else {
 							safe_snprintf(str, slen, "0");

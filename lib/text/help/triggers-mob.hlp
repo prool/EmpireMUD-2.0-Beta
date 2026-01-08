@@ -424,6 +424,7 @@ When using field  - The variable returns:
 &cbonus_physical&0 - Character's Bonus-Physical damage trait.
 &ccan_act&0 - True if the character could take a timed action (not stunned, etc).
 &ccan_afford(amt)&0 - Checks if the actor has enough coins of any converted type.
+&ccan_fight(person)&0 - Checks if the character is allowed to fight someone else.
 &ccan_gain_new_skills&0 - Checks if the character can gain a new skill from 0.
 &ccan_recognize_lang(lang,on|off)&0 - Whether the character can at least
    recognize a language. Optional on/off 2nd arg grants/removes this from the
