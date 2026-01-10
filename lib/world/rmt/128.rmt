@@ -10,7 +10,7 @@ The Mining Tunnel of a Bygone Age~
 fireflies that scatter as you approach. At one end, rocky steps rise up through
 a narrow hole where the air smells of warm, spicy incense. At the other, the
 tunnel ends abruptly.
-Commands: Type 'return' to leave.
+Commands: return
 ~
 ci 0 0 12810
 D8
@@ -240,6 +240,11 @@ E
 lodestone stone chain~
    At the center of the forge, a huge, silvery lodestone strains against its
 iron chain as it pulls to the north.
+~
+E
+stacks piles designs patterns~
+   There are stacks of patterns and designs for various earrings all over, but
+you can't really understand the notes scrawled on them.
 ~
 M 0 12813 100.00 1
 T 12803

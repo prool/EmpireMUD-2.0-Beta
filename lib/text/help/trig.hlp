@@ -721,7 +721,7 @@ When using field - The variable returns:
 Additional data helpers:
 &c_obj.exists(VNUM)&0 - Whether or not this vnum exists.
 &c_obj.name(VNUM)&0 - The name of the one with this vnum.
-(Also available for: &c%_adv%, %_mob%&0)
+(Also available for: &c%_abil%, %_adv%, %_mob%&0)
 
 Names and pronouns:
 &c~%var%&0 - name, someone, you
