@@ -10981,15 +10981,33 @@ void read_vault(empire_data *emp) {
 	struct empire_island *isle, *next_isle;
 	int old = EMPIRE_WEALTH(emp);
 	obj_data *proto;
+	struct shipping_data *sd;
+	
+	if (!emp) {
+		return;	// safety
+	}
 	
 	EMPIRE_WEALTH(emp) = 0;
 	
+	// items in storage
 	HASH_ITER(hh, EMPIRE_ISLANDS(emp), isle, next_isle) {
 		HASH_ITER(hh, isle->store, store, next_store) {
 			if (store->amount > 0 && (proto = store->proto)) {
 				if (IS_WEALTH_ITEM(proto)) {
 					SAFE_ADD(EMPIRE_WEALTH(emp), (GET_WEALTH_VALUE(proto) * store->amount), 0, INT_MAX, FALSE);
 				}
+			}
+		}
+	}
+	
+	// items mid-shipment
+	
+	
+	// move all shipping entries over
+	DL_FOREACH(EMPIRE_SHIPPING_LIST(emp), sd) {
+		if (sd->amount > 0 && sd->vnum != NOTHING && (proto = obj_proto(sd->vnum))) {
+			if (IS_WEALTH_ITEM(proto)) {
+				SAFE_ADD(EMPIRE_WEALTH(emp), (GET_WEALTH_VALUE(proto) * sd->amount), 0, INT_MAX, FALSE);
 			}
 		}
 	}
