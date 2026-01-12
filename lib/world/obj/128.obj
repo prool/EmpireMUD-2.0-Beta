@@ -527,7 +527,7 @@ you can summon and dismiss like any other companion. This elemental lasts until
 it is destroyed. Each elemental is built from up to 3 modules. This module adds
 melee combat capabilities:
    1 jagged module: It gains the ability to attack in combat.
-   2 jagged modules: Increasese its damage and adds 'order companion actuate'
+   2 jagged modules: Increases its damage and adds 'order companion actuate'
       to debuff the enemy.
    3 jagged modules: Increases its damage and makes it immune to disarm.
    Combining a jagged and magnetic module will also boost its damage.
