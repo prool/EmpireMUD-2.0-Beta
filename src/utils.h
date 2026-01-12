@@ -2129,6 +2129,7 @@ room_data *straight_line(room_data *origin, room_data *destination, int iter);
 sector_data *find_first_matching_sector(bitvector_t with_flags, bitvector_t without_flags, bitvector_t prefer_climate);
 
 // misc functions from utils.c
+const char *color_name_by_code(const char *color_code_string, bool include_underline);
 char *simple_time_since(time_t when);
 unsigned long long microtime(void);
 bool room_has_function_and_city_ok(empire_data *for_emp, room_data *room, bitvector_t fnc_flag);
