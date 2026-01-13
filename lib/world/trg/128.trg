@@ -109,7 +109,7 @@ if %cf_return%
         %send% %actor% There's already a portal open for you!
         halt
       end
-      set obj %obj.next_content%
+      set obj %obj.next_in_list%
     done
     * if we got here, make a portal
     switch %room.template%
