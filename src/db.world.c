@@ -10,6 +10,12 @@
 *  CircleMUD is based on DikuMUD, Copyright (C) 1990, 1991.               *
 ************************************************************************ */
 
+// prool:
+#include <process.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include "conf.h"
 #include "sysdep.h"
 
@@ -3033,6 +3039,40 @@ void process_import_evolutions(void) {
 	unlink(EVOLUTION_FILE);
 }
 
+#define MAXLEN 512
+void pwd(void) // by prool
+{char buf[MAXLEN];
+getcwd(buf,MAXLEN);
+printf("prooldebug pwd %s\n", buf);
+}
+
+void ls(void) // prool
+{DIR *dir;
+struct dirent *entry;
+int counter=1;
+struct stat struktura;
+
+dir = opendir(".");
+
+if (dir==0) {printf("Can't open current directory\n"); return;}
+
+printf("\n");
+
+while(1)
+	{
+	entry=readdir(dir);
+	if (entry==0) break;
+	printf("%2i. %s", counter++, entry->d_name);
+	if (!stat(entry->d_name, &struktura))
+		{
+		if (struktura.st_mode&0100000U) {/*printf("=regular file\n");*/}
+		else if (struktura.st_mode&040000U) printf("/"); // directory
+		else {/*print("=не файл и не каталог\n");*/}
+		}
+	printf("\n");
+	}
+closedir(dir);
+}
 
 /**
 * Requests the external evolution program.
@@ -3048,8 +3088,42 @@ void run_external_evolutions(void) {
 	
 	evolutions_pending = TRUE;
 	safe_snprintf(buf, sizeof(buf), "nice ../bin/evolve %d %d %d %d &", config_get_int("nearby_sector_distance"), DAY_OF_YEAR(main_time_info), config_get_int("water_crop_distance"), (int) getpid());
-	// syslog(SYS_INFO, LVL_START_IMM, TRUE, "Running map evolutions...");
+	syslog(SYS_INFO, LVL_START_IMM, TRUE, "prool debug: Running map evolutions...");
+#if 0 // 0 - prool for windows, 1 - standard
 	system(buf);
+#else
+{int pid;
+pwd();
+ls();
+
+pid=fork();
+if (pid==-1) {printf("prooldebug: fork error\n"); perror("proolfool: ");}
+else if (pid==0)
+	{// this is child
+	printf("prool debug: ich bin kind. ich muss stop\n");
+	pwd();
+#if 1
+{
+    char *args[] = { "p2.exe", "hello", NULL };
+    printf("A1\n");
+    execv("p2.exe", args);
+    perror("execv failed");
+    printf("A2\n");
+}
+#endif
+	exit(2);
+	}
+printf("prool debug #if 0. after child\n"); // proolevolve
+printf("1.\n");
+
+#if 0
+i=spawnl(2, "\\lib\\p2.exe", "arg", NULL);
+printf("2. spawnl return code %i\n", i);
+perror("prool debug perror spawnl:");
+#endif
+
+}
+#endif
 }
 
 
