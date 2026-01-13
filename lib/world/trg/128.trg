@@ -1,9 +1,11 @@
 #12800
 Celestial Forge: Donate to open portal~
-0 c 0 4
+0 c 0 6
 L c 12800
+L c 12801
 L c 12806
 L j 12810
+L j 12850
 L w 5100
 donate~
 set room %self.room%
@@ -19,6 +21,11 @@ elseif iron forge /= %arg% || lodestone forge /= %arg%
   set dest 12810
   set curr 5100
   set str an iron shard
+elseif imperium forge /= %arg% || victory forge /= %arg%
+  set which 12801
+  set dest 12850
+  set curr 5101
+  set str an imperium shard
 else
   %send% %actor% Unknown celestial forge.
 end
@@ -70,12 +77,14 @@ end
 ~
 #12801
 Celestial Forge: Request exit~
-2 c 0 5
+2 c 0 7
 L c 9680
 L c 12800
+L c 12801
 L c 12806
 L e 5195
 L j 12810
+L j 12850
 return~
 if %actor.is_npc%
   * possibly immortal trying to return
@@ -106,6 +115,9 @@ if %cf_return%
     switch %room.template%
       case 12810
         set in_vnum 12800
+      break
+      case 12850
+        set in_vnum 12801
       break
       default
         set in_vnum 0
@@ -169,7 +181,7 @@ end
 ~
 #12802
 Celestial Forge: Detect player entry, Grant abilities, Start progress~
-2 g 100 8
+2 gA 100 8
 L c 9684
 L e 5195
 L i 12800
@@ -1116,7 +1128,7 @@ elseif %cmd% == reproach
   set cooldown 30
 elseif %cmd% == reset
   * remove debuffs
-  %echo% &&YA shard from ~%self% dissolves into a ball if gleaming metallic mana...&&0
+  %echo% &&YA shard from ~%self% dissolves into a ball of gleaming metallic mana...&&0
   cleanse
   set cooldown 30
 end
@@ -1386,6 +1398,64 @@ else
   * just trigger my command script
   wait 1
   magnetize
+end
+~
+#12850
+Celestial Forge: Change camp standards on entry~
+2 gA 100 6
+L c 12850
+L j 12851
+L j 12852
+L j 12853
+L j 12854
+L j 12855
+~
+set room_list 12851 12852 12853 12854 12855
+* sanity
+if %method% != portal || %actor.is_npc% || !%actor.empire%
+  halt
+end
+* short delay so only the first to enter this way triggers the change, if someone is following
+wait 1
+* detect color
+set color %actor.empire.banner_name_simple%
+if !%color% || %color% == none
+  halt
+end
+* update all the banners
+while %room_list%
+  set vnum %room_list.car%
+  set room_list %room_list.cdr%
+  set there %instance.nearest_rmt(%vnum%)%
+  if %there%
+    set obj %there.contents(12850)%
+    if %obj%
+      * update 1 banner
+      %mod% %obj% longdesc A %color% camp standard flies over the forge.
+      %mod% %obj% lookdesc The %color% camp standard rises above the forge, snapping and sighing in the night wind. Firelight from the smelter makes it visible against the starry night sky, splashed with the color of old embers and fresh blood.
+      %mod% %obj% append-lookdesc In the center of the %color% standard is the symbol of %actor.empire.name%.
+      %at% %there% %echo% The camp standard ripples and gleams as it changes to a new %color% emblem.
+    end
+  end
+done
+~
+#12851
+Celestial Forge: Fake exits from Victory Forge~
+2 c 0 0
+north south east west northeast ne southeast se southwest sw northwest nw~
+set dir %actor.parse_dir(%cmd%)%
+eval to_room %%room.%dir%(room)%%
+if !%to_room%
+  %send% %actor% You wander %actor.dir(%dir%)% but somehow end up back by the forge.
+  set ch %room.people%
+  while %ch%
+    if %ch% != %actor%
+      %send% %ch% ~%actor% wanders %ch.dir(%dir%)% but somehow ends up back by the forge.
+    end
+    set ch %ch.next_in_room%
+  done
+else
+  return 0
 end
 ~
 $
