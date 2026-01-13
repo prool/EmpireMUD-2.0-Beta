@@ -3850,6 +3850,8 @@ void do_stat_empire(char_data *ch, empire_data *emp) {
 		build_page_display(ch, "Next timeout check: [%ld / not scheduled]", EMPIRE_NEXT_TIMEOUT(emp));
 	}
 	
+	build_page_display(ch, "Banner: [%s%s\t0]", EMPIRE_BANNER(emp), color_name_by_code(EMPIRE_BANNER(emp), TRUE));
+	
 	sprintbit(EMPIRE_ADMIN_FLAGS(emp), empire_admin_flags, line, TRUE);
 	build_page_display(ch, "Admin flags: \tg%s\t0", line);
 	
