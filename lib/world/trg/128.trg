@@ -15,7 +15,7 @@ set dest 0
 if !%actor.canuseroom_guest(%room%)%
   %send% %actor% You don't have permission to do that here.
 elseif !%arg%
-  %send% %actor% Donate to which celestial forge? (iron, ...)
+  %send% %actor% Donate to which celestial forge? (iron, imperium, ...)
 elseif iron forge /= %arg% || lodestone forge /= %arg%
   set which 12800
   set dest 12810
