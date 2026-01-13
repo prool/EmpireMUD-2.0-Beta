@@ -1,12 +1,46 @@
-Prools fork is in branch "prool"
+From Prool:
+My fork is in branch 'prool'.
+This fork is running at mud.virtustan.net, port 7000
 
-Prools shard work in address mud.virtustan.net:7000
+Prool's remarks in file readme.prool
 
-Prools future remarks is in file readme-prool.md
+Serhii "Prool" Pustovoitov
+Germany, Duisburg, 2024-2026
+proolix@gmail.com
+http://prool.virtustan.net
 
-Serhii "Prool" Pustovoitov, Duisburg, Germany, 2026 year
+----------------------------------------------------------------------------
 
--------------------------------------------------------------------
+EmpireMUD 2.0 beta 6 is coming in 2024! In the mean time, if you want to run
+an EmpireMUD server, consider using the beta-dev branch rather than the
+master. This branch has many updates to its features, code, and content.
+
+Here's how to get the beta-dev branch with a fresh clone:
+1. git clone https://github.com/EmpireMUD/EmpireMUD-2.0-Beta.git empiremud
+2. cd empiremud
+3. git checkout -b beta-dev remotes/origin/beta-dev
+4. Follow the rest of the steps below under "Compiling and Running EmpireMUD".
+
+Or, if you already have a working copy of EmpireMUD, here's how to switch to
+the beta-dev branch:
+1. Shut down your EmpireMUD with "shutdown die", and wait for it to finish.
+   It's very important that the MUD is shut down before updating.
+2. Create a backup, just in case (gzipping your EmpireMUD directory is an
+   easy way, or use EmpireMUD's PHP backup tool if you've configured it).
+3. In your EmpireMUD directory, type:
+4. git stash
+5. git checkout -b beta-dev remotes/origin/beta-dev
+6. git stash pop
+7. ./configure  (do this even if you configured it before; there are new code
+   files and the configure script will add them to your Makefile)
+8. cd src
+9. make all
+10. If you were running a version older than beta 4, you may need to run the
+   included playerfile converter. Contact paul@empiremud.net for assistance
+   or log into empiremud.net port 4000 and I am happy to assist you.
+11. You can now restart the autorun with "./autorun &" in your EmpireMUD
+   directory.
+
 
 Warning: Always back up your EmpireMUD before updating your git checkout. Some
 patches may require playerfile conversions or may have other unexpected side-
@@ -224,9 +258,6 @@ Futher steps once you are logged into EmpireMUD:
   the correct paths for the game and backup directories. You should set these
   on a cron, to get hourly backups:
    0 * * * * php /path/to/backups/make-backup.php
-- If you end up with a large number of former players and your MUD's startup
-  time is long, remove the -q flag from your autorun to enable auto-deletes.
-  See HELP AUTO-DELETE in-game for more information on configuring it.
 
 
 Other Documentation
