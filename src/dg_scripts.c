@@ -6973,6 +6973,12 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 					if (!str_cmp(field, "banner")) {
 						safe_snprintf(str, slen, "%s", EMPIRE_BANNER(e));
 					}
+					else if (!str_cmp(field, "banner_name")) {
+						safe_snprintf(str, slen, "%s", color_name_by_code(EMPIRE_BANNER(e), TRUE));
+					}
+					else if (!str_cmp(field, "banner_name_simple")) {
+						safe_snprintf(str, slen, "%s", color_name_by_code(EMPIRE_BANNER(e), FALSE));
+					}
 					break;
 				}
 				case 'c': {	// emp.c*

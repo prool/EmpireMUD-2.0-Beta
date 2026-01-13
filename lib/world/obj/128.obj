@@ -13,6 +13,21 @@ M
 18
 $p creaks and snaps shut!~
 S
+#12801
+portal canvas cloth swirling~
+a canvas portal~
+A portal of swirling canvas cloth spins in front of you.~
+An unbroken sheet of canvas twists and wrings as it encircles a magical portal.
+~
+8 0 0 0 0 3
+-1 0 0
+11 3
+C
+1 1
+M
+18
+$p tears itself apart and dissolves into the air!~
+S
 #12805
 controller celestial forge~
 the celestial forge controller~
@@ -527,7 +542,7 @@ you can summon and dismiss like any other companion. This elemental lasts until
 it is destroyed. Each elemental is built from up to 3 modules. This module adds
 melee combat capabilities:
    1 jagged module: It gains the ability to attack in combat.
-   2 jagged modules: Increasese its damage and adds 'order companion actuate'
+   2 jagged modules: Increases its damage and adds 'order companion actuate'
       to debuff the enemy.
    3 jagged modules: Increases its damage and makes it immune to disarm.
    Combining a jagged and magnetic module will also boost its damage.
@@ -607,5 +622,17 @@ for one rider with two animals.
 7 0 a 0 0 1
 12839 0 0
 0 0
+S
+#12850
+standards banners flags~
+the camp standard~
+A camp standard flies over the forge.~
+A flag flies over the camp, showing the empire's standard.
+~
+3 0 0 0 0 2
+0 0 0
+0 0
+C
+1 1
 S
 $

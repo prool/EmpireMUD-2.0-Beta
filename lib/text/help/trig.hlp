@@ -212,6 +212,8 @@ When using field - The variable returns:
 &cadd_progress(vnum)&0 - Grants a progression goal (preferably set NO-AUTOSTART).
 &cadjective&0 - Adjective form of the empire's name.
 &cbanner&0 - Empire's banner (as a color code).
+&cbanner_name, banner_name_simple&0 - Empire's banner as color name with or without
+   underline.
 &ccan_recognize_lang(lang,on|off)&0 - Whether the empire can at least recognize
    a language. Optional on/off 2nd arg grants/removes this from the empire but
    NOT from members who already have it. Cannot add/remove if the empire speaks

@@ -375,4 +375,324 @@ M 0 12815 100.00 1
 T 12803
 T 12802
 S
+#12850
+A Cluttered Siege Pavilion~
+   The tent is crowded with the tools of war, its canvas walls bowed inward by
+hanging maps, tally boards, and rolls of marked parchment. Long tables sag
+beneath stone weights, carved tokens standing in for regiments on plots of the
+battlefield. The light flickers off of fresh ink, wax seals, and bits of soot
+as lanterns swing from the central poles. Outside there's a general silence,
+punctuated by the ring of hammers against hard anvils.
+~
+ci 0 0 12850
+D5
+~
+0 12851
+E
+tent canvas walls~
+tba
+~
+E
+maps hanging~
+tba
+~
+E
+boards tally~
+tba
+~
+E
+tables weights stone carved carvings tokens regiments plots battlefield~
+tba
+~
+E
+out~
+tba
+~
+E
+light lanterns~
+tba
+~
+E
+poles~
+tba
+~
+E
+soot~
+tba
+~
+E
+ink fresh~
+tba
+~
+E
+seals wax~
+tba
+~
+T 12803
+T 12802
+T 12801
+T 12850
+S
+#12851
+Victory Forge~
+   At the heart of Victory Forge rises a squat smelting furnace, glowing
+white-hot at its mouth, burning steady despite the night air. Heat ripples
+outward from it, warping shadows cast by the lanterns. The furnace breathes a
+fiery roar that drowns out the silence of the battlefield, punctuated by the
+rhythmic ringing of the anvils.
+~
+cei 0 vGL 12850
+D6
+~
+0 12850
+D3
+~
+0 12852
+D1
+~
+0 12853
+D2
+~
+0 12854
+D0
+~
+0 12855
+E
+forge~
+tba
+~
+E
+furnace smelter smelting squat glow mouth fire~
+tba
+~
+E
+shadows~
+tba
+~
+E
+lanterns~
+tba
+~
+E
+up stars sky expanse night~
+tba
+~
+E
+out battlefield field around~
+tba
+~
+E
+camp~
+tba
+~
+M 1 12850 100.00 5
+T 12803
+T 12802
+S
+#12852
+Victory Forge~
+   A lone anvil stands planted in the packed earth, scarred across its surface
+by countless blows. Sparks still glitter faintly around it, cooling in the
+night air before they reach the ground. The hilltop wind carries the sound of
+hammering outward, echoing in measured rhythm over the silent battlefield.
+~
+cei 0 h 12850
+D1
+~
+0 12851
+E
+anvil lone surface~
+tba
+~
+E
+earth packed ground~
+tba
+~
+E
+hilltop~
+tba
+~
+E
+sparks glitter~
+tba
+~
+E
+up stars sky expanse night~
+tba
+~
+E
+out battlefield field around~
+tba
+~
+E
+camp~
+tba
+~
+M 1 12850 100.00 5
+T 12803
+T 12802
+T 12851
+S
+#12853
+Victory Forge~
+   Several anvils are set in a rough arc, each surrounded by scorched earth and
+scattered hammerscale. The metal beneath them gleams dully in lanternlight,
+twinkling like the stars above. Beyond the forge lights, the camp and
+battlefield rest in uneasy stillness as the smiths work through the night.
+~
+cei 0 h 12850
+D3
+~
+0 12851
+E
+anvils arc~
+tba
+~
+E
+earth scorched ground~
+tba
+~
+E
+metal hammerscale scale gleam~
+tba
+~
+E
+lanterns lanternlight~
+tba
+~
+E
+forge~
+tba
+~
+E
+up stars sky expanse night~
+tba
+~
+E
+out battlefield field around~
+tba
+~
+E
+hilltop~
+tba
+~
+E
+camp~
+tba
+~
+M 1 12850 100.00 5
+T 12803
+T 12802
+T 12851
+S
+#12854
+Victory Forge~
+   An anvil rests near the edge of the hill, overlooking the darkened siege
+lines below. Lanternlight glints off its battered face, reflecting every dent
+and ding from its storied past. The air here feels thinner, colder, almost
+silent but for the echoing pings of the smiths working tirelessly to resupply
+the soldiers at the front.
+~
+cei 0 h 12850
+D0
+~
+0 12851
+E
+anvil battered face~
+tba
+~
+E
+dent ding~
+tba
+~
+E
+edge~
+tba
+~
+E
+hilltop~
+tba
+~
+E
+siege lines front~
+tba
+~
+E
+lanterns lanternlight~
+tba
+~
+E
+up stars sky expanse night~
+tba
+~
+E
+out battlefield field around~
+tba
+~
+E
+camp~
+tba
+~
+M 1 12850 100.00 5
+T 12803
+T 12802
+T 12851
+S
+#12855
+Victory Forge~
+   Crates of iron and imperium ingots are stacked in careful rows beneath tarps
+darkened by soot and dew. Barrels of charcoal and oil sit wedged between weapon
+blanks and bundled hafts, all arranged with the tidy severity of a war camp. A
+clean water barrel rests near the supplies with a ladle to drink from. The
+battlefield below lies quiet and still, blanketed by a light fog.
+~
+cei 0 F 12850
+D2
+~
+0 12851
+E
+crates~
+tba
+~
+E
+iron imperium ingots stacks rows~
+tba
+~
+E
+tarps~
+tba
+~
+E
+soot~
+tba
+~
+E
+dew~
+tba
+~
+E
+charcoal oil weapons blanks bundles hafts barrels~
+tba
+~
+E
+up stars sky expanse night~
+tba
+~
+E
+out battlefield field around fog~
+tba
+~
+E
+camp~
+tba
+~
+E
+water barrel ladle~
+tba
+~
+M 1 12850 100.00 5
+T 12803
+T 12802
+T 12851
+S
 $
