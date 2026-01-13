@@ -970,6 +970,7 @@ void heartbeat(unsigned long heart_pulse) {
 	if (HEARTBEAT(30 * SECS_PER_REAL_MIN)) {
 		run_external_evolutions();
 		HEARTBEAT_LOG("22.5")
+		process_import_evolutions(); // prool
 		
 		reduce_outside_territory();
 		HEARTBEAT_LOG("23")
@@ -1024,6 +1025,7 @@ void heartbeat(unsigned long heart_pulse) {
 	
 	// check if we've been asked to import new evolutions
 	if (do_evo_import) {
+		printf("prool debug do_evo_import ? \n");
 		do_evo_import = FALSE;
 		process_import_evolutions();
 		HEARTBEAT_LOG("32")

@@ -1426,7 +1426,7 @@ void parse_crop(FILE *fl, crop_vnum vnum) {
 
 	HASH_FIND_INT(crop_table, &vnum, find);
 	if (find) {
-		log("WARNING: Duplicate crop vnum #%d", vnum);
+		//log("prool debug WARNING: Duplicate crop vnum #%d (2)", vnum); // prool
 		// but have to load it anyway to advance the file
 	}
 	add_crop_to_table(crop);
@@ -6906,7 +6906,7 @@ void parse_sector(FILE *fl, sector_vnum vnum) {
 
 	HASH_FIND_INT(sector_table, &vnum, find);
 	if (find) {
-		log("WARNING: Duplicate sector vnum #%d", vnum);
+		//log("prool debug WARNING: Duplicate sector vnum #%d (3)", vnum); // prool fool
 		// but have to load it anyway to advance the file
 	}
 	add_sector_to_table(sect);

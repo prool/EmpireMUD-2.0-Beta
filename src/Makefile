@@ -39,7 +39,7 @@ OBJFILES = abilities.o act.action.o act.battle.o act.comm.o act.empire.o \
 	olc.attack.o olc.craft.o olc.crop.o olc.global.o olc.map.o olc.mobile.o \
 	olc.object.o olc.roomtemplate.o olc.sector.o olc.trigger.o pathfind.o \
 	progress.o protocol.o quest.o random.o shop.o skills.o social.o spells.o \
-	statistics.o updates.o utils.o vehicles.o weather.o workforce.o
+	statistics.o updates.o utils.o vehicles.o weather.o workforce.o evolve_int.o
 
 CXREF_FILES = abilities.c act.action.c act.battle.c act.comm.c act.empire.c \
 	act.fight.c act.god.c act.highsorcery.c act.immortal.c act.informative.c \
@@ -55,7 +55,7 @@ CXREF_FILES = abilities.c act.action.c act.battle.c act.comm.c act.empire.c \
 	olc.attack.c olc.craft.c olc.crop.c olc.global.c olc.map.c olc.mobile.c \
 	olc.object.c olc.roomtemplate.c olc.sector.c olc.trigger.c pathfind.c \
 	progress.c protocol.c quest.c random.c shop.c skills.c social.c spells.c \
-	statistics.c updates.c utils.c vehicles.c weather.c workforce.c
+	statistics.c updates.c utils.c vehicles.c weather.c workforce.c evolve_int.c
 
 default: all
 
@@ -99,6 +99,9 @@ ref:
 	@echo Indexing
 	@( cd . ; $(CXREF) -D__CXREF__ -index-all -Odoc -Nempire -html )
 	@rm -f $(DOCS)
+
+evolve_int.o: evolve_int.c
+	$(CC) -c $(CFLAGS) evolve_int.c
 
 # Dependencies for the object files (automagically generated with
 # gcc -MM)
@@ -182,10 +185,12 @@ act.vehicles.o: act.vehicles.c conf.h sysdep.h structs.h uthash.h utils.h \
   comm.h interpreter.h handler.h db.h skills.h dg_scripts.h vnums.h constants.h
 	$(CC) -c $(CFLAGS) act.vehicles.c
 archetypes.o: archetypes.c conf.h sysdep.h structs.h protocol.h uthash.h \
-  utils.h interpreter.h db.h comm.h olc.h skills.h handler.h constants.h
+  utils.h interpreter.h db.h comm.h olc.h skills.h handler.h constants.h \
+  dg_scripts.h
 	$(CC) -c $(CFLAGS) archetypes.c
 augments.o: augments.c conf.h sysdep.h structs.h protocol.h uthash.h \
-  utils.h interpreter.h db.h comm.h olc.h skills.h handler.h constants.h
+  utils.h interpreter.h db.h comm.h olc.h skills.h handler.h constants.h \
+  dg_scripts.h
 	$(CC) -c $(CFLAGS) augments.c
 ban.o: ban.c conf.h sysdep.h structs.h uthash.h utils.h comm.h \
   interpreter.h handler.h db.h
@@ -203,7 +208,7 @@ building.o: building.c conf.h sysdep.h structs.h uthash.h utils.h comm.h \
   interpreter.h handler.h db.h skills.h vnums.h dg_scripts.h constants.h
 	$(CC) -c $(CFLAGS) building.c
 class.o: class.c conf.h sysdep.h structs.h uthash.h utils.h comm.h \
-  interpreter.h handler.h db.h skills.h olc.h constants.h
+  interpreter.h handler.h db.h skills.h olc.h constants.h dg_scripts.h
 	$(CC) -c $(CFLAGS) class.c
 comm.o: comm.c conf.h sysdep.h structs.h uthash.h utils.h comm.h \
   interpreter.h handler.h db.h skills.h dg_scripts.h dg_event.h vnums.h \
@@ -273,7 +278,7 @@ event.o: event.c conf.h sysdep.h structs.h uthash.h utils.h comm.h db.h \
   skills.h handler.h interpreter.h dg_event.h dg_scripts.h vnums.h constants.h
 	$(CC) -c $(CFLAGS) event.c
 faction.o: faction.c conf.h sysdep.h structs.h uthash.h utils.h comm.h \
-  interpreter.h handler.h db.h skills.h olc.h constants.h
+  interpreter.h handler.h db.h skills.h olc.h constants.h dg_scripts.h
 	$(CC) -c $(CFLAGS) faction.c
 fight.o: fight.c conf.h sysdep.h structs.h uthash.h utils.h comm.h \
   handler.h interpreter.h db.h skills.h vnums.h dg_scripts.h constants.h
@@ -294,7 +299,7 @@ instance.o: instance.c conf.h sysdep.h structs.h uthash.h utils.h db.h \
 	$(CC) -c $(CFLAGS) instance.c
 interpreter.o: interpreter.c conf.h sysdep.h structs.h uthash.h comm.h \
   interpreter.h db.h utils.h handler.h olc.h skills.h vnums.h \
-  dg_scripts.h constants.h prool-patch.c
+  dg_scripts.h constants.h
 	$(CC) -c $(CFLAGS) interpreter.c
 limits.o: limits.c conf.h sysdep.h structs.h uthash.h utils.h comm.h db.h \
   handler.h interpreter.h skills.h vnums.h dg_event.h dg_scripts.h constants.h
@@ -329,16 +334,16 @@ olc.o: olc.c conf.h sysdep.h structs.h uthash.h utils.h interpreter.h \
 	$(CC) -c $(CFLAGS) olc.c
 olc.attack.o: olc.attack.c conf.h sysdep.h structs.h protocol.h uthash.h \
   utlist.h utils.h interpreter.h db.h comm.h olc.h skills.h handler.h \
-  constants.h
+  constants.h dg_scripts.h
 	$(CC) -c $(CFLAGS) olc.attack.c
 olc.craft.o: olc.craft.c conf.h sysdep.h structs.h uthash.h utils.h \
-  interpreter.h db.h comm.h olc.h skills.h handler.h constants.h
+  interpreter.h db.h comm.h olc.h skills.h handler.h constants.h dg_scripts.h
 	$(CC) -c $(CFLAGS) olc.craft.c
 olc.crop.o: olc.crop.c conf.h sysdep.h structs.h uthash.h utils.h \
-  interpreter.h db.h comm.h olc.h skills.h handler.h constants.h
+  interpreter.h db.h comm.h olc.h skills.h handler.h constants.h dg_scripts.h
 	$(CC) -c $(CFLAGS) olc.crop.c
 olc.global.o: olc.global.c conf.h sysdep.h structs.h uthash.h utils.h \
-  interpreter.h db.h comm.h olc.h skills.h handler.h constants.h
+  interpreter.h db.h comm.h olc.h skills.h handler.h constants.h dg_scripts.h
 	$(CC) -c $(CFLAGS) olc.global.c
 olc.map.o: olc.map.c conf.h sysdep.h structs.h uthash.h utils.h \
   interpreter.h handler.h db.h comm.h olc.h vnums.h dg_scripts.h constants.h
@@ -354,7 +359,7 @@ olc.roomtemplate.o: olc.roomtemplate.c conf.h sysdep.h structs.h uthash.h \
   constants.h
 	$(CC) -c $(CFLAGS) olc.roomtemplate.c
 olc.sector.o: olc.sector.c conf.h sysdep.h structs.h uthash.h utils.h \
-  interpreter.h db.h comm.h olc.h skills.h handler.h constants.h
+  interpreter.h db.h comm.h olc.h skills.h handler.h constants.h dg_scripts.h
 	$(CC) -c $(CFLAGS) olc.sector.c
 olc.trigger.o: olc.trigger.c conf.h sysdep.h structs.h uthash.h utils.h \
   interpreter.h db.h comm.h olc.h handler.h dg_scripts.h dg_event.h constants.h
@@ -364,7 +369,7 @@ pathfind.o: pathfind.c conf.h sysdep.h structs.h protocol.h uthash.h \
 	$(CC) -c $(CFLAGS) pathfind.c
 progress.o: progress.c conf.h sysdep.h structs.h protocol.h uthash.h \
   utlist.h utils.h interpreter.h db.h comm.h olc.h skills.h handler.h \
-  constants.h
+  constants.h dg_scripts.h
 	$(CC) -c $(CFLAGS) progress.c
 protocol.o: protocol.c conf.h sysdep.h comm.h protocol.h structs.h utils.h \
   handler.h db.h skills.h dg_scripts.h constants.h
@@ -375,13 +380,15 @@ quest.o: quest.c conf.h sysdep.h structs.h uthash.h utils.h comm.h db.h \
 random.o: random.c
 	$(CC) -c $(CFLAGS) random.c
 shop.o: shop.c conf.h sysdep.h structs.h protocol.h uthash.h utlist.h \
-  utils.h interpreter.h db.h comm.h olc.h skills.h handler.h constants.h
+  utils.h interpreter.h db.h comm.h olc.h skills.h handler.h constants.h \
+  dg_scripts.h
 	$(CC) -c $(CFLAGS) shop.c
 skills.o: skills.c conf.h sysdep.h structs.h uthash.h utils.h comm.h olc.h \
   interpreter.h handler.h db.h skills.h vnums.h dg_scripts.h constants.h
 	$(CC) -c $(CFLAGS) skills.c
 social.o: social.c conf.h sysdep.h structs.h protocol.h uthash.h \
-  utils.h interpreter.h db.h comm.h olc.h skills.h handler.h constants.h
+  utils.h interpreter.h db.h comm.h olc.h skills.h handler.h constants.h \
+  dg_scripts.h
 	$(CC) -c $(CFLAGS) social.c
 spells.o: spells.c conf.h sysdep.h structs.h uthash.h utils.h comm.h \
   interpreter.h handler.h db.h skills.h vnums.h dg_scripts.h constants.h

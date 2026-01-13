@@ -49,6 +49,7 @@ extern FILE *binary_map_fl;
 extern int prool_flag; // by prool
 
 // external funcs
+int evolve_main (int, int, int, int); // prool
 EVENT_CANCEL_FUNC(cancel_room_event);
 EVENT_CANCEL_FUNC(cancel_room_expire_event);
 bool load_pre_b5_116_world_map_from_file();
@@ -3040,16 +3041,23 @@ void process_import_evolutions(void) {
 void run_external_evolutions(void) {
 	char buf[MAX_STRING_LENGTH];
 
-	if (prool_flag) printf("%s prool debug: run_external_evolutions\n", ptime()); // prool
-	
+	if (prool_flag) printf("%s prool debug: run_external_evolutions()\n", ptime()); // prool
+#if 0	
 	if (evolutions_pending) {
 		log("SYSERR: Unable to import map evolutions: bin/evolve program does not respond");
+		printf("prool debug:: SYSERR: Unable to import map evolutions: bin/evolve program does not respond\n");
 	}
+#endif
 	
 	evolutions_pending = TRUE;
 	safe_snprintf(buf, sizeof(buf), "nice ../bin/evolve %d %d %d %d &", config_get_int("nearby_sector_distance"), DAY_OF_YEAR(main_time_info), config_get_int("water_crop_distance"), (int) getpid());
 	// syslog(SYS_INFO, LVL_START_IMM, TRUE, "Running map evolutions...");
+#if 0 // 1 - standard (run external evolution), 0 - prool mode (run internal evolution)
 	system(buf);
+#else
+	//printf("prool debug buf='%s'\n", buf);
+	evolve_main(config_get_int("nearby_sector_distance"), DAY_OF_YEAR(main_time_info), config_get_int("water_crop_distance"), (int) getpid());
+#endif
 }
 
 
