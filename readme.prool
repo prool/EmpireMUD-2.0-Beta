@@ -3,8 +3,12 @@ Readme from Prool
 My fork is in branch 'prool'.
 This fork is running at mud.kharkov.org/mud.virtustan.net, port 7000
 
+runmud.bat - batch file for run MUD in Windows
+
+run mud in Linux: bin/empire 
+
 Serhii "Prool" Pustovoitov
-Germany, Duisburg, 2026 year, December
+Germany, Duisburg, 2024-2026 year, December
 
 proolix@gmail.com
 

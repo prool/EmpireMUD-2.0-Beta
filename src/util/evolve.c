@@ -90,6 +90,8 @@ const int shift_dir[][2] = {
  //////////////////////////////////////////////////////////////////////////////
 //// PROTOTYPES //////////////////////////////////////////////////////////////
 
+void cp (char *file1, char *file2); // file copy, by prool
+
 bool check_crop_water(struct map_t *tile);
 bool check_near_evo_sector(struct map_t *tile, int type, struct evolution_data *for_evo);
 bool check_near_evo_sector_flagged(struct map_t *tile, int type, struct evolution_data *for_evo);
@@ -355,19 +357,38 @@ char *ptime(void) // by prool: Возвращаемое значение: ссы
 int main(int argc, char **argv) {
 	struct map_t *tile;
 	int num, pid = 0;
+	FILE *fp;
+	int i1, i2, i3, i4;
 
-	//printf("%s prool debug: evolve\n", ptime()); // prool
-	
+	printf("%s prool debug: evolve.exe\n", ptime()); // prool
+
+#if 0	
 	if (argc < 4 || argc > 5) {
 		printf("Format: %s <nearby distance> <day of year> <water crop distance> [pid to signal]\n", argv[0]);
 		exit(0);
 	}
+#endif
 	
 	empire_srandom(time(0));
+
+	fp=fopen("semafor1.txt", "r");
+
+	if (fp==0)	{
+			//printf("prool debug: file semafor not found\n");
+			exit(0);
+			}
+
+	fscanf(fp,"%i %i %i %i ",&i1, &i2, &i3, &i4);
+
+	printf("prool debug %i %i %i %i\n", i1, i2, i3, i4);
+
+	unlink("semafor1.txt");
+
+	//exit(1);
 	
-	nearby_distance = atoi(argv[1]);
-	day_of_year = atoi(argv[2]);
-	water_crop_distance = atoi(argv[3]);	// may be 0 to ignore unwatered crops
+	nearby_distance = i1;
+	day_of_year = i2;
+	water_crop_distance = i3;	// may be 0 to ignore unwatered crops
 	
 	if (DEBUG_MODE) {
 		printf("%s prool debug evolve. ", ptime()+4);
@@ -375,6 +396,8 @@ int main(int argc, char **argv) {
 		printf("Using day of year: %d. ", day_of_year);
 		printf("Using water crop distance: %d. ", water_crop_distance);
 	}
+
+#if 0
 	
 	// determines if we will send a signal back to the mud
 	if (argc == 5) {
@@ -383,6 +406,9 @@ int main(int argc, char **argv) {
 			printf("Will signal pid: %d. ", pid);
 		}
 	}
+#endif
+	pid=i4;
+	if (DEBUG_MODE) printf("Will signal pid: %d. ", pid);
 	
 	// load data
 	index_boot_crops();
@@ -416,6 +442,10 @@ int main(int argc, char **argv) {
 	if (pid) {
 		kill(pid, SIGUSR1);
 	}
+
+	fp=fopen("semafor2.txt","w"); // prool
+	fprintf(fp,"OK\n");
+	fclose(fp);
 	
 	return 0;
 }
@@ -1004,8 +1034,12 @@ void load_base_map(void) {
 	}
 	
 	// first create a duplicate...
+#if 0 // 0 - prool, 1 - standard
 	sprintf(sys, "cp %s %s.copy", BINARY_MAP_FILE, BINARY_MAP_FILE);
 	system(sys);
+#else
+	cp (BINARY_MAP_FILE, BINARY_MAP_FILE ".copy");
+#endif
 	if (!(fl = fopen(BINARY_MAP_FILE ".copy", "r+b"))) {
 		printf("ERROR: No binary map file '%s.copy' to evolve\n", BINARY_MAP_FILE);
 		exit(0);
@@ -1581,4 +1615,29 @@ int number(int from, int to) {
 	}
 
 	return ((empire_random() % (to - from + 1)) + from);
+}
+
+// begin prool code:
+
+#define BUFLEN 512
+
+void cp (char *file1, char *file2) // file copy, by prool
+{
+int f1, f2, n;
+char buf[BUFLEN];
+
+printf("prool debug cp() file1='%s', file2='%s'\n", file1, file2);
+f1=open(file1, O_RDONLY);
+if (f1==-1) {printf("prool debug cp() cant open file1\n"); return;}
+f2=open(file2, O_CREAT|O_WRONLY|O_TRUNC);
+if (f2==-1) {printf("prool debug cp() cant open file2\n"); return;}
+while (1)
+	{
+	n=read(f1, buf, BUFLEN);
+	if (n==0) break;
+	//printf("prool debug n=%i\n", n);
+	write(f2, buf, n);
+	}
+close(f1);
+close(f2);
 }

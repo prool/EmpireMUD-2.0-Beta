@@ -2999,6 +2999,8 @@ void process_import_evolutions(void) {
 	struct evo_import_data dat;
 	int total, changed;
 	FILE *fl;
+
+	//printf("prool debug process_import_evolutions()\n");
 	
 	evolutions_pending = FALSE;	// prevents error log
 	
@@ -3040,16 +3042,32 @@ void process_import_evolutions(void) {
 void run_external_evolutions(void) {
 	char buf[MAX_STRING_LENGTH];
 
-	if (prool_flag) printf("%s prool debug: run_external_evolutions\n", ptime()); // prool
+	//printf("%s prool debug: run_external_evolutions ()\n", ptime()); // prool
 	
 	if (evolutions_pending) {
-		log("SYSERR: Unable to import map evolutions: bin/evolve program does not respond");
+		//log("SYSERR: Unable to import map evolutions: bin/evolve program does not respond"); // prool
 	}
 	
 	evolutions_pending = TRUE;
 	safe_snprintf(buf, sizeof(buf), "nice ../bin/evolve %d %d %d %d &", config_get_int("nearby_sector_distance"), DAY_OF_YEAR(main_time_info), config_get_int("water_crop_distance"), (int) getpid());
 	// syslog(SYS_INFO, LVL_START_IMM, TRUE, "Running map evolutions...");
+#if 0 // 1 - standard code, 0 - prools code for experiment-two-windows
 	system(buf);
+#else
+	{
+	FILE *fp;
+	//printf("prool debug: experiment 2 windows evolve\n");
+	fp=fopen("semafor1.txt", "w");
+	if (fp)
+		{
+		fprintf(fp, "%d %d %d %d %s",
+		config_get_int("nearby_sector_distance"), DAY_OF_YEAR(main_time_info), config_get_int("water_crop_distance"), (int) getpid(), ptime());
+		fclose(fp);
+		}
+	else	{printf("prool debug can't open for write semafor1\n");
+		}
+	}
+#endif
 }
 
 

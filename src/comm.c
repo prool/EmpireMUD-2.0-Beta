@@ -745,6 +745,7 @@ void perform_reboot(void) {
 	}
 	// Otherwise it's a shutdown
 	else {
+		FILE *fp; // prool
 		empire_shutdown = 1;
 		switch (reboot_control.level) {
 			case SHUTDOWN_DIE:
@@ -768,6 +769,13 @@ void perform_reboot(void) {
 		if (reboot_control.level == SHUTDOWN_COMPLETE) {
 			free_whole_library();
 		}
+
+		fp=fopen("stop.txt", "w"); // by prool
+		if (fp)	{
+			fprintf(fp, "STOP\n");
+			fclose(fp);
+			}
+
 		exit(0);
 	}
 }
@@ -841,6 +849,18 @@ void heartbeat(unsigned long heart_pulse) {
 	if (HEARTBEAT(13)) {
 		script_trigger_check();
 		HEARTBEAT_LOG("1")
+	}
+
+	if (HEARTBEAT(60)) { // prool
+	FILE *fp;
+	//printf("prool debug HEARTBEAT %s\n", ptime());
+	fp=fopen("semafor2.txt", "r");
+	if (fp)	{
+		//printf("prool debug semafor2 found!\n");
+		fclose(fp);
+		unlink("semafor2.txt");
+		do_evo_import = TRUE;
+		}
 	}
 
 	if (HEARTBEAT(0.2)) {
@@ -4247,7 +4267,7 @@ void init_game(ush_int port) {
 	if (reboot_recovery)
 		reboot_recover();
 
-	log("EmpireMUD/prool mod: Entering game loop.");
+	log("EmpireMUD/prool mod: Entering game loop. MUD STARTED!");
 	game_loop(mother_desc);
 
 	save_all_players(FALSE);

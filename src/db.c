@@ -578,7 +578,7 @@ void boot_world(void) {
 	init_reputation();
 	
 	// requires sectors, buildings, and room templates -- order matters here
-	log("Loading the world.");
+	log("Loading the world... WAIT PLEASE!..");
 	load_binary_map_file();	// get base data
 	load_world_from_binary_index();	// override with live rooms
 	build_world_map();	// ensure full world map
