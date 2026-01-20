@@ -181,15 +181,19 @@ end
 ~
 #12802
 Celestial Forge: Detect player entry, Grant abilities, Start progress~
-2 gA 100 8
+2 gA 100 12
 L c 9684
 L e 5195
 L i 12800
 L j 12810
 L j 12815
+L j 12850
+L j 12855
 L o 12810
+L o 12850
 L q 6
 L y 12810
+L y 12850
 ~
 if %actor.is_npc%
   halt
@@ -207,6 +211,19 @@ if %actor.skill(6)% >= 76
     end
     if %actor.empire%
       nop %actor.empire.start_progress(12810)%
+    end
+  end
+  if %room.template% >= 12850 && %room.template% <= 12855
+    if !%actor.has_bonus_ability(12850)%
+      * grant the ability after a short delay
+      %load% obj 9684 %actor%
+      set obj %actor.inventory%
+      if %obj.vnum% == 9684
+        nop %obj.val0(12850)%
+      end
+    end
+    if %actor.empire%
+      nop %actor.empire.start_progress(12850)%
     end
   end
 end
@@ -229,22 +246,37 @@ end
 ~
 #12803
 Celestial Forge: Time and Weather commands~
-2 c 0 1
+2 c 0 2
 L j 12810
+L j 12850
 time weather~
 if %cmd.mudcommand% == time
-  if %room.template% == 12810
-    %send% %actor% It looks like nighttime through the hole at the top of the tunnel.
-  else
-    %send% %actor% The beautiful night sky overhead tells you it's nighttime.
-  end
+  * TIME
+  switch %room.template%
+    case 12810
+      %send% %actor% It looks like nighttime through the hole at the top of the tunnel.
+    break
+    case 12850
+      %send% %actor% It looks like nighttime out through the flap.
+    break
+    default
+      %send% %actor% The beautiful night sky overhead tells you it's nighttime.
+    break
+  done
   return 1
 elseif %cmd.mudcommand% == weather
-  if %room.template% == 12810
-    %send% %actor% It's hard to tell the weather from in here.
-  else
-    %send% %actor% The night sky is cloudless and vast.
-  end
+  * WEATHER
+  switch %room.template%
+    case 12810
+      %send% %actor% It's hard to tell the weather from in here.
+    break
+    case 12850
+      %send% %actor% The night sky is cloudless outside.
+    break
+    default
+      %send% %actor% The night sky is cloudless and vast.
+    break
+  done
   return 1
 else
   * unknown command somehow?
@@ -1412,7 +1444,10 @@ L j 12855
 ~
 set room_list 12851 12852 12853 12854 12855
 * sanity
-if %method% != portal || %actor.is_npc% || !%actor.empire%
+if %method% != portal || %actor.is_npc% || !%actor.empire% || !%was_in%
+  halt
+elseif %actor.empire% != %was_in.empire%
+  * not coming from own empire
   halt
 end
 * short delay so only the first to enter this way triggers the change, if someone is following
@@ -1431,26 +1466,51 @@ while %room_list%
     set obj %there.contents(12850)%
     if %obj%
       * update 1 banner
-      %mod% %obj% longdesc A %color% camp standard flies over the forge.
+      %mod% %obj% longdesc &Z%color.ana% %color% camp standard flies over the forge.
       %mod% %obj% lookdesc The %color% camp standard rises above the forge, snapping and sighing in the night wind. Firelight from the smelter makes it visible against the starry night sky, splashed with the color of old embers and fresh blood.
       %mod% %obj% append-lookdesc In the center of the %color% standard is the symbol of %actor.empire.name%.
       %at% %there% %echo% The camp standard ripples and gleams as it changes to a new %color% emblem.
     end
   end
 done
+* and update mobs
+set Mateo %instance.mob(12851)%
+set Amina %instance.mob(12852)%
+set Oksana %instance.mob(12855)%
+if %Mateo%
+  %mod% %Mateo% lookdesc The master campwright is dressed in tight black trousers and a white shirt under a short, fitted black jacket, wrapped at the waist with %color.ana% %color% sash.
+  %mod% %Mateo% append-lookdesc His face, soot-stained from work at the smelter, is gentle, with sharp creases around his eyes. On his head, he wears a wide-brimmed black hat, though the sun has already set.
+end
+if %Amina%
+  %mod% %Amina% lookdesc The forgehand is steady as she raises and drops her hammer onto the anvil over and over, in perfect rhythm. She wears a hefty leather apron over a loose white dress
+  %mod% %Amina% append-lookdesc hemmed just above the ankle with patterns of red, yellow, and green. Over her shoulders, she has pinned a gold shawl with colorful beads and her head is
+  %mod% %Amina% append-lookdesc covered in a brimless gold cap decorated on the front with a stylized %color% flower.
+end
+if %Oksana%
+  %mod% %Oksana% lookdesc She wears a white blouse with %color% flowers, tucked loosely into a striped red and white skirt. Her long brown hair flows freely over her shoulders and, at the
+  %mod% %Oksana% append-lookdesc top, she has adorned it with flowers of all colors. Though she isn't working the anvil, she has the muscled build of a smith, and the old burn scars on her arms from years of toil at the forge.
+end
 ~
 #12851
 Celestial Forge: Fake exits from Victory Forge~
 2 c 0 0
-north south east west northeast ne southeast se southwest sw northwest nw~
+north south east west northeast ne southeast se southwest sw northwest nw down~
 set dir %actor.parse_dir(%cmd%)%
 eval to_room %%room.%dir%(room)%%
 if !%to_room%
-  %send% %actor% You wander %actor.dir(%dir%)% but somehow end up back by the forge.
+  if %dir% == down
+    %send% %actor% You start to wander down the hill but somehow end up back by the forge.
+  else
+    %send% %actor% You wander %actor.dir(%dir%)% but somehow end up back by the forge.
+  end
   set ch %room.people%
   while %ch%
     if %ch% != %actor%
-      %send% %ch% ~%actor% wanders %ch.dir(%dir%)% but somehow ends up back by the forge.
+      if %dir% == down
+        %send% %ch% ~%actor% starts to wander down the hill but somehow ends up back by the forge.
+      else
+        %send% %ch% ~%actor% wanders %ch.dir(%dir%)% but somehow ends up back by the forge.
+      end
     end
     set ch %ch.next_in_room%
   done
