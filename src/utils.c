@@ -928,7 +928,7 @@ bool process_import_one(empire_data *emp) {
 				// items
 				orn = obj_proto(trade->vnum);
 				add_to_empire_storage(emp, found_island, trade->vnum, trade_amt, orn ? GET_OBJ_TIMER(orn) : 0);
-				charge_stored_resource(pair->emp, ANY_ISLAND, trade->vnum, trade_amt, TRUE);
+				charge_stored_resource(pair->emp, ANY_ISLAND, trade->vnum, trade_amt, STORAGE_TIMERS_OLDEST);
 				
 				// mark gather trackers
 				add_production_total(emp, trade->vnum, trade_amt);

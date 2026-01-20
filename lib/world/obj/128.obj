@@ -635,4 +635,23 @@ A flag flies over the camp, showing the empire's standard.
 C
 1 1
 S
+#12851
+spark victory~
+a spark of victory~
+There's a spark of victory here.~
+   At a glance, it's a bright white metal token -- so white it can only be
+imperium -- but as you touch it, there's a spark. Just a little one. But in an
+instant, you feel bold, almost daring. This is the stuff victory is made of.
+   The spark of victory is a crafting material for Victory Forging.
+~
+3 0 a 0 0 2
+0 0 0
+2 0
+C
+175 175
+R
+4 5108 0
+R
+4 5115 0
+S
 $

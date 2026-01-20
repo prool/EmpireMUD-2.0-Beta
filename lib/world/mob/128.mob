@@ -387,4 +387,116 @@ D
 The elemental is a glimmering mass of imperium.
 ~
 S
+#12851
+mateo master campwright wright~
+Mateo~
+Master Campwright Mateo stands near the smelter.
+~
+0 0 bdvL cnG 3
+1 0 0 15 -1 -1
+D
+   The master campwright is dressed in tight black trousers and a white shirt
+under a short, fitted black jacket, wrapped at the waiste with a red sash. His
+face, soot-stained from work at the smelter, is gentle, with sharp creases
+around his eyes. On his head, he wears a wide-brimmed black hat, though the sun
+has already set.
+~
+M
+7
+say Welcome.~
+M
+8
+say Welcome back.~
+T 12807
+S
+#12852
+amina veteran forgehand hand~
+Amina~
+Amina, Veteran Forgehand, works the anvil.
+~
+0 0 bdvL cnG 3
+2 0 0 15 -1 -1
+D
+   The forgehand is steady as she raises and drops her hammer onto the anvil
+over and over, in perfect rhythm. She wears a hefty leather apron over a loose
+white dress hemmed just above the ankle with patterns of red, yellow, and
+green. Over her shoulders, she has pinned a gold shawl with colorful beads and
+her head is covered in a brimless gold cap decorated on the front with a
+stylized bead flower.
+~
+M
+7
+say Welcome.~
+M
+8
+say Welcome back.~
+T 12807
+S
+#12853
+Yara first~
+Yara~
+Yara of the First Anvil swings her hammer with precision.
+~
+0 0 bdvL cnG 3
+2 0 0 15 -1 -1
+D
+   She wears a heavy leather apron over a sleeveless woven tunic, bound at the
+waist with a patterned sash coated in too much soot to guess the original
+color. Her feet bear only simple sandals, firmly planted in the earthy hilltop
+as she strikes the anvil. Her dark hair is braided back, clear of the sparks
+that fly from each strike.
+~
+M
+7
+say Welcome.~
+M
+8
+say Welcome back.~
+T 12807
+S
+#12854
+hiro siege-honored honored~
+Hiro~
+Hiro the Siege-Honored works tirelessly at the anvil.
+~
+0 0 bdvL cnG 3
+1 0 0 15 -1 -1
+D
+   The honored blacksmith wears a short, indigo-dyed work kimono with the
+sleeves tied back, layered beneath a thick leather apron. Below that, his
+hakama trousers are stained with ash and oil. His feet are wrapped in simple
+cloth sandals with firm leather soles. His hair is bound neartly at the nape of
+his neck, clear of the work he performs with measured precision.
+~
+M
+7
+say Welcome.~
+M
+8
+say Welcome back.~
+T 12807
+S
+#12855
+Oksana lawhammer hammer~
+Oksana~
+Oksana Lawhammer is tallying the supplies.
+~
+0 0 bdvL cnG 3
+2 0 0 15 -1 -1
+D
+   She wears a white blouse with flowers that match the standards the fly over
+the camp, tucked loosely into a striped red and white skirt. Her long brown
+hair flows freely over her shoulders and, at the top, she has adorned it with
+flowers of all colors. Though she isn't working the anvil, she has the muscled
+build of a smith, and the old burn scars on her arms from years of toil at the
+forge.
+~
+M
+7
+say Welcome.~
+M
+8
+say Welcome back.~
+T 12807
+S
 $
