@@ -389,44 +389,58 @@ D5
 ~
 0 12851
 E
-tent canvas walls~
-tba
+pavilion tent canvas walls~
+   The pavilion is made of heavy canvas, grayed from soot and wear, held up by
+sturdy beams of solid wood. Maps and boards hang all over the walls.
 ~
 E
 maps hanging~
-tba
+   The walls of the tent are hung with many maps showing parts of the
+battlefield, surrounding areas, and the larger campaign.
 ~
 E
 boards tally~
-tba
+Boards hanging from the walls bear tally marks in charcoal.
 ~
 E
 tables weights stone carved carvings tokens regiments plots battlefield~
-tba
+   Solid wood tables are burdened nearly to the point of breaking, weighed
+down by heavy stone and carved tokens that are used to plan the siege.
 ~
 E
 out~
-tba
+   Cool night air rushes in as you glance out the tent flap and see the
+smelter and anvils, all hard at work repairing arms and armor for the weary
+soldiers.
 ~
 E
 light lanterns~
-tba
+Oil lanterns hang from wooden poles, casting flickering light over the tent.
 ~
 E
 poles~
-tba
+Sturdy wooden poles hold up the tent.
 ~
 E
 soot~
-tba
+   There's light soot on almost everything in this pavilion, especially the
+upper parts of the tent where smoke from the lanterns stains the canvas. The
+outside of the tent also bears soot from the smelter and the tireless work of
+the camp's smiths.
 ~
 E
 ink fresh~
-tba
+Light from the lanterns flickers off of fresh ink on various parchments.
+~
+E
+parchments~
+   Many parchments fill the tent, both old and new. In some cases, the ink is
+still fresh. But when you look closely at them, you can't make out any of the
+words.
 ~
 E
 seals wax~
-tba
+Red wax seals adorn rolled letters on the table.
 ~
 T 12803
 T 12802
@@ -459,33 +473,48 @@ D0
 0 12855
 E
 forge~
-tba
+   Victory Forge stands all around you, perched on a hilltop above the
+battlefield.
 ~
 E
 furnace smelter smelting squat glow mouth fire~
-tba
+   A heavy smelter smokes nearby, ensuring strong metal is available for the
+war effort.
 ~
 E
 shadows~
-tba
+   The lanterns cast shadows through the hot air, making the shadows dance
+across the forge.
 ~
 E
-lanterns~
-tba
+lanterns poles~
+Lanterns swing from poles to light up the work area.
+~
+E
+tent pavilion~
+The siege pavilion stands at the center of Victory Forge.
 ~
 E
 up stars sky expanse night~
-tba
+The endless night sky stretches out above you, twinkling with stars.
 ~
 E
-out battlefield field around~
-tba
+out battlefield field around fog~
+   A light fog hangs low in the air as the battlefield stretches out below the
+hill, still smoking from the day's fighting, though silence has overtaken it
+now.
 ~
 E
-camp~
-tba
+camp hilltop~
+   The small camp takes up much of the hilltop, perched well above the empty
+battlefield.
+~
+E
+dewdrops grass~
+Bits of grass here and there shimmer with the night's dew.
 ~
 M 1 12850 100.00 5
+M 0 12851 100.00 1
 T 12803
 T 12802
 S
@@ -502,33 +531,51 @@ D1
 0 12851
 E
 anvil lone surface~
-tba
+   The anvil is old and well-scarred from many decades of use on different
+battlefields.
 ~
 E
 earth packed ground~
-tba
+Little grass pokes out from the well-trampled bare earth.
 ~
 E
-hilltop~
-tba
+hilltop camp~
+   The small camp takes up much of the hilltop, perched well above the empty
+battlefield.
 ~
 E
 sparks glitter~
-tba
+Hot red embers and stray sparks glow like glitter around the anvil.
 ~
 E
 up stars sky expanse night~
-tba
+The endless night sky stretches out above you, twinkling with stars.
 ~
 E
-out battlefield field around~
-tba
+out battlefield field around fog~
+   A light fog hangs low in the air as the battlefield stretches out below the
+hill, still smoking from the day's fighting, though silence has overtaken it
+now.
 ~
 E
-camp~
-tba
+dewdrops grass~
+Bits of grass here and there shimmer with the night's dew.
+~
+E
+lanterns poles~
+Lanterns swing from poles to light up the work area.
+~
+E
+pavilion tent~
+The siege pavilion stands at the center of Victory Forge.
+~
+E
+forge~
+   Victory Forge stands all around you, perched on a hilltop above the
+battlefield.
 ~
 M 1 12850 100.00 5
+M 0 12852 100.00 1
 T 12803
 T 12802
 T 12851
@@ -546,41 +593,52 @@ D3
 0 12851
 E
 anvils arc~
-tba
+   The anvils arc around a central patch where several artisans can work in
+tandem. They show heavy use, with hammerscale scattered all around.
 ~
 E
 earth scorched ground~
-tba
+The ground around the anvils is blackened and scorched from heavy use.
 ~
 E
 metal hammerscale scale gleam~
-tba
+   Bits of scattered metal on the ground gleam in the lanternlight. Most of
+these are hammerscale, the byproduct of heavy hammer blows against hot iron.
 ~
 E
 lanterns lanternlight~
-tba
+Lanterns swing from poles to light up the work area.
 ~
 E
 forge~
-tba
+   Victory Forge stands all around you, perched on a hilltop above the
+battlefield.
 ~
 E
 up stars sky expanse night~
-tba
+The endless night sky stretches out above you, twinkling with stars.
 ~
 E
-out battlefield field around~
-tba
+out battlefield field around fog~
+   A light fog hangs low in the air as the battlefield stretches out below the
+hill, still smoking from the day's fighting, though silence has overtaken it
+now.
 ~
 E
-hilltop~
-tba
+hilltop camp~
+   The small camp takes up much of the hilltop, perched well above the empty
+battlefield.
 ~
 E
-camp~
-tba
+dewdrops grass~
+Bits of grass here and there shimmer with the night's dew.
+~
+E
+pavilion tent~
+The siege pavilion stands at the center of Victory Forge.
 ~
 M 1 12850 100.00 5
+M 0 12853 100.00 1
 T 12803
 T 12802
 T 12851
@@ -598,42 +656,48 @@ D0
 ~
 0 12851
 E
-anvil battered face~
-tba
-~
-E
-dent ding~
-tba
+anvil battered face dents dings~
+The old anvil is heavily worn from many years of travel on hard campaigns.
 ~
 E
 edge~
-tba
+   The hill drops off precipitously not far from the anvil, plummeting down
+toward the smouldering battlefield.
 ~
 E
-hilltop~
-tba
+hilltop camp~
+   The small camp takes up much of the hilltop, perched well above the quiet
+battlefield.
 ~
 E
 siege lines front~
-tba
+   Only a handful of troops still guard the front line, visible in the distance
+across the smouldering battlefield.
 ~
 E
-lanterns lanternlight~
-tba
+lanterns lanternlight poles~
+Lanterns swing from poles to light up the work area.
 ~
 E
 up stars sky expanse night~
-tba
+The endless night sky stretches out above you, twinkling with stars.
 ~
 E
-out battlefield field around~
-tba
+out battlefield field around fog~
+   A light fog hangs low in the air as the battlefield stretches out below the
+hill, still smoking from the day's fighting, though silence has overtaken it
+now.
 ~
 E
-camp~
-tba
+dewdrops grass~
+Bits of grass here and there shimmer with the night's dew.
+~
+E
+pavilion tent~
+The siege pavilion stands at the center of Victory Forge.
 ~
 M 1 12850 100.00 5
+M 0 12854 100.00 1
 T 12803
 T 12802
 T 12851
@@ -652,45 +716,59 @@ D2
 0 12851
 E
 crates~
-tba
+Reinforced crates are stacked along the edge of the hilltop camp.
 ~
 E
 iron imperium ingots stacks rows~
-tba
+   Rows and rows of metal ingots are stacked in easy reach of the forge, but
+any attempt to touch them is met with only failure. These aren't here for you.
 ~
 E
-tarps~
-tba
+tarps tarpaulins~
+Dark canvas tarpaulins cover many of the supplies.
 ~
 E
-soot~
-tba
-~
-E
-dew~
-tba
-~
-E
-charcoal oil weapons blanks bundles hafts barrels~
-tba
-~
-E
-up stars sky expanse night~
-tba
-~
-E
-out battlefield field around fog~
-tba
-~
-E
-camp~
-tba
+soot canvas~
+Soot has settled on most things here, especially on the canvas tarps.
 ~
 E
 water barrel ladle~
-tba
+An open water barrel is available to all.
+~
+E
+charcoal oil weapons blanks bundles hafts barrels~
+   The camp is full of supplies for both its brave soldiers and its legendary
+smiths.
+~
+E
+up stars sky expanse night~
+The endless night sky stretches out above you, twinkling with stars.
+~
+E
+out battlefield field around fog~
+   A light fog hangs low in the air as the battlefield stretches out below the
+hill, still smoking from the day's fighting, though silence has overtaken it
+now.
+~
+E
+hilltop camp~
+   The small camp takes up much of the hilltop, perched well above the empty
+battlefield.
+~
+E
+dewdrops grass~
+Bits of grass here and there shimmer with the night's dew.
+~
+E
+pavilion tent~
+The siege pavilion stands at the center of Victory Forge.
+~
+E
+lanterns poles~
+Lanterns swing from poles to light up the work area.
 ~
 M 1 12850 100.00 5
+M 0 12855 100.00 1
 T 12803
 T 12802
 T 12851
