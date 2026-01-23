@@ -493,14 +493,19 @@ mine~
 ~
 #12811
 Celestial Forge: Unique item exclusion~
-1 j 0 5
+1 j 0 10
 L c 12810
 L c 12814
 L c 12818
 L c 12822
 L c 12826
+L c 12852
+L c 12856
+L c 12860
+L c 12864
+L c 12868
 ~
-set ring_list 12810 12814 12818 12822 12826
+set ring_list 12810 12814 12818 12822 12826 12852 12856 12860 12864 12868
 set ring_pos rfinger lfinger
 set pos_list
 *
@@ -569,6 +574,12 @@ switch %self.vnum%
     set shard 5100
     set refund 1000
   break
+  case 12872
+    set requires 12850
+    set grants 12851
+    set shard 5101
+    set refund 1000
+  break
   default
     %echo% @%self% is not implemented.
     %purge% %self%
@@ -598,9 +609,12 @@ end
 ~
 #12834
 Shard companion: Buy shard companion~
-1 n 100 8
+1 n 100 11
 L b 12834
 L b 12844
+L c 12879
+L c 12880
+L c 12881
 L f 12837
 L w 5100
 L w 5101
@@ -642,6 +656,21 @@ switch %self.vnum%
   case 12836
     set tier 1
     set new_vnum 12834
+    set upgrade caster
+  break
+  case 12879
+    set tier 2
+    set new_vnum 12844
+    set upgrade tank
+  break
+  case 12880
+    set tier 2
+    set new_vnum 12844
+    set upgrade dps
+  break
+  case 12881
+    set tier 2
+    set new_vnum 12844
     set upgrade caster
   break
   default
@@ -1025,11 +1054,12 @@ detach 12837 %self.id%
 ~
 #12838
 Celestial Forge: Set up training dummy with use~
-1 c 6 1
+1 c 6 2
 L b 12838
+L b 12873
 use~
 * List of dummies to exclude here
-set dummy_list 12838
+set dummy_list 12838 12873
 *
 if %actor.obj_target(%arg.argument1%)% != %self%
   return 0
@@ -1516,6 +1546,21 @@ if !%to_room%
   done
 else
   return 0
+end
+~
+#12877
+Celestial Forge: Banner hawk load script~
+0 nt 100 0
+~
+set guy %self.leader%
+if !%guy% || !%guy.is_pc% || !%guy.empire%
+  halt
+end
+set emp %guy.empire%
+set color %emp.banner_name_simple%
+if %color% != none
+  %mod% %self% longdesc A sharp-eyed hawk trails %color.ana% %color% banner from its talons.
+  %mod% %self% lookdesc The lean, broad-winged hawk has feathers mottled in gleaming white and stark black. A light harness made of leather crosses its chest. In its talons, it clutches the %color% banner of %emp.name%.
 end
 ~
 $

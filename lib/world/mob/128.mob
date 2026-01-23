@@ -499,4 +499,35 @@ M
 say Welcome back.~
 T 12807
 S
+#12873
+dummy training gleaming imperium~
+a gleaming imperium dummy~
+A gleaming imperium training dummy has been set up here.
+~
+100 200 bdhnyDJK 0 3
+0 0 0 15 -1 -1
+D
+   This glorious suit of armor has been fitted over a weighted wooden stand,
+reinforced at the bottom so that it can take blow after blow from a heavy
+weapon. Though it teeters as it's struck, it never strikes back.
+~
+M
+13
+This training dummy will not attack back.~
+T 12839
+T 12840
+S
+#12877
+hawk banner sharp-eyed sharpeyed~
+a banner hawk~
+A sharp-eyed hawk circles overhead.
+~
+1 1 bdoD mn 1
+0 0 2 5 -1 -1
+D
+The lean, broad-winged hawk has feathers mottled in gleaming white and stark
+black. A light harness made of leather crosses its chest.
+~
+T 12877
+S
 $
