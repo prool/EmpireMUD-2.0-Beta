@@ -548,6 +548,8 @@ end
 * setup
 switch %room.template%
   case 12817
+  case 12818
+  case 12819
     set dest %instance.nearest_rmt(12811)%
     set mes swirl of iron filings
   break
@@ -589,6 +591,8 @@ L j 12817
 ~
 switch %self.template%
   case 12817
+  case 12818
+  case 12819
     set mob 12817
     set mes The scattered weapons across the field suddenly shudder and slide, racing inward as a towering form of lodestone rises from the center, armored in the spoils of a thousand forgotten battles.
   break
