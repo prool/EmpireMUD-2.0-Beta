@@ -34,7 +34,7 @@ the celestial forge controller~
 The celestial forge controller is lying here.~
    This elegant shard serves as the controller for a celestial forge. It can
 only be used by immortals.
-Usage: cforge goto iron
+Usage: cforge goto iron, imperium
        cforge goto <template vnum>
 ~
 3 0 a 0 0 3
@@ -583,8 +583,7 @@ Some magnetic iron elemental parts are here.~
 you can summon and dismiss like any other companion. This elemental lasts until
 it is destroyed. Each elemental is built from up to 3 modules. This module adds
 casting capabilities:
-   1 magnetic module: Adds 'order companion magnetize', which buffs you during
-      combat.
+   1 magnetic module: Adds 'order companion magnetize', which buffs you.
    2 magnetic modules: Increases the potency of its buffs and, if combined with
       a jagged module, changes the melee attack to a magical one.
    3 magnetic modules: Increases the buffs again and makes them automatic.
@@ -1228,8 +1227,7 @@ Some magnetic imperium elemental parts are here.~
 which you can summon and dismiss like any other companion. This elemental lasts
 until it is destroyed. Each elemental is built from up to 3 modules. This
 module adds casting capabilities:
-   1 magnetic module: Adds 'order companion magnetize', which buffs you during
-      combat.
+   1 magnetic module: Adds 'order companion magnetize', which buffs you.
    2 magnetic modules: Increases the potency of its buffs and, if combined with
       a jagged module, changes the melee attack to a magical one.
    3 magnetic modules: Increases the buffs again and makes them automatic.

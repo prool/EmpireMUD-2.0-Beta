@@ -84,6 +84,22 @@ there is no gap or grout between them. A large chain is bolted to the floor
 near the hole down to the tunnel.
 ~
 E
+north~
+You see a Ptahite blacksmith rearranging supplies.
+~
+E
+south~
+You see a Thorian blacksmith prodding a smelting pit.
+~
+E
+east~
+You see a Brigidine blacksmith staring up at the stars.
+~
+E
+west~
+You see a Hephaestian blacksmith fixing his hair.
+~
+E
 walls red northeast northwest southeast southwest ne se sw nw~
 The towering walls have been painted a rich red color.
 ~
@@ -127,22 +143,6 @@ E
 hole tunnel steps stairs down~
 A hole in the floor contains stone steps that lead down into the tunnel.
 ~
-E
-north~
-You see a Ptahite blacksmith rearranging supplies.
-~
-E
-south~
-You see a Thorian blacksmith prodding a smelting pit.
-~
-E
-east~
-You see a Brigidine blacksmith staring up at the stars.
-~
-E
-west~
-You see a Hephaestian blacksmith fixing his hair.
-~
 M 0 12811 100.00 1
 T 12803
 T 12802
@@ -185,6 +185,10 @@ roof up stars sky expanse~
 its dazzling stars.
 ~
 E
+east~
+You see a Gibilian blacksmith tending to the lodestone.
+~
+E
 walls red north south west northwest northeast southwest southeast nw ne sw se~
 The smooth walls are painted red and hung with iron lanterns.
 ~
@@ -200,10 +204,6 @@ E
 lodestone stone chain~
    A massive chain in the center of the forge supports an even larger silvery
 lodestone, which seems to tug at the chain as it pulls upward and to the north.
-~
-E
-east~
-You see a Gibilian blacksmith tending to the lodestone.
 ~
 M 0 12812 100.00 1
 T 12803
@@ -254,6 +254,10 @@ stains~
 The floor is stained with red-orange rust along some of the seams.
 ~
 E
+west~
+You see a Gibilian blacksmith tending to the lodestone.
+~
+E
 walls red north south east northwest northeast southwest southeast nw ne sw se~
 The walls have been painted red and lit by iron lanterns.
 ~
@@ -270,10 +274,6 @@ E
 stacks piles designs patterns~
    There are stacks of patterns and designs for various earrings all over, but
 you can't really understand the notes scrawled on them.
-~
-E
-west~
-You see a Gibilian blacksmith tending to the lodestone.
 ~
 M 0 12813 100.00 1
 T 12803
@@ -313,6 +313,10 @@ tools~
 are too high to reach.
 ~
 E
+north~
+You see a Gibilian blacksmith tending to the lodestone.
+~
+E
 walls red south east west northwest northeast southwest southeast nw ne sw se~
 The red walls look recently-painted.
 ~
@@ -333,10 +337,6 @@ north, held down only by a heavy chain.
 E
 lanterns shadows~
 Iron lanterns hang along the walls, casting shadows around the tools.
-~
-E
-north~
-You see a Gibilian blacksmith tending to the lodestone.
 ~
 M 0 12814 100.00 1
 T 12803
@@ -369,6 +369,10 @@ Virtually everything here is made from iron, from the floor to the barrels.
 E
 letters labels fiery red~
 The barrels are labeled in a red script that you cannot read.
+~
+E
+south~
+You see a Gibilian blacksmith tending to the lodestone.
 ~
 E
 walls north east west northwest northeast southwest southeast nw ne sw se~
@@ -406,10 +410,6 @@ The iron chain that tethers the lodestone is thick enough to pull a castle.
 E
 lanterns~
 Barrels are stacked so high you can hardly see the lanterns on the wall.
-~
-E
-south~
-You see a Gibilian blacksmith tending to the lodestone.
 ~
 M 0 12815 100.00 1
 T 12803
@@ -667,6 +667,22 @@ lanterns poles~
 Lanterns swing from poles to light up the work area.
 ~
 E
+north~
+You see one of the blacksmiths rearranging supplies.
+~
+E
+south~
+You see a blacksmith working at an anvil near the edge of the hill.
+~
+E
+east~
+You see a blacksmith hammering away at one of the anvils.
+~
+E
+west~
+You see a veteran forgehand working a lone anvil.
+~
+E
 tent pavilion southwest sw~
 The siege pavilion stands at the center of Victory Forge.
 ~
@@ -688,22 +704,6 @@ battlefield.
 E
 dewdrops grass down~
 Bits of grass here and there shimmer with the night's dew.
-~
-E
-north~
-You see one of the blacksmiths rearranging supplies.
-~
-E
-south~
-You see a blacksmith working at an anvil near the edge of the hill.
-~
-E
-east~
-You see a blacksmith hammering away at one of the anvils.
-~
-E
-west~
-You see a veteran forgehand working a lone anvil.
 ~
 M 1 12850 100.00 5
 M 0 12851 100.00 1
@@ -745,6 +745,10 @@ up stars sky expanse night~
 The endless night sky stretches out above you, twinkling with stars.
 ~
 E
+east~
+You see Mateo tending the smelter.
+~
+E
 out battlefield field around fog north south west northwest northeast southwest southeast nw ne sw se down~
    A light fog hangs low in the air as the battlefield stretches out below the
 hill, still smoking from the day's fighting, though silence has overtaken it
@@ -766,10 +770,6 @@ E
 forge~
    Victory Forge stands all around you, perched on a hilltop above the
 battlefield.
-~
-E
-east~
-You see Mateo tending the smelter.
 ~
 M 1 12850 100.00 5
 M 0 12852 100.00 1
@@ -818,6 +818,10 @@ up stars sky expanse night~
 The endless night sky stretches out above you, twinkling with stars.
 ~
 E
+west~
+You see Mateo tending the smelter.
+~
+E
 out battlefield field around fog north south east northwest northeast southwest southeast nw ne sw se down~
    A light fog hangs low in the air as the battlefield stretches out below the
 hill, still smoking from the day's fighting, though silence has overtaken it
@@ -835,10 +839,6 @@ Bits of grass here and there shimmer with the night's dew.
 E
 pavilion tent~
 The siege pavilion stands at the center of Victory Forge.
-~
-E
-west~
-You see Mateo tending the smelter.
 ~
 M 1 12850 100.00 5
 M 0 12853 100.00 1
@@ -888,6 +888,10 @@ up stars sky expanse night~
 The endless night sky stretches out above you, twinkling with stars.
 ~
 E
+north~
+You see Mateo tending the smelter.
+~
+E
 out battlefield field around fog south east west northwest northeast southwest southeast nw ne sw se down~
    A light fog hangs low in the air as the battlefield stretches out below the
 hill, still smoking from the day's fighting, though silence has overtaken it
@@ -900,10 +904,6 @@ Bits of grass here and there shimmer with the night's dew.
 E
 pavilion tent~
 The siege pavilion stands at the center of Victory Forge.
-~
-E
-north~
-You see Mateo tending the smelter.
 ~
 M 1 12850 100.00 5
 M 0 12854 100.00 1
@@ -955,6 +955,10 @@ up stars sky expanse night~
 The endless night sky stretches out above you, twinkling with stars.
 ~
 E
+south~
+You see Mateo tending the smelter.
+~
+E
 out battlefield field around fog north east west northwest northeast southwest southeast nw ne sw se down~
    A light fog hangs low in the air as the battlefield stretches out below the
 hill, still smoking from the day's fighting, though silence has overtaken it
@@ -976,10 +980,6 @@ The siege pavilion stands at the center of Victory Forge.
 E
 lanterns poles~
 Lanterns swing from poles to light up the work area.
-~
-E
-south~
-You see Mateo tending the smelter.
 ~
 M 1 12850 100.00 5
 M 0 12855 100.00 1

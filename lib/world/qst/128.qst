@@ -10,15 +10,18 @@ and broken steel of warriors past have taken on a life of their own, bound by
 powerful lodestones, and always prepared for another battle.
    If you're ready to prove your mettle against the creature, type 'challenge'
 from Charlotte Gibilian's location in Lodestone Forge. If you want to ensure a
-private arena, type 'challenge empty'.
+private arena, type 'challenge empty'. You can return from the challenge by
+typing 'return' from the battlefield.
 ~
    Still coughing from battlefield ash in your lungs, you emerge triumphant
 against the Lodestone Colossus, proving -- to yourself, at least -- that you're
-more than just another dented suit of armor if the rusty wasteland of history.
+more than just another dented suit of armor in the rusty wasteland of history.
    You can challenge the Lodestone Colossus again as many times as you want by
 typing 'challenge' or 'challenge empty' from Charlotte Gibilian's location in
 Lodestone Forge. However, it will only reward you with a shatterable relic
 shield once per day.
+   Remember, you can always return from the challenge by typing 'return' from
+the battlefield.
 ~
 1 0 1 100 -1
 A

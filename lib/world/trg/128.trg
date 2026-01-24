@@ -296,8 +296,10 @@ set mode %arg.car%
 set arg2 %arg.cdr%
 if goto /= %mode%
   * target handling
-  if iron /= %arg2%
+  if iron /= %arg2% || lodestone forge /= %arg2%
     set to_room %instance.nearest_rmt(12810)%
+  elseif imperium /= %arg2% || victory forge /= %arg2%
+    set to_room %instance.nearest_rmt(12850)%
   else
     set to_room %instance.nearest_rmt(%arg2%)%
   end
@@ -1642,7 +1644,7 @@ remote last_cmd %self.id%
 *
 if %last_cmd% == 1
   * Haste IF player isn't already hastened OR is already fighting
-  if %actor.affect(HASTE)% || %actor.fighting%
+  if %actor.aff_flagged(HASTE)% || %actor.fighting%
     set last_cmd 2
     remote last_cmd %self.id%
     set allow_cmd_5 1
@@ -1687,7 +1689,7 @@ elseif %last_cmd% == 4
   * boosts damage
   set weap %actor.eq(wield)%
   if %weap%
-    if %weap.magic%
+    if %weap.attack(magic)%
       set field BONUS-MAGICAL
       set desc glowing
     else
