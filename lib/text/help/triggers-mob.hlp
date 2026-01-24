@@ -573,6 +573,7 @@ When using field  - The variable returns:
 &cmaxblood&0 - The maximum blood points of the actor.
 &cmaxcarrying&0 - Inventory size limit (total they can carry).
 &cmaxhealth&0 - The maximum hit points of the actor.
+&cmaxlevel, minlevel&0 - For NPCs, their upper and lower level limits.
 &cmaxmana&0 - The maximum mana points of the actor.
 &cmaxmove&0 - The maximum movement points of the actor.
 &cmob_flagged(FLAG)&0 - Returns TRUE if the NPC has the given flag, e.g. VAMPIRE.
