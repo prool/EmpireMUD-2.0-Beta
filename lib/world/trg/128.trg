@@ -181,15 +181,19 @@ end
 ~
 #12802
 Celestial Forge: Detect player entry, Grant abilities, Start progress~
-2 gA 100 8
+2 gA 100 12
 L c 9684
 L e 5195
 L i 12800
 L j 12810
 L j 12815
+L j 12850
+L j 12855
 L o 12810
+L o 12850
 L q 6
 L y 12810
+L y 12850
 ~
 if %actor.is_npc%
   halt
@@ -207,6 +211,19 @@ if %actor.skill(6)% >= 76
     end
     if %actor.empire%
       nop %actor.empire.start_progress(12810)%
+    end
+  end
+  if %room.template% >= 12850 && %room.template% <= 12855
+    if !%actor.has_bonus_ability(12850)%
+      * grant the ability after a short delay
+      %load% obj 9684 %actor%
+      set obj %actor.inventory%
+      if %obj.vnum% == 9684
+        nop %obj.val0(12850)%
+      end
+    end
+    if %actor.empire%
+      nop %actor.empire.start_progress(12850)%
     end
   end
 end
@@ -229,22 +246,37 @@ end
 ~
 #12803
 Celestial Forge: Time and Weather commands~
-2 c 0 1
+2 c 0 2
 L j 12810
+L j 12850
 time weather~
 if %cmd.mudcommand% == time
-  if %room.template% == 12810
-    %send% %actor% It looks like nighttime through the hole at the top of the tunnel.
-  else
-    %send% %actor% The beautiful night sky overhead tells you it's nighttime.
-  end
+  * TIME
+  switch %room.template%
+    case 12810
+      %send% %actor% It looks like nighttime through the hole at the top of the tunnel.
+    break
+    case 12850
+      %send% %actor% It looks like nighttime out through the flap.
+    break
+    default
+      %send% %actor% The beautiful night sky overhead tells you it's nighttime.
+    break
+  done
   return 1
 elseif %cmd.mudcommand% == weather
-  if %room.template% == 12810
-    %send% %actor% It's hard to tell the weather from in here.
-  else
-    %send% %actor% The night sky is cloudless and vast.
-  end
+  * WEATHER
+  switch %room.template%
+    case 12810
+      %send% %actor% It's hard to tell the weather from in here.
+    break
+    case 12850
+      %send% %actor% The night sky is cloudless outside.
+    break
+    default
+      %send% %actor% The night sky is cloudless and vast.
+    break
+  done
   return 1
 else
   * unknown command somehow?
@@ -461,14 +493,19 @@ mine~
 ~
 #12811
 Celestial Forge: Unique item exclusion~
-1 j 0 5
+1 j 0 10
 L c 12810
 L c 12814
 L c 12818
 L c 12822
 L c 12826
+L c 12852
+L c 12856
+L c 12860
+L c 12864
+L c 12868
 ~
-set ring_list 12810 12814 12818 12822 12826
+set ring_list 12810 12814 12818 12822 12826 12852 12856 12860 12864 12868
 set ring_pos rfinger lfinger
 set pos_list
 *
@@ -494,6 +531,297 @@ if %pos_list% && %vnum_list%
 end
 * ok
 return 1
+~
+#12817
+Celestial Forge: Arena return command~
+2 c 0 2
+L j 12811
+L j 12851
+return~
+if %actor.fighting% || %actor.disabled%
+  %send% %actor% You can't do that right now.
+  halt
+elseif %actor.position% != Standing
+  %send% %actor% You need to stand up first.
+  halt
+end
+* setup
+switch %room.template%
+  case 12817
+  case 12818
+  case 12819
+    set dest %instance.nearest_rmt(12811)%
+    set mes swirl of iron filings
+  break
+  case 12857
+    set dest %instance.nearest_rmt(12851)%
+    set mes gleaming flash of imperium
+  break
+done
+if !%dest%
+  %send% %actor% You can't do that right now.
+  halt
+end
+* teleport
+%echoaround% %actor% ~%actor% vanishes with a %mes%!
+%send% %actor% You vanish with a %mes%!
+%teleport% %actor% %dest%
+%echoaround% %actor% ~%actor% appears in a %mes%!
+%load% obj 9680 %actor% inv
+* fellows
+set ch %room.people%
+while %ch%
+  set next_ch %ch.next_in_room%
+  if %ch.leader% == actor && !%ch.fighting%
+    %echoaround% %ch% ~%ch% vanishes with a %mes%!
+    %teleport% %ch% %dest%
+    %echoaround% %ch% ~%ch% appears in a %mes%!
+    if %ch.position% != Sleeping
+      %load% obj 9680 %ch% inv
+    end
+  end
+  set ch %next_ch%
+done
+~
+#12818
+Celetsial Forge: Spawn arena mob~
+2 bw 100 2
+L b 12817
+L j 12817
+~
+switch %self.template%
+  case 12817
+  case 12818
+  case 12819
+    set mob 12817
+    set mes The scattered weapons across the field suddenly shudder and slide, racing inward as a towering form of lodestone rises from the center, armored in the spoils of a thousand forgotten battles.
+  break
+  default
+    halt
+  break
+done
+if %room.people(%mob%)%
+  * already present
+  halt
+end
+* load me!
+wait 2 sec
+%load% mob %mob%
+set guy %room.people%
+if %guy.vnum% == %mob%
+  * success
+  %echo% &&w%mes%&&0
+end
+~
+#12819
+Celestial Forge: Challenge command to enter arena~
+2 c 0 4
+L j 12811
+L j 12817
+L j 12818
+L j 12819
+challenge~
+* Tries to find an available arena to fight in
+* optional 'empty' arg gets you one with zero players
+if %actor.fighting% || %actor.disabled%
+  %send% %actor% You can't do that right now.
+  halt
+elseif %actor.position% != Standing
+  %send% %actor% You need to stand up first.
+  halt
+end
+* setup
+switch %room.template%
+  case 12811
+    set room_list 12817 12818 12819
+    set mes swirl of iron filings
+  break
+  case 12851
+    set room_list ** TODO
+    set mes gleaming flash of imperium
+  break
+done
+eval empty %arg% == empty
+set dest 0
+while %room_list% && !%dest%
+  set vnum %room_list.car%
+  set room_list %room_list.cdr%
+  set dest %instance.nearest_rmt(%vnum%)%
+  set ok 1
+  if %dest%
+    set ch %dest.people%
+    while %ch% && %ok%
+      if %ch.fighting%
+        set ok 0
+      elseif %empty% && %ch.is_pc%
+        set ok 0
+      end
+      set ch %ch.next_in_room%
+    done
+    if !%ok%
+      set dest 0
+    end
+  end
+done
+if !%dest%
+  %send% %actor% No challenge arena was available. Try again later.
+  halt
+end
+* teleport
+%echoaround% %actor% ~%actor% vanishes with a %mes%!
+%send% %actor% You vanish with a %mes%!
+%teleport% %actor% %dest%
+%echoaround% %actor% ~%actor% appears in a %mes%!
+%load% obj 9680 %actor% inv
+* fellows
+set ch %room.people%
+while %ch%
+  set next_ch %ch.next_in_room%
+  if %ch.leader% == actor && !%ch.fighting%
+    %echoaround% %ch% ~%ch% vanishes with a %mes%!
+    %teleport% %ch% %dest%
+    %echoaround% %ch% ~%ch% appears in a %mes%!
+    if %ch.position% != Sleeping
+      %load% obj 9680 %ch% inv
+    end
+  end
+  set ch %next_ch%
+done
+~
+#12820
+Celestial Forge: Loot once per day per person~
+0 f 100 0
+~
+eval min_level %self.minlevel% - 25
+set room %self.room%
+set ch %room.people%
+set any_ok 0
+set varname %self.vnum%_daily
+* ensure a player has loot permission
+if %actor.is_pc% && %actor.level% >= %min_level% && %self.is_tagged_by(%actor%)%
+  if %actor.var(%varname%,0)% < %dailycycle%
+    * actor qualifies
+    set %varname% %dailycycle%
+    remote %varname% %actor.id%
+    nop %self.remove_mob_flag(!LOOT)%
+    set any_ok 1
+  end
+end
+* actor didn't qualify -- find anyone present who does
+set ch %room.people%
+while %ch% && !%any_ok%
+  if %ch.is_pc% && %ch.level% >= %min_level% && %self.is_tagged_by(%ch%)%
+    if %ch.var(%varname%,0)% < %dailycycle%
+      * ch qualifies
+      set %varname% %dailycycle%
+      remote %varname% %ch.id%
+      nop %self.remove_mob_flag(!LOOT)%
+      set any_ok 1
+    end
+  end
+  set ch %ch.next_in_room%
+done
+* no death cry
+return 0
+~
+#12821
+Celestial Forge: Single mob difficulty selector~
+0 c 0 0
+difficulty~
+if !%arg%
+  %send% %actor% You must specify a level of difficulty. (Normal, Hard, Group, or Boss)
+  return 1
+  halt
+end
+if %self.fighting%
+  %send% %actor% You can't change |%self% difficulty while &%self% is in combat!
+  return 1
+  halt
+end
+if normal /= %arg%
+  set diff 1
+elseif hard /= %arg%
+  set diff 2
+elseif group /= %arg%
+  set diff 3
+elseif boss /= %arg%
+  set diff 4
+else
+  %send% %actor% That is not a valid difficulty level for this encounter. (Normal, Hard, Group, or Boss)
+  return 1
+  halt
+end
+* messaging
+%send% %actor% You set the difficulty...
+%echoaround% %actor% ~%actor% sets the difficulty...
+* Clear existing difficulty flags and set new ones.
+remote diff %self.id%
+set mob %self%
+nop %mob.remove_mob_flag(HARD)%
+nop %mob.remove_mob_flag(GROUP)%
+if %diff% == 1
+  * Then we don't need to do anything
+  %echo% ~%self% has been set to Normal.
+elseif %diff% == 2
+  %echo% ~%self% has been set to Hard.
+  nop %mob.add_mob_flag(HARD)%
+elseif %diff% == 3
+  %echo% ~%self% has been set to Group.
+  nop %mob.add_mob_flag(GROUP)%
+elseif %diff% == 4
+  %echo% ~%self% has been set to Boss.
+  nop %mob.add_mob_flag(HARD)%
+  nop %mob.add_mob_flag(GROUP)%
+end
+nop %mob.unscale_and_reset%
+* remove no-attack
+if %mob.aff_flagged(!ATTACK)%
+  dg_affect %mob% !ATTACK off
+end
+* unscale and restore me
+nop %self.unscale_and_reset%
+* mark me as scaled
+set scaled 1
+remote scaled %self.id%
+* attempt to remove (difficulty) from longdesc
+set test (difficulty)
+if %self.longdesc% ~= %test%
+  set string %self.longdesc%
+  set replace %string.car%
+  set string %string.cdr%
+  while %string%
+    set word %string.car%
+    set string %string.cdr%
+    if %word% != %test%
+      set replace %replace% %word%
+    end
+  done
+  if %replace%
+    %mod% %self% longdesc %replace%
+  end
+end
+~
+#12822
+Celestial Forge: Mob gains no-attack on load~
+0 nA 100 0
+~
+* turn on no-attack (until diff-sel)
+dg_affect %self% !ATTACK on -1
+~
+#12823
+Celestial Forge: Message when no-attack mob is attacked~
+0 B 0 0
+~
+if %self.aff_flagged(!ATTACK)%
+  %send% %actor% You need to choose a difficulty before you can fight ~%self%.
+  %send% %actor% Usage: difficulty <normal \| hard \| group \| boss>
+  %echoaround% %actor% ~%actor% considers attacking ~%self%.
+  return 0
+else
+  * no need for this script anymore
+  detach 12823 %self.id%
+  return 1
+end
 ~
 #12832
 Lodestone Firefly: Northward pull~
@@ -537,6 +865,12 @@ switch %self.vnum%
     set shard 5100
     set refund 1000
   break
+  case 12872
+    set requires 12850
+    set grants 12851
+    set shard 5101
+    set refund 1000
+  break
   default
     %echo% @%self% is not implemented.
     %purge% %self%
@@ -566,9 +900,12 @@ end
 ~
 #12834
 Shard companion: Buy shard companion~
-1 n 100 8
+1 n 100 11
 L b 12834
 L b 12844
+L c 12879
+L c 12880
+L c 12881
 L f 12837
 L w 5100
 L w 5101
@@ -610,6 +947,21 @@ switch %self.vnum%
   case 12836
     set tier 1
     set new_vnum 12834
+    set upgrade caster
+  break
+  case 12879
+    set tier 2
+    set new_vnum 12844
+    set upgrade tank
+  break
+  case 12880
+    set tier 2
+    set new_vnum 12844
+    set upgrade dps
+  break
+  case 12881
+    set tier 2
+    set new_vnum 12844
     set upgrade caster
   break
   default
@@ -993,11 +1345,12 @@ detach 12837 %self.id%
 ~
 #12838
 Celestial Forge: Set up training dummy with use~
-1 c 6 1
+1 c 6 2
 L b 12838
+L b 12873
 use~
 * List of dummies to exclude here
-set dummy_list 12838
+set dummy_list 12838 12873
 *
 if %actor.obj_target(%arg.argument1%)% != %self%
   return 0
@@ -1400,6 +1753,24 @@ else
   magnetize
 end
 ~
+#12845
+Celestial Forge: Open shard box~
+1 c 2 0
+open~
+if %actor.obj_target(%arg.argument1%)% != %self%
+  return 0
+  halt
+elseif %self.val0% <= 0 || %self.val1% < 1
+  %send% %actor% @%self% seems to be empty.
+  halt
+end
+* ok
+nop %actor.give_currency(%self.val0%,%self.val1%)%
+eval name %%currency.%self.val0%(%self.val1%)%%
+%send% %actor% You open @%self% and gain %self.val1% %name%!
+%echoaround% %actor% ~%actor5 opens @%self% and gains %self.val1% %name%!
+%purge% %self%
+~
 #12850
 Celestial Forge: Change camp standards on entry~
 2 gA 100 6
@@ -1412,7 +1783,10 @@ L j 12855
 ~
 set room_list 12851 12852 12853 12854 12855
 * sanity
-if %method% != portal || %actor.is_npc% || !%actor.empire%
+if %method% != portal || %actor.is_npc% || !%actor.empire% || !%was_in%
+  halt
+elseif %actor.empire% != %was_in.empire%
+  * not coming from own empire
   halt
 end
 * short delay so only the first to enter this way triggers the change, if someone is following
@@ -1431,31 +1805,71 @@ while %room_list%
     set obj %there.contents(12850)%
     if %obj%
       * update 1 banner
-      %mod% %obj% longdesc A %color% camp standard flies over the forge.
+      %mod% %obj% longdesc &Z%color.ana% %color% camp standard flies over the forge.
       %mod% %obj% lookdesc The %color% camp standard rises above the forge, snapping and sighing in the night wind. Firelight from the smelter makes it visible against the starry night sky, splashed with the color of old embers and fresh blood.
       %mod% %obj% append-lookdesc In the center of the %color% standard is the symbol of %actor.empire.name%.
       %at% %there% %echo% The camp standard ripples and gleams as it changes to a new %color% emblem.
     end
   end
 done
+* and update mobs
+set Mateo %instance.mob(12851)%
+set Amina %instance.mob(12852)%
+set Oksana %instance.mob(12855)%
+if %Mateo%
+  %mod% %Mateo% lookdesc The master campwright is dressed in tight black trousers and a white shirt under a short, fitted black jacket, wrapped at the waist with %color.ana% %color% sash.
+  %mod% %Mateo% append-lookdesc His face, soot-stained from work at the smelter, is gentle, with sharp creases around his eyes. On his head, he wears a wide-brimmed black hat, though the sun has already set.
+end
+if %Amina%
+  %mod% %Amina% lookdesc The forgehand is steady as she raises and drops her hammer onto the anvil over and over, in perfect rhythm. She wears a hefty leather apron over a loose white dress
+  %mod% %Amina% append-lookdesc hemmed just above the ankle with patterns of red, yellow, and green. Over her shoulders, she has pinned a gold shawl with colorful beads and her head is
+  %mod% %Amina% append-lookdesc covered in a brimless gold cap decorated on the front with a stylized %color% flower.
+end
+if %Oksana%
+  %mod% %Oksana% lookdesc She wears a white blouse with %color% flowers, tucked loosely into a striped red and white skirt. Her long brown hair flows freely over her shoulders and, at the
+  %mod% %Oksana% append-lookdesc top, she has adorned it with flowers of all colors. Though she isn't working the anvil, she has the muscled build of a smith, and the old burn scars on her arms from years of toil at the forge.
+end
 ~
 #12851
 Celestial Forge: Fake exits from Victory Forge~
 2 c 0 0
-north south east west northeast ne southeast se southwest sw northwest nw~
+north south east west northeast ne southeast se southwest sw northwest nw down~
 set dir %actor.parse_dir(%cmd%)%
 eval to_room %%room.%dir%(room)%%
 if !%to_room%
-  %send% %actor% You wander %actor.dir(%dir%)% but somehow end up back by the forge.
+  if %dir% == down
+    %send% %actor% You start to wander down the hill but somehow end up back by the forge.
+  else
+    %send% %actor% You wander %actor.dir(%dir%)% but somehow end up back by the forge.
+  end
   set ch %room.people%
   while %ch%
     if %ch% != %actor%
-      %send% %ch% ~%actor% wanders %ch.dir(%dir%)% but somehow ends up back by the forge.
+      if %dir% == down
+        %send% %ch% ~%actor% starts to wander down the hill but somehow ends up back by the forge.
+      else
+        %send% %ch% ~%actor% wanders %ch.dir(%dir%)% but somehow ends up back by the forge.
+      end
     end
     set ch %ch.next_in_room%
   done
 else
   return 0
+end
+~
+#12877
+Celestial Forge: Banner hawk load script~
+0 nt 100 0
+~
+set guy %self.leader%
+if !%guy% || !%guy.is_pc% || !%guy.empire%
+  halt
+end
+set emp %guy.empire%
+set color %emp.banner_name_simple%
+if %color% != none
+  %mod% %self% longdesc A sharp-eyed hawk trails %color.ana% %color% banner from its talons.
+  %mod% %self% lookdesc The lean, broad-winged hawk has feathers mottled in gleaming white and stark black. A light harness made of leather crosses its chest. In its talons, it clutches the %color% banner of %emp.name%.
 end
 ~
 $

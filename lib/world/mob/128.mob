@@ -321,6 +321,24 @@ M
 $n carefully arranges panes of glass in a rack.~
 T 12807
 S
+#12817
+colossus lodestone stone form shape center~
+the Lodestone Colossus~
+A Lodestone Colossus towers above the field. (difficulty)
+~
+1 100 dhyzDJKL cEG 3
+0 0 0 14 -1 -1
+D
+   The behemoth is formed from hulking blocks of lodestone, cobbled and stacked
+into a crude but unstoppable human-like shape. Countless weapons, some rusted
+and others still shining, cleave tightly to its surface to form a jagged shell
+of blades and shields that grinds and rearranges itself as the colossus moves.
+~
+I 4 12807 100.00 1  # LOOT: lodestone relic shield
+T 12822
+T 12821
+T 12823
+S
 #12832
 firefly fly lodestone~
 a lodestone firefly~
@@ -353,7 +371,7 @@ An iron elemental is here.
 1 125 dhoGK cGL 3
 0 0 80 6 -1 -1
 D
-The elemental is a swirling mass of iron.
+The elemental is configuring itself from a swirling mass of iron.
 ~
 T 12836
 T 12835
@@ -381,11 +399,13 @@ elemental imperium~
 an imperium elemental~
 An imperium elemental is here.
 ~
-1 225 dhoG cmG 3
-0 0 85 6 -1 -1
+1 225 dhoGK cGL 3
+0 0 94 6 -1 -1
 D
-The elemental is a glimmering mass of imperium.
+The elemental is configuring itself from a swirling mass of imperium.
 ~
+T 12836
+T 12835
 S
 #12851
 mateo master campwright wright~
@@ -396,7 +416,7 @@ Master Campwright Mateo stands near the smelter.
 1 0 0 15 -1 -1
 D
    The master campwright is dressed in tight black trousers and a white shirt
-under a short, fitted black jacket, wrapped at the waiste with a red sash. His
+under a short, fitted black jacket, wrapped at the waist with a red sash. His
 face, soot-stained from work at the smelter, is gentle, with sharp creases
 around his eyes. On his head, he wears a wide-brimmed black hat, though the sun
 has already set.
@@ -498,5 +518,36 @@ M
 8
 say Welcome back.~
 T 12807
+S
+#12873
+dummy training gleaming imperium~
+a gleaming imperium dummy~
+A gleaming imperium training dummy has been set up here.
+~
+100 200 bdhnyDJK 0 3
+0 0 0 15 -1 -1
+D
+   This glorious suit of armor has been fitted over a weighted wooden stand,
+reinforced at the bottom so that it can take blow after blow from a heavy
+weapon. Though it teeters as it's struck, it never strikes back.
+~
+M
+13
+This training dummy will not attack back.~
+T 12839
+T 12840
+S
+#12877
+hawk banner sharp-eyed sharpeyed~
+a banner hawk~
+A sharp-eyed hawk circles overhead.
+~
+1 1 bdoD mn 1
+0 0 2 5 -1 -1
+D
+The lean, broad-winged hawk has feathers mottled in gleaming white and stark
+black. A light harness made of leather crosses its chest.
+~
+T 12877
 S
 $

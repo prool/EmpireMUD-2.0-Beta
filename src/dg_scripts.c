@@ -4410,6 +4410,9 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 					else if (!str_cmp(field, "maxblood")) {
 						safe_snprintf(str, slen, "%d", GET_MAX_BLOOD(c));
 					}
+					else if (!str_cmp(field, "maxlevel")) {
+						safe_snprintf(str, slen, "%d", IS_NPC(c) ? GET_MAX_SCALE_LEVEL(c) : get_approximate_level(c));
+					}
 					else if (!str_cmp(field, "mana")) {
 						int amt;
 						if (subfield && *subfield && (amt = atoi(subfield))) {
@@ -4437,6 +4440,9 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							strcpy(str, "");
 						else
 							safe_snprintf(str, slen, "%c%d", UID_CHAR, char_script_id(GET_LEADER(c)));
+					}
+					else if (!str_cmp(field, "minlevel")) {
+						safe_snprintf(str, slen, "%d", IS_NPC(c) ? GET_MIN_SCALE_LEVEL(c) : get_approximate_level(c));
 					}
 					else if (!str_cmp(field, "mob_flagged")) {
 						if (subfield && *subfield) {
