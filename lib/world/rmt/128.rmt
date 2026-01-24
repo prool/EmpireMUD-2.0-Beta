@@ -59,6 +59,7 @@ iron lanterns. Above, the roof is open, showing the infinite expanse of a
 starry night. A heavy chain supports a massive lodestone over your head. Light
 wisps of smoke drift through the air, carrying the aroma of a warm, spicy
 incense.
+Commands: challenge
 ~
 cei 0 0 12810
 D9
@@ -145,6 +146,7 @@ You see a Hephaestian blacksmith fixing his hair.
 M 0 12811 100.00 1
 T 12803
 T 12802
+T 12819
 S
 #12812
 Lodestone Forge~
@@ -412,6 +414,135 @@ You see a Gibilian blacksmith tending to the lodestone.
 M 0 12815 100.00 1
 T 12803
 T 12802
+S
+#12817
+An Old and Broken Battlefield~
+   The ground is carpeted with the rusted remnants of an ancient battle.
+Broken spears, shattered shields, and dented helms lie half-buried in dark ash,
+a silent farm of fallen arms stretching as far as the eye can see. A rough
+scraping noise follows every footstep as you trod along, watching as loose bits
+of iron slowly creep across the ground, drawn to the shape at the center.
+Commands: return
+~
+aci 0 0 12817
+E
+ground carpet~
+   Rare hints of green poke through the ash and armor that carpet the
+battlefield where eons of endless war have left little natural ground exposed.
+~
+E
+remnants~
+From horizon to horizon, all you can see is what remains of endless war.
+~
+E
+rust~
+A soft blanket of dark red covers many of the fallen arms and armor.
+~
+E
+spears shields helms arms armor weapons~
+All around you are the rusted remains of battle.
+~
+E
+ash farm~
+Old weapons rise from the field of ash like so many crops.
+~
+E
+iron~
+Everything here is made of iron.
+~
+E
+shape center mass hulking~
+There's a hulking mass at the center of the battlefield.
+~
+T 12817
+T 12818
+Z1 1
+S
+#12818
+An Old and Broken Battlefield~
+   The ground is carpeted with the rusted remnants of an ancient battle.
+Broken spears, shattered shields, and dented helms lie half-buried in dark ash,
+a silent farm of fallen arms stretching as far as the eye can see. A rough
+scraping noise follows every footstep as you trod along, watching as loose bits
+of iron slowly creep across the ground, drawn to the shape at the center.
+Commands: return
+~
+aci 0 0 12818
+E
+ground carpet~
+   Rare hints of green poke through the ash and armor that carpet the
+battlefield where eons of endless war have left little natural ground exposed.
+~
+E
+remnants~
+From horizon to horizon, all you can see is what remains of endless war.
+~
+E
+rust~
+A soft blanket of dark red covers many of the fallen arms and armor.
+~
+E
+spears shields helms arms armor weapons~
+All around you are the rusted remains of battle.
+~
+E
+ash farm~
+Old weapons rise from the field of ash like so many crops.
+~
+E
+iron~
+Everything here is made of iron.
+~
+E
+shape center mass hulking~
+There's a hulking mass at the center of the battlefield.
+~
+T 12817
+T 12818
+Z1 1
+S
+#12819
+An Old and Broken Battlefield~
+   The ground is carpeted with the rusted remnants of an ancient battle.
+Broken spears, shattered shields, and dented helms lie half-buried in dark ash,
+a silent farm of fallen arms stretching as far as the eye can see. A rough
+scraping noise follows every footstep as you trod along, watching as loose bits
+of iron slowly creep across the ground, drawn to the shape at the center.
+Commands: return
+~
+aci 0 0 12819
+E
+ground carpet~
+   Rare hints of green poke through the ash and armor that carpet the
+battlefield where eons of endless war have left little natural ground exposed.
+~
+E
+remnants~
+From horizon to horizon, all you can see is what remains of endless war.
+~
+E
+rust~
+A soft blanket of dark red covers many of the fallen arms and armor.
+~
+E
+spears shields helms arms armor weapons~
+All around you are the rusted remains of battle.
+~
+E
+ash farm~
+Old weapons rise from the field of ash like so many crops.
+~
+E
+iron~
+Everything here is made of iron.
+~
+E
+shape center mass hulking~
+There's a hulking mass at the center of the battlefield.
+~
+T 12817
+T 12818
+Z1 1
 S
 #12850
 A Cluttered Siege Pavilion~

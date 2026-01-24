@@ -1,0 +1,40 @@
+#12817
+Lodestone Forge: Shadow of the Colossus~
+   Charlotte makes no attempt to hide the fact that she's sizing you up. She
+pulls her mouth back into a contemplative face as she checks out your gear and
+watches you move.
+   'Legendary equipment requires a legendary victory,' she says. 'Think you're
+up to the task?'
+   She begins to weave the tale of a battlefield lost to time, where the lost
+and broken steel of warriors past have taken on a life of their own, bound by
+powerful lodestones, and always prepared for another battle.
+   If you're ready to prove your mettle against the creature, type 'challenge'
+from Charlotte Gibilian's location in Lodestone Forge. If you want to ensure a
+private arena, type 'challenge empty'.
+~
+   Still coughing from battlefield ash in your lungs, you emerge triumphant
+against the Lodestone Colossus, proving -- to yourself, at least -- that you're
+more than just another dented suit of armor if the rusty wasteland of history.
+   You can challenge the Lodestone Colossus again as many times as you want by
+typing 'challenge' or 'challenge empty' from Charlotte Gibilian's location in
+Lodestone Forge. However, it will only reward you with a shatterable relic
+shield once per day.
+~
+1 0 1 100 -1
+A
+1 12811
+R
+8 5100 100
+W+
+3 12817 0 1 -
+Defeat the Lodestone Colossus~
+Z
+1 12811
+Z
+3 12817
+Z
+3 12818
+Z
+3 12819
+S
+$

@@ -60,6 +60,27 @@ M
 $p snaps shut!~
 T 12806
 S
+#12807
+shield relic lodestone stone~
+a lodestone relic shield~
+A lodestone relic shield is lying in the ashes.~
+   The rusted shield once bore an insignia, but decades of battle and centuries
+of time have left it inscrutible. What glory this shield still bears rests on
+the story of where it was found: on an old and broken battlefield, attached to
+a great colossus, fighting one last great fight.
+~
+23 em ao 0 0 2
+0 0 0
+2 0
+A
+5 1 0
+C
+1 100
+E
+ashes~
+The lodestone relic shield rests in a pile of ashes.
+~
+S
 #12808
 field magnetic sparking~
 a sparking magnetic field~
@@ -622,6 +643,38 @@ for one rider with two animals.
 7 0 a 0 0 1
 12839 0 0
 0 0
+S
+#12840
+crate shards iron 100~
+a crate of 100 iron shards~
+A crate of iron shards is stacked here.~
+   This wooden crate is full of iron shards, the currency of Lodestone Forge.
+Open this box for a one-time supply of 100 iron shards.
+~
+3 e a 0 0 3
+5100 100 0
+0 0
+C
+1 1
+R
+4 5195 0
+T 12845
+S
+#12841
+crate shards imperium 100~
+a crate of 100 imperium shards~
+A crate of imperium shards is stacked here.~
+   This old crate is full of imperium shards, the currency of Victory Forge.
+Open this box for a one-time supply of 100 imperium shards.
+~
+3 e a 0 0 4
+5101 100 0
+0 0
+C
+1 1
+R
+4 5195 0
+T 12845
 S
 #12850
 standards banners flags~

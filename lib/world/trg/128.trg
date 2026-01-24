@@ -532,6 +532,293 @@ end
 * ok
 return 1
 ~
+#12817
+Celestial Forge: Arena return command~
+2 c 0 2
+L j 12811
+L j 12851
+return~
+if %actor.fighting% || %actor.disabled%
+  %send% %actor% You can't do that right now.
+  halt
+elseif %actor.position% != Standing
+  %send% %actor% You need to stand up first.
+  halt
+end
+* setup
+switch %room.template%
+  case 12817
+    set dest %instance.nearest_rmt(12811)%
+    set mes swirl of iron filings
+  break
+  case 12857
+    set dest %instance.nearest_rmt(12851)%
+    set mes gleaming flash of imperium
+  break
+done
+if !%dest%
+  %send% %actor% You can't do that right now.
+  halt
+end
+* teleport
+%echoaround% %actor% ~%actor% vanishes with a %mes%!
+%send% %actor% You vanish with a %mes%!
+%teleport% %actor% %dest%
+%echoaround% %actor% ~%actor% appears in a %mes%!
+%load% obj 9680 %actor% inv
+* fellows
+set ch %room.people%
+while %ch%
+  set next_ch %ch.next_in_room%
+  if %ch.leader% == actor && !%ch.fighting%
+    %echoaround% %ch% ~%ch% vanishes with a %mes%!
+    %teleport% %ch% %dest%
+    %echoaround% %ch% ~%ch% appears in a %mes%!
+    if %ch.position% != Sleeping
+      %load% obj 9680 %ch% inv
+    end
+  end
+  set ch %next_ch%
+done
+~
+#12818
+Celetsial Forge: Spawn arena mob~
+2 bw 100 2
+L b 12817
+L j 12817
+~
+switch %self.template%
+  case 12817
+    set mob 12817
+    set mes The scattered weapons across the field suddenly shudder and slide, racing inward as a towering form of lodestone rises from the center, armored in the spoils of a thousand forgotten battles.
+  break
+  default
+    halt
+  break
+done
+if %room.people(%mob%)%
+  * already present
+  halt
+end
+* load me!
+wait 2 sec
+%load% mob %mob%
+set guy %room.people%
+if %guy.vnum% == %mob%
+  * success
+  %echo% &&w%mes%&&0
+end
+~
+#12819
+Celestial Forge: Challenge command to enter arena~
+2 c 0 4
+L j 12811
+L j 12817
+L j 12818
+L j 12819
+challenge~
+* Tries to find an available arena to fight in
+* optional 'empty' arg gets you one with zero players
+if %actor.fighting% || %actor.disabled%
+  %send% %actor% You can't do that right now.
+  halt
+elseif %actor.position% != Standing
+  %send% %actor% You need to stand up first.
+  halt
+end
+* setup
+switch %room.template%
+  case 12811
+    set room_list 12817 12818 12819
+    set mes swirl of iron filings
+  break
+  case 12851
+    set room_list ** TODO
+    set mes gleaming flash of imperium
+  break
+done
+eval empty %arg% == empty
+set dest 0
+while %room_list% && !%dest%
+  set vnum %room_list.car%
+  set room_list %room_list.cdr%
+  set dest %instance.nearest_rmt(%vnum%)%
+  set ok 1
+  if %dest%
+    set ch %dest.people%
+    while %ch% && %ok%
+      if %ch.fighting%
+        set ok 0
+      elseif %empty% && %ch.is_pc%
+        set ok 0
+      end
+      set ch %ch.next_in_room%
+    done
+    if !%ok%
+      set dest 0
+    end
+  end
+done
+if !%dest%
+  %send% %actor% No challenge arena was available. Try again later.
+  halt
+end
+* teleport
+%echoaround% %actor% ~%actor% vanishes with a %mes%!
+%send% %actor% You vanish with a %mes%!
+%teleport% %actor% %dest%
+%echoaround% %actor% ~%actor% appears in a %mes%!
+%load% obj 9680 %actor% inv
+* fellows
+set ch %room.people%
+while %ch%
+  set next_ch %ch.next_in_room%
+  if %ch.leader% == actor && !%ch.fighting%
+    %echoaround% %ch% ~%ch% vanishes with a %mes%!
+    %teleport% %ch% %dest%
+    %echoaround% %ch% ~%ch% appears in a %mes%!
+    if %ch.position% != Sleeping
+      %load% obj 9680 %ch% inv
+    end
+  end
+  set ch %next_ch%
+done
+~
+#12820
+Celestial Forge: Loot once per day per person~
+0 f 100 0
+~
+eval min_level %self.minlevel% - 25
+set room %self.room%
+set ch %room.people%
+set any_ok 0
+set varname %self.vnum%_daily
+* ensure a player has loot permission
+if %actor.is_pc% && %actor.level% >= %min_level% && %self.is_tagged_by(%actor%)%
+  if %actor.var(%varname%,0)% < %dailycycle%
+    * actor qualifies
+    set %varname% %dailycycle%
+    remote %varname% %actor.id%
+    nop %self.remove_mob_flag(!LOOT)%
+    set any_ok 1
+  end
+end
+* actor didn't qualify -- find anyone present who does
+set ch %room.people%
+while %ch% && !%any_ok%
+  if %ch.is_pc% && %ch.level% >= %min_level% && %self.is_tagged_by(%ch%)%
+    if %ch.var(%varname%,0)% < %dailycycle%
+      * ch qualifies
+      set %varname% %dailycycle%
+      remote %varname% %ch.id%
+      nop %self.remove_mob_flag(!LOOT)%
+      set any_ok 1
+    end
+  end
+  set ch %ch.next_in_room%
+done
+* no death cry
+return 0
+~
+#12821
+Celestial Forge: Single mob difficulty selector~
+0 c 0 0
+difficulty~
+if !%arg%
+  %send% %actor% You must specify a level of difficulty. (Normal, Hard, Group, or Boss)
+  return 1
+  halt
+end
+if %self.fighting%
+  %send% %actor% You can't change |%self% difficulty while &%self% is in combat!
+  return 1
+  halt
+end
+if normal /= %arg%
+  set diff 1
+elseif hard /= %arg%
+  set diff 2
+elseif group /= %arg%
+  set diff 3
+elseif boss /= %arg%
+  set diff 4
+else
+  %send% %actor% That is not a valid difficulty level for this encounter. (Normal, Hard, Group, or Boss)
+  return 1
+  halt
+end
+* messaging
+%send% %actor% You set the difficulty...
+%echoaround% %actor% ~%actor% sets the difficulty...
+* Clear existing difficulty flags and set new ones.
+remote diff %self.id%
+set mob %self%
+nop %mob.remove_mob_flag(HARD)%
+nop %mob.remove_mob_flag(GROUP)%
+if %diff% == 1
+  * Then we don't need to do anything
+  %echo% ~%self% has been set to Normal.
+elseif %diff% == 2
+  %echo% ~%self% has been set to Hard.
+  nop %mob.add_mob_flag(HARD)%
+elseif %diff% == 3
+  %echo% ~%self% has been set to Group.
+  nop %mob.add_mob_flag(GROUP)%
+elseif %diff% == 4
+  %echo% ~%self% has been set to Boss.
+  nop %mob.add_mob_flag(HARD)%
+  nop %mob.add_mob_flag(GROUP)%
+end
+nop %mob.unscale_and_reset%
+* remove no-attack
+if %mob.aff_flagged(!ATTACK)%
+  dg_affect %mob% !ATTACK off
+end
+* unscale and restore me
+nop %self.unscale_and_reset%
+* mark me as scaled
+set scaled 1
+remote scaled %self.id%
+* attempt to remove (difficulty) from longdesc
+set test (difficulty)
+if %self.longdesc% ~= %test%
+  set string %self.longdesc%
+  set replace %string.car%
+  set string %string.cdr%
+  while %string%
+    set word %string.car%
+    set string %string.cdr%
+    if %word% != %test%
+      set replace %replace% %word%
+    end
+  done
+  if %replace%
+    %mod% %self% longdesc %replace%
+  end
+end
+~
+#12822
+Celestial Forge: Mob gains no-attack on load~
+0 nA 100 0
+~
+* turn on no-attack (until diff-sel)
+dg_affect %self% !ATTACK on -1
+~
+#12823
+Celestial Forge: Message when no-attack mob is attacked~
+0 B 0 0
+~
+if %self.aff_flagged(!ATTACK)%
+  %send% %actor% You need to choose a difficulty before you can fight ~%self%.
+  %send% %actor% Usage: difficulty <normal \| hard \| group \| boss>
+  %echoaround% %actor% ~%actor% considers attacking ~%self%.
+  return 0
+else
+  * no need for this script anymore
+  detach 12823 %self.id%
+  return 1
+end
+~
 #12832
 Lodestone Firefly: Northward pull~
 0 bt 8 0
@@ -1461,6 +1748,24 @@ else
   wait 1
   magnetize
 end
+~
+#12845
+Celestial Forge: Open shard box~
+1 c 2 0
+open~
+if %actor.obj_target(%arg.argument1%)% != %self%
+  return 0
+  halt
+elseif %self.val0% <= 0 || %self.val1% < 1
+  %send% %actor% @%self% seems to be empty.
+  halt
+end
+* ok
+nop %actor.give_currency(%self.val0%,%self.val1%)%
+eval name %%currency.%self.val0%(%self.val1%)%%
+%send% %actor% You open @%self% and gain %self.val1% %name%!
+%echoaround% %actor% ~%actor5 opens @%self% and gains %self.val1% %name%!
+%purge% %self%
 ~
 #12850
 Celestial Forge: Change camp standards on entry~
