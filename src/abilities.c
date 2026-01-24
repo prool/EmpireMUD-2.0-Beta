@@ -1177,7 +1177,7 @@ int get_player_level_for_ability(char_data *ch, any_vnum abil_vnum) {
 * valid range is available. This fails from a !LOCATION room template because
 * conceptually the player is not in this location.
 *
-* @param char_data *ch The pperson lookin for a random room.
+* @param char_data *ch The person lookin for a random room.
 * @param ability_data *abil Which ability they are using.
 * @param bool require_guest_permission If TRUE, checks permission
 * @return room_data* The random room, NULL if none found, or current room if range 0.
