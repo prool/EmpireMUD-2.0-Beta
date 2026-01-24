@@ -59,6 +59,7 @@ iron lanterns. Above, the roof is open, showing the infinite expanse of a
 starry night. A heavy chain supports a massive lodestone over your head. Light
 wisps of smoke drift through the air, carrying the aroma of a warm, spicy
 incense.
+Commands: challenge
 ~
 cei 0 0 12810
 D9
@@ -83,7 +84,7 @@ there is no gap or grout between them. A large chain is bolted to the floor
 near the hole down to the tunnel.
 ~
 E
-walls red~
+walls red northeast northwest southeast southwest ne se sw nw~
 The towering walls have been painted a rich red color.
 ~
 E
@@ -123,12 +124,29 @@ smoke wisps~
 The wisps of smoke have a warm, spicy, almost sweet scent.
 ~
 E
-hole tunnel steps stairs~
+hole tunnel steps stairs down~
 A hole in the floor contains stone steps that lead down into the tunnel.
+~
+E
+north~
+You see a Ptahite blacksmith rearranging supplies.
+~
+E
+south~
+You see a Thorian blacksmith prodding a smelting pit.
+~
+E
+east~
+You see a Brigidine blacksmith staring up at the stars.
+~
+E
+west~
+You see a Hephaestian blacksmith fixing his hair.
 ~
 M 0 12811 100.00 1
 T 12803
 T 12802
+T 12819
 S
 #12812
 Lodestone Forge~
@@ -136,6 +154,7 @@ Lodestone Forge~
 overhead. A trio of small anvils sit on wooden blocks that do little to dampen
 the sound. Between them, a red-hot pit smoulders with spiced smoke from
 incense which has been tossed into it.
+Commands: forge, smelt, shatter <item to destroy>
 ~
 cei 0 hv 12810
 D1
@@ -166,11 +185,11 @@ roof up stars sky expanse~
 its dazzling stars.
 ~
 E
-walls red~
+walls red north south west northwest northeast southwest southeast nw ne sw se~
 The smooth walls are painted red and hung with iron lanterns.
 ~
 E
-plates iron floor tiles~
+plates iron floor tiles down~
 The floor is made up of square iron plates.
 ~
 E
@@ -182,9 +201,14 @@ lodestone stone chain~
    A massive chain in the center of the forge supports an even larger silvery
 lodestone, which seems to tug at the chain as it pulls upward and to the north.
 ~
+E
+east~
+You see a Gibilian blacksmith tending to the lodestone.
+~
 M 0 12812 100.00 1
 T 12803
 T 12802
+T 5195
 S
 #12813
 Lodestone Forge~
@@ -192,6 +216,7 @@ Lodestone Forge~
 a smelting pit that sparks and crackles as fresh incense sends up smoke with a
 warm, spicy aroma that rises upward and out of the open roof. The iron tiles
 of the floor are stained and partly melted near the pit.
+Commands: forge, smelt, shatter <item to destroy>
 ~
 cei 0 hv 12810
 D3
@@ -220,7 +245,7 @@ roof up stars sky expanse~
 The open roof reveals a cosmic canvas of twinkling stars.
 ~
 E
-floor tiles plates~
+floor tiles plates down~
    The floor is made from tight-fitting squares of solid iron. Near the
 smelting pit, some of the tiles are partly melted.
 ~
@@ -229,7 +254,7 @@ stains~
 The floor is stained with red-orange rust along some of the seams.
 ~
 E
-walls red~
+walls red north south east northwest northeast southwest southeast nw ne sw se~
 The walls have been painted red and lit by iron lanterns.
 ~
 E
@@ -246,9 +271,14 @@ stacks piles designs patterns~
    There are stacks of patterns and designs for various earrings all over, but
 you can't really understand the notes scrawled on them.
 ~
+E
+west~
+You see a Gibilian blacksmith tending to the lodestone.
+~
 M 0 12813 100.00 1
 T 12803
 T 12802
+T 5195
 S
 #12814
 Lodestone Forge~
@@ -256,6 +286,7 @@ Lodestone Forge~
 incense that has been sprinkled over the coals. Tools of every sort hang
 between lanterns on the red wall, some so close to the open roof that they're
 out of reach for all but the giants.
+Commands: forge, smelt, shatter <item to destroy>
 ~
 cei 0 hv 12810
 D0
@@ -282,7 +313,7 @@ tools~
 are too high to reach.
 ~
 E
-walls red~
+walls red south east west northwest northeast southwest southeast nw ne sw se~
 The red walls look recently-painted.
 ~
 E
@@ -291,7 +322,7 @@ roof up stars sky expanse~
 night sky.
 ~
 E
-plates iron floor tiles~
+plates iron floor tiles down~
 Square iron plates tile the floor.
 ~
 E
@@ -303,9 +334,14 @@ E
 lanterns shadows~
 Iron lanterns hang along the walls, casting shadows around the tools.
 ~
+E
+north~
+You see a Gibilian blacksmith tending to the lodestone.
+~
 M 0 12814 100.00 1
 T 12803
 T 12802
+T 5195
 S
 #12815
 Lodestone Forge~
@@ -335,7 +371,7 @@ letters labels fiery red~
 The barrels are labeled in a red script that you cannot read.
 ~
 E
-walls~
+walls north east west northwest northeast southwest southeast nw ne sw se~
 The walls have been painted a rich red color.
 ~
 E
@@ -353,7 +389,7 @@ smoke~
 Smoky wisps of spiced incense hang in the air.
 ~
 E
-plates floor tiles~
+plates floor tiles down~
    The square floor tiles are made of solid iron. Smaller shards of iron are
 scattered here and there.
 ~
@@ -371,9 +407,142 @@ E
 lanterns~
 Barrels are stacked so high you can hardly see the lanterns on the wall.
 ~
+E
+south~
+You see a Gibilian blacksmith tending to the lodestone.
+~
 M 0 12815 100.00 1
 T 12803
 T 12802
+S
+#12817
+An Old and Broken Battlefield~
+   The ground is carpeted with the rusted remnants of an ancient battle.
+Broken spears, shattered shields, and dented helms lie half-buried in dark ash,
+a silent farm of fallen arms stretching as far as the eye can see. A rough
+scraping noise follows every footstep as you trod along, watching as loose bits
+of iron slowly creep across the ground, drawn to the shape at the center.
+Commands: return
+~
+aci 0 0 12817
+E
+ground carpet~
+   Rare hints of green poke through the ash and armor that carpet the
+battlefield where eons of endless war have left little natural ground exposed.
+~
+E
+remnants~
+From horizon to horizon, all you can see is what remains of endless war.
+~
+E
+rust~
+A soft blanket of dark red covers many of the fallen arms and armor.
+~
+E
+spears shields helms arms armor weapons~
+All around you are the rusted remains of battle.
+~
+E
+ash farm~
+Old weapons rise from the field of ash like so many crops.
+~
+E
+iron~
+Everything here is made of iron.
+~
+E
+shape center mass hulking~
+There's a hulking mass at the center of the battlefield.
+~
+T 12817
+T 12818
+Z1 1
+S
+#12818
+An Old and Broken Battlefield~
+   The ground is carpeted with the rusted remnants of an ancient battle.
+Broken spears, shattered shields, and dented helms lie half-buried in dark ash,
+a silent farm of fallen arms stretching as far as the eye can see. A rough
+scraping noise follows every footstep as you trod along, watching as loose bits
+of iron slowly creep across the ground, drawn to the shape at the center.
+Commands: return
+~
+aci 0 0 12818
+E
+ground carpet~
+   Rare hints of green poke through the ash and armor that carpet the
+battlefield where eons of endless war have left little natural ground exposed.
+~
+E
+remnants~
+From horizon to horizon, all you can see is what remains of endless war.
+~
+E
+rust~
+A soft blanket of dark red covers many of the fallen arms and armor.
+~
+E
+spears shields helms arms armor weapons~
+All around you are the rusted remains of battle.
+~
+E
+ash farm~
+Old weapons rise from the field of ash like so many crops.
+~
+E
+iron~
+Everything here is made of iron.
+~
+E
+shape center mass hulking~
+There's a hulking mass at the center of the battlefield.
+~
+T 12817
+T 12818
+Z1 1
+S
+#12819
+An Old and Broken Battlefield~
+   The ground is carpeted with the rusted remnants of an ancient battle.
+Broken spears, shattered shields, and dented helms lie half-buried in dark ash,
+a silent farm of fallen arms stretching as far as the eye can see. A rough
+scraping noise follows every footstep as you trod along, watching as loose bits
+of iron slowly creep across the ground, drawn to the shape at the center.
+Commands: return
+~
+aci 0 0 12819
+E
+ground carpet~
+   Rare hints of green poke through the ash and armor that carpet the
+battlefield where eons of endless war have left little natural ground exposed.
+~
+E
+remnants~
+From horizon to horizon, all you can see is what remains of endless war.
+~
+E
+rust~
+A soft blanket of dark red covers many of the fallen arms and armor.
+~
+E
+spears shields helms arms armor weapons~
+All around you are the rusted remains of battle.
+~
+E
+ash farm~
+Old weapons rise from the field of ash like so many crops.
+~
+E
+iron~
+Everything here is made of iron.
+~
+E
+shape center mass hulking~
+There's a hulking mass at the center of the battlefield.
+~
+T 12817
+T 12818
+Z1 1
 S
 #12850
 A Cluttered Siege Pavilion~
@@ -383,6 +552,7 @@ beneath stone weights, carved tokens standing in for regiments on plots of the
 battlefield. The light flickers off of fresh ink, wax seals, and bits of soot
 as lanterns swing from the central poles. Outside there's a general silence,
 punctuated by the ring of hammers against hard anvils.
+Commands: return
 ~
 ci 0 0 12850
 D5
@@ -442,6 +612,11 @@ E
 seals wax~
 Red wax seals adorn rolled letters on the table.
 ~
+E
+northeast ne out flap exit~
+   Looking out through the flap, you see a fiery smelter tended by a blacksmith
+in a wide black hat.
+~
 T 12803
 T 12802
 T 12801
@@ -454,6 +629,7 @@ white-hot at its mouth, burning steady despite the night air. Heat ripples
 outward from it, warping shadows cast by the lanterns. The furnace breathes a
 fiery roar that drowns out the silence of the battlefield, punctuated by the
 rhythmic ringing of the anvils.
+Commands: smelt
 ~
 cei 0 vGL 12850
 D6
@@ -491,7 +667,7 @@ lanterns poles~
 Lanterns swing from poles to light up the work area.
 ~
 E
-tent pavilion~
+tent pavilion southwest sw~
 The siege pavilion stands at the center of Victory Forge.
 ~
 E
@@ -510,8 +686,24 @@ camp hilltop~
 battlefield.
 ~
 E
-dewdrops grass~
+dewdrops grass down~
 Bits of grass here and there shimmer with the night's dew.
+~
+E
+north~
+You see one of the blacksmiths rearranging supplies.
+~
+E
+south~
+You see a blacksmith working at an anvil near the edge of the hill.
+~
+E
+east~
+You see a blacksmith hammering away at one of the anvils.
+~
+E
+west~
+You see a veteran forgehand working a lone anvil.
 ~
 M 1 12850 100.00 5
 M 0 12851 100.00 1
@@ -524,6 +716,7 @@ Victory Forge~
 by countless blows. Sparks still glitter faintly around it, cooling in the
 night air before they reach the ground. The hilltop wind carries the sound of
 hammering outward, echoing in measured rhythm over the silent battlefield.
+Commands: forge, shatter <item to destroy>
 ~
 cei 0 h 12850
 D1
@@ -552,7 +745,7 @@ up stars sky expanse night~
 The endless night sky stretches out above you, twinkling with stars.
 ~
 E
-out battlefield field around fog~
+out battlefield field around fog north south west northwest northeast southwest southeast nw ne sw se down~
    A light fog hangs low in the air as the battlefield stretches out below the
 hill, still smoking from the day's fighting, though silence has overtaken it
 now.
@@ -574,11 +767,16 @@ forge~
    Victory Forge stands all around you, perched on a hilltop above the
 battlefield.
 ~
+E
+east~
+You see Mateo tending the smelter.
+~
 M 1 12850 100.00 5
 M 0 12852 100.00 1
 T 12803
 T 12802
 T 12851
+T 5195
 S
 #12853
 Victory Forge~
@@ -586,6 +784,7 @@ Victory Forge~
 scattered hammerscale. The metal beneath them gleams dully in lanternlight,
 twinkling like the stars above. Beyond the forge lights, the camp and
 battlefield rest in uneasy stillness as the smiths work through the night.
+Commands: forge, shatter <item to destroy>
 ~
 cei 0 h 12850
 D3
@@ -619,7 +818,7 @@ up stars sky expanse night~
 The endless night sky stretches out above you, twinkling with stars.
 ~
 E
-out battlefield field around fog~
+out battlefield field around fog north south east northwest northeast southwest southeast nw ne sw se down~
    A light fog hangs low in the air as the battlefield stretches out below the
 hill, still smoking from the day's fighting, though silence has overtaken it
 now.
@@ -637,11 +836,16 @@ E
 pavilion tent~
 The siege pavilion stands at the center of Victory Forge.
 ~
+E
+west~
+You see Mateo tending the smelter.
+~
 M 1 12850 100.00 5
 M 0 12853 100.00 1
 T 12803
 T 12802
 T 12851
+T 5195
 S
 #12854
 Victory Forge~
@@ -650,6 +854,7 @@ lines below. Lanternlight glints off its battered face, reflecting every dent
 and ding from its storied past. The air here feels thinner, colder, almost
 silent but for the echoing pings of the smiths working tirelessly to resupply
 the soldiers at the front.
+Commands: forge, shatter <item to destroy>
 ~
 cei 0 h 12850
 D0
@@ -683,7 +888,7 @@ up stars sky expanse night~
 The endless night sky stretches out above you, twinkling with stars.
 ~
 E
-out battlefield field around fog~
+out battlefield field around fog south east west northwest northeast southwest southeast nw ne sw se down~
    A light fog hangs low in the air as the battlefield stretches out below the
 hill, still smoking from the day's fighting, though silence has overtaken it
 now.
@@ -696,11 +901,16 @@ E
 pavilion tent~
 The siege pavilion stands at the center of Victory Forge.
 ~
+E
+north~
+You see Mateo tending the smelter.
+~
 M 1 12850 100.00 5
 M 0 12854 100.00 1
 T 12803
 T 12802
 T 12851
+T 5195
 S
 #12855
 Victory Forge~
@@ -745,7 +955,7 @@ up stars sky expanse night~
 The endless night sky stretches out above you, twinkling with stars.
 ~
 E
-out battlefield field around fog~
+out battlefield field around fog north east west northwest northeast southwest southeast nw ne sw se down~
    A light fog hangs low in the air as the battlefield stretches out below the
 hill, still smoking from the day's fighting, though silence has overtaken it
 now.
@@ -766,6 +976,10 @@ The siege pavilion stands at the center of Victory Forge.
 E
 lanterns poles~
 Lanterns swing from poles to light up the work area.
+~
+E
+south~
+You see Mateo tending the smelter.
 ~
 M 1 12850 100.00 5
 M 0 12855 100.00 1
