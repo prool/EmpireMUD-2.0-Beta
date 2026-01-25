@@ -1003,6 +1003,18 @@ else
   return 1
 end
 ~
+#12824
+Celestial Forge: Arena commands~
+2 c 0 0
+flee respawn~
+if %cmd% == flee
+  %send% %actor% You cannot flee from this challenge. You must face it and live or die on your own merits.
+elseif %cmd% == respawn
+  %send% %actor% You cannot respawn from here. The spirit of the forge will restore you in a moment.
+else
+  return 0
+end
+~
 #12832
 Lodestone Firefly: Northward pull~
 0 bt 8 0
