@@ -763,6 +763,7 @@ switch %self.template%
   break
 done
 * auto-restore if nobody is fighting
+wait 6 s
 set any 0
 set ch %room.people%
 while %ch% && !%any%
@@ -787,7 +788,7 @@ if %room.people(%mob%)%
   halt
 end
 * load me!
-wait 2 sec
+wait 6 s
 %load% mob %mob%
 set guy %room.people%
 if %guy.vnum% == %mob%
