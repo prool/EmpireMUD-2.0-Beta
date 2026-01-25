@@ -2081,7 +2081,7 @@ Celestial Forge: War Machine phase 1 to 2~
 L b 12858
 ~
 %load% mob 12858
-set mob %room.people%
+set mob %self.room.people%
 if %mob.vnum% == 12858
   set diff %self.var(diff,1)%
   remote diff %mob.id%
@@ -2113,7 +2113,7 @@ Celestial Forge: War Machine phase 2 to 3~
 L b 12858
 ~
 %load% mob 12859
-set mob %room.people%
+set mob %self.room.people%
 if %mob.vnum% == 12859
   set diff %self.var(diff,1)%
   remote diff %mob.id%
