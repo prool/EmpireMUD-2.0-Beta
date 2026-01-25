@@ -97,6 +97,9 @@ The stars twinkle above you.~
 M
 0
 Warm incense wafts past your nose.~
+M
+1
+Have you challenged the Lodestone Colossus yet today?~
 T 12807
 S
 #12812
@@ -335,9 +338,36 @@ and others still shining, cleave tightly to its surface to form a jagged shell
 of blades and shields that grinds and rearranges itself as the colossus moves.
 ~
 I 4 12807 100.00 1  # LOOT: lodestone relic shield
+M
+11
+!rust !armor !fling !blades~
+M
+0
+All around you, rusted armor rattles in the ashes.~
+M
+0
+A piece of armor flies from the ashes to the colossus and attaches itself!~
+M
+0
+The colossus grows as red rust rises from the ashes to join it.~
+M
+0
+Jagged, rusted blades cling to the colossus as it moves.~
+M
+0
+An eering scraping noise echoes in the distance.~
+M
+0
+The colossus creaks as it slowly moves.~
 T 12822
 T 12821
 T 12823
+T 12820
+T 12816
+T 9600
+T 9601
+T 9604
+T 9609
 S
 #12832
 firefly fly lodestone~

@@ -534,6 +534,165 @@ end
 * ok
 return 1
 ~
+#12816
+Lodestone Colossus combat: Rust Stream, Armor All, Shield Fling, Rain of Rusted Blades~
+0 c 0 6
+L w 12817
+L w 12818
+L w 12819
+L w 12820
+L w 12821
+L w 12822
+!rust !armor !fling !blades~
+set targ %arg%
+set room %self.room%
+set diff %self.var(diff,1)%
+set cmd %cmd.substr(1)%
+if %actor% != %self% || !%targ% || %targ.id% == %self.id%
+  halt
+elseif %cmd% == rust
+  * Rust Stream (interrupt)
+  scfight clear interrupt
+  %echo% &&w**** Motes of rust begin to rise from the field the colossus's lodestones pulse... ****&&0 (interrupt)
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  scfight setup interrupt all
+  wait 3 s
+  if %diff% > 2
+    set needed %room.players_present%
+  else
+    set needed 1
+  end
+  if %self.var(count_scfinterrupt,0)% < %needed%
+    %echo% &&w**** Vibrant red streams of rust flow through the air, toward the colossus... ****&&0 (interrupt)
+  end
+  wait 3 s
+  if %self.var(count_scfinterrupt,0)% >= %needed%
+    %echo% &&wThe rust rains down onto the battlefield as ~%self% loses focus and the lodestones fall silent!&&0
+    if %diff% == 1
+      dg_affect #12817 %self% HARD-STUNNED on 5
+    end
+    wait 30 s
+  else
+    %echo% &&wThe colossus grows as the streams of rust join with its tremendous body!&&0
+    eval amount %self.maxhealth% / 15
+    dg_affect #12818 %self% HEAL-OVER-TIME %amount% 15
+  end
+  scfight clear interrupt
+elseif %cmd% == armor
+  * Armor All (interrupt)
+  scfight clear interrupt
+  %echo% &&w**** The lodestones of the colossus pulse and the whole field begins to rattle... ****&&0 (interrupt)
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  scfight setup interrupt all
+  wait 3 s
+  if %diff% > 2
+    set needed %room.players_present%
+  else
+    set needed 1
+  end
+  if %self.var(count_scfinterrupt,0)% < %needed%
+    %echo% &&w**** Pauldrons, greaves, and breastplates rise from the ashes, hovering in the air for just a moment... ****&&0 (interrupt)
+  end
+  wait 3 s
+  if %self.var(count_scfinterrupt,0)% >= %needed%
+    %echo% &&wThe cacophanous clatter deafens you momentarily as metal rains down on the battlefield.&&0
+    if %diff% == 1
+      dg_affect #12817 %self% HARD-STUNNED on 5
+    end
+    wait 30 s
+  else
+    %echo% &&wSlowly at first, then all at once, pieces of floating armor snap to the colossus, reinforcing its massive frame!&&0
+    eval amount %self.level% / 4
+    dg_affect #12819 %self% RESIST-PHYSICAL %amount% 30
+    dg_affect #12819 %self% RESIST-MAGICAL %amount% 30
+  end
+  scfight clear interrupt
+elseif %cmd% == fling
+  * Shield Fling (group duck)
+  scfight clear duck
+  %echo% &&wClanging echoes across the battlefield, distant at first, then all around you!&&0
+  eval dodge %diff% * 40
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  %echo% &&w**** Shields, large and small, round and pointed, fly spinning from all across the field... toward you! ****&&0 (duck)
+  set cycle 1
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup duck all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfduck)%
+          %echo% &&wA flying shield strikes ~%ch% in the head!&&0
+          dg_affect #12820 %ch% STUNNED on 10
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&GwYou feel the air whoosh just above your head as you duck just in time to avoid a shield!&&0
+          if %diff% == 1
+            dg_affect #12821 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&w**** More shields are still coming! ****&&0 (duck)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear duck
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+elseif %cmd% == blades
+  * Rain of Rusted Blades (group dodge)
+  scfight clear dodge
+  %echo% &&wA high-pitched screech pierces your ears as thousands of rusted blades scrape up from the ashes and rise into the air!&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  %echo% &&w**** Rusted blades begin plummeting from above, one by one, all around you! ****&&0 (dodge)
+  set cycle 1
+  set hit 0
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup dodge all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfdodge)%
+          set hit 1
+          %echo% &&wA rusted blade gashes ~%ch% as it falls!&&0
+          %dot% #12822 %ch% 100 30 physical 2
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&wYou narrowly avoid a pair of blades that fall inches from your feet!&&0
+          if %diff% == 1
+            dg_affect #12821 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&G**** There are still more blades coming down... ****&&0 (dodge)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear dodge
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+end
+nop %self.remove_mob_flag(NO-ATTACK)%
+~
 #12817
 Celestial Forge: Arena return command~
 2 c 0 2

@@ -1,3 +1,49 @@
+#12817
+silent~
+4 0
+0 0 0 0
+S
+#12818
+rust stream~
+4 0
+0 0 0 0
+T5
+...it seems to be growing as streams of rust join its body!~
+S
+#12819
+armor all~
+4 0
+0 0 0 0
+T5
+...it's plated in bits of metal from the battlefield.~
+S
+#12820
+shield fling~
+4 0
+0 0 0 0
+T0
+You recover from that flung shield.~
+T2
+All you can see is stars!~
+T5
+...$e is stunned!~
+S
+#12821
+timely dodge~
+4 0
+0 0 0 0
+S
+#12822
+rain of rusted blades~
+4 0
+61 0 0 0
+T0
+Your wounds stop bleeding.~
+T3
+You're bleeding!~
+T5
+...$e's bleeding!~
+S
 #12827
 companion rebuild~
 3 0
