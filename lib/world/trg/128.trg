@@ -715,6 +715,8 @@ switch %room.template%
     set mes swirl of iron filings
   break
   case 12857
+  case 12858
+  case 12859
     set dest %instance.nearest_rmt(12851)%
     set mes gleaming flash of imperium
   break
@@ -755,8 +757,16 @@ switch %self.template%
   case 12817
   case 12818
   case 12819
+    set check_list 12817
     set mob 12817
-    set mes The scattered weapons across the field suddenly shudder and slide, racing inward as a towering form of lodestone rises from the center, armored in the spoils of a thousand forgotten battles.
+    set mes The scattered weapons across the field suddenly shudder and slide, racing inward as a towering form of lodestone rises from the center, armored in the spoils of a thousand forgotten battles!
+  break
+  case 12857
+  case 12858
+  case 12859
+    set check_list 12857 12858 12859
+    set mob 12857
+    set mes The ground shakes as a fearsome War Machine rolls onto the battlefield, roaring like a furnace!
   break
   default
     halt
@@ -783,17 +793,23 @@ if !%any%
   done
 end
 * spawn mob?
-if %room.people(%mob%)%
-  * already present
-  halt
-end
-* load me!
-wait 6 s
-%load% mob %mob%
-set guy %room.people%
-if %guy.vnum% == %mob%
-  * success
-  %echo% &&w%mes%&&0
+set any 0
+while %check_list% && !%any%
+  set vnum %check_list.car%
+  set check_list %check_list.cdr%
+  if %room.people(%vnum%)%
+    set any 1
+  end
+done
+if !%any%
+  * load me!
+  wait 6 s
+  %load% mob %mob%
+  set guy %room.people%
+  if %guy.vnum% == %mob%
+    * success
+    %echo% &&w%mes%&&0
+  end
 end
 ~
 #12819
@@ -879,7 +895,16 @@ eval min_level %self.minlevel% - 25
 set room %self.room%
 set ch %room.people%
 set any_ok 0
-set varname %self.vnum%_daily
+switch %self.vnum%
+  case 12857
+  case 12858
+  case 12859
+    set varname 12857_daily
+  break
+  default
+    set varname %self.vnum%_daily
+  break
+done
 * ensure a player has loot permission
 if %actor.is_pc% && %actor.level% >= %min_level% && %self.is_tagged_by(%actor%)%
   if %actor.var(%varname%,0)% < %dailycycle%
@@ -2048,6 +2073,70 @@ if !%to_room%
   done
 else
   return 0
+end
+~
+#12857
+Celestial Forge: War Machine phase 1 to 2~
+0 l 85 1
+L b 12858
+~
+%load% mob 12858
+set mob %room.people%
+if %mob.vnum% == 12858
+  set diff %self.var(diff,1)%
+  remote diff %mob.id%
+  nop %mob.remove_mob_flag(HARD)%
+  nop %mob.remove_mob_flag(GROUP)%
+  if %diff% == 1
+    * Then we don't need to do anything
+  elseif %diff% == 2
+    nop %mob.add_mob_flag(HARD)%
+  elseif %diff% == 3
+    nop %mob.add_mob_flag(GROUP)%
+  elseif %diff% == 4
+    nop %mob.add_mob_flag(HARD)%
+    nop %mob.add_mob_flag(GROUP)%
+  end
+  nop %mob.unscale_and_reset%
+  %scale% %mob% %self.level%
+  set scaled 1
+  remote scaled %mob.id%
+  * messaging
+  %echo% &&wPlate after plate breaks off of the War Machine, exposing its weapons!&&0
+  %force% %mob% maggro %self.fighting%
+  %purge% %self%
+end
+~
+#12858
+Celestial Forge: War Machine phase 2 to 3~
+0 l 30 1
+L b 12858
+~
+%load% mob 12859
+set mob %room.people%
+if %mob.vnum% == 12859
+  set diff %self.var(diff,1)%
+  remote diff %mob.id%
+  nop %mob.remove_mob_flag(HARD)%
+  nop %mob.remove_mob_flag(GROUP)%
+  if %diff% == 1
+    * Then we don't need to do anything
+  elseif %diff% == 2
+    nop %mob.add_mob_flag(HARD)%
+  elseif %diff% == 3
+    nop %mob.add_mob_flag(GROUP)%
+  elseif %diff% == 4
+    nop %mob.add_mob_flag(HARD)%
+    nop %mob.add_mob_flag(GROUP)%
+  end
+  nop %mob.unscale_and_reset%
+  %scale% %mob% %self.level%
+  set scaled 1
+  remote scaled %mob.id%
+  * messaging
+  %echo% &&wA trumpet sounds as the battered War Machine rallies for one last stand!&&0
+  %force% %mob% maggro %self.fighting%
+  %purge% %self%
 end
 ~
 #12877

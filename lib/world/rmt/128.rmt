@@ -457,6 +457,7 @@ There's a hulking mass at the center of the battlefield.
 T 12817
 T 12818
 T 12824
+T 12803
 Z1 1
 S
 #12818
@@ -501,6 +502,7 @@ There's a hulking mass at the center of the battlefield.
 T 12817
 T 12818
 T 12824
+T 12803
 Z1 1
 S
 #12819
@@ -545,6 +547,7 @@ There's a hulking mass at the center of the battlefield.
 T 12817
 T 12818
 T 12824
+T 12803
 Z1 1
 S
 #12850
@@ -989,5 +992,155 @@ M 0 12855 100.00 1
 T 12803
 T 12802
 T 12851
+S
+#12857
+A Smouldering Battlefield~
+   The battlefield stretches out in uneasy silence, a broad expanse of churned
+mud, shattered wagons, and abandoned siege works. Smoke still coils lazily from
+blackened pits and splintered palisades, but no banners fly and no voices
+carry. From here, the hilltop forge looms as a dark silhouette against the
+night sky, its furnaces the only steady lights in the distance. Below it, a low
+fog creeps in from the edges of the field, draping it in a still silence.
+~
+aci 0 0 12857
+E
+battefield field around distance out expanse~
+   Nightfall has brought silence to the battlefield as each and every soldier
+has retreated to their own side to rest and recharge. A light fog makes it
+difficult to make out details; you cannot tell which side is winning.
+~
+E
+mud ground grass~
+   The ground is mostly mud, divided into a thousand tiny territories by
+wagon wheels and lines of bootprints. Only the rare patch of grass offers a
+glimmer of green in the sea of brown.
+~
+E
+wagons works shattered~
+   Fallen wagons and siege machines line the battlefield, some burned and
+others merely smashed.
+~
+E
+smoke~
+Smoke rises from parts of the battlefield, joining with the fog.
+~
+E
+up stars sky expanse night~
+The endless night sky stretches out above you, twinkling with stars.
+~
+E
+hilltop forge victory silhouette lights~
+   Victory Forge sits atop the hill, watching over the silent battlefield like
+a sentinel.
+~
+E
+fog~
+A low fog hangs in the air.
+~
+T 12817
+T 12818
+T 12824
+T 12803
+Z1 1
+S
+#12858
+A Smouldering Battlefield~
+   The battlefield stretches out in uneasy silence, a broad expanse of churned
+mud, shattered wagons, and abandoned siege works. Smoke still coils lazily from
+blackened pits and splintered palisades, but no banners fly and no voices
+carry. From here, the hilltop forge looms as a dark silhouette against the
+night sky, its furnaces the only steady lights in the distance. Below it, a low
+fog creeps in from the edges of the field, draping it in a still silence.
+~
+aci 0 0 12858
+E
+battefield field around distance out expanse~
+   Nightfall has brought silence to the battlefield as each and every soldier
+has retreated to their own side to rest and recharge. A light fog makes it
+difficult to make out details; you cannot tell which side is winning.
+~
+E
+mud ground grass~
+   The ground is mostly mud, divided into a thousand tiny territories by
+wagon wheels and lines of bootprints. Only the rare patch of grass offers a
+glimmer of green in the sea of brown.
+~
+E
+wagons works shattered~
+   Fallen wagons and siege machines line the battlefield, some burned and
+others merely smashed.
+~
+E
+smoke~
+Smoke rises from parts of the battlefield, joining with the fog.
+~
+E
+up stars sky expanse night~
+The endless night sky stretches out above you, twinkling with stars.
+~
+E
+hilltop forge victory silhouette lights~
+   Victory Forge sits atop the hill, watching over the silent battlefield like
+a sentinel.
+~
+E
+fog~
+A low fog hangs in the air.
+~
+T 12817
+T 12818
+T 12824
+T 12803
+Z1 1
+S
+#12859
+A Smouldering Battlefield~
+   The battlefield stretches out in uneasy silence, a broad expanse of churned
+mud, shattered wagons, and abandoned siege works. Smoke still coils lazily from
+blackened pits and splintered palisades, but no banners fly and no voices
+carry. From here, the hilltop forge looms as a dark silhouette against the
+night sky, its furnaces the only steady lights in the distance. Below it, a low
+fog creeps in from the edges of the field, draping it in a still silence.
+~
+aci 0 0 12859
+E
+battefield field around distance out expanse~
+   Nightfall has brought silence to the battlefield as each and every soldier
+has retreated to their own side to rest and recharge. A light fog makes it
+difficult to make out details; you cannot tell which side is winning.
+~
+E
+mud ground grass~
+   The ground is mostly mud, divided into a thousand tiny territories by
+wagon wheels and lines of bootprints. Only the rare patch of grass offers a
+glimmer of green in the sea of brown.
+~
+E
+wagons works shattered~
+   Fallen wagons and siege machines line the battlefield, some burned and
+others merely smashed.
+~
+E
+smoke~
+Smoke rises from parts of the battlefield, joining with the fog.
+~
+E
+up stars sky expanse night~
+The endless night sky stretches out above you, twinkling with stars.
+~
+E
+hilltop forge victory silhouette lights~
+   Victory Forge sits atop the hill, watching over the silent battlefield like
+a sentinel.
+~
+E
+fog~
+A low fog hangs in the air.
+~
+T 12817
+T 12818
+T 12824
+T 12803
+Z1 1
 S
 $

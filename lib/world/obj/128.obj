@@ -69,7 +69,7 @@ of time have left it inscrutible. What glory this shield still bears rests on
 the story of where it was found: on an old and broken battlefield, attached to
 a great colossus, fighting one last great fight.
 ~
-23 em ao 0 0 2
+23 emo ao 0 0 3
 0 0 0
 2 0
 A
@@ -1239,5 +1239,22 @@ module adds casting capabilities:
 C
 125 125
 T 12834
+S
+#12882
+gear imperium great~
+a great imperium gear~
+A great imperium gear is lying here.~
+   This enormous gear is tremendously heavy, suggesting it is solid imperium
+all the way to the core. It once drove the heart of a great siege machine; now
+at best it functions as a shield. But with its large size, it's not a very
+maneuverable one.
+~
+23 emo ao 0 0 5
+0 0 0
+2 0
+A
+5 1 0
+C
+1 100
 S
 $

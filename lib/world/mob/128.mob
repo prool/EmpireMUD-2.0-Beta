@@ -490,6 +490,15 @@ Such a nice night.~
 M
 1
 Looks like the fog is rolling in.~
+M
+0
+Anvils ring out rhythmically in the distance.~
+M
+0
+A light breeze chills you.~
+M
+0
+The sound of smiths working tireless fills the air.~
 T 12807
 S
 #12852
@@ -558,6 +567,9 @@ $n hits the anvil in steady rhythm.~
 M
 0
 $n wipes $s brow.~
+M
+0
+You can hear the pinging of other anvils in the distance.~
 T 12807
 S
 #12853
@@ -613,6 +625,9 @@ $n hammers rhythmically at the anvil.~
 M
 0
 $n hammers rhythmically at the anvil.~
+M
+0
+You hear other smiths working their anvils in the distance.~
 T 12807
 S
 #12854
@@ -674,6 +689,9 @@ $n switches hammers.~
 M
 0
 $n taps at the anvil.~
+M
+0
+You hear the occasional ding of another anvil being struck in the distance.~
 T 12807
 S
 #12855
@@ -736,7 +754,67 @@ Donations aplenty to keep the war effort going.~
 M
 1
 Buy all you like; there's no shortage.~
+M
+0
+The rhythmic sound of hammers hitting anvils echoes in the distance.~
+M
+0
+The rhythmic sound of hammers hitting anvils echoes in the distance.~
 T 12807
+S
+#12857
+machine war plated heavily-plated fearsome~
+the War Machine~
+A heavily-plated War Machine rolls to the center of the field. (difficulty)
+~
+101 200 dhnyzDJKL cEG 3
+0 0 0 30 -1 -1
+D
+   It stands in the center of the fog like a forgotten siege engine brought
+back to life. Its massive frame is built from thick timber beams, barely
+visible beneath black and white bands of powerful metal. Whoever controls this
+thing, whoever is moving it, you cannot see them. Every part of it is covered
+in armored plates that will have to come off in order to fight it.
+~
+I 4 12882 100.00 1  # LOOT: imperium relic
+T 12822
+T 12821
+T 12823
+T 12820
+T 12857
+S
+#12858
+machine war fearsome plated heavily-plated~
+the War Machine~
+A fearsome War Machine rolls ever forward.
+~
+101 200 dhnyzDJKL cEG 3
+0 0 0 30 -1 -1
+D
+   The fearsome machine has been stripped of some of its best armor, but it
+just keeps coming! Now, crossbows poke from every gap in its shields, and the
+grinding of gears signals worse to come.
+~
+I 4 12882 100.00 1  # LOOT: imperium relic
+T 12821
+T 12820
+T 12858
+S
+#12859
+machine war plated heavily-plated fearsome battered~
+the War Machine~
+A battered War Machine creaks onward.
+~
+101 200 dhzDJKL cEG 3
+0 0 0 30 -1 -1
+D
+   Much of its armor now hangs twisted and torn away, exposing the timber
+framework beneath. Its gears are smashed and it barely moves, but the
+crossbowmen within continue their onslaught.
+~
+I 4 12882 100.00 1  # LOOT: imperium relic
+T 12821
+T 12820
 S
 #12873
 dummy training gleaming imperium~
