@@ -1005,7 +1005,7 @@ end
 ~
 #12824
 Celestial Forge: Arena commands~
-2 c 0 0
+2 cD 0 0
 flee respawn~
 if %cmd% == flee
   %send% %actor% You cannot flee from this challenge. You must face it and live or die on your own merits.
