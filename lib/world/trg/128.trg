@@ -903,8 +903,6 @@ while %ch% && !%any_ok%
   end
   set ch %ch.next_in_room%
 done
-* no death cry
-return 0
 ~
 #12821
 Celestial Forge: Single mob difficulty selector~
