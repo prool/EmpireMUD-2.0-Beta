@@ -635,7 +635,7 @@ elseif %cmd% == fling
           dg_affect #12820 %ch% STUNNED on 10
           %damage% %ch% 50 physical
         elseif %ch.is_pc%
-          %send% %ch% &&GwYou feel the air whoosh just above your head as you duck just in time to avoid a shield!&&0
+          %send% %ch% &&wYou feel the air whoosh just above your head as you duck just in time to avoid a shield!&&0
           if %diff% == 1
             dg_affect #12821 %ch% TO-HIT 25 20
           end
@@ -681,7 +681,7 @@ elseif %cmd% == blades
           end
         end
         if %cycle% < %diff%
-          %send% %ch% &&G**** There are still more blades coming down... ****&&0 (dodge)
+          %send% %ch% &&w**** There are still more blades coming down... ****&&0 (dodge)
         end
       end
       set ch %next_ch%
@@ -745,11 +745,12 @@ while %ch%
 done
 ~
 #12818
-Celetsial Forge: Spawn arena mob~
+Celetsial Forge: Reset arena and spawn mob~
 2 bw 100 2
 L b 12817
 L j 12817
 ~
+* setup
 switch %self.template%
   case 12817
   case 12818
@@ -761,6 +762,26 @@ switch %self.template%
     halt
   break
 done
+* auto-restore if nobody is fighting
+set any 0
+set ch %room.people%
+while %ch% && !%any%
+  if %ch.fighting%
+    set any 1
+  end
+  set ch %ch.next_in_room%
+done
+if !%any%
+  set ch %room.people%
+  while %ch%
+    if %ch.health% < %ch.maxhealth% || %ch.mana% < %ch.maxmana%
+      %send% %ch% &&wThe spirit of the forge flows through you and restores you!&&0
+    end
+    %restore% %ch%
+    set ch %ch.next_in_room%
+  done
+end
+* spawn mob?
 if %room.people(%mob%)%
   * already present
   halt
