@@ -4900,6 +4900,7 @@ const char *trig_types[] = {
 	"Allow-Multiple",
 	"Can-Fight",
 	"Pre-Greet-All",
+	"Dead-Ok",
 	"\n"
 };
 
@@ -4934,6 +4935,7 @@ const bitvector_t mtrig_argument_types[] = {
 	NOBITS,	// allow-multiple
 	NOBITS,	// can-fight
 	TRIG_ARG_PERCENT,	// pre-greet-all
+	NOBITS,	// dead-ok
 };
 
 
@@ -4966,6 +4968,9 @@ const char *otrig_types[] = {
 	"Buy",
 	"Kill",		// 25
 	"Allow-Multiple",
+	"*",
+	"*",
+	"Dead-Ok",
 	"\n"
 };
 
@@ -4998,6 +5003,9 @@ const bitvector_t otrig_argument_types[] = {
 	TRIG_ARG_OBJ_WHERE,	// buy
 	TRIG_ARG_PERCENT,	// 25, kill
 	NOBITS,	// allow-multiple
+	NOBITS,	// 27
+	NOBITS,	// 28
+	NOBITS,	// dead-ok
 };
 
 
@@ -5030,6 +5038,9 @@ const char *vtrig_types[] = {
 	"Buy",
 	"Kill",		// 25
 	"Allow-Multiple",
+	"*",
+	"*",
+	"Dead-Ok",
 	"\n"
 };
 
@@ -5063,6 +5074,9 @@ const bitvector_t vtrig_argument_types[] = {
 	NOBITS,	// buy
 	TRIG_ARG_PERCENT,	// 25, kill
 	NOBITS,	// allow-multiple
+	NOBITS,	// 27
+	NOBITS,	// 28
+	NOBITS,	// dead-ok
 };
 
 
@@ -5095,6 +5109,9 @@ const char *wtrig_types[] = {
 	"Buy",
 	"*",	// 25
 	"Allow-Multiple",
+	"*",
+	"*",
+	"Dead-Ok",
 	"\n"
 };
 
@@ -5127,6 +5144,9 @@ const bitvector_t wtrig_argument_types[] = {
 	NOBITS,	// buy
 	NOBITS,	// 25
 	NOBITS,	// allow-multiple
+	NOBITS,	// 27
+	NOBITS,	// 28
+	NOBITS,	// dead-ok
 };
 
 
