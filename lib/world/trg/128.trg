@@ -733,7 +733,7 @@ end
 set ch %room.people%
 while %ch%
   set next_ch %ch.next_in_room%
-  if %ch.leader% == actor && !%ch.fighting%
+  if %ch.leader% == %actor% && !%ch.fighting%
     %echoaround% %ch% ~%ch% vanishes with a %mes%!
     %teleport% %ch% %dest%
     %echoaround% %ch% ~%ch% appears in a %mes%!
@@ -859,7 +859,7 @@ end
 set ch %room.people%
 while %ch%
   set next_ch %ch.next_in_room%
-  if %ch.leader% == actor && !%ch.fighting%
+  if %ch.leader% == %actor% && !%ch.fighting%
     %echoaround% %ch% ~%ch% vanishes with a %mes%!
     %teleport% %ch% %dest%
     %echoaround% %ch% ~%ch% appears in a %mes%!
