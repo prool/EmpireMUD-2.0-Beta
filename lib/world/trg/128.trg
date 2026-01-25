@@ -1888,7 +1888,7 @@ elseif %last_cmd% == 5
   * special regen move IF player had haste (skipped otherwise)
   if %actor.role% == Caster || %actor.role% == Healer
     set field MANA-REGEN
-  elseif %actor.role% == Tank || %actor.role == Melee
+  elseif %actor.role% == Tank || %actor.role% == Melee
     set field MOVE-REGEN
   elseif %actor.mana% < %actor.maxmana%
     set field MANA-REGEN
