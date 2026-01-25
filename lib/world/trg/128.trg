@@ -836,7 +836,7 @@ switch %room.template%
     set mes swirl of iron filings
   break
   case 12851
-    set room_list ** TODO
+    set room_list 12857 12858 12859
     set mes gleaming flash of imperium
   break
 done
