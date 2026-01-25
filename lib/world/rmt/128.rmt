@@ -635,7 +635,7 @@ white-hot at its mouth, burning steady despite the night air. Heat ripples
 outward from it, warping shadows cast by the lanterns. The furnace breathes a
 fiery roar that drowns out the silence of the battlefield, punctuated by the
 rhythmic ringing of the anvils.
-Commands: smelt
+Commands: challenge, smelt
 ~
 cei 0 vGL 12850
 D6
@@ -715,6 +715,7 @@ M 1 12850 100.00 5
 M 0 12851 100.00 1
 T 12803
 T 12802
+T 12819
 S
 #12852
 Victory Forge~

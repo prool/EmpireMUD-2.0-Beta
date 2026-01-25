@@ -499,6 +499,9 @@ A light breeze chills you.~
 M
 0
 The sound of smiths working tireless fills the air.~
+M
+0
+Have you challenged the War Machine yet today?~
 T 12807
 S
 #12852
@@ -776,7 +779,7 @@ visible beneath black and white bands of powerful metal. Whoever controls this
 thing, whoever is moving it, you cannot see them. Every part of it is covered
 in armored plates that will have to come off in order to fight it.
 ~
-I 4 12882 100.00 1  # LOOT: imperium relic
+I 4 12882 100.00 1  # LOOT: great imperium gear
 T 12822
 T 12821
 T 12823
@@ -795,7 +798,7 @@ D
 just keeps coming! Now, crossbows poke from every gap in its shields, and the
 grinding of gears signals worse to come.
 ~
-I 4 12882 100.00 1  # LOOT: imperium relic
+I 4 12882 100.00 1  # LOOT: great imperium gear
 T 12821
 T 12820
 T 12858
@@ -812,7 +815,7 @@ D
 framework beneath. Its gears are smashed and it barely moves, but the
 crossbowmen within continue their onslaught.
 ~
-I 4 12882 100.00 1  # LOOT: imperium relic
+I 4 12882 100.00 1  # LOOT: great imperium gear
 T 12821
 T 12820
 S
