@@ -2149,6 +2149,12 @@ if %mob.vnum% == 12859
   %purge% %self%
 end
 ~
+#12859
+War Machine phase 2 combat: tba~
+0 c 0 0
+!test~
+* tba
+~
 #12877
 Celestial Forge: Banner hawk load script~
 0 nt 100 0
