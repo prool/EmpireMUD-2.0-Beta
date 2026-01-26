@@ -937,7 +937,7 @@ while %ch% && !%any_ok%
 done
 * did we drop it?
 if %any_ok% && %loot%
-  %echo% &&Z%loot% falls to the ground as ~%self% is defeated!
+  %echo% &&w&&Z%loot% falls to the ground as ~%self% is defeated!&&0
 end
 ~
 #12821
