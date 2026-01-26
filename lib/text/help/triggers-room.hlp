@@ -180,6 +180,7 @@ When using field - The variable returns:
 &cdepletion(type)&0 - Get the current depletion amount (OLC DEPLETION) for the
    room, or change it with %room.depletion(type,amount)%; 0 is not-depleted.
 &cdirection(target)&0 - The approximate direction to the target.
+&cdismantling&0 - True if the room is being dismantled.
 &cdistance(target)&0 - The distance between this room and the target.
 &cempire&0 - The empire that owns the room, if any.
 &cempire_adjective&0 - The owner empire's adjective form, if any.

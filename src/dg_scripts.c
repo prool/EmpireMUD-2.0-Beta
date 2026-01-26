@@ -5911,6 +5911,9 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							*str = '\0';
 						}
 					}
+					else if (!str_cmp(field, "dismantling")) {
+						safe_snprintf(str, slen, "%d", IS_DISMANTLING(r) ? 1 : 0);
+					}
 					else if (!str_cmp(field, "distance")) {
 						room_data *targ;
 						if (subfield && *subfield && (targ = get_room(r, subfield))) {
