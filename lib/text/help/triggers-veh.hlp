@@ -120,6 +120,7 @@ When using field  - The variable returns:
 &cdedicated_to&0 - If the vehicle is dedicated to someone, gets the name.
 &cdepletion(type)&0 - Get the current depletion amount (OLC DEPLETION) for the
    vehicle, or change it with %veh.depletion(type,amount)%; 0 is not-depleted.
+&cdismantling&0 - True if the vehicle is being dismantled.
 &cdriver&0 - The person driving/sailing the vehicle, if any.
 &cdump&0 - Empties everything out of the vehicle, including people.
 &cdump_objects&0 - Empties just the contents, if the vehicle is a container.

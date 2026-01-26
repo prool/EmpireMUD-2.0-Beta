@@ -6566,6 +6566,9 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							safe_snprintf(str, slen, "%d", get_vehicle_depletion(v, type));
 						}
 					}
+					else if (!str_cmp(field, "dismantling")) {
+						safe_snprintf(str, slen, "%d", VEH_IS_DISMANTLING(v) ? 1 : 0);
+					}
 					else if (!str_cmp(field, "driver")) {
 						if (VEH_DRIVER(v)) {
 							safe_snprintf(str, slen, "%c%d", UID_CHAR, char_script_id(VEH_DRIVER(v)));
