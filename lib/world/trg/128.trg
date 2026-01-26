@@ -896,13 +896,19 @@ set room %self.room%
 set ch %room.people%
 set any_ok 0
 switch %self.vnum%
+  case 12817
+    set varname %self.vnum%_daily
+    set loot lodestone relic shield
+  break
   case 12857
   case 12858
   case 12859
     set varname 12857_daily
+    set loot great imperium gear
   break
   default
     set varname %self.vnum%_daily
+    set loot
   break
 done
 * ensure a player has loot permission
@@ -929,6 +935,10 @@ while %ch% && !%any_ok%
   end
   set ch %ch.next_in_room%
 done
+* did we drop it?
+if %any_ok% && %loot%
+  %echo% &&Z%loot% falls to the ground as ~%self% is defeated!
+end
 ~
 #12821
 Celestial Forge: Single mob difficulty selector~
