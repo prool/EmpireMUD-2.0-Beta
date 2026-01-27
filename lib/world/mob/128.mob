@@ -97,6 +97,9 @@ The stars twinkle above you.~
 M
 0
 Warm incense wafts past your nose.~
+M
+1
+Have you challenged the Lodestone Colossus yet today?~
 T 12807
 S
 #12812
@@ -326,7 +329,7 @@ colossus lodestone stone form shape center~
 the Lodestone Colossus~
 A Lodestone Colossus towers above the field. (difficulty)
 ~
-1 100 dhyzDJKL cEG 3
+1 100 dhyzDJKL cEGU 3
 0 0 0 14 -1 -1
 D
    The behemoth is formed from hulking blocks of lodestone, cobbled and stacked
@@ -335,9 +338,36 @@ and others still shining, cleave tightly to its surface to form a jagged shell
 of blades and shields that grinds and rearranges itself as the colossus moves.
 ~
 I 4 12807 100.00 1  # LOOT: lodestone relic shield
+M
+11
+!rust !armor !fling !blades~
+M
+0
+All around you, rusted armor rattles in the ashes.~
+M
+0
+A piece of armor flies from the ashes to the colossus and attaches itself!~
+M
+0
+The colossus grows as red rust rises from the ashes to join it.~
+M
+0
+Jagged, rusted blades cling to the colossus as it moves.~
+M
+0
+An eering scraping noise echoes in the distance.~
+M
+0
+The colossus creaks as it slowly moves.~
 T 12822
 T 12821
 T 12823
+T 12820
+T 12816
+T 9600
+T 9601
+T 9604
+T 9609
 S
 #12832
 firefly fly lodestone~
@@ -423,10 +453,55 @@ has already set.
 ~
 M
 7
-say Welcome.~
+say You've finally reached Victory Forge!~
+M
+7
+say We've been waiting for you.~
+M
+7
+say There's a lull in the fighting, but the smiths are hard at work.~
+M
+7
+say Be sure to have a look around.~
 M
 8
-say Welcome back.~
+say Oye, good to see you again.~
+M
+8
+say So long as the smelter burns, time yet remains to seize victory.~
+M
+0
+$n tends the smelter.~
+M
+0
+$n prods the smelter with a long poker.~
+M
+0
+$n sweeps some ash.~
+M
+0
+$n takes off $s hat and fans $mself.~
+M
+0
+$n wipes $s brow.~
+M
+1
+Such a nice night.~
+M
+1
+Looks like the fog is rolling in.~
+M
+0
+Anvils ring out rhythmically in the distance.~
+M
+0
+A light breeze chills you.~
+M
+0
+The sound of smiths working tireless fills the air.~
+M
+0
+Have you challenged the War Machine yet today?~
 T 12807
 S
 #12852
@@ -446,10 +521,58 @@ stylized bead flower.
 ~
 M
 7
-say Welcome.~
+say Ah, a respectable visitor.~
+M
+7
+say I have some inspiration for you, but I am hard at work.~
+M
+7
+emote $n swings $s heavy hammer, bringing it down on the anvil with a heavy DING, DING, DING.~
+M
+7
+say Do not worry about being perfect. If you cannot be a lighthouse, be a candle.~
 M
 8
-say Welcome back.~
+emote $n looks up from $s work.~
+M
+8
+say Nice to see you again.~
+M
+8
+say Here to be inspired?~
+M
+0
+$n hits the anvil in steady rhythm.~
+M
+0
+$n hits the anvil in steady rhythm.~
+M
+0
+$n hits the anvil in steady rhythm.~
+M
+0
+$n hits the anvil in steady rhythm.~
+M
+0
+$n hits the anvil in steady rhythm.~
+M
+0
+$n hits the anvil in steady rhythm.~
+M
+0
+$n hits the anvil in steady rhythm.~
+M
+0
+$n hits the anvil in steady rhythm.~
+M
+0
+$n hits the anvil in steady rhythm.~
+M
+0
+$n wipes $s brow.~
+M
+0
+You can hear the pinging of other anvils in the distance.~
 T 12807
 S
 #12853
@@ -468,10 +591,46 @@ that fly from each strike.
 ~
 M
 7
-say Welcome.~
+emote $n grins as she looks up from her work for a moment.~
+M
+7
+say A new face. Do you find the battlefield as inspiring as I do?~
+M
+7
+say The greatest things are won at the highest cost.~
+M
+7
+say But enough chit-chat. I have work to do.~
 M
 8
-say Welcome back.~
+say Good to see you back again.~
+M
+8
+emote $n swings $s hammer high and brings it down on the anvil with a CLANG!~
+M
+8
+say Hope you're here for more inspiration.~
+M
+8
+emote $n swings $s hammer for another powerful CLANG!~
+M
+8
+say Pardon me if I don't stop what I'm doing, but there are only so many hours in the night.~
+M
+8
+emote $n looks at $s work and smiles.~
+M
+0
+$n brings $s hammer down with a powerful blow at the anvil.~
+M
+0
+$n hammers rhythmically at the anvil.~
+M
+0
+$n hammers rhythmically at the anvil.~
+M
+0
+You hear other smiths working their anvils in the distance.~
 T 12807
 S
 #12854
@@ -490,10 +649,52 @@ his neck, clear of the work he performs with measured precision.
 ~
 M
 7
-say Welcome.~
+say Ah! I thought you would make it here. Glad to see I was right.~
+M
+7
+say I hope you are studying more than just the smithing arts.~
+M
+7
+say It is also important to study your foe.~
+M
+7
+say Respect others, even your enemies.~
 M
 8
-say Welcome back.~
+emote $n looks up from $s work.~
+M
+8
+say You again.~
+M
+8
+say Good to see you.~
+M
+8
+say We can always use help here.~
+M
+8
+say As the cherry blossom is considered foremost among flowers, so the warrior is foremost among men.~
+M
+0
+$n heats a piece of metal.~
+M
+0
+$n hammers at the anvil.~
+M
+0
+$n examines $s work carefully.~
+M
+0
+$n hmms to $mself.~
+M
+0
+$n switches hammers.~
+M
+0
+$n taps at the anvil.~
+M
+0
+You hear the occasional ding of another anvil being struck in the distance.~
 T 12807
 S
 #12855
@@ -513,11 +714,118 @@ forge.
 ~
 M
 7
-say Welcome.~
+emote $n sets down a crate and looks up to see you.~
+M
+7
+say You don't wait for the weather from the sea, do you?~
+M
+7
+say Glad you're here, but be quick with what you want.~
+M
+7
+say Well, don't stand around, buy something or let me get back to work.~
 M
 8
-say Welcome back.~
+say Talking about the wolf...~
+M
+8
+say I was just thinking about you.~
+M
+8
+say Still lots more for sale here if you need supplies.~
+M
+0
+$n holds open a bag and catches some sparkling gems as they appear in the air.~
+M
+0
+$n sorts handles into bins.~
+M
+0
+$n stacks exotic hides in a pile.~
+M
+0
+$n carefully stacks ingots.~
+M
+0
+$n moves a crate.~
+M
+0
+$n steps aside quickly as a crate of imperium appears from thin air.~
+M
+1
+Donations aplenty to keep the war effort going.~
+M
+1
+Buy all you like; there's no shortage.~
+M
+0
+The rhythmic sound of hammers hitting anvils echoes in the distance.~
+M
+0
+The rhythmic sound of hammers hitting anvils echoes in the distance.~
 T 12807
+S
+#12857
+machine war plated heavily-plated fearsome~
+the War Machine~
+A heavily-plated War Machine rolls to the center of the field. (difficulty)
+~
+101 200 dhnyzDJKL cEGU 3
+0 0 0 30 -1 -1
+D
+   It stands in the center of the fog like a forgotten siege engine brought
+back to life. Its massive frame is built from thick timber beams, barely
+visible beneath black and white bands of powerful metal. Whoever controls this
+thing, whoever is moving it, you cannot see them. Every part of it is covered
+in armored plates that will have to come off in order to fight it.
+~
+I 4 12882 100.00 1  # LOOT: great imperium gear
+T 12822
+T 12821
+T 12823
+T 12820
+T 12857
+S
+#12858
+machine war fearsome plated heavily-plated~
+the War Machine~
+A fearsome War Machine rolls ever forward.
+~
+101 200 dhyzDJKL cEGU 3
+0 0 0 30 -1 -1
+D
+   The fearsome machine has been stripped of some of its best armor, but it
+just keeps coming! Now, crossbows poke from every gap in its shields, and the
+grinding of gears signals worse to come.
+~
+I 4 12882 100.00 1  # LOOT: great imperium gear
+M
+11
+!catapult !whirl !tremor !scald !winch~
+T 12821
+T 12820
+T 12858
+T 12859
+T 9600
+T 9601
+T 9604
+T 9609
+S
+#12859
+machine war plated heavily-plated fearsome battered~
+the War Machine~
+A battered War Machine creaks onward.
+~
+101 200 dhzDJKL cEGU 3
+0 0 0 30 -1 -1
+D
+   Much of its armor now hangs twisted and torn away, exposing the timber
+framework beneath. Its gears are smashed and it barely moves, but the
+crossbowmen within continue their onslaught.
+~
+I 4 12882 100.00 1  # LOOT: great imperium gear
+T 12821
+T 12820
 S
 #12873
 dummy training gleaming imperium~

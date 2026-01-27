@@ -34,7 +34,7 @@ the celestial forge controller~
 The celestial forge controller is lying here.~
    This elegant shard serves as the controller for a celestial forge. It can
 only be used by immortals.
-Usage: cforge goto iron
+Usage: cforge goto iron, imperium
        cforge goto <template vnum>
 ~
 3 0 a 0 0 3
@@ -69,7 +69,7 @@ of time have left it inscrutible. What glory this shield still bears rests on
 the story of where it was found: on an old and broken battlefield, attached to
 a great colossus, fighting one last great fight.
 ~
-23 em ao 0 0 2
+23 emo ao 0 0 3
 0 0 0
 2 0
 A
@@ -583,8 +583,7 @@ Some magnetic iron elemental parts are here.~
 you can summon and dismiss like any other companion. This elemental lasts until
 it is destroyed. Each elemental is built from up to 3 modules. This module adds
 casting capabilities:
-   1 magnetic module: Adds 'order companion magnetize', which buffs you during
-      combat.
+   1 magnetic module: Adds 'order companion magnetize', which buffs you.
    2 magnetic modules: Increases the potency of its buffs and, if combined with
       a jagged module, changes the melee attack to a magical one.
    3 magnetic modules: Increases the buffs again and makes them automatic.
@@ -1228,8 +1227,7 @@ Some magnetic imperium elemental parts are here.~
 which you can summon and dismiss like any other companion. This elemental lasts
 until it is destroyed. Each elemental is built from up to 3 modules. This
 module adds casting capabilities:
-   1 magnetic module: Adds 'order companion magnetize', which buffs you during
-      combat.
+   1 magnetic module: Adds 'order companion magnetize', which buffs you.
    2 magnetic modules: Increases the potency of its buffs and, if combined with
       a jagged module, changes the melee attack to a magical one.
    3 magnetic modules: Increases the buffs again and makes them automatic.
@@ -1241,5 +1239,22 @@ module adds casting capabilities:
 C
 125 125
 T 12834
+S
+#12882
+gear imperium great~
+a great imperium gear~
+A great imperium gear is lying here.~
+   This enormous gear is tremendously heavy, suggesting it is solid imperium
+all the way to the core. It once drove the heart of a great siege machine; now
+at best it functions as a shield. But with its large size, it's not a very
+maneuverable one.
+~
+23 emo ao 0 0 5
+0 0 0
+2 0
+A
+5 1 0
+C
+100 200
 S
 $

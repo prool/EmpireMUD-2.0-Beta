@@ -296,8 +296,10 @@ set mode %arg.car%
 set arg2 %arg.cdr%
 if goto /= %mode%
   * target handling
-  if iron /= %arg2%
+  if iron /= %arg2% || lodestone forge /= %arg2%
     set to_room %instance.nearest_rmt(12810)%
+  elseif imperium /= %arg2% || victory forge /= %arg2%
+    set to_room %instance.nearest_rmt(12850)%
   else
     set to_room %instance.nearest_rmt(%arg2%)%
   end
@@ -532,6 +534,164 @@ end
 * ok
 return 1
 ~
+#12816
+Lodestone Colossus combat: Rust Stream, Armor All, Shield Fling, Rain of Rusted Blades~
+0 c 0 6
+L w 12817
+L w 12818
+L w 12819
+L w 12820
+L w 12821
+L w 12822
+!rust !armor !fling !blades~
+set targ %arg%
+set room %self.room%
+set diff %self.var(diff,1)%
+set cmd %cmd.substr(1)%
+if %actor% != %self% || !%targ% || %targ.id% == %self.id%
+  halt
+elseif %cmd% == rust
+  * Rust Stream (interrupt)
+  scfight clear interrupt
+  %echo% &&w**** Motes of rust begin to rise from the field the colossus's lodestones pulse... ****&&0 (interrupt)
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  scfight setup interrupt all
+  wait 3 s
+  if %diff% > 2
+    set needed %room.players_present%
+  else
+    set needed 1
+  end
+  if %self.var(count_scfinterrupt,0)% < %needed%
+    %echo% &&w**** Vibrant red streams of rust flow through the air, toward the colossus... ****&&0 (interrupt)
+  end
+  wait 3 s
+  if %self.var(count_scfinterrupt,0)% >= %needed%
+    %echo% &&wThe rust rains down onto the battlefield as ~%self% loses focus and the lodestones fall silent!&&0
+    if %diff% == 1
+      dg_affect #12817 %self% HARD-STUNNED on 5
+    end
+    wait 30 s
+  else
+    %echo% &&wThe colossus grows as the streams of rust join with its tremendous body!&&0
+    eval amount %self.maxhealth% / 15
+    dg_affect #12818 %self% HEAL-OVER-TIME %amount% 15
+  end
+  scfight clear interrupt
+elseif %cmd% == armor
+  * Armor All (interrupt)
+  scfight clear interrupt
+  %echo% &&w**** The lodestones of the colossus pulse and the whole field begins to rattle... ****&&0 (interrupt)
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  scfight setup interrupt all
+  wait 3 s
+  if %diff% > 2
+    set needed %room.players_present%
+  else
+    set needed 1
+  end
+  if %self.var(count_scfinterrupt,0)% < %needed%
+    %echo% &&w**** Pauldrons, greaves, and breastplates rise from the ashes, hovering in the air for just a moment... ****&&0 (interrupt)
+  end
+  wait 3 s
+  if %self.var(count_scfinterrupt,0)% >= %needed%
+    %echo% &&wThe cacophanous clatter deafens you momentarily as metal rains down on the battlefield.&&0
+    if %diff% == 1
+      dg_affect #12817 %self% HARD-STUNNED on 5
+    end
+    wait 30 s
+  else
+    %echo% &&wSlowly at first, then all at once, pieces of floating armor snap to the colossus, reinforcing its massive frame!&&0
+    eval amount %self.level% / 4
+    dg_affect #12819 %self% RESIST-PHYSICAL %amount% 30
+    dg_affect #12819 %self% RESIST-MAGICAL %amount% 30
+  end
+  scfight clear interrupt
+elseif %cmd% == fling
+  * Shield Fling (group duck)
+  scfight clear duck
+  %echo% &&wClanging echoes across the battlefield, distant at first, then all around you!&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  %echo% &&w**** Shields, large and small, round and pointed, fly spinning from all across the field... toward you! ****&&0 (duck)
+  set cycle 1
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup duck all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfduck)%
+          %echo% &&wA flying shield strikes ~%ch% in the head!&&0
+          dg_affect #12820 %ch% STUNNED on 10
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&wYou feel the air whoosh just above your head as you duck just in time to avoid a shield!&&0
+          if %diff% == 1
+            dg_affect #12821 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&w**** More shields are still coming! ****&&0 (duck)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear duck
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+elseif %cmd% == blades
+  * Rain of Rusted Blades (group dodge)
+  scfight clear dodge
+  %echo% &&wA high-pitched screech pierces your ears as thousands of rusted blades scrape up from the ashes and rise into the air!&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  %echo% &&w**** Rusted blades begin plummeting from above, one by one, all around you! ****&&0 (dodge)
+  set cycle 1
+  set hit 0
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup dodge all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfdodge)%
+          set hit 1
+          %echo% &&wA rusted blade gashes ~%ch% as it falls!&&0
+          %dot% #12822 %ch% 100 30 physical 2
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&wYou narrowly avoid a pair of blades that fall inches from your feet!&&0
+          if %diff% == 1
+            dg_affect #12821 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&w**** There are still more blades coming down... ****&&0 (dodge)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear dodge
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+end
+nop %self.remove_mob_flag(NO-ATTACK)%
+~
 #12817
 Celestial Forge: Arena return command~
 2 c 0 2
@@ -554,6 +714,8 @@ switch %room.template%
     set mes swirl of iron filings
   break
   case 12857
+  case 12858
+  case 12859
     set dest %instance.nearest_rmt(12851)%
     set mes gleaming flash of imperium
   break
@@ -572,7 +734,7 @@ end
 set ch %room.people%
 while %ch%
   set next_ch %ch.next_in_room%
-  if %ch.leader% == actor && !%ch.fighting%
+  if %ch.leader% == %actor% && !%ch.fighting%
     %echoaround% %ch% ~%ch% vanishes with a %mes%!
     %teleport% %ch% %dest%
     %echoaround% %ch% ~%ch% appears in a %mes%!
@@ -584,33 +746,69 @@ while %ch%
 done
 ~
 #12818
-Celetsial Forge: Spawn arena mob~
+Celetsial Forge: Reset arena and spawn mob~
 2 bw 100 2
 L b 12817
 L j 12817
 ~
+* setup
 switch %self.template%
   case 12817
   case 12818
   case 12819
+    set check_list 12817
     set mob 12817
-    set mes The scattered weapons across the field suddenly shudder and slide, racing inward as a towering form of lodestone rises from the center, armored in the spoils of a thousand forgotten battles.
+    set mes The scattered weapons across the field suddenly shudder and slide, racing inward as a towering form of lodestone rises from the center, armored in the spoils of a thousand forgotten battles!
+  break
+  case 12857
+  case 12858
+  case 12859
+    set check_list 12857 12858 12859
+    set mob 12857
+    set mes The ground shakes as a fearsome War Machine rolls onto the battlefield, roaring like a furnace!
   break
   default
     halt
   break
 done
-if %room.people(%mob%)%
-  * already present
-  halt
+* auto-restore if nobody is fighting
+wait 6 s
+set any 0
+set ch %room.people%
+while %ch% && !%any%
+  if %ch.fighting%
+    set any 1
+  end
+  set ch %ch.next_in_room%
+done
+if !%any%
+  set ch %room.people%
+  while %ch%
+    if %ch.health% < %ch.maxhealth% || %ch.mana% < %ch.maxmana%
+      %send% %ch% &&wThe spirit of the forge flows through you and restores you!&&0
+    end
+    %restore% %ch%
+    set ch %ch.next_in_room%
+  done
 end
-* load me!
-wait 2 sec
-%load% mob %mob%
-set guy %room.people%
-if %guy.vnum% == %mob%
-  * success
-  %echo% &&w%mes%&&0
+* spawn mob?
+set any 0
+while %check_list% && !%any%
+  set vnum %check_list.car%
+  set check_list %check_list.cdr%
+  if %room.people(%vnum%)%
+    set any 1
+  end
+done
+if !%any%
+  * load me!
+  wait 6 s
+  %load% mob %mob%
+  set guy %room.people%
+  if %guy.vnum% == %mob%
+    * success
+    %echo% &&w%mes%&&0
+  end
 end
 ~
 #12819
@@ -637,7 +835,7 @@ switch %room.template%
     set mes swirl of iron filings
   break
   case 12851
-    set room_list ** TODO
+    set room_list 12857 12858 12859
     set mes gleaming flash of imperium
   break
 done
@@ -677,7 +875,7 @@ end
 set ch %room.people%
 while %ch%
   set next_ch %ch.next_in_room%
-  if %ch.leader% == actor && !%ch.fighting%
+  if %ch.leader% == %actor% && !%ch.fighting%
     %echoaround% %ch% ~%ch% vanishes with a %mes%!
     %teleport% %ch% %dest%
     %echoaround% %ch% ~%ch% appears in a %mes%!
@@ -696,7 +894,25 @@ eval min_level %self.minlevel% - 25
 set room %self.room%
 set ch %room.people%
 set any_ok 0
-set varname %self.vnum%_daily
+switch %self.vnum%
+  case 12817
+    set varname %self.vnum%_daily
+    set loot a lodestone relic shield
+    set death The Lodestone Colossus crumbles into ash and bits of broken armor!
+  break
+  case 12857
+  case 12858
+  case 12859
+    set varname 12857_daily
+    set loot a great imperium gear
+    set death The War Machine collapses in a heap of broken wood and metal!
+  break
+  default
+    set varname %self.vnum%_daily
+    set loot
+    set death
+  break
+done
 * ensure a player has loot permission
 if %actor.is_pc% && %actor.level% >= %min_level% && %self.is_tagged_by(%actor%)%
   if %actor.var(%varname%,0)% < %dailycycle%
@@ -721,8 +937,15 @@ while %ch% && !%any_ok%
   end
   set ch %ch.next_in_room%
 done
-* no death cry
-return 0
+* death message
+if %death%
+  %echo% &&w&&Z%death%&&0
+  return 0
+end
+* did we drop it?
+if %any_ok% && %loot%
+  %echo% &&w&&Z%loot% falls to the ground as ~%self% is defeated!&&0
+end
 ~
 #12821
 Celestial Forge: Single mob difficulty selector~
@@ -821,6 +1044,18 @@ else
   * no need for this script anymore
   detach 12823 %self.id%
   return 1
+end
+~
+#12824
+Celestial Forge: Arena commands~
+2 cD 0 0
+flee respawn~
+if %cmd% == flee
+  %send% %actor% You cannot flee from this challenge. You must face it and live or die on your own merits.
+elseif %cmd% == respawn
+  %send% %actor% You cannot respawn from here. The spirit of the forge will restore you in a moment.
+else
+  return 0
 end
 ~
 #12832
@@ -1642,7 +1877,7 @@ remote last_cmd %self.id%
 *
 if %last_cmd% == 1
   * Haste IF player isn't already hastened OR is already fighting
-  if %actor.affect(HASTE)% || %actor.fighting%
+  if %actor.aff_flagged(HASTE)% || %actor.fighting%
     set last_cmd 2
     remote last_cmd %self.id%
     set allow_cmd_5 1
@@ -1687,7 +1922,7 @@ elseif %last_cmd% == 4
   * boosts damage
   set weap %actor.eq(wield)%
   if %weap%
-    if %weap.magic%
+    if %weap.attack(magic)%
       set field BONUS-MAGICAL
       set desc glowing
     else
@@ -1708,7 +1943,7 @@ elseif %last_cmd% == 5
   * special regen move IF player had haste (skipped otherwise)
   if %actor.role% == Caster || %actor.role% == Healer
     set field MANA-REGEN
-  elseif %actor.role% == Tank || %actor.role == Melee
+  elseif %actor.role% == Tank || %actor.role% == Melee
     set field MOVE-REGEN
   elseif %actor.mana% < %actor.maxmana%
     set field MANA-REGEN
@@ -1856,6 +2091,286 @@ if !%to_room%
 else
   return 0
 end
+~
+#12857
+Celestial Forge: War Machine phase 1 to 2~
+0 l 85 1
+L b 12858
+~
+%load% mob 12858
+set mob %self.room.people%
+if %mob.vnum% == 12858
+  set diff %self.var(diff,1)%
+  remote diff %mob.id%
+  nop %mob.remove_mob_flag(HARD)%
+  nop %mob.remove_mob_flag(GROUP)%
+  if %diff% == 1
+    * Then we don't need to do anything
+  elseif %diff% == 2
+    nop %mob.add_mob_flag(HARD)%
+  elseif %diff% == 3
+    nop %mob.add_mob_flag(GROUP)%
+  elseif %diff% == 4
+    nop %mob.add_mob_flag(HARD)%
+    nop %mob.add_mob_flag(GROUP)%
+  end
+  nop %mob.unscale_and_reset%
+  %scale% %mob% %self.level%
+  set scaled 1
+  remote scaled %mob.id%
+  * messaging
+  %echo% &&wPlate after plate breaks off of the War Machine, exposing its weapons!&&0
+  %force% %mob% maggro %self.fighting%
+  %purge% %self%
+end
+~
+#12858
+Celestial Forge: War Machine phase 2 to 3~
+0 l 30 1
+L b 12858
+~
+%load% mob 12859
+set mob %self.room.people%
+if %mob.vnum% == 12859
+  set diff %self.var(diff,1)%
+  remote diff %mob.id%
+  nop %mob.remove_mob_flag(HARD)%
+  nop %mob.remove_mob_flag(GROUP)%
+  if %diff% == 1
+    * Then we don't need to do anything
+  elseif %diff% == 2
+    nop %mob.add_mob_flag(HARD)%
+  elseif %diff% == 3
+    nop %mob.add_mob_flag(GROUP)%
+  elseif %diff% == 4
+    nop %mob.add_mob_flag(HARD)%
+    nop %mob.add_mob_flag(GROUP)%
+  end
+  nop %mob.unscale_and_reset%
+  %scale% %mob% %self.level%
+  set scaled 1
+  remote scaled %mob.id%
+  * messaging
+  %echo% &&wA trumpet sounds as the battered War Machine rallies for one last stand!&&0
+  %force% %mob% maggro %self.fighting%
+  %purge% %self%
+end
+~
+#12859
+War Machine phase 2 combat: Burning Catapult, Whirling Sawblades, Hammer Tremor, Scalding Vents, Grapple Winch~
+0 c 0 0
+!catapult !whirl !tremor !scald !winch~
+set targ %arg%
+set room %self.room%
+set diff %self.var(diff,1)%
+set cmd %cmd.substr(1)%
+if %actor% != %self% || !%targ% || %targ.id% == %self.id%
+  halt
+elseif %cmd% == catapult
+  * Burning Catapult (dodge)
+  scfight clear dodge
+  %echo% &&wSmoke streams upward as the burning arm of a catapult extends from the War Machine!&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  set cycle 1
+  eval pain 100 * (diff + 1)
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    set targ %random.enemy%
+    if !%targ%
+      halt
+    end
+    %send% %targ% &&w**** The catapult takes aim... at you! ****&&0 (dodge)
+    %echoaround% %targ% &&wThe catapult takes aim... at ~%targ%!&&0
+    scfight setup dodge %targ%
+    set targ_id %targ.id%
+    wait %wait% s
+    if %targ% && %targ_id% == %targ.id%
+      * still here
+      if %targ.var(did_scfdodge)%
+        %echo% &&wThere's a fiery explosion as the catapult hits the ground mere feet from where ~%targ% dodged!&&0
+        if %diff% == 1
+          dg_affect #12821 %targ% TO-HIT 25 20
+        end
+      else
+        * hit!
+        %echo% &&wA burning mass of pitch and tar from the catapult explodes into |%targ% chest!&&0
+        %damage% %targ% %pain% physical
+      end
+    end
+    scfight clear dodge
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+elseif %cmd% == whirl
+  * Whirling Sawblades (group duck)
+  scfight clear duck
+  %echo% &&wThe War Machine stops for a moment and creaks as long sawblades extend from its sides...&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  %echo% &&w**** The War Machine begins to spin, slowly at first, then faster, and faster... ****&&0 (duck)
+  set cycle 1
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup duck all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfduck)%
+          %echo% &&wA sawblade catches ~%ch%, ripping through ^%ch% flesh, causing deep and grievous wounds!&&0
+          %dot% #12857 %ch% 100 30 physical 5
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&wYou feel the air slice past the top of your head as you narrowly duck the whirling sawblade.&&0
+          if %diff% == 1
+            dg_affect #12821 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&w**** It's still spinning! ****&&0 (duck)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear duck
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+elseif %cmd% == tremor
+  * Hammer Tremor (group jump)
+  scfight clear jump
+  %echo% &&wA mast rises from the top of the War Machine...&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  %echo% &&w**** The War Machine raises its tremendous mast to the highest position... this isn't good! ****&&0 (jump)
+  set cycle 1
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup jump all
+    wait %wait% s
+    %echo% &&wThe mast of the War Machine slams downward with a deafening thud! A tremor ripples across the battlefield...&&0
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfjump)%
+          if %ch.aff_flagged(!STUN)%
+            %echo% &&wThe tremor knocks ~%ch% into a broken wagon!&&0
+          else
+            %echo% &&wThe tremor knocks ~%ch% to the ground!&&0
+            dg_affect #12858 %ch% STUNNED on 10
+          end
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&wYou time your jump perfectly to avoid the tremor.&&0
+          if %diff% == 1
+            dg_affect #12821 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&w**** The mast is rising again! ****&&0 (jump)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear jump
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+elseif %cmd% == scald
+  * Scalding Vents (group dodge)
+  scfight clear dodge
+  %echo% &&wA furnace roars within the War Machine as low vents on its sides slide open...&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  %echo% &&w**** Steam rises from the open vents as the War Machine turns and takes aim... ****&&0 (dodge)
+  set cycle 1
+  set hit 0
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup dodge all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfdodge)%
+          set hit 1
+          %echo% &&wA blast of steam from the War Machine scalds ~%ch%!&&0
+          %dot% #12859 %ch% 100 30 physical 5
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&wYou hurl yourself out of the way just in time to avoid a scalding blast of steam!&&0
+          if %diff% == 1
+            dg_affect #12821 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&w**** The vents are still steaming... ****&&0 (dodge)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear dodge
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+elseif %cmd% == winch
+  * Grapple Winch (struggle)
+  %echo% &&wA crossbow rises from the top of the War Machine...&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  set cycle 1
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    set targ %random.enemy%
+    if !%targ%
+      halt
+    elseif !%targ.affect(9602)%
+      * only if not already struggling
+      %send% %targ% &&w**** The War Machine fires a grappler at you... You're caught, and being pulled in! ****&&0 (struggle)
+      %echoaround% %targ% &&wThe War Machine fires a grappler at ~%targ%... and starts reeling *%targ% in!&&0
+      scfight setup struggle %targ% 30
+      * messages
+      set scf_strug_char You struggle to free yourself from the winch...
+      set scf_strug_room ~%%actor%% struggles to free *%%actor%%self from the winch...
+      remote scf_strug_char %targ.id%
+      remote scf_strug_room %targ.id%
+      set scf_free_char You cut yourself free of the winch!
+      set scf_free_room ~%%actor%% cuts *%%actor%%self free of the winch!
+      remote scf_free_char %targ.id%
+      remote scf_free_room %targ.id%
+    end
+    eval cycle %cycle% + 1
+    wait %wait% s
+  done
+  eval pause 28 - (%wait% * %diff%)
+  wait %pause% s
+  * punish anybody still grappled
+  eval pain 100 * %diff%
+  set ch %room.people%
+  while %ch%
+    set next_ch %ch.next_in_room%
+    if %self.is_enemy(%ch%)% && %ch.affect(9602)%
+      %echo% &&wThe War Machine reels ~%ch% in and impales *%ch% on a dull spike!&&0
+      %damage% %ch% %pain% physical
+    end
+    set ch %next_ch%
+  done
+end
+nop %self.remove_mob_flag(NO-ATTACK)%
 ~
 #12877
 Celestial Forge: Banner hawk load script~

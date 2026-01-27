@@ -995,7 +995,7 @@ void script_trigger_check(void) {
 			case MOB_TRIGGER: {
 				mob = (char_data *)sc->attached_to;
 				in_room = IN_ROOM(mob);
-				if (GET_POS(mob) < POS_SLEEPING || IS_DEAD(mob) || EXTRACTED(mob) || AFF_FLAGGED(mob, AFF_STUNNED | AFF_HARD_STUNNED) || IS_INJURED(mob, INJ_TIED) || GET_FED_ON_BY(mob)) {
+				if (GET_POS(mob) < POS_SLEEPING || (IS_DEAD(mob) && !TRIGGER_CHECK(trig, MTRIG_DEAD_OK)) || EXTRACTED(mob) || AFF_FLAGGED(mob, AFF_STUNNED | AFF_HARD_STUNNED) || IS_INJURED(mob, INJ_TIED) || GET_FED_ON_BY(mob)) {
 					fail = TRUE;
 				}
 				if (AFF_FLAGGED(mob, AFF_CHARM) && !TRIGGER_CHECK(trig, MTRIG_CHARMED)) {
@@ -5911,6 +5911,9 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							*str = '\0';
 						}
 					}
+					else if (!str_cmp(field, "dismantling")) {
+						safe_snprintf(str, slen, "%d", IS_DISMANTLING(r) ? 1 : 0);
+					}
 					else if (!str_cmp(field, "distance")) {
 						room_data *targ;
 						if (subfield && *subfield && (targ = get_room(r, subfield))) {
@@ -6562,6 +6565,9 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 							set_vehicle_depletion(v, type, atoi(arg2));
 							safe_snprintf(str, slen, "%d", get_vehicle_depletion(v, type));
 						}
+					}
+					else if (!str_cmp(field, "dismantling")) {
+						safe_snprintf(str, slen, "%d", VEH_IS_DISMANTLING(v) ? 1 : 0);
 					}
 					else if (!str_cmp(field, "driver")) {
 						if (VEH_DRIVER(v)) {
