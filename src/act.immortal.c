@@ -42,9 +42,7 @@
 extern bool manual_evolutions;
 
 // external functions
-struct instance_data *build_instance_loc(adv_data *adv, struct adventure_link_rule *rule, room_data *loc, int dir);
 void do_stat_vehicle(char_data *ch, vehicle_data *veh, bool details);
-room_data *find_location_for_rule(adv_data *adv, struct adventure_link_rule *rule, int *which_dir);
 
 // locals
 void instance_list_row(struct instance_data *inst, int number, char *save_buffer, size_t size);

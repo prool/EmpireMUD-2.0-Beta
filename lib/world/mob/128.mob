@@ -780,6 +780,39 @@ thing, whoever is moving it, you cannot see them. Every part of it is covered
 in armored plates that will have to come off in order to fight it.
 ~
 I 4 12882 100.00 1  # LOOT: great imperium gear
+M
+0
+A small man runs out from under the War Machine, grabs a shield, and runs back in.~
+M
+0
+The War Machine turns toward you, briefly, before resuming its slow crawl.~
+M
+0
+The roar of a furnace erupts from within the War Machine.~
+M
+0
+The War Machine creaks as it rolls slowly forward.~
+M
+0
+Smoke billows from a chimney on top of the War Machine.~
+M
+0
+The War Machine seems to be adding armored plates.~
+M
+0
+Sparks spill from a seam in the War Machine as something is welded shut from the inside.~
+M
+0
+A hatch in the War Machine opens briefly, venting a blast of hot steam.~
+M
+0
+The War Machine's wheels crunch over broken weapons and shields.~
+M
+0
+A muffled hammering echoes from deep within the War Machine.~
+M
+0
+The War Machine creeps slowly across the battlefield.~
 T 12822
 T 12821
 T 12823
@@ -802,6 +835,39 @@ I 4 12882 100.00 1  # LOOT: great imperium gear
 M
 11
 !catapult !whirl !tremor !scald !winch~
+M
+0
+The War Machine creeps slowly across the battlefield.~
+M
+0
+The War Machine turns toward you, briefly, before resuming its slow crawl.~
+M
+0
+The roar of a furnace erupts from within the War Machine.~
+M
+0
+The War Machine creaks as it rolls slowly forward.~
+M
+0
+Smoke billows from a chimney on top of the War Machine.~
+M
+0
+A hatch in the War Machine opens briefly, venting a blast of hot steam.~
+M
+0
+The War Machine's wheels crunch over broken weapons and shields.~
+M
+0
+A muffled hammering echoes from deep within the War Machine.~
+M
+0
+A crossbowman pops up from the top of the War Machine, then ducks back down.~
+M
+0
+Crossbow bolts glint from within the War Machine's arrow slits.~
+M
+0
+A winch ratchets loudly from within the War Machine.~
 T 12821
 T 12820
 T 12858
@@ -824,6 +890,42 @@ framework beneath. Its gears are smashed and it barely moves, but the
 crossbowmen within continue their onslaught.
 ~
 I 4 12882 100.00 1  # LOOT: great imperium gear
+M
+0
+The battered War Machine turns toward you, briefly, before resuming its slow crawl.~
+M
+0
+The roar of a furnace erupts from within the battered War Machine.~
+M
+0
+The War Machine creaks as it rolls slowly forward.~
+M
+0
+Smoke billows from a bent chimney on top of the War Machine.~
+M
+0
+Steam rises slowly from the battered seams of the War Machine.~
+M
+0
+The War Machine's battered wheels crunch over broken weapons and shields.~
+M
+0
+A muffled hammering echoes from deep within the battered War Machine.~
+M
+0
+A crossbowman pops up from the top of the battered War Machine, then ducks back down.~
+M
+0
+Crossbow bolts glint from within the battered War Machine's arrow slits.~
+M
+0
+The War Machine inches forward, one wheel grinding loudly against stone.~
+M
+0
+A broken catapult arm drags uselessly behind the War Machine.~
+M
+0
+A loose shield clatters off the War Machine and skids along the ground.~
 T 12821
 T 12820
 S
