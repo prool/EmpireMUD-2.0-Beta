@@ -897,17 +897,20 @@ set any_ok 0
 switch %self.vnum%
   case 12817
     set varname %self.vnum%_daily
-    set loot lodestone relic shield
+    set loot a lodestone relic shield
+    set death The Lodestone Colossus crumbles into ash and bits of broken armor!
   break
   case 12857
   case 12858
   case 12859
     set varname 12857_daily
-    set loot great imperium gear
+    set loot a great imperium gear
+    set death The War Machine collapses in a heap of broken wood and metal!
   break
   default
     set varname %self.vnum%_daily
     set loot
+    set death
   break
 done
 * ensure a player has loot permission
@@ -934,6 +937,11 @@ while %ch% && !%any_ok%
   end
   set ch %ch.next_in_room%
 done
+* death message
+if %death%
+  %echo% &&w&&Z%death%&&0
+  return 0
+end
 * did we drop it?
 if %any_ok% && %loot%
   %echo% &&w&&Z%loot% falls to the ground as ~%self% is defeated!&&0
@@ -2308,7 +2316,7 @@ elseif %cmd% == scald
           end
         end
         if %cycle% < %diff%
-          %send% %ch% &&w**** There are still more blades coming down... ****&&0 (dodge)
+          %send% %ch% &&w**** The vents are still steaming... ****&&0 (dodge)
         end
       end
       set ch %next_ch%
@@ -2338,12 +2346,12 @@ elseif %cmd% == winch
       * messages
       set scf_strug_char You struggle to free yourself from the winch...
       set scf_strug_room ~%%actor%% struggles to free *%%actor%%self from the winch...
-      remote scf_strug_char %ch.id%
-      remote scf_strug_room %ch.id%
+      remote scf_strug_char %targ.id%
+      remote scf_strug_room %targ.id%
       set scf_free_char You cut yourself free of the winch!
       set scf_free_room ~%%actor%% cuts *%%actor%%self free of the winch!
-      remote scf_free_char %ch.id%
-      remote scf_free_room %ch.id%
+      remote scf_free_char %targ.id%
+      remote scf_free_room %targ.id%
     end
     eval cycle %cycle% + 1
   done
