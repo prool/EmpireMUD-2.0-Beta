@@ -2354,6 +2354,7 @@ elseif %cmd% == winch
       remote scf_free_room %targ.id%
     end
     eval cycle %cycle% + 1
+    wait %wait% s
   done
   eval pause 28 - (%wait% * %diff%)
   wait %pause% s
