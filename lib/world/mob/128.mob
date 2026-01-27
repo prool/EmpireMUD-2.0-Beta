@@ -801,7 +801,7 @@ grinding of gears signals worse to come.
 I 4 12882 100.00 1  # LOOT: great imperium gear
 M
 11
-!test~
+!catapult !whirl !tremor !scald !winch~
 T 12821
 T 12820
 T 12858

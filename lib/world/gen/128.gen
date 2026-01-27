@@ -39,7 +39,7 @@ rain of rusted blades~
 61 0 0 0
 T0
 Your wounds stop bleeding.~
-T3
+T2
 You're bleeding!~
 T5
 ...$e's bleeding!~
@@ -196,5 +196,36 @@ shard-covered~
 0 0 0 0
 T0
 The shards drop off of you and your damage returns to normal.~
+S
+#12857
+whirling sawblades~
+4 0
+61 0 0 0
+T0
+Your wounds stop bleeding.~
+T2
+You're bleeding!~
+T5
+...$e's bleeding!~
+S
+#12858
+hammer tremor~
+4 0
+0 0 0 0
+T0
+You recover from the tremor and dust yourself off.~
+T5
+...$e is stunned!~
+S
+#12859
+scalding vents~
+4 0
+12859 0 0 0
+T0
+Your steam burns begin to subside.~
+T2
+You're badly burned by the hot steam!~
+T5
+...$e's badly burned!~
 S
 $

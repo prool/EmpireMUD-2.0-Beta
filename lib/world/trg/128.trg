@@ -615,7 +615,6 @@ elseif %cmd% == fling
   * Shield Fling (group duck)
   scfight clear duck
   %echo% &&wClanging echoes across the battlefield, distant at first, then all around you!&&0
-  eval dodge %diff% * 40
   if %diff% == 1
     nop %self.add_mob_flag(NO-ATTACK)%
   end
@@ -2150,10 +2149,219 @@ if %mob.vnum% == 12859
 end
 ~
 #12859
-War Machine phase 2 combat: tba~
+War Machine phase 2 combat: Burning Catapult, Whirling Sawblades, Hammer Tremor, Scalding Vents, Grapple Winch~
 0 c 0 0
-!test~
-* tba
+!catapult !whirl !tremor !scald !winch~
+set targ %arg%
+set room %self.room%
+set diff %self.var(diff,1)%
+set cmd %cmd.substr(1)%
+if %actor% != %self% || !%targ% || %targ.id% == %self.id%
+  halt
+elseif %cmd% == catapult
+  * Burning Catapult (dodge)
+  scfight clear dodge
+  %echo% &&wSmoke streams upward as the burning arm of a catapult extends from the War Machine!&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  set cycle 1
+  eval pain 100 * (diff + 1)
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    set targ %random.enemy%
+    if !%targ%
+      halt
+    end
+    %send% %targ% &&w**** The catapult takes aim... at you! ****&&0 (dodge)
+    %echoaround% %targ% &&wThe catapult takes aim... at ~%targ%!&&0
+    scfight setup dodge %targ%
+    set targ_id %targ.id%
+    wait %wait% s
+    if %targ% && %targ_id% == %targ.id%
+      * still here
+      if %targ.var(did_scfdodge)%
+        %echo% &&wThere's a fiery explosion as the catapult hits the ground mere feet from where ~%targ% dodged!&&0
+        if %diff% == 1
+          dg_affect #12821 %targ% TO-HIT 25 20
+        end
+      else
+        * hit!
+        %echo% &&wA burning mass of pitch and tar from the catapult explodes into |%targ% chest!&&0
+        %damage% %targ% %pain% physical
+      end
+    end
+    scfight clear dodge
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+elseif %cmd% == whirl
+  * Whirling Sawblades (group duck)
+  scfight clear duck
+  %echo% &&wThe War Machine stops for a moment and creaks as long sawblades extend from its sides...&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  %echo% &&w**** The War Machine begins to spin, slowly at first, then faster, and faster... ****&&0 (duck)
+  set cycle 1
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup duck all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfduck)%
+          %echo% &&wA sawblade catches ~%ch%, ripping through ^%ch% flesh, causing deep and grievous wounds!&&0
+          %dot% #12857 %ch% 100 30 physical 5
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&wYou feel the air slice past the top of your head as you narrowly duck the whirling sawblade.&&0
+          if %diff% == 1
+            dg_affect #12821 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&w**** It's still spinning! ****&&0 (duck)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear duck
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+elseif %cmd% == tremor
+  * Hammer Tremor (group jump)
+  scfight clear jump
+  %echo% &&wA mast rises from the top of the War Machine...&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  %echo% &&w**** The War Machine raises its tremendous mast to the highest position... this isn't good! ****&&0 (jump)
+  set cycle 1
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup jump all
+    wait %wait% s
+    %echo% &&wThe mast of the War Machine slams downward with a deafening thud! A tremor ripples across the battlefield...&&0
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfjump)%
+          if %ch.aff_flagged(!STUN)%
+            %echo% &&wThe tremor knocks ~%ch% into a broken wagon!&&0
+          else
+            %echo% &&wThe tremor knocks ~%ch% to the ground!&&0
+            dg_affect #12858 %ch% STUNNED on 10
+          end
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&wYou time your jump perfectly to avoid the tremor.&&0
+          if %diff% == 1
+            dg_affect #12821 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&w**** The mast is rising again! ****&&0 (jump)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear jump
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+elseif %cmd% == scald
+  * Scalding Vents (group dodge)
+  scfight clear dodge
+  %echo% &&wA furnace roars within the War Machine as low vents on its sides slide open...&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  %echo% &&w**** Steam rises from the open vents as the War Machine turns and takes aim... ****&&0 (dodge)
+  set cycle 1
+  set hit 0
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    scfight setup dodge all
+    wait %wait% s
+    set ch %room.people%
+    while %ch%
+      set next_ch %ch.next_in_room%
+      if %self.is_enemy(%ch%)%
+        if !%ch.var(did_scfdodge)%
+          set hit 1
+          %echo% &&wA blast of steam from the War Machine scalds ~%ch%!&&0
+          %dot% #12859 %ch% 100 30 physical 5
+          %damage% %ch% 50 physical
+        elseif %ch.is_pc%
+          %send% %ch% &&wYou hurl yourself out of the way just in time to avoid a scalding blast of steam!&&0
+          if %diff% == 1
+            dg_affect #12821 %ch% TO-HIT 25 20
+          end
+        end
+        if %cycle% < %diff%
+          %send% %ch% &&w**** There are still more blades coming down... ****&&0 (dodge)
+        end
+      end
+      set ch %next_ch%
+    done
+    scfight clear dodge
+    eval cycle %cycle% + 1
+  done
+  wait 8 s
+elseif %cmd% == winch
+  * Grapple Winch (struggle)
+  %echo% &&wA crossbow rises from the top of the War Machine...&&0
+  if %diff% == 1
+    nop %self.add_mob_flag(NO-ATTACK)%
+  end
+  wait 3 s
+  set cycle 1
+  eval wait 10 - %diff%
+  while %cycle% <= %diff%
+    set targ %random.enemy%
+    if !%targ%
+      halt
+    elseif !%targ.affect(9602)%
+      * only if not already struggling
+      %send% %targ% &&w**** The War Machine fires a grappler at you... You're caught, and being pulled in! ****&&0 (struggle)
+      %echoaround% %targ% &&wThe War Machine fires a grappler at ~%targ%... and starts reeling *%targ% in!&&0
+      scfight setup struggle %targ% 30
+      * messages
+      set scf_strug_char You struggle to free yourself from the winch...
+      set scf_strug_room ~%%actor%% struggles to free *%%actor%%self from the winch...
+      remote scf_strug_char %ch.id%
+      remote scf_strug_room %ch.id%
+      set scf_free_char You cut yourself free of the winch!
+      set scf_free_room ~%%actor%% cuts *%%actor%%self free of the winch!
+      remote scf_free_char %ch.id%
+      remote scf_free_room %ch.id%
+    end
+    eval cycle %cycle% + 1
+  done
+  eval pause 28 - (%wait% * %diff%)
+  wait %pause% s
+  * punish anybody still grappled
+  eval pain 100 * %diff%
+  set ch %room.people%
+  while %ch%
+    set next_ch %ch.next_in_room%
+    if %self.is_enemy(%ch%)% && %ch.affect(9602)%
+      %echo% &&wThe War Machine reels ~%ch% in and impales *%ch% on a dull spike!&&0
+      %damage% %ch% %pain% physical
+    end
+    set ch %next_ch%
+  done
+end
+nop %self.remove_mob_flag(NO-ATTACK)%
 ~
 #12877
 Celestial Forge: Banner hawk load script~
