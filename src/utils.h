@@ -2417,6 +2417,7 @@ bool liquid_flagged(any_vnum generic_liquid_vnum, bitvector_t flag);
 
 // instance.c
 int adjusted_instance_limit(adv_data *adv);
+struct instance_data *build_instance_loc(adv_data *adv, struct adventure_link_rule *rule, room_data *loc, int dir);
 bool can_enter_instance(char_data *ch, struct instance_data *inst);
 bool can_instance(adv_data *adv);
 void check_instance_is_loaded(struct instance_data *inst);
@@ -2424,6 +2425,7 @@ int count_instances(adv_data *adv);
 int delete_all_instances(adv_data *adv);
 void delete_instance(struct instance_data *inst, bool run_cleanup);
 void empty_instance_vehicle(struct instance_data *inst, vehicle_data *veh, room_data *to_room);
+room_data *find_location_for_rule(adv_data *adv, struct adventure_link_rule *rule, int *which_dir);
 room_data *find_nearest_adventure(room_data *from, rmt_vnum vnum);
 room_data *find_nearest_rmt(room_data *from, rmt_vnum vnum);
 room_data *find_room_template_in_instance(struct instance_data *inst, rmt_vnum vnum);
