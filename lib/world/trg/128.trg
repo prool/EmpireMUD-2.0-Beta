@@ -1116,7 +1116,8 @@ dg_affect %self% !ATTACK on -1
 ~
 #12823
 Celestial Forge: Message when no-attack mob is attacked~
-0 B 0 0
+0 B 0 1
+L f 12823
 ~
 if %self.aff_flagged(!ATTACK)%
   %send% %actor% You need to choose a difficulty before you can fight ~%self%.
@@ -1482,7 +1483,7 @@ end
 if %dps% >= 3
   nop %self.add_mob_flag(DPS)%
   if !%self.affect(12835)%
-    dg_affect #12835 %self% !DISARM on -1
+    dg_affect #12835 %self% NO-DISARM on -1
   end
 end
 * caster
@@ -1877,7 +1878,7 @@ elseif %move% == 2
     eval amount %self.level% / 10
     dg_affect #12831 @%self% %enemy% off silent
     dg_affect #12831 %enemy% DODGE -%amount% 30
-  elseif %dps% >= 3 && !%enemy.aff_flagged(!STUN)%
+  elseif %dps% >= 3 && !%enemy.aff_flagged(NO-STUN)%
     * stun
     dg_affect #12831 @%self% %enemy% off silent
     dg_affect #12831 %enemy% STUNNED on 5
@@ -1897,8 +1898,8 @@ elseif %move% == 3
   else
     eval duration 20
   end
-  dg_affect #12830 @%self% %enemy% off
-  dg_affect #12830 %enemy% SLOW on %durtion%
+  dg_affect #12830 @%self% %enemy% off silent
+  dg_affect #12830 %enemy% SLOW on %duration%
   %echo% &&Y~%self% unleashes a shard flurry at ~%enemy%, slowing ^%enemy% advance considerably!&&0
   if !%self.fighting%
     mkill %enemy%
@@ -2356,7 +2357,7 @@ elseif %cmd% == tremor
       set next_ch %ch.next_in_room%
       if %self.is_enemy(%ch%)%
         if !%ch.var(did_scfjump)%
-          if %ch.aff_flagged(!STUN)%
+          if %ch.aff_flagged(NO-STUN)%
             %echo% &&wThe tremor knocks ~%ch% into a broken wagon!&&0
           else
             %echo% &&wThe tremor knocks ~%ch% to the ground!&&0
@@ -2643,7 +2644,6 @@ switch %arg%
     set abil_msg ~%self% signs, 'But feel free to look around.'
     set non_msg ~%self% points to ^%self% eyes with ^%self% fingers, and then gestures around the area.
   break
-  
   * SAOIRSE
   case 20
     set abil_msg ~%self% signs with ^%self% hands, 'I didn't realize we have a new guest.'
@@ -2661,7 +2661,6 @@ switch %arg%
     set abil_msg ~%self% signs with one hand, 'Have you fought the beast yet?'
     set non_msg ~%self% crosses ^%self% arms in an X, points at you, then points at the great wall.
   break
-  
   * PERCY
   case 30
     set abil_msg ~%self% signs with ^%self% hands, 'I'm quite pleased to see you observing the Silence rule.'
@@ -2679,7 +2678,6 @@ switch %arg%
     set abil_msg ~%self% signs, 'There's still more availble here for you here.'
     set non_msg ~%self% gestures around the area, then folds ^%self% hands and opens them like a book, and then points forward.
   break
-  
   * SOMSAK
   case 40
     set abil_msg ~%self% signs with ^%self% hands, 'Nice to see a new face. Are you here to work or shop?'
