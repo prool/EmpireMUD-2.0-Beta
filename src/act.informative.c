@@ -4449,7 +4449,7 @@ ACMD(do_nearby) {
 			
 			// owner part
 			if (ROOM_OWNER(loc)) {
-				safe_snprintf(part, sizeof(part), " / %s%s&0", EMPIRE_BANNER(ROOM_OWNER(loc)), EMPIRE_NAME(ROOM_OWNER(loc)));
+				safe_snprintf(part, sizeof(part), " / %s%s&0%s", EMPIRE_BANNER(ROOM_OWNER(loc)), EMPIRE_NAME(ROOM_OWNER(loc)), (ROOM_AFF_FLAGGED(loc, ROOM_AFF_PUBLIC) ? " (public)" : ""));
 			}
 			else {
 				*part = '\0';
@@ -4656,13 +4656,15 @@ ACMD(do_score) {
 ACMD(do_survey) {
 	char line[MAX_STRING_LENGTH];
 	char *temp, *argptr;
+	double health;
 	struct empire_city_data *city;
 	struct empire_island *eisle;
 	struct island_info *island;
-	int max, prc, ter_type;
+	int max, maxhealth, prc, ter_type;
 	// int base_height, mod_height;
 	bool junk, large_radius;
 	struct depletion_data *dep;
+	struct instance_data *inst;
 	
 	argptr = one_argument(argument, arg);
 	
@@ -4736,7 +4738,11 @@ ACMD(do_survey) {
 	// building info
 	if (COMPLEX_DATA(IN_ROOM(ch))) {
 		if (BUILDING_DAMAGE(IN_ROOM(ch)) > 0 || (IS_COMPLETE(IN_ROOM(ch)) && BUILDING_RESOURCES(IN_ROOM(ch)))) {
-			msg_to_char(ch, "It's in need of maintenance and repair.\r\n");
+			maxhealth = GET_BUILDING(IN_ROOM(ch)) ? GET_BLD_MAX_DAMAGE(GET_BUILDING(IN_ROOM(ch))) : 1;
+			maxhealth = MAX(1, maxhealth);	// don't crash me, bro
+			health = (double) BUILDING_DAMAGE(IN_ROOM(ch)) / maxhealth * 100.0;
+			health = MIN(100.0, health);
+			msg_to_char(ch, "It's in need of maintenance and repair (%d%% damaged).\r\n", (int)round(health));
 		}
 		if (IS_BURNING(IN_ROOM(ch))) {
 			msg_to_char(ch, "It's on fire!\r\n");
@@ -4775,8 +4781,8 @@ ACMD(do_survey) {
 	}
 	
 	// adventure info
-	if (find_instance_by_room(IN_ROOM(ch), FALSE, TRUE)) {
-		do_adventure(ch, "", 0, 0);
+	if ((inst = find_instance_by_room(IN_ROOM(ch), FALSE, TRUE))) {
+		msg_to_char(ch, "Adventure: %s\r\n", GET_ADV_NAME(INST_ADVENTURE(inst)));
 	}
 	
 	// TO ADD:

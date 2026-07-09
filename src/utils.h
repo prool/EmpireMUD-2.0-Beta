@@ -127,6 +127,7 @@
 #define ABIL_MIN_POS(abil)  ((abil)->min_position)
 #define ABIL_MOVE_TYPE(abil)  ((abil)->move_type)
 #define ABIL_NAME(abil)  ((abil)->name)
+#define ABIL_NOTES(abil)  ((abil)->notes)
 #define ABIL_POOL_TYPE(abil)  ((abil)->pool_type)
 #define ABIL_REQUIRES_TOOL(abil)  ((abil)->requires_tool)
 #define ABIL_RESOURCE_COST(abil)  ((abil)->resource_cost)
@@ -166,6 +167,7 @@
 #define GET_ADV_MIN_LEVEL(adv)  ((adv)->min_level)
 #define GET_ADV_MAX_LEVEL(adv)  ((adv)->max_level)
 #define GET_ADV_MAX_INSTANCES(adv)  ((adv)->max_instances)
+#define GET_ADV_NOTES(adv)  ((adv)->notes)
 #define GET_ADV_RESET_TIME(adv)  ((adv)->reset_time)
 #define GET_ADV_FLAGS(adv)  ((adv)->flags)
 #define GET_ADV_LINKING(adv)  ((adv)->linking)
@@ -208,6 +210,7 @@
 #define GET_ARCH_LORE(arch)  ((arch)->lore)
 #define GET_ARCH_MALE_RANK(arch)  ((arch)->male_rank)
 #define GET_ARCH_NAME(arch)  ((arch)->name)
+#define GET_ARCH_NOTES(arch)  ((arch)->notes)
 #define GET_ARCH_SKILLS(arch)  ((arch)->skills)
 #define GET_ARCH_TYPE(arch)  ((arch)->type)
 #define GET_ARCH_VNUM(arch)  ((arch)->vnum)
@@ -222,6 +225,7 @@
 #define GET_AUG_APPLIES(aug)  ((aug)->applies)
 #define GET_AUG_FLAGS(aug)  ((aug)->flags)
 #define GET_AUG_NAME(aug)  ((aug)->name)
+#define GET_AUG_NOTES(aug)  ((aug)->notes)
 #define GET_AUG_RESOURCES(aug)  ((aug)->resources)
 #define GET_AUG_REQUIRES_OBJ(aug)  ((aug)->requires_obj)
 #define GET_AUG_TYPE(aug)  ((aug)->type)
@@ -253,6 +257,7 @@
 #define BOOK_FLAGS(book)		((book)->flags)
 #define BOOK_ITEM_DESC(book)	((book)->item_description)
 #define BOOK_ITEM_NAME(book)	((book)->item_name)
+#define BOOK_NOTES(book)		((book)->notes)
 #define BOOK_PARAGRAPHS(book)	((book)->paragraphs)
 #define BOOK_TITLE(book)		((book)->title)
 
@@ -290,6 +295,7 @@
 #define GET_BLD_SHOP_LOOKUPS(bld)  ((bld)->shop_lookups)
 #define GET_BLD_TEMPERATURE_TYPE(bld)  ((bld)->temperature_type)
 #define GET_BLD_REGULAR_MAINTENANCE(bld)  ((bld)->regular_maintenance)
+#define GET_BLD_NOTES(bld)  ((bld)->notes)
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -486,6 +492,7 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 
 #define CLASS_VNUM(cls)  ((cls)->vnum)
 #define CLASS_NAME(cls)  ((cls)->name)
+#define CLASS_NOTES(cls)  ((cls)->notes)
 #define CLASS_ABBREV(cls)  ((cls)->abbrev)
 #define CLASS_FLAGS(cls)  ((cls)->flags)
 #define CLASS_POOL(cls, type)  ((cls)->pools[type])
@@ -505,6 +512,7 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 #define GET_CRAFT_FLAGS(craft)  ((craft)->flags)
 #define GET_CRAFT_MIN_LEVEL(craft)  ((craft)->min_level)
 #define GET_CRAFT_NAME(craft)  ((craft)->name)
+#define GET_CRAFT_NOTES(craft)  ((craft)->notes)
 #define GET_CRAFT_OBJECT(craft)  ((craft)->object)
 #define GET_CRAFT_QUANTITY(craft)  ((craft)->quantity)
 #define GET_CRAFT_REQUIRES_OBJ(craft)  ((craft)->requires_obj)
@@ -531,6 +539,7 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 #define GET_CROP_INTERACTIONS(crop)  ((crop)->interactions)
 #define GET_CROP_MAPOUT(crop)  ((crop)->mapout)
 #define GET_CROP_NAME(crop)  ((crop)->name)
+#define GET_CROP_NOTES(crop)  ((crop)->notes)
 #define GET_CROP_SPAWNS(crop)  ((crop)->spawns)
 #define GET_CROP_TITLE(crop)  ((crop)->title)
 #define GET_CROP_VNUM(crop)  ((crop)->vnum)
@@ -724,6 +733,7 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 #define FCT_MAX_REP(fct)  ((fct)->max_rep)
 #define FCT_MIN_REP(fct)  ((fct)->min_rep)
 #define FCT_NAME(fct)  ((fct)->name)
+#define FCT_NOTES(fct)  ((fct)->notes)
 #define FCT_RELATIONS(fct)  ((fct)->relations)
 #define FCT_REP_LOSS_PER_KILL(fct)  ((fct)->rep_loss_per_kill)
 #define FCT_STARTING_REP(fct)  ((fct)->starting_rep)
@@ -767,6 +777,7 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 #define GEN_COMPUTED_RELATIONS(gen)  ((gen)->computed_relations)
 #define GEN_FLAGS(gen)  ((gen)->flags)
 #define GEN_NAME(gen)  ((gen)->name)
+#define GEN_NOTES(gen)  ((gen)->notes)
 #define GEN_RELATIONS(gen)  ((gen)->relations)
 #define GEN_STRING(gen, pos)  ((gen)->string[(pos)])
 #define GEN_TYPE(gen)  ((gen)->type)
@@ -857,6 +868,7 @@ int CAN_CARRY_N(char_data *ch);	// formerly a macro
 #define GET_GLOBAL_TYPE_FLAGS(glb)  ((glb)->type_flags)
 #define GET_GLOBAL_MIN_LEVEL(glb)  ((glb)->min_level)
 #define GET_GLOBAL_MAX_LEVEL(glb)  ((glb)->max_level)
+#define GET_GLOBAL_NOTES(glb)  ((glb)->notes)
 #define GET_GLOBAL_VAL(glb, pos)  ((glb)->value[(pos)])
 #define GET_GLOBAL_INTERACTIONS(glb)  ((glb)->interactions)
 #define GET_GLOBAL_SPARE_BITS(glb)  ((glb)->spare_bits)
@@ -918,29 +930,39 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 
 // ch->mob_specials: mob_special_data
 #define GET_CURRENT_SCALE_LEVEL(ch)  ((ch)->mob_specials.current_scale_level)
-#define GET_MAX_SCALE_LEVEL(ch)  ((ch)->mob_specials.max_scale_level)
 #define GET_MOB_VNUM(mob)  (IS_NPC(mob) ? (mob)->vnum : NOTHING)
-#define GET_MIN_SCALE_LEVEL(ch)  ((ch)->mob_specials.min_scale_level)
-#define MOB_NAME_SET(ch)  ((ch)->mob_specials.name_set)
 #define MOB_ATTACK_TYPE(ch)  ((ch)->mob_specials.attack_type)
-#define MOB_CUSTOM_CORPSE(ch)  ((ch)->mob_specials.custom_corpse)
-#define MOB_CUSTOM_MSGS(ch)  ((ch)->mob_specials.custom_msgs)
 #define MOB_DAMAGE(ch)  ((ch)->mob_specials.damage)
 #define MOB_DYNAMIC_NAME(ch)  ((ch)->mob_specials.dynamic_name)
 #define MOB_DYNAMIC_SEX(ch)  ((ch)->mob_specials.dynamic_sex)
 #define MOB_FACTION(ch)  ((ch)->mob_specials.faction)
 #define MOB_INSTANCE_ID(ch)  ((ch)->mob_specials.instance_id)
-#define MOB_INTERACTIONS(ch)  ((ch)->interactions)
 #define MOB_LANGUAGE(ch)  ((ch)->mob_specials.language)
-#define MOB_MOVE_TYPE(ch)  ((ch)->mob_specials.move_type)
 #define MOB_PURSUIT(ch)  ((ch)->mob_specials.pursuit)
 #define MOB_PURSUIT_LEASH_LOC(ch)  ((ch)->mob_specials.pursuit_leash_loc)
 #define MOB_TAGGED_BY(ch)  ((ch)->mob_specials.tagged_by)
 #define MOB_SPAWN_TIME(ch)  ((ch)->mob_specials.spawn_time)
 #define MOB_TO_DODGE(ch)  ((ch)->mob_specials.to_dodge)
 #define MOB_TO_HIT(ch)  ((ch)->mob_specials.to_hit)
-#define MOB_QUEST_LOOKUPS(ch)  ((ch)->quest_lookups)
-#define MOB_SHOP_LOOKUPS(ch)  ((ch)->shop_lookups)
+
+// prototype data
+#define MOB_CUSTOM_CORPSE(ch)  (IS_NPC(ch) ? (ch)->proto_data->custom_corpse : NOTHING)
+#define MOB_CUSTOM_MSGS(ch)  ((ch)->proto_data->custom_msgs)
+#define MOB_INTERACTIONS(ch)  ((ch)->proto_data->interactions)
+#define GET_MAX_SCALE_LEVEL(ch)  (IS_NPC(ch) ? (ch)->proto_data->max_scale_level : 0)
+#define GET_MIN_SCALE_LEVEL(ch)  (IS_NPC(ch) ? (ch)->proto_data->min_scale_level : 0)
+#define MOB_MOVE_TYPE(ch)  (IS_NPC(ch) ? (ch)->proto_data->move_type : MOB_MOVE_WALK)
+#define MOB_NAME_SET(ch)  (IS_NPC(ch) ? (ch)->proto_data->name_set : 0)
+#define MOB_NOTES(ch)  ((ch)->proto_data->notes)
+#define MOB_QUEST_LOOKUPS(ch)  ((ch)->proto_data->quest_lookups)
+#define MOB_SHOP_LOOKUPS(ch)  ((ch)->proto_data->shop_lookups)
+
+// protected data (regular getter won't allow set)
+#define SET_CUSTOM_CORPSE(ch, val)  ((ch)->proto_data->custom_corpse = (val))
+#define SET_MAX_SCALE_LEVEL(ch, val)  ((ch)->proto_data->max_scale_level = (val))
+#define SET_MIN_SCALE_LEVEL(ch, val)  ((ch)->proto_data->min_scale_level = (val))
+#define SET_MOVE_TYPE(ch, val)  ((ch)->proto_data->move_type = (val))
+#define SET_NAME_SET(ch, val)  ((ch)->proto_data->name_set = (val))
 
 // helpers
 #define IS_MOB(ch)  (IS_NPC(ch) && GET_MOB_VNUM(ch) != NOTHING)
@@ -969,6 +991,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define MORPH_LOOK_DESC(mph)  ((mph)->look_desc)
 #define MORPH_MAX_SCALE(mph)  ((mph)->max_scale)
 #define MORPH_MOVE_TYPE(mph)  ((mph)->move_type)
+#define MORPH_NOTES(mph)  ((mph)->notes)
 #define MORPH_REQUIRES_OBJ(mph)  ((mph)->requires_obj)
 #define MORPH_SHORT_DESC(mph)  ((mph)->short_desc)
 #define MORPH_SIZE(mph)  ((mph)->size)
@@ -1014,6 +1037,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define GET_OBJ_MAX_SCALE_LEVEL(obj)  ((obj)->proto_data ? (obj)->proto_data->max_scale_level : 0)
 #define GET_OBJ_MIN_SCALE_LEVEL(obj)  ((obj)->proto_data ? (obj)->proto_data->min_scale_level : 0)
 #define GET_OBJ_QUEST_LOOKUPS(obj)  ((obj)->proto_data ? (obj)->proto_data->quest_lookups : NULL)
+#define GET_OBJ_NOTES(obj)  ((obj)->proto_data ? (obj)->proto_data->notes : NULL)
 #define GET_OBJ_REQUIRES_QUEST(obj)  ((obj)->proto_data ? (obj)->proto_data->requires_quest : NOTHING)
 #define GET_OBJ_REQUIRES_TOOL(obj)  ((obj)->proto_data ? (obj)->proto_data->requires_tool : NOTHING)
 #define GET_OBJ_SHOP_LOOKUPS(obj)  ((obj)->proto_data ? (obj)->proto_data->shop_lookups : NULL)
@@ -1029,6 +1053,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define IS_STOLEN(obj)  (GET_STOLEN_TIMER(obj) > 0 && (config_get_int("stolen_object_timer") * SECS_PER_REAL_MIN) + GET_STOLEN_TIMER(obj) > time(0))
 #define IS_STOLEN_FROM(obj, ch)  (!IS_NPC(ch) && GET_LOYALTY(ch) && GET_STOLEN_FROM(obj) == EMPIRE_VNUM(GET_LOYALTY(ch)))
 #define IS_STOLEN_FROM_EMPIRE(obj, emp)  ((emp) && GET_STOLEN_FROM(obj) == EMPIRE_VNUM(emp))
+#define OBJ_IS_NOWHERE(obj)  (!IN_ROOM(obj) && !((obj)->in_obj) && !((obj)->in_vehicle) && !((obj)->carried_by) && !((obj)->worn_by))
 
 // helpers
 #define OBJ_FLAGGED(obj, flag)  (IS_SET(GET_OBJ_EXTRA(obj), (flag)))
@@ -1038,7 +1063,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define TOOL_FLAGGED(obj, flag)  IS_SET(GET_OBJ_TOOL_FLAGS(obj), (flag))
 #define WORN_OR_CARRIED_BY(obj, ch)  ((obj)->worn_by == (ch) || (obj)->carried_by == (ch))
 
-// for stacking, sotring, etc
+// for stacking, sorting, etc
 #define OBJ_CAN_STACK(obj)  (GET_OBJ_TYPE(obj) != ITEM_CONTAINER && !IS_AMMO(obj))
 #define OBJ_CAN_STORE(obj)  (GET_OBJ_STORAGE(obj) && GET_OBJ_REQUIRES_QUEST(obj) == NOTHING && !OBJ_BOUND_TO(obj) && !OBJ_FLAGGED((obj), OBJ_NO_BASIC_STORAGE | OBJ_SUPERIOR | OBJ_ENCHANTED) && !IS_STOLEN(obj))
 #define OBJ_IS_IN_WORLD(obj)  (IN_ROOM(obj) || (obj)->in_obj || (obj)->in_vehicle || ((obj)->carried_by && IN_ROOM((obj)->carried_by)) || ((obj)->worn_by && IN_ROOM((obj)->worn_by)))
@@ -1420,6 +1445,11 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define IS_THIRSTY(ch)  (GET_COND((ch), THIRST) >= (REAL_UPDATES_PER_MUD_HOUR * 24) && !HAS_BONUS_TRAIT((ch), BONUS_NO_THIRST) && !has_player_tech((ch), PTECH_NO_THIRST))
 #define IS_BLOOD_STARVED(ch)  (IS_VAMPIRE(ch) && GET_BLOOD(ch) <= config_get_int("blood_starvation_level"))
 
+// protocol helpers
+#define CAN_NAWS(ch)  ((ch)->desc && (ch)->desc->pProtocol->bNAWS)
+#define GET_SCREEN_WIDTH(ch)  (((ch)->desc && (ch)->desc->pProtocol->ScreenWidth > 0) ? (ch)->desc->pProtocol->ScreenWidth : 80)
+#define GET_SCREEN_HEIGHT(ch)  (((ch)->desc && (ch)->desc->pProtocol->ScreenHeight > 0) ? (ch)->desc->pProtocol->ScreenHeight : 24)
+
 // for act() and act-like things (requires to_sleeping and is_spammy set to true/false)
 #define SENDOK(ch)  (((ch)->desc || SCRIPT_CHECK((ch), MTRIG_ACT)) && (to_sleeping || AWAKE(ch)) && (!is_spammy || !PRF_FLAGGED((ch), PRF_NOSPAM)) && (!is_animal_move || IS_NPC(ch) || SHOW_STATUS_MESSAGES((ch), SM_ANIMAL_MOVEMENT)))
 
@@ -1432,6 +1462,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define PRG_DESCRIPTION(prg)  ((prg)->description)
 #define PRG_FLAGS(prg)  ((prg)->flags)
 #define PRG_NAME(prg)  ((prg)->name)
+#define PRG_NOTES(prg)  ((prg)->notes)
 #define PRG_PERKS(prg)  ((prg)->perks)
 #define PRG_PREREQS(prg)  ((prg)->prereqs)
 #define PRG_TASKS(prg)  ((prg)->tasks)
@@ -1455,6 +1486,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define QUEST_MAX_LEVEL(quest)  ((quest)->max_level)
 #define QUEST_MIN_LEVEL(quest)  ((quest)->min_level)
 #define QUEST_NAME(quest)  ((quest)->name)
+#define QUEST_NOTES(quest)  ((quest)->notes)
 #define QUEST_PREREQS(quest)  ((quest)->prereqs)
 #define QUEST_REPEATABLE_AFTER(quest)  ((quest)->repeatable_after)
 #define QUEST_REWARDS(quest)  ((quest)->rewards)
@@ -1642,6 +1674,7 @@ static inline int GET_SEASON(room_data *room) {
 #define GET_RMT_SCRIPTS(rmt)  ((rmt)->proto_script)
 #define GET_RMT_SUBZONE(rmt)  ((rmt)->subzone)
 #define GET_RMT_TEMPERATURE_TYPE(rmt)  ((rmt)->temperature_type)
+#define GET_RMT_NOTES(rmt)  ((rmt)->notes)
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -1680,6 +1713,7 @@ static inline int GET_SEASON(room_data *room) {
 #define SHOP_ITEMS(shop)  ((shop)->items)
 #define SHOP_LOCATIONS(shop)  ((shop)->locations)
 #define SHOP_NAME(shop)  ((shop)->name)
+#define SHOP_NOTES(shop)  ((shop)->notes)
 #define SHOP_OPEN_TIME(shop)  ((shop)->open_time)
 
 // helpers
@@ -1696,6 +1730,7 @@ static inline int GET_SEASON(room_data *room) {
 #define SKILL_MAX_LEVEL(skill)  ((skill)->max_level)
 #define SKILL_MIN_DROP_LEVEL(skill)  ((skill)->min_drop_level)
 #define SKILL_NAME(skill)  ((skill)->name)
+#define SKILL_NOTES(skill)  ((skill)->notes)
 #define SKILL_SYNERGIES(skill)  ((skill)->synergies)
 #define SKILL_VNUM(skill)  ((skill)->vnum)
 
@@ -1712,6 +1747,7 @@ static inline int GET_SEASON(room_data *room) {
 #define SOC_MIN_CHAR_POS(soc)  ((soc)->min_char_position)
 #define SOC_MIN_VICT_POS(soc)  ((soc)->min_victim_position)
 #define SOC_NAME(soc)  ((soc)->name)
+#define SOC_NOTES(soc)  ((soc)->notes)
 #define SOC_REQUIREMENTS(soc)  ((soc)->requirements)
 #define SOC_VNUM(soc)  ((soc)->vnum)
 
@@ -1791,11 +1827,9 @@ static inline int GET_SEASON(room_data *room) {
 #define VEH_NEEDS_RESOURCES(veh)  ((veh)->needs_resources)
 #define VEH_OWNER(veh)  ((veh)->owner)
 #define VEH_QUARTER_ICON(veh)  ((veh)->quarter_icon)
-#define VEH_QUEST_LOOKUPS(veh)  ((veh)->quest_lookups)
 #define VEH_ROOM_AFFECTS(veh)  ((veh)->room_affects)
 #define VEH_ROOM_LIST(veh)  ((veh)->room_list)
 #define VEH_SCALE_LEVEL(veh)  ((veh)->scale_level)
-#define VEH_SHOP_LOOKUPS(veh)  ((veh)->shop_lookups)
 #define VEH_SHORT_DESC(veh)  ((veh)->short_desc)
 #define VEH_SITTING_ON(veh)  ((veh)->sitting_on)
 #define VEH_VNUM(veh)  ((veh)->vnum)
@@ -1820,9 +1854,12 @@ static inline int GET_SEASON(room_data *room) {
 #define VEH_MILITARY(veh)  ((veh)->attributes->military)
 #define VEH_MIN_SCALE_LEVEL(veh)  ((veh)->attributes->min_scale_level)
 #define VEH_MOVE_TYPE(veh)  ((veh)->attributes->move_type)
+#define VEH_NOTES(veh)  ((veh)->attributes->notes)
+#define VEH_QUEST_LOOKUPS(veh)  ((veh)->attributes->quest_lookups)
 #define VEH_RELATIONS(veh)  ((veh)->attributes->relations)
 #define VEH_REQUIRES_CLIMATE(veh)  ((veh)->attributes->requires_climate)
 #define VEH_REGULAR_MAINTENANCE(veh)  ((veh)->attributes->regular_maintenance)
+#define VEH_SHOP_LOOKUPS(veh)  ((veh)->attributes->shop_lookups)
 #define VEH_SIZE(veh)  ((veh)->attributes->size)
 #define VEH_SPAWNS(veh)  ((veh)->attributes->spawns)
 #define VEH_SPEED_BONUSES(veh)  ((veh)->attributes->veh_move_speed)
@@ -2017,7 +2054,7 @@ bool can_see_in_dark_room(char_data *ch, room_data *room, bool count_adjacent_li
 void command_lag(char_data *ch, int wait_type);
 void despawn_charmies(char_data *ch, any_vnum only_vnum);
 void determine_gear_level(char_data *ch);
-room_data *find_load_room(char_data *ch);
+room_data *find_load_room(char_data *ch, int *load_room_type);
 room_data *find_starting_location(room_data *near_room);
 int get_view_height(char_data *ch, room_data *from_room);
 bool has_one_day_playtime(char_data *ch);
@@ -2281,6 +2318,7 @@ bool find_and_bind(char_data *ch, obj_vnum vnum);
 int get_craft_scale_level(char_data *ch, craft_data *craft);
 int get_crafting_level(char_data *ch);
 obj_data *has_required_obj_for_craft(char_data *ch, obj_vnum vnum);
+bool obj_can_be_superior(obj_data *obj);
 
 // act.vampire.c
 bool cancel_biting(char_data *ch, bool preventable);
@@ -2367,6 +2405,7 @@ void delete_player_from_running_events(char_data *ch);
 int gain_event_points(char_data *ch, any_vnum event_vnum, int points);
 struct player_event_data *get_event_data(char_data *ch, int event_id);
 bool has_uncollected_event_rewards(char_data *ch);
+void log_active_events_to_char(char_data *ch);
 struct event_running_data *only_one_running_event(int *count);
 
 // faction.c
@@ -2530,6 +2569,7 @@ void schedule_scavenge_event(char_data *ch, bool randomize);
 void set_mob_spawn_time(char_data *mob, long when);
 void setup_generic_npc(char_data *mob, empire_data *emp, int name, int sex);
 void spawn_mobs_from_center(room_data *center);
+void spawn_one_room(room_data *room, bool only_artisans);
 bool try_mobile_movement(char_data *ch);
 bool validate_spawn_location(room_data *room, bitvector_t spawn_flags, int x_coord, int y_coord, bool in_city);
 
@@ -2800,6 +2840,11 @@ void sort_einv_for_empire(empire_data *emp, int einv_sort_type);
 #define GROUP(ch)  (ch->group)
 #define GROUP_LEADER(group)  (group->leader)
 #define GROUP_FLAGS(group)  (group->group_flags)
+
+// LOAD_ROOM_x: used by find_load_room()
+#define LOAD_ROOM_START_LOC  0
+#define LOAD_ROOM_MY_TOMB  1
+#define LOAD_ROOM_ANY_TOMB  2
 
 // handy
 #define SELF(sub, obj)  ((sub) == (obj))

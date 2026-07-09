@@ -11,6 +11,59 @@ in about an hour.
 
 See also: ADVENTURE
 #
+CELESTIALFORGE "CELESTIAL FORGE" SHATTER SHARD SHARDS "LODESTONE FORGE" "VICTORY FORGE" "ECHO FORGE" "TERMINUS FORGE" "IRON SHARDS" "IMPERIUM SHARDS" "EVENTIDE SHARDS" "METEORITE SHARDS" "CELESTIAL SHARDS"
+
+[FF]  Celestial Forge  (Renown goal)
+
+Commands:  shatter <item to destroy>
+           donate <shard type>
+Fame:  5
+Temperature:  always comfortable
+
+Your celestial forge is a place not only to forge gear, but to destroy gear you
+no longer need and recycle it into shards. The number and type of shards you
+get are based on the level and quality of the item.
+
+You can see how many shards you have by typing 'coins'.
+
+Each celestial forge in your empire is also linked to the divine celestial
+forges that sell crafting recipes and items in exchange for shards. To reach
+these forges, visit the Starsmith at your celestial forge and 'donate' a shard
+of any type. This will take you to the forge that matches the shard:
+
+  Lodestone Forge:  iron shards  (level 1-100)
+  Victory Forge:  imperium shards  (level 101-200)
+  Echo Forge:  eventide shards  (level 201-300)
+  Terminus Forge:  meteorite shards  (level 301-400)
+  celestial shards  (level 401-500) -- coming soon!
+
+To leave a celestial forge, type 'return' in its entry area. This will open a
+portal or teleport you out, depending upon how you entered.
+
+Each celestial forge also has a daily boss challenge. From the center of the
+forge, type 'challenge' to teleport to the first available arena where nobody
+is fighting, or 'challenge empty' to teleport to the first available arena with
+no players in it. Your followers come with you. Once the fight begins, no other
+players may join. Type 'return' to leave the challenge arena.
+
+See also: CELESTIAL CRAFTING, CURRENCY
+#
+"CELESTIAL CRAFTING" "LODESTONE FORGING" "LODESTONE MASTERY" "VICTORIOUS SMITHING" "VICTORIOUS MASTERY" "RESONANT LIGHTCRAFT" "RESONANT MASTERY" "IMPACT FORGING" "IMPACT MASTERY"
+
+Each celestial forge has its own crafting ability, which you receive
+automatically if you visit that forge with Trade skill 76 or higher. Purchase
+training for each forge's mastery ability from one of the shops in that forge.
+
+Crafting celestial forge items will require a special component which you must
+purchase from the appropriate forge:
+
+  Lodestone Forging (level 1-100): requires a small lodestone
+  Victorious Smithing (level 100-200): requires a spark of victory
+  Resonant Lightcraft (level 200-300): requires a mote of harmony
+  Impact Forging (level 300-400): requires an unfallen meteor
+
+See also: CELESTIAL FORGE
+#
 COLOSSUS "CLOCKWORK COLOSSUS" "CLOCK WORK COLOSSUS"
 
 Clockwork Colossus (level 100-200 adventure)
@@ -119,6 +172,10 @@ elemental, and you can repeat these quests if you wait at least an hour after
 finishing them. You can purchase rewards from the apprentice with the 'list'
 and 'buy' commands. Hint: If you're a thief, try pickpocketing the apprentice.
 
+Each adventure has its own goals and activities. For this one, use the
+'where elemental' command to find and fight each elemental, pick up its item,
+and return them to the apprentice.
+
 The sorcerer's apprentice sells:
   a sorcerous biscuit - food
   a stone breastplate - raises health
@@ -209,10 +266,14 @@ See also: ADVENTURE
 
 Goblin Mines (level 1-25 adventure)
 
-   The goblins have fled the mines and something tells you it's not good.
+The goblins have fled the mines and something tells you it's not good.
 Venture into the goblin mines and see what sends even goblins running for their
 lives! And maybe if you can find those goblins, they'll be willing to reward
 you for clearing out the mine.
+
+Each adventure has its own goals and activities. In Goblin Mines, fight
+creatures inside the mine. Then, try 'where goblin' to find one of the goblins
+outside to trade with.
 
 You can buy items from four goblins who have fled the mines. If you don't have
 any coins, try selling spider parts to Miner Nynar or spider meat to Miner
@@ -223,7 +284,7 @@ Miner Meena sells a goblin pick (for mining).
 Miner Hanx sells a goblin raft (drag it to the shore and sit on it to sail).
 Blacklung, Goblin Foreman sells a goblin coffin (temporary, single-use tomb).
 
-See also: ADVENTURE
+See also: ADVENTURE, WHERE
 #
 "GOBLIN OUTPOST" "SEWER: GOBLIN OUTPOST" "THE SEWER: GOBLIN OUTPOST" "GOBLIN SEWERS"
 
@@ -1001,9 +1062,15 @@ See also: ADVENTURE, BURN
 
 Trade Tutorial: Museum of Early Man (level 1-50 adventure)
 
-Find this adventure in a cave on the newbie island using the 'nearby museum'
-command. In this adventure, you can learn to do quests, gather resources, and
-craft basic tools.
+This tutorial has quests for people who have the Trade skill under level 50.
+If you don't have Trade at all, look for the wandering museum crier and start
+his intro quest. You can type "nearby Museum" to find the museum.
+
+Each adventure has its own goals and activities. In this one, visit the
+museum and craft items to complete a series of quests.
+
+This adventure appears on a mountain tile, facing flat terrain. You may have to
+go around a mountain to find the entrance.
 
 See also: ADVENTURE, NEARBY, QUEST
 #

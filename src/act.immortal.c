@@ -3177,6 +3177,10 @@ void do_stat_adventure(char_data *ch, adv_data *adv) {
 		build_page_display_str(ch, "Scripts: none");
 	}
 	
+	if (GET_ADV_NOTES(adv) && *GET_ADV_NOTES(adv)) {
+		build_page_display(ch, "Notes:\r\n%s", GET_ADV_NOTES(adv));
+	}
+	
 	send_page_display(ch);
 }
 
@@ -3232,6 +3236,10 @@ void do_stat_book(char_data *ch, book_data *book, bool details) {
 		build_page_display_str(ch, "(use vstat -d to view all paragraph text)");
 	}
 	
+	if (BOOK_NOTES(book) && *BOOK_NOTES(book)) {
+		build_page_display(ch, "Notes:\r\n%s", BOOK_NOTES(book));
+	}
+	
 	send_page_display(ch);
 }
 
@@ -3252,12 +3260,14 @@ void do_stat_building(char_data *ch, bld_data *bdg, bool details) {
 	build_page_display(ch, "Room Title: %s", GET_BLD_TITLE(bdg));
 	
 	// icon line
-	line = build_page_display(ch, "Icon: %s&0", GET_BLD_ICON(bdg) ? one_icon_display(GET_BLD_ICON(bdg), NULL) : "none");
-	if (GET_BLD_HALF_ICON(bdg)) {
-		append_page_display_line(line, "  Half Icon: %s&0", GET_BLD_HALF_ICON(bdg) ? one_icon_display(GET_BLD_HALF_ICON(bdg), NULL) : "none");
-	}
-	if (GET_BLD_QUARTER_ICON(bdg)) {
-		append_page_display_line(line, "  Quarter Icon: %s&0", GET_BLD_QUARTER_ICON(bdg) ? one_icon_display(GET_BLD_QUARTER_ICON(bdg), NULL) : "none");
+	if (!BLD_FLAGGED(bdg, BLD_ROOM) || GET_BLD_ICON(bdg) || GET_BLD_HALF_ICON(bdg) || GET_BLD_QUARTER_ICON(bdg)) {
+		line = build_page_display(ch, "Icon: %s&0", GET_BLD_ICON(bdg) ? one_icon_display(GET_BLD_ICON(bdg), NULL) : "none");
+		if (GET_BLD_HALF_ICON(bdg)) {
+			append_page_display_line(line, "  Half Icon: %s&0", GET_BLD_HALF_ICON(bdg) ? one_icon_display(GET_BLD_HALF_ICON(bdg), NULL) : "none");
+		}
+		if (GET_BLD_QUARTER_ICON(bdg)) {
+			append_page_display_line(line, "  Quarter Icon: %s&0", GET_BLD_QUARTER_ICON(bdg) ? one_icon_display(GET_BLD_QUARTER_ICON(bdg), NULL) : "none");
+		}
 	}
 	
 	if (GET_BLD_DESC(bdg) && *GET_BLD_DESC(bdg)) {
@@ -3331,6 +3341,10 @@ void do_stat_building(char_data *ch, bld_data *bdg, bool details) {
 	
 	show_spawn_summary_display(ch, TRUE, GET_BLD_SPAWNS(bdg));
 	
+	if (GET_BLD_NOTES(bdg) && *GET_BLD_NOTES(bdg)) {
+		build_page_display(ch, "Notes:\r\n%s", GET_BLD_NOTES(bdg));
+	}
+	
 	send_page_display(ch);
 }
 
@@ -3383,7 +3397,7 @@ void do_stat_character(char_data *ch, char_data *k, bool details) {
 	if (k->desc) {
 		// protocol info
 		build_page_display(ch, "Connection info: Client: [%s], X-Colors: [%s\t0], MSDP: [%s\t0],", NULLSAFE(k->desc->pProtocol->pVariables[eMSDP_CLIENT_ID]->pValueString), ((k->desc->pProtocol->b256Support || k->desc->pProtocol->pVariables[eMSDP_XTERM_256_COLORS]->ValueInt) ? "\tgyes" : "\trno"), (k->desc->pProtocol->bMSDP ? "\tgyes" : "\trno"));
-		build_page_display(ch, "   MSP: [%s\t0], MXP: [%s\t0], NAWS: [%s\t0], Screen: [%dx%d]", ((k->desc->pProtocol->bMSP || k->desc->pProtocol->pVariables[eMSDP_SOUND]->ValueInt) ? "\tgyes" : "\trno"), ((k->desc->pProtocol->bMXP || k->desc->pProtocol->pVariables[eMSDP_MXP]->ValueInt) ? "\tgyes" : "\trno"), (k->desc->pProtocol->bNAWS ? "\tgyes" : "\trno"), k->desc->pProtocol->ScreenWidth, k->desc->pProtocol->ScreenHeight);
+		build_page_display(ch, "   MSP: [%s\t0], MXP: [%s\t0], NAWS: [%s\t0], Screen: [%dx%d]", ((k->desc->pProtocol->bMSP || k->desc->pProtocol->pVariables[eMSDP_SOUND]->ValueInt) ? "\tgyes" : "\trno"), ((k->desc->pProtocol->bMXP || k->desc->pProtocol->pVariables[eMSDP_MXP]->ValueInt) ? "\tgyes" : "\trno"), (CAN_NAWS(k) ? "\tgyes" : "\trno"), k->desc->pProtocol->ScreenWidth, k->desc->pProtocol->ScreenHeight);
 	}
 	
 	if (IS_MOB(k)) {
@@ -3528,9 +3542,9 @@ void do_stat_character(char_data *ch, char_data *k, bool details) {
 		append_page_display_line(line, "eq: %d", i2);
 	}
 
-	if (IS_NPC(k) && k->interactions) {
+	if (IS_NPC(k) && MOB_INTERACTIONS(k)) {
 		build_page_display_str(ch, "Interactions:");
-		show_interaction_display(ch, k->interactions, FALSE);
+		show_interaction_display(ch, MOB_INTERACTIONS(k), FALSE);
 	}
 	
 	if (MOB_CUSTOM_MSGS(k)) {
@@ -3666,6 +3680,11 @@ void do_stat_character(char_data *ch, char_data *k, bool details) {
 	for (dot = k->over_time_effects; dot; dot = dot->next) {
 		build_page_display(ch, "TYPE: (%s) &r%s&0 %d %s damage (%d/%d)", colon_time(dot->time_remaining, FALSE, NULL), get_generic_name_by_vnum(dot->type), dot->damage * dot->stack, damage_types[dot->damage_type], dot->stack, dot->max_stack);
 	}
+	
+	// notes on proto only
+	if (!IN_ROOM(k) && MOB_NOTES(k) && *MOB_NOTES(k)) {
+		build_page_display(ch, "Notes:\r\n%s", MOB_NOTES(k));
+	}
 
 	/* check mobiles for a script */
 	if (IS_NPC(k)) {
@@ -3754,6 +3773,10 @@ void do_stat_craft(char_data *ch, craft_data *craft) {
 	build_page_display_str(ch, "Resources required:");
 	show_resource_display(ch, GET_CRAFT_RESOURCES(craft), FALSE);
 	
+	if (GET_CRAFT_NOTES(craft) && *GET_CRAFT_NOTES(craft)) {
+		build_page_display(ch, "Notes:\r\n%s", GET_CRAFT_NOTES(craft));
+	}
+	
 	send_page_display(ch);
 }
 
@@ -3831,6 +3854,10 @@ void do_stat_crop(char_data *ch, crop_data *cp, bool details) {
 	}
 	
 	show_spawn_summary_display(ch, TRUE, GET_CROP_SPAWNS(cp));
+	
+	if (GET_CROP_NOTES(cp) && *GET_CROP_NOTES(cp)) {
+		build_page_display(ch, "Notes:\r\n%s", GET_CROP_NOTES(cp));
+	}
 	
 	send_page_display(ch);
 }
@@ -4013,6 +4040,10 @@ void do_stat_global(char_data *ch, struct global_data *glb) {
 	if (GET_GLOBAL_INTERACTIONS(glb)) {
 		build_page_display_str(ch, "Interactions:");
 		show_interaction_display(ch, GET_GLOBAL_INTERACTIONS(glb), FALSE);
+	}
+	
+	if (GET_GLOBAL_NOTES(glb) && *GET_GLOBAL_NOTES(glb)) {
+		build_page_display(ch, "Notes:\r\n%s", GET_GLOBAL_NOTES(glb));
 	}
 	
 	send_page_display(ch);
@@ -4380,6 +4411,10 @@ void do_stat_object(char_data *ch, obj_data *j, bool details) {
 			LL_COUNT(GET_OBJ_CUSTOM_MSGS(j), ocm, count);
 			build_page_display(ch, "Custom messages: \tc%d\t0 (use vstat -d to view)", count);
 		}
+	}
+	
+	if (OBJ_IS_NOWHERE(j) && GET_OBJ_NOTES(j) && *GET_OBJ_NOTES(j)) {
+		build_page_display(ch, "Notes:\r\n%s", GET_OBJ_NOTES(j));
 	}
 
 	/* check the object for a script */
@@ -4823,6 +4858,10 @@ void do_stat_room_template(char_data *ch, room_template *rmt, bool details) {
 
 	build_page_display_str(ch, "Scripts:");
 	show_script_display(ch, GET_RMT_SCRIPTS(rmt), FALSE);
+	
+	if (GET_RMT_NOTES(rmt) && *GET_RMT_NOTES(rmt)) {
+		build_page_display(ch, "Notes:\r\n%s", GET_RMT_NOTES(rmt));
+	}
 	
 	send_page_display(ch);
 }

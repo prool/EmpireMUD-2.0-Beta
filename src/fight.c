@@ -1416,7 +1416,7 @@ obj_data *die(char_data *ch, char_data *killer) {
 	char_data *ch_iter, *player, *killleader;
 	obj_data *corpse = NULL;
 	struct mob_tag *tag;
-	int iter, trig_val, obj_ok = 0;
+	int iter, trig_val, tomb_type, obj_ok = 0;
 	
 	// no need to repeat
 	if (EXTRACTED(ch)) {
@@ -1522,7 +1522,25 @@ obj_data *die(char_data *ch, char_data *killer) {
 			add_player_kill(ch, killleader);
 		}
 		add_cooldown(ch, COOLDOWN_DEATH_RESPAWN, config_get_int("death_release_minutes") * SECS_PER_REAL_MIN);
-		msg_to_char(ch, "Type 'respawn' to come back at your tomb.\r\n");
+		
+		find_load_room(ch, &tomb_type);
+		// LOAD_ROOM_x
+		switch (tomb_type) {
+			case LOAD_ROOM_MY_TOMB: {
+				msg_to_char(ch, "Type 'respawn' to come back at your tomb.\r\n");
+				break;
+			}
+			case LOAD_ROOM_ANY_TOMB: {
+				msg_to_char(ch, "Type 'respawn' to come back at a local tomb.\r\n");
+				break;
+			}
+			case LOAD_ROOM_START_LOC:
+			default: {
+				msg_to_char(ch, "Type 'respawn' to come back at a starting location.\r\n");
+				break;
+			}
+		}
+		
 		set_health(ch, MIN(GET_HEALTH(ch), -10));	// ensure negative health
 		GET_POS(ch) = POS_DEAD;	// ensure pos
 		run_kill_triggers(ch, killer, NULL);
@@ -1677,7 +1695,7 @@ void drop_loot(char_data *mob, char_data *killer) {
 	}
 
 	// find and drop loot
-	run_interactions(mob, mob->interactions, INTERACT_LOOT, IN_ROOM(mob), mob, NULL, NULL, loot_interact);
+	run_interactions(mob, MOB_INTERACTIONS(mob), INTERACT_LOOT, IN_ROOM(mob), mob, NULL, NULL, loot_interact);
 	run_global_mob_interactions(mob, mob, INTERACT_LOOT, loot_interact);
 	
 	// coins?
@@ -1708,7 +1726,7 @@ obj_data *make_corpse(char_data *ch) {
 	bool human = (!IS_NPC(ch) || MOB_FLAGGED(ch, MOB_HUMAN));
 	
 	// custom corpse?
-	if (IS_NPC(ch) && MOB_CUSTOM_CORPSE(ch) != NOTHING) {
+	if (MOB_CUSTOM_CORPSE(ch) != NOTHING) {
 		corpse_vnum = MOB_CUSTOM_CORPSE(ch);
 	}
 	

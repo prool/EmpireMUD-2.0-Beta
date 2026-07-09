@@ -277,6 +277,9 @@ void random_encounter(char_data *ch) {
 	if (AFF_FLAGGED(ch, AFF_FLYING | AFF_MAJESTY)) {
 		return;
 	}
+	if (GET_SITTING_ON(ch) && VEH_FLAGGED(GET_SITTING_ON(ch), VEH_FLYING)) {
+		return;
+	}
 	
 	// water encounters don't trigger if the player is on a vehicle
 	if ((ROOM_SECT_FLAGGED(IN_ROOM(ch), SECTF_SHALLOW_WATER) || WATER_SECT(IN_ROOM(ch)) || ROOM_BLD_FLAGGED(IN_ROOM(ch), BLD_NEED_BOAT) || RMT_FLAGGED(IN_ROOM(ch), RMT_NEED_BOAT)) && (GET_SITTING_ON(ch) || EFFECTIVELY_FLYING(ch))) {
@@ -1753,7 +1756,7 @@ GLB_FUNCTION(run_global_map_spawns) {
 * @param room_data *room The location to spawn.
 * @param bool only_artisans If TRUE, the room has respawned too recently and will only spawn artisans
 */
-static void spawn_one_room(room_data *room, bool only_artisans) {
+void spawn_one_room(room_data *room, bool only_artisans) {
 	room_data *iter, *next_iter, *home;
 	struct empire_territory_data *ter;
 	struct empire_vehicle_data *vter;

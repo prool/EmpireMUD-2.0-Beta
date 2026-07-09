@@ -137,9 +137,9 @@ An eggplant is sitting on the ground.~
    This large, fresh eggplant is a deep aubergine purple. Eggplants this large
 are prized at market, as few dishes require more than one.
 ~
-6 bgC a 0 0 14
+6 bgC a 0 0 15
 8 11011 0
-7 120
+7 168
 O+ 1 6152
 R
 4 5215 0
@@ -809,7 +809,7 @@ see the requirements to make each item.
 
 Sew (Sew ability): warm hatchling blankets (x2)
 Craft (Woodworking): nesting material (x2)
-Forge (Forge ability): protective nest traps (x2)
+Forge (Forge ability): protective nest trap (x2)
 ~
 3 p a 0 0 2
 0 0 0

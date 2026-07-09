@@ -510,6 +510,15 @@ is in.
 
 See also: BUILDING GUIDE
 #d
+AEDIT
+
+The correct help file prefixes for editors starting with 'A' are:
+  Abilities: ABILEDIT
+  Adventures: ADVEDIT
+  Archetypes: ARCHEDIT
+  Attack types: ATTACKEDIT
+  Augments: AUGEDIT
+#d
 ABILEDIT "OLC ABILITIES" "OLC ABILITY" "ABILITY EDITOR"
 
 Usage:  .abil <command>
@@ -1515,15 +1524,6 @@ matches "Horrid Form".
 
 See also: OLC ABILITIES
 #d
-"SECTEDIT NOTES"
-
-Usage:  .notes
-
-This text field allows you to set notes that are only visible in the OLC editor
-and via the 'stat' command. You can put any information you want in the notes.
-
-See also: OLC, STAT
-#d
 "ABILEDIT OVER-TIME" "ABILEDIT OVER TIME" "OVER TIME ABILITY" "OVER-TIME ABILITY"
 
 Using the OVER-TIME flag on an ability causes it to take multiple turns, like a
@@ -1872,7 +1872,7 @@ Targeted resurrection messages:
 
 Self-resurrection messages:
  &cself-to-char&0 - Sent to the caster when resurrecting.
- &cself-to-room&0 - Sent to teh room the caster is in when resurrecting.
+ &cself-to-room&0 - Sent to the room the caster is in when resurrecting.
 
 When the resurrection completes, it also sends:
  &cspec-to-char&0 - Sent to the person being resurrected.
@@ -3867,7 +3867,7 @@ range.
 
 See also: OLC BUILDINGS
 #d
-"BEDIT HITPOINTS" "BEDIT HEALTH"
+"BEDIT HITPOINTS" "BEDIT HIT POINTS" "BEDIT HP" "BEDIT HEALTH"
 
 Usage:  .hitpoints <value>
 
@@ -4724,6 +4724,26 @@ Usage:  .mapout <color>
 
 This determines what color pixel the sector or crop has on the graphical map.
 
+Available colors:
+ Starting Location (shows a red diamond on the map)
+ Neutral (blank map color)
+ Bright White, Medium Gray, Dark Gray
+ Bright Red, Dark Red
+ Bright Green, Pale Green, Yellow-Green, Sea Green, Medium Green, Dark Green,
+   Olive Green, Lime Green, Dark Lime Green, Dark Dark Green
+ Bright Yellow, Pale Yellow, Deep Yellow, 
+ Bright Blue, Ice Blue, Light Blue, Medium Blue, Deep Blue, Dark Blue,
+   Dark Azure Blue
+ Bright Magenta, Dark Magenta, Pink, Dark Pink
+ Bright Cyan, Dark Cyan
+ Brown, Yellow Brown, Dark Brown, Tan, Light Tan
+ Orange, Dark Orange, Peach
+ Violet, Deep Violet
+
+To see what crops or sectors use these mapout colors, try:
+ > .crop fullsearch -mapout orange
+ > .sect fullsearch -mapout "sea green"
+
 See also: OLC CROPS, OLC SECTORS
 #d
 "CROPEDIT NAME"
@@ -4909,14 +4929,29 @@ do it in the quests or scripts that reward event points.
 
 See also: OLC EVENTS
 #d
-"EVEDIT NOTES"
+"EVEDIT NOTES" "ABILEDIT NOTES" "ADVEDIT NOTES" "ARCHEDIT NOTES" "AUGEDIT NOTES" "BEDIT NOTES" "BOOKEDIT NOTES" "CEDIT NOTES" "CLASSEDIT NOTES" "CROPEDIT NOTES" "FEDIT NOTES" "GEDIT NOTES" "GENEDIT NOTES"
 
 Usage:  .notes
 
-Notes are for internal use only. THis message is set in the string editor, and
-you should record anything that's important for running the event.
+Notes are for internal use only. This message is set in the string editor, and
+you should record anything that's important for future developers or immortals
+to know.
 
-See also: OLC EVENTS, STRING EDITOR
+This text is not shown to players. It is only visible on the 'stat' command.
+
+See also: OLC, STAT, STRING EDITOR
+#d
+"MEDIT NOTES" "MORPHEDIT NOTES" "OEDIT NOTES" "PROGEDIT NOTES" "QEDIT NOTES" "REDIT NOTES" "SECTEDIT NOTES" "SHOPEDIT NOTES" "SKILLEDIT NOTES" "SOCEDIT NOTES" "VEDIT NOTES"
+
+Usage:  .notes
+
+Notes are for internal use only. This message is set in the string editor, and
+you should record anything that's important for future developers or immortals
+to know.
+
+This text is not shown to players. It is only visible on the 'stat' command.
+
+See also: OLC, STAT, STRING EDITOR
 #d
 "EVEDIT REPEAT" "EVEDIT REPEAT TIME" "EVEDIT REPEATS AFTER"
 
@@ -5899,6 +5934,8 @@ map editor commands make instant changes to the map where you're standing.
 
 You can get help on any of the mapeditor commands with &yHELP MAPEDIT <COMMAND>&0.
 The following commands are available:
+ basesector - Change the 'base' sector of the tile you're standing on.
+ build - Create a finished building on this tile.
  complete - Finishes the building you're standing in.
  convert2newbie - Converts an island's terrains to/from newbie terrains.
  decay - Performs 1 cycle of decay (building, trench) on the tile or vehicle.
@@ -5907,6 +5944,8 @@ The following commands are available:
  deleteroom - Deletes the room you're standing in (interior rooms only).
  description - Customize the description on an interior room.
  exit - Add a new exit between two interior rooms (similar to interlink).
+ grow - Triggers immediate growth, similar to chant of nature.
+ height - Set the 'height' property of this tile (e.g. Mountain).
  icon - Customize the map icon.
  maintain - Repairs and maintains a building.
  name - Customize the room title.
@@ -5916,6 +5955,7 @@ The following commands are available:
  remember - Stores the current terrain as the 'natural terrain'.
  roomtype - Change the type of an interior room.
  ruin - Turn a building or vehicle to ruins.
+ spawn - Cause the tile you're standing on to spawn mobs, if possible.
  terrain - Change the tile you're standing on.
  unclaimable - Make a tile or square of tiles unclaimable (or not).
  undeplete - Remove depletion from a tile or vehicle.
@@ -6166,6 +6206,22 @@ Usage:  .map ruin [vehicle]
 
 This command will reduce the map building you're in to ruins, or will do the
 same to a vehicle you target.
+#d
+"MAPEDIT SPAWN"
+
+Usage:  .map spawn
+
+This command causes the tile you're standing on to run a normal mob-spawning
+cycle.
+
+Mobs may spawn from:
+- the sector
+- the crop
+- the building
+- vehicles in the room
+
+Note: It's possible for nothing to spawn when you type this if all spawns fail
+their random chance OR if there are no spawns assigned to anything here.
 #d
 "MAPEDIT TERRAIN"
 
@@ -8261,7 +8317,7 @@ Supported types:
   trigger
   vehicle
 
-Unsupported types: class, faction, global, morph, shop, social
+Unsupported types: class, faction, global, morph, shop
 #d
 "OLC LIST" OLIST MLIST RLIST
 
@@ -8599,6 +8655,10 @@ Basic production chores only eat food when they produce something, but skilled
 labor will eat if it COULD produce something, even if the random roll fails.
 
 See also: INTERACTIONS, OLC WORKFORCE, OLC DEPLETION
+#d
+PEDIT
+
+For progress goal editor help files, use the PROGEDIT prefix instead.
 #d
 PROGEDIT "OLC PROGRESSION" "PROGRESSION OLC" "PROGRESS OLC"
 
@@ -9535,6 +9595,12 @@ three sector types on a room using "stat room".
 
 See also: BASE SECTOR, MAPEDIT TERRAIN, NATURAL SECTOR, SECTEDIT, SHOW SECTORS
 #d
+SEDIT
+
+For shop editor help files, use the SHOPEDIT prefix instead. Other editors
+beginning with 'S' include sectors (SECTEDIT), skills (SKILLEDIT), and socials
+(SOCEDIT).
+#d
 SHOPEDIT "OLC SHOPS" "SHOP OLC"
 
 Usage:  .shop <command>
@@ -9874,13 +9940,39 @@ Usage:  .flags [add | remove] <flags>
 Social flags are properties that affect how the social behaves.
 
 Available flags:
- IN-DEV - Cannot be used by mortals.
- HIDE-IF-INVIS - No messages are shown to the room if the actor is not visible.
+ &cIN-DEV&0 - Cannot be used by mortals.
+ &cHIDE-IF-INVIS&0 - No messages are shown to the room if the actor is not visible.
    (this is normally used for socials that are visual but silent, like 'smile')
+ &cNOISY&0 - If the social would make noise, won't work in SILENT rooms.
 
 See also: OLC SOCIALS
 #d
-"SOCEDIT MESSAGES" "SOCEDIT N2CHARACTER" "SOCEDIT N2OTHERS" "SOCEDIT S2CHARACTER" "SOCEDIT S2OTHERS" "SOCEDIT T2CHARACTER" "SOCEDIT T2VICTIM" "SOCEDIT T2OTHERS" "SOCEDIT TNOTFOUND"
+"SOCEDIT FULLSEARCH" "SOCIAL FULLSEARCH"
+
+Usage:  .social fullsearch -<field> <argument> <...>
+
+This command allows you to search for socials matching certain criteria. You
+can specify multiple fields if you want. Any arguments that don't start with a
+dash (-) are matched to the social's name and strings.
+
+Fields:
+  &c-flagged&0, &cunflagged&0 - see HELP SOCEDIT FLAGS
+  &c-hasrequirements&0, &c-norequirements&0 - find only ones that do or don't
+                                              have any requirements
+  &c-maxcharposition&0, &c-mincharposition&0 - for actor - HELP POSITIONS
+  &c-maxvictposition&0, &c-minvictposition&0 - for victim
+  &c-vmin&0, &c-vmax&0 - VNUM range limits
+
+Examples:
+ > .soc fullsearch clap -noreq
+ > .soc fullsearch -flag NOISY
+ > .soc fullsearch -flag NOISY -vmin 0 -vmax 9999
+
+To search the "requirements" field, you can generally use normal searches for
+other OLC types. For example, to find which social requires the hag's pointe
+shoes (object 19034), use ".obj search 19034".
+#d
+"SOCEDIT MESSAGES" "SOCEDIT N2CHARACTER" "SOCEDIT N2OTHERS" "SOCEDIT S2CHARACTER" "SOCEDIT S2OTHERS" "SOCEDIT T2CHARACTER" "SOCEDIT T2VICTIM" "SOCEDIT T2OTHERS" "SOCEDIT TNOTFOUND" "SOCEDIT SILENT2CHAR" "SOCEDIT SILENT2OTHERS"
 
 Usage:  .n2char <message | none>
         .<type> <message | none>
@@ -9902,6 +9994,10 @@ Messages when a social is typed with an argument ("grin Gaia"):
 Messages when the actor targets himself ("grin self"):
   Target-self to character <&ys2char&0>  - may be blank
   Target-self to others <&ys2other&0>  - may be blank (s2char must be blank)
+
+When a room has the SILENT affect AND the social has the NOISY flag:
+  Silent to character <&ysilent2char&0>  - may be blank (sends default message)
+  Silent to others <&ysilent2others&0>  - may be blank
 
 See &cHELP DOLLAR SIGN CODES&0 for a list of codes that can be used in socials:
   $n, $m, $e, $s - used for the actor
@@ -10979,7 +11075,7 @@ range.
 
 See also: OLC VEHICLES
 #d
-"VEDIT HITPOINTS" "VEDIT HEALTH"
+"VEDIT HITPOINTS" "VEDIT HIT POINTS" "VEDIT HP" "VEDIT HEALTH"
 
 Usage:  .hitpoints <value>
 
