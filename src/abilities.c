@@ -963,6 +963,10 @@ bool is_ability_enemy(char_data *ch, char_data *vict) {
 	if (!can_fight(ch, vict)) {
 		return FALSE;
 	}
+	if (GET_LOYALTY(ch) && GET_LOYALTY(ch) == GET_LOYALTY(vict)) {
+		// same empire, e.g. guard, and not fighting each other
+		return FALSE;
+	}
 	
 	return TRUE;
 	/* // skipping these because it defaults to TRUE:
@@ -2727,8 +2731,9 @@ DO_ABIL(abil_action_devastate_area) {
 	
 	// SUCCESS: distribute resources
 	if (to_room) {
-		if (ROOM_SECT_FLAGGED(to_room, SECTF_CROP) && (cp = ROOM_CROP(to_room)) && has_interaction(GET_CROP_INTERACTIONS(cp), INTERACT_HARVEST)) {
+		if (ROOM_SECT_FLAGGED(to_room, SECTF_CROP) && (cp = ROOM_CROP(to_room)) && (has_interaction(GET_CROP_INTERACTIONS(cp), INTERACT_HARVEST) || has_interaction(GET_CROP_INTERACTIONS(cp), INTERACT_PICK))) {
 			run_room_interactions(ch, to_room, INTERACT_HARVEST, NULL, MEMBERS_ONLY, devastate_crop);
+			run_room_interactions(ch, to_room, INTERACT_PICK, NULL, MEMBERS_ONLY, devastate_crop);
 			run_room_interactions(ch, to_room, INTERACT_CHOP, NULL, MEMBERS_ONLY, devastate_trees);
 			uncrop_tile(to_room);
 			data->success = TRUE;
@@ -3382,7 +3387,7 @@ bool check_ability_limitations(char_data *ch, ability_data *abil, char_data *vic
 			}
 			case ABIL_LIMIT_IN_CITY: {
 				bool wait = FALSE;
-				if (!ROOM_OWNER(any_room) && !is_in_city_for_empire(any_room, ROOM_OWNER(any_room), TRUE, &wait)) {
+				if (!ROOM_OWNER(any_room) || !is_in_city_for_empire(any_room, ROOM_OWNER(any_room), TRUE, &wait)) {
 					msg_to_char(ch, "You must be in a city to use that ability%s.\r\n", wait ? " (this city was founded too recently)" : "");
 					_set_fatal_error(TRUE);
 					return FALSE;
@@ -5598,6 +5603,7 @@ DO_ABIL(do_summon_random_ability) {
 DO_ABIL(do_teleport_ability) {
 	room_data *was_in = IN_ROOM(ch), *to_room;
 	bool infiltrate;
+	struct follow_type *fol, *next_fol;
 	
 	to_room = (room_targ ? room_targ : (vict ? IN_ROOM(vict) : (vvict ? IN_ROOM(vvict) : ovict ? obj_room(ovict) : IN_ROOM(ch))));
 	
@@ -5645,15 +5651,23 @@ DO_ABIL(do_teleport_ability) {
 			msdp_update_room(ch);	// once we're sure we're staying
 			data->success = TRUE;
 			
-			// teleport companion, too
-			if (GET_COMPANION(ch) && !FIGHTING(GET_COMPANION(ch)) && IN_ROOM(ch) != was_in && IN_ROOM(GET_COMPANION(ch)) == was_in) {
-				act("$n vanishes!", TRUE, GET_COMPANION(ch), NULL, NULL, TO_ROOM);
-				char_to_room(GET_COMPANION(ch), IN_ROOM(ch));
-				send_ability_special_messages(GET_COMPANION(ch), vict, ovict, abil, data, NULL, 0);
-				
-				if (!enter_triggers(GET_COMPANION(ch), NO_DIR, "ability", TRUE, was_in) || !greet_triggers(GET_COMPANION(ch), NO_DIR, "ability", TRUE, was_in)) {
-					char_from_room(GET_COMPANION(ch));
-					char_to_room(GET_COMPANION(ch), was_in);
+			// teleport followers, too
+			LL_FOREACH_SAFE(ch->followers, fol, next_fol) {
+				if (IS_NPC(fol->follower) && AFF_FLAGGED(fol->follower, AFF_CHARM) && IN_ROOM(fol->follower) == was_in && !FIGHTING(fol->follower)) {
+					if (pre_greet_mtrigger(fol->follower, to_room, NO_DIR, "ability", was_in)) {
+						act("$n vanishes!", TRUE, fol->follower, NULL, NULL, TO_ROOM);
+						char_to_room(fol->follower, IN_ROOM(ch));
+						
+						if (!enter_triggers(fol->follower, NO_DIR, "ability", TRUE, was_in) || !greet_triggers(fol->follower, NO_DIR, "ability", TRUE, was_in)) {
+							char_from_room(fol->follower);
+							char_to_room(fol->follower, was_in);
+						}
+						else {
+							look_at_room(fol->follower);
+						}
+						
+						send_ability_special_messages(fol->follower, vict, ovict, abil, data, NULL, 0);
+					}
 				}
 			}
 		}
@@ -7846,7 +7860,7 @@ void call_ability_one(char_data *ch, ability_data *abil, char *argument, char_da
 	post_ability_procs(ch, abil, vict, ovict, vvict, room_targ, data);
 	
 	// exp gain unless we hit something that prevented costs
-	if (data->should_charge_cost && !IS_NPC(ch) && (!vict || can_gain_exp_from(ch, vict))) {
+	if (data->should_charge_cost && !IS_NPC(ch) && (!vict || can_gain_exp_from(ch, vict, abil))) {
 		// determine exp gain amount
 		if (ABIL_COOLDOWN_SECS(abil) >= 300) {
 			// long cooldown

@@ -533,6 +533,7 @@ void cancel_permanent_affects_room(room_data *room) {
 * @param int flags ADD_ or AVG_ + DURATION or MODIFIER (bitvectors)
 */
 void affect_join(char_data *ch, struct affected_type *af, int flags) {
+	int old_val;
 	struct affected_type *af_iter;
 	generic_data *gen;
 	bool found = FALSE;
@@ -553,6 +554,8 @@ void affect_join(char_data *ch, struct affected_type *af, int flags) {
 				af_iter->expire_time = af->expire_time;
 			}
 			
+			// check modifier change
+			old_val = af_iter->modifier;
 			if (IS_SET(flags, ADD_MODIFIER)) {
 				af_iter->modifier += af->modifier;
 			}
@@ -561,6 +564,12 @@ void affect_join(char_data *ch, struct affected_type *af, int flags) {
 			}
 			else {	// otherwise keep the new modifier
 				af_iter->modifier = af->modifier;
+			}
+			
+			// process modifier change
+			if (af_iter->modifier != old_val) {
+				affect_modify(ch, af_iter->location, old_val, af_iter->bitvector, FALSE);
+				affect_modify(ch, af_iter->location, af_iter->modifier, af_iter->bitvector, TRUE);
 			}
 
 			// prior to b5.129b this removed the old aff and applied a new one,
@@ -3731,7 +3740,8 @@ void perform_abandon_vehicle(vehicle_data *veh) {
 			abandon_room(VEH_INTERIOR_HOME_ROOM(veh));
 		}
 		
-		adjust_vehicle_tech(veh, GET_ISLAND_ID(IN_ROOM(veh)), FALSE);
+		// adjust_vehicle_tech(veh, GET_ISLAND_ID(IN_ROOM(veh)), FALSE);
+		unapply_vehicle_to_island(veh);
 		
 		// remove territory entry?
 		if (emp && (vter = find_empire_vehicle_entry(emp, veh))) {
@@ -8243,6 +8253,66 @@ obj_data *get_obj_in_list_vis(char_data *ch, char *name, int *number, obj_data *
 
 /**
 * Finds an object the char can see in any list (ch->carrying, etc), with a
+* preference for one that has a given object flag. However, if the player
+* gave a specific object using a number (2.tree) this will ignore the flag
+* request.
+*
+* @param char_data *ch The person who's looking.
+* @param char *name The target argument.
+* @param int *number Optional: For multi-list number targeting (look 4.hat; may be NULL)
+* @param obj_data *list The list to search.
+* @return bitvector_t want_flag Any OBJ_ flags that should be preferred over unflagged items.
+* @return obj_data *The item found, or NULL. May or may not have the type.
+*/
+obj_data *get_obj_in_list_vis_prefer_flag(char_data *ch, char *name, int *number, obj_data *list, bitvector_t want_flag) {
+	char copy[MAX_INPUT_LENGTH], *tmp = copy;
+	obj_data *i, *backup = NULL;
+	int num;
+	bool gave_num;
+	
+	if (!number) {
+		strcpy(tmp, name);
+		number = &num;
+		num = get_number(&tmp);
+	}
+	else {
+		tmp = name;
+	}
+	if (*number == 0) {
+		return NULL;
+	}
+	
+	// if the number is > 1 (PROBABLY requested #.name) take any item that matches
+	gave_num = (*number > 1);
+	
+	DL_FOREACH2(list, i, next_content) {
+		if (CAN_SEE_OBJ(ch, i) && MATCH_ITEM_NAME(tmp, i)) {
+			if (gave_num || !want_flag) {
+				if (--(*number) == 0) {
+					return i;
+				}
+			}
+			else {	// did not give a number
+				if ((GET_OBJ_EXTRA(i) & want_flag) == want_flag) {
+					return i;	// perfect match
+				}
+				else if (backup && OBJ_FLAGGED(i, want_flag) && !OBJ_FLAGGED(i, want_flag)) {
+					// possibly a better match (partial flag overlap)
+					backup = i;
+				}
+				else if (!backup) {
+					backup = i;	// missing flag but otherwise a match
+				}
+			}
+		}
+	}
+
+	return backup;
+}
+
+
+/**
+* Finds an object the char can see in any list (ch->carrying, etc), with a
 * preference for one that has a given interaction type. However, if the player
 * gave a specific object using a number (2.tree) this will ignore the interact
 * request.
@@ -8345,7 +8415,7 @@ obj_data *get_obj_in_list_vis_prefer_type(char_data *ch, char *name, int *number
 					return i;	// perfect match
 				}
 				else if (!backup) {
-					backup = i;	// missing interaction but otherwise a match
+					backup = i;	// missing type but otherwise a match
 				}
 			}
 		}
@@ -11018,9 +11088,6 @@ void read_vault(empire_data *emp) {
 	}
 	
 	// items mid-shipment
-	
-	
-	// move all shipping entries over
 	DL_FOREACH(EMPIRE_SHIPPING_LIST(emp), sd) {
 		if (sd->amount > 0 && sd->vnum != NOTHING && (proto = obj_proto(sd->vnum))) {
 			if (IS_WEALTH_ITEM(proto)) {

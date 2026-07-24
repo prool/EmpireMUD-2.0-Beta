@@ -2079,7 +2079,9 @@ void workforce_crafting_chores(empire_data *emp, room_data *room, vehicle_data *
 * @param int mode Which CHORE_ is being performed (build/maintain).
 */
 void do_chore_building(empire_data *emp, room_data *room, int mode) {
+	any_vnum use_action = NOTHING;
 	char_data *worker;
+	generic_data *gen;
 	struct empire_storage_data *store = NULL;
 	bool can_do = FALSE;
 	struct resource_data *res = NULL;
@@ -2125,6 +2127,9 @@ void do_chore_building(empire_data *emp, room_data *room, int mode) {
 					}
 					charge_stored_component(emp, islid, res->vnum, 1, FALSE, TRUE, &GET_BUILT_WITH(room));
 				}
+				else if (res->type == RES_ACTION) {
+					use_action = res->vnum;
+				}
 			
 				res->amount -= 1;
 			
@@ -2153,7 +2158,12 @@ void do_chore_building(empire_data *emp, room_data *room, int mode) {
 			else {	// not complete
 				// only send message if someone else is present (don't bother verifying it's a player)
 				if (ROOM_PEOPLE(IN_ROOM(worker))->next_in_room) {
-					act("$n works on the building.", FALSE, worker, NULL, NULL, TO_ROOM | TO_SPAMMY | TO_QUEUE);
+					if (use_action != NOTHING && (gen = real_generic(use_action)) && GEN_TYPE(gen) == GENERIC_ACTION && GEN_STRING(gen, GSTR_ACTION_BUILD_TO_ROOM)) {
+						act(GEN_STRING(gen, GSTR_ACTION_BUILD_TO_ROOM), FALSE, worker, NULL, NULL, TO_ROOM | TO_SPAMMY | TO_QUEUE);
+					}
+					else {
+						act("$n works on the building.", FALSE, worker, NULL, NULL, TO_ROOM | TO_SPAMMY | TO_QUEUE);
+					}
 				}
 			}
 		}
@@ -3133,7 +3143,7 @@ void do_chore_shearing(empire_data *emp, room_data *room, vehicle_data *veh) {
 	char_data *mob, *shearable = NULL;
 	obj_data *proto;
 	
-	bool any_already_sheared = FALSE;
+	bool any_already_sheared = FALSE, over_limit = FALSE;
 	struct interact_exclusion_data *excl = NULL;
 	struct interaction_item *interact;
 	bool found;
@@ -3157,6 +3167,7 @@ void do_chore_shearing(empire_data *emp, room_data *room, vehicle_data *veh) {
 					continue;
 				}
 				if (!can_gain_chore_resource(emp, room, CHORE_SHEARING, interact->vnum)) {
+					over_limit = TRUE;
 					continue;
 				}
 				
@@ -3198,7 +3209,7 @@ void do_chore_shearing(empire_data *emp, room_data *room, vehicle_data *veh) {
 			charge_workforce(emp, CHORE_SHEARING, room, worker, 1, NOTHING, 0);
 		}
 	}
-	else {
+	else if (any_already_sheared || over_limit) {
 		mark_workforce_delay(emp, room, CHORE_SHEARING, any_already_sheared ? WF_PROB_ALREADY_SHEARED : WF_PROB_OVER_LIMIT);
 		log_workforce_problem(emp, room, CHORE_SHEARING, any_already_sheared ? WF_PROB_ALREADY_SHEARED : WF_PROB_OVER_LIMIT, FALSE);
 	}
@@ -3231,7 +3242,9 @@ void vehicle_chore_fire_brigade(empire_data *emp, vehicle_data *veh) {
 
 // handles both build (CHORE_BUILD) and repair (CHORE_MAINTENANCE)
 void vehicle_chore_build(empire_data *emp, vehicle_data *veh, int chore) {
+	any_vnum use_action = NOTHING;
 	char_data *worker;
+	generic_data *gen;
 	struct empire_storage_data *store = NULL;
 	int islid = GET_ISLAND_ID(IN_ROOM(veh));
 	char buf[MAX_STRING_LENGTH];
@@ -3275,6 +3288,10 @@ void vehicle_chore_build(empire_data *emp, vehicle_data *veh, int chore) {
 					}
 					charge_stored_component(emp, islid, res->vnum, 1, FALSE, TRUE, VEH_FLAGGED(veh, VEH_NEVER_DISMANTLE) ? NULL : &VEH_BUILT_WITH(veh));
 				}
+				else if (res->type == RES_ACTION) {
+					use_action = res->vnum;
+				}
+				
 				// apply it
 				res->amount -= 1;
 			
@@ -3283,6 +3300,18 @@ void vehicle_chore_build(empire_data *emp, vehicle_data *veh, int chore) {
 					LL_DELETE(VEH_NEEDS_RESOURCES(veh), res);
 					free(res);
 				}
+			}
+			
+			// messaging
+			if (ROOM_PEOPLE(IN_ROOM(worker))->next_in_room) {
+				if (use_action != NOTHING && (gen = real_generic(use_action)) && GEN_TYPE(gen) == GENERIC_ACTION && GEN_STRING(gen, chore == CHORE_MAINTENANCE ? GSTR_ACTION_REPAIR_TO_ROOM : GSTR_ACTION_CRAFT_TO_ROOM)) {
+					act(GEN_STRING(gen, chore == CHORE_MAINTENANCE ? GSTR_ACTION_REPAIR_TO_ROOM : GSTR_ACTION_CRAFT_TO_ROOM), FALSE, worker, NULL, veh, TO_ROOM | TO_SPAMMY | TO_QUEUE);
+				}
+				else {
+					sprintf(buf, "$n works on %s $V.", (chore == CHORE_MAINTENANCE) ? "repairing" : "constructing");
+					act(buf, FALSE, worker, NULL, veh, TO_ROOM | TO_SPAMMY | ACT_VEH_VICT);
+				}
+				request_vehicle_save_in_world(veh);
 			}
 		
 			// check for completion
@@ -3301,11 +3330,6 @@ void vehicle_chore_build(empire_data *emp, vehicle_data *veh, int chore) {
 					complete_vehicle(veh);
 					complete_vtrigger(veh);
 				}
-			}
-			else {
-				sprintf(buf, "$n works on %s $V.", (chore == CHORE_MAINTENANCE) ? "repairing" : "constructing");
-				act(buf, FALSE, worker, NULL, veh, TO_ROOM | TO_SPAMMY | ACT_VEH_VICT);
-				request_vehicle_save_in_world(veh);
 			}
 		}
 		else if ((worker = place_chore_worker(emp, chore, IN_ROOM(veh)))) {

@@ -2942,7 +2942,7 @@ void do_import_list(char_data *ch, empire_data *emp, char *argument, int subcmd)
 	
 	// two different things we can show here:
 	
-	if (!partner) {
+	if (!partner || partner == emp) {
 		// show our own imports/exports based on type
 		use_emp = emp;
 		use_type = subcmd;
@@ -3171,6 +3171,8 @@ struct do_islands_data {
 	int id;
 	int territory;
 	int einv_size;
+	int warehouse_size;
+	int shipping_size;
 	int population;
 	UT_hash_handle hh;
 };
@@ -3181,9 +3183,11 @@ struct do_islands_data {
 *
 * @param struct do_islands_data **list Pointer to a do_islands hash.
 * @param int island_id Which island.
-* @param int amount How much einv to add.
+* @param int einv_amount How much einv to add.
+* @param int warehouse_amount How much warehouse to add.
+* @param int shipping_amount How much shipping to add.
 */
-void do_islands_add_einv(struct do_islands_data **list, int island_id, int amount) {
+void do_islands_add_einv(struct do_islands_data **list, int island_id, int einv_amount, int warehouse_amount, int shipping_amount) {
 	struct do_islands_data *isle;
 	
 	HASH_FIND_INT(*list, &island_id, isle);
@@ -3192,7 +3196,9 @@ void do_islands_add_einv(struct do_islands_data **list, int island_id, int amoun
 		isle->id = island_id;
 		HASH_ADD_INT(*list, id, isle);
 	}
-	SAFE_ADD(isle->einv_size, amount, INT_MIN, INT_MAX, TRUE);
+	SAFE_ADD(isle->einv_size, einv_amount, INT_MIN, INT_MAX, TRUE);
+	SAFE_ADD(isle->warehouse_size, warehouse_amount, INT_MIN, INT_MAX, TRUE);
+	SAFE_ADD(isle->shipping_size, shipping_amount, INT_MIN, INT_MAX, TRUE);
 }
 
 
@@ -4216,8 +4222,9 @@ ACMD(do_buildcheck) {
 * @param char_data *ch The person doing the burning.
 * @param room_data *room The targeted room (should be a map building).
 * @param obj_data *lighter Optional: If a lighter is given, it will be used for this. If not, we assume they don't need it.
+* @param bool confirmed If TRUE, player typed CONFIRM as the last arg. FALSE if not.
 */
-void do_burn_building(char_data *ch, room_data *room, obj_data *lighter) {
+void do_burn_building(char_data *ch, room_data *room, obj_data *lighter, bool confirmed) {
 	char to_char[256], to_room[256];
 	
 	// ensure we have the real room
@@ -4228,7 +4235,7 @@ void do_burn_building(char_data *ch, room_data *room, obj_data *lighter) {
 		msg_to_char(ch, "NPCs cannot light buildings on fire.\r\n");
 	}
 	else if (GET_ROOM_VEHICLE(room)) {
-		do_light_vehicle(ch, GET_ROOM_VEHICLE(room), lighter);
+		do_light_vehicle(ch, GET_ROOM_VEHICLE(room), lighter, confirmed);
 	}
 	else if (IS_BURNING(room)) {
 		msg_to_char(ch, "Looks like it's already on fire!\r\n");
@@ -4244,6 +4251,9 @@ void do_burn_building(char_data *ch, room_data *room, obj_data *lighter) {
 	}
 	else if (GET_LOYALTY(ch) && ROOM_OWNER(IN_ROOM(ch)) == GET_LOYALTY(ch) && !HAS_DISMANTLE_PRIV_FOR_BUILDING(ch, IN_ROOM(ch))) {
 		msg_to_char(ch, "You don't have permission to burn the empire's buildings (it requires the dismantle privilege).\r\n");
+	}
+	else if (GET_LOYALTY(ch) && ROOM_OWNER(IN_ROOM(ch)) == GET_LOYALTY(ch) && !confirmed) {
+		msg_to_char(ch, "You must type 'burn building CONFIRM' to burn a building you own.\r\n");
 	}
 	else if (!ROOM_BLD_FLAGGED(room, BLD_BURNABLE)) {
 		msg_to_char(ch, "It doesn't seem to be flammable.\r\n");
@@ -4286,20 +4296,27 @@ void do_burn_building(char_data *ch, room_data *room, obj_data *lighter) {
 
 ACMD(do_burn) {
 	bool objless = has_player_tech(ch, PTECH_LIGHT_FIRE);
-	char *argptr = arg;
+	char *argptr = arg, most_args[MAX_INPUT_LENGTH], last_arg[MAX_INPUT_LENGTH];
 	obj_data *lighter = NULL;
 	room_data *target;
 	vehicle_data *veh;
-	bool kept = FALSE;
+	bool kept = FALSE, confirmed = FALSE;
 	int number, dir;
 
+	// check for CONFIRM
+	chop_last_arg(argument, most_args, last_arg);
+	if (*last_arg && !str_cmp(last_arg, "confirm")) {
+		confirmed = TRUE;
+		argument = most_args;
+	}
+	
 	one_argument(argument, arg);
 	number = get_number(&argptr);
 
 	if (!objless) {
 		lighter = find_lighter_in_list(ch->carrying, &kept);
 	}
-
+	
 	if (!*argptr) {
 		msg_to_char(ch, "Burn what?\r\n");
 	}
@@ -4321,18 +4338,18 @@ ACMD(do_burn) {
 			msg_to_char(ch, "You can't burn anything in that direction.\r\n");
 		}
 		else {
-			do_burn_building(ch, target, lighter);
+			do_burn_building(ch, target, lighter, confirmed);
 		}
 	}
 	else if ((!str_cmp(arg, "building") || !str_cmp(arg, "build")) && IS_ANY_BUILDING(IN_ROOM(ch))) {
-		do_burn_building(ch, IN_ROOM(ch), lighter);
+		do_burn_building(ch, IN_ROOM(ch), lighter, confirmed);
 	}
 	else if (generic_find(argptr, &number, FIND_VEHICLE_ROOM | FIND_VEHICLE_INSIDE, ch, NULL, NULL, &veh)) {
 		// try burning a vehicle
-		do_light_vehicle(ch, veh, lighter);
+		do_light_vehicle(ch, veh, lighter, confirmed);
 	}
 	else if (!str_cmp(arg, "area") || !str_cmp(arg, "room") || !str_cmp(arg, "here") || isname(arg, get_room_name(IN_ROOM(ch), FALSE)) || isname(arg, GET_SECT_NAME(SECT(IN_ROOM(ch))))) {
-		do_burn_area(ch);
+		do_burn_area(ch, confirmed);
 	}
 		
 	else if (get_obj_in_list_vis_prefer_interaction(ch, argptr, &number, ch->carrying, INTERACT_LIGHT) || get_obj_in_list_vis_prefer_interaction(ch, argptr, &number, ROOM_CONTENTS(IN_ROOM(ch)), INTERACT_LIGHT)) {
@@ -6490,6 +6507,7 @@ ACMD(do_home) {
 
 
 ACMD(do_islands) {
+	bool comma;
 	char emp_arg[MAX_INPUT_LENGTH];
 	struct do_islands_data *item, *next_item, *list = NULL;
 	struct empire_island *eisle, *next_eisle;
@@ -6536,7 +6554,7 @@ ACMD(do_islands) {
 		// mark storage
 		HASH_ITER(hh, eisle->store, store, next_store) {
 			if (store->amount > 0) {
-				do_islands_add_einv(&list, eisle->island, store->amount);
+				do_islands_add_einv(&list, eisle->island, store->amount, 0, 0);
 			}
 		}
 		
@@ -6546,12 +6564,12 @@ ACMD(do_islands) {
 	
 	// add unique storage
 	DL_FOREACH(EMPIRE_UNIQUE_STORAGE(emp), eus) {
-		do_islands_add_einv(&list, eus->island, eus->amount);
+		do_islands_add_einv(&list, eus->island, 0, eus->amount, 0);
 	}
 	
 	// add shipping
 	DL_FOREACH(EMPIRE_SHIPPING_LIST(emp), shipd) {
-		do_islands_add_einv(&list, shipd->from_island, shipd->amount);
+		do_islands_add_einv(&list, shipd->from_island, 0, 0, shipd->amount);
 	}
 	
 	// and then build the display while freeing it up
@@ -6567,19 +6585,31 @@ ACMD(do_islands) {
 		}
 		
 		// only show if they have one of these
-		if (item->territory > 0 || item->einv_size > 0 || item->population > 0) {
+		if (item->territory > 0 || item->einv_size > 0 || item->warehouse_size > 0 || item->shipping_size > 0 || item->population > 0) {
 			isle = get_island(item->id, TRUE);
 			room = real_room(isle->center);
+			comma = FALSE;
 			line = build_page_display(ch, " %s%s - ", get_island_name_for(isle->id, ch), coord_display_room(ch, room, FALSE));
 		
 			if (item->territory > 0) {
-				append_page_display_line(line, "%d territory%s", item->territory, (item->einv_size > 0 || item->population > 0) ? ", " : "");
+				append_page_display_line(line, "%s%d territory", (comma ? ", " : ""), item->territory);
+				comma = TRUE;
 			}
 			if (item->einv_size > 0) {
-				append_page_display_line(line, "%d einventory%s", item->einv_size, (item->population > 0) ? ", " : "");
+				append_page_display_line(line, "%s%d einventory", (comma ? ", " : ""), item->einv_size);
+				comma = TRUE;
+			}
+			if (item->warehouse_size > 0) {
+				append_page_display_line(line, "%s%d warehouse", (comma ? ", " : ""), item->warehouse_size);
+				comma = TRUE;
+			}
+			if (item->shipping_size > 0) {
+				append_page_display_line(line, "%s%d shipping", (comma ? ", " : ""), item->shipping_size);
+				comma = TRUE;
 			}
 			if (item->population > 0) {
-				append_page_display_line(line, "%d citizen%s", item->population, PLURAL(item->population));
+				append_page_display_line(line, "%s%d citizen%s", (comma ? ", " : ""), item->population, PLURAL(item->population));
+				comma = TRUE;
 			}
 		}
 		
@@ -6611,7 +6641,7 @@ ACMD(do_tomb) {
 			build_page_display(ch, "You have no tomb set.");
 		}
 		else {
-			build_page_display(ch, "Your tomb is at: %s%s%s", get_room_name(tomb, FALSE), coord_display_room(ch, tomb, FALSE), (GET_ISLAND_ID(tomb) == GET_ISLAND_ID(IN_ROOM(ch))) ? "" : " (different island)");
+			build_page_display(ch, "Your tomb is at: %s%s", get_room_name(tomb, FALSE), coord_display_room(ch, tomb, FALSE));
 			find_load_room(ch, &tomb_type);
 			// LOAD_ROOM_x
 			switch (tomb_type) {
@@ -6742,7 +6772,7 @@ ACMD(do_import) {
 	else if (is_abbrev(arg, "analyze") || is_abbrev(arg, "analysis")) {
 		do_import_analysis(ch, emp, argument, subcmd);
 	}
-	else if (EMPIRE_IMM_ONLY(emp) && config_get_bool("immortal_empire_restrictions")) {
+	else if (EMPIRE_IMM_ONLY(emp) && config_get_bool("immortal_empire_restrict_trade")) {
 		msg_to_char(ch, "Immortal empires cannot trade.\r\n");
 	}
 	else if (!imm_access && GET_RANK(ch) < EMPIRE_PRIV(emp, PRIV_TRADE)) {

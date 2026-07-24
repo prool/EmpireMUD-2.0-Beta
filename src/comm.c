@@ -2539,7 +2539,7 @@ int new_descriptor(int s) {
 	/* determine if the site is banned */
 	if (isbanned(newd->host) == BAN_ALL) {
 		CLOSE_SOCKET(desc);
-		syslog(SYS_LOGIN, 0, FALSE, "Connection attempt denied from [%s]", newd->host);
+		syslog(SYS_BANS, 0, FALSE, "Connection attempt denied from [%s]", newd->host);
 		free(newd);
 		return (0);
 	}
@@ -2887,6 +2887,7 @@ int process_input(descriptor_data *t) {
 			}
 		}
 		else if (*input == '!' && *(input + 1)) {
+			bool replaced = FALSE;
 			char *commandln = (input + 1);
 			int cnt;
 
@@ -2918,6 +2919,7 @@ int process_input(descriptor_data *t) {
 							t->history_pos = 0;		// Wrap to top
 						}
 					}
+					replaced = TRUE;
 					break;	// done
 				}
 				
@@ -2928,6 +2930,16 @@ int process_input(descriptor_data *t) {
 				else if (cnt == 0) {
 					cnt = HISTORY_SIZE;		// loop back around
 				}
+			}
+			
+			if (!replaced) {
+				// no match
+				if (*commandln) {
+					SEND_TO_Q("'", t);
+					SEND_TO_Q(commandln, t);
+					SEND_TO_Q("' not found in command history.\r\n", t);
+				}
+				strcpy(input, "");
 			}
 		}
 		else if (*input == '^') {
@@ -2945,6 +2957,13 @@ int process_input(descriptor_data *t) {
 			if (*input == '+') {	// add to head of queue
 				add_to_head = TRUE;
 				++input;
+				
+				// remove leading ! to prevent players starting commands with ! (which interferes with other systems)
+				if (strchr(input, '!')) {
+					while (*input == '!' || *input == ' ') {
+						++input;
+					}
+				}
 			}
 			
 			strncpy(t->last_input, input, sizeof(t->last_input)-1);

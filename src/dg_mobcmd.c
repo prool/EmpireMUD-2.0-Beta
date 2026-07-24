@@ -972,12 +972,23 @@ ACMD(do_mload) {
 
 ACMD(do_mlog) {
 	char source_info[MAX_STRING_LENGTH];
+	
+	if (!MOB_OR_IMPL(ch)) {
+		send_config_msg(ch, "huh_string");
+		return;
+	}
+	
 	safe_snprintf(source_info, sizeof(source_info), "mob %d %s", GET_MOB_VNUM(ch), GET_SHORT_DESC(ch));
 	script_log_command(argument, source_info);
 }
 
 
 ACMD(do_mmod) {
+	if (!MOB_OR_IMPL(ch)) {
+		send_config_msg(ch, "huh_string");
+		return;
+	}
+	
 	script_modify(argument);
 }
 
@@ -1907,7 +1918,7 @@ ACMD(do_mforce) {
 
 		if (*arg == UID_CHAR) {
 			if (!(victim = get_char(arg))) {
-				mob_log(ch, "mforce: victim (%s) does not exist",arg);
+				mob_log(ch, "mforce: victim (%s) does not exist (mforce %s %s)", arg, arg, argument);
 				return;
 			}
 		}

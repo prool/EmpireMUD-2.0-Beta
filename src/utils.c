@@ -976,7 +976,7 @@ void process_imports(void) {
 	int time_to_empire_emptiness = config_get_int("time_to_empire_emptiness") * SECS_PER_REAL_WEEK;
 	
 	HASH_ITER(hh, empire_table, emp, next_emp) {
-		if (EMPIRE_IMM_ONLY(emp) && config_get_bool("immortal_empire_restrictions")) {
+		if (EMPIRE_IMM_ONLY(emp) && config_get_bool("immortal_empire_restrict_trade")) {
 			continue;
 		}
 		if (!EMPIRE_HAS_TECH(emp, TECH_TRADE_ROUTES)) {
@@ -1294,7 +1294,7 @@ bool is_trading_with(empire_data *emp, empire_data *partner) {
 		return FALSE;
 	}
 	// neither can be imm-only
-	if ((EMPIRE_IMM_ONLY(emp) || EMPIRE_IMM_ONLY(partner)) && config_get_bool("immortal_empire_restrictions")) {
+	if ((EMPIRE_IMM_ONLY(emp) || EMPIRE_IMM_ONLY(partner)) && config_get_bool("immortal_empire_restrict_trade")) {
 		return FALSE;
 	}
 	// both must have trade routes
@@ -4773,7 +4773,7 @@ bool has_resources(char_data *ch, struct resource_data *list, bool ground, bool 
 				}
 				case RES_TOOL: {
 					prettier_sprintbit(res->vnum, tool_flags, buf);
-					msg_to_char(ch, "%s %d more %s (tool%s)", (ok ? prefix : ","), res->amount, buf, PLURAL(res->amount));
+					msg_to_char(ch, "%s %d more %s (tool%s, not equipped/kept)", (ok ? prefix : ","), res->amount, buf, PLURAL(res->amount));
 					break;
 				}
 				case RES_COINS: {
@@ -6637,6 +6637,33 @@ int get_depletion_max(room_data *room, int depletion_type) {
 
 
 /**
+* Determines the maximum depletion amount the interactions on a certain vehicle
+* allow.
+*
+* @param vehicle_data *veh Which vehicle (to find interactions on).
+* @param int depletion_type Which depletion we're looking for.
+* @return int Detected deletion cap if any; -1 if not detected.
+*/
+int get_depletion_max_vehicle(vehicle_data *veh, int depletion_type) {
+	int max, best = -1;
+	struct interaction_item *interact;
+	
+	if (!veh) {
+		return best;
+	}
+	
+	LL_FOREACH(VEH_INTERACTIONS(veh), interact) {
+		if (determine_depletion_type(interact) == depletion_type) {
+			max = interact_data[interact->type].one_at_a_time ? interact->quantity : config_get_int("common_depletion");
+			best = MAX(best, max);
+		}
+	}
+	
+	return best;
+}
+
+
+/**
 * This finds the ultimate map point for a given room, resolving any number of
 * layers of boats and home rooms.
 *
@@ -6768,7 +6795,7 @@ room_data *find_load_room(char_data *ch, int *load_room_type) {
 		
 		// does not require last room but if there is one, it must be the same island
 		rl_last_room = real_room(GET_LAST_ROOM(ch));
-		if (veh_ok && (!rl_last_room || GET_ISLAND(rl) == GET_ISLAND(rl_last_room))) {
+		if (veh_ok && (!rl_last_room || GET_ISLAND(rl) == GET_ISLAND(rl_last_room) || (IN_ROOM(ch) && !GET_ISLAND(IN_ROOM(ch)) && compute_distance(IN_ROOM(ch), rl) <= config_get_int("tomb_off_island_distance")))) {
 			if (load_room_type) {
 				*load_room_type = LOAD_ROOM_MY_TOMB;
 			}
@@ -6782,7 +6809,7 @@ room_data *find_load_room(char_data *ch, int *load_room_type) {
 		found = NULL;
 		// room territory
 		HASH_ITER(hh, EMPIRE_TERRITORY_LIST(GET_LOYALTY(ch)), ter, next_ter) {
-			if (room_has_function_and_city_ok(GET_LOYALTY(ch), ter->room, FNC_TOMB) && IS_COMPLETE(ter->room) && GET_ISLAND_ID(ter->room) == island && !IS_BURNING(ter->room)) {
+			if (room_has_function_and_city_ok(GET_LOYALTY(ch), ter->room, FNC_TOMB) && IS_COMPLETE(ter->room) && (GET_ISLAND_ID(ter->room) == island || (IN_ROOM(ch) && !GET_ISLAND(IN_ROOM(ch)) && compute_distance(IN_ROOM(ch), ter->room) <= config_get_int("tomb_off_island_distance"))) && !IS_BURNING(ter->room)) {
 				// pick at random if more than 1
 				if (!number(0, num_found++) || !found) {
 					found = ter->room;
@@ -7440,7 +7467,7 @@ bool room_is_light(room_data *room, bool count_adjacent_light, bool ignore_magic
 	if (GET_ISLAND(room) && IS_SET(GET_ISLAND(room)->flags, ISLE_ALWAYS_LIGHT) && IS_OUTDOOR_TILE(room) && !NO_LOCATION(room)) {
 		return TRUE;
 	}
-	if (ROOM_LIGHTS(room) > 0 || RMT_FLAGGED(room, RMT_LIGHT)) {
+	if (ROOM_LIGHTS(room) > 0 || RMT_FLAGGED(room, RMT_LIGHT) || ROOM_BLD_FLAGGED(room, BLD_LIGHT)) {
 		return TRUE;	// not dark: has a light source
 	}
 	if (IS_ANY_BUILDING(room) && (ROOM_OWNER(room) || ROOM_AFF_FLAGGED(room, ROOM_AFF_UNCLAIMABLE))) {

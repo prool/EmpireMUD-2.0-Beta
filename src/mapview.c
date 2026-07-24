@@ -409,9 +409,10 @@ void get_informative_string(char_data *ch, char *buffer, bool dismantling, bool 
 * command, which actually sets the diameter.
 *
 * @param char_data *ch The person to get mapsize for.
+* @param bool reduce_for_movement If TRUE, can be reduced based on a high number of recent moves. If FALSE, skips this step.
 * @return int The map radius.
 */
-int get_map_radius(char_data *ch) {
+int get_map_radius(char_data *ch, bool reduce_for_movement) {
 	int mapsize, recent, max, smallmax;
 
 	mapsize = GET_MAPSIZE(REAL_CHAR(ch));
@@ -436,7 +437,7 @@ int get_map_radius(char_data *ch) {
 	}
 	
 	// automatically limit size if the player is moving too fast
-	if (mapsize > 5 && (recent = count_recent_moves(ch)) > 5) {
+	if (reduce_for_movement && mapsize > 5 && (recent = count_recent_moves(ch)) > 5) {
 		max = config_get_int("max_map_size") - (recent - 5);
 		mapsize = MIN(mapsize, max);
 		smallmax = config_get_int("max_map_while_moving");
@@ -677,8 +678,9 @@ void replace_color_codes(char *string, char *new_color) {
 * @param room_data *to_room The room being looked at.
 * @param char *icon_buf The buffer where the icon is stored -- text in this buffer will be replaced.
 * @param int tileset Which tile set (season) to pull icons from.
+* @param bool is_vehicle If TRUE, uses the regular sector for this room rather than base sector.
 */
-void replace_icon_codes(char_data *ch, room_data *to_room, char *icon_buf, int tileset) {
+void replace_icon_codes(char_data *ch, room_data *to_room, char *icon_buf, int tileset, bool is_vehicle) {
 	struct icon_data *icon;
 	sector_data *sect;
 	char temp[256];
@@ -692,15 +694,16 @@ void replace_icon_codes(char_data *ch, room_data *to_room, char *icon_buf, int t
 		
 		// here (@.) roadside icon
 		if (strstr(icon_buf, "@.")) {
-			icon = get_icon_from_set(GET_SECT_ICONS(BASE_SECT(to_room)), tileset);
-			sprintf(temp, "%s%c", icon ? icon->color : "&0", GET_SECT_ROADSIDE_ICON(BASE_SECT(to_room)));
+			sect = is_vehicle ? SECT(to_room) : BASE_SECT(to_room);
+			icon = get_icon_from_set(GET_SECT_ICONS(sect), tileset);
+			sprintf(temp, "%s%c", icon ? icon->color : "&0", GET_SECT_ROADSIDE_ICON(sect));
 			str = str_replace("@.", temp, icon_buf);
 			strcpy(icon_buf, partial_room_icon(ch, to_room, str, 4));
 			free(str);
 		}
 		// east (@e) tile attachment
 		if (strstr(icon_buf, "@e")) {
-			sect = r_east ? BASE_SECT(r_east) : BASE_SECT(to_room);
+			sect = r_east ? BASE_SECT(r_east) : (is_vehicle ? SECT(to_room) : BASE_SECT(to_room));
 			icon = get_icon_from_set(GET_SECT_ICONS(sect), tileset);
 			sprintf(temp, "%s%c", icon ? icon->color : "&0", GET_SECT_ROADSIDE_ICON(sect));
 			str = str_replace("@e", temp, icon_buf);
@@ -709,7 +712,7 @@ void replace_icon_codes(char_data *ch, room_data *to_room, char *icon_buf, int t
 		}
 		// west (@w) tile attachment
 		if (strstr(icon_buf, "@w")) {
-			sect = r_west ? BASE_SECT(r_west) : BASE_SECT(to_room);
+			sect = r_west ? BASE_SECT(r_west) : (is_vehicle ? SECT(to_room) : BASE_SECT(to_room));
 			icon = get_icon_from_set(GET_SECT_ICONS(sect), tileset);
 			sprintf(temp, "%s%c", icon ? icon->color : "&0", GET_SECT_ROADSIDE_ICON(sect));
 			str = str_replace("@w", temp, icon_buf);
@@ -733,7 +736,8 @@ void replace_icon_codes(char_data *ch, room_data *to_room, char *icon_buf, int t
 			}
 			else {
 				// west is not a barrier
-				sprintf(temp, "&?%c", GET_SECT_ROADSIDE_ICON(BASE_SECT(to_room)));
+				sect = (is_vehicle ? SECT(to_room) : BASE_SECT(to_room));
+				sprintf(temp, "&?%c", GET_SECT_ROADSIDE_ICON(sect));
 				str = str_replace("@u", temp, icon_buf);
 				strcpy(icon_buf, str);
 				free(str);
@@ -759,7 +763,8 @@ void replace_icon_codes(char_data *ch, room_data *to_room, char *icon_buf, int t
 			}
 			else {
 				// east is not a barrier
-				sprintf(temp, "&?%c", GET_SECT_ROADSIDE_ICON(BASE_SECT(to_room)));
+				sect = (is_vehicle ? SECT(to_room) : BASE_SECT(to_room));
+				sprintf(temp, "&?%c", GET_SECT_ROADSIDE_ICON(sect));
 				str = str_replace("@v", temp, icon_buf);
 				strcpy(icon_buf, str);
 				free(str);
@@ -798,7 +803,7 @@ bool should_show_city_background(char_data *ch, room_data *to_room) {
 		if (ROOM_OWNER(to_room) && GET_LOYALTY(ch) != ROOM_OWNER(to_room)) {
 			return FALSE;	// owned by someone else outside of main radius
 		}
-		if (GET_LOYALTY(ch) != ROOM_OWNER(to_room) && CHECK_CHAMELEON(IN_ROOM(ch), to_room)) {
+		if (GET_LOYALTY(ch) != ROOM_OWNER(to_room) && CHECK_CHAMELEON(IN_ROOM(ch), to_room) && !PRF_FLAGGED(ch, PRF_HOLYLIGHT)) {
 			return FALSE;	// failed chameleon while not the owner
 		}
 	}
@@ -1314,7 +1319,7 @@ void build_vehicle_icon(char_data *ch, room_data *room, vehicle_data *main_veh, 
 		quarter[iter] = NULL;
 	}
 	
-	// include main vehicle first
+	// include main vehicle first (don't use vehicle_is_chameleon() here because we don't want to store chameleon vehicles to memory)
 	if (main_veh && (!memory_only || !VEH_IS_COMPLETE(main_veh) || !VEH_FLAGGED(main_veh, VEH_CHAMELEON)) && (!memory_only || VEH_FLAGGED(main_veh, VEH_BUILDING))) {
 		if (VEH_ICON(main_veh)) {
 			whole = partial_vehicle_icon(ch, main_veh, VEH_ICON(main_veh), WHOLE_ICON);
@@ -1338,7 +1343,7 @@ void build_vehicle_icon(char_data *ch, room_data *room, vehicle_data *main_veh, 
 			continue;	// already shown
 		}
 		if (memory_only && VEH_IS_COMPLETE(veh) && VEH_FLAGGED(veh, VEH_CHAMELEON)) {
-			continue;	// hide chameleon
+			continue;	// hide chameleon: don't use vehicle_is_chameleon() here because we don't want to store chameleon vehicles to memory
 		}
 		if (memory_only && !VEH_FLAGGED(veh, VEH_BUILDING)) {
 			continue;	// hide non-building
@@ -1474,7 +1479,7 @@ void look_at_room_by_loc(char_data *ch, room_data *room, bitvector_t options) {
 		GET_LAST_LOOK_SUN(ch) = get_sun_status(IN_ROOM(ch));
 	}
 
-	mapsize = get_map_radius(ch);
+	mapsize = get_map_radius(ch, TRUE);
 
 	if (AFF_FLAGGED(ch, AFF_BLIND)) {
 		msg_to_char(ch, "You see nothing but infinite darkness...\r\n");
@@ -2257,7 +2262,6 @@ static void show_map_to_char(char_data *ch, struct mappc_data_container *mappc, 
 	
 	// check for a vehicle with an icon: we do this even if it won't be displayed later (because it may be stored as the tile icon)
 	if (show_veh && VEH_HAS_ANY_ICON(show_veh)) {
-		// strcpy(veh_icon, VEH_ICON(show_veh));
 		build_vehicle_icon(ch, to_room, show_veh, FALSE, veh_icon);
 	}
 	
@@ -2291,7 +2295,7 @@ static void show_map_to_char(char_data *ch, struct mappc_data_container *mappc, 
 		strcpy(show_icon, "????");
 	}
 	
-	replace_icon_codes(ch, to_room, show_icon, tileset);
+	replace_icon_codes(ch, to_room, show_icon, tileset, veh_is_shown);
 	
 	// 3. Check for special icon coloring including &?
 	if (IS_BURNING(to_room)) {
@@ -2323,7 +2327,7 @@ static void show_map_to_char(char_data *ch, struct mappc_data_container *mappc, 
 			if (show_veh && !VEH_FLAGGED(show_veh, VEH_NO_CLAIM)) {
 				sprintf(show_icon, "%s%s%s", (VEH_OWNER(show_veh) && EMPIRE_BANNER(VEH_OWNER(show_veh))) ? EMPIRE_BANNER(VEH_OWNER(show_veh)) : "&0", temp, no_color);
 			}
-			else if (ROOM_OWNER(to_room) && (!CHECK_CHAMELEON(IN_ROOM(ch), to_room) || ROOM_OWNER(to_room) == GET_LOYALTY(ch))) {
+			else if (ROOM_OWNER(to_room) && (!CHECK_CHAMELEON(IN_ROOM(ch), to_room) || ROOM_OWNER(to_room) == GET_LOYALTY(ch) || PRF_FLAGGED(ch, PRF_HOLYLIGHT))) {
 				sprintf(show_icon, "%s%s%s", EMPIRE_BANNER(ROOM_OWNER(to_room)) ? EMPIRE_BANNER(ROOM_OWNER(to_room)) : "&0", temp, no_color);
 			}
 			else {
@@ -2433,13 +2437,13 @@ static void show_map_to_char(char_data *ch, struct mappc_data_container *mappc, 
 			build_vehicle_icon(ch, to_room, show_veh, TRUE, veh_icon);
 			
 			// memorize building-vehicle icon
-			replace_icon_codes(ch, to_room, veh_icon, tileset);
+			replace_icon_codes(ch, to_room, veh_icon, tileset, TRUE);
 			add_player_map_memory(ch, GET_ROOM_VNUM(to_room), veh_icon, NULL, 0);
 		}
 		else {
 			// memorize map icon (may be a map building)
 			// TODO: should this ignore chameleon buildings and show the terrain instead? if so, split buildings from other icons
-			replace_icon_codes(ch, to_room, map_icon, tileset);
+			replace_icon_codes(ch, to_room, map_icon, tileset, FALSE);
 			add_player_map_memory(ch, GET_ROOM_VNUM(to_room), map_icon, NULL, 0);
 		}
 		
@@ -2763,7 +2767,7 @@ char *screenread_one_tile(char_data *ch, room_data *origin, room_data *to_room, 
 	}
 	
 	// show ownership (political)
-	if (PRF_FLAGGED(ch, PRF_POLITICAL) && !CHECK_CHAMELEON(origin, to_room)) {
+	if (PRF_FLAGGED(ch, PRF_POLITICAL) && (!CHECK_CHAMELEON(origin, to_room) || PRF_FLAGGED(ch, PRF_HOLYLIGHT))) {
 		emp = ROOM_OWNER(to_room);
 	
 		if (emp) {
@@ -3355,12 +3359,12 @@ ACMD(do_scan) {
 	}
 	else if (!*new_arg && (dist >= 0 || dir_modifiers) && !dash_distance && !plus_distance) {
 		// normal 'screenreader look' scan with a custom distance
-		show_screenreader_room(ch, use_room, NOBITS, (dist != -1) ? dist : GET_MAPSIZE(ch), dir_modifiers);
+		show_screenreader_room(ch, use_room, NOBITS, (dist != -1) ? dist : get_map_radius(ch, FALSE), dir_modifiers);
 	}
 	else if ((dir = parse_direction(ch, new_arg)) == NO_DIR || (dist >= 0 && (dash_distance || plus_distance))) {
 		// scanning by tile name
 		clear_recent_moves(ch);
-		scan_for_tile(ch, new_arg, (dist != -1) ? dist : GET_MAPSIZE(ch), dir_modifiers, dash_distance);
+		scan_for_tile(ch, new_arg, (dist != -1) ? dist : get_map_radius(ch, FALSE), dir_modifiers, dash_distance);
 		gain_player_tech_exp(ch, PTECH_MAP_MEMORY, 0.1);
 	}
 	else if (dir >= NUM_2D_DIRS) {
@@ -3370,7 +3374,7 @@ ACMD(do_scan) {
 	else {
 		// valid dir: scan in one line
 		clear_recent_moves(ch);
-		screenread_one_dir(ch, use_room, dir, (dist != -1) ? dist : GET_MAPSIZE(ch));
+		screenread_one_dir(ch, use_room, dir, (dist != -1) ? dist : get_map_radius(ch, FALSE));
 		gain_player_tech_exp(ch, PTECH_MAP_MEMORY, 0.1);
 	}
 }
