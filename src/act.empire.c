@@ -2784,7 +2784,7 @@ void add_obj_to_efind(char_data *ch, struct efind_group **list, obj_data *obj, v
 	
 	if (obj && OBJ_CAN_STACK(obj)) {
 		DL_FOREACH(*list, eg) {
-			if (eg->location == location && eg->stackable && GET_OBJ_VNUM(eg->obj) == GET_OBJ_VNUM(obj)) {
+			if (eg->location == location && eg->stackable && GET_OBJ_VNUM(eg->obj) == GET_OBJ_VNUM(obj) && (GET_OBJ_SHORT_DESC(eg->obj) == GET_OBJ_SHORT_DESC(obj) || !strcmp(GET_OBJ_SHORT_DESC(eg->obj), GET_OBJ_SHORT_DESC(obj)))) {
 				eg->count += 1;
 				found = TRUE;
 				break;
@@ -8475,7 +8475,7 @@ ACMD(do_unpublicize) {
 */
 void do_workforce_keep(char_data *ch, empire_data *emp, char *argument) {
 	any_vnum vnum;
-	bool found;
+	bool found, unkeep = FALSE;
 	char lim_arg[MAX_INPUT_LENGTH], local_arg[MAX_INPUT_LENGTH], temp[MAX_INPUT_LENGTH], kept[24];
 	int limit = 0, number;
 	obj_data *proto, *obj;
@@ -8573,7 +8573,10 @@ void do_workforce_keep(char_data *ch, empire_data *emp, char *argument) {
 		half_chop(argument, lim_arg, temp);	// find a number
 		strcpy(argument, temp);
 		limit = atoi(lim_arg);
-		if (limit < 0) {
+		if (limit == 0) {
+			unkeep = TRUE;
+		}
+		else if (limit < 0) {
 			msg_to_char(ch, "Invalid number to keep.\r\n");
 			return;
 		}
@@ -8601,10 +8604,14 @@ void do_workforce_keep(char_data *ch, empire_data *emp, char *argument) {
 		if (limit == UNLIMITED || limit > 0) {
 			store->keep = limit;
 		}
+		else if (unkeep) {
+			// always set to 0
+			store->keep = 0;
+		}
 		else {	// toggle off/all
 			store->keep = store->keep ? 0 : UNLIMITED;
 		}
-		msg_to_char(ch, "Your workforce will %s keep %s of its '%s' on this island.\r\n", store->keep ? "now" : "no longer", limit ? lim_arg : (store->keep ? "all" : "any"), skip_filler(GET_OBJ_SHORT_DESC(proto)));
+		msg_to_char(ch, "Your workforce will %s keep %s of its '%s' on this island.\r\n", (store->keep ? "now" : (unkeep ? "not" : "no longer")), limit ? lim_arg : (store->keep ? "all" : "any"), skip_filler(GET_OBJ_SHORT_DESC(proto)));
 		
 		EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
 		break;
@@ -8634,8 +8641,8 @@ void do_workforce_keep(char_data *ch, empire_data *emp, char *argument) {
 			HASH_ADD_INT(eisle->store, vnum, store);
 		}
 		
-		store->keep = (limit == UNLIMITED || limit > 0) ? limit : (store->keep ? 0 : UNLIMITED);
-		msg_to_char(ch, "Your workforce will %s keep %s of its '%s' on this island.\r\n", store->keep ? "now" : "no longer", limit ? lim_arg : (store->keep ? "all" : "any"), skip_filler(GET_OBJ_SHORT_DESC(proto)));
+		store->keep = (limit == UNLIMITED || limit > 0) ? limit : ((store->keep || unkeep) ? 0 : UNLIMITED);
+		msg_to_char(ch, "Your workforce will %s keep %s of its '%s' on this island.\r\n", (store->keep ? "now" : (unkeep ? "not" : "no longer")), limit ? lim_arg : (store->keep ? "all" : "any"), skip_filler(GET_OBJ_SHORT_DESC(proto)));
 		EMPIRE_NEEDS_STORAGE_SAVE(emp) = TRUE;
 	}
 }
