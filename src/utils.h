@@ -2244,6 +2244,7 @@ void survey_city(char_data *ch, char *argument);
 
 // act.item.c
 bool can_take_obj(char_data *ch, obj_data *obj);
+bool check_douse_light_before_store(char_data *ch, obj_data *obj);
 int count_objs_in_room(room_data *room);
 void deliver_shipment(empire_data *emp, struct shipping_data *shipd);
 bool douse_light(obj_data *obj);
@@ -2525,8 +2526,8 @@ char *get_mine_type_name(room_data *room);
 char *get_room_description(room_data *room);
 char *get_room_name(room_data *room, bool color);
 char *get_screenreader_room_name(char_data *ch, room_data *from_room, room_data *to_room, bool show_dark);
-void look_at_room_by_loc(char_data *ch, room_data *room, bitvector_t options);
-#define look_at_room(ch)  look_at_room_by_loc((ch), IN_ROOM(ch), NOBITS)
+void look_at_room_by_loc(char_data *ch, room_data *room, bitvector_t options, vehicle_data *view_from_veh);
+#define look_at_room(ch)  look_at_room_by_loc((ch), IN_ROOM(ch), NOBITS, NULL)
 void look_in_direction(char_data *ch, int dir);
 char *screenread_one_tile(char_data *ch, room_data *origin, room_data *to_room, bool show_dark);
 
@@ -2747,6 +2748,7 @@ void qt_remove_obj(char_data *ch, obj_data *obj);
 void qt_start_quest(char_data *ch, any_vnum vnum);
 void qt_triggered_task(char_data *ch, any_vnum vnum, int specific_val);
 void qt_untrigger_task(char_data *ch, any_vnum vnum, bool remove_all);
+void qt_update_progress(char_data *ch, any_vnum only_vnum);
 void qt_visit_room(char_data *ch, room_data *room);
 void qt_wear_obj(char_data *ch, obj_data *obj);
 
@@ -2767,6 +2769,7 @@ void et_get_obj(empire_data *emp, obj_data *obj, int amount, int new_total);
 void et_lose_building(empire_data *emp, any_vnum vnum);
 void et_lose_tile_sector(empire_data *emp, sector_vnum vnum);
 void et_lose_vehicle(empire_data *emp, vehicle_data *veh);
+void et_update_progress(empire_data *emp, any_vnum only_vnum);
 
 // random.c
 unsigned long empire_random();

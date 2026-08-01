@@ -8249,7 +8249,8 @@ ACMD(do_territory) {
 		
 			// final ok: add to the list
 			if (ok && (node = find_territory_node_in_hash(&node_hash, IN_ROOM(veh), TRUE))) {
-				++(node->count);
+				// only ensure at least 1 on the count; do not add at this point
+				node->count = MAX(1, node->count);
 				
 				// add notes
 				sprintf(buf, "%s%s%s", NULLSAFE(node->details), (node->details ? ", " : ""), skip_filler(VEH_SHORT_DESC(veh)));
@@ -8346,7 +8347,8 @@ ACMD(do_territory) {
 		
 		// final ok: add to the list
 		if (ok && (node = find_territory_node_in_hash(&node_hash, iter, TRUE))) {
-			++(node->count);
+			// only ensure at least 1 on the count; do not add at this point
+			node->count = MAX(1, node->count);
 			
 			// mark as interior?
 			if (GET_ROOM_VNUM(iter) != node->vnum && (!node->details || !strstr(node->details, "interior"))) {
