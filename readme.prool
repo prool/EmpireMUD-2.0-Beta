@@ -2,27 +2,27 @@ Readme from Prool:
 
 My fork is in branch 'prool'.
 
-This fork is running at virtustan.net, port 7000
+This fork is running at virtustan.net (IP 95.217.157.136), port 7000
 
 Adaptation for Windows 11 - branch 'experiment-two-windows'
 
-Compiled binaries for Windows 11 - https://mud.kharkov.org/files/windows11-binaries/empiremud-win11-14-Jan-2026-2.zip
-
-or from: https://github.com/prool/EmpireMUD-2.0-Beta/releases/tag/prool-windows
+Compiled binaries for Windows 11 - https://github.com/prool/EmpireMUD-2.0-Beta/releases/tag/prool-windows
 
 Serhii "Prool" Pustovoitov
-Europe, 2024-2026 year
+Europe, Germany, 2024-2026 year
 
 proolix@gmail.com
 
-https://mud.virtustan.net
+https://virtustan.net
 
 Glory for Ukraine!
 
 -------
 
-29.03.2026. Сьогодні тестовий сервер EmpireMUD, скомпільований під Віндовс за допомогою gcc/cygwin, на моєму ноутбуці з Віндовс 11
+29.03.2026. Note: EmpireMUD Windows 11 server started slowly, about 22 min in my notebook.
+
+Сьогодні тестовий сервер EmpireMUD, скомпільований під Віндовс за допомогою gcc/cygwin, на моєму ноутбуці з Віндовс 11
 (HP 255 G10, processor AMD Ryzen 5 7520U, RAM 8G) завантажувався 22 хвилини!
 
 Треба мати на увазі усім, хто хоче використовувати цей муд на Віндовс. Треба чекати, доки повністю завантажиться і запуститься світ! І сохраняється при остановці
-мада теж деякий час, теж треба чекати.
+мада теж деякий час, теж треба чекати. Але після довгого завантаження муд працює з нормальною швидкістю.
