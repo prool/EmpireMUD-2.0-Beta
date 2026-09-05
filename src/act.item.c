@@ -176,9 +176,6 @@ INTERACTION_FUNC(combine_obj_interact) {
 	struct resource_data *res = NULL;
 	obj_data *new_obj;
 	
-	// flags to keep on separate
-	bitvector_t preserve_flags = OBJ_SEEDED | OBJ_NO_BASIC_STORAGE | OBJ_NO_WAREHOUSE | OBJ_CREATED;
-	
 	// how many they need
 	add_to_resource_list(&res, RES_OBJECT, GET_OBJ_VNUM(inter_item), interaction->quantity, 0);
 	
@@ -192,6 +189,10 @@ INTERACTION_FUNC(combine_obj_interact) {
 	safe_snprintf(to_room, sizeof(to_room), "$n combines %dx %s into $p!", interaction->quantity, skip_filler(GET_OBJ_SHORT_DESC(inter_item)));
 	
 	new_obj = read_object(interaction->vnum, TRUE);
+	
+	// copy these flags, if any
+	SET_BIT(GET_OBJ_EXTRA(new_obj), (GET_OBJ_EXTRA(inter_item) & OBJ_PRESERVE_FLAGS));
+	
 	scale_item_to_level(new_obj, GET_OBJ_CURRENT_SCALE_LEVEL(inter_item));
 	
 	if (GET_OBJ_TIMER(new_obj) != UNLIMITED && GET_OBJ_TIMER(inter_item) != UNLIMITED) {
@@ -208,9 +209,6 @@ INTERACTION_FUNC(combine_obj_interact) {
 	// ownership
 	new_obj->last_owner_id = GET_IDNUM(ch);
 	new_obj->last_empire_id = GET_LOYALTY(ch) ? EMPIRE_VNUM(GET_LOYALTY(ch)) : NOTHING;
-	
-	// copy these flags, if any
-	SET_BIT(GET_OBJ_EXTRA(new_obj), (GET_OBJ_EXTRA(inter_item) & preserve_flags));
 	
 	// put it somewhere
 	if (CAN_WEAR(new_obj, ITEM_WEAR_TAKE)) {
@@ -564,9 +562,6 @@ INTERACTION_FUNC(identifies_to_interact) {
 	obj_data *new_obj;
 	int iter;
 	
-	// flags to keep on identifies-to
-	bitvector_t preserve_flags = OBJ_SEEDED | OBJ_CREATED | OBJ_KEEP;
-	
 	if (interaction->quantity > 1) {
 		safe_snprintf(to_char, sizeof(to_char), "%s turns out to be %s (x%d)!", GET_OBJ_SHORT_DESC(inter_item), get_obj_name_by_proto(interaction->vnum), interaction->quantity);
 	}
@@ -582,14 +577,15 @@ INTERACTION_FUNC(identifies_to_interact) {
 	
 	for (iter = 0; iter < interaction->quantity; ++iter) {
 		new_obj = read_object(interaction->vnum, TRUE);
+		
+		// copy these flags, if any
+		SET_BIT(GET_OBJ_EXTRA(new_obj), (GET_OBJ_EXTRA(inter_item) & OBJ_PRESERVE_FLAGS));
+		
 		scale_item_to_level(new_obj, GET_OBJ_CURRENT_SCALE_LEVEL(inter_item));
 	
 		if (GET_OBJ_TIMER(new_obj) != UNLIMITED && GET_OBJ_TIMER(inter_item) != UNLIMITED) {
 			GET_OBJ_TIMER(new_obj) = MIN(GET_OBJ_TIMER(new_obj), GET_OBJ_TIMER(inter_item));
 		}
-		
-		// copy these flags, if any
-		SET_BIT(GET_OBJ_EXTRA(new_obj), (GET_OBJ_EXTRA(inter_item) & preserve_flags));
 		
 		// ownership
 		new_obj->last_owner_id = GET_IDNUM(ch);
@@ -1738,9 +1734,6 @@ INTERACTION_FUNC(separate_obj_interact) {
 	obj_data *new_obj;
 	int iter;
 	
-	// flags to keep on separate
-	bitvector_t preserve_flags = OBJ_SEEDED | OBJ_NO_BASIC_STORAGE | OBJ_NO_WAREHOUSE | OBJ_CREATED;
-	
 	safe_snprintf(to_char, sizeof(to_char), "You separate %s into %s (x%d)!", GET_OBJ_SHORT_DESC(inter_item), get_obj_name_by_proto(interaction->vnum), interaction->quantity);
 	act(to_char, FALSE, ch, NULL, NULL, TO_CHAR);
 	safe_snprintf(to_room, sizeof(to_room), "$n separates %s into %s (x%d)!", GET_OBJ_SHORT_DESC(inter_item), get_obj_name_by_proto(interaction->vnum), interaction->quantity);
@@ -1753,14 +1746,15 @@ INTERACTION_FUNC(separate_obj_interact) {
 	
 	for (iter = 0; iter < interaction->quantity; ++iter) {
 		new_obj = read_object(interaction->vnum, TRUE);
+		
+		// copy these flags, if any
+		SET_BIT(GET_OBJ_EXTRA(new_obj), (GET_OBJ_EXTRA(inter_item) & OBJ_PRESERVE_FLAGS));
+		
 		scale_item_to_level(new_obj, GET_OBJ_CURRENT_SCALE_LEVEL(inter_item));
 	
 		if (GET_OBJ_TIMER(new_obj) != UNLIMITED && GET_OBJ_TIMER(inter_item) != UNLIMITED) {
 			GET_OBJ_TIMER(new_obj) = MIN(GET_OBJ_TIMER(new_obj), GET_OBJ_TIMER(inter_item));
 		}
-		
-		// copy these flags, if any
-		SET_BIT(GET_OBJ_EXTRA(new_obj), (GET_OBJ_EXTRA(inter_item) & preserve_flags));
 		
 		// ownership
 		new_obj->last_owner_id = GET_IDNUM(ch);
@@ -1950,7 +1944,7 @@ bool used_lighter(char_data *ch, obj_data *obj) {
 		return FALSE;	// not even a lighter
 	}
 	
-	if (ch && !consume_otrigger(obj, ch, OCMD_LIGHT, NULL)) {
+	if (ch && !consume_otrigger(obj, ch, OCMD_LIGHT, NULL, 1)) {
 		return TRUE;	// trigger kicked us out (return TRUE because possibly used up)
 	}
 	
@@ -2471,20 +2465,53 @@ void do_eq_delete(char_data *ch, char *argument) {
 * @param char_data *ch The person viewing the list.
 */
 void do_eq_list(char_data *ch, char *argument) {
+	obj_data *obj;
 	struct player_eq_set *eq_set;
-	int count = 0;
+	int iter, count = 0;
 	
-	build_page_display_str(ch, "Saved equipment sets:");
-	LL_FOREACH(GET_EQ_SETS(ch), eq_set) {
-		++count;
-		build_page_display_col(ch, 3, FALSE, " %s", eq_set->name);
+	if (*argument) {
+		// show one set
+		LL_FOREACH(GET_EQ_SETS(ch), eq_set) {
+			if (multi_isname(argument, eq_set->name)) {
+				++count;
+				build_page_display(ch, "Equipment set '%s':", eq_set->name);
+				
+				for (iter = 0; iter < NUM_WEARS; ++iter) {
+					if ((obj = GET_EQ(ch, iter)) && get_obj_eq_set_by_id(obj, eq_set->id)) {
+						build_page_display_col(ch, 2, FALSE, " %s", GET_OBJ_SHORT_DESC(obj));
+					}
+				}
+				
+				DL_FOREACH2(ch->carrying, obj, next_content) {
+					if (get_obj_eq_set_by_id(obj, eq_set->id)) {
+						build_page_display_col(ch, 2, FALSE, " %s", GET_OBJ_SHORT_DESC(obj));
+					}
+				}
+				
+				// only show 1
+				send_page_display(ch);
+				break;
+			}
+		}
+		
+		if (!count) {
+			msg_to_char(ch, "You have no saved equipment set called '%s'.\r\n", argument);
+		}
 	}
-	
-	if (!count) {
-		build_page_display_str(ch, " none");
+	else {
+		// no-arg: list all sets
+		build_page_display_str(ch, "Saved equipment sets:");
+		LL_FOREACH(GET_EQ_SETS(ch), eq_set) {
+			++count;
+			build_page_display_col(ch, 3, FALSE, " %s", eq_set->name);
+		}
+		
+		if (!count) {
+			build_page_display_str(ch, " none");
+		}
+		
+		send_page_display(ch);
 	}
-	
-	send_page_display(ch);
 }
 
 
@@ -3149,9 +3176,20 @@ static bool can_drink_from_room(char_data *ch, byte type) {
 }
 
 
-static void drink_message(char_data *ch, obj_data *obj, byte type, int subcmd, int *liq) {
-	*liq = LIQ_WATER;
-
+/**
+* Shows the drink message. It's not clear to me why this is its own function
+* as it's only called in 1 place. But it had no comment so it must be old and,
+* by extension, arcane. Prior to b5.214, the liquid argument was a pointer and
+* was actually set in this function, but the drink command needs the liquid
+* type sooner.
+*
+* @param char_data *ch The person drinking
+* @param obj_data *obj Only required for type==drink_OBJ: the obj being drank
+* @param byte type drink_OBJ, drink_ROOM
+* @param int subcmd SCMD_SIP or SCMD_DRINK
+* @param any_vnum liquid What type of liquid.
+*/
+static void drink_message(char_data *ch, obj_data *obj, byte type, int subcmd, any_vnum liquid) {
 	switch (type) {
 		case drink_OBJ: {
 			// message to char
@@ -3178,7 +3216,6 @@ static void drink_message(char_data *ch, obj_data *obj, byte type, int subcmd, i
 				act(buf, TRUE, ch, obj, NULL, TO_ROOM);
 			}
 
-			*liq = GET_DRINK_CONTAINER_TYPE(obj);
 			break;
 		}
 		case drink_ROOM:
@@ -3190,7 +3227,7 @@ static void drink_message(char_data *ch, obj_data *obj, byte type, int subcmd, i
 	}
 
 	if (subcmd == SCMD_SIP) {
-		msg_to_char(ch, "It tastes like %s.\r\n", get_generic_string_by_vnum(*liq, GENERIC_LIQUID, GSTR_LIQUID_NAME));
+		msg_to_char(ch, "It tastes like %s.\r\n", get_generic_string_by_vnum(liquid, GENERIC_LIQUID, GSTR_LIQUID_NAME));
 	}
 }
 
@@ -5686,7 +5723,7 @@ ACMD(do_drink) {
 	char line[256], part[256];
 	char *thirst_str;
 	obj_data *obj = NULL, *check_list[2];
-	int amount, i, liquid;
+	int amount, i, liquid = LIQ_WATER;
 	double thirst_amt, hunger_amt;
 	int type = drink_OBJ, number, iter, warmed;
 	room_data *to_room;
@@ -5838,78 +5875,88 @@ ACMD(do_drink) {
 	}
 	*/
 
-	if (obj && GET_DRINK_CONTAINER_CONTENTS(obj) <= 0) {
-		send_to_char("It's empty.\r\n", ch);
-		return;
-	}
-
-	/* check trigger */
-	if (obj && !consume_otrigger(obj, ch, (subcmd == SCMD_SIP) ? OCMD_SIP : OCMD_DRINK, NULL)) {
-		return;
-	}
-
-	// send message
-	drink_message(ch, obj, type, subcmd, &liquid);
-	
-	// no modifiers on sip
-	if (subcmd == SCMD_SIP) {
-		return;
+	if (obj) {
+		if (GET_DRINK_CONTAINER_CONTENTS(obj) <= 0) {
+			send_to_char("It's empty.\r\n", ch);
+			return;
+		}
+		
+		liquid = GET_DRINK_CONTAINER_TYPE(obj);
 	}
 	
-	// load the generic now (after drink_message, which can modify liquid
+	// load the generic now
 	liq_generic = real_generic(liquid);
 	if (!liq_generic || GEN_TYPE(liq_generic) != GENERIC_LIQUID) {
 		// clear it if invalid
 		liq_generic = NULL;
 	}
 	
-	// "amount" will be how many gulps to take from the CAPACITY
-	if (liq_generic && IS_SET(GET_LIQUID_FLAGS(liq_generic), LIQF_BLOOD)) {
-		// drinking blood?
-		amount = GET_MAX_BLOOD(ch) - GET_BLOOD(ch);
+	// determine amount
+	if (subcmd == SCMD_SIP) {
+		amount = 1;	// actually drinks 0, but send 1 for scripts
 	}
-	else if ((LIQ_VAL(GVAL_LIQUID_THIRST) > 0 && GET_COND(ch, THIRST) == UNLIMITED) || (LIQ_VAL(GVAL_LIQUID_FULL) > 0 && GET_COND(ch, FULL) == UNLIMITED) || (LIQ_VAL(GVAL_LIQUID_DRUNK) > 0 && GET_COND(ch, DRUNK) == UNLIMITED)) {
-		// if theirs is unlimited
-		amount = 1;
-	}
-	else {
-		// how many hours of thirst I have, divided by how much thirst it gives per hour
-		thirst_amt = GET_COND(ch, THIRST) == UNLIMITED ? 1 : (((double) GET_COND(ch, THIRST) / REAL_UPDATES_PER_MUD_HOUR) / (double) LIQ_VAL(GVAL_LIQUID_THIRST));
-		hunger_amt = GET_COND(ch, FULL) == UNLIMITED ? 1 : (((double) GET_COND(ch, FULL) / REAL_UPDATES_PER_MUD_HOUR) / (double) LIQ_VAL(GVAL_LIQUID_FULL));
-		
-		// round up
-		thirst_amt = ceil(thirst_amt);
-		hunger_amt = ceil(hunger_amt);
-	
-		// whichever is more
-		amount = MAX((int)thirst_amt, (int)hunger_amt);
-	
-		// if it causes drunkenness, minimum of 1
-		if (LIQ_VAL(GVAL_LIQUID_DRUNK) > 0) {
-			amount = MAX(1, amount);
+	else {	// drink
+		// "amount" will be how many gulps to take from the CAPACITY
+		if (liq_generic && IS_SET(GET_LIQUID_FLAGS(liq_generic), LIQF_BLOOD)) {
+			// drinking blood?
+			amount = GET_MAX_BLOOD(ch) - GET_BLOOD(ch);
 		}
-	}
-	
-	// check warming/cooling needs
-	if (liq_generic && IS_SET(GET_LIQUID_FLAGS(liq_generic), LIQF_WARMING) && GET_TEMPERATURE(ch) < (get_room_temperature(IN_ROOM(ch)) + 5)) {
-		// needs warming: drink at least 4
-		amount = MAX(4, amount);
-	}
-	if (liq_generic && IS_SET(GET_LIQUID_FLAGS(liq_generic), LIQF_COOLING) && GET_TEMPERATURE(ch) > (get_room_temperature(IN_ROOM(ch)) - 5)) {
-		// needs cooling: drink at least 4
-		amount = MAX(4, amount);
-	}
-	
-	// amount is now the number of gulps to take to fill the player
-	
-	if (obj) {
-		// bound by contents available
-		amount = MIN(GET_DRINK_CONTAINER_CONTENTS(obj), amount);
-		
-		// can no longer be stored to prevent refilling, if single-use
-		if (OBJ_FLAGGED(obj, OBJ_SINGLE_USE)) {
-			SET_BIT(GET_OBJ_EXTRA(obj), OBJ_NO_BASIC_STORAGE);
+		else if ((LIQ_VAL(GVAL_LIQUID_THIRST) > 0 && GET_COND(ch, THIRST) == UNLIMITED) || (LIQ_VAL(GVAL_LIQUID_FULL) > 0 && GET_COND(ch, FULL) == UNLIMITED) || (LIQ_VAL(GVAL_LIQUID_DRUNK) > 0 && GET_COND(ch, DRUNK) == UNLIMITED)) {
+			// if theirs is unlimited
+			amount = 1;
 		}
+		else {
+			// how many hours of thirst I have, divided by how much thirst it gives per hour
+			thirst_amt = GET_COND(ch, THIRST) == UNLIMITED ? 1 : (((double) GET_COND(ch, THIRST) / REAL_UPDATES_PER_MUD_HOUR) / (double) LIQ_VAL(GVAL_LIQUID_THIRST));
+			hunger_amt = GET_COND(ch, FULL) == UNLIMITED ? 1 : (((double) GET_COND(ch, FULL) / REAL_UPDATES_PER_MUD_HOUR) / (double) LIQ_VAL(GVAL_LIQUID_FULL));
+			
+			// round up
+			thirst_amt = ceil(thirst_amt);
+			hunger_amt = ceil(hunger_amt);
+		
+			// whichever is more
+			amount = MAX((int)thirst_amt, (int)hunger_amt);
+		
+			// if it causes drunkenness, minimum of 1
+			if (LIQ_VAL(GVAL_LIQUID_DRUNK) > 0) {
+				amount = MAX(1, amount);
+			}
+		}
+		
+		// check warming/cooling needs
+		if (liq_generic && IS_SET(GET_LIQUID_FLAGS(liq_generic), LIQF_WARMING) && GET_TEMPERATURE(ch) < (get_room_temperature(IN_ROOM(ch)) + 5)) {
+			// needs warming: drink at least 4
+			amount = MAX(4, amount);
+		}
+		if (liq_generic && IS_SET(GET_LIQUID_FLAGS(liq_generic), LIQF_COOLING) && GET_TEMPERATURE(ch) > (get_room_temperature(IN_ROOM(ch)) - 5)) {
+			// needs cooling: drink at least 4
+			amount = MAX(4, amount);
+		}
+		
+		if (obj) {
+			// bound by contents available
+			amount = MIN(GET_DRINK_CONTAINER_CONTENTS(obj), amount);
+			
+			// can no longer be stored to prevent refilling, if single-use
+			if (OBJ_FLAGGED(obj, OBJ_SINGLE_USE)) {
+				SET_BIT(GET_OBJ_EXTRA(obj), OBJ_NO_BASIC_STORAGE);
+			}
+		}
+		
+		// amount is now the number of gulps to take to fill the player or the max available
+	}
+
+	/* check trigger */
+	if (obj && !consume_otrigger(obj, ch, (subcmd == SCMD_SIP) ? OCMD_SIP : OCMD_DRINK, NULL, amount)) {
+		return;
+	}
+
+	// send message
+	drink_message(ch, obj, type, subcmd, liquid);
+	
+	// no modifiers on sip
+	if (subcmd == SCMD_SIP) {
+		return;
 	}
 	
 	// apply effects
@@ -6213,11 +6260,6 @@ ACMD(do_eat) {
 		eat_hours = 1;
 		will_buff = FALSE;
 	}
-
-	/* check trigger */
-	if (!consume_otrigger(food, ch, (subcmd == SCMD_TASTE) ? OCMD_TASTE : OCMD_EAT, NULL)) {
-		return;
-	}
 	
 	// 3. apply caps
 	if (will_buff) {
@@ -6229,6 +6271,11 @@ ACMD(do_eat) {
 		eat_hours = MIN(eat_hours, (GET_COND(ch, FULL) / REAL_UPDATES_PER_MUD_HOUR));
 	}
 	eat_hours = MAX(eat_hours, 0);
+
+	/* check trigger */
+	if (!consume_otrigger(food, ch, (subcmd == SCMD_TASTE) ? OCMD_TASTE : OCMD_EAT, NULL, eat_hours)) {
+		return;
+	}
 	
 	// stomach full: only if we're not using it for a buff effect
 	if (eat_hours == 0 && GET_COND(ch, FULL) != UNLIMITED && !will_buff) {
@@ -7803,7 +7850,7 @@ ACMD(do_quaff) {
 			scale_item_to_level(obj, 1);	// just in case
 		}
 		
-		if (!consume_otrigger(obj, ch, OCMD_QUAFF, NULL)) {
+		if (!consume_otrigger(obj, ch, OCMD_QUAFF, NULL, 1)) {
 			return;	// check trigger last
 		}
 

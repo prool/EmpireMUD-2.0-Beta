@@ -5857,6 +5857,8 @@ struct companion_data *add_companion(char_data *ch, any_vnum vnum, any_vnum from
 	}
 	cd->from_abil = from_abil;	// may be NO_ABIL
 	
+	qt_change_companion(ch, vnum, TRUE);
+	
 	return cd;
 }
 
@@ -6019,7 +6021,7 @@ struct companion_data *has_companion(char_data *ch, any_vnum vnum) {
 	struct companion_data *cd;
 	
 	if (IS_NPC(ch)) {
-		return FALSE;
+		return NULL;
 	}
 	
 	HASH_FIND_INT(GET_COMPANIONS(ch), &vnum, cd);
@@ -6074,6 +6076,8 @@ void remove_companion(char_data *ch, any_vnum vnum) {
 		HASH_DEL(GET_COMPANIONS(ch), cd);
 		free_companion(cd);
 	}
+	
+	qt_change_companion(ch, vnum, FALSE);
 }
 
 
@@ -7674,7 +7678,9 @@ void obj_to_obj(obj_data *obj, obj_data *obj_to) {
 		
 		// clear these now
 		REMOVE_BIT(GET_OBJ_EXTRA(obj), OBJ_KEEP);
-		clear_obj_eq_sets(obj);
+		
+		// putting an item in another item does not inherently clear eq sets as of b5.213
+		// clear_obj_eq_sets(obj);
 		
 		DL_PREPEND2(obj_to->contains, obj, prev_content, next_content);
 		obj->in_obj = obj_to;
@@ -7706,9 +7712,11 @@ void obj_to_room(obj_data *object, room_data *room) {
 			++ROOM_LIGHTS(IN_ROOM(object));
 		}
 		
-		// clear these now
+		// clear keep now
 		REMOVE_BIT(GET_OBJ_EXTRA(object), OBJ_KEEP);
-		clear_obj_eq_sets(object);
+		
+		// dropping an item does not inherently clear eq sets as of b5.213
+		// clear_obj_eq_sets(object);
 
 		// set the timer here; actual rules for it are in limits.c
 		if (!suspend_autostore_updates) {
@@ -7747,9 +7755,11 @@ void obj_to_vehicle(obj_data *object, vehicle_data *veh) {
 		object->in_vehicle = veh;
 		VEH_CARRYING_N(veh) += obj_carry_size(object);
 		
-		// clear these now
+		// clear keeyp
 		REMOVE_BIT(GET_OBJ_EXTRA(object), OBJ_KEEP);
-		clear_obj_eq_sets(object);
+		
+		// putting an item in a vehicle does not inherently clear eq sets as of b5.213
+		// clear_obj_eq_sets(object);
 		
 		// set the timer here; actual rules for it are in limits.c
 		VEH_LAST_MOVE_TIME(veh) = time(0);
@@ -9430,6 +9440,14 @@ bool meets_requirements(char_data *ch, struct req_data *list, struct instance_da
 				ok = (GET_LOYALTY(ch) && !get_current_goal(GET_LOYALTY(ch), req->vnum));
 				break;
 			}
+			case REQ_HAVE_COMPANION: {
+				ok = has_companion(ch, req->vnum) ? TRUE : FALSE;
+				break;
+			}
+			case REQ_NOT_HAVE_COMPANION: {
+				ok = has_companion(ch, req->vnum) ? FALSE : TRUE;
+				break;
+			}
 			
 			// some types do not support pre-reqs
 			case REQ_KILL_MOB:
@@ -9518,6 +9536,14 @@ char *requirement_string(struct req_data *req, bool show_vnums, bool allow_custo
 		}
 		case REQ_KILL_MOB: {
 			safe_snprintf(output, sizeof(output), "Kill %dx mob%s: %s%s", req->needed, PLURAL(req->needed), vnum, get_mob_name_by_proto(req->vnum, TRUE));
+			break;
+		}
+		case REQ_HAVE_COMPANION: {
+			safe_snprintf(output, sizeof(output), "Have companion: %s%s", vnum, get_mob_name_by_proto(req->vnum, TRUE));
+			break;
+		}
+		case REQ_NOT_HAVE_COMPANION: {
+			safe_snprintf(output, sizeof(output), "Don't have companion: %s%s", vnum, get_mob_name_by_proto(req->vnum, TRUE));
 			break;
 		}
 		case REQ_KILL_MOB_FLAGGED: {
@@ -11459,6 +11485,9 @@ void store_unique_item(char_data *ch, struct empire_unique_storage **to_list, ob
 				}
 			}
 		}
+		
+		// other data that can be removed
+		GET_AUTOSTORE_TIMER(obj) = 0;
 	}
 	
 	// mark storage timer

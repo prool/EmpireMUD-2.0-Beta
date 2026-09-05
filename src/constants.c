@@ -63,8 +63,8 @@ void tog_pvp(char_data *ch);
 //// EMPIREMUD CONSTANTS /////////////////////////////////////////////////////
 
 // Shown on the "version" command and sent over MSSP
-const char *version = "EmpireMUD 2.0 beta 5.213";
-const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.22";
+const char *version = "EmpireMUD 2.0 beta 5.214";
+const char *DG_SCRIPT_VERSION = "DG Scripts 1.0.12 e5.1.23";
 
 
 // data for the built-in game levels -- this adapts itself if you reduce the number of immortal levels
@@ -751,7 +751,7 @@ const char *room_template_flags[] = {
 	"LOOK-OUT",
 	"!LOCATION",
 	"WATER-DESCRIPTIONS",
-	"*",	// 10
+	"ALLOW-MOUNTS",	// 10
 	"\n"
 };
 
@@ -1174,7 +1174,7 @@ const char *preference_bits[] = {
 	"!TELL",
 	"POLIT",
 	"RP",	// 5
-		"*",	// formerly MORTLOG
+	"GRAY-CITY-BG",
 	"!REP",
 	"LIGHT",
 	"INCOGNITO",
@@ -1289,6 +1289,7 @@ const struct toggle_data_type toggle_data[] = {
 	
 	{ "exits", TOG_OFFON, PRF_NO_EXITS, 0, NULL },
 	{ "short-exits", TOG_ONOFF, PRF_SHORT_EXITS, 0, NULL },
+	{ "gray-city-bg", TOG_ONOFF, PRF_GRAY_CITY_BG, 0, NULL },
 	
 	// imm section
 	{ "wiznet", TOG_OFFON, PRF_NOWIZ, LVL_START_IMM, NULL },
@@ -1468,6 +1469,7 @@ const char *status_message_types[] = {
 	"vehicle movement",	// 15
 	"weather",
 	"fight prompt",
+	"passenger auto look",
 	"\n"
 };
 
@@ -2569,6 +2571,7 @@ const char *empire_admin_flags[] = {
 	"NO-DECAY",
 	"ALL-TECHS",
 	"FREE-WAR",
+	"ALLOW-NEWBIE-ISLE",	// 10
 	"\n"
 };
 
@@ -3278,7 +3281,7 @@ const char *extra_bits[] = {
 	"TWO-HANDED",
 	"BOE",
 	"BOP",	// 15
-	"*",	// formerly STAFF
+	"*READIED-WEAPON-ABIL",
 	"UNCOLLECTED-LOOT",
 	"*KEEP",
 	"*",	// formerly TOOL-PAN
@@ -3315,7 +3318,7 @@ const char *extra_bits_inv_flags[] = {
 	"2h",
 	"BoE",
 	"BoP",	// 15
-	"",	// *
+	"",	// ready-weapon-abil
 	"",	// uncollected
 	"keep",
 	"",	// *
@@ -3352,7 +3355,7 @@ const double obj_flag_scaling_bonus[] = {
 	1.8,	// OBJ_TWO_HANDED
 	1.3,	// OBJ_BIND_ON_EQUIP
 	1.4,	// 15, OBJ_BIND_ON_PICKUP
-	1.0,	// unused
+	1.0,	// OBJ_READIED_WEAPON_ABIL
 	1.0,	// OBJ_UNCOLLECTED_LOOT
 	1.0,	// OBJ_KEEP
 	1.0,	// unused
@@ -3855,6 +3858,9 @@ const char *quest_reward_types[] = {
 	"UNLOCK-ARCHETYPE",
 	"BONUS-ABILITY",	// 15
 	"REMOVE-ABILITY",
+	"COMPANION",
+	"REMOVE-COMPANION",
+	"MINIPET",
 	"\n",
 };
 
@@ -5572,6 +5578,8 @@ const char *requirement_types[] = {
 	"EMPIRE-LACKS-PROGRESS",	// 50
 	"EMPIRE-ON-PROGRESS",
 	"EMPIRE-NOT-ON-PROGRESS",
+	"HAVE-COMPANION",
+	"NOT-HAVE-COMPANION",
 	"\n",
 };
 
@@ -5631,6 +5639,8 @@ const bool requirement_amt_type[] = {
 	REQ_AMT_NONE,	// 50, empire-lacks-progress
 	REQ_AMT_NONE,	// empire-on-progress
 	REQ_AMT_NONE,	// empire-not-on-progress
+	REQ_AMT_NONE,	// have-companion
+	REQ_AMT_NONE,	// not-have-companion
 };
 
 
@@ -5689,6 +5699,8 @@ const bool requirement_needs_tracker[] = {
 	FALSE,	// 50, empire-lacks-progress
 	FALSE,	// empire-on-progress
 	FALSE,	// empire-not-on-progress
+	FALSE,	// have-companion
+	FALSE,	// not-have-companion
 };
 
 
@@ -5786,6 +5798,7 @@ const char *vehicle_flags[] = {
 	"*TEMPORARY",
 	"TINY",	// 40
 	"HIDE-STORAGE-UNOWNED",
+	"LIGHT",
 	"\n"
 };
 
@@ -5834,6 +5847,7 @@ const char *identify_vehicle_flags[] = {
 	"",	// *TEMPORARY
 	"",	// TINY	// 40
 	"",	// HIDE-STORAGE-UNOWNED
+	"provides light",	// LIGHT
 	"\n"
 };
 

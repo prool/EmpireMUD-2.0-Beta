@@ -2683,10 +2683,24 @@ void nanny(descriptor_data *d, char *arg) {
 		}
 
 		case CON_NEWPASSWD: {
+			bool has_alpha = FALSE, has_lowercase = FALSE;
+			
 			if (!*arg || strlen(arg) > MAX_PWD_LENGTH || strlen(arg) < 3 || !str_cmp(arg, GET_PC_NAME(d->character))) {
 				SEND_TO_Q("\r\nIllegal password.\r\n", d);
 				msg_to_desc(d, "Password: %s", telnet_go_ahead(d));
 				return;
+			}
+			
+			for (iter = 0; iter < strlen(arg); ++iter) {
+				if (isalpha(arg[iter])) {
+					has_alpha = TRUE;
+					if (!isupper(arg[iter])) {
+						has_lowercase = TRUE;
+					}
+				}
+			}
+			if (has_alpha && !has_lowercase) {
+				msg_to_desc(d, "\r\nWARNING: Your password is all-uppercase. If this was a caps-lock error, press enter to try again. Otherwise:");
 			}
 			
 			GET_PASSWD(d->character) = str_dup(CRYPT(arg, PASSWORD_SALT));
@@ -2956,6 +2970,7 @@ void nanny(descriptor_data *d, char *arg) {
 
 			// put them in-game
 			enter_player_game(d, TRUE, TRUE);
+			clear_command_history(d);
 			
 			msg_to_desc(d, "\r\n%s\r\n\r\n", config_get_string("welcome_message"));
 			act("$n has entered the game.", TRUE, d->character, 0, 0, TO_ROOM);

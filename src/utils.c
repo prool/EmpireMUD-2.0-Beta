@@ -416,6 +416,49 @@ bool building_counts_as(bld_data *bld, bld_vnum which_bld, veh_vnum which_veh) {
 //// EMPIRE UTILS ////////////////////////////////////////////////////////////
 
 /**
+* May upgrade an empire to imm-only status, but does not downgrade them. This
+* is based on the presence of only immortals in the empire. It will only warn
+* if there's a mix.
+*
+* @param empire_data *emp The empire to check.
+*/
+void check_empire_imm_only(empire_data *emp) {
+	int imms, morts;
+	player_index_data *index, *next_index;
+	
+	if (!emp || EMPIRE_IMM_ONLY(emp)) {
+		return;	// no work
+	}
+	
+	// gather data
+	imms = morts = 0;
+	HASH_ITER(name_hh, player_table_by_name, index, next_index) {
+		if (index->loyalty == emp) {
+			if (index->access_level >= LVL_GOD) {
+				++imms;
+			}
+			else {
+				++morts;
+			}
+		}
+	}
+	
+	if (imms > 0) {
+		// flag
+		syslog(SYS_EMPIRE, LVL_START_IMM, TRUE, "EMPIRE: %s is now an immortal empire", EMPIRE_NAME(emp));
+		SET_BIT(EMPIRE_ADMIN_FLAGS(emp), config_get_bitvector("immortal_empire_default_flags"));
+		EMPIRE_IMM_ONLY(emp) = TRUE;
+		EMPIRE_NEEDS_SAVE(emp) = TRUE;
+		
+		// warn
+		if (morts > 0 && config_get_bool("immortal_empire_restrictions")) {
+			syslog(SYS_EMPIRE, LVL_START_IMM, TRUE, "EMPIRE: %s contains both mortals and immortals", EMPIRE_NAME(emp));
+		}
+	}
+}
+
+
+/**
 * Cancels a requested refresh on 1 or more empires.
 *
 * @param empire_data *only_emp Optional: Only remove from one empire (default: NULL = all)
@@ -4700,7 +4743,7 @@ bool has_resources(char_data *ch, struct resource_data *list, bool ground, bool 
 									break;
 								}
 								case RES_COMPONENT: {
-									if (GET_OBJ_COMPONENT(obj) == res->vnum || is_component_vnum(obj, res->vnum)) {
+									if (GET_OBJ_COMPONENT(obj) == res->vnum || (liter == 1 && is_component_vnum(obj, res->vnum))) {
 										--res->amount;
 										obj->search_mark = TRUE;
 									}
@@ -7476,11 +7519,16 @@ void relocate_players(room_data *room, room_data *to_room) {
 * @return bool TRUE if the room is light, FALSE if not.
 */
 bool room_is_light(room_data *room, bool count_adjacent_light, bool ignore_magic_darkness) {
+	vehicle_data *veh;
+	
 	if (!ignore_magic_darkness && MAGIC_DARKNESS(room)) {
 		return FALSE;	// always dark
 	}
 	
 	// 1. things that make the room light
+	if (IS_BURNING(room)) {
+		return TRUE;
+	}
 	if (GET_ISLAND(room) && IS_SET(GET_ISLAND(room)->flags, ISLE_ALWAYS_LIGHT) && IS_OUTDOOR_TILE(room) && !NO_LOCATION(room)) {
 		return TRUE;
 	}
@@ -7495,6 +7543,11 @@ bool room_is_light(room_data *room, bool count_adjacent_light, bool ignore_magic
 	}
 	if (count_adjacent_light && adjacent_room_is_light(room, ignore_magic_darkness)) {
 		return TRUE;	// not dark: adjacent room is light
+	}
+	DL_FOREACH2(ROOM_VEHICLES(room), veh, next_in_room) {
+		if (VEH_FLAGGED(veh, VEH_LIGHT | VEH_ON_FIRE)) {
+			return TRUE;
+		}
 	}
 	
 	// 2. things that make the room dark

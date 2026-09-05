@@ -1772,7 +1772,7 @@ obj_data *make_corpse(char_data *ch) {
 	if (!IS_NPC(ch)) {
 		GET_LAST_CORPSE_ID(ch) = obj_script_id(corpse);
 	}
-	else {	// mob corpse setup
+	else if (MOB_CUSTOM_CORPSE(ch) != NOTHING) {	// mob corpse setup, unless custom corpse given
 		if (!size_data[size].can_take_corpse) {
 			REMOVE_BIT(GET_OBJ_WEAR(corpse), ITEM_WEAR_TAKE);
 		}
@@ -1820,8 +1820,14 @@ obj_data *make_corpse(char_data *ch) {
 		// custom corpse: add replacements?
 	}
 	
-	set_obj_val(corpse, VAL_CORPSE_IDNUM, IS_NPC(ch) ? GET_MOB_VNUM(ch) : (-1 * GET_IDNUM(ch)));
-	set_obj_val(corpse, VAL_CORPSE_SIZE, size);
+	if (MOB_CUSTOM_CORPSE(ch) == NOTHING || GET_OBJ_VAL(corpse, VAL_CORPSE_IDNUM) <= 0) {
+		// only set corpse idnum if it didn't have a custom one set
+		set_obj_val(corpse, VAL_CORPSE_IDNUM, IS_NPC(ch) ? GET_MOB_VNUM(ch) : (-1 * GET_IDNUM(ch)));
+	}
+	if (MOB_CUSTOM_CORPSE(ch) == NOTHING) {
+		// only preserve size if it's not a custom corpse
+		set_obj_val(corpse, VAL_CORPSE_SIZE, size);
+	}
 	set_obj_val(corpse, VAL_CORPSE_FLAGS, (MOB_FLAGGED(ch, MOB_NO_LOOT) ? CORPSE_NO_LOOT : NOBITS));
 		
 	if (human) {
@@ -3636,7 +3642,7 @@ int damage(char_data *ch, char_data *victim, int dam, int attacktype, byte damty
 		stop_fighting(victim);
 
 	/* Uh oh.  Victim died. */
-	if (GET_POS(victim) == POS_DEAD) {
+	if (GET_POS(victim) == POS_DEAD || (GET_POS(victim) <= POS_STUNNED && MOB_FLAGGED(victim, MOB_NO_UNCONSCIOUS))) {
 		if (match_attack_type(attacktype, ATTACK_VAMPIRE_BITE) && ch != victim && !AFF_FLAGGED(victim, AFF_NO_DRINK_BLOOD) && !GET_FEEDING_FROM(ch) && IN_ROOM(ch) == IN_ROOM(victim)) {
 			set_health(victim, 0);
 			GET_POS(victim) = POS_STUNNED;
@@ -4338,8 +4344,9 @@ void perform_violence_missile(char_data *ch, obj_data *weapon) {
 	obj_data *ammo, *best = NULL;
 	struct affected_type *af;
 	struct obj_apply *apply;
-	int dam = 0, ret, atype;
+	int dam = 0, ret, atype, bonus;
 	char_data *vict;
+	double attack_speed, cur_speed;
 	
 	if (!(vict = FIGHTING(ch))) {
 		return;
@@ -4426,6 +4433,19 @@ void perform_violence_missile(char_data *ch, obj_data *weapon) {
 		// compute damage
 		dam = GET_MISSILE_WEAPON_DAMAGE(weapon) + (best ? GET_AMMO_DAMAGE_BONUS(best) : 0);
 		
+		// applicable bonuses
+		if (IS_MAGIC_ATTACK(GET_MISSILE_WEAPON_TYPE(weapon))) {
+			bonus = GET_INTELLIGENCE(ch) + GET_BONUS_MAGICAL(ch);
+		}
+		else {
+			bonus = GET_STRENGTH(ch) + GET_BONUS_PHYSICAL(ch);
+		}
+		
+		// bonus add is based on speeds
+		attack_speed = get_base_speed(ch, WEAR_RANGED);
+		cur_speed = get_combat_speed(ch, WEAR_RANGED);
+		dam += bonus * (attack_speed / basic_speed) * (attack_speed / cur_speed);
+		
 		if (!IS_NPC(ch) && has_ability(ch, ABIL_BOWMASTER)) {
 			dam *= 1.5;
 			if (can_gain_exp_from(ch, vict, ability_proto(ABIL_BOWMASTER))) {
@@ -4457,7 +4477,7 @@ void perform_violence_missile(char_data *ch, obj_data *weapon) {
 		}
 		
 		// fire a consume trigger but it can't block execution here
-		if (best && !consume_otrigger(best, ch, OCMD_SHOOT, (!EXTRACTED(vict) && !IS_DEAD(vict)) ? vict : NULL)) {
+		if (best && !consume_otrigger(best, ch, OCMD_SHOOT, (!EXTRACTED(vict) && !IS_DEAD(vict)) ? vict : NULL, 1)) {
 			purge = FALSE;	// ammo likely extracted
 		}
 		

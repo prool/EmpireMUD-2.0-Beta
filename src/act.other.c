@@ -462,6 +462,10 @@ void perform_alternate(char_data *old, char_data *new) {
 		msg_to_char(new, "\r\n\tY%s\t0", msg);
 	}
 	
+	if (should_reset_bonus_traits(new) || num_earned_bonus_traits(new) > count_bits(GET_BONUS_TRAITS(new))) {
+		msg_to_char(new, "\r\n\tAYou have new bonus traits available. Quit and then re-login from the login screen to choose them.\t0\r\n");
+	}
+	
 	if (!IS_IMMORTAL(new)) {
 		add_cooldown(new, COOLDOWN_ALTERNATE, SECS_PER_REAL_MIN);
 	}
@@ -1712,6 +1716,9 @@ ACMD(do_changepass) {
 	argument = any_one_word(argument, new1);
 	argument = any_one_word(argument, new2);
 	
+	// always clear command history-- don't keep passwords
+	clear_command_history(ch->desc);
+	
 	if (IS_NPC(ch)) {
 		msg_to_char(ch, "You can't do that.\r\n");
 	}
@@ -1735,7 +1742,8 @@ ACMD(do_changepass) {
 		if (ch->desc && ch->desc->snoop_by) {
 			syslog(SYS_INFO, MIN(LVL_TOP, MAX(GET_INVIS_LEV(ch), GET_ACCESS_LEVEL(ch) + 1)), TRUE, "WARNING: %s changed password while being snooped", GET_NAME(ch));
 		}
-		msg_to_char(ch, "You have successfully changed your password.\r\n");
+		
+		msg_to_char(ch, "You have successfully changed your password. Your command history has been cleared for privacy.\r\n");
 	}
 }
 
@@ -2763,9 +2771,10 @@ ACMD(do_milk) {
 
 
 ACMD(do_minipets) {
+	bool random;
 	struct minipet_data *mini, *next_mini;
 	char_data *mob, *to_summon;
-	int count, number;
+	int count, num;
 	
 	skip_spaces(&argument);
 	
@@ -2812,18 +2821,35 @@ ACMD(do_minipets) {
 			dismiss_any_minipet(ch);
 		}
 	}
+	else if (!GET_MINIPETS(ch)) {
+		msg_to_char(ch, "You don't have any minipets.\r\n");
+	}
 	else {
-		number = get_number(&argument);
+		if (!str_cmp(argument, "rand") || !str_cmp(argument, "random")) {
+			random = TRUE;
+			num = 0;
+		}
+		else {
+			// not random: allow number-dot-name syntax
+			num = get_number(&argument);
+		}
 		
 		to_summon = NULL;	// to find
 		HASH_ITER(hh, GET_MINIPETS(ch), mini, next_mini) {
 			if (!(mob = mob_proto(mini->vnum))) {
 				continue;	// no mob
 			}
+			
+			if (random) {
+				// just pick based on number
+				if (!number(0, num++) || !to_summon) {
+					to_summon = mob;
+				}
+			}
 			else if (!multi_isname(argument, GET_PC_NAME(mob))) {
 				continue;	// no match
 			}
-			else if (--number == 0) {
+			else if (--num == 0) {
 				to_summon = mob;
 				break;	// FOUND!
 			}

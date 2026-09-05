@@ -164,6 +164,11 @@ You can create:
   bloodsword (slash)
   bloodwhip (whip/tank)
 
+Note: If you're already using a weapon from any Ready Weapon-type ability when
+you use Ready Blood Weapons, the new weapon is capped at the same level as the
+current readied weapon. If this results in the wrong weapon level, remove the
+other readied weapon before activating Ready Blood Weapons again.
+
 When you activate this power, you will automatically wield the weapon of your
 choice, and it will disappear when unequipped.
 
@@ -411,6 +416,8 @@ Red Mist (Vampire ability)
 With this ability, you gain a chance to absorb blood from the air after any
 physical attack. Your claws and blood weapons are also upgraded in quality.
 
+Gain experience whenever this ability triggers.
+
 See also: CLAWS, READY BLOOD WEAPONS
 #
 REGENERATE
@@ -448,7 +455,7 @@ Usage:  bite [target]
 
 Your 'bite' becomes more dangerous in combat, with effects that depend on what
 group role you're in. All roles will steal a small amount of blood with each
-bite.
+bite. Gain experience when you bite a target.
 
 Melee/Solo role:
 - Bite never "taunts" the target to focus on you (instead of 33% chance).

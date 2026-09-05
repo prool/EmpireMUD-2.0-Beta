@@ -536,7 +536,7 @@ void survey_city(char_data *ch, char *argument) {
 				owned = rough = ocean = water = FALSE;
 				
 				// analyze tile
-				owned = (ROOM_OWNER(room) && ROOM_OWNER(room) != GET_LOYALTY(ch) && !ROOM_AFF_FLAGGED(room, ROOM_AFF_CHAMELEON));
+				owned = (ROOM_OWNER(room) && ROOM_OWNER(room) != GET_LOYALTY(ch) && !CHECK_CHAMELEON(IN_ROOM(ch), room));
 				rough = SECT_FLAGGED(BASE_SECT(room), SECTF_ROUGH) ? TRUE : FALSE;
 				ocean = SECT_FLAGGED(BASE_SECT(room), SECTF_OCEAN) ? TRUE : FALSE;
 				water = SECT_FLAGGED(BASE_SECT(room), SECTF_FRESH_WATER) ? TRUE : FALSE;
@@ -2449,8 +2449,11 @@ char *obj_desc_for_char(obj_data *obj, char_data *ch, int mode) {
 		}
 		else if (IS_PORTAL(obj)) {
 			room = real_room(GET_PORTAL_TARGET_VNUM(obj));
-			if (room) {
+			if (room && can_see_in_dark_room(ch, room, TRUE)) {
 				sprintf(buf, "%sYou peer into %s and see: %s%s\t0", NULLSAFE(GET_OBJ_ACTION_DESC(obj)), GET_OBJ_DESC(obj, ch, OBJ_DESC_SHORT), get_room_name(room, TRUE), coord_display_room(ch, room, FALSE));
+			}
+			else if (room) {
+				sprintf(buf, "%s", NULLSAFE(GET_OBJ_ACTION_DESC(obj)));
 			}
 			else {
 				sprintf(buf, "%sIt's a portal, but it doesn't seem to lead anywhere.", NULLSAFE(GET_OBJ_ACTION_DESC(obj)));
