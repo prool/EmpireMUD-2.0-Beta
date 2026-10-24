@@ -576,22 +576,50 @@ L w 5102
 L w 5103
 L w 5104
 shatter~
+* certain resources that are too easy to acquire
+set ban_list -1 100 102 106 131 134 135 136 142 146 148 180 181 184 616 851 852 919 2104 2140
+*
 eval target %%actor.obj_target(%arg.argument1%)%%
 if !%arg%
+  * no-arg: just list
   %send% %actor% Shatter which piece of gear?
+  set any 0
+  set obj %actor.inventory%
+  while %obj%
+    if %obj.wearable% && !%obj.is_flagged(*KEEP)% && !%obj.is_stolen% && !(%ban_list% ~= %obj.vnum%)
+      if %obj.is_flagged(SUPERIOR)%
+        set qual &&Y superior&&0
+      elseif %obj.is_flagged(HARD-DROP)% && %obj.is_flagged(GROUP-DROP)%
+        set qual &&M boss&&0
+      elseif %obj.is_flagged(GROUP-DROP)%
+        set qual &&C group&&0
+      elseif %obj.is_flagged(HARD-DROP)%
+        set qual &&G hard&&0
+      else
+        set qual
+      end
+      %send% %actor% &&0  @%obj%  (level %obj.level%%qual%)
+      set any 1
+    end
+    set obj %obj.next_in_list%
+  done
+  if !%any%
+    %send% %actor%  (no shatterable items found)
+  end
   halt
 elseif !%target%
   %send% %actor% You don't see that to shatter here.
   halt
-end
-if !%target.carried_by%
+elseif !%target.carried_by%
   %send% %actor% Pick @%target% up first.
   halt
-end
-if !%target.wearable%
+elseif %target.vnum% < 0 || %ban_list% ~= %target.vnum%
+  %send% %actor% You cannot shatter that.
+  halt
+elseif !%target.wearable%
   %send% %actor% @%target% is not an equipment item.
   halt
-elseif %target.is_flagged(*keep)%
+elseif %target.is_flagged(*KEEP)%
   %send% %actor% You cannot shatter something you are keeping.
   halt
 elseif %target.is_stolen%
@@ -617,7 +645,7 @@ end
 * 301~400: 5103
 * 401~500: 5104
 eval shard_type 5100 + ((%level_modified%-1) / 100)
-eval currency_name %%currency.%shard_type%%%
+eval currency_name %%currency.%shard_type%(%shard_value%)%%
 if !%currency_name% || %currency_name% == UNKNOWN
   %send% %actor% @%target% is too high level to shatter into any current type of shard!
   halt
@@ -627,7 +655,7 @@ if %shard_value% < 1 || %target.quest%
   halt
 end
 %send% %actor% You shatter @%target% into %shard_value% %currency_name%.
-%echoaround% %actor% ~%actor% shatters @%target% into %currency_name%.
+%echoaround% %actor% ~%actor% shatters @%target% into %shard_value% %currency_name%.
 eval money %%actor.give_currency(%shard_type%, %shard_value%)%%
 nop %money%
 %purge% %target%

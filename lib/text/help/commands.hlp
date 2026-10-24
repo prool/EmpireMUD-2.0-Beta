@@ -64,7 +64,7 @@ completed.
 
 See also: TOGGLE
 #
-AFFECTS
+AFFECTS EFFECTS
 
 Usage:  affects [person]
 
@@ -293,12 +293,14 @@ Inviting a player to a group automatically beckons them to follow.
 
 See also: FOLLOW
 #
-BOARD
+BOARD EMBARK
 
 Usage:  board <vehicle>
 
 This command is used to board a ship or other vehicle in the same room. Not
 all vehicles can be boarded.
+
+If you were looking for message boards, try HELP BOARDS.
 
 See also: DISEMBARK, SAIL, MANUFACTURE, LOAD, SHIPS
 #
@@ -909,7 +911,7 @@ You can also do the following complex emotes:
  - Use @target to insert another person (e.g. "@wolf")
  - Use #item to insert an item (e.g. "#sword")
 
-See also: SOCIALS
+See also: RECOLOR, SOCIALS
 #
 EMPTY
 
@@ -1297,7 +1299,7 @@ Usage:  gsay <message>
 Tell something to all the members of your group, even if they're not in the
 room. You can also use the older psay/ptell command, which does the same thing.
 
-See also: DISPLAY, IGNORE, GROUP, TELL, SAY
+See also: DISPLAY, IGNORE, GROUP, TELL, RECOLOR, SAY
 #
 HELP
 
@@ -1313,6 +1315,8 @@ Examples:
     will find the help text for the hide ability.
 
 Immortals may view mortal help files with: help -m <topic>
+
+Help files are also available in a web browser at http://empiremud.net/help.php
 
 See also: COMMANDS, HELPSEARCH, SOCIALS
 #
@@ -1513,6 +1517,9 @@ When junking coins, if you don't specify an empire, it will default to your
 generic coins. If you need to use an empire with a multi-word name, put it in
 "quotes". You can use the empire's full name, adjective name, or number.
 
+To offer an item to a god for its resource value, use "sacrifice". To break
+down unneeded gear for shards, use "shatter".
+
 Examples:
 
   > junk cup
@@ -1521,7 +1528,7 @@ Examples:
 Were you looking for the 'JUNK' item flag? This indicates an item that cannot
 be stored anywhere. It will disappear if left on the ground too long.
 
-See also: COINS, DROP
+See also: COINS, DROP, SACRIFICE, SHATTER
 #
 KILL HIT MURDER
 
@@ -2198,6 +2205,10 @@ and affect-wear-off messages, to make them easier to see in combat.
 
 Type 'recolor' by itself to see your current custom colors.
 
+You can recolor:
+ Channels and messages: emote, etalk, gsay, oocsay, say, slash-channels, tell
+ Status messages: status, sun, temperature, weather
+
 See HELP COLOR to see a list of color codes.
 
 See also: COLOR
@@ -2296,6 +2307,10 @@ Usage:  respawn
 
 When your character has died, you can still observe for a short time. When you
 are ready to respawn, use this command.
+
+When your respawn cooldown expires, you will automatically respawn. However,
+the respawn cooldown will reset instead if other players are still in combat
+when the cooldown ends.
 
 You will come back at your tomb if it's on the same island or within 100 tiles
 of where you died. Otherwise, you'll come back at a random tomb your empire
@@ -2441,7 +2456,8 @@ Examples:
  > pilot east 3, north 4, northwest 7
  > drive (415,780)
 
-Many vehicles cannot move through portals.
+Note: Only certain vehicles can pass through portals. Most, like carts and
+wagons, cannot.
 
 See also: BOARD, DISEMBARK, DRAG, LAND VEHICLES, LEAD, SHIPBUILDING, SHIPS,
 STATUS MESSAGES, STOP, TOGGLE, RUN
@@ -2487,7 +2503,7 @@ You can use ' as a shorthand for say, and " for oocsay, as in:
   > 'hello there.
 
 See also: CHANNELS, GSAY, IGNORE, NOREPEAT, NOTELL, REPLY, SLASH CHANNELS,
-   SPEAK
+   RECOLOR, SPEAK
 #
 SAYHISTORY
 
@@ -2936,7 +2952,7 @@ Sweltering penalties: distracted from timed actions, damage over time
 
 You can turn off alerts about changes in temperature with "smessages".
 
-See also: SURVEY, STATUS MESSAGES, TIME, WEATHER
+See also: RECOLOR, SURVEY, STATUS MESSAGES, TIME, WEATHER
 #
 THROW
 
@@ -3016,6 +3032,7 @@ Toggles:
   item-details - shows level and some other information in inventory/equipment
   item-quality - shows superior/hard/group/boss info in inventory/equipment
   map-color - shut off color for just the map
+  no-columns - turns off column view and shows one thing per line instead
   no-empire - will not create a new empire when you try to claim or build
   no-friends - this alt is hidden from friends lists
   no-paint - turns off custom paint colors on buildings
@@ -3047,6 +3064,15 @@ dim tiles.
 
 See also: FIGHT MESSAGES, FRIENDS, MANAGE, STATUS MESSAGES, TOGGLE <type>,
   WORKFORCE
+#
+"TOGGLE NO-COLUMNS" "TOGGLE NOCOLUMNS" "NO COLUMNS" NO-COLUMNS NOCOLUMNS
+
+Usage:  toggle no-columns [on/off]
+
+This toggle turns off column display and shows one item per line instead. Some
+commands do not support this toggle yet.
+
+This toggle defaults to 'on' for screen-reader users.
 #
 "TOGGLE NO-EMPIRE" "TOGGLE NOEMPIRE" NOEMPIRE NO-EMPIRE
 
@@ -3199,7 +3225,7 @@ the sun or moon are up.
 You also receive alerts as the weather changes when you're outdoors or near a
 window. These messages can be disabled with the "smessages" command.
 
-See also: STATUS MESSAGES, SURVEY, TEMPERATURE, TIME
+See also: RECOLOR, STATUS MESSAGES, SURVEY, TEMPERATURE, TIME
 #
 WHO
 

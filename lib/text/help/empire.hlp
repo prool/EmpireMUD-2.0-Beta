@@ -263,7 +263,7 @@ Usage:  demote <person> [rank]
 Demotes a person within the empire. You can specify the name of the rank
 you'd like to demote them to, or just do it one rank at a time.
 
-See also: PRIVILEGE, PROMOTE, EXPEL
+See also: PRIVILEGE, PROMOTE, EXPEL, ROSTER
 #
 DEPOSIT
 
@@ -379,12 +379,13 @@ Available options:
  rank - change the name of a rank
  ranks - change the number of ranks
  frontiertraits - set your empire's default behavior outside of cities
+ toggles - settings
 
 Ranking immortals may use the syntax:  eedit [empire] <option> <argument>
  adminflags - immortals may set admin flags on empires
  rescan - immortals can have the game rescan territory and other stats
 
-See also: PRIVILEGE, EMPIRE TRAITS
+See also: PRIVILEGE, ROSTER, EMPIRE TRAITS
 #
 "EEDIT ADMINFLAGS" "EEDIT ADMIN FLAGS" "EMPIRE ADMIN FLAGS"
 
@@ -404,6 +405,8 @@ Immortals with the "EMPIRES" grant can set administrative flags on empires.
  &gALL-TECHS&0 - Empire can use all empire techs (e.g. Seafaring).
  &gFREE-WAR&0 - Wars by/against the empire have no cost.
  &gALLOW-NEWBIE-ISLE&0 - Newbie island claims don't auto-clear.
+ &gROSTER-SHARING&0 - Allies can see the roster (this is an eedit toggle).
+ &cHIDDEN-PROGRESS&0 - Progress goals are not announced to the world.
 
 Both the NO-WAR and NO-STEAL flags will prevent 'reclaim' from being used by OR
 against the empire.
@@ -494,6 +497,21 @@ This was formerly 'utility rescan'.
 
 See also: GRANT
 #d
+"EEDIT TOGGLES" "EMPIRE TOGGLES"
+
+Usage:  eedit toggles
+        eedit toggle <option> [on | off]
+
+You can configure certain empire settings using "eedit toggles", if you're the
+leader or the highest rank in the empire.
+
+Available toggles:
+  Roster Sharing - Members of allied empires can view your roster.
+  Hidden Progress - Your progress goals won't announce to the world (requires
+    the Hidden Progress goal).
+
+See also: HIDDEN PROGRESS, ROSTER SHARING
+#
 EFIND
 
 Usage:  efind <name>
@@ -579,6 +597,7 @@ EMPIREINVENTORY EINVENTORY EINV
 
 Usage:  empireinventory [item | all]
         einventory [item | all]
+        einventory -c <component type>
        
 The EInventory command shows the contents of all storage buildings and rooms
 for the island you're currently on. It won't work out in the ocean. You can
@@ -587,7 +606,7 @@ use the ship command to move resources between multiple islands.
 You can specify an item name to see only matching items. If you specify a name,
 it'll show them whether or not the item is stored on your current island. If
 you don't specify a name, you can see all items regardless of where they are
-stored using "EInv all".
+stored using "EInv all". You can also search by component type.
 
 You can use "warehouse inventory" to see items in warehouse (unique) storage.
 
@@ -595,7 +614,7 @@ You can use "warehouse inventory" to see items in warehouse (unique) storage.
 their own empire. If the empire name has more than one word, you can use
 quotation marks.
 
-See also: AUTOSTORE, EFIND, SHIPPING, WORKFORCE, EIDENTIFY
+See also: AUTOSTORE, COMPONENT TYPES, EFIND, SHIPPING, WORKFORCE, EIDENTIFY
 #
 "EMPIRE SCORE" ESCORE
 
@@ -628,7 +647,7 @@ inventory, and territory will also become part of your empire. However, if
 the newly-merged empire doesn't have enough city points available, some of
 the merged cities may lose their city status.
 
-See also: CITY, EXPEL, PROMOTE, PRIVILEGE, PLEDGE
+See also: CITY, EXPEL, PROMOTE, PRIVILEGE, PLEDGE, ROSTER
 #
 ESAY ETALK EHISTORY EMPIREHISTORY
 
@@ -654,6 +673,8 @@ Examples:
  > etalk Hi guys!
  > etalk #high_lord Hi, High Lords!
  > etalk #lord *bows before the other lords.
+
+See also: RECOLOR
 #
 ESTABLISH ESTABLISHED ESTABLISHING "NOT ESTABLISHED" "CITY DELAY"
 
@@ -704,6 +725,8 @@ with. Coins will be converted from your currency to theirs (for importing), or
 from their currency to yours (for exporting). The better your relationship with
 that empire, the more even the exchange of money will be.
 
+Imports are processed automatically; items are imported to your main island.
+
 The analyze command will show you which of your trading partners has the item
 available.
 
@@ -723,7 +746,7 @@ Examples:
   > import add 500 1 strange crystal seed
   > export add 750 5 strange crystal seed
 
-See also: COINS, EXCHANGE RATE
+See also: COINS, EXCHANGE RATE, MAIN ISLAND
 #
 "EXTENDED RADIUS" EXTENDED-RADIUS "LARGE CITY RADIUS" LARGE-CITY-RADIUS "LARGE RADIUS" LARGE-RADIUS
 
@@ -832,6 +855,16 @@ Rewards the following building:
   .TT.  guardtower
 
 See also: PROGRESS
+#
+"HIDDEN PROGRESS" "HIDE PROGRESS"
+
+Hidden Progress (purchasable progress goal)
+
+After purchasing this progress goal, you can turn this feature on or off with
+"eedit toggle Hidden Progress". If you enable this, your future progress goal
+achievements will not announce to the world that you have completed them.
+
+See also: EEDIT TOGGLES, PROGRESS
 #
 "HIGH MOUNTAIN GRAZIERS" "MOUNTAIN GRAZIERS" GRAZIERS
 
@@ -946,6 +979,19 @@ Rewards the following buildings:
   &g^/\^&0  trappers post
 
 See also: LUXURIES GOAL, PROGRESS
+#
+"MAIN ISLAND" "PRIMARY ISLAND"
+
+An empire's "main island" is the one where it has the largest city. Or, if two
+or more islands have the same city size, the main island is whichever has the
+oldest city.
+
+Situations involving the main island:
+- Imports from another empire go to your main island.
+- Vessel at sea with items stored inside autostore to the main island.
+- Stolen items that are left at sea autostore back to your main island.
+
+See also: AUTOSTORE
 #
 MANAGE MANAGEMENT "LAND MANAGEMENT" NOWORK NO-WORK NODISMANTLE NO-DISMANTLE PUBLIC PUBLICIZE PRIVATE PRIVATIZE
 
@@ -1127,7 +1173,8 @@ Privileges:
   dismantle: can dismantle buildings and vehicles owned by the empire (also
     controls burning your empire's buildings and vehicles)
 
-See also: CLAIM, BUILD, HARVEST, PROMOTE, DEMOTE, CHOP, CEDE, EEDIT, ELOG
+See also: CLAIM, BUILD, HARVEST, PROMOTE, DEMOTE, CHOP, CEDE, EEDIT, ELOG,
+ROSTER
 #
 PUBLICIZE
 
@@ -1202,7 +1249,7 @@ See also: PROGRESS
 #
 ROSTER
 
-Usage:  roster [all]
+Usage:  roster [empire] [all]
 
 This command shows you the members of your empire and lets you know who's on-
 line and who's been gone a while. The color of the player's main skills (if not
@@ -1210,9 +1257,18 @@ white) indicates their role, if any: &aCaster&0, &jHealer&0, &yTank&0 or &rMelee
 
 If you don't use the "all" option, you won't see members who have timed out.
 
-High-level immortals can also target other empires with this command.
+You can view the roster of allied empires if they have toggled Roster Sharing
+on with eedit. Privileged immortals can also target other empires with this
+command.
 
-See also: WHO
+See also: ROSTER SHARING, WHO
+#
+"ROSTER SHARING" "SHARED ROSTER"
+
+You can enable or disable roster sharing with "eedit toggle Roster Sharing".
+When enabled, any empire that is allied with yours can view your roster.
+
+See also: EEDIT TOGGLES, ROSTER
 #
 "SALT OF THE EARTH"
 
@@ -1333,6 +1389,7 @@ Supported options:
    -no-work   Only no-work tiles.
    -public   Only public tiles.
    -private  Only private tiles.
+   -all  No grouping (show all tiles, even if the list is long).
 
 You can also add search keywords. Starting a keyword with a dash (-) will
 search for tiles that DON'T have that word. If you need to exclude a word
@@ -1516,13 +1573,14 @@ help keep its workforce well-fed. Players can also retrieve these foods from
 the larder and take them along as long-lasting food.
 
 Examples of village foods:
- loaf of village bread
- village gruel
- village rice
- pickled village vegetables
- village oat cakes
- village fruit preserves
- pickled village eggs
+ loaf of village bread  (2x flour)
+ village gruel  (2x grain)
+ village rice  (2x rice)
+ pickled village vegetables  (2x large vegetables, 1x salt)
+ village oat cakes  (2x oatmeal)
+ village fruit preserves  (2x large raw fruit)
+ pickled village eggs  (2x raw eggs, 1x salt)
+ village smoked meat  (2x meat)
 
 See also: EINVENTORY, WORKFORCE CRAFTING
 #

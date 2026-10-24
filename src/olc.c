@@ -4898,7 +4898,8 @@ void show_requirement_display(char_data *ch, struct req_data *list, bool send_ou
 
 
 /**
-* Displays a resource list.
+* Displays a resource list for immortals and stat screens -- this includes
+* vnums. Mortals instead use show_resource_list().
 *
 * @param char_data *ch Person viewing the list.
 * @param struct resource_data *list The list to show.
@@ -4919,7 +4920,7 @@ void show_resource_display(char_data *ch, struct resource_data *list, bool send_
 				break;
 			}
 			case RES_COMPONENT: {
-				sprintf(line, "%dx (%s)", res->amount, res->amount == 1 ? get_generic_name_by_vnum(res->vnum) : get_generic_string_by_vnum(res->vnum, GENERIC_COMPONENT, GSTR_COMPONENT_PLURAL));
+				sprintf(line, "%dx [%d] (%s)", res->amount, res->vnum, res->amount == 1 ? get_generic_name_by_vnum(res->vnum) : get_generic_string_by_vnum(res->vnum, GENERIC_COMPONENT, GSTR_COMPONENT_PLURAL));
 				break;
 			}
 			case RES_LIQUID: {
@@ -5898,7 +5899,7 @@ bitvector_t olc_process_flag(char_data *ch, char *argument, char *name, char *co
 	int iter;
 	
 	if (!*argument) {
-		one_per_line = PRF_FLAGGED(ch, PRF_SCREEN_READER) ? TRUE : FALSE;
+		one_per_line = PRF_FLAGGED(ch, PRF_NO_COLUMNS) ? TRUE : FALSE;
 		for (iter = 0; *flag_names[iter] != '\n' && !one_per_line; ++iter) {
 			if (strlen(flag_names[iter]) + 5 > 34) {
 				// too long
@@ -7021,7 +7022,7 @@ int olc_process_type(char_data *ch, char *argument, char *name, char *command, c
 	bool alldigit, found, one_per_line;
 	
 	if (!*argument) {
-		one_per_line = PRF_FLAGGED(ch, PRF_SCREEN_READER) ? TRUE : FALSE;
+		one_per_line = PRF_FLAGGED(ch, PRF_NO_COLUMNS) ? TRUE : FALSE;
 		for (iter = 0; *type_names[iter] != '\n' && !one_per_line; ++iter) {
 			if (strlen(type_names[iter]) + 10 > 34) {
 				// too long
@@ -7557,7 +7558,6 @@ void olc_process_extra_desc(char_data *ch, char *argument, struct extra_descr_da
 void olc_process_icons(char_data *ch, char *argument, struct icon_data **list) {
 	char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH], arg4[MAX_INPUT_LENGTH];
 	char num_arg[MAX_INPUT_LENGTH], type_arg[MAX_INPUT_LENGTH], val_arg[MAX_INPUT_LENGTH];
-	char lbuf[MAX_INPUT_LENGTH];
 	struct icon_data *icon, *change, *temp, *copyfrom;
 	int iter, loc, num, findtype;
 	any_vnum vnum;
@@ -7621,8 +7621,8 @@ void olc_process_icons(char_data *ch, char *argument, struct icon_data **list) {
 			LL_APPEND(*list, temp);
 
 			LL_SORT(*list, sort_icon_set);
-			strcpy(lbuf, show_color_codes(arg4));
-			msg_to_char(ch, "You add %s: %s %s%s&0 %s\r\n", icon_types[loc], show_color_codes(arg3), arg3, arg4, lbuf);
+			
+			msg_to_char(ch, "You add %s: %s\r\n", icon_types[loc], one_icon_display(temp->icon, temp->color));
 		}
 	}
 	else if (is_abbrev(arg1, "copy")) {
@@ -7735,7 +7735,7 @@ void olc_process_icons(char_data *ch, char *argument, struct icon_data **list) {
 					free(change->icon);
 				}
 				change->icon = str_dup(val_arg);
-				msg_to_char(ch, "Icon %d changed to: %s%s&0 %s\r\n", atoi(num_arg), icon->color, val_arg, show_color_codes(val_arg));
+				msg_to_char(ch, "Icon %d changed to: %s\r\n", atoi(num_arg), one_icon_display(icon->icon, icon->color));
 			}
 		}
 		else {

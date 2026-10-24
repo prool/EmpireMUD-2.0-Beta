@@ -244,9 +244,27 @@ craft_data *create_craft_table_entry(craft_vnum vnum) {
 */
 char *list_one_craft(craft_data *craft, bool detail) {
 	static char output[MAX_STRING_LENGTH];
+	char abil[256], flags[MAX_STRING_LENGTH], obj[256];
 	
 	if (detail) {
-		safe_snprintf(output, sizeof(output), "[%5d] %s (%s)", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft), craft_types[GET_CRAFT_TYPE(craft)]);
+		// requirements
+		if (GET_CRAFT_ABILITY(craft) != NOTHING) {
+			safe_snprintf(abil, sizeof(abil), " {%s}", get_ability_name_by_vnum(GET_CRAFT_ABILITY(craft)));
+		}
+		else {
+			*abil = '\0';
+		}
+		if (GET_CRAFT_REQUIRES_OBJ(craft) != NOTHING) {
+			safe_snprintf(abil, sizeof(abil), " [%s]", skip_filler(get_obj_name_by_proto(GET_CRAFT_REQUIRES_OBJ(craft))));
+		}
+		else {
+			*obj = '\0';
+		}
+		
+		// flags
+		sprintbit(GET_CRAFT_FLAGS(craft), craft_flags, flags, TRUE);
+		
+		safe_snprintf(output, sizeof(output), "[%5d] %s (%s)%s%s %s", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft), craft_types[GET_CRAFT_TYPE(craft)], abil, obj, flags);
 	}
 	else {
 		safe_snprintf(output, sizeof(output), "[%5d] %s", GET_CRAFT_VNUM(craft), GET_CRAFT_NAME(craft));
@@ -414,7 +432,7 @@ void olc_fullsearch_craft(char_data *ch, char *argument) {
 		FULLSEARCH_FLAGS("requiresfunction", only_functions, function_flags)
 		FULLSEARCH_BOOL("requiresobject", requires_obj)
 		FULLSEARCH_INT("time", only_time, 0, INT_MAX)
-		FULLSEARCH_INT("timesover", time_over, 0, INT_MAX)
+		FULLSEARCH_INT("timeover", time_over, 0, INT_MAX)
 		FULLSEARCH_INT("timeunder", time_under, 0, INT_MAX)
 		FULLSEARCH_FLAGS("tools", only_tools, tool_flags)
 		FULLSEARCH_INT("vmin", vmin, 0, INT_MAX)

@@ -2296,6 +2296,44 @@ int is_abbrev(const char *arg1, const char *arg2) {
 
 
 /**
+* Determines if 'arg' is an abbrev of 'string' without regard to hyphens in
+* 'string'. For example, lets you accept 'no-tell' or 'notell' equally, and
+* the player might have typed 'no-t' or 'not' for this abbrev.
+*
+* @param const char *arg The argument typed by the player.
+* @param const char *string The string to compare to.
+* @preturn bool TRUE if 
+*/
+bool is_abbrev_ignore_hyphen(const char *arg, const char *string) {
+	bool ok;
+	char *copied;
+	int iter, pos;
+	
+	// basic abbrev
+	if (is_abbrev(arg, string)) {
+		return TRUE;
+	}
+	
+	// duplicate the string with no -
+	CREATE(copied, char, strlen(string)+1);
+	for (iter = 0, pos = 0; iter < strlen(string); ++iter) {
+		if (string[iter] != '-') {
+			copied[pos++] = string[iter];
+		}
+	}
+	copied[pos++] = '\0';
+	
+	// test, save result for later
+	ok = is_abbrev(arg, copied);
+	
+	// cleanup copy
+	free(copied);
+	
+	return ok;
+}
+
+
+/**
 * similar to is_abbrev() but compares abbreviations of multiple words, e.g.
 * "cl br" would be a multi-abbrev of "clay bricks".
 *
@@ -2973,8 +3011,8 @@ int get_attribute_by_apply(char_data *ch, int apply_type) {
 		case APPLY_BLOOD_UPKEEP: {
 			return GET_BLOOD_UPKEEP(ch);
 		}
-		case APPLY_NIGHT_VISION: {
-			return GET_EXTRA_ATT(ch, ATT_NIGHT_VISION);
+		case APPLY_LIGHT_RADIUS: {
+			return GET_EXTRA_ATT(ch, ATT_LIGHT_RADIUS);
 		}
 		case APPLY_NEARBY_RANGE: {
 			return GET_EXTRA_ATT(ch, ATT_NEARBY_RANGE);
@@ -4743,7 +4781,7 @@ bool has_resources(char_data *ch, struct resource_data *list, bool ground, bool 
 									break;
 								}
 								case RES_COMPONENT: {
-									if (GET_OBJ_COMPONENT(obj) == res->vnum || (liter == 1 && is_component_vnum(obj, res->vnum))) {
+									if (GET_OBJ_COMPONENT(obj) == res->vnum || is_component_vnum(obj, res->vnum)) {
 										--res->amount;
 										obj->search_mark = TRUE;
 									}
@@ -4867,7 +4905,8 @@ bool has_resources(char_data *ch, struct resource_data *list, bool ground, bool 
 
 
 /**
-* Gets the resources-needed list for display to mortals.
+* Gets the resources-needed list for display to mortals. Immortals generally
+* use show_resource_display() instead.
 *
 * @param struct resource_data *list The list to show.
 * @param char *save_buffer A string to write the output to.
@@ -5073,6 +5112,25 @@ char *delete_doubledollar(char *string) {
 	*write = '\0';
 
 	return (string);
+}
+
+
+/**
+* Determines if a string ends in punctuation, ignoring color codes.
+*
+* @param const char *string The string.
+* @return bool TRUE if the string ends in punctuation, FALSE if not.
+*/
+bool ends_in_punct(const char *string) {
+	char buf[MAX_STRING_LENGTH];
+	int pos;
+	
+	strcpy(buf, strip_color(NULLSAFE(string)));
+	
+	// search backwards for the true end
+	for (pos = strlen(buf) - 1; pos > 0 && (isspace(buf[pos]) || buf[pos] == '\r' || buf[pos] == '\n'); --pos);
+	
+	return ispunct(buf[pos]) ? TRUE : FALSE;
 }
 
 
@@ -6003,10 +6061,10 @@ char *str_replace(const char *search, const char *replace, const char *subject) 
 /**
 * Strips out the color codes and returns the string.
 *
-* @param char *input
+* @param const char *input
 * @return char *result (no memory allocated, so str_dup if you want to keep it)
 */
-char *strip_color(char *input) {
+char *strip_color(const char *input) {
 	static char lbuf[MAX_STRING_LENGTH];
 	char *ptr;
 	int iter, pos;

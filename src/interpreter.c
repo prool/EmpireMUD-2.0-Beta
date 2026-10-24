@@ -227,6 +227,7 @@ ACMD(do_lay);
 ACMD(do_lead);
 ACMD(do_learn);
 ACMD(do_learned);
+ACMD(do_levels);
 ACMD(do_library);
 ACMD(do_light);
 ACMD(do_list);
@@ -640,11 +641,13 @@ cpp_extern const struct command_info cmd_info[] = {
 	SIMPLE_CMD( "efind", POS_SLEEPING, do_efind, NO_MIN, CTYPE_EMPIRE ),
 	SIMPLE_CMD( "elog", POS_DEAD, do_elog, NO_MIN, CTYPE_EMPIRE ),
 	SIMPLE_CMD( "empires", POS_DEAD, do_empires, NO_MIN, CTYPE_EMPIRE ),
+	SCMD_CMD( "embark", POS_STANDING, do_board, NO_MIN, CTYPE_MOVE, SCMD_BOARD ),
 	SCMD_CMD( "empireidentify", POS_DEAD, do_empire_inventory, NO_MIN, CTYPE_EMPIRE, SCMD_EIDENTIFY ),
 	SCMD_CMD( "empireinventory", POS_DEAD, do_empire_inventory, NO_MIN, CTYPE_EMPIRE, SCMD_EINVENTORY ),
 	SIMPLE_CMD( "empty", POS_STANDING, do_empty, NO_MIN, CTYPE_UTIL ),
 	SCMD_CMD( "einventory", POS_DEAD, do_empire_inventory, NO_MIN, CTYPE_EMPIRE, SCMD_EINVENTORY ),
 	SCMD_CMD( "eidentify", POS_DEAD, do_empire_inventory, NO_MIN, CTYPE_EMPIRE, SCMD_EIDENTIFY ),
+	SIMPLE_CMD( "effects", POS_DEAD, do_affects, NO_MIN, CTYPE_UTIL ),
 	SIMPLE_CMD( "emotd", POS_DEAD, do_emotd, NO_MIN, CTYPE_EMPIRE ),
 	SCMD_CMD( "emote", POS_RESTING, do_echo, NO_MIN, CTYPE_COMM, SCMD_EMOTE ),
 	SCMD_CMD( ":", POS_RESTING, do_echo, NO_MIN, CTYPE_COMM, SCMD_EMOTE ),
@@ -765,7 +768,7 @@ cpp_extern const struct command_info cmd_info[] = {
 	STANDARD_CMD( "loadvehicle", POS_STANDING, do_load_vehicle, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_MOVE, CMD_NO_ANIMALS, NO_ABIL ),
 	SIMPLE_CMD( "localinventory", POS_DEAD, do_local_inventory, NO_MIN, CTYPE_UTIL ),
 	GRANT_CMD( "lore", POS_DEAD, do_lore, LVL_CIMPL, CTYPE_IMMORTAL, GRANT_LORE ),
-	SCMD_CMD( "levels", POS_DEAD, do_no_cmd, NO_MIN, CTYPE_UTIL, NOCMD_LEVELS ),
+	SIMPLE_CMD( "levels", POS_DEAD, do_levels, NO_MIN, CTYPE_UTIL ),
 
 	SIMPLE_CMD( "mount", POS_STANDING, do_mount, NO_MIN, CTYPE_MOVE ),
 	STANDARD_CMD( "maintain", POS_STANDING, do_maintain, NO_MIN, NO_GRANTS, NO_SCMD, CTYPE_BUILD, CMD_NO_ANIMALS, NO_ABIL ),
@@ -2738,7 +2741,7 @@ void nanny(descriptor_data *d, char *arg) {
 
 		case CON_Q_SCREEN_READER: {
 			if (UPPER(*arg) == 'Y') {
-				SET_BIT(PRF_FLAGS(d->character), PRF_SCREEN_READER | PRF_COMPACT | PRF_SCROLLING);
+				SET_BIT(PRF_FLAGS(d->character), PRF_SCREEN_READER | PRF_COMPACT | PRF_SCROLLING | PRF_NO_COLUMNS);
 				set_creation_state(d, CON_Q_HAS_ALT);
 			}
 			else if (UPPER(*arg) == 'N') {

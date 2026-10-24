@@ -442,7 +442,7 @@ set Candy18810 %self.Candy18810%
 set Candy18811 %self.Candy18811%
 * only looking at it?
 if %cmd% == look || %cmd% == examine
-  if %actor.obj_target(%arg.argument1%)% != %self%
+  if %actor.obj_target(%arg.argument1%)% != %self% && %actor.obj_target(%arg.argument2%)% != %self%
     return 0
     halt
   end
@@ -1137,7 +1137,7 @@ if %actor.room% != %room%
   halt
 end
 * Skill check
-set chance %random.100%
+set chance %random.75%
 if %chance% > %actor.skill(Stealth)%
   * Fail
   %send% %actor% You hear someone approaching!
@@ -1145,7 +1145,7 @@ if %chance% > %actor.skill(Stealth)%
   %at% %room% %echo% A guard arrives!
   %at% %room% %load% mob 18824 %actor.level%
   set guard %room.people%
-  if %guard.vnum% == 18824
+  if %guard.vnum% == 18824 && %guard.room% == %actor.room% && %guard.can_see(%actor%)%
     %force% %guard% mhunt %actor%
   end
 else
@@ -1487,7 +1487,7 @@ unleash~
 return 1
 * word list for adjectives
 set adj_list horrifying monstrous terrifying gargantuan dreadful nightmarish eldritch spectral otherworldly ghastly unearthly macabre sinister diabolical phantom hulking beastly grim cursed accursed demonic infernal
-set adj_size 23
+set adj_size 22
 * basics
 if !%arg%
   %send% %actor% Unleash what?
@@ -2437,7 +2437,7 @@ if %self.varexists(same_round)%
   return 1
   halt
 end
-%send% %actor% You dip your head into the water of the bucket and start looking for an apple.
+%send% %actor% You dip your head into the water of the bucket and start looking for an apple. Type 'stand' when you're ready to grab one and complete your turn.
 %echoaround% %actor% ~%actor% sticks ^%actor% head into the bucket and starts looking for an apple.
 set start_bob %timestamp%
 remote start_bob %self.id%
@@ -2445,11 +2445,14 @@ set timer_running 1
 remote timer_running %self.id%
 set same_round 1
 remote same_round %self.id%
-wait 10 s
-if %self.varexists(timer_running)%
-  %send% %actor% You can't hold your breath much longer! You need to 'stand' soon!
-end
-wait 4 s
+set count 14
+while %count% > 0 && %self.varexists(same_round)%
+  wait 1 s
+  if %count% == 5 && %self.varexists(timer_running)%
+    %send% %actor% You can't hold your breath much longer! You need to 'stand' soon!
+  end
+  eval count %count% - 1
+done
 if %self.varexists(timer_running)%
   set turn %self.turn%
   %send% %turn% You can't hold your breath any longer and pull your head out of the water.
@@ -2516,10 +2519,12 @@ if %cmd% == stand
   end
   return 1
   rdelete timer_running %self.id%
+  rdelete same_round %self.id%
   eval time %timestamp% - %self.start_bob%
   if %time% == 0
     %send% %actor% You stand back up immediately, with no apple.
     %echoaround% %actor% ~%actor% stands back up immediately with no apple in ^%actor% mouth.
+    %send% %actor% Type 'bob bucket' to try again.
     return 1
     halt
   end
@@ -2588,6 +2593,7 @@ if %cmd% == stand
     remote ch_apple %self.id%
     set turn %self.owner%
     remote turn %self.id%
+    %send% %self.owner% It's your turn next. Type 'bob bucket' to start.
   elseif %actor% == %self.owner%
     set ow_apple %apple_val%
     set ch_apple %self.ch_apple%

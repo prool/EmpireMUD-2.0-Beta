@@ -945,7 +945,7 @@ bool has_stolen_items(char_data *ch) {
 */
 void return_stolen_item_one(obj_data *obj) {
 	bool extract, full;
-	int island_id, timer;
+	int island_id, timer, o_timer;
 	empire_data *emp;
 	room_data *room;
 	
@@ -978,7 +978,11 @@ void return_stolen_item_one(obj_data *obj) {
 		else {
 			log_to_empire(emp, ELOG_HOSTILITY, "%s: stolen item returned to storage!", GET_OBJ_SHORT_DESC(obj));
 		}
-		add_to_empire_storage(emp, island_id, GET_OBJ_VNUM(obj), 1, GET_OBJ_TIMER(obj));
+	
+		// note drink containers don't store timers in basic storage because they'll come out with default values
+		o_timer = IS_DRINK_CONTAINER(obj) ? UNLIMITED : GET_OBJ_TIMER(obj);
+		
+		add_to_empire_storage(emp, island_id, GET_OBJ_VNUM(obj), 1, o_timer);
 		extract = TRUE;
 	}
 	else if (UNIQUE_OBJ_CAN_STORE(obj, FALSE)) {
@@ -1772,7 +1776,7 @@ obj_data *make_corpse(char_data *ch) {
 	if (!IS_NPC(ch)) {
 		GET_LAST_CORPSE_ID(ch) = obj_script_id(corpse);
 	}
-	else if (MOB_CUSTOM_CORPSE(ch) != NOTHING) {	// mob corpse setup, unless custom corpse given
+	else if (MOB_CUSTOM_CORPSE(ch) == NOTHING) {	// mob corpse setup, unless custom corpse given
 		if (!size_data[size].can_take_corpse) {
 			REMOVE_BIT(GET_OBJ_WEAR(corpse), ITEM_WEAR_TAKE);
 		}
@@ -2719,11 +2723,11 @@ int skill_message(int dam, char_data *ch, char_data *vict, int attacktype, attac
 					else {	// no damage numbers
 						safe_snprintf(message, sizeof(message), "\ty%s\t0", msg->msg[MSG_DIE].attacker_msg);
 					}
-					act(message, FALSE, ch, weap, vict, TO_CHAR | hit_flags);
+					act(message, FALSE, ch, weap, vict, TO_CHAR | hit_flags | ACT_DIE);
 				}
 				
 				if (msg->msg[MSG_DIE].room_msg) {
-					act(msg->msg[MSG_DIE].room_msg, FALSE, ch, weap, vict, TO_NOTVICT | hit_flags);
+					act(msg->msg[MSG_DIE].room_msg, FALSE, ch, weap, vict, TO_NOTVICT | hit_flags | ACT_DIE);
 				}
 			}
 			
@@ -2735,7 +2739,7 @@ int skill_message(int dam, char_data *ch, char_data *vict, int attacktype, attac
 				else {	// no damage numbers
 					safe_snprintf(message, sizeof(message), "\tr%s\t0", msg->msg[MSG_DIE].victim_msg);
 				}
-				act(message, FALSE, ch, weap, vict, TO_VICT | TO_SLEEP | hit_flags);
+				act(message, FALSE, ch, weap, vict, TO_VICT | TO_SLEEP | hit_flags | ACT_DIE);
 			}
 		}
 		else {
@@ -3048,11 +3052,11 @@ void appear(char_data *ch) {
 	REMOVE_BIT(AFF_FLAGS(ch), AFF_HIDDEN | AFF_INVISIBLE);
 
 	if (GET_ACCESS_LEVEL(ch) < LVL_GOD) {
-		act("$n slowly fades into existence.", FALSE, ch, 0, 0, TO_ROOM);
+		act("$n slowly fades into existence.", TRUE, ch, NULL, NULL, TO_ROOM);
 		msg_to_char(ch, "You fade back into view.\r\n");
 	}
 	else {
-		act("You feel a strange presence as $n appears, seemingly from nowhere.", FALSE, ch, NULL, NULL, TO_ROOM | (IS_IMMORTAL(ch) ? DG_NO_TRIG : NOBITS));
+		act("You feel a strange presence as $n appears, seemingly from nowhere.", TRUE, ch, NULL, NULL, TO_ROOM | (IS_IMMORTAL(ch) ? DG_NO_TRIG : NOBITS));
 	}
 }
 
@@ -3366,9 +3370,9 @@ void check_auto_assist(char_data *ch) {
 		
 		// if we got this far and hit an assist condition
 		if (assist && can_fight(ch_iter, FIGHTING(ch))) {
-			act("You jump to $N's aid!", FALSE, ch_iter, 0, ch, TO_CHAR);
-			act("$n jumps to your aid!", FALSE, ch_iter, 0, ch, TO_VICT);
-			act("$n jumps to $N's aid!", FALSE, ch_iter, 0, ch, TO_NOTVICT);
+			act("You jump to $N's aid!", FALSE, ch_iter, NULL, ch, TO_CHAR);
+			act("$n jumps to your aid!", FALSE, ch_iter, NULL, ch, TO_VICT);
+			act("$n jumps to $N's aid!", TRUE, ch_iter, NULL, ch, TO_NOTVICT);
 			engage_combat(ch_iter, FIGHTING(ch), FALSE);
 			continue;
 		}
@@ -4601,14 +4605,14 @@ void fight_wait_run(char_data *ch, double speed) {
 		return;
 	}
 
-	act("You run toward $N!", FALSE, ch, 0, FIGHTING(ch), TO_CHAR);
-	act("$n runs toward you!", FALSE, ch, 0, FIGHTING(ch), TO_VICT);
+	act("You run toward $N!", FALSE, ch, NULL, FIGHTING(ch), TO_CHAR);
+	act("$n runs toward you!", TRUE, ch, NULL, FIGHTING(ch), TO_VICT);
 	
 	--FIGHT_WAIT(ch);
 	
 	if (FIGHT_WAIT(ch) <= 0 || FIGHT_MODE(FIGHTING(ch)) != FMODE_MISSILE) {
-		act("You engage $M in melee combat!", FALSE, ch, 0, FIGHTING(ch), TO_CHAR);
-		act("$e engages you in melee combat!", FALSE, ch, 0, FIGHTING(ch), TO_VICT);
+		act("You engage $M in melee combat!", FALSE, ch, NULL, FIGHTING(ch), TO_CHAR);
+		act("$e engages you in melee combat!", TRUE, ch, NULL, FIGHTING(ch), TO_VICT);
 		
 		FIGHT_MODE(ch) = FMODE_MELEE;
 		

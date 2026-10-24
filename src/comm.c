@@ -1304,7 +1304,7 @@ void send_to_all(const char *messg, ...) {
 
 /* higher-level communication: the act() function */
 void perform_act(const char *orig, char_data *ch, const void *obj, const void *vict_obj, const char_data *to, bitvector_t act_flags) {
-	const char *i = NULL;
+	const char *i = NULL, *start = orig;
 	char *buf, lbuf[MAX_STRING_LENGTH], *dg_arg = NULL, temp[MAX_STRING_LENGTH];
 	bool real_ch = FALSE, real_vict = FALSE;
 	char_data *dg_victim = NULL;
@@ -1322,7 +1322,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 	}
 	
 	// check fight messages (may exit early)
-	if (!IS_NPC(to) && FIGHTING(to) && IAF(ACT_BUFF)) {
+	if (!IS_NPC(to) && FIGHTING(to) && IAF(ACT_BUFF) && !IAF(ACT_DIE)) {
 		show = any = FALSE;
 		if (!show && vict_obj && to == vict_obj) {
 			any = TRUE;
@@ -1345,7 +1345,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 			return;
 		}
 	}
-	if (!IS_NPC(to) && FIGHTING(to) && IAF(ACT_AFFECT)) {
+	if (!IS_NPC(to) && FIGHTING(to) && IAF(ACT_AFFECT) && !IAF(ACT_DIE)) {
 		// aff flags in combat
 		show = any = FALSE;
 		if (!show && to == ch) {
@@ -1368,7 +1368,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 			return;
 		}
 	}
-	if (!IS_NPC(to) && FIGHTING(to) && IAF(ACT_ABILITY)) {
+	if (!IS_NPC(to) && FIGHTING(to) && IAF(ACT_ABILITY) && !IAF(ACT_DIE)) {
 		show = any = FALSE;
 		if (!show && to == ch) {
 			any = TRUE;
@@ -1403,7 +1403,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 			return;
 		}
 	}
-	if (!IS_NPC(to) && FIGHTING(to) && IAF(ACT_HEAL)) {
+	if (!IS_NPC(to) && FIGHTING(to) && IAF(ACT_HEAL) && !IAF(ACT_DIE)) {
 		show = any = FALSE;
 		if (!show && to == ch) {
 			any = TRUE;
@@ -1434,7 +1434,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 			return;
 		}
 	}
-	if (!IS_NPC(to) && ch != vict_obj && IAF(ACT_COMBAT_HIT | ACT_COMBAT_MISS)) {
+	if (!IS_NPC(to) && ch != vict_obj && IAF(ACT_COMBAT_HIT | ACT_COMBAT_MISS) && !IAF(ACT_DIE)) {
 		show = any = FALSE;
 		// hits
 		if (IAF(ACT_COMBAT_HIT)) {
@@ -1471,7 +1471,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 			}
 		}
 		// misses
-		if (IAF(ACT_COMBAT_MISS)) {
+		if (IAF(ACT_COMBAT_MISS) && !IAF(ACT_DIE)) {
 			if (!show && to == ch && !vict_obj) {
 				any = TRUE;	// hitting self with no vict-obj
 				show |= SHOW_FIGHT_MESSAGES(to, FM_MISSES_AGAINST_ME);
@@ -1522,7 +1522,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 'N': {
 					if (IAF(ACT_NON_MOB_VICT)) {
-						log("SYSERR: Using $N with a non-mob vict_obj flag: %s", orig);
+						log("SYSERR: Using $N with a non-mob vict_obj flag: %s", start);
 					}
 					CHECK_NULL(vict_obj, PERS((char_data*)vict_obj,(char_data*)to, FALSE));
 					dg_victim = (char_data*) vict_obj;
@@ -1535,7 +1535,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 'O': {
 					if (IAF(ACT_NON_MOB_VICT)) {
-						log("SYSERR: Using $O with a non-mob vict_obj flag: %s", orig);
+						log("SYSERR: Using $O with a non-mob vict_obj flag: %s", start);
 					}
 					CHECK_NULL(vict_obj, PERS((char_data*)vict_obj, (char_data*)to, TRUE));
 					dg_victim = (char_data*) vict_obj;
@@ -1554,7 +1554,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 'K': {	// loyalty/empire adjective of $N
 					if (IAF(ACT_NON_MOB_VICT)) {
-						log("SYSERR: Using $K with a non-mob vict_obj flag: %s", orig);
+						log("SYSERR: Using $K with a non-mob vict_obj flag: %s", start);
 					}
 					dg_victim = (char_data*) vict_obj;
 					if (dg_victim && GET_LOYALTY(dg_victim)) {
@@ -1578,7 +1578,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 'L': {	// loyalty/empire name of $N
 					if (IAF(ACT_NON_MOB_VICT)) {
-						log("SYSERR: Using $L with a non-mob vict_obj flag: %s", orig);
+						log("SYSERR: Using $L with a non-mob vict_obj flag: %s", start);
 					}
 					dg_victim = (char_data*) vict_obj;
 					if (dg_victim && GET_LOYALTY(dg_victim)) {
@@ -1596,7 +1596,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 'M': {
 					if (IAF(ACT_NON_MOB_VICT)) {
-						log("SYSERR: Using $M with a non-mob vict_obj flag: %s", orig);
+						log("SYSERR: Using $M with a non-mob vict_obj flag: %s", start);
 					}
 					CHECK_NULL(vict_obj, (real_vict ? REAL_HMHR((char_data*) vict_obj) : HMHR((char_data*) vict_obj)));
 					dg_victim = (char_data*) vict_obj;
@@ -1608,7 +1608,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 'S': {
 					if (IAF(ACT_NON_MOB_VICT)) {
-						log("SYSERR: Using $S with a non-mob vict_obj flag: %s", orig);
+						log("SYSERR: Using $S with a non-mob vict_obj flag: %s", start);
 					}
 					CHECK_NULL(vict_obj, (real_vict ? REAL_HSHR((char_data*) vict_obj) : HSHR((char_data*) vict_obj)));
 					dg_victim = (char_data*) vict_obj;
@@ -1620,7 +1620,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 'E': {
 					if (IAF(ACT_NON_MOB_VICT)) {
-						log("SYSERR: Using $E with a non-mob vict_obj flag: %s", orig);
+						log("SYSERR: Using $E with a non-mob vict_obj flag: %s", start);
 					}
 					CHECK_NULL(vict_obj, (real_vict ? REAL_HSSH((char_data*) vict_obj) : HSSH((char_data*) vict_obj)));
 					dg_victim = (char_data*) vict_obj;
@@ -1628,14 +1628,14 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 'p': {
 					if (IAF(ACT_NON_OBJ_OBJ)) {
-						log("SYSERR: Using $p with a non-obj obj flag: %s", orig);
+						log("SYSERR: Using $p with a non-obj obj flag: %s", start);
 					}
 					CHECK_NULL(obj, OBJS((obj_data*)obj, (char_data*)to));
 					break;
 				}
 				case 'P': {
 					if (!IAF(ACT_OBJ_VICT)) {
-						log("SYSERR: Using $P without ACT_OBJ_VICT: %s", orig);
+						log("SYSERR: Using $P without ACT_OBJ_VICT: %s", start);
 					}
 					CHECK_NULL(vict_obj, OBJS((obj_data*) vict_obj, (char_data*)to));
 					dg_target = (obj_data*) vict_obj;
@@ -1643,14 +1643,14 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 'a': {
 					if (IAF(ACT_NON_OBJ_OBJ)) {
-						log("SYSERR: Using $a with a non-obj obj flag: %s", orig);
+						log("SYSERR: Using $a with a non-obj obj flag: %s", start);
 					}
 					CHECK_NULL(obj, SANA((obj_data*)obj));
 					break;
 				}
 				case 'A': {
 					if (!IAF(ACT_OBJ_VICT)) {
-						log("SYSERR: Using $A without ACT_OBJ_VICT: %s", orig);
+						log("SYSERR: Using $A without ACT_OBJ_VICT: %s", start);
 					}
 					CHECK_NULL(vict_obj, SANA((const obj_data*) vict_obj));
 					dg_target = (obj_data*) vict_obj;
@@ -1658,7 +1658,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 'T': {
 					if (!IAF(ACT_STR_VICT)) {
-						log("SYSERR: Using $T without ACT_STR_VICT: %s", orig);
+						log("SYSERR: Using $T without ACT_STR_VICT: %s", start);
 					}
 					CHECK_NULL(vict_obj, (const char *) vict_obj);
 					dg_arg = (char *) vict_obj;
@@ -1666,7 +1666,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 't': {
 					if (!IAF(ACT_STR_OBJ)) {
-						log("SYSERR: Using $t without ACT_STR_OBJ: %s", orig);
+						log("SYSERR: Using $t without ACT_STR_OBJ: %s", start);
 					}
 					CHECK_NULL(obj, (const char *) obj);
 					dg_arg = (char *) obj;
@@ -1674,28 +1674,28 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				case 'F': {
 					if (!IAF(ACT_STR_VICT)) {
-						log("SYSERR: Using $F without ACT_STR_VICT: %s", orig);
+						log("SYSERR: Using $F without ACT_STR_VICT: %s", start);
 					}
 					CHECK_NULL(vict_obj, fname((const char *) vict_obj));
 					break;
 				}
 				case 'f': {
 					if (!IAF(ACT_STR_OBJ)) {
-						log("SYSERR: Using $f without ACT_STR_OBJ: %s", orig);
+						log("SYSERR: Using $f without ACT_STR_OBJ: %s", start);
 					}
 					CHECK_NULL(obj, fname((const char *) obj));
 					break;
 				}
 				case 'v': {	// $v: vehicle
 					if (!IAF(ACT_VEH_OBJ)) {
-						log("SYSERR: Using $v without ACT_VEH_OBJ: %s", orig);
+						log("SYSERR: Using $v without ACT_VEH_OBJ: %s", start);
 					}
 					CHECK_NULL(obj, get_vehicle_short_desc((vehicle_data*)obj, (char_data*)to));
 					break;
 				}
 				case 'V': {	// $V: vehicle
 					if (!IAF(ACT_VEH_VICT)) {
-						log("SYSERR: Using $V without ACT_VEH_VICT: %s", orig);
+						log("SYSERR: Using $V without ACT_VEH_VICT: %s", start);
 					}
 					CHECK_NULL(vict_obj, get_vehicle_short_desc((vehicle_data*)vict_obj, (char_data*)to));
 					break;
@@ -1706,8 +1706,7 @@ void perform_act(const char *orig, char_data *ch, const void *obj, const void *v
 				}
 				default: {
 					if (!IAF(TO_IGNORE_BAD_CODE)) {
-						log("SYSERR: Illegal $-code to act(): %c", *orig);
-						log("SYSERR: %s", orig);
+						log("SYSERR: Illegal $-code to act(): $%c: %s", *orig, start);
 						i = "";
 					}
 					else {

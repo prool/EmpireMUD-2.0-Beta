@@ -415,7 +415,7 @@ void do_customize_island(char_data *ch, char *argument) {
 			msg_to_char(ch, "That name is already taken by another island.\r\n");
 		}
 		else {
-			log_to_empire(GET_LOYALTY(ch), ELOG_TERRITORY, "%s has given %s the custom name of %s", PERS(ch, ch, TRUE), get_island_name_for(island->id, ch), argument);
+			log_to_empire(GET_LOYALTY(ch), ELOG_TERRITORY, "%s has given the %s of %s the custom name of %s", PERS(ch, ch, TRUE), (IS_SET(island->flags, ISLE_CONTINENT) ? "continent" : "island"), get_island_name_for(island->id, ch), argument);
 			msg_to_char(ch, "It is now called \"%s\".\r\n", argument);
 			
 			if (eisle->name) {
@@ -739,7 +739,7 @@ static void show_detailed_empire(char_data *ch, empire_data *e) {
 		build_page_display(ch, "Workforce cap: %d item%s, Max city size: %s", total, PLURAL(total), city_type[type].name);
 	}
 	
-	if (is_own_empire || !EMPIRE_HAS_TECH(e, TECH_HIDDEN_PROGRESS)) {
+	if (is_own_empire || !EMPIRE_ADMIN_FLAGGED(e, EADM_HIDDEN_PROGRESS)) {
 		pline = build_page_display(ch, "Technology: ");
 		for (iter = 0, comma = FALSE; iter < NUM_TECHS; ++iter) {
 			if (EMPIRE_HAS_TECH(e, iter)) {
@@ -1067,9 +1067,10 @@ int sort_territory_nodes_by_distance(struct find_territory_node *a, struct find_
 * @param char *argument The requested inventory item, if any.
 */
 static void show_empire_inventory_to_char(char_data *ch, empire_data *emp, char *argument) {
-	char vstr[256], keepstr[256], totalstr[256];
+	char compstr[256], vstr[256], keepstr[256], totalstr[256], arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 	struct einv_type *einv, *next_einv, *list = NULL;
 	obj_vnum vnum, last_vnum = NOTHING;
+	generic_data *find_component = NULL;
 	struct empire_dropped_item *edi, *next_edi;
 	struct empire_storage_data *store, *next_store;
 	struct empire_island *isle, *next_isle;
@@ -1085,6 +1086,23 @@ static void show_empire_inventory_to_char(char_data *ch, empire_data *emp, char 
 		*argument = '\0';
 		all = TRUE;
 	}
+	else if (!strn_cmp(argument, "-c", 2)) {
+		half_chop(argument, arg1, arg2);
+		if (is_abbrev(arg1, "-component")) {
+			if (!*arg2) {
+				msg_to_char(ch, "Search for which component type?\r\n");
+				return;
+			}
+			else if (!(find_component = find_generic_component(arg2))) {
+				msg_to_char(ch, "Unknown component type '%s'.\r\n", arg2);
+				return;
+			}
+			// else we've got a good component
+			
+			// clear this out for component search
+			*argument = '\0';
+		}
+	}
 	
 	if (!GET_ISLAND(IN_ROOM(ch)) && !IS_IMMORTAL(ch) && !all && !*argument) {
 		msg_to_char(ch, "You don't have anything stored at sea.\r\n");
@@ -1098,18 +1116,17 @@ static void show_empire_inventory_to_char(char_data *ch, empire_data *emp, char 
 				continue;	// none in storage here
 			}
 			
-			// prototype lookup
-			if (store->vnum != last_vnum) {
-				proto = store->proto;
-				last_vnum = store->vnum;
+			if (!store->proto) {
+				continue;
 			}
 			
-			if (!proto) {
+			// component requested but doesn't match?
+			if (find_component && !is_component(store->proto, find_component)) {
 				continue;
 			}
 			
 			// argument given but doesn't match
-			if (*argument && !multi_isname(argument, GET_OBJ_KEYWORDS(proto))) {
+			if (*argument && !multi_isname(argument, GET_OBJ_KEYWORDS(store->proto))) {
 				continue;
 			}
 			
@@ -1199,13 +1216,21 @@ static void show_empire_inventory_to_char(char_data *ch, empire_data *emp, char 
 	
 	HASH_ITER(hh, list, einv, next_einv) {
 		// only display it if it's on the requested island, or if they requested it by name, or all
-		if (all || einv->local > 0 || *argument) {
+		if ((all || einv->local > 0 || *argument || find_component) && (proto = obj_proto(einv->vnum))) {
 			// prefix
 			if (PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
 				sprintf(vstr, "[%5d] ", einv->vnum);
 			}
 			else {
 				*vstr = '\0';
+			}
+			
+			// component partial-match string
+			if (find_component && GET_OBJ_COMPONENT(proto) != GEN_VNUM(find_component)) {
+				safe_snprintf(compstr, sizeof(compstr), " (%s)", get_generic_name_by_vnum(GET_OBJ_COMPONENT(proto)));
+			}
+			else {
+				*compstr = '\0';
 			}
 			
 			// keep section
@@ -1236,7 +1261,7 @@ static void show_empire_inventory_to_char(char_data *ch, empire_data *emp, char 
 			}
 			
 			// actual line
-			build_page_display(ch, "(%4d) %s%s%s%s", einv->local, vstr, get_obj_name_by_proto(einv->vnum), keepstr, totalstr);
+			build_page_display(ch, "(%4d) %s%s%s%s%s", einv->local, vstr, GET_OBJ_SHORT_DESC(proto), compstr, keepstr, totalstr);
 			any = TRUE;
 		}
 		
@@ -1675,10 +1700,15 @@ void show_workforce_setup_to_char(empire_data *emp, char_data *ch) {
 		here = (this_isle ? (this_isle->workforce_limit[chore] != 0) : FALSE);
 		
 		safe_snprintf(part, sizeof(part), "%s: %s%s", chore_data[chore].name, here ? "&con&0" : "&yoff&0", ((on && !here) || (off && here)) ? (PRF_FLAGGED(ch, PRF_SCREEN_READER) ? (on > 1 ? " (some islands)" : " (one island)") : "*") : "");
-		size = 24 + color_code_length(part) + (PRF_FLAGGED(ch, PRF_SCREEN_READER) ? 24 : 0);
-		msg_to_char(ch, " %-*.*s%s", size, size, part, (PRF_FLAGGED(ch, PRF_SCREEN_READER) || !(count % 3)) ? "\r\n" : " ");
+		if (PRF_FLAGGED(ch, PRF_NO_COLUMNS)) {
+			msg_to_char(ch, " %s\r\n", part);
+		}
+		else {	// columns
+			size = 24 + color_code_length(part) + (PRF_FLAGGED(ch, PRF_SCREEN_READER) ? 24 : 0);
+			msg_to_char(ch, " %-*.*s%s", size, size, part, !(count % 3) ? "\r\n" : " ");
+		}
 	}
-	if (count % 3 && !PRF_FLAGGED(ch, PRF_SCREEN_READER)) {
+	if (count % 3 && !PRF_FLAGGED(ch, PRF_NO_COLUMNS)) {
 		msg_to_char(ch, "\r\n");
 	}
 }
@@ -7455,7 +7485,7 @@ ACMD(do_progress) {
 		}
 		
 		// show current progress in that category
-		build_page_display(ch, "%s goals (%d points):", progress_types[cat], EMPIRE_PROGRESS_POINTS(emp, cat));
+		build_page_display(ch, "%s goals (%d point%s):", progress_types[cat], EMPIRE_PROGRESS_POINTS(emp, cat), PLURAL(EMPIRE_PROGRESS_POINTS(emp, cat)));
 		
 		// show current goals
 		any = 0;
@@ -7519,7 +7549,7 @@ ACMD(do_progress) {
 				}
 			}
 		}
-		build_page_display(ch, "- %d completed goals, %d rewards bought", complete, bought);
+		build_page_display(ch, "- %d completed goal%s, %d reward%s bought", complete, PLURAL(complete), bought, PLURAL(bought));
 		
 		send_page_display(ch);
 	}
@@ -7996,8 +8026,8 @@ ACMD(do_roster) {
 	// imm usage: roster ["empire"] [all]
 	// mortal usage: roster [all]
 	
-	// override for imm args: roster <empire> (with no quotes and no -all)
-	if (imm_access && *argument && *argument != '"' && (e = get_empire_by_name(argument))) {
+	// are we using: roster <empire> (with no quotes and no -all)
+	if (*argument && *argument != '"' && str_cmp(arg, "all") && str_cmp(arg, "-all") && (e = get_empire_by_name(argument))) {
 		*argument = '\0';	// clear further args and accept the empire name as-is
 	}
 	
@@ -8008,7 +8038,7 @@ ACMD(do_roster) {
 		if (!str_cmp(arg, "all") || is_abbrev(arg, "-all")) {
 			all = TRUE;
 		}
-		else if (*arg && imm_access) {
+		else if (*arg) {
 			if (!(e = get_empire_by_name(arg))) {
 				msg_to_char(ch, "Unknown empire.\r\n");
 				return;
@@ -8023,6 +8053,14 @@ ACMD(do_roster) {
 	if (!e) {
 		msg_to_char(ch, "You must be a member of an empire to do that.\r\n");
 		return;
+	}
+	
+	// allowed to view other empire?
+	if (!imm_access && e != GET_LOYALTY(ch)) {
+		if (!EMPIRE_ADMIN_FLAGGED(e, EADM_ROSTER_SHARING) || !has_relationship(GET_LOYALTY(ch), e, DIPL_ALLIED)) {
+			msg_to_char(ch, "You cannot view the roster for %s%s\t0.\r\n", EMPIRE_BANNER(e), EMPIRE_NAME(e));
+			return;
+		}
 	}
 	
 	// build roster:
@@ -8115,7 +8153,7 @@ ACMD(do_roster) {
 
 ACMD(do_territory) {
 	char search_str[MAX_INPUT_LENGTH], exclude_str[MAX_INPUT_LENGTH], arg[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], option_buf[1024], *remain;
-	bool ok, junk;
+	bool ok, junk, will_group;
 	bool check_city, check_outskirts, check_frontier, any_type_found;
 	bool no_abandon, no_dismantle, no_work, public_only, private_only;
 	int dist_from_me, total, ttype;
@@ -8156,6 +8194,7 @@ ACMD(do_territory) {
 	no_abandon = no_dismantle = no_work = public_only = private_only = FALSE;
 	dist_from_me = -1;
 	find_island = NULL;
+	will_group = TRUE;	// by default
 	
 	// parse options
 	while (*argument) {
@@ -8188,6 +8227,9 @@ ACMD(do_territory) {
 				check_outskirts = FALSE;
 				any_type_found = TRUE;
 			}
+		}
+		else if (is_abbrev(arg, "-all")) {
+			will_group = FALSE;
 		}
 		else if (is_abbrev(arg, "-distance")) {
 			argument = any_one_arg(argument, arg2);
@@ -8466,7 +8508,9 @@ ACMD(do_territory) {
 	}
 	
 	if (node_hash) {
-		reduce_territory_node_list(&node_hash);
+		if (will_group) {
+			reduce_territory_node_list(&node_hash);
+		}
 		
 		// start buf
 		build_page_display(ch, "%s%s&0 territory: %s", EMPIRE_BANNER(emp), EMPIRE_ADJECTIVE(emp), option_buf);

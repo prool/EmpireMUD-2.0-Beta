@@ -1070,7 +1070,7 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define OBJ_IS_IN_WORLD(obj)  (IN_ROOM(obj) || (obj)->in_obj || (obj)->in_vehicle || ((obj)->carried_by && IN_ROOM((obj)->carried_by)) || ((obj)->worn_by && IN_ROOM((obj)->worn_by)))
 #define UNIQUE_OBJ_CAN_STORE(obj, allow_bound)  ((allow_bound || (!OBJ_BOUND_TO(obj) && !OBJ_FLAGGED((obj), OBJ_BIND_ON_PICKUP))) && !OBJ_CAN_STORE(obj) && !OBJ_FLAGGED((obj), OBJ_NO_WAREHOUSE | OBJ_JUNK) && GET_OBJ_REQUIRES_QUEST(obj) == NOTHING && !IS_STOLEN(obj) && (!IS_LIGHT(obj) || !LIGHT_IS_LIT(obj) || (LIGHT_FLAGGED(obj, LIGHT_FLAG_CAN_DOUSE) && !LIGHT_FLAGGED(obj, LIGHT_FLAG_DESTROY_WHEN_DOUSED))))
 #define OBJ_STACK_FLAGS  (OBJ_SUPERIOR | OBJ_KEEP | OBJ_ENCHANTED | OBJ_HARD_DROP | OBJ_GROUP_DROP | OBJ_BIND_ON_EQUIP | OBJ_BIND_ON_PICKUP)
-#define OBJS_ARE_SAME(o1, o2)  (GET_OBJ_VNUM(o1) == GET_OBJ_VNUM(o2) && GET_OBJ_CURRENT_SCALE_LEVEL(o1) == GET_OBJ_CURRENT_SCALE_LEVEL(o2) && ((GET_OBJ_EXTRA(o1) & OBJ_STACK_FLAGS) == (GET_OBJ_EXTRA(o2) & OBJ_STACK_FLAGS)) && (GET_OBJ_SHORT_DESC(o1) == GET_OBJ_SHORT_DESC(o2) || !strcmp(GET_OBJ_SHORT_DESC(o1), GET_OBJ_SHORT_DESC(o2))) && (GET_OBJ_LONG_DESC(o1) == GET_OBJ_LONG_DESC(o2) || !strcmp(GET_OBJ_LONG_DESC(o1), GET_OBJ_LONG_DESC(o2))) && (!IS_DRINK_CONTAINER(o1) || GET_DRINK_CONTAINER_TYPE(o1) == GET_DRINK_CONTAINER_TYPE(o2)) && (!IS_BOOK(o1) || !IS_BOOK(o2) || GET_BOOK_ID(o1) == GET_BOOK_ID(o2)) && (!IS_AMMO(o1) || !IS_AMMO(o2) || GET_AMMO_QUANTITY(o1) == GET_AMMO_QUANTITY(o2)) && (!IS_LIGHT(o1) || !IS_LIGHT(o2) || GET_LIGHT_IS_LIT(o1) == GET_LIGHT_IS_LIT(o2) || GET_LIGHT_HOURS_REMAINING(o1) == GET_LIGHT_HOURS_REMAINING(o2) || (GET_LIGHT_HOURS_REMAINING(o1) > 0 && GET_LIGHT_HOURS_REMAINING(o2) > 0)) && (IS_STOLEN(o1) == IS_STOLEN(o2)) && identical_bindings((o1),(o2)))
+#define OBJS_ARE_SAME(o1, o2)  (GET_OBJ_VNUM(o1) == GET_OBJ_VNUM(o2) && GET_OBJ_CURRENT_SCALE_LEVEL(o1) == GET_OBJ_CURRENT_SCALE_LEVEL(o2) && (LIGHT_IS_LIT(o1) == LIGHT_IS_LIT(o2)) && ((GET_OBJ_EXTRA(o1) & OBJ_STACK_FLAGS) == (GET_OBJ_EXTRA(o2) & OBJ_STACK_FLAGS)) && (GET_OBJ_SHORT_DESC(o1) == GET_OBJ_SHORT_DESC(o2) || !strcmp(GET_OBJ_SHORT_DESC(o1), GET_OBJ_SHORT_DESC(o2))) && (GET_OBJ_LONG_DESC(o1) == GET_OBJ_LONG_DESC(o2) || !strcmp(GET_OBJ_LONG_DESC(o1), GET_OBJ_LONG_DESC(o2))) && (!IS_DRINK_CONTAINER(o1) || GET_DRINK_CONTAINER_TYPE(o1) == GET_DRINK_CONTAINER_TYPE(o2)) && (!IS_BOOK(o1) || !IS_BOOK(o2) || GET_BOOK_ID(o1) == GET_BOOK_ID(o2)) && (!IS_AMMO(o1) || !IS_AMMO(o2) || GET_AMMO_QUANTITY(o1) == GET_AMMO_QUANTITY(o2)) && (!IS_LIGHT(o1) || !IS_LIGHT(o2) || GET_LIGHT_IS_LIT(o1) == GET_LIGHT_IS_LIT(o2) || GET_LIGHT_HOURS_REMAINING(o1) == GET_LIGHT_HOURS_REMAINING(o2) || (GET_LIGHT_HOURS_REMAINING(o1) > 0 && GET_LIGHT_HOURS_REMAINING(o2) > 0)) && (IS_STOLEN(o1) == IS_STOLEN(o2)) && identical_bindings((o1),(o2)))
 
 
  //////////////////////////////////////////////////////////////////////////////
@@ -1336,6 +1336,8 @@ int Y_COORD(room_data *room);	// formerly #define Y_COORD(room)  FLAT_Y_COORD(ge
 #define GET_LAST_AFF_WEAR_OFF_ID(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_aff_wear_off_id))
 #define GET_LAST_AFF_WEAR_OFF_VNUM(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_aff_wear_off_vnum))
 #define GET_LAST_AFF_WEAR_OFF_TIME(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_aff_wear_off_time))
+#define GET_LAST_COINS(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_coins_amount))
+#define GET_LAST_COINS_EMPIRE(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_coins_empire))
 #define GET_LAST_COLD_TIME(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_cold_time))
 #define GET_LAST_COMPANION(ch)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_companion))
 #define GET_LAST_COND_MESSAGE_TIME(ch, cond)  CHECK_PLAYER_SPECIAL((ch), ((ch)->player_specials->last_cond_message_time[(cond)]))
@@ -1922,6 +1924,7 @@ extern struct weather_data weather_info;	// db.c
 void add_pair_hash(struct pair_hash **hash, int id, int value);
 void add_string_hash(struct string_hash **hash, const char *string, int count);
 void add_vnum_hash(struct vnum_hash **hash, any_vnum vnum, int count);
+bool ends_in_punct(const char *string);
 struct pair_hash *find_in_pair_hash(struct pair_hash *hash, int id);
 struct string_hash *find_in_string_hash(struct string_hash *hash, const char *string);
 struct vnum_hash *find_in_vnum_hash(struct vnum_hash *hash, any_vnum vnum);
@@ -2001,6 +2004,7 @@ void comma_args(char *string, char *arg1, char *arg2);
 int fill_word(char *argument);
 void half_chop(char *string, char *arg1, char *arg2);
 int is_abbrev(const char *arg1, const char *arg2);
+bool is_abbrev_ignore_hyphen(const char *arg, const char *string);
 bool is_multiword_abbrev(const char *arg, const char *phrase);
 int is_number(const char *str);
 char *one_argument(char *argument, char *first_arg);
@@ -2114,7 +2118,7 @@ char *show_color_codes(char *string);
 char *str_dup(const char *source);
 char *str_replace(const char *search, const char *replace, const char *subject);
 char *str_str(const char *cs, const char *ct);
-char *strip_color(char *input);
+char *strip_color(const char *input);
 char *stripcr(char *dest, const char *src);
 void strip_crlf(char *buffer);
 char *strtolower(char *str);

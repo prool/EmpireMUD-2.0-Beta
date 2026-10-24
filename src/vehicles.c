@@ -1696,7 +1696,7 @@ bool audit_vehicle(vehicle_data *veh, char_data *ch) {
 		olc_audit_msg(ch, VEH_VNUM(veh), "Long desc not set");
 		problem = TRUE;
 	}
-	if (!ispunct(VEH_LONG_DESC(veh)[strlen(VEH_LONG_DESC(veh)) - 1])) {
+	if (!ends_in_punct(VEH_LONG_DESC(veh))) {
 		olc_audit_msg(ch, VEH_VNUM(veh), "Long desc missing punctuation");
 		problem = TRUE;
 	}
@@ -1713,7 +1713,7 @@ bool audit_vehicle(vehicle_data *veh, char_data *ch) {
 		olc_audit_msg(ch, VEH_VNUM(veh), "Short desc capitalized");
 		problem = TRUE;
 	}
-	if (ispunct(VEH_SHORT_DESC(veh)[strlen(VEH_SHORT_DESC(veh)) - 1])) {
+	if (ends_in_punct(VEH_SHORT_DESC(veh))) {
 		olc_audit_msg(ch, VEH_VNUM(veh), "Short desc has punctuation");
 		problem = TRUE;
 	}
@@ -1888,6 +1888,7 @@ bool audit_vehicle(vehicle_data *veh, char_data *ch) {
 */
 void complete_vehicle(vehicle_data *veh) {
 	room_data *room = IN_ROOM(veh);	// store room in case veh is purged during a trigger
+	struct empire_vehicle_data *vter;
 	struct vehicle_room_list *vrl;
 	
 	if (VEH_IS_DISMANTLING(veh)) {
@@ -1909,7 +1910,12 @@ void complete_vehicle(vehicle_data *veh) {
 	// only if it was incomplete:
 	if (VEH_FLAGGED(veh, VEH_INCOMPLETE)) {
 		remove_vehicle_flags(veh, VEH_INCOMPLETE);
+		finish_vehicle_setup(veh);
 		
+		// build the interior if not built?
+		get_vehicle_interior(veh);
+		
+		// apply empire after completing setup
 		if (VEH_OWNER(veh)) {
 			qt_empire_players_vehicle(VEH_OWNER(veh), qt_gain_vehicle, veh);
 			et_gain_vehicle(VEH_OWNER(veh), veh);
@@ -1919,12 +1925,12 @@ void complete_vehicle(vehicle_data *veh) {
 			LL_FOREACH(VEH_ROOM_LIST(veh), vrl) {
 				adjust_building_tech(VEH_OWNER(veh), vrl->room, TRUE);
 			}
+			
+			// reset population timer
+			if ((vter = find_empire_vehicle_entry(VEH_OWNER(veh), veh))) {
+				vter->population_timer = config_get_int("building_population_timer");
+			}
 		}
-		
-		finish_vehicle_setup(veh);
-		
-		// build the interior if not built?
-		get_vehicle_interior(veh);
 	}
 	
 	if (room) {

@@ -131,6 +131,7 @@ void complete_quest(char_data *ch, struct player_quest *pq, empire_data *giver_e
 	struct player_completed_quest *pcq;
 	any_vnum vnum;
 	int level;
+	struct group_member_data *mem;
 	
 	if (!quest) {
 		// somehow
@@ -214,6 +215,17 @@ void complete_quest(char_data *ch, struct player_quest *pq, empire_data *giver_e
 	}
 	
 	queue_delayed_update(ch, CDU_SAVE);
+	
+	// group completion
+	if (QUEST_FLAGGED(quest, QST_GROUP_COMPLETION) && GROUP(ch)) {
+		LL_FOREACH(GROUP(ch)->members, mem) {
+			if (mem->member != ch && !IS_NPC(mem->member) && IN_ROOM(mem->member) == IN_ROOM(ch) && (pq = is_on_quest(mem->member, QUEST_VNUM(quest)))) {
+				if (check_finish_quest_trigger(mem->member, quest, get_instance_by_id(pq->instance_id))) {
+					complete_quest(mem->member, pq, giver_emp);
+				}
+			}
+		}
+	}
 }
 
 
@@ -567,6 +579,45 @@ void drop_quest(char_data *ch, struct player_quest *pq) {
 
 
 /**
+* Lists one active quest to the player -- directly to their page_display
+*
+* @param char_data *ch The player.
+* @param struct player_quest *pq Which of their current quest entries to show.
+*/
+void list_one_active_quest_to_page_display(char_data *ch, struct player_quest *pq) {
+	char vstr[128], typestr[128];
+	int count, total;
+	quest_data *proto;
+	
+	if ((proto = quest_proto(pq->vnum))) {
+		count_quest_tasks(pq->tracker, &count, &total);
+		
+		if (PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
+			sprintf(vstr, "[%5d] ", QUEST_VNUM(proto));
+		}
+		else {
+			*vstr = '\0';
+		}
+		
+		if (IS_EVENT_DAILY(proto)) {
+			safe_snprintf(typestr, sizeof(typestr), "; event daily");
+		}
+		else if (IS_DAILY_QUEST(proto)) {
+			safe_snprintf(typestr, sizeof(typestr), "; daily");
+		}
+		else if (IS_EVENT_QUEST(proto)) {
+			safe_snprintf(typestr, sizeof(typestr), "; event");
+		}
+		else {
+			*typestr = '\0';
+		}
+		
+		build_page_display(ch, "  %s%s%s\t0 (%d/%d task%s%s)", vstr, QUEST_LEVEL_COLOR(ch, proto), QUEST_NAME(proto), count, total, PLURAL(total), typestr);
+	}
+}
+
+
+/**
 * Shown on some quest commands to indicate number of dailies remaining.
 *
 * @param char_data *ch The person whose count to show.
@@ -787,15 +838,27 @@ QCMD(qcmd_completed) {
 
 
 QCMD(qcmd_drop) {
+	bool confirm = FALSE;
+	char part_arg[MAX_INPUT_LENGTH], last_arg[MAX_INPUT_LENGTH];
 	struct instance_data *inst;
 	struct player_quest *pq;
 	quest_data *qst;
+	
+	// check for confirm
+	chop_last_arg(argument, part_arg, last_arg);
+	if (!str_cmp(last_arg, "confirm")) {
+		confirm = TRUE;
+		argument = part_arg;
+	}
 	
 	if (!*argument) {
 		msg_to_char(ch, "Drop which quest?\r\n");
 	}
 	else if (!(qst = find_local_quest_by_name(ch, argument, TRUE, FALSE, &inst)) || !(pq = is_on_quest(ch, QUEST_VNUM(qst)))) {
 		msg_to_char(ch, "You don't seem to be on a quest called '%s'.\r\n", argument);
+	}
+	else if (QUEST_FLAGGED(qst, QST_CONFIRM_DROP) && !confirm) {
+		msg_to_char(ch, "You must type 'quest drop <name> CONFIRM' to drop that quest.\r\n");
 	}
 	else {
 		msg_to_char(ch, "You drop %s%s\t0.\r\n", QUEST_LEVEL_COLOR(ch, qst), QUEST_NAME(qst));
@@ -814,7 +877,6 @@ QCMD(qcmd_drop) {
 */
 bool qcmd_finish_one(char_data *ch, struct player_quest *pq, bool show_errors) {
 	quest_data *quest = quest_proto(pq->vnum);
-	struct group_member_data *mem;
 	empire_data *giver_emp = NULL;
 	int complete, total;
 	
@@ -872,22 +934,13 @@ bool qcmd_finish_one(char_data *ch, struct player_quest *pq, bool show_errors) {
 	// SUCCESS
 	complete_quest(ch, pq, giver_emp);
 	
-	// group completion
-	if (QUEST_FLAGGED(quest, QST_GROUP_COMPLETION) && GROUP(ch)) {
-		LL_FOREACH(GROUP(ch)->members, mem) {
-			if (mem->member != ch && !IS_NPC(mem->member) && IN_ROOM(mem->member) == IN_ROOM(ch) && (pq = is_on_quest(mem->member, QUEST_VNUM(quest)))) {
-				if (check_finish_quest_trigger(mem->member, quest, get_instance_by_id(pq->instance_id))) {
-					complete_quest(mem->member, pq, giver_emp);
-				}
-			}
-		}
-	}
-	
 	return TRUE;
 }
 
 
 QCMD(qcmd_finish) {
+	int complete, total;
+	empire_data *giver_emp = NULL;
 	struct player_quest *pq;
 	struct instance_data *inst = NULL;
 	quest_data *qst;
@@ -902,7 +955,34 @@ QCMD(qcmd_finish) {
 		msg_to_char(ch, "You can't start or finish quests while disguised.\r\n");
 	}
 	else if (!*argument) {
-		msg_to_char(ch, "Finish which quest (use 'quest list' to see quests you're on)?\r\n");
+		// no arg ~ list quests?
+		any = FALSE;
+		LL_FOREACH_SAFE(GET_QUESTS(ch), pq, global_next_player_quest) {
+			if (!(qst = quest_proto(pq->vnum)) || !can_turn_in_quest_at(ch, IN_ROOM(ch), qst, &giver_emp)) {
+				continue;
+			}
+			
+			// preliminary completeness check
+			count_quest_tasks(pq->tracker, &complete, &total);
+			if (complete < total) {
+				continue;
+			}
+			
+			// ok! header if needed?
+			if (!any) {
+				build_page_display_str(ch, "Finish which quest:");
+				any = TRUE;
+			}
+			
+			// build the list
+			list_one_active_quest_to_page_display(ch, pq);
+		}
+		
+		if (!any) {
+			build_page_display(ch, "You don't have any quests you can finish here%s.", (PRF_FLAGGED(ch, PRF_NO_TUTORIALS) ? "" : " (type 'quest list' to see quests you're on)"));
+		}
+		
+		send_page_display(ch);
 	}
 	else if (!all && (!(qst = find_local_quest_by_name(ch, argument, TRUE, FALSE, &inst)) || !(pq = is_on_quest(ch, QUEST_VNUM(qst))))) {
 		msg_to_char(ch, "You don't seem to be on a quest called '%s'.\r\n", argument);
@@ -1003,11 +1083,9 @@ QCMD(qcmd_info) {
 
 
 QCMD(qcmd_list) {
-	char vstr[128], typestr[128];
 	struct quest_temp_list *quest_list = NULL, *qtl;
 	struct player_quest *pq;
-	quest_data *proto;
-	int count, total;
+	int count;
 	
 	if (!GET_QUESTS(ch)) {
 		msg_to_char(ch, "You aren't on any quests.\r\n");
@@ -1022,30 +1100,7 @@ QCMD(qcmd_list) {
 	
 	build_page_display(ch, "Your quests:");
 	LL_FOREACH(GET_QUESTS(ch), pq) {
-		count_quest_tasks(pq->tracker, &count, &total);
-		if ((proto = quest_proto(pq->vnum))) {
-			if (PRF_FLAGGED(ch, PRF_ROOMFLAGS)) {
-				sprintf(vstr, "[%5d] ", QUEST_VNUM(proto));
-			}
-			else {
-				*vstr = '\0';
-			}
-			
-			if (IS_EVENT_DAILY(proto)) {
-				safe_snprintf(typestr, sizeof(typestr), "; event daily");
-			}
-			else if (IS_DAILY_QUEST(proto)) {
-				safe_snprintf(typestr, sizeof(typestr), "; daily");
-			}
-			else if (IS_EVENT_QUEST(proto)) {
-				safe_snprintf(typestr, sizeof(typestr), "; event");
-			}
-			else {
-				*typestr = '\0';
-			}
-			
-			build_page_display(ch, "  %s%s%s\t0 (%d/%d task%s%s)", vstr, QUEST_LEVEL_COLOR(ch, proto), QUEST_NAME(proto), count, total, PLURAL(total), typestr);
-		}
+		list_one_active_quest_to_page_display(ch, pq);
 	}
 	
 	// show dailies status, too

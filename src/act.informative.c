@@ -597,10 +597,10 @@ void survey_city(char_data *ch, char *argument) {
 		if (sct->owned_count) {
 			dist = MIN(dist, sct->owned_dist);
 			if (verbose) {
-				sprintf(buf1 + strlen(buf1), "%s%d claimed (%d away)", (*buf1 ? ", " : ""), sct->owned_count, sct->owned_dist);
+				sprintf(buf1 + strlen(buf1), "%s%d claimed by others (%d away)", (*buf1 ? ", " : ""), sct->owned_count, sct->owned_dist);
 			}
 			else {
-				sprintf(buf1 + strlen(buf1), "%sclaimed", (*buf1 ? ", " : ""));
+				sprintf(buf1 + strlen(buf1), "%sclaimed (%d away)", (*buf1 ? ", " : ""), sct->owned_dist);
 			}
 		}
 		if (sct->rough_count) {
@@ -609,7 +609,7 @@ void survey_city(char_data *ch, char *argument) {
 				sprintf(buf1 + strlen(buf1), "%s%d rough (%d away)", (*buf1 ? ", " : ""), sct->rough_count, sct->rough_dist);
 			}
 			else {
-				sprintf(buf1 + strlen(buf1), "%srough", (*buf1 ? ", " : ""));
+				sprintf(buf1 + strlen(buf1), "%srough (%d away)", (*buf1 ? ", " : ""), sct->rough_dist);
 			}
 		}
 		if (sct->ocean_count) {
@@ -618,7 +618,7 @@ void survey_city(char_data *ch, char *argument) {
 				sprintf(buf1 + strlen(buf1), "%s%d ocean (%d away)", (*buf1 ? ", " : ""), sct->ocean_count, sct->ocean_dist);
 			}
 			else {
-				sprintf(buf1 + strlen(buf1), "%socean", (*buf1 ? ", " : ""));
+				sprintf(buf1 + strlen(buf1), "%socean (%d away)", (*buf1 ? ", " : ""), sct->ocean_dist);
 			}
 		}
 		if (sct->water_count) {
@@ -627,12 +627,12 @@ void survey_city(char_data *ch, char *argument) {
 				sprintf(buf1 + strlen(buf1), "%s%d fresh water (%d away)", (*buf1 ? ", " : ""), sct->water_count, sct->water_dist);
 			}
 			else {
-				sprintf(buf1 + strlen(buf1), "%sfresh water", (*buf1 ? ", " : ""));
+				sprintf(buf1 + strlen(buf1), "%sfresh water (%d away)", (*buf1 ? ", " : ""), sct->water_dist);
 			}
 		}
 		
 		if (*buf1) {
-			msg_to_char(ch, "%d %s: %s\r\n", dist, (*sct->dir ? sct->dir : "away"), buf1);
+			msg_to_char(ch, "%s: %s\r\n", (*sct->dir ? sct->dir : "away"), buf1);
 		}
 		
 		HASH_DEL(hash, sct);
@@ -640,7 +640,7 @@ void survey_city(char_data *ch, char *argument) {
 	}
 	
 	// and totals?
-	msg_to_char(ch, "Total tiles: %d owned, %d rough, %d ocean, %d fresh water\r\n", tot_owned, tot_rough, tot_ocean, tot_water);
+	msg_to_char(ch, "Total tiles: %d claimed by others, %d rough, %d ocean, %d fresh water\r\n", tot_owned, tot_rough, tot_ocean, tot_water);
 }
 
 
@@ -748,6 +748,7 @@ int sort_chart_hash(struct chart_territory *a, struct chart_territory *b) {
 */
 void look_at_target(char_data *ch, char *arg, char *more_args, bool look_inside) {
 	char targ_arg[MAX_INPUT_LENGTH];
+	char *desc_ptr;
 	int found = FALSE, fnum;
 	bitvector_t bits;
 	char_data *found_char = NULL, *proto, *ch_iter;
@@ -838,7 +839,10 @@ void look_at_target(char_data *ch, char *arg, char *more_args, bool look_inside)
 			else {
 				act("You look at $p:", FALSE, ch, found_obj, NULL, TO_CHAR | TO_PAGE_DISPLAY);
 			}
-			build_page_display_str(ch, obj_desc_for_char(found_obj, ch, OBJ_DESC_LOOK_AT));	/* Show no-description */
+			desc_ptr = obj_desc_for_char(found_obj, ch, OBJ_DESC_LOOK_AT);
+			if (desc_ptr && *desc_ptr) {
+				build_page_display_str(ch, desc_ptr);	/* Show no-description */
+			}
 			
 			found = TRUE;
 			if (look_inside && (IS_CONTAINER(found_obj) || IS_CORPSE(found_obj) || IS_DRINK_CONTAINER(found_obj))) {
@@ -1382,8 +1386,8 @@ void list_one_char(char_data *i, char_data *ch, int num) {
 				// npc shows empire adj
 				msg_to_char(ch, "<%s> ", EMPIRE_ADJECTIVE(GET_LOYALTY(i)));
 			}
-			else {
-				// player shows rank
+			else if (!is_ignoring(ch, i)) {
+				// player shows rank -- unless ignoring
 				msg_to_char(ch, "<%s&0&y> ", EMPIRE_RANK(GET_LOYALTY(i), GET_RANK(i)-1));
 			}
 		}
@@ -2667,11 +2671,12 @@ WHO_SORTER(sort_who_role_level) {
 * Get the "who" display for one person.
 *
 * @param char_data *ch The person to get WHO info for.
+* @param char_data *to The person who will view this.
 * @param bool shortlist If TRUE, only gets a short entry.
 * @param bool screenreader If TRUE, shows slightly differently
 * @return char* A pointer to the output.
 */
-char *one_who_line(char_data *ch, bool shortlist, bool screenreader) {
+char *one_who_line(char_data *ch, char_data *to, bool shortlist, bool screenreader) {
 	static char out[MAX_STRING_LENGTH];
 	char show_role[24], part[MAX_STRING_LENGTH];
 	size_t size;
@@ -2698,7 +2703,7 @@ char *one_who_line(char_data *ch, bool shortlist, bool screenreader) {
 	}
 	
 	// rank
-	if (GET_LOYALTY(ch)) {
+	if (GET_LOYALTY(ch) && !is_ignoring(to, ch)) {
 		size += snprintf(out + size, sizeof(out) - size, "<%s&0> ", EMPIRE_RANK(GET_LOYALTY(ch), GET_RANK(ch)-1));
 	}
 
@@ -2718,8 +2723,13 @@ char *one_who_line(char_data *ch, bool shortlist, bool screenreader) {
 		return out;
 	}
 	
-	// title
-	size += snprintf(out + size, sizeof(out) - size, "%s&0", NULLSAFE(GET_TITLE(ch)));
+	// title?
+	if (is_ignoring(to, ch)) {
+		size += snprintf(out + size, sizeof(out) - size, " &R(ignore)&0");
+	}
+	else {
+		size += snprintf(out + size, sizeof(out) - size, "%s&0", NULLSAFE(GET_TITLE(ch)));
+	}
 	
 	// tags
 	if (IS_AFK(ch)) {
@@ -2848,7 +2858,7 @@ int partial_who(char_data *ch, char *name_search, int low, int high, empire_data
 		entry->access_level = GET_ACCESS_LEVEL(tch);
 		entry->computed_level = GET_COMPUTED_LEVEL(tch);
 		entry->role = GET_CLASS_ROLE(tch);
-		entry->string = str_dup(one_who_line(tch, shortlist, PRF_FLAGGED(ch, PRF_SCREEN_READER)));
+		entry->string = str_dup(one_who_line(tch, ch, shortlist, PRF_FLAGGED(ch, PRF_SCREEN_READER)));
 		LL_PREPEND(list, entry);
 		++count;
 	}
@@ -3133,17 +3143,15 @@ ACMD(do_chart) {
 		
 		// alternate names
 		if (isle->id != NO_ISLAND) {
+			num = 0;
+			
 			if (GET_LOYALTY(ch) && (e_isle = get_empire_island(GET_LOYALTY(ch), isle->id)) && e_isle->name && strcmp(e_isle->name, isle->name)) {
 				// show global name if different
 				msg_to_char(ch, "Also known as: %s", isle->name);
 				num = 1;
 			}
-			else {
-				num = 0;	// not shown yet
-			}
 		
 			// alternate names
-			num = 0;
 			HASH_ITER(hh, empire_table, emp, next_emp) {
 				if (EMPIRE_IS_TIMED_OUT(emp) || emp == GET_LOYALTY(ch)) {
 					continue;
@@ -3773,7 +3781,7 @@ ACMD(do_inventory) {
 						return;
 					}
 					
-					safe_snprintf(heading + strlen(heading), sizeof(heading) - strlen(heading), "%s'%s':", (*heading ? ", " : ""), GEN_NAME(cmp));
+					safe_snprintf(heading + strlen(heading), sizeof(heading) - strlen(heading), "%s'%s'", (*heading ? ", " : ""), GEN_NAME(cmp));
 					break;
 				}
 				case 'w': {
@@ -3788,7 +3796,7 @@ ACMD(do_inventory) {
 						return;
 					}
 					
-					safe_snprintf(heading + strlen(heading), sizeof(heading) - strlen(heading), "%sworn on %s:", (*heading ? ", " : ""), wear_bits[wear_type]);
+					safe_snprintf(heading + strlen(heading), sizeof(heading) - strlen(heading), "%sworn on %s", (*heading ? ", " : ""), wear_bits[wear_type]);
 					break;
 				}
 				case 't': {
@@ -5342,7 +5350,7 @@ ACMD(do_whois) {
 	}
 	
 	// basic info
-	msg_to_char(ch, "%s%s&0\r\n", PERS(victim, victim, TRUE), NULLSAFE(GET_TITLE(victim)));
+	msg_to_char(ch, "%s%s&0\r\n", PERS(victim, victim, TRUE), (is_ignoring(ch, victim) ? "" : NULLSAFE(GET_TITLE(victim))));
 	sprinttype(GET_REAL_SEX(victim), genders, part, sizeof(part), "UNDEFINED");
 	msg_to_char(ch, "Status: %s %s%s\r\n", CAP(part), level_names[(int) GET_ACCESS_LEVEL(victim)][1], friend_part);
 
@@ -5356,7 +5364,12 @@ ACMD(do_whois) {
 	}
 
 	if (GET_LOYALTY(victim)) {
-		msg_to_char(ch, "%s&0 of %s%s&0\r\n", EMPIRE_RANK(GET_LOYALTY(victim), GET_RANK(victim)-1), EMPIRE_BANNER(GET_LOYALTY(victim)), EMPIRE_NAME(GET_LOYALTY(victim)));
+		if (is_ignoring(ch, victim)) {
+			msg_to_char(ch, "Member of %s%s&0\r\n", EMPIRE_BANNER(GET_LOYALTY(victim)), EMPIRE_NAME(GET_LOYALTY(victim)));
+		}
+		else {
+			msg_to_char(ch, "%s&0 of %s%s&0\r\n", EMPIRE_RANK(GET_LOYALTY(victim), GET_RANK(victim)-1), EMPIRE_BANNER(GET_LOYALTY(victim)), EMPIRE_NAME(GET_LOYALTY(victim)));
+		}
 		msg_to_char(ch, "Territory: %d, Members: %d, Greatness: %d\r\n", EMPIRE_TERRITORY(GET_LOYALTY(victim), TER_TOTAL), EMPIRE_MEMBERS(GET_LOYALTY(victim)), EMPIRE_GREATNESS(GET_LOYALTY(victim)));
 	}
 	

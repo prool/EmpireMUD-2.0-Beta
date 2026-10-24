@@ -4564,7 +4564,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 						safe_snprintf(str, slen,"%d", NOHASSLE(c) ? 1 : 0);
 					}
 					else if (!str_cmp(field, "nohunger")) {
-						safe_snprintf(str, slen, "%d", (GET_COND(c, FULL) == -1 || HAS_BONUS_TRAIT(c, BONUS_NO_HUNGER)) ? 1 : 0);
+						safe_snprintf(str, slen, "%d", (GET_COND(c, FULL) == -1 || HAS_BONUS_TRAIT(c, BONUS_NO_HUNGER) || has_player_tech(c, PTECH_NO_HUNGER)) ? 1 : 0);
 					}
 					else if (!str_cmp(field, "noskill")) {
 						if (subfield && *subfield && !IS_NPC(c)) {
@@ -4579,7 +4579,7 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 						}
 					}
 					else if (!str_cmp(field, "nothirst")) {
-						safe_snprintf(str, slen, "%d", (GET_COND(c, THIRST) == -1 || HAS_BONUS_TRAIT(c, BONUS_NO_THIRST)) ? 1 : 0);
+						safe_snprintf(str, slen, "%d", (GET_COND(c, THIRST) == -1 || HAS_BONUS_TRAIT(c, BONUS_NO_THIRST) || has_player_tech(c, PTECH_NO_THIRST)) ? 1 : 0);
 					}
 					break;
 				}
@@ -4598,6 +4598,15 @@ void find_replacement(void *go, struct script_data *sc, trig_data *trig, int typ
 						*str = '\0';	// default to no-target
 						if (subfield && *subfield) {
 							if ((targ = get_obj_in_list_vis(c, subfield, NULL, c->carrying))) {
+								safe_snprintf(str, slen, "%c%d", UID_CHAR, obj_script_id(targ));
+							}
+						}
+					}
+					else if (!str_cmp(field, "obj_target_room")) {
+						obj_data *targ;
+						*str = '\0';	// default to no-target
+						if (subfield && *subfield) {
+							if ((targ = get_obj_in_list_vis(c, subfield, NULL, ROOM_CONTENTS(IN_ROOM(c))))) {
 								safe_snprintf(str, slen, "%c%d", UID_CHAR, obj_script_id(targ));
 							}
 						}

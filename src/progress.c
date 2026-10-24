@@ -608,13 +608,14 @@ void apply_progress_to_empire(empire_data *emp, progress_data *prg, bool add) {
 		return;	// sanitation
 	}
 	
-	// apply points/cost
+	// apply value as points (costs are not applied to this as of b5.216)
 	if (PRG_VALUE(prg)) {	// adds to point total and pool
 		SAFE_ADD(EMPIRE_PROGRESS_POINTS(emp, PRG_TYPE(prg)), (add ? PRG_VALUE(prg) : -PRG_VALUE(prg)), INT_MIN, INT_MAX, FALSE);
 		SAFE_ADD(EMPIRE_ATTRIBUTE(emp, EATT_PROGRESS_POOL), (add ? PRG_VALUE(prg) : -PRG_VALUE(prg)), INT_MIN, INT_MAX, FALSE);
 	}
-	if (PRG_COST(prg)) {	// adds to point total, subtracts from pool
-		SAFE_ADD(EMPIRE_PROGRESS_POINTS(emp, PRG_TYPE(prg)), (add ? PRG_COST(prg) : -PRG_COST(prg)), INT_MIN, INT_MAX, FALSE);
+	if (PRG_COST(prg)) {	// subtracts from pool
+		// no longer adds cost to the points total as of b5.216
+		// SAFE_ADD(EMPIRE_PROGRESS_POINTS(emp, PRG_TYPE(prg)), (add ? PRG_COST(prg) : -PRG_COST(prg)), INT_MIN, INT_MAX, FALSE);
 		SAFE_ADD(EMPIRE_ATTRIBUTE(emp, EATT_PROGRESS_POOL), (add ? -PRG_COST(prg) : PRG_COST(prg)), INT_MIN, INT_MAX, FALSE);
 	}
 	
@@ -803,7 +804,7 @@ void complete_goal(empire_data *emp, struct empire_goal *goal) {
 	}
 	
 	if (!PRG_FLAGGED(prg, PRG_NO_ANNOUNCE)) {
-		if (!EMPIRE_HAS_TECH(emp, TECH_HIDDEN_PROGRESS)) {
+		if (!EMPIRE_ADMIN_FLAGGED(emp, EADM_HIDDEN_PROGRESS)) {
 			log_to_slash_channel_by_name(PROGRESS_LOG_CHANNEL, NULL, "%s%s\t0 achieved %s", EMPIRE_BANNER(emp), EMPIRE_NAME(emp), PRG_NAME(prg));
 		}
 		log_to_empire(emp, ELOG_PROGRESS, "Achieved: %s", PRG_NAME(prg));
@@ -1211,7 +1212,7 @@ void script_reward_goal(empire_data *emp, progress_data *prg) {
 		return;	// nothing to do
 	}
 	
-	if (!EMPIRE_HAS_TECH(emp, TECH_HIDDEN_PROGRESS)) {
+	if (!EMPIRE_ADMIN_FLAGGED(emp, EADM_HIDDEN_PROGRESS)) {
 		log_to_slash_channel_by_name(PROGRESS_LOG_CHANNEL, NULL, "%s%s\t0 achieved %s", EMPIRE_BANNER(emp), EMPIRE_NAME(emp), PRG_NAME(prg));
 	}
 	log_to_empire(emp, ELOG_PROGRESS, "Achieved: %s", PRG_NAME(prg));
@@ -1925,7 +1926,7 @@ bool audit_progress(progress_data *prg, char_data *ch) {
 		olc_audit_msg(ch, PRG_VNUM(prg), "No name set");
 		problem = TRUE;
 	}
-	if (ispunct(*(PRG_NAME(prg) + strlen(PRG_NAME(prg)) - 1))) {
+	if (ends_in_punct(PRG_NAME(prg))) {
 		olc_audit_msg(ch, PRG_VNUM(prg), "Name ends with punctuation");
 		problem = TRUE;
 	}
@@ -1992,7 +1993,12 @@ char *list_one_progress(progress_data *prg, bool detail) {
 	static char output[MAX_STRING_LENGTH];
 	
 	if (detail) {
-		safe_snprintf(output, sizeof(output), "[%5d] %s (%s)%s", PRG_VNUM(prg), PRG_NAME(prg), progress_types[PRG_TYPE(prg)], PRG_FLAGGED(prg, PRG_IN_DEVELOPMENT) ? " (IN-DEV)" : "");
+		if (PRG_COST(prg) > 0) {
+			safe_snprintf(output, sizeof(output), "[%5d] %s (%s) [costs %d]%s", PRG_VNUM(prg), PRG_NAME(prg), progress_types[PRG_TYPE(prg)], PRG_COST(prg), PRG_FLAGGED(prg, PRG_IN_DEVELOPMENT) ? " (IN-DEV)" : "");
+		}
+		else {
+			safe_snprintf(output, sizeof(output), "[%5d] %s (%s) [%d point%s]%s", PRG_VNUM(prg), PRG_NAME(prg), progress_types[PRG_TYPE(prg)], PRG_VALUE(prg), PLURAL(PRG_VALUE(prg)), PRG_FLAGGED(prg, PRG_IN_DEVELOPMENT) ? " (IN-DEV)" : "");
+		}
 	}
 	else {
 		safe_snprintf(output, sizeof(output), "[%5d] %s%s", PRG_VNUM(prg), PRG_NAME(prg), PRG_FLAGGED(prg, PRG_IN_DEVELOPMENT) ? " (IN-DEV)" : "");

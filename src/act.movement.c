@@ -2318,7 +2318,7 @@ ACMD(do_climb) {
 		msg_to_char(ch, "You can't go that way!\r\n");
 	}
 	else if (!ROOM_SECT_FLAGGED(to_room, SECTF_ROUGH) && !ROOM_SECT_FLAGGED(IN_ROOM(ch), SECTF_ROUGH)) {
-		msg_to_char(ch, "You can only climb onto rough terrain.\r\n");
+		msg_to_char(ch, "You only need to use 'climb' for rough terrain.\r\n");
 	}
 	else {
 		perform_move(ch, dir, NULL, MOVE_CLIMB);
@@ -2854,7 +2854,7 @@ ACMD(do_rest) {
 			send_to_char("You have to wake up first.\r\n", ch);
 			break;
 		case POS_FIGHTING:
-			send_to_char("Rest while fighting?  Are you MAD?\r\n", ch);
+			send_to_char("Rest while fighting? Are you MAD?\r\n", ch);
 			break;
 		default:
 			send_to_char("You stop floating around, and stop to rest your tired bones.\r\n", ch);
@@ -3058,7 +3058,7 @@ ACMD(do_sleep) {
 			send_to_char("You are already sound asleep.\r\n", ch);
 			break;
 		case POS_FIGHTING:
-			send_to_char("Sleep while fighting?  Are you MAD?\r\n", ch);
+			send_to_char("Sleep while fighting? Are you MAD?\r\n", ch);
 			break;
 		default:
 			send_to_char("You stop floating around, and lie down to sleep.\r\n", ch);

@@ -866,7 +866,7 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 		return;
 	}
 	if (!(craft = find_best_craft_by_name(ch, argument, craft_type, TRUE, &found_wrong_cmd))) {
-		if (found_wrong_cmd != NOTHING) {
+		if (found_wrong_cmd != NOTHING && found_wrong_cmd != CRAFT_TYPE_WORKFORCE) {
 			msg_to_char(ch, "Unknown %s. Try '%s' instead.\r\n", gen_craft_data[craft_type].command, gen_craft_data[found_wrong_cmd].command);
 		}
 		else {
@@ -967,6 +967,12 @@ void show_craft_info(char_data *ch, char *argument, int craft_type) {
 	}
 	else if ((proto = obj_proto(GET_CRAFT_OBJECT(craft)))) {
 		craft_level = get_craft_scale_level(ch, craft);
+		
+		// rounding?
+		if (round_level_scaling_to_nearest > 1 && craft_level > 1 && (craft_level % round_level_scaling_to_nearest) > 0) {
+			craft_level += (round_level_scaling_to_nearest - (craft_level % round_level_scaling_to_nearest));
+		}
+		
 		// build info string
 		sprintf(buf, " (%s", item_types[(int) GET_OBJ_TYPE(proto)]);
 		if (GET_OBJ_MIN_SCALE_LEVEL(proto) > 0 || GET_OBJ_MAX_SCALE_LEVEL(proto) > 0) {
@@ -1380,19 +1386,24 @@ void finish_gen_craft(char_data *ch) {
 		}
 	}
 
-	// send message -- soup uses quantity for amount of soup instead of multiple items
+	// send message to char
 	if (!obj_ok) {
 		// object self-purged?
 		sprintf(buf, "You finish %s!", gen_craft_data[GET_CRAFT_TYPE(type)].verb);
 		act(buf, FALSE, ch, NULL, NULL, TO_CHAR);
 	}
-	else if (amt > 1 && !IS_SET(GET_CRAFT_FLAGS(type), CRAFT_SOUP)) {
+	else if (IS_SET(GET_CRAFT_FLAGS(type), CRAFT_SOUP)) {
+		// ignore amt for soup
+		sprintf(buf, "You finish %s %s in $p!", gen_craft_data[GET_CRAFT_TYPE(type)].verb, get_generic_string_by_vnum(GET_CRAFT_OBJECT(type), GENERIC_LIQUID, GSTR_LIQUID_NAME));
+		act(buf, FALSE, ch, obj, NULL, TO_CHAR);
+	}
+	else if (amt > 1) {
 		sprintf(buf, "You finish %s $p (x%d)!", gen_craft_data[GET_CRAFT_TYPE(type)].verb, amt);
-		act(buf, FALSE, ch, obj, 0, TO_CHAR);
+		act(buf, FALSE, ch, obj, NULL, TO_CHAR);
 	}
 	else {
 		sprintf(buf, "You finish %s $p!", gen_craft_data[GET_CRAFT_TYPE(type)].verb);
-		act(buf, FALSE, ch, obj, 0, TO_CHAR);
+		act(buf, FALSE, ch, obj, NULL, TO_CHAR);
 	}
 	
 	// to-room message
@@ -2180,7 +2191,7 @@ ACMD(do_gen_craft) {
 			}
 			
 			// match so far...
-			if (!str_cmp(arg, GET_CRAFT_NAME(craft)) || (*short_arg && !str_cmp(short_arg, GET_CRAFT_NAME(craft)))) {
+			if (!str_cmp(arg, GET_CRAFT_NAME(craft)) || (CRAFT_IS_BUILDING(craft) && *short_arg && !str_cmp(short_arg, GET_CRAFT_NAME(craft)))) {
 				// prior to b5.207, short_arg was only checked here for buildings with facing: if (!str_cmp(arg, GET_CRAFT_NAME(craft)) || (GET_CRAFT_BUILD_FACING(craft) && *short_arg && !str_cmp(short_arg, GET_CRAFT_NAME(craft)))) {
 				
 				// do this last because it records if they are on the wrong command or just missing an ability
@@ -2197,7 +2208,7 @@ ACMD(do_gen_craft) {
 				type = craft;
 				break;
 			}
-			else if (!abbrev_match && (is_abbrev(arg, GET_CRAFT_NAME(craft)) || (*short_arg && is_abbrev(short_arg, GET_CRAFT_NAME(craft))))) {
+			else if (!abbrev_match && (is_abbrev(arg, GET_CRAFT_NAME(craft)) || (CRAFT_IS_BUILDING(craft) && *short_arg && is_abbrev(short_arg, GET_CRAFT_NAME(craft))))) {
 				// prior to b5.207, also checked GET_CRAFT_BUILD_FACING(craft) for short_arg
 				
 				// do this last because it records if they are on the wrong command or just missing an ability
@@ -2218,7 +2229,7 @@ ACMD(do_gen_craft) {
 					abbrev_no_res = craft;
 				}
 			}
-			else if (!multi_match && (multi_isname(arg, GET_CRAFT_NAME(craft)) || (*short_arg && multi_isname(short_arg, GET_CRAFT_NAME(craft))))) {
+			else if (!multi_match && (multi_isname(arg, GET_CRAFT_NAME(craft)) || (CRAFT_IS_BUILDING(craft) && *short_arg && multi_isname(short_arg, GET_CRAFT_NAME(craft))))) {
 				// prior to b5.207, also checked GET_CRAFT_BUILD_FACING(craft) for short_arg
 				
 				// do this last because it records if they are on the wrong command or just missing an ability
@@ -2267,7 +2278,7 @@ ACMD(do_gen_craft) {
 		// attempting to resume a building by name
 		resume_craft_building(ch, type);
 	}
-	else if (*arg && !list_only && !type && wrong_cmd != NOTHING) {
+	else if (*arg && !list_only && !type && wrong_cmd != NOTHING && wrong_cmd != CRAFT_TYPE_WORKFORCE) {
 		// found no match but there was an almost-match with a different command (forge, sew, etc)
 		msg_to_char(ch, "Unknown %s. Try '%s' instead.\r\n", gen_craft_data[subcmd].command, gen_craft_data[wrong_cmd].command);
 	}
@@ -2318,7 +2329,7 @@ ACMD(do_gen_craft) {
 			if (IS_SET(GET_CRAFT_FLAGS(craft), CRAFT_LEARNED) && !has_learned_craft(ch, GET_CRAFT_VNUM(craft))) {
 				continue;	// not learned
 			}
-			if (*arg && !multi_isname(arg, GET_CRAFT_NAME(craft)) && (!GET_CRAFT_BUILD_FACING(craft) || !*short_arg || !multi_isname(short_arg, GET_CRAFT_NAME(craft)))) {
+			if (*arg && !multi_isname(arg, GET_CRAFT_NAME(craft)) && (!GET_CRAFT_BUILD_FACING(craft) || !CRAFT_IS_BUILDING(craft) || !*short_arg || !multi_isname(short_arg, GET_CRAFT_NAME(craft)))) {
 				continue;	// search exclusion
 			}
 			

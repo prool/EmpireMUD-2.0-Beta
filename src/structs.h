@@ -335,7 +335,7 @@ typedef struct vehicle_data vehicle_data;
 #define APPLY_RESIST_MAGICAL  24	// Apply to magic damage resistance
 #define APPLY_CRAFTING  25	// bonus craft levels
 #define APPLY_BLOOD_UPKEEP  26	// vampire blood requirement
-#define APPLY_NIGHT_VISION  27	// bonus to nighttime light radius
+#define APPLY_LIGHT_RADIUS  27	// bonus to nighttime light radius
 #define APPLY_NEARBY_RANGE  28	// larger "nearby"
 #define APPLY_WHERE_RANGE  29	// larger "where"
 #define APPLY_WARMTH  30	// protects against cold weather
@@ -880,7 +880,7 @@ typedef struct vehicle_data vehicle_data;
 #define ATT_CRAFTING_BONUS  11	// levels added to crafting
 #define ATT_BLOOD_UPKEEP  12	// blood cost per hour
 #define ATT_AGE_MODIFIER  13	// +/- age
-#define ATT_NIGHT_VISION  14	// bonus light radius at night
+#define ATT_LIGHT_RADIUS  14	// bonus light radius at night
 #define ATT_NEARBY_RANGE  15	// larger "nearby"
 #define ATT_WHERE_RANGE  16		// larger "where"
 #define ATT_WARMTH  17	// from gear that keeps you warm in the cold
@@ -1096,6 +1096,8 @@ typedef struct vehicle_data vehicle_data;
 #define EADM_ALL_TECHS			BIT(8)	// i. empire can use all technologies
 #define EADM_FREE_WAR			BIT(9)	// j. no war costs
 #define EADM_ALLOW_NEWBIE_ISLE	BIT(10)	// k. can keep claims on newbie island
+#define EADM_ROSTER_SHARING		BIT(11)	// l. allies can see roster
+#define EADM_HIDDEN_PROGRESS	BIT(12)	// m. no progress goal announcements to the world
 
 
 // EATT_x: empire attributes
@@ -1386,6 +1388,7 @@ typedef struct vehicle_data vehicle_data;
 #define FCT_REP_FROM_KILLS  BIT(1)	// b. killing mobs affects faction rating
 #define FCT_HIDE_IN_LIST  BIT(2)	// c. not shown in player's list
 #define FCT_HIDE_ON_MOB  BIT(3)	// d. does not appear under mob's description
+#define FCT_NPC_ONLY  BIT(4)	// e. won't attach to players
 
 
 // FCTR_x: Relationship flags
@@ -2447,7 +2450,7 @@ typedef enum {
 #define PRF_NOHASSLE  BIT(12)	// Ignored by mobs and triggers
 #define PRF_NO_IDLE_OUT  BIT(13)	// Player won't idle out
 #define PRF_ROOMFLAGS  BIT(14)	// Sees vnums and flags on look
-	#define PRF_UNUSED_2  BIT(15)	// was !CHANNEL-JOINS before b5.162
+#define PRF_NO_COLUMNS  BIT(15)	// Request no columns for things with a columnar view
 #define PRF_AUTOKILL  BIT(16)	// Stops from knocking players out
 #define PRF_SCROLLING  BIT(17)	// Turns off page_string
 #define PRF_NO_ROOM_DESCS  BIT(18)	// Removes room descs; formerly 'brief'
@@ -2693,6 +2696,7 @@ typedef enum {
 #define QST_GROUP_COMPLETION  BIT(8)	// group members auto-finish this quest, even if incomplete, if present when any member does
 #define QST_EVENT  BIT(9)	// shows as an event quest; splits dailies into 2 pools
 #define QST_IN_CITY_ONLY  BIT(10)	// requires that it's in a city
+#define QST_CONFIRM_DROP  BIT(11)	// player must type 'confirm' when dropping this quest
 
 
 // QG_x: quest giver types
@@ -5025,6 +5029,8 @@ struct player_special_data {
 	int last_aff_wear_off_id;	// helps prevent duplicate wear-off messages
 	int last_aff_wear_off_vnum;	// helps prevent duplicate wear-off messages
 	time_t last_aff_wear_off_time;	// helps prevent duplicate wear-off messages
+	int last_coins_amount;	// coin amount tracking for easy-split
+	int last_coins_empire;	// coin empire tracking for easy-split
 	time_t last_cond_message_time[NUM_CONDS];	// last time we sent a message for drunk, full, thirsty
 	time_t last_cold_time;	// last time a player was told they're getting colder
 	time_t last_warm_time;	// last time a player was told they're getting warmer

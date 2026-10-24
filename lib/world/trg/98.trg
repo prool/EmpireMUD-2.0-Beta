@@ -29,7 +29,7 @@ return 0
 ~
 #9803
 Companion dies permanently~
-0 ft 100 1
+0 ftA 100 1
 L f 9809
 ~
 * This script deletes a companion's entry when it dies.
@@ -95,13 +95,13 @@ if %arg% == cleardata
   halt
 end
 * 2. NORMAL USE OF 'stop'
-if %actor.varexists(needs_stop_command)%
-  set needs_stop %actor.needs_stop_command%
-else
-  set needs_stop 0
-end
-* room set?
-if %needs_stop% && %actor.var(stop_room_lock)% && %actor.room.id% != %actor.var(stop_room_lock)%
+set needs_stop %actor.var(needs_stop_command,0)%
+* basic checks
+if !%needs_stop%
+  * no work
+  return 0
+  halt
+elseif %needs_stop% && %actor.var(stop_room_lock)% && %actor.room.id% != %actor.var(stop_room_lock)%
   * wrong room, they moved, just cancel
   set stop_command 1
   remote stop_command %actor.id%
@@ -128,14 +128,8 @@ if %actor.varexists(stop_message_room)%
   %echoaround% %actor% %actor.stop_message_room%
   rdelete stop_message_room %actor.id%
 end
-* prevent basic stop if needed
-if %needs_stop% && !%actor.action%
-  * prevents basic 'stop' output
-  return 1
-else
-  * will show normal 'stop' output
-  return 0
-end
+* prevent basic stop
+return 1
 ~
 #9807
 No pickpocket while unkillable~
@@ -177,13 +171,13 @@ if %arg% == cleardata
   halt
 end
 * 2. NORMAL USE OF 'stop'
-if %actor.varexists(needs_stop_command)%
-  set needs_stop %actor.needs_stop_command%
-else
-  set needs_stop 0
-end
-* room set?
-if %needs_stop% && %actor.var(stop_room_lock)% && %actor.room.id% != %actor.var(stop_room_lock)%
+set needs_stop %actor.var(needs_stop_command,0)%
+* basic checks
+if !%needs_stop%
+  * no work
+  return 0
+  halt
+elseif %needs_stop% && %actor.var(stop_room_lock)% && %actor.room.id% != %actor.var(stop_room_lock)%
   * wrong room, they moved, just cancel
   set stop_command 1
   remote stop_command %actor.id%
@@ -210,18 +204,12 @@ if %actor.varexists(stop_message_room)%
   %echoaround% %actor% %actor.stop_message_room%
   rdelete stop_message_room %actor.id%
 end
-* prevent basic stop if needed
-if %needs_stop% && !%actor.action%
-  * prevents basic 'stop' output
-  return 1
-else
-  * will show normal 'stop' output
-  return 0
-end
+* prevent basic stop
+return 1
 ~
 #9809
 Companion initialization for perma-death~
-0 n 100 1
+0 ntA 100 1
 L f 9803
 ~
 * permanently store leader ID in order to detect deaths correctly

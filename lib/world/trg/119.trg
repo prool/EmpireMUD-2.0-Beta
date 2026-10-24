@@ -674,6 +674,20 @@ while %cycle% < 3
   done
   eval cycle %cycle% + 1
 done
+* followers?
+set fol %room.people%
+while %fol%
+  set next_fol %fol.next_in_room%
+  if %fol.is_npc% && %fol.leader% == %actor% && !%fol.fighting%
+    %echoaround% %fol% ~%fol% vanishes in a flash of violet light!
+    %teleport% %fol% %loc%
+    %echoaround% %fol% ~%fol% appears in a flash of violet light!
+    if %fol.position% != Sleeping
+      %force% %fol% look
+    end
+  end
+  set fol %next_fol%
+done
 * cleanup
 nop %actor.set_cooldown(%self.vnum%,%cooldown_time%)%
 nop %actor.cancel_adventure_summon%
@@ -954,7 +968,7 @@ racework countdown %max_time%
 ~
 #11913
 Pixy Races: Catch pixy in jar command~
-1 c 2 32
+1 c 2 35
 L b 615
 L b 616
 L b 10042
@@ -984,11 +998,14 @@ L b 11886
 L b 11887
 L b 11963
 L b 11982
+L b 13553
+L b 13554
 L b 16624
 L b 16625
 L c 11914
+L c 13532
 catch~
-set ok_list 615 616 10042 11520 11521 11522 11523 11524 11525 11526 11820 16624 16625 11963
+set ok_list 615 616 10042 11520 11521 11522 11523 11524 11525 11526 11820 16624 16625 11963 13553 13554
 set clever_list 11819 11982
 set error_list 11873 11874 11875 11876 11877 11878 11879 11880 11881 11882 11883 11884 11885 11886 11887
 set jar_vnum 11914
@@ -1023,6 +1040,7 @@ elseif !(%ok_list% ~= %target.vnum%)
   halt
 end
 * switch will validate the target vnum and set up stats
+set tar_name ~%target%
 set speed 1
 set guile 1
 set luck 1
@@ -1063,6 +1081,22 @@ switch %target.vnum%
     eval guile 1 + %random.3%
     eval luck 1 + %random.3%
   break
+  case 13553
+    * blind cave pixy
+    set tar_name a blind cave pixy from the cluster
+    set pixy a blind cave pixy
+    set speed 1
+    eval guile 1 + %random.4%
+    eval luck %random.2%
+  break
+  case 13554
+    * blind cave pixy on a wokestone guardian
+    set tar_name the blind cave pixy on the back of ~%target%
+    set pixy a blind cave pixy
+    set speed 1
+    eval guile 1 + %random.4%
+    eval luck %random.2%
+  break
   default
     * all other vnums in the pixy_list
     set speed %random.2%
@@ -1071,8 +1105,8 @@ switch %target.vnum%
     set pixy %target.name%
   break
 done
-%send% %actor% You swoop toward ~%target% with an enchanted jar...
-%echoaround% %actor% ~%actor% swoops toward ~%target% with an enchanted jar...
+%send% %actor% You swoop toward %tar_name% with an enchanted jar...
+%echoaround% %actor% ~%actor% swoops toward %tar_name% with an enchanted jar...
 * short wait, then re-validate
 wait 2 sec
 if !%target%
@@ -1102,8 +1136,17 @@ remote losses %jar.id%
 set last_race 0
 remote last_race %jar.id%
 * messaging
-%send% %actor% You catch ~%target% in a jar!
-%echoaround% %actor% ~%actor% catches ~%target% in a jar!
+%send% %actor% You catch %tar_name% in a jar!
+%echoaround% %actor% ~%actor% catches %tar_name% in a jar!
+if %target.vnum% == 13554
+  * cave pixy on a wokestone guardian
+  %echo% ~%target% falls to the ground, motionless.
+  %load% obj 13532 %target.room%
+  set obj %target.room.contents%
+  if %obj.vnum% == 13532
+    nop %obj.bind(%actor%)%
+  end
+end
 %purge% %target%
 %purge% %self%
 ~
@@ -2456,13 +2499,16 @@ while %count% < 12
     set skycleave_wake 0
     remote skycleave_wake %actor.id%
     * teleport fellows
+    set teleport_list %actor%
+    set loops 0
     set ch %room.people%
     while %ch%
       set next_ch %ch.next_in_room%
-      if %ch.leader% == %actor% && !%ch.fighting%
+      if %ch.leader% && %teleport_list% ~= %ch.leader% && !%ch.fighting%
         if %ch.is_pc% && !%ch.plr_flagged(ADV-SUMMON)% && !%room.template%
           nop %ch.mark_adventure_summoned_from%
         end
+        set teleport_list %teleport_list% %ch%
         %echoaround% %ch% ~%ch% vanishes into thin air!
         %teleport% %ch% %to_room%
         if %ch.is_pc%
@@ -2476,6 +2522,11 @@ while %count% < 12
         end
       end
       set ch %next_ch%
+      if !%ch% && !%loops%
+        * go twice to get followers of followers
+        set ch %room.people%
+        set loops 1
+      end
     done
     set teleported 1
     dg_affect #11927 %actor% off silent
@@ -4850,13 +4901,16 @@ while %count% < 12
     set skycleave_wake 0
     remote skycleave_wake %actor.id%
     * teleport fellows
+    set teleport_list %actor%
+    set loops 0
     set ch %room.people%
     while %ch%
       set next_ch %ch.next_in_room%
-      if %ch.leader% == %actor% && !%ch.fighting%
+      if %ch.leader% && %teleport_list% ~= %ch.leader% && !%ch.fighting%
         if %ch.is_pc% && !%ch.plr_flagged(ADV-SUMMON)% && !%room.template%
           nop %ch.mark_adventure_summoned_from%
         end
+        set teleport_list %teleport_list% %ch%
         %echoaround% %ch% ~%ch% vanishes into thin air!
         %teleport% %ch% %to_room%
         if %ch.is_pc%
@@ -4870,6 +4924,11 @@ while %count% < 12
         end
       end
       set ch %next_ch%
+      if !%ch% && !%loops%
+        * go twice to get followers of followers
+        set ch %room.people%
+        set loops 1
+      end
     done
     set teleported 1
     * it's actually ok to continue the loop and show the dreams
@@ -5154,13 +5213,16 @@ while %count% < 12
     set skycleave_wake 0
     remote skycleave_wake %actor.id%
     * teleport fellows
+    set teleport_list %actor%
+    set loops 0
     set ch %room.people%
     while %ch%
       set next_ch %ch.next_in_room%
-      if %ch.leader% == %actor% && !%ch.fighting%
+      if %ch.leader% && %teleport_list% ~= %ch.leader% && !%ch.fighting%
         if %ch.is_pc% && !%ch.plr_flagged(ADV-SUMMON)% && !%room.template%
           nop %ch.mark_adventure_summoned_from%
         end
+        set teleport_list %teleport_list% %ch%
         %echoaround% %ch% ~%ch% vanishes into thin air!
         %teleport% %ch% %to_room%
         if %ch.is_pc%
@@ -5174,6 +5236,11 @@ while %count% < 12
         end
       end
       set ch %next_ch%
+      if !%ch% && !%loops%
+        * go twice to get followers of followers
+        set ch %room.people%
+        set loops 1
+      end
     done
     set teleported 1
     * it's actually ok to continue the loop and show the dreams
@@ -8197,7 +8264,7 @@ done
 ~
 #11998
 Gemstone flute: Everybody dance now~
-1 ab 100 30
+1 ab 100 32
 L b 615
 L b 616
 L b 10042
@@ -8226,6 +8293,8 @@ L b 11886
 L b 11887
 L b 11963
 L b 11982
+L b 13553
+L b 13554
 L b 16624
 L b 16625
 ~
@@ -8238,7 +8307,7 @@ elseif %actor.action% != playing
   halt
 end
 * lists
-set list1 11873 11874 11875 11876 11877 11878 11879 11880 11881 11882 11883 11885 11886 11887
+set list1 11873 11874 11875 11876 11877 11878 11879 11880 11881 11882 11883 11885 11886 11887 13553 13554
 set list2 615 616 10042 11520 11521 11522 11523 11524 11525 11526 11819 11820 11963 11982 16624 16625
 * loop
 set ch %actor.room.people%
