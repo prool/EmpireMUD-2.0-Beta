@@ -2,7 +2,8 @@
 
 		if (!strcmp(arg,"prool"))
 			{
-			msg_to_char(ch,"\b&B Слава Україні! Grüß Gott!&0\n");
+			msg_to_char(ch,"\b&B Слава Україні! Grüß Gott!&0\nFlush buffers.\n");
+			fflush(0);
 			return;
 			}
 		else if (!strcmp(arg,"prooldebug"))
